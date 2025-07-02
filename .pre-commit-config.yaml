@@ -1,0 +1,194 @@
+fail_fast: false
+default_stages: [pre-commit, pre-push]
+
+repos:
+  - repo: meta
+    hooks:
+      - id: identity
+      - id: check-useless-excludes
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-toml
+      - id: end-of-file-fixer
+      - id: check-added-large-files # 定义的hook脚本，在repo的.pre-commit-hooks.yaml中定义
+        args: ["--maxkb=5120"]
+      - id: trailing-whitespace # 移除尾部空格符
+      - id: check-merge-conflict # 检查是否含有合并冲突符号
+      - id: check-json
+      - id: check-symlinks
+      - id: mixed-line-ending
+      - id: check-case-conflict
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
+
+  - repo: https://github.com/pre-commit-ci/pre-commit-ci-config
+    rev: v1.6.1
+    hooks:
+      - id: check-pre-commit-ci-config
+
+  - repo: https://github.com/jorisroovers/gitlint
+    rev: v0.19.1
+    hooks:
+      - id: gitlint
+        name: Git Commit Message Linter
+        entry: gitlint
+        types: [gitlint]
+        language: python
+      - id: gitlint-ci
+
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v4.8.3
+    hooks:
+      - id: commitizen
+        stages: [commit-msg]
+      - id: commitizen-branch
+        stages: [pre-push]
+
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.6.25
+    hooks:
+      - id: actionlint
+
+#  - repo: https://github.com/shellcheck-py/shellcheck-py
+#    rev: v0.10.0.1
+#    hooks:
+#      - id: shellcheck
+#        types: [shell]
+
+  #  - repo: https://github.com/pre-commit/mirrors-eslint
+  #    rev: v9.29.0
+  #    hooks:
+  #      - id: eslint
+  #        files: \.[jt]sx?$  # *.js, *.jsx, *.ts and *.tsx
+  #        types: [file]
+
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.45.0
+    hooks:
+      - id: markdownlint
+        alias: md
+        name: Lint Markdown files
+        entry: markdownlint -f -c .github/linters/markdownlint.yml -i node_modules
+        types: [markdown]
+        language: node
+        files: ^blog/
+
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.37.1
+    hooks:
+      - id: yamllint
+        name: Lint YAML files
+        entry: yamllint -c .github/linters/yamllint.yml .
+        types: [yaml]
+        language: python
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.5.0
+    hooks:
+      - id: ruff
+        types: [python]
+      - id: ruff-format
+        types: [python]
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.19.2
+    hooks:
+      - id: gitleaks
+        name: Scan Secrets
+        entry: gitleaks detect --source . -v
+
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.99.4
+    hooks:
+      - id: terraform_fmt
+        args:
+          - --args=-diff
+      - id: terraform_docs
+      - id: terraform_tflint
+
+  #  - repo: local
+  #    hooks:
+  #      - id: dashboard-linter
+  #        name: dashboard-linter
+  #        entry: leeway run components/dashboard:lint
+  #        language: system
+  #        pass_filenames: false
+  #        files: ^components/dashboard/
+
+  - repo: https://github.com/hadolint/hadolint
+    rev: v2.12.0
+    hooks:
+      - id: hadolint
+
+
+  - repo: https://github.com/golangci/golangci-lint
+    rev: v2.1.6
+    hooks:
+      - id: golangci-lint-config-verify
+      - id: golangci-lint
+        entry: golangci-lint run --fix
+        types: [go]
+        language: golang
+      - id: golangci-lint-full
+
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v2.1.2
+    hooks:
+      - id: prettier
+        files: ^docs/
+
+
+
+  #- url: https://github.com/uber-go/goleak
+  #  des: Used to detect goroutine leaks
+  #- url: https://github.com/uber-go/nilaway
+  #  des: 用来在编译时捕获nil，来规避生产环境出现nil panic问题。确实非常实用，帮我避免了很多坑。
+  #- url: https://github.com/dkorunic/betteralign
+  #  des: 相比于fieldalignment，不会去修改各种 xxx_gen.go 以及 xxx_test.go 代码
+  #- url: https://github.com/mvdan/gofumpt
+  #- url: https://github.com/daixiang0/gci
+  #  des: GCI, a tool that control golang package import order and make it always deterministic.
+  #- url: https://github.com/mgechev/revive
+  #  des: golangci-lint已经内置了
+  #  - repo: https://github.com/lietu/go-pre-commit
+  #    rev: v0.1.0
+  #    hooks:
+  #      - id: errcheck
+  #      - id: go-fmt-goimports
+  #      - id: go-test
+  #      - id: go-vet
+  #        entry: go vet -vettool=$(which shadow) -strict
+  #      - id: gofumpt
+  #        entry: gofumpt -l -w .
+  #      - id: golangci-lint
+  #      - id: golint
+  #      - id: staticcheck
+  #      - id: go-mod-tidy
+
+  - repo: local
+    hooks:
+      - id: fieldalignment
+        name: fieldalignment
+        types: [go]
+        language: golang
+        entry: fieldalignment -fix ./...
+
+      - id: betteralign
+        name: betteralign
+        types: [go]
+        language: golang
+        entry: betteralign -apply ./...
+
+      - id: go-test
+        name: go-test
+        types: [go]
+        language: golang
+        entry: go test `go list ./... | grep -v examples` -coverprofile=coverage.out -covermode=atomic
+
+      - id: nilaway
+        name: nilaway
+        types: [go]
+        language: golang
+        entry: nilaway ./...
