@@ -22,6 +22,3 @@
     ~/.hammerspoon: .hammerspoon
     ~/taskfile: taskfile
     ~/Taskfile.yml: taskfile/Taskfile.yml
-
-- create:
-    - ~/.config/backup  # 创建备份目录
