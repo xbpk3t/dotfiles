@@ -16,12 +16,12 @@
 - link:
     # 单个文件链接
     ~/.zshrc: .zshrc
-    ~/.vimrc: .vimrc
     ~/.bashrc: .bashrc
 
     # 目录链接
     ~/.hammerspoon: .hammerspoon
     ~/taskfile: taskfile
+    ~/Taskfile.yml: taskfile/Taskfile.yml
 
 - create:
     - ~/.config/backup  # 创建备份目录
