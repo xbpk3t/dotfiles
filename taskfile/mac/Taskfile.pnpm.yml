@@ -1,0 +1,75 @@
+---
+version: "3"
+
+
+#- pnpm list -g # 查看所有全局包列表
+#- pnpm root -g # 查看全局包位置
+#- pnpm config set prefix <目标目录> # 修改全局包位置
+#- pnpm install -g <pkg> # 全局安装
+#- pnpm rm -g <pkg> # 全局卸载，相当于npm uninstall，rm是uninstall的alias，需要注意的是只写pkg名就可以了，不要加version. 比如 npm rm -g create-react-app.
+
+tasks:
+  install:
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - pnpm install
+    desc: "pnpm install"
+
+  add:
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - pnpm add {{.CLI_ARGS}}
+    desc: "pnpm add package"
+
+  global-add:
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - pnpm add -g {{.CLI_ARGS}}
+    desc: "pnpm global install"
+
+  build:
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - pnpm run build
+    desc: "pnpm run build"
+
+  dev:
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - pnpm run dev
+    desc: "pnpm run dev"
+
+  test:
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - pnpm test
+    desc: "pnpm test"
+
+  update:
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - pnpm update
+    desc: "pnpm update"
+
+  outdated:
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - pnpm outdated
+    desc: "pnpm outdated"
+
+
+  #- url: https://github.com/dylang/npm-check
+  #  des: 可以认为 npm-check = depcheck + npm-check-updates. 可以用来检查并自动更新dependency，也支持检查unused依赖项. Check for outdated, incorrect, and unused dependencies in package.json.
+  #- url: https://github.com/depcheck/depcheck
+  #  des: depcheck = npm-check, 但是只能查找unused dep
+  #- url: https://github.com/raineorshine/npm-check-updates
+  #  des: 顾名思义，相当于 `npm-check -u`，用来检查pkg版本是否有新版本. 支持brew安装。`ncu -u`
+  # [webpro-nl/knip: ✂️ Find unused files, dependencies and exports in your JavaScript and TypeScript projects. Knip it before you ship it!](https://github.com/webpro-nl/knip)
+  depcheck:
+    cmds:
+      - knip --fix
+      - task: install # post-fix需要重新install来uninstall这些unused依赖
+      - npm-check -u
+      - npm-check
+    dir: '{{.USER_WORKING_DIR}}'
+    interactive: true

@@ -1,0 +1,105 @@
+---
+version: '3'
+
+
+#- goreleaser check
+#- goreleaser build
+
+#  goreleaser announce - Announces a previously prepared release
+#  goreleaser build - Builds the current project
+#  goreleaser changelog - Preview your changelog
+#  goreleaser check - Checks if configuration is valid
+#  goreleaser completion - Generate the autocompletion script for the specified shell
+#  goreleaser continue - Continues a previously prepared release
+#  goreleaser healthcheck - Checks if needed tools are installed
+#  goreleaser init - Generates a .goreleaser.yaml file
+#  goreleaser jsonschema - Outputs goreleaser's JSON schema
+#  goreleaser mcp - Start a MCP server that provides GoReleaser tools
+#  goreleaser publish - Publishes a previously prepared release
+#  goreleaser release - Releases the current project
+#  goreleaser subscribe - Subscribe to GoReleaser Pro, or manage your subscription
+#  goreleaser verify-license - Verify if the given license is valid
+
+
+tasks:
+  # 初始化配置文件
+  init:
+    desc: Initialize GoReleaser configuration
+    cmds:
+      - goreleaser init
+
+  # 环境检查
+  healthcheck:
+    desc: Verify required tools are installed
+    cmds:
+      - goreleaser healthcheck
+
+  # 配置验证
+  check:
+    desc: Validate .goreleaser.yaml configuration
+    cmds:
+      - goreleaser check
+
+  # 生成变更日志
+  changelog:
+    desc: Preview release changelog
+    cmds:
+      - goreleaser changelog
+
+  # 仅构建二进制
+  build:
+    desc: Build binaries without publishing
+    cmds:
+      - goreleaser build --snapshot --rm-dist
+
+  # 完整发布流程
+  release:
+    desc: Full release workflow (build + publish)
+    cmds:
+      - task: healthcheck
+      - task: check
+      - goreleaser release --rm-dist
+      - task: announce
+
+  # 继续中断的发布
+  continue:
+    desc: Resume interrupted release
+    cmds:
+      - goreleaser continue
+
+  # 发布已构建的版本
+  publish:
+    desc: Publish prepared release
+    cmds:
+      - goreleaser publish
+
+  # 发布通知
+  announce:
+    desc: Announce published release
+    cmds:
+      - goreleaser announce
+
+  # 生成JSON Schema
+  schema:
+    desc: Generate JSON schema for configuration
+    cmds:
+      - goreleaser jsonschema
+
+  # Shell自动补全
+  completions:
+    desc: Generate shell completions
+    tasks:
+      bash:
+        cmds: goreleaser completion bash > goreleaser-completion.bash
+      zsh:
+        cmds: goreleaser completion zsh > goreleaser-completion.zsh
+      fish:
+        cmds: goreleaser completion fish > goreleaser-completion.fish
+      powershell:
+        cmds: goreleaser completion powershell > goreleaser-completion.ps1
+
+  # 默认任务：完整发布流程 (commented out to prevent auto-execution when included)
+  # default:
+  #   desc: Run full release process
+  #   cmds:
+  #     - task: release

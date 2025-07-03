@@ -1,0 +1,111 @@
+---
+version: '3'
+
+# 全局变量配置
+vars:
+  RCLONE_REMOTE: "r2"                     # rclone.conf 中的存储配置名
+  BUCKET: "hhacking"                      # 默认存储桶名
+  LOCAL_PATH: "{{.USER_WORKING_DIR}}/docs" # 默认本地路径（自动获取当前目录）
+  DRY_RUN_FLAG: "--dry-run"               # 默认启用模拟执行
+
+
+
+#- rclone config file
+#- rclone copy <local-path> r2:<bucket>/<r2-path> --progress --dry-run # rclone copy docs r2:hhacking/docs --progress 上传到目标文件夹
+#- rclone check <local-path> r2:<bucket>/<r2-path> --dry-run --size-only --one-way # rclone check docs r2:hhacking/docs --size-only --one-way 上传完成后 check 文件是否全部上传
+#- rclone sync r2:<bucket> <local-path> # 用来下载远程，需要注意的是因为sync命令的本质是mapping，所以会删掉该文件夹下其他文件，一定要注意。另外，上面的r2指的是rclone.conf中的group key
+#- rclone delete --dry-run r2:hhacking/x # 用来删除指定文件夹，cloudflare不支持该操作
+#- rclone purge
+#- rclone mkdir
+#- rclone rmdir
+#- rclone rmdirs
+#- rclone lsl # 列出指定路径下的所有的文件以及文件大小和路径，并且显示上传时间
+
+
+
+tasks:
+  # 基础命令 ====================================================
+  config-path:
+    desc: 显示 rclone 配置文件路径
+    cmds:
+      - rclone config file
+    silent: true
+
+  remote-list:
+    desc: 列出所有配置的远程存储
+    cmds:
+      - rclone listremotes
+
+  # 上传操作 ====================================================
+  upload:
+    desc: 上传文件到远程（默认启用模拟执行）
+    cmds:
+      - rclone copy {{.LOCAL_PATH}} {{.RCLONE_REMOTE}}:{{.BUCKET}}/{{if .REMOTE_PATH}}{{.REMOTE_PATH}}{{else}}docs{{end}} --progress {{.DRY_RUN_FLAG}}
+    vars:
+      REMOTE_PATH: ""  # 可选：指定远程子目录
+
+  upload-force:
+    desc: "⚠️ 实际执行上传（禁用模拟执行）"
+    cmds:
+      - task: upload
+        vars: {DRY_RUN_FLAG: ""}
+
+  # 验证操作 ====================================================
+  verify:
+    desc: 校验本地与远程文件一致性
+    cmds:
+      - rclone check {{.LOCAL_PATH}} {{.RCLONE_REMOTE}}:{{.BUCKET}}/{{if .REMOTE_PATH}}{{.REMOTE_PATH}}{{else}}docs{{end}} --size-only --one-way {{.DRY_RUN_FLAG}}
+
+  # 下载操作 ====================================================
+  download:
+    desc: "⚠️ 同步远程文件到本地（会删除本地多余文件）"
+    cmds:
+      - rclone sync {{.RCLONE_REMOTE}}:{{.BUCKET}}/{{.REMOTE_PATH}} {{.LOCAL_PATH}} {{.DRY_RUN_FLAG}}
+    vars:
+      REMOTE_PATH: "docs"  # 指定远程路径
+
+  download-safe:
+    desc: 复制下载（不删除本地文件）
+    cmds:
+      - rclone copy {{.RCLONE_REMOTE}}:{{.BUCKET}}/{{.REMOTE_PATH}} {{.LOCAL_PATH}} --progress
+    vars:
+      REMOTE_PATH: "docs"
+
+  # 删除操作 ====================================================
+  delete-dir:
+    desc: "🔥 删除远程文件夹内容（默认模拟执行）"
+    cmds:
+      - rclone delete {{.RCLONE_REMOTE}}:{{.BUCKET}}/{{.TARGET_PATH}} {{.DRY_RUN_FLAG}}
+    vars:
+      TARGET_PATH: "x"  # 需删除的路径
+
+  purge-dir:
+    desc: "🔥 彻底删除远程文件夹（包括目录本身）"
+    cmds:
+      - rclone purge {{.RCLONE_REMOTE}}:{{.BUCKET}}/{{.TARGET_PATH}} {{.DRY_RUN_FLAG}}
+
+  # 目录管理 ====================================================
+  make-dir:
+    desc: 创建远程目录
+    cmds:
+      - rclone mkdir {{.RCLONE_REMOTE}}:{{.BUCKET}}/{{.NEW_DIR}}
+    vars:
+      NEW_DIR: "new_folder"
+
+  remove-empty-dirs:
+    desc: 删除所有空目录
+    cmds:
+      - rclone rmdirs {{.RCLONE_REMOTE}}:{{.BUCKET}}/{{.BASE_PATH}} -v
+
+  # 查看操作 ====================================================
+  list-remote:
+    desc: 列出远程文件详情（含大小/时间）
+    cmds:
+      - rclone lsl {{.RCLONE_REMOTE}}:{{.BUCKET}}/{{.TARGET_PATH}}
+    vars:
+      TARGET_PATH: "docs"
+
+  size-report:
+    desc: 统计远程存储使用量
+    cmds:
+      - rclone size {{.RCLONE_REMOTE}}:{{.BUCKET}}

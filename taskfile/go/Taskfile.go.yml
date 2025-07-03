@@ -1,0 +1,301 @@
+version: "3"
+
+
+#- go test -c
+#- go test -i
+#
+## xxx
+#- go test ./... # 运行当前文件夹下的所有 case
+#- go test foo/... # 指定目录下的所有 case
+#- go test foo... # 指定前缀的所有 case
+#- go test ... # 运行 GOPATH 下的所有 case ⚠️
+#
+#- go test -cover # 代码覆盖率
+#- go test -covermode=set # 覆盖测试模式，有三种值 set,count,atomic, 其中 set 代表的是这个语句运行吗？count 代表的是这个语句执行多少次，atomic 代表的是多线程正确使用的，耗资源的。
+#- go test -v -coverprofile=c.out && go tool cover -html=c.out -o=tag.html # 生成测试覆盖率报告，并转化为 html 文件进行预览
+#
+##test.short : 一个快速测试的标记，在测试用例中可以使用 testing.Short () 来绕开一些测试
+##test.outputdir : 输出目录
+##test.coverprofile : 测试覆盖率参数，指定输出文件
+##test.run : 指定正则来运行某个 / 某些测试用例
+##test.memprofile : 内存分析参数，指定输出文件
+##test.memprofilerate : 内存分析参数，内存分析的抽样率
+##test.cpuprofile : cpu 分析输出参数，为空则不做 cpu 分析
+##test.blockprofile : 阻塞事件的分析参数，指定输出文件
+##test.blockprofilerate : 阻塞事件的分析参数，指定抽样频率
+##test.timeout : 超时时间
+##test.cpu : 指定 cpu 数量
+##test.parallel : 指定运行测试用例的并行数
+#- go test -bench=. # 基准测试
+#- go test -benchtime=3s -bench=. # 在持续时间 3s 内运行每个基准测试
+#- go test -benchmem -bench=. # 打印基准测试时的内存分配
+#- go test -count=2 -bench=. # 执行指定次数的基准测试，在 - count=1 时相当于禁用缓存
+#- go test -cpu=1 -bench=. # 设置指定的 cpu 数量来进行基准测试，可以指定多个不同的 cpu 个数列别，比如：-cpu=1,2,4
+#- go test -timeout=3s # 默认情况下，测试执行超过 10 分钟就会超时而退出，我们可以通过这个时间指定超时时间
+#- go test -parallel=2 # 当测试使用 t.Parallel () 方法将测试转为并发时，将受到最大并发数的限制，默认情况下最多有 GOMAXPROCS 个测试并发，其他的测试只能阻塞等待，这个可以用来并发安全的测试。
+#- go test -v -cpuprofile=cpuprof.out # 生成 cpuprof 的文件
+#- go test -short # 缩短长时间运行的测试的测试时间。默认关闭
+#- go test -bench=. -benchmem -benchtime=10s -count=5 # benchmark最全命令
+
+
+
+
+
+#- go get -u # 更新项目依赖到最新版本
+#- go get -u ./... #  if you want to update all dependencies to the latest version in the current directory and its subdirectories.
+#- go get -u -t ./... # to update all dependencies in the current directory and its subdirectories including test dependencies.
+#- go get -u all # if you want to update all packages in the main module and all its dependencies including test dependencies.
+#- go clean -modcache # 清除模块缓存
+#- go build -gcflags '-m -l' main.go # 使用 go build -gcflags='-m=2' 查看编译器报告，来查看是否发生了内存逃逸。(-m 最大为 4，通常使用 2，否则返回信息太多)
+
+
+
+
+#- pprof top10 -cum
+#- pprof web
+#- pprof web mapaccess1
+#- pprof web mallocgc
+#- pprof list DFS
+#- pprof list FindLoops
+
+
+
+#- run
+#- cache
+#- completion
+#- config
+#- golangci-lint cache clean
+#- golangci-lint run -v
+
+
+# TODO 可以参考 [alexhokl/auth-server: Serving authentication and OAuth2 authorization](https://github.com/alexhokl/auth-server) 这个Taskfile
+
+vars:
+  PASSWORD: Passw0rd
+  DOMAIN: localhost
+  PORT: "8080"
+  COOKIE_FILE: cookies.txt
+  LOGIN_NAME: alex@test.com
+  LOGIN_PASSWORD: P@ssw0rd
+  SITE: "{{.DOMAIN}}:{{.PORT}}"
+  REDIRECT_URI: "http://127.0.0.1:8088"
+  CLIENT_ID: cli
+
+
+
+tasks:
+  # Commented out to prevent auto-execution when included
+  # default:
+  #   dir: '{{.USER_WORKING_DIR}}'
+  #   desc: "Run the default go tasks"
+  #   cmds:
+  #     - task: clean
+  #     - task: generate
+  #     - task: fmt
+  #     - task: vet
+  #     - task: tidy
+  #     - task: test
+  #     - task: lint
+  #     - task: gosec
+
+  clean:
+    desc: "Clean the go binary"
+    cmds:
+      - echo "Cleaning..."
+      - rm -f coverage.*
+    silent: true
+    dir: '{{.USER_WORKING_DIR}}'
+
+  generate:
+    desc: "Generate the go code"
+    cmds:
+      - echo "Generating..."
+      - go generate ./...
+    silent: true
+    dir: '{{.USER_WORKING_DIR}}'
+
+  vet:
+    desc: "Vet the go code"
+    cmds:
+      - echo "Vetting..."
+      - go vet ./...
+    silent: true
+    dir: '{{.USER_WORKING_DIR}}'
+
+  fmt:
+    desc: "Format the go code"
+    cmds:
+      - echo "Formatting..."
+      - go fmt ./...
+    silent: true
+    dir: '{{.USER_WORKING_DIR}}'
+
+  lint:
+    desc: "Lint the go code"
+    cmds:
+      - echo "Linting..."
+      - golangci-lint run ./...
+    silent: true
+    dir: '{{.USER_WORKING_DIR}}'
+
+  test:
+    desc: "Test the go code"
+    cmds:
+      - echo "Testing..."
+      - go test ./...
+    silent: true
+    dir: '{{.USER_WORKING_DIR}}'
+
+  test-coverage:
+    desc: "Test the go code with coverage"
+    cmds:
+      - echo "Generating test coverage..."
+      - go test -v ./... -covermode=atomic -coverpkg=./... -coverprofile coverage.out
+      - go tool cover -html coverage.out -o coverage.html
+    silent: true
+    dir: '{{.USER_WORKING_DIR}}'
+
+  tidy:
+    desc: "Tidy the go code"
+    cmds:
+      - echo "Tidying..."
+      - go mod tidy
+    silent: true
+    dir: '{{.USER_WORKING_DIR}}'
+
+  gosec:
+    desc: "Run gosec on the go code"
+    cmds:
+      - echo "Running gosec..."
+      - gosec ./...
+    silent: true
+    dir: '{{.USER_WORKING_DIR}}'
+
+  update:
+    desc: "Update the go dependencies"
+    cmds:
+      - echo "Updating dependencies..."
+      - go get -u ./...
+    silent: true
+    dir: '{{.USER_WORKING_DIR}}'
+
+
+  pre-install:
+    cmds:
+      - go install go.uber.org/nilaway/cmd/nilaway@latest
+      - go install github.com/swaggo/swag/cmd/swag@latest
+      - go install github.com/dkorunic/betteralign/cmd/betteralign@latest
+      - go install github.com/goreleaser/goreleaser@latest
+      - go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+      - go install github.com/a-h/templ/cmd/templ@latest
+      - go install github.com/vektra/mockery/v2@latest
+      - go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.58.1
+      - go install github.com/segmentio/golines@latest
+      - go install golang.org/x/tools/cmd/goimports@latest
+      - go install github.com/securego/gosec/v2/cmd/gosec@latest
+      - go install mvdan.cc/gofumpt@latest
+      - go install github.com/spf13/cobra-cli@latest
+    preconditions:
+      - ls -1 $(go env GOPATH)/bin # 列出所有go install安装的bin (cli工具)
+
+
+  pprof:
+    desc: "执行多步骤性能分析"
+    cmds:
+      # 1. 全局瓶颈定位
+      - task: analyze-top
+      # 2. 可视化调用链
+      - task: analyze-web
+      # 3. 专项优化（需替换为你的热点函数）
+      - task: analyze-focus func=FindLoops
+
+  analyze-top: # 输出 **`top10 -cum` 结果**，识别累积耗时最高的函数
+    cmds:
+      - echo "==== 累积耗时 Top10 函数 ===="
+      - go tool pprof -top -cum cpu.pprof | head -20
+
+  analyze-web: # 打开**全局调用图**，可视化函数依赖关系
+    cmds:
+      - echo "==== 生成全局调用图 (web) ===="
+      - go tool pprof -web cpu.pprof
+
+  analyze-focus: # **组合使用 `list` 和 `web`**，聚焦分析特定函数（如 `FindLoops`）的代码行和子图
+    cmds:
+      - echo "==== 分析特定函数 {{.func}} ===="
+      # 代码行级分析
+      - go tool pprof -list '{{.func}}' cpu.pprof
+      # 生成调用子图
+      - go tool pprof -web -focus '{{.func}}' cpu.pprof
+
+  swagger:
+    desc: Generate code of Swagger 2.0 documentation
+    silent: true
+    cmds:
+      - swag init
+
+  swagger-format:
+    desc: Format Swagger comments in Go code
+    silent: true
+    cmds:
+      - swag fmt
+
+  swagger-open:
+    desc: Open Swagger documentation in a browser
+    silent: true
+    cmds:
+      - cmd: open http://{{.SITE}}/swagger/index.html
+        platforms: [darwin, linux]
+      - cmd: explorer http://{{.SITE}}/swagger/index.html
+        platforms: [windows]
+
+#- url: https://github.com/ko-build/ko
+#  doc: https://ko.build/
+#  des: 专门用来打包golang应用容器的image的工具，被很多k8s生态下的主流OSS使用
+  ko:
+    desc: 打包golang应用的image
+
+  # [PaulXu-cn/go-mod-graph-chart: Draw graphs through GO MOD GRAPH output](https://github.com/PaulXu-cn/go-mod-graph-chart) 怎么快速定位 pkg冲突问题? gmchart非常实用，每次遇到pkg conflict的时候，就很抓狂，你根本不知道到底是哪个indirect的pkg冲突了。用gmchart就可以快速定位具体是哪个pkg的version问题。
+  modChart:
+    cmd: go mod graph | gmchart
+
+
+  # [icholy/gomajor: Go tool for major version upgrades](https://github.com/icholy/gomajor) go get -u 主要负责升级到最新的 minor 或 patch 版本，而 gomajor 专门设计用来处理 major 版本升级的独特挑战。
+  modUpgrade:
+    desc: 用来升级golang应用的 Major Version
+    cmds:
+      - gomajor list
+      - gomajor get all
+
+
+
+# TODO
+#- url: https://github.com/fatih/gomodifytags
+#  des: 用来给struct添加tags的cli工具，挺实用
+  add-tags:
+    desc: "为指定结构体添加 JSON 标签（驼峰式）"
+    vars:
+      FILE: "path/to/file.go"  # 替换为目标文件路径
+      STRUCT: "User"           # 替换为结构体名称
+    cmds:
+      - gomodifytags -file {{.FILE}} -struct {{.STRUCT}} -add-tags json -transform camelcase -w
+
+
+
+# TODO
+#- url: https://github.com/cuonglm/gocmt
+#  des: Add missing comment on exported function, method, type, constant, variable in go file. 可以说是非常实用了
+  add-comments:
+    desc: "为导出元素添加缺失注释"
+    vars:
+      TARGET: "path/to/directory"  # 替换为目标目录或文件
+    cmds:
+      - gocmt -i {{.TARGET}}
+
+
+# [golang/tools: [mirror] Go Tools](https://github.com/golang/tools)
+# 【gopls/modernize】 # [11个现代Go特性：用gopls/modernize让你的代码焕然一新 | Tony Bai](https://tonybai.com/2025/04/15/embrace-modern-go-style-with-gopls-modernize/)
+  modernize:
+    status:
+      - command -v modernize # go install golang.org/x/tools/gopls/internal/analysis/modernize/cmd/modernize@latest
+    cmds:
+      - modernize -fix ./... # TODO

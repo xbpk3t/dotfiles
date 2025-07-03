@@ -1,0 +1,18 @@
+---
+version: '3'
+
+
+
+tasks:
+#- url: https://github.com/rendercv/rendercv
+#  doc: https://app.rendercv.com/
+#  des: 直接用yaml写简历，貌似真的不错，网站本身支持在线简历。RenderCV 是一个用于生成高质量简历的引擎，能够从 YAML 输入文件创建 PDF 格式的简历。
+#  record:
+#    - 【冷熊简历】不支持在线保存简历
+#    - 【Typst】则相对复杂，并且加载较慢，不支持Markdown语法
+#    - 【一纸简历】支持在线保存，以及Markdown语法，但是和【boss直聘】不适配，需要花很长时间在boss上再修改
+#    - 【2025-04-25】之前考虑“与其在其他平台写完简历，还是需要在【boss直聘】上在线编辑，不如在线写。” 但是毫无疑问，相较之下 rendercv是更好的方案。
+  cv:
+    desc: 用 rendercv 渲染简历
+    cmd: rendercv render {{.CLI_ARGS}}
+    dir: '{{.USER_WORKING_DIR}}'

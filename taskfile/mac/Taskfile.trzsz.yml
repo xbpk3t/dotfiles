@@ -1,0 +1,73 @@
+---
+version: '3'
+
+# task upload -- -d  # 明确指定上传文件夹
+# task download -- -y  # 下载时自动覆盖
+# task upload -- -p  # 显示传输进度条
+
+
+#- trzsz --dragfile ssh <root@ip>
+#- trz/tsz -d # 直接使用trz是不支持上传文件夹的，需要加个-d才能
+#- trz/tsz -y
+
+
+tasks:
+  # Commented out to prevent auto-execution when included
+  # default:
+  #   desc: 默认上传操作（支持文件夹）
+  #   cmds:
+  #     - task: status
+  #       ignore_error: true
+  #     - task: upload
+
+  status:
+    desc: 检测trzsz-go是否安装
+    cmds:
+      - command -v trzsz >/dev/null && echo "✔ trzsz-go已安装" || exit 1
+
+  install:
+    desc: 安装trzsz-go（通过Homebrew）
+    cmds:
+      - brew install trzsz-go
+    silent: true
+
+  upload:
+    desc: 执行文件/文件夹上传
+    cmds:
+      - |
+        if command -v trzsz >/dev/null; then
+          echo "🚀 使用trz上传文件/文件夹 (支持拖拽)"
+          echo "💡 提示: 输入'trz -d'上传文件夹"
+          trz {{if .CLI_ARGS}}{{.CLI_ARGS}}{{else}}-d{{end}}
+        else
+          echo "❌ trzsz未安装，请先执行：task install"
+          exit 1
+        fi
+
+  download:
+    desc: 下载文件/文件夹
+    cmds:
+      - |
+        if ! command -v trzsz >/dev/null; then
+          task install
+        fi
+        tsz {{if .CLI_ARGS}}{{.CLI_ARGS}}{{else}}-d{{end}}
+
+  connect:
+    desc: 连接到远程服务器（支持拖拽上传）
+    cmds:
+      - trzsz --dragfile ssh {{.USER}}@{{.HOST}}
+    env:
+      USER: "root"
+      HOST: "your-server-ip"
+
+  config:
+    desc: 生成配置文件
+    cmds:
+      - |
+        cat <<EOL > ~/.trzsz.conf
+        # trzsz配置文件
+        DefaultUploadPath = ~/Downloads
+        DefaultDownloadPath = ~/Downloads
+        EOL
+        echo "✅ 配置文件已生成: ~/.trzsz.conf"

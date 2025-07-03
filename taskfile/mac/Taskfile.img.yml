@@ -1,0 +1,36 @@
+---
+version: "3"
+
+
+#- url: https://github.com/ImageMagick/ImageMagick
+#  des: ImageMagick 用来用cli执行各种图片操作（比如压缩、）
+
+#- 我自己的图片都需要png格式的，但是有很多图片本身是jpg格式的，在网页操作很麻烦，怎么用cli批量操作? # 'find . -type f \( -name "*.jpg" -o -name "*.jpeg" \) -exec sh -c 'magick mogrify -format png "{}" && rm "{}"' \;' #  # 注意这里使用的mogrify本身是支持直接替换的，但是如果使用-format就无法替换了，所以后面需要使用rm手动删除
+#- magick in.png -resize 50% out.png # 压缩PNG图片
+
+
+tasks:
+  update:
+    desc: Update all installed dependencies
+    summary: |
+      task update
+    cmds:
+      - brew update
+      - brew upgrade
+      - brew cleanup
+
+  install:
+    desc: Install all dependencies using HomeBrew
+    summary: |
+      Must have Task installed (brew install go-task)
+      task setup
+    cmds:
+      - task: update
+      - brew install ffmpeg
+      - brew install imagemagick
+      - brew install webp
+
+  j2p:
+    desc: jpg-to-png
+    dir: '{{.USER_WORKING_DIR}}'
+    cmd: find . -type f \( -name "*.jpg" -o -name "*.JPG" -o -name "*.jpeg" \) -exec sh -c 'magick mogrify -format png "{}" && rm "{}"' \;

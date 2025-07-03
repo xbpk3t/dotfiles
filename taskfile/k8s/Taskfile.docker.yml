@@ -1,0 +1,199 @@
+---
+version: "3"
+
+#- docker image run
+#- docker stats --no-stream <container> # 查看 docker 容器的内存占用，只返回当前状态
+#- docker stats --format 'table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}' <container> # 查看 docker 容器的内存占用，格式化输出
+#- docker inspect --format='{{.Name}} - {{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(docker ps -aq) # 查看所有docker容器的ip
+#- docker inspect --format='{{.LogPath}}' <container-name> # 清理某个容器的运行日志
+#- docker inspect <container-id> --format='{{.State.ExitCode}}' # 查看某个容器的退出码。退出码必须在 0-255 之间，0 表示正常退出。外界将程序中断退出，状态码在 129-255。程序自身异常退出，状态码一般在 1-128。
+#- docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Ports}}\t{{.ID}}\t{{.Status}}' # 格式化查看 docker ps
+#- docker network prune # 清理所有没用的容器网络
+#- docker volume ls/inspect/rm/prune # prune, 删除所有现在没有使用的数据卷(类似image的prune)
+#- docker search <formulae> # 从官方仓库搜索image
+#- docker pull # 拉到本地
+#- docker system df # 查看images, containers, volumes所占用的空间
+#- docker commit # 提交镜像
+#- docker history <nginx:latest> # 查看本地镜像的历史提交记录
+#- docker diff <container name/id>
+#- docker exec -it <container name/id> /bin/bash # 进入容器使用exec，而不是attch，因为attch退出后会导致容器停止
+#- docker export/import # 导出/导入 容器
+#- docker image rm $(docker image ls -q <image name>) # 删除镜像名中含有<image name>的镜像
+#- docker image prune -a # 清除所有没有使用的镜像(不仅是dangling images)
+#- docker image prune # 删除所有dangling images(就是没有tag的镜像，比如说二阶段提交后遗弃的一阶段镜像)
+#- docker image prune -a -f && docker container prune -f && docker rmi $(docker images | grep "^<none>" | awk "{print $3}") # 删除悬空镜像、不用的容器、批量删除tag为none的镜像
+#- docker inspect --format '{{ .State.Pid }}' <CONTAINER ID or NAME> # 获取某个容器的PID信息
+#- docker inspect --format '{{ .NetworkSettings.IPAddress }}' <CONTAINER ID or NAME> # 获取某个容器的IP地址
+#- docker container prune # Remove all stopped containers. 清理所有stopped的容器
+#- docker system prune # Remove unused data. 清理所有的stopped的容器、所有dangling状态的image、无用网络
+#- docker rm -fv <containerID> # 停止删除容器，并删除volume
+#- docker container stop/rm $(docker ps -aq) # 停止/清除 所有容器
+#- docker manifest inspect --verbose <image> # 查看manifest (RepoTags, Config, Layers)信息，如果需要更简要的输出，就去掉--verbose
+#- docker image inspect <image> # 比如 docker image inspect <debian>
+#- docker exec -it $(docker ps -ql) sh # 查看docker iptables rules
+#- docker info | grep Storage
+#- docker run --rm -v docker-mariadb_db-mariadb:/data -v $(pwd):/backup ubuntu tar cvf /backup/backup.tar /data # 设置了具名volume，根据docker安全策略是无法找到volume对应的物理文件的，那怎么导出这些sql呢？
+
+
+
+#- url: https://github.com/lavie/runlike
+#  des: 类似chrome 之于 copy as curl，用来一键生成非常复杂的docker run命令。快速获取 Docker 容器启动命令的工具。这是一个用于解析运行中容器的工具，可自动生成对应的 docker run 启动命令。它能够提取容器的配置信息，包括端口绑定、映射卷、环境变量、网络设置等，适用于复制、调试或迁移容器的场景。 # 具体情况如下，事情要从上周的一次事故说起，我们用 docker 部署的程序有一点问题，要马上回滚到上一个版本。这个 docker 是一个比较复杂的和 BPF 有关的程序，启动时候需要设置很多 mount 和 environments，docker run 的命令特别长。所以我用 Ansible 来配置好这些变量，然后启动 docker，一个实例要花费 3～5 分钟才能启动。同事突然说，某实例他手动启动了，当时我就震惊了，怎么手速这么快？！请教了一下，原来是用的 runlike 工具。这个工具的原理是，`docker inspect <container-name> | runlike --stdin` ，就会生成这个容器的 docker run 命令。
+
+
+#- url: https://github.com/containers/skopeo
+#  des: 一个命令行工具，用于在不同的容器镜像仓库之间复制、检查和删除容器镜像
+
+vars:
+  IMAGE_NAME: "my-app"
+  IMAGE_TAG: "latest"
+  DOCKERFILE: "Dockerfile"
+
+
+
+tasks:
+
+  # ========================
+  # 容器生命周期管理
+  # ========================
+  run-container:
+    desc: 启动容器（后台模式）
+    cmds:
+      - docker run -d --name {{.APP_NAME}} -p {{.PORT}}:80 {{.IMAGE}}
+
+  stop-container:
+    desc: 停止指定容器
+    cmds:
+      - docker stop {{.CONTAINER}}
+
+  rm-container:
+    desc: 删除容器（强制删除运行中容器）
+    cmds:
+      - docker rm -f {{.CONTAINER}}
+
+  # ========================
+  # 容器监控与诊断
+  # ========================
+  container-stats:
+    desc: 查看容器资源占用（格式化输出）
+    cmds:
+      - docker stats --no-stream --format 'table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}' {{.CONTAINER}}
+
+  container-logs:
+    desc: 实时跟踪容器日志
+    cmds:
+      - docker logs -f {{.CONTAINER}}
+
+  inspect-ip:
+    desc: 查看所有容器IP地址
+    cmds:
+      - docker inspect --format='{{.Name}} - {{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(docker ps -aq)
+
+  exit-code:
+    desc: 检查容器退出码
+    cmds:
+      - docker inspect --format='{{.State.ExitCode}}' {{.CONTAINER}}
+
+  # ========================
+  # 系统清理与优化
+  # ========================
+  system-clean:
+    desc: 综合清理（容器/镜像/卷/网络）
+    cmds:
+      - docker system prune -af
+      - docker volume prune -f
+      - docker network prune -f
+
+  image-clean:
+    desc: 删除悬空镜像和指定镜像
+    cmds:
+      - docker image prune -a -f
+      - docker rmi $(docker images -q {{.IMAGE}})
+
+  log-clean:
+    desc: 清理容器日志（需重启容器生效）
+    cmds:
+      - truncate -s 0 $(docker inspect --format='{{.LogPath}}' {{.CONTAINER}})
+
+  # ========================
+  # 镜像与存储管理
+  # ========================
+  image-backup:
+    desc: 备份具名卷数据
+    cmds:
+      - docker run --rm -v {{.VOLUME}}:/data -v $(pwd):/backup alpine tar cvf /backup/backup.tar /data
+
+  image-history:
+    desc: 查看镜像构建历史
+    cmds:
+      - docker history {{.IMAGE}}
+
+
+
+
+  #- url: https://github.com/bcicen/ctop
+  #  des: top in containers
+  ctop:
+    cmds:
+
+
+  #- url: https://github.com/hadolint/hadolint
+  #- url: https://github.com/aquasecurity/trivy
+  #  des: docker 的镜像安全检测工具，查找 docker 容器、k8s 中是否有错误配置、密钥、SBOM 以及漏洞。（desktop 内置了，但是这个看起来更直观）, better than quay/clair and anchore/grype
+  #- url: https://github.com/slimtoolkit/slim
+  #  des: 优化和缩小 docker 镜像大小. 其实没啥用，并且不好用
+  #- url: https://github.com/wagoodman/dive
+  #  des: image layer. 镜像分析工具，查看各层信息
+  zzz:
+    desc: "完整镜像优化流程"
+    cmds:
+      - task: lint
+      - task: build
+      - task: scan
+      - task: analyze
+      - task: optimize
+        if: {{eq .OPTIMIZE "true"}}
+      - task: verify
+
+  lint:
+    desc: "检查 Dockerfile 规范"
+    cmds:
+      - hadolint {{.DOCKERFILE}}
+    silent: true
+
+  build:
+    desc: "构建 Docker 镜像"
+    cmds:
+      - docker build -t {{.IMAGE_NAME}}:{{.IMAGE_TAG}} -f {{.DOCKERFILE}} .
+
+  scan:
+    desc: "安全漏洞扫描"
+    cmds:
+      - trivy image --ignore-unfixed --severity CRITICAL {{.IMAGE_NAME}}:{{.IMAGE_TAG}}
+
+  analyze:
+    desc: "分析镜像层结构"
+    cmds:
+      - dive {{.IMAGE_NAME}}:{{.IMAGE_TAG}}
+
+  optimize:
+    desc: "优化镜像大小"
+    cmds:
+      - slim build --target {{.IMAGE_NAME}}:{{.IMAGE_TAG}} --tag {{.IMAGE_NAME}}:slim-{{.IMAGE_TAG}}
+    postcmds:
+      - docker tag {{.IMAGE_NAME}}:slim-{{.IMAGE_TAG}} {{.IMAGE_NAME}}:{{.IMAGE_TAG}}
+
+  # [goldmann/docker-squash：Docker 镜像压缩工具 --- goldmann/docker-squash: Docker image squashing tool](https://github.com/goldmann/docker-squash)
+  squash:
+    desc: 【合并层】减少层数，去除层之间的冗余文件
+
+
+  verify:
+    desc: "验证最终镜像"
+    cmds:
+      - docker images {{.IMAGE_NAME}}
+      - echo "优化后镜像大小:"
+      - docker inspect {{.IMAGE_NAME}}:{{.IMAGE_TAG}} --format='{{"{{.Size}}"}}' | numfmt --to=iec
+
+  # [composerize/composerize：🏃→ 🎼 docker 运行 asdlksjfksdf > docker-composerize up --- composerize/composerize: 🏃→🎼 docker run asdlksjfksdf > docker-composerize up](https://github.com/composerize/composerize)
+  composerize:
+    desc: 把 Dockerfile 转为 dc

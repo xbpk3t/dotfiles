@@ -1,0 +1,11 @@
+---
+version: "3"
+
+#- minikube dashboard # 启动 Minikube 的 Kubernetes dashboard
+#- minikube start --driver=docker --container-runtime=docker # 使用 Docker 作为虚拟化程序和容器运行时启动 Minikube
+#- eval $(minikube docker-env) # 设置环境变量，使得 Docker 能够构建和运行 Minikube 中的镜像
+#- minikube addons list # 列出所有可用的 Minikube 插件（addons）
+
+
+
+tasks:

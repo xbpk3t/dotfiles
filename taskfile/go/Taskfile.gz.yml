@@ -1,0 +1,102 @@
+version: "3"
+
+# 全局环境变量配置
+env:
+  USER_WORKING_DIR: .  # 默认当前目录，可通过命令行覆盖
+  API_FILE: "*.api"    # 默认API文件匹配模式
+  PROTO_FILE: "*.proto" # 默认Proto文件匹配模式
+
+
+
+#- goctl api new <project> # 用这个命令生成的项目结构
+#- goctl api go -api *.api -dir . --style=goZero
+#- goctl rpc protoc *.proto --go_out=../ --go-rpc_out=../ -zrpc_out=../ --style=goZero
+#- goctl model mysql
+#- goctl model mysql datasource
+#- goctl model mysql ddl # goctl model mysql ddl -src blog.sql -dir ./model
+#- goctl model mysql ddl -src user.sql -dir ./users -c # 用来生成model层的CURD代码
+
+
+# 任务定义
+tasks:
+  # 1. 创建新API项目
+  api-new:
+    desc: "创建新的API项目结构"
+    vars:
+      PROJECT_NAME: "{{default \"myproject\" .PROJECT_NAME}}"
+    cmds:
+      - goctl api new {{.PROJECT_NAME}}
+    dir: '{{.USER_WORKING_DIR}}'
+    sources:
+      - "{{.USER_WORKING_DIR}}/**/*.api"
+
+  # 2. 根据API文件生成Go代码
+  api-gen:
+    desc: "从API文件生成Go服务代码"
+    cmds:
+      - goctl api go -api {{.API_FILE}} -dir . --style=goZero
+    dir: '{{.USER_WORKING_DIR}}'
+    sources:
+      - "{{.USER_WORKING_DIR}}/{{.API_FILE}}"
+
+  # 3. 生成RPC服务代码
+  rpc-gen:
+    desc: "从Proto文件生成gRPC服务代码"
+    cmds:
+      - goctl rpc protoc {{.PROTO_FILE}} --go_out=../ --go-grpc_out=../ --zrpc_out=../ --style=goZero
+    dir: '{{.USER_WORKING_DIR}}'
+    sources:
+      - "{{.USER_WORKING_DIR}}/{{.PROTO_FILE}}"
+
+  # 4. 通用模型生成命令
+  model-gen:
+    desc: "通用MySQL模型生成器"
+    cmds:
+      - |
+        if [ -n "{{.DSN}}" ]; then
+          goctl model mysql datasource -url="{{.DSN}}" -dir="{{.OUT_DIR}}" -cache="{{.CACHE}}" --style=goZero
+        elif [ -n "{{.SQL_FILE}}" ]; then
+          goctl model mysql ddl -src="{{.SQL_FILE}}" -dir="{{.OUT_DIR}}" -cache="{{.CACHE}}" --style=goZero
+        else
+          echo "错误：必须指定DSN或SQL_FILE"
+          exit 1
+        fi
+    dir: '{{.USER_WORKING_DIR}}'
+    vars:
+      OUT_DIR: "./model"
+      CACHE: "true"
+
+  # 5. 博客模型生成（具体示例）
+  model-blog:
+    desc: "生成博客模型（具体示例）"
+    cmds:
+      - goctl model mysql ddl -src blog.sql -dir ./model
+    dir: '{{.USER_WORKING_DIR}}'
+    sources:
+      - "{{.USER_WORKING_DIR}}/blog.sql"
+
+  # 6. 用户模型生成（具体示例）
+  model-user:
+    desc: "生成用户模型（带缓存）"
+    cmds:
+      - goctl model mysql ddl -src user.sql -dir ./users -c
+    dir: '{{.USER_WORKING_DIR}}'
+    sources:
+      - "{{.USER_WORKING_DIR}}/user.sql"
+
+  # 7. 完整工作流
+  full-workflow:
+    desc: "完整API+RPC+模型生成工作流"
+    cmds:
+      - task: api-new
+        vars:
+          PROJECT_NAME: "{{.PROJECT_NAME}}"
+      - task: api-gen
+      - task: rpc-gen
+      - task: model-gen
+        vars:
+          SQL_FILE: "{{.MODEL_SQL}}"
+          OUT_DIR: "./internal/model"
+    vars:
+      PROJECT_NAME: "myapp"
+      MODEL_SQL: "models.sql"

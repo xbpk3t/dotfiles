@@ -1,0 +1,22 @@
+---
+version: "3"
+
+#- etcdctl version
+#- etcdctl member list # 获取etcd成员列表
+#- etcdctl member list --write-out=[table|fields|json|protobuf|simple] # 其中输出信息的格式有 fields, json, protobuf, simple, table这几种，通过--write-out指定
+#- etcdctl put <key> <value> # 向etcd写入数据 比如 `etcdctl --endpoints=$ENDPOINTS put web3 'hello world3'`
+#- etcdctl get <key>
+#- etcdctl get --prefix <ctx> # 模糊查询匹配到前缀为web的数据
+#- etcdctl --prefix --keys-only=true get web # 模糊查询匹配到前缀为web的key（不返回value）
+#- etcdctl del <key>
+#- etcdctl lease grant 20 # 设置一个20s的租约
+#- etcdctl lease list # 查看租约列表
+#- etcdctl lease timetolive   xxxxxxx # 查看信息（剩余时间）
+#- etcdctl lease revoke   xxxxxxx # 删除租约
+#- etcdctl lease keep-alive xxxxx # 保持租约始终存活
+#- etcdctl put /user shenyi --lease=xxxxxooo # 一旦租约过期，或被删掉,key就没了
+#- etcdctl lease timetolive   xxxxxxx --keys # 可以查看该租约下的所有key
+
+
+
+tasks:

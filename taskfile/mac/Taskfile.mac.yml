@@ -1,0 +1,44 @@
+---
+version: '3'
+
+
+
+tasks:
+  # [fastfetch-cli/fastfetch: A maintained, feature-rich and performance oriented, neofetch like system information tool.](https://github.com/fastfetch-cli/fastfetch) 因为neofetch的性能差（因为基于bash实现）、并且已经EOL了，所以选择 fastfetch
+  fetch:
+    cmd: fastfetch
+
+
+  df:
+    cmd: df -lh # disk free
+
+  du:
+    cmd: du -sh * | sort -h # disk usage, 查看文件夹下各文件大小，并排序
+    dir: '{{.USER_WORKING_DIR}}'
+
+
+    #- url: https://github.com/mac-cleanup/mac-cleanup-py
+    #  des: Mac Cleaner. 这个比Clean-macOS好用点，不过都用不到了。普通OS本身就不适合有“对OS清洁有强迫症”的群体，所以比较什么cleaner对清洁更彻底，也就毫无意义了。平时用tencent-lemon就足够了。没必要求全责备。
+    #  rel:
+    #    - url: https://github.com/MarioCatuogno/Clean-macOS
+
+
+
+    #  - url: https://github.com/syncthing/syncthing
+    #    des: 一个基于P2P实现的“远程同步文件”工具，提供GUI和CLI（通过web操作）两种下载方式，用homebrew安装，默认CLI。用这个就可以代替之前用的【坚果云】了 (Some time ago used Nutstore to sync code bidirectionally. I've also used other cloud service like icloud, dropbox, google-cloud to implement similar task.)。
+
+    #- url: https://github.com/yeongpin/cursor-free-vip
+    #  des: 目前可用的
+
+  cursor:
+    cmd: curl -fsSL https://aizaozao.com/accelerate.php/https://raw.githubusercontent.com/yuaotian/go-cursor-help/refs/heads/master/scripts/run/cursor_mac_id_modifier.sh -o ./cursor_mac_id_modifier.sh && sudo bash ./cursor_mac_id_modifier.sh && rm ./cursor_mac_id_modifier.sh
+    dir: ~/Downloads
+
+  # [nicolargo/glances](https://github.com/nicolargo/glances)
+  top:
+    cmd: glances # 更易用的top/htop，还支持web模式。但是其核心是“轻量级monitor系统”，glances还分可以分为server模式和client模式，所有slave机器都需要安装glances的server，master开启client模式就可以收集所有slave的数据（类似prometheus这样的pull模式）。所以也可以理解为局域网下的prom（glances不适合在公网做monitor），感觉意思不大。
+
+  # 修改dotbot配置之后，执行同步
+  dotbot:
+    cmd: dotbot -c install.conf.yaml
+    dir: '{{.USER_WORKING_DIR}}'

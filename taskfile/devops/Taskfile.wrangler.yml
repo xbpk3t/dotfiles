@@ -1,0 +1,8 @@
+---
+version: '3'
+
+
+
+tasks:
+  info:
+    cmd: wrangler whoami # 无法推送到pages，怎么排查具体问题? 怎么查看wrangler权限设置?

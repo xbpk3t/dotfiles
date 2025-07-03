@@ -1,0 +1,97 @@
+version: "3"
+
+#- brew commands
+#- /cleanup/outdated/doctor/commands # 一些brew全局命令
+#- brew update -vvv # 更新homebrew
+#- brew install/uninstall
+#- brew upgrade # 用来升级brew的formula（不支持cask）
+#- brew list --<cask|formula> # brew remove
+#- brew services list/run/start/stop/restart/cleanup
+#- brew tap # 查看所有已经tapped的repo
+#- brew tap/untap <user/repo> # 添加/移除 新tap
+#- brew tap --repair
+#- brew info <service> # brew info --github <service>
+#- brew pin/unpin <service@version> # 锁定/解锁 不想更新的包
+#- brew link/unlink <service>
+#- brew deps/uses <pkg> --tree --installed # 查看 pkg 的上游包（依赖包）/ 下游包（被依赖包）
+#- brew leaves # 列出不被任何包依赖的包
+#- brew update-reset # To undo all changes you have made to any of Homebrew’s repositories, It will revert to the upstream state on all Homebrew’s repositories.
+#- brew autoremove # Uninstall formulae that were only installed as a dependency of another formula and are now no longer needed
+#- brew bundle dump --describe --force --file='./Brewfile' # backup brew formulae and cask
+#- brew bundle # 根据Brewfile恢复homebrew中的软件
+#- brew bundle install --file='./Brewfile'
+#- brew cu -facy # true
+#- brew graph --installed | fdp -Tpng -ograph.png
+
+
+#- des: brew upgrade只能升级formulae，不支持cask。那怎么才能upgrade cask呢?
+#  url: https://github.com/buo/homebrew-cask-upgrade
+#- des: brew graph提供的依赖关系不是可视化的，怎么可视化查看homebrew的formulae之间的依赖关系?
+#  url: https://github.com/martido/homebrew-graph
+
+
+tasks:
+  default:
+    desc: x
+    cmds:
+      - task: upgrade
+      - task: cleanup
+      - task: details
+      - brew doctor
+
+  check-size:
+    cmds:
+      - git count-objects -v
+      - du -sh * | sort -h
+      - du -sh docs/* | sort -h
+
+  upgrade:
+    desc: ddd
+    cmds:
+      - brew update -vvv
+      - brew upgrade
+      - brew outdated # 更新homebrew
+      - task: cask-upgrade
+
+  info:
+    cmds:
+      - brew config
+      - git -C "$(brew --repo)" remote -v # 查看brew镜像源
+      - brew --prefix # 用来查看bin path和cask path
+
+
+
+  bundle:
+    cmds:
+      - brew bundle dump --describe --force --file='./Brewfile'
+    desc: bundle to Brewfile
+
+  cleanup:
+    desc: 清除所有brew本地缓存
+    cmds:
+      - brew cleanup -n
+      - brew cleanup -s # 清理
+      - brew services cleanup
+      - brew autoremove
+
+
+
+  cask-upgrade:
+    desc: 更新cask（也就是所有app）
+    cmds:
+      - brew cu -facy
+    preconditions:
+      - brew tap buo/cask-upgrade
+
+
+  deps:
+    desc: Show dependency tree for a package (provide package name)
+    cmds:
+      - brew deps {{.CLI_ARGS}} --tree --installed
+    silent: true
+
+  uses:
+    desc: Show reverse dependency tree for a package (provide package name)
+    cmds:
+      - brew uses {{.CLI_ARGS}} --tree --installed
+    silent: true

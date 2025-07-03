@@ -1,0 +1,206 @@
+---
+version: '3'
+
+
+#- git config --list # 其实就是.gitconfig
+#- 'git commit -m "<type>(<scope>): <subject> <footer>" -m "Description <body>"' # 'git commit -m "fix(sms): 修复短信到达率问题 fix #12, fix #13, fix #14" -m "通过xxx修复该bug"'
+#- git log --graph --date=short # 查看提交记录，相当于glods
+#- glods --grep <keywords> # 搜索提交记录，非常好用
+#- git reflog # reflog 是一个本地结构，它记录了 HEAD 和分支引用在过去指向的位置。reflog 信息没法与其他任何人共享，每个人都是自己特有的 reflog。重要的一点是，它不是永久保存的，有一个可配置的过期时间，reflog 中过期的信息会被自动删除。我们在使用reset后，部分代码会丢失，如果这时想找回这些代码，就可以使用reflog
+#- git remote rm origin && git remote add origin <url> # git 怎么修改远程仓库地址
+#- git rm -r --cached . # 忽略规则不生效，清空git缓存，撤销已经写到缓存区文件的修改
+#- git push -f # 强制推送
+#- git checkout . # 放弃本地所有修改
+#- git remote -v # 查看git的远程仓库地址
+#- git diff <filename>
+#- git diff .
+#- git diff --cached . # 展示和暂存区的差异，而git diff .展示和工作区的差异
+#- git reset [--mixed | --soft | --hard] <起始点的父提交> # 三种reset type，默认mixed 回退到某个版本，本地会保留源码，回退 commit 和 index 信息，若要提交重新 commit。soft 回退到某个版本，只回退了 commit 的信息，不会恢复到 index file 一级，若要提交重新 commit。Hard 彻底回退到某个版本，本地的源码也会变为上一个版本的内容。
+#- git reset HEAD~3
+#- git reset --merge # 用来撤销合并，也可以与mixed/soft/hard搭配使用
+#- git rebase -i HEAD~n # 合并前n个commit。需要注意的是，编辑时把pick改为s即可，记得第一个不要修改（需要父commit）
+#- git stash
+#- git filter-branch
+#- git cherry-pick
+#- git work-together
+#- git config -f .gitmodules submodule.xxx.ignore dirty # 忽略子模块的脏commit
+#- git clone url path --recursive # clone包含submodule的repo
+#- git blame <filename> -L 10,20 # 查看10到20行，blame命令 我们往往通过blame查到具体是哪个人修改了某文件到某块代码，找到这个背锅侠。也可以使用 'git blame <filename> -L:<func_name>'
+#- git grep -n -p <str> # 从当前branch中查找指定字符串，相比于 'git grep -n <str>' 会显示匹配行以及上下几行的内容
+#- git grep -n -p <str> <commit号/tag号> # 从指定commit中查找指定字符串
+#- git rev-list --all | xargs git grep <str> # 从所有历史commit中查找指定字符串
+#- git count-objects -v # 查看git仓库大小
+#- git rev-list --objects --all | grep "$(git verify-pack -v .git/objects/pack/*.idx | sort -k 3 -n | tail -10 | awk '{print$1}')"
+#- git filter-branch --force --index-filter 'git rm -rf --cached --ignore-unmatch <filename>' --prune-empty --tag-name-filter cat -- --all # 怎么从所有git记录中查找指定字符串？？？ 需要按照上面输出的大文件，指定文件或者文件夹
+#- |
+#  git filter-branch --force --index-filter \
+#  'git rm -rf --cached --ignore-unmatch '"$(gitleaks detect --source . -v | awk -F': ' '/^File:/ {print $2}' | sort -u | tr '\n' ' ')" \
+#  --prune-empty --tag-name-filter cat -- --all
+#
+#- git push origin --force --all && rm -rf .git/refs/original/ && git reflog expire --expire=now --all && git gc --prune=now # [git 查找大文件，删除大文件写公司的一个内部项目，前期没配置好.gitignore导致整个git仓库达到1.1G，查了 - 掘金](https://juejin.cn/post/6844904046797520909) 怎么压缩 git 项目？push后，并清除本地缓存。删除之后会有大量输出，显示已经从各自历史log中剔除掉关于这个大文件的信息，之后可以使用gc命令再次压缩。一定要执行“清除缓存”。另外，之后最好从远程重新拉取。
+#- git maintenance run --task=gc --task=loose-objects --task=pack-refs && git prune # used to reduce git repo size, equal to 'git gc'
+#- git push --force --all --tags # gp默认只有main分支，如果使用git push --all就可以推送所有branch，使用git push --all --tags可以顺便推送所有tag
+#- git log -S <str> # 从所有commit的内容中查找str
+#- "删除远程所有标签？ `git tag -l | xargs -I {} git push origin :refs/tags/{}`"
+#- "怎么删除本地所有标签？ `git tag -l | xargs git tag -d`"
+
+
+
+#- bfg --delete-files id_{dsa,rsa} # 删除所有含有 'id_rsa' or 'id_dsa' 的文件
+#- bfg --strip-blobs-bigger-than 50M # 删除所有超过50MB的blobs文件
+#- bfg --replace-text <filepath> --no-blob-protection # 替换文件中的敏感信息（不删除文件）
+
+
+
+#- gh cache list
+#- gh workflow list # "Get workflow-id, nor workflow-name. NOTICE: As long as add test branch, you can trigger by workflow_dispatch event"
+#- gh workflow run <workflow-id> --ref <branch-name> # Trigger by test branch. eg. gh workflow run 75843747 --ref test
+
+
+
+tasks:
+  default:
+  # Commented out to prevent auto-execution when included
+  # desc: Init Git Repo
+  # cmds:
+  #   - REPO="{{.CLI_ARGS}}"
+  #   - mkdir -p "$REPO" && cd "$REPO"
+  #   - echo "# $REPO" >> README.md
+  #   - git init
+  #   - git add .
+  #   - git commit -m "first commit"
+  #   - git branch -M main
+  #   - 'if ! git remote | grep -q origin; then git remote add origin "https://github.com/xbpk3t/$REPO.git"; fi'
+  #   - git push -u origin main
+  # silent: false
+
+  #- url: https://github.com/sinclairtarget/git-who
+  #  des: 一个开源的命令行工具，显示 Git 仓库的提交者统计。
+  #- url: https://github.com/git-quick-stats/git-quick-stats
+  #- url: https://github.com/IonicaBizau/git-stats
+  # 安装 git-quick-stats
+  install-git-quick-stats:
+    status:
+      - command -v git-quick-stats >> /dev/null
+    cmds:
+      - brew install git-quick-stats
+      - echo "✅ git-quick-stats 安装完成"
+    silent: true
+
+  # 安装 git-who
+  install-git-who:
+    status:
+      - command -v git-who >> /dev/null
+    cmds:
+      - brew install git-who
+      - echo "✅ git-who 安装完成"
+    silent: true
+
+  # 主报告任务
+  analyze:
+    desc: 在控制台显示完整的Git仓库分析报告
+    deps:
+      - install-git-quick-stats
+      - install-git-who
+    preconditions:
+      - 'test -d .git || { echo "错误: 当前目录不是Git仓库"; exit 1; }'
+    cmds:
+      - echo "================ 仓库概览 ================"
+      - git-quick-stats --detailed-git-stats
+      - echo "================ 贡献者排名 ================"
+      - git-quick-stats --contributors
+      - echo "================ 代码所有权分析 ================"
+      - git who table -l -n 10 | head -n 15
+      - echo "================ 目录责任分布 ================"
+      - git who tree -d 2 | head -n 30
+      - echo "================ 历史贡献趋势 ================"
+      - git who hist -n 5 | head -n 20
+      - echo "✅ Git仓库分析报告完成！"
+    dir: '{{.USER_WORKING_DIR}}'
+
+
+  #  - url: https://github.com/Bhupesh-V/ugit
+  #    des: 千呼万唤才出来的git工具，用来撤销git操作。最经典的场景就是，经常有那种已经commit了，然后还有点代码想放到那个commit里提交上去。这个就很难操作，这种情况下用ugit就很容易了。
+  # 使用 ugit 撤销上一次 Git 操作（支持交互式选择）
+  undo:
+    desc: "使用 ugit 撤销上一次 Git 操作（支持交互式菜单）"
+    cmds:
+      # 若未指定操作类型，进入交互式菜单
+      - if [ -z "{{.CLI_ARGS}}"]; then
+        ugit;
+        else
+        ugit undo {{.CLI_ARGS}};
+        fi
+    # 支持直接指定操作类型（如 `task undo commit`）
+    examples: |
+      task undo          # 进入交互式菜单选择撤销类型
+      task undo commit   # 撤销最后一次 commit
+      task undo add      # 撤销 git add 操作
+      task undo push     # 强制撤销最后一次 push
+      task undo branch-D # 恢复误删的分支
+    dir: '{{.USER_WORKING_DIR}}'
+
+  #- 操作场景: 【回滚本地未提交代码】丢弃未暂存更改
+  #  原生 Git 命令: "git restore . 或 git checkout -- ."
+  #  ugit 替代方案: "ugit → 选择 Undo git add"
+  #
+  #- 操作场景: 【回滚本地已提交的代码】
+  #  原生 Git 命令: "git reset --soft HEAD~1（保留修改）；git reset --hard HEAD~1（彻底删除）"
+  #  ugit 替代方案: "ugit → 选择 Undo git commit"
+  #
+  #- 操作场景: 回滚所有未暂存/未贮藏代码
+  #  原生 Git 命令: "git restore . && git clean -df（含未跟踪文件）"
+  #  ugit 替代方案: "ugit → 组合使用 Undo git add + git clean"
+  #
+  #- 操作场景: 【撤回已 push 的提交】
+  #  原生 Git 命令: "git revert <commit>（安全）；git reset --hard <commit> && git push -f（危险）"
+  #  ugit 替代方案: "ugit → 选择 Undo git push"
+  #
+  #- 操作场景: 恢复误删除的 commit
+  #  原生 Git 命令: "git reflog → 找到 commit hash → git reset --hard <hash>"
+  #  ugit 替代方案: "ugit → 选择 Undo git reset"
+  #
+  #- 操作场景: 彻底删除历史 commit
+  #  原生 Git 命令: "git reset --hard <commit-id>（本地）；git push origin HEAD --force（远程）"
+  #  ugit 替代方案: "ugit 仅支持删除最近 commit（等效 reset HEAD~1）"
+
+
+
+
+
+  # TODO
+  #- des: 怎么压缩 git 项目？
+  #  url: https://github.com/newren/git-filter-repo # rewrite git repository history. Another filter-branch.
+
+
+  #- url: https://github.com/kubernetes/git-sync
+  #  des: 怎么保证repo和其upstream同步?
+
+
+
+  #- url: https://github.com/rtyley/bfg-repo-cleaner
+  #  des: bfg, 经过测试，发现 bfg 只能修改 commit 历史，但是无法直接修改当前文件
+
+  #- url: https://github.com/gruntwork-io/fetch
+  #  des: 非常好用的工具，用来直接拉取github的指定folder（注意只能用于github）。工具很好，但是不适合日常使用，3个required参数，用起来有点麻烦。
+
+
+  # TODO 现在还没想好有什么需要的workflow，之后再搞
+  #- url: https://github.com/cli/cli
+  #  doc: https://docs.github.com/en # 只需要这么一个就可以了，什么actions, pages之类的从这里打开即可
+  #  des: GitHub’s official command line tool
+  # [Manual | GitHub CLI](https://cli.github.com/manual/)
+  gist:clear: # 注意list默认只有10条，--limit则可以自定义条数
+    desc: 清空所有gist
+    cmd: |
+      gh gist list --limit 100 | awk '{print $1}' | while read gist_id; do
+          gh gist clone "$gist_id" && gh gist delete --yes "$gist_id"
+      done
+    dir: '{{.USER_WORKING_DIR}}'
+
+  gist:list:
+    cmd: gh gist list
+
+  gist:test:
+    cmds:
+      - task: gist:list

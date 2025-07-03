@@ -1,0 +1,38 @@
+---
+version: "3"
+
+#- helm completion
+#- helm create
+#- helm dependency
+#- helm env
+#- helm install <bitnami/mysql> # 安装指定服务
+#- helm uninstall
+#- helm lint
+#- helm ls # helm list 的 alias
+#- helm package # 把Chart目录打包为Chart归档文件
+#- helm pull
+#- helm push
+#- helm registry
+#- helm show [chart|crds|readme|values|all] <bitnami/mysql> # 获取Chart相关信息
+#- helm get [hooks|manifest|notes|values|all] # 获取Release相关信息
+#- helm status # 用来追踪release状态 helm status happy-panda
+#- helm template
+#- helm upgrade
+#- helm verify
+#- helm search # helm search repo bitnami
+#- helm repo list
+#- helm repo add <name> <url> # 添加chart仓库
+#- helm repo update # 确保我们拿到最新的charts列表
+#- helm history # 查看某个Release的版本记录
+#- helm rollback # 把某个Release回滚到某个版本
+#- helm plugin [install|uninstall|update] <pkg> # helm plugin update dashboard
+#- helm plugin list
+#- helm completion [bash|fish|powershell|zsh] # 为指定的shell生成自动补全脚本
+#- helm registry [login|logout] # 登录或登出注册表
+#- helm diff upgrade my-release stable/postgresql --values values.yaml # databus23/helm-diff, used to show a diff explaining what a helm upgrade would change
+
+
+
+#- helmfile apply
+#- helmfile build
+#- helmfile list

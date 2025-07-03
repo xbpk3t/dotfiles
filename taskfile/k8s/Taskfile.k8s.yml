@@ -1,0 +1,63 @@
+---
+version: "3"
+
+
+
+#- kubectl get <pods|ingress> # 显示一个或者多个资源, [查看 default 命名空间的数据]
+#- kubectl get no -o wide
+#- kubectl describe no
+#- kubectl get no -o yaml
+#- kubectl get node -selector=[label]
+#- kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=='ExternalIP')].adress}'
+#- kubectl get po --shaw-labels
+#- kubectl get po -l app=nginx
+#- kubectl get pod [pod_name] -o yaml --export
+#- kubectl get pod [pod_name] -o yaml --export > nameoffline.yaml
+#- kubectl get pods --filed-selector status.phase=Running
+#- kubectl get pods --all-namespaces # 查看所有 namespace 的数据
+#- kubectl get pods --field-selector=status.phase=Running # 查询命名空间下所有在运行的 pod
+#- kubectl get pod pod-name -o=yaml # 查询资源当下在集群中的属性
+#- kubectl api-resources --namespaced --verbs=list -o name
+#- kubectl apply -f <resources.yaml> # 提交资源给集群应用
+#- kubectl apply -f <resources.yaml> --record # 并记录版本，想用 K8s 中--Deployment 资源的回滚能力的话，还得让 K8s 记住每个版本都提交了什么，这个功能可以通过--record 选项开启
+#- kubectl describe pod <pod-name> # 查看资源对象的事件信息，比如退出码
+#- kubectl logs <podname> -n <namespace> # 查看容器日志
+#- kubectl logs <podname> --previous # 如果恰巧这个Pod 被重启了，查不出来任何东西，可以通过增加 —previous 参数选项，查看之前容器的日志
+#- kubectl describe
+#- kubectl create # 从文件或者标准输入创建资源
+#- kubectl update # 从文件或者标准输入更新资源
+#- kubectl delete # 通过文件名、标准输入、资源名或者 label selector 删除资源
+#- kubectl log # 输出 pod 中一个容器的日志
+#- kubectl rolling-update
+#- kubectl exec # 在容器内部执行命令
+#- kubectl port-forward # 将本地端口转发到 pod
+#- kubectl proxy # 为 k8s API server 启动代理服务器
+#- kubectl run # 在集群中使用指定镜像启动容器
+#- kubectl expose # 将 replication controller service 或者 pod 暴露为新的 k8s service
+#- kubectl label # 更新资源的 label
+#- kubectl config # 修改 k8s 配置文件
+#- kubectl config get-contexts # 获取k8s的所有context
+#- kubectl config use-context <rancher-desktop> # 设置k8s的context
+#- kubectl cluster-info # 显示集群信息
+#- kubectl api-versions # 以 '组/版本' 的格式输出服务端支持的 API 版本
+#- kubectl drain # 用于将节点标记为不可调度并驱逐上面运行的所有 Pod。这在需要维护节点或将其从集群中移除时很有用。当你想要停止一个节点上的所有工作负载，并将其迁移到其他节点时，可以使用 kubectl drain。
+#- kubectl delete pod <pod-name>
+#- kubectl get ns
+#- kubectl get ns -o yaml
+#- kubectl get <xxx> -o wide # find resources in default namespace
+#- kubectl get <xxx> -o yaml
+#- kubectl get <deploy|svc|ds|events|sa|rs|secrets|cm|ing|pv|pvc|sc> # kubectl get svc, po
+#- kubectl get all # kubectl get all --all-namespaces
+#- kubectl get ds --all-namespaces
+#- kubectl describe ds [daemonset_name] -n [namespace_name]
+#- kubectl get sa default -o yaml > ./sa.yaml
+#- kubectl replace serviceaccount default -f ./sa.yaml
+#- kubectl get cm --all-namespaces
+#- kubectl get cm --all-namespaces -o yaml
+#- kubectl get ing --all-namespaces
+#- kubectl taint <node_name> <taint_name>
+#- kubectl <cordon|uncordon> <node_name>
+#- kubectl port-forward <image> <port:port> # 用来在apply服务之前验证是否可用，kubectl port-forward svc/http-echo 8080:5678
+
+
+tasks:

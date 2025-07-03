@@ -1,0 +1,116 @@
+---
+version: '3'
+
+
+#- caddy run --config Caddyfile # 指定文件 caddy run
+#- caddy start # 把服务进程化
+#- caddy stop # 停止服务
+#- caddy reload # 修改配置之后，不需要重启，重载服务
+#- caddy validate # 测试配置文件是否正确
+#- caddy reverse-proxy # 快速且可适用生产的反向代理
+#- caddy adapt # 将配置文件转换成 json
+#- caddy environ # 打印环境变量
+#- caddy file-server # 启动可付诸生产的文件服务器
+#- caddy file-server --root <~/mysite> --domain <localhost> # 用 caddy 直接部署 web 服务，不需要 Caddyfile 或者 nginx.conf 那样的配置文件
+#- caddy hash-password # 用 base64 加密密码
+#- caddy list-modules # 列出已安装的模块
+
+
+vars:
+  # 基础配置
+  DOMAIN: "localhost"
+  PORT: "2015"
+  ROOT_DIR: "~/www"
+  CONFIG: "Caddyfile"
+  ADMIN_ADDR: ":2019"
+
+  # 安全配置
+  USERNAME: "admin"
+  PASSWORD: "{{default `secret` .PASSWORD}}"
+  TARGET: "localhost:9000"  # 反向代理默认目标
+
+tasks:
+  # Commented out to prevent auto-execution when included
+  # default:
+  #   desc: 启动静态文件服务器（默认任务）
+  #   cmds:
+  #     - task: file-server
+
+  run:
+    desc: 使用 Caddyfile 运行服务器
+    preconditions:
+      - test -f {{.CONFIG}}
+    cmds:
+      - caddy run --config {{.CONFIG}}
+
+  start:
+    desc: 守护进程方式启动服务
+    preconditions:
+      - test -f {{.CONFIG}}
+    cmds:
+      - caddy start --config {{.CONFIG}}
+
+  stop:
+    desc: 停止后台服务
+    cmds:
+      - caddy stop
+
+  reload:
+    desc: 热重载配置（无需重启）
+    cmds:
+      - caddy reload --config {{.CONFIG}} --adapter caddyfile
+
+  validate:
+    desc: 验证配置文件语法
+    cmds:
+      - caddy validate --config {{.CONFIG}}
+
+  reverse-proxy:
+    desc: 快速启动生产级反向代理
+    cmds:
+      - caddy reverse-proxy --from {{.DOMAIN}}:{{.PORT}} --to {{.TARGET}}
+
+  adapt:
+    desc: 转换 Caddyfile 为 JSON 配置
+    preconditions:
+      - test -f {{.CONFIG}}
+    cmds:
+      - caddy adapt --config {{.CONFIG}} --pretty
+
+  environ:
+    desc: 打印 Caddy 环境变量
+    cmds:
+      - caddy environ
+
+  file-server:
+    desc: 启动生产级文件服务器
+    cmds:
+      - caddy file-server --domain {{.DOMAIN}} --listen :{{.PORT}} --root {{.ROOT_DIR}} --browse
+
+  hash-password:
+    desc: 生成 BasicAuth 加密密码
+    cmds:
+      - cmd: caddy hash-password
+        stdin: "{{.PASSWORD}}"
+
+  list-modules:
+    desc: 列出已安装模块
+    cmds:
+      - caddy list-modules
+
+  # 复合任务
+  secure-server:
+    desc: 带密码验证的文件服务器
+    cmds:
+      - task: hash-password
+        vars:
+          PASSWORD: "{{.PASSWORD}}"
+        silent: true
+      - caddy file-server --domain {{.DOMAIN}} --root {{.ROOT_DIR}} --browse --auth-basic "{{.USERNAME}}:{{.HASHED_PASSWORD}}"
+
+  full-deploy:
+    desc: 完整部署流程（验证→重载→监控）
+    cmds:
+      - task: validate
+      - task: reload
+      - caddy run --watch --config {{.CONFIG}}

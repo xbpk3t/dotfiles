@@ -1,0 +1,20 @@
+---
+version: '3'
+
+
+
+tasks:
+
+  #  url: https://github.com/cage1016/ak
+  #  doc: https://kaichu.io/zh-tw/posts/golang-alfred-workflow-generator-ak/
+  #  des: cli工具，基于awgo+cobra实现，用来初始化workflow，提高开发效率。使用ak开发alfred workflow，开发阶段就不需要手动替换bin了，直接make build即可。发布阶段，不需要在本地打包、导出再上传，直接在cicd打包，非常简单。
+  #  qs:
+  #    - 为啥应该用ak来开发alfred workflow? (没使用 ak 脚手架之前，开发alfred workflow的开发流程和release流程? 使用 ak脚手架之后呢?)
+  #    - 执行 `make link` 可以操作对应 alfred 的具体原理 # 执行后，给对应 workflow 创建软链接
+  #    - ak bugs (go-bindata, unlink symbolic link error, release tag) # [found the following issues that I'd like to discuss with you · Issue #4 · cage1016/ak](https://github.com/cage1016/ak/issues/4)
+  # Commented out to prevent auto-execution when included
+  # default:
+  #   status:
+  #     - command -v ak
+  #   preconditions:
+  #     - go install github.com/cage1016/ak@latest

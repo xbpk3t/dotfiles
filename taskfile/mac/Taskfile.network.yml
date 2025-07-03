@@ -1,0 +1,10 @@
+---
+version: '3'
+
+
+
+tasks:
+
+  # [jsdelivr/globalping-cli: A simple CLI tool to run networking commands remotely from hundreds of globally distributed servers](https://github.com/jsdelivr/globalping-cli)
+  global-ping:
+    cmd: globalping ping {{.CLI_ARGS}}
