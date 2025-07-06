@@ -1,13 +1,39 @@
 -- 多任务 Hammerspoon menubar 管理器
 local menubar = hs.menubar.new()
 local tasks = {}  -- 存储所有任务
-local currentTaskIndex = nil  -- 当前选中的任务索引
+local currentTaskId = nil  -- 当前选中的任务ID
 local maxTasks = 20  -- 最大任务数量
 
 local countdownTimer = nil  -- 倒计时计时器
 local remainingSeconds = 0  -- 剩余秒数
 local isPaused = false      -- 是否暂停
-local taskCountdowns = {}   -- 存储每个任务的剩余倒计时时间
+local taskCountdowns = {}   -- 存储每个任务的剩余倒计时时间（按任务ID存储）
+
+-- 简单的字符串hash函数
+local function simpleHash(str)
+    local hash = 0
+    for i = 1, #str do
+        hash = (hash * 31 + string.byte(str, i)) % 2147483647
+    end
+    return hash
+end
+
+-- 生成任务ID的函数（hash(添加时间戳 + 任务内容)）
+local function generateTaskId(addTime, taskName, date, estimatedTime)
+    local content = tostring(addTime) .. "|" .. taskName .. "|" .. date .. "|" .. tostring(estimatedTime)
+    return tostring(simpleHash(content))
+end
+
+-- 根据任务ID查找任务
+local function findTaskById(taskId)
+    if not taskId then return nil end
+    for i, task in ipairs(tasks) do
+        if task.id == taskId then
+            return task, i
+        end
+    end
+    return nil, nil
+end
 
 -- 数据持久化文件路径
 local dataFile = hs.configdir .. "/tasks_data.json"
@@ -150,13 +176,22 @@ local function loadTasks()
         local success, data = pcall(hs.json.decode, content)
         if success and data then
             tasks = data.tasks or {}
-            currentTaskIndex = data.currentTaskIndex
+            -- 兼容旧数据：如果保存的是索引，转换为ID
+            if data.currentTaskIndex and type(data.currentTaskIndex) == "number" and tasks[data.currentTaskIndex] then
+                currentTaskId = tasks[data.currentTaskIndex].id
+            else
+                currentTaskId = data.currentTaskId
+            end
             -- 兼容旧数据，为没有新字段的任务添加默认值
             for i, task in ipairs(tasks) do
                 if type(task) == "string" then
+                    local defaultDate = getCurrentDate()
+                    local addTime = math.floor(hs.timer.secondsSinceEpoch() * 1000) -- 为旧任务生成添加时间
                     tasks[i] = {
+                        id = generateTaskId(addTime, task, defaultDate, 1),
                         name = task,
-                        date = getCurrentDate(),
+                        date = defaultDate,
+                        addTime = addTime,
                         estimatedTime = 1, -- 默认1个E1f
                         actualTime = 0,
                         isDone = false,
@@ -164,6 +199,9 @@ local function loadTasks()
                         startTime = nil
                     }
                 else
+                    -- 为旧任务添加 addTime 字段
+                    task.addTime = task.addTime or math.floor(hs.timer.secondsSinceEpoch() * 1000)
+                    task.id = task.id or generateTaskId(task.addTime, task.name or "unknown", task.date or getCurrentDate(), task.estimatedTime or 1)
                     task.date = task.date or getCurrentDate()
                     task.estimatedTime = task.estimatedTime or 1
                     task.actualTime = task.actualTime or 0
@@ -180,7 +218,7 @@ end
 local function saveTasks()
     local data = {
         tasks = tasks,
-        currentTaskIndex = currentTaskIndex
+        currentTaskId = currentTaskId
     }
     local file = io.open(dataFile, "w")
     if file then
@@ -215,9 +253,9 @@ updateMenubar = function()
     if menubar then
         local displayText = "无任务"
 
-        if currentTaskIndex and tasks[currentTaskIndex] and not tasks[currentTaskIndex].isDone then
-            local task = tasks[currentTaskIndex]
-            local taskName = task.name
+        local currentTask = findTaskById(currentTaskId)
+        if currentTask and not currentTask.isDone then
+            local taskName = currentTask.name
 
             -- 使用 UTF-8 安全的字符串截取
             local maxLength = 20
@@ -273,8 +311,8 @@ startCountdown = function(minutes)
             remainingSeconds = remainingSeconds - 1
 
             -- 保存当前任务的剩余时间
-            if currentTaskIndex and tasks[currentTaskIndex] then
-                taskCountdowns[currentTaskIndex] = remainingSeconds
+            if currentTaskId then
+                taskCountdowns[currentTaskId] = remainingSeconds
             end
 
             updateMenubar()
@@ -282,8 +320,8 @@ startCountdown = function(minutes)
             if remainingSeconds <= 0 then
                 -- 倒计时结束，自动续期40分钟
                 remainingSeconds = 40 * 60
-                if currentTaskIndex and tasks[currentTaskIndex] then
-                    taskCountdowns[currentTaskIndex] = remainingSeconds
+                if currentTaskId then
+                    taskCountdowns[currentTaskId] = remainingSeconds
                 end
 
                 hs.notify.new({
@@ -308,8 +346,8 @@ end
 -- 停止倒计时
 stopCountdown = function()
     -- 保存当前任务的剩余时间
-    if currentTaskIndex and tasks[currentTaskIndex] and remainingSeconds > 0 then
-        taskCountdowns[currentTaskIndex] = remainingSeconds
+    if currentTaskId and remainingSeconds > 0 then
+        taskCountdowns[currentTaskId] = remainingSeconds
     end
 
     if countdownTimer then
@@ -337,17 +375,18 @@ end
 
 -- 启动任务
 local function startTask()
-    if currentTaskIndex and tasks[currentTaskIndex] and not tasks[currentTaskIndex].startTime then
-        tasks[currentTaskIndex].startTime = os.time()
+    local currentTask = findTaskById(currentTaskId)
+    if currentTask and not currentTask.startTime then
+        currentTask.startTime = os.time()
         saveTasks()
 
         -- 启动倒计时
-        local totalMinutes = tasks[currentTaskIndex].estimatedTime * 40
+        local totalMinutes = currentTask.estimatedTime * 40
         startCountdown(totalMinutes)
 
         hs.notify.new({
             title = "任务开始",
-            informativeText = "任务 \"" .. tasks[currentTaskIndex].name .. "\" 已开始",
+            informativeText = "任务 \"" .. currentTask.name .. "\" 已开始",
             withdrawAfter = 3
         }):send()
     end
@@ -355,9 +394,10 @@ end
 
 -- 停止任务并记录实际时间
 local function stopTask()
-    if currentTaskIndex and tasks[currentTaskIndex] and tasks[currentTaskIndex].startTime then
-        local elapsed = os.time() - tasks[currentTaskIndex].startTime
-        tasks[currentTaskIndex].actualTime = math.floor(elapsed / 60) -- 转换为分钟
+    local currentTask = findTaskById(currentTaskId)
+    if currentTask and currentTask.startTime then
+        local elapsed = os.time() - currentTask.startTime
+        currentTask.actualTime = math.floor(elapsed / 60) -- 转换为分钟
         saveTasks()
     end
 
@@ -428,9 +468,12 @@ local function addTask()
     end
 
     -- 创建新任务
+    local addTime = math.floor(hs.timer.secondsSinceEpoch() * 1000) -- 任务添加时间（精确到毫秒）
     local newTask = {
+        id = generateTaskId(addTime, taskName, dateStr, estimatedTime),
         name = taskName,
         date = dateStr,
+        addTime = addTime,
         estimatedTime = estimatedTime,
         actualTime = 0,
         isDone = false,
@@ -441,27 +484,12 @@ local function addTask()
     table.insert(tasks, newTask)
     sortTasks()
 
-    -- 找到新任务的索引并设为当前任务
-    for i, task in ipairs(tasks) do
-        if task == newTask then
-            currentTaskIndex = i
-            break
-        end
-    end
-
-    -- 立即启动任务
-    startTask()
-
-    -- 启动对应的倒计时
-    local countdownMinutes = calculateCountdownTime(newTask)
-    startCountdown(countdownMinutes)
-
     updateMenubar()
     saveTasks()
 
     hs.notify.new({
         title = "任务管理器",
-        informativeText = "任务已添加并开始计时 (倒计时: " .. countdownMinutes .. "分钟)",
+        informativeText = "任务已添加: " .. taskName,
         withdrawAfter = 3
     }):send()
 end
@@ -538,15 +566,12 @@ local function editTask(index)
     for i, t in ipairs(tasks) do
         if t == task then
             newIndex = i
-            if currentTaskIndex == index then
-                currentTaskIndex = i
-            end
             break
         end
     end
 
     -- 如果这是当前任务且预计时间发生了变化，更新倒计时
-    if currentTaskIndex == newIndex and oldEstimatedTime ~= newEstimatedTime then
+    if task.id == currentTaskId and oldEstimatedTime ~= newEstimatedTime then
         local countdownMinutes = calculateCountdownTime(task)
         stopCountdown()  -- 先停止当前倒计时
         startCountdown(countdownMinutes)
@@ -585,15 +610,15 @@ local function completeTask(index)
         -- 修改为包含日期的完整时间格式
         task.deletedAt = os.date("%Y-%m-%d %H:%M")
 
-        -- 如果这是当前任务，清除当前任务索引
-        if currentTaskIndex == index then
-            currentTaskIndex = nil
+        -- 如果这是当前任务，清除当前任务ID
+        if task.id == currentTaskId then
+            currentTaskId = nil
             -- 尝试选择下一个活跃任务
             local activeTasks = getActiveTasks()
             if #activeTasks > 0 then
                 for i, activeTask in ipairs(activeTasks) do
                     if activeTask.index ~= index then
-                        currentTaskIndex = activeTask.index
+                        currentTaskId = activeTask.task.id
                         break
                     end
                 end
@@ -623,20 +648,18 @@ local function deleteTask(index)
     )
     if button == "删除" then
         -- 如果删除的是当前任务，停止任务
-        if currentTaskIndex == index then
+        if task.id == currentTaskId then
             stopTask()
-            currentTaskIndex = nil
-        elseif currentTaskIndex and currentTaskIndex > index then
-            currentTaskIndex = currentTaskIndex - 1
+            currentTaskId = nil
         end
 
         table.remove(tasks, index)
 
         -- 尝试选择下一个活跃任务
-        if not currentTaskIndex then
+        if not currentTaskId then
             local activeTasks = getActiveTasks()
             if #activeTasks > 0 then
-                currentTaskIndex = activeTasks[1].index
+                currentTaskId = activeTasks[1].task.id
             end
         end
 
@@ -674,21 +697,23 @@ local function selectTask(index)
     if not tasks[index] or tasks[index].isDone then return end
 
     -- 如果有正在进行的任务，停止任务
-    if currentTaskIndex and tasks[currentTaskIndex] and not tasks[currentTaskIndex].isDone then
+    local currentTask = findTaskById(currentTaskId)
+    if currentTask and not currentTask.isDone then
         stopTask()
     end
 
-    currentTaskIndex = index
+    currentTaskId = tasks[index].id
 
     -- 如果任务还没有开始时间，则启动任务
-    if not tasks[currentTaskIndex].startTime then
+    if not tasks[index].startTime then
         startTask()
     end
 
-    -- 检查是否有保存的倒计时时间
-    if taskCountdowns[index] and taskCountdowns[index] > 0 then
+    -- 检查是否有保存的倒计时时间（只对已经开始过的任务使用保存的倒计时）
+    local taskId = tasks[index].id
+    if taskCountdowns[taskId] and taskCountdowns[taskId] > 0 and tasks[index].startTime then
         -- 直接使用保存的剩余秒数
-        remainingSeconds = taskCountdowns[index]
+        remainingSeconds = taskCountdowns[taskId]
         isPaused = false
 
         -- 创建倒计时器
@@ -697,8 +722,8 @@ local function selectTask(index)
                 remainingSeconds = remainingSeconds - 1
 
                 -- 保存当前任务的剩余时间
-                if currentTaskIndex and tasks[currentTaskIndex] then
-                    taskCountdowns[currentTaskIndex] = remainingSeconds
+                if currentTaskId then
+                    taskCountdowns[currentTaskId] = remainingSeconds
                 end
 
                 updateMenubar()
@@ -706,8 +731,8 @@ local function selectTask(index)
                 if remainingSeconds <= 0 then
                     -- 倒计时结束，自动续期40分钟
                     remainingSeconds = 40 * 60
-                    if currentTaskIndex and tasks[currentTaskIndex] then
-                        taskCountdowns[currentTaskIndex] = remainingSeconds
+                    if currentTaskId then
+                        taskCountdowns[currentTaskId] = remainingSeconds
                     end
 
                     sendNotification("⏰ 倒计时结束", "任务时间到！自动续期40分钟", 10, "Glass")
@@ -737,13 +762,12 @@ local function selectTask(index)
     updateMenubar()
     saveTasks()
 end
-
-
 -- 更新任务实际时间
 local function updateTaskActualTime()
-    if currentTaskIndex and tasks[currentTaskIndex] and tasks[currentTaskIndex].startTime then
-        local elapsed = os.time() - tasks[currentTaskIndex].startTime
-        tasks[currentTaskIndex].actualTime = math.floor(elapsed / 60) -- 转换为分钟
+    local currentTask = findTaskById(currentTaskId)
+    if currentTask and currentTask.startTime then
+        local elapsed = os.time() - currentTask.startTime
+        currentTask.actualTime = math.floor(elapsed / 60) -- 转换为分钟
         saveTasks()
     end
 end
@@ -831,11 +855,10 @@ local function createMenu()
     local activeTasks = getActiveTasks()
 
     -- 当前任务显示
-    if currentTaskIndex and tasks[currentTaskIndex] and not tasks[currentTaskIndex].isDone then
-        local task = tasks[currentTaskIndex]
-
+    local currentTask = findTaskById(currentTaskId)
+    if currentTask and not currentTask.isDone then
         table.insert(menu, {
-            title = "当前: " .. task.name,
+            title = "当前: " .. currentTask.name,
             disabled = true
         })
 
@@ -884,7 +907,7 @@ local function createMenu()
             for _, activeTask in ipairs(tasksByDate[date]) do
                 local task = activeTask.task
                 local index = activeTask.index
-                local prefix = (index == currentTaskIndex) and "● " or "○ "
+                local prefix = (task.id == currentTaskId) and "● " or "○ "
 
                 -- 使用 UTF-8 安全的字符串截取
                 local maxLength = 50
@@ -950,30 +973,6 @@ local function createMenu()
         fn = exportCompletedTasks
     })
 
-    table.insert(menu, {
-        title = "🔔 测试通知",
-        fn = function()
-            -- 测试基本通知
-            local success1 = sendNotification("通知测试", "这是一个测试通知，如果你看到了这个，说明通知功能正常", 5)
-
-            -- 测试带声音的通知
-            hs.timer.doAfter(2, function()
-                local success2 = sendNotification("声音测试", "这是带声音的通知测试", 5, "Glass")
-
-                if success1 and success2 then
-                    print("✅ 通知测试成功")
-                else
-                    print("❌ 通知测试失败，请检查系统通知权限")
-                    print("请到 系统偏好设置 > 通知与专注模式 > Hammerspoon 中启用通知")
-                end
-            end)
-
-            print("📢 通知测试已发送，请检查系统通知中心")
-        end
-    })
-
-
-
     table.insert(menu, { title = "-" })
 
     -- 显示已完成任务数量
@@ -1017,22 +1016,23 @@ sortTasks()
 updateMenubar()
 
 -- 如果有活跃任务但没有当前任务，选择第一个活跃任务
-if not currentTaskIndex then
+if not currentTaskId then
     local activeTasks = getActiveTasks()
     if #activeTasks > 0 then
-        currentTaskIndex = activeTasks[1].index
+        currentTaskId = activeTasks[1].task.id
     end
 end
 
 -- 如果有当前任务，启动任务
-if currentTaskIndex and tasks[currentTaskIndex] and not tasks[currentTaskIndex].isDone then
+local currentTask = findTaskById(currentTaskId)
+if currentTask and not currentTask.isDone then
     -- 如果任务还没有开始时间，则启动任务
-    if not tasks[currentTaskIndex].startTime then
+    if not currentTask.startTime then
         startTask()
     end
 
     -- 启动对应的倒计时
-    local countdownMinutes = calculateCountdownTime(tasks[currentTaskIndex])
+    local countdownMinutes = calculateCountdownTime(currentTask)
     startCountdown(countdownMinutes)
 end
 
