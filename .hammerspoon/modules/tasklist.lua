@@ -92,6 +92,29 @@ local function getCurrentDate()
     return os.date("%Y-%m-%d")
 end
 
+-- 获取昨天日期
+local function getYesterdayDate()
+    return os.date("%Y-%m-%d", os.time() - 24 * 60 * 60)
+end
+
+-- 获取本周的日期范围（周一到今天）
+local function getThisWeekRange()
+    local today = os.time()
+    local todayWeekday = tonumber(os.date("%w", today)) -- 0=Sunday, 1=Monday, ...
+
+    -- 计算本周一的日期
+    local mondayOffset = (todayWeekday == 0) and 6 or (todayWeekday - 1)
+    local monday = today - mondayOffset * 24 * 60 * 60
+
+    local mondayStr = os.date("%Y-%m-%d", monday)
+    local todayStr = os.date("%Y-%m-%d", today)
+
+    -- 计算周数
+    local weekNum = tonumber(os.date("%W", today))
+
+    return mondayStr, todayStr, weekNum
+end
+
 -- 获取当前时间字符串
 local function getCurrentTime()
     return os.date("%H:%M")
@@ -195,7 +218,7 @@ local function loadTasks()
                         estimatedTime = 1, -- 默认1个E1f
                         actualTime = 0,
                         isDone = false,
-                        deletedAt = nil,
+                        doneAt = nil,
                         startTime = nil
                     }
                 else
@@ -206,7 +229,7 @@ local function loadTasks()
                     task.estimatedTime = task.estimatedTime or 1
                     task.actualTime = task.actualTime or 0
                     task.isDone = task.isDone or false
-                    task.deletedAt = task.deletedAt or nil
+                    task.doneAt = task.doneAt or task.deletedAt or nil
                     task.startTime = task.startTime or nil
                 end
             end
@@ -477,7 +500,7 @@ local function addTask()
         estimatedTime = estimatedTime,
         actualTime = 0,
         isDone = false,
-        deletedAt = nil,
+        doneAt = nil,
         startTime = nil
     }
 
@@ -608,7 +631,7 @@ local function completeTask(index)
         stopTask()
         task.isDone = true
         -- 修改为包含日期的完整时间格式
-        task.deletedAt = os.date("%Y-%m-%d %H:%M")
+        task.doneAt = os.date("%Y-%m-%d %H:%M")
 
         -- 如果这是当前任务，清除当前任务ID
         if task.id == currentTaskId then
@@ -772,17 +795,8 @@ local function updateTaskActualTime()
     end
 end
 
--- 导出某日已完成任务
-local function exportCompletedTasks()
-    local button, dateStr = hs.dialog.textPrompt(
-        "导出已完成任务",
-        "请输入要导出的日期 (格式: YYYY-MM-DD):",
-        getCurrentDate(),
-        "导出",
-        "取消"
-    )
-    if button ~= "导出" then return end
-
+-- 通用导出函数
+local function exportTasksForDate(dateStr, dateLabel)
     if not isValidDate(dateStr) then
         hs.notify.new({
             title = "输入错误",
@@ -795,9 +809,9 @@ local function exportCompletedTasks()
     -- 查找在指定日期完成的任务（按完成时间而不是任务日期）
     local completedTasks = {}
     for _, task in ipairs(tasks) do
-        if task.isDone and task.deletedAt then
-            -- 提取完成日期（deletedAt 格式：YYYY-MM-DD HH:MM）
-            local completedDate = task.deletedAt:match("^(%d%d%d%d%-%d%d%-%d%d)")
+        if task.isDone and task.doneAt then
+            -- 提取完成日期（doneAt 格式：YYYY-MM-DD HH:MM）
+            local completedDate = task.doneAt:match("^(%d%d%d%d%-%d%d%-%d%d)")
             if completedDate == dateStr then
                 table.insert(completedTasks, task)
             end
@@ -807,16 +821,16 @@ local function exportCompletedTasks()
     if #completedTasks == 0 then
         hs.notify.new({
             title = "导出结果",
-            informativeText = "该日期没有已完成的任务",
+            informativeText = (dateLabel or dateStr) .. " 没有已完成的任务",
             withdrawAfter = 3
         }):send()
         return
     end
 
-    -- 按完成时间排序 (deletedAt 升序)
+    -- 按完成时间排序 (doneAt 升序)
     table.sort(completedTasks, function(a, b)
-        local timeA = a.deletedAt or "0000-00-00 00:00"
-        local timeB = b.deletedAt or "0000-00-00 00:00"
+        local timeA = a.doneAt or "0000-00-00 00:00"
+        local timeB = b.doneAt or "0000-00-00 00:00"
         return timeA < timeB
     end)
 
@@ -824,8 +838,8 @@ local function exportCompletedTasks()
     local yaml = "- date: " .. dateStr .. "\n  task:\n"
     for _, task in ipairs(completedTasks) do
         yaml = yaml .. "    - name: " .. task.name .. "\n"
-        if task.deletedAt then
-            yaml = yaml .. "      deletedAt: " .. task.deletedAt .. "\n"
+        if task.doneAt then
+            yaml = yaml .. "      doneAt: " .. task.doneAt .. "\n"
         end
         if task.estimatedTime and task.estimatedTime > 0 then
             yaml = yaml .. "      PD: " .. (task.estimatedTime * 40) .. "min\n"
@@ -844,9 +858,83 @@ local function exportCompletedTasks()
     hs.pasteboard.setContents(yaml)
     hs.notify.new({
         title = "导出完成",
-        informativeText = "已导出 " .. #completedTasks .. " 个任务到剪贴板",
+        informativeText = "已导出 " .. (dateLabel or dateStr) .. " 的 " .. #completedTasks .. " 个任务到剪贴板",
         withdrawAfter = 5
     }):send()
+end
+
+-- 导出本周已完成任务
+local function exportThisWeekTasks()
+    local mondayStr, todayStr, weekNum = getThisWeekRange()
+
+    -- 查找本周完成的任务
+    local completedTasks = {}
+    for _, task in ipairs(tasks) do
+        if task.isDone and task.doneAt then
+            local completedDate = task.doneAt:match("^(%d%d%d%d%-%d%d%-%d%d)")
+            if completedDate and completedDate >= mondayStr and completedDate <= todayStr then
+                table.insert(completedTasks, task)
+            end
+        end
+    end
+
+    if #completedTasks == 0 then
+        hs.notify.new({
+            title = "导出结果",
+            informativeText = "本周没有已完成的任务",
+            withdrawAfter = 3
+        }):send()
+        return
+    end
+
+    -- 按完成时间排序
+    table.sort(completedTasks, function(a, b)
+        local timeA = a.doneAt or "0000-00-00 00:00"
+        local timeB = b.doneAt or "0000-00-00 00:00"
+        return timeA < timeB
+    end)
+
+    -- 生成YAML格式
+    local yaml = "- week: w" .. weekNum .. " " .. mondayStr .. " - " .. todayStr .. "\n  task:\n"
+    for _, task in ipairs(completedTasks) do
+        yaml = yaml .. "    - name: " .. task.name .. "\n"
+        if task.doneAt then
+            yaml = yaml .. "      doneAt: " .. task.doneAt .. "\n"
+        end
+        if task.estimatedTime and task.estimatedTime > 0 then
+            yaml = yaml .. "      PD: " .. (task.estimatedTime * 40) .. "min\n"
+        end
+        if task.actualTime and task.actualTime > 0 then
+            yaml = yaml .. "      AD: " .. task.actualTime .. "min\n"
+        end
+        local score = calculateScore(task)
+        if score > 0 then
+            yaml = yaml .. "      score: " .. score .. "\n"
+        end
+        yaml = yaml .. "\n"
+    end
+
+    -- 复制到剪贴板
+    hs.pasteboard.setContents(yaml)
+    hs.notify.new({
+        title = "导出完成",
+        informativeText = "已导出本周的 " .. #completedTasks .. " 个任务到剪贴板",
+        withdrawAfter = 5
+    }):send()
+end
+
+-- 自定义日期导出
+local function exportCustomDateTasks()
+    local button, dateStr = hs.dialog.textPrompt(
+        "导出已完成任务",
+        "请输入要导出的日期 (格式: YYYY-MM-DD):",
+        getCurrentDate(),
+        "导出",
+        "取消"
+    )
+    if button ~= "导出" then return end
+
+    exportTasksForDate(dateStr, nil)
 end
 
 -- 创建菜单项
@@ -970,7 +1058,26 @@ local function createMenu()
 
     table.insert(menu, {
         title = "📤 导出已完成任务",
-        fn = exportCompletedTasks
+        menu = {
+            {
+                title = "今天 (" .. getCurrentDate() .. ")",
+                fn = function() exportTasksForDate(getCurrentDate(), "今天") end
+            },
+            {
+                title = "昨天 (" .. getYesterdayDate() .. ")",
+                fn = function() exportTasksForDate(getYesterdayDate(), "昨天") end
+            },
+
+            {
+--                 title = "本周 (w" .. select(3, getThisWeekRange()) .. " " .. select(1, getThisWeekRange()) .. " - " .. select(2, getThisWeekRange()) .. ")",
+                title = "本周",
+                fn = exportThisWeekTasks
+            },
+            {
+                title = "自定义",
+                fn = exportCustomDateTasks
+            },
+        }
     })
 
     table.insert(menu, { title = "-" })

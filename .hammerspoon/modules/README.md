@@ -55,7 +55,7 @@
     estimatedTime = 2,          -- 预计耗时 (几个E1f)
     actualTime = 75,            -- 实际耗时 (分钟)
     isDone = false,             -- 是否完成
-    deletedAt = "14:30",        -- 完成时间
+    doneAt = "2025-06-28 14:30", -- 完成时间
     startTime = 1640995200      -- 开始时间戳
 }
 ```
@@ -80,12 +80,12 @@
 - date: 2025-06-28
   task:
     - name: 优化hammerspoon脚本
-      deletedAt: 12:20
+      doneAt: 2025-06-28 12:20
       PD: 80min
       AD: 75min
       score: 4
     - name: 处理邮件
-      deletedAt: 16:10
+      doneAt: 2025-06-28 16:10
       PD: 40min
       AD: 35min
       score: 5
