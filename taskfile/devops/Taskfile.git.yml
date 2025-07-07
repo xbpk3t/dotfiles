@@ -1,6 +1,8 @@
 ---
 version: '3'
 
+dir: '{{.USER_WORKING_DIR}}'
+
 
 #- git config --list # 其实就是.gitconfig
 #- 'git commit -m "<type>(<scope>): <subject> <footer>" -m "Description <body>"' # 'git commit -m "fix(sms): 修复短信到达率问题 fix #12, fix #13, fix #14" -m "通过xxx修复该bug"'
@@ -43,13 +45,6 @@ version: '3'
 #- git log -S <str> # 从所有commit的内容中查找str
 #- "删除远程所有标签？ `git tag -l | xargs -I {} git push origin :refs/tags/{}`"
 #- "怎么删除本地所有标签？ `git tag -l | xargs git tag -d`"
-
-
-
-#- bfg --delete-files id_{dsa,rsa} # 删除所有含有 'id_rsa' or 'id_dsa' 的文件
-#- bfg --strip-blobs-bigger-than 50M # 删除所有超过50MB的blobs文件
-#- bfg --replace-text <filepath> --no-blob-protection # 替换文件中的敏感信息（不删除文件）
-
 
 
 #- gh cache list
@@ -118,10 +113,15 @@ tasks:
       - echo "✅ Git仓库分析报告完成！"
     dir: '{{.USER_WORKING_DIR}}'
 
+  # 查看 tag list
+  tag-list:
+    cmd:
+
 
   #  - url: https://github.com/Bhupesh-V/ugit
   #    des: 千呼万唤才出来的git工具，用来撤销git操作。最经典的场景就是，经常有那种已经commit了，然后还有点代码想放到那个commit里提交上去。这个就很难操作，这种情况下用ugit就很容易了。
   # 使用 ugit 撤销上一次 Git 操作（支持交互式选择）
+  # 怎么修改（上一次commit的，以及指定commit的） commit message? # git rebase -i：修改某次 commit 的 message。
   undo:
     desc: "使用 ugit 撤销上一次 Git 操作（支持交互式菜单）"
     cmds:
@@ -177,12 +177,45 @@ tasks:
   #  des: 怎么保证repo和其upstream同步?
 
 
-
+  # 我们可以用 bfg, git-filter-repo, 以及git内置的git filter-branch 这三种工具来压缩 git 项目，分别怎么用？哪个更方便呢？ # [git 查找大文件，删除大文件 - 掘金](https://juejin.cn/post/6844904046797520909)
+  #- bfg --delete-files id_{dsa,rsa} # 删除所有含有 'id_rsa' or 'id_dsa' 的文件
+  #- bfg --strip-blobs-bigger-than 50M # 删除所有超过50MB的blobs文件
+  #- bfg --replace-text <filepath> --no-blob-cprotection # 替换文件中的敏感信息（不删除文件）
   #- url: https://github.com/rtyley/bfg-repo-cleaner
   #  des: bfg, 经过测试，发现 bfg 只能修改 commit 历史，但是无法直接修改当前文件
+  bfg:
+    desc: 怎么在不重建项目的情况下，清除git历史（如何移除历史密钥） # TODO 好像gfr更好用
+
+
+
+
+
+
+
+
+  # fork 后如何同步源的最新代码：我fork出来的分支，怎么同步后来父分支的更新？ # [Syncing a fork - GitHub Docs](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork) git remote add <upstream> && git fetch <upstream> && git checkout main && git merge <upstream>/master
+  sync-upstream:
+
+
+  # 怎么合并多个 commit? rebase、merge、cherry pick都可以合并多个 commit，有啥区别? Why we'd better use merge?***" # rebase 操作和 cherry-pick 操作都会修改 commit-id，导致无法追溯问题。所以通常禁止使用，只允许 merge 操作公共分支（merge将两个分支上的所有提交记录合并成一个新的提交记录，并且保留原来的提交记录。这个操作不会修改提交记录的 SHA 值），方便 debug。
+  merge-commit:
+
 
   #- url: https://github.com/gruntwork-io/fetch
   #  des: 非常好用的工具，用来直接拉取github的指定folder（注意只能用于github）。工具很好，但是不适合日常使用，3个required参数，用起来有点麻烦。
+  fetch:
+
+
+  # 啥时候用 git bisect? 怎么用? # start, (bad, good), reset
+  # TODO 能否写个 taskfile的task，让我更方便地使用这个命令？另外，是否有什么第三方工具可以更方便地实现类似功能？
+  bisect:
+
+
+
+  #  - git gc 是啥意思？有啥用？ # [git clean - Reduce Git repository size - Stack Overflow](https://stackoverflow.com/questions/2116778/reduce-git-repository-size)
+#  - If I delete a git branch, whether .git folder size will decrease or not? git gc # git gc --prune=now
+  git-gc:
+
 
 
   # TODO 现在还没想好有什么需要的workflow，之后再搞
@@ -204,3 +237,23 @@ tasks:
   gist:test:
     cmds:
       - task: gist:list
+
+
+
+  # 我现在main分支的代码挂了，我怎么把代码切到之前的某个正常commit，并且把这部分新增的commit切到一个新branch？操作的具体流程 # git checkout -b <new-branch> <existed-branch> && git reset --hard <commit-id> && git push -f
+
+
+
+  # 怎么判断某个热门开源项目是不是草台班子，有啥技巧 # [那些年，我被坑过的开源项目【让编程再次伟大#19】_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV1u7mjYpETD/) 11:20 这段，牛逼。按 comments desc查看issue，在吵的
+
+
+
+  # git config --global pull.rebase true # 设置 pull 时自动 rebase（避免意外合并提交）
+
+
+  size:
+    vars:
+      GIT_SIZE:
+        sh: "git count-objects -v"
+    cmd: "{{.GIT_SIZE}}"
+    dir: '{{.USER_WORKING_DIR}}'

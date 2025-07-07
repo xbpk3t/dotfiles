@@ -138,6 +138,7 @@ tasks:
     silent: true
     dir: '{{.USER_WORKING_DIR}}'
 
+
   test:
     desc: "Test the go code"
     cmds:
@@ -146,14 +147,19 @@ tasks:
     silent: true
     dir: '{{.USER_WORKING_DIR}}'
 
+  # [mfridman/tparse: CLI tool for summarizing go test output. Pipe friendly. CI/CD friendly.](https://github.com/mfridman/tparse) 怎么在cicd中可视化测试覆盖率? # CLI tool for summarizing go test output. Pipe friendly. CI/CD friendly.
+  # [qiniu/goc: A Comprehensive Coverage Testing System for The Go Programming Language](https://github.com/qiniu/goc) [系统测试中的Go代码覆盖率统计](https://tech.qimao.com/test/)
   test-coverage:
     desc: "Test the go code with coverage"
     cmds:
       - echo "Generating test coverage..."
-      - go test -v ./... -covermode=atomic -coverpkg=./... -coverprofile coverage.out
+      - set -o pipefail # 同时使用 tparse 和覆盖率检测
+      - go test -json -covermode=atomic -coverpkg=./... -coverprofile coverage.out ./... | tparse
+#      - go test -v ./... -covermode=atomic -coverpkg=./... -coverprofile coverage.out
       - go tool cover -html coverage.out -o coverage.html
     silent: true
     dir: '{{.USER_WORKING_DIR}}'
+
 
   tidy:
     desc: "Tidy the go code"
@@ -299,3 +305,7 @@ tasks:
       - command -v modernize # go install golang.org/x/tools/gopls/internal/analysis/modernize/cmd/modernize@latest
     cmds:
       - modernize -fix ./... # TODO
+
+  # [quasilyte/qbenchstat: My personal, slightly improved version of benchstat utility](https://github.com/quasilyte/qbenchstat) Better benchstat. Support "Colored output" and "significance test". 单次的基准测试，往往没有统计意义，所以我们需要使用 benchstat 工具进行一组基准测试，用来查看基准值的稳定程度
+  benchstat:
+    cmd:
