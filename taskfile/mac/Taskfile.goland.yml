@@ -1,0 +1,148 @@
+---
+version: '3'
+
+vars:
+  JETBRAINS_LOCATION: "{{.HOME}}/Library/Application Support/JetBrains"
+  ICLOUD_SCRATCHES_LOCATION: "{{.HOME}}/Library/Mobile Documents/com~apple~CloudDocs/GoLand Scratches"
+  GOLAND_VERSION:
+    sh: |
+      find "{{.HOME}}/Library/Application Support/JetBrains" -type d -maxdepth 1 -name "GoLand*" -exec basename {} \; | \
+      sed 's/GoLand//' | sort -V | tail -1
+  GOLAND_PATH: "{{.JETBRAINS_LOCATION}}/GoLand{{.GOLAND_VERSION}}"
+  GOLAND_SCRATCHES_PATH: "{{.GOLAND_PATH}}/scratches"
+  GOLAND_CLOUD_PATH: "{{.GOLAND_SCRATCHES_PATH}}/cloud"
+
+tasks:
+  check:
+    desc: 检查系统环境和 GoLand 安装情况
+    cmds:
+      - |
+        echo "GoLand Cloud Scratches Status"
+        echo "============================"
+        echo "GoLand Version: {{.GOLAND_VERSION}}"
+        echo "GoLand Path: {{.GOLAND_PATH}}"
+        echo "Scratches Path: {{.GOLAND_SCRATCHES_PATH}}"
+        echo "Cloud Path: {{.GOLAND_CLOUD_PATH}}"
+        echo "iCloud Location: {{.ICLOUD_SCRATCHES_LOCATION}}"
+        echo ""
+
+        if [ ! -d "{{.GOLAND_PATH}}" ]; then
+          echo "✗ GoLand {{.GOLAND_VERSION}} not found"
+          exit 1
+        fi
+
+        echo "Local Scratches:"
+        if [ -d "{{.GOLAND_SCRATCHES_PATH}}" ]; then
+          echo "✓ Local scratches directory exists"
+          echo "Local files: $(find "{{.GOLAND_SCRATCHES_PATH}}" -type f 2>/dev/null | wc -l | tr -d ' ')"
+        else
+          echo "✗ No local scratches directory found"
+        fi
+
+        echo ""
+        echo "Cloud Sync Status:"
+        if [ -L "{{.GOLAND_CLOUD_PATH}}" ]; then
+          if [ -d "{{.GOLAND_CLOUD_PATH}}" ]; then
+            echo "✓ Cloud scratches linked and accessible"
+            echo "Cloud files: $(find "{{.ICLOUD_SCRATCHES_LOCATION}}" -type f 2>/dev/null | wc -l | tr -d ' ')"
+          else
+            echo "⚠ Cloud link exists but target not accessible"
+          fi
+        elif [ -d "{{.GOLAND_CLOUD_PATH}}" ]; then
+          echo "✗ Cloud directory exists but not linked"
+        else
+          echo "- Cloud sync not configured"
+        fi
+
+  link:
+    desc: 启用云端同步（一次性操作）
+    cmds:
+      - |
+        if [ ! -d "{{.GOLAND_PATH}}" ]; then
+          echo "ERROR: GoLand {{.GOLAND_VERSION}} not found" >&2
+          exit 1
+        fi
+
+        # 创建 iCloud 目录
+        mkdir -p "{{.ICLOUD_SCRATCHES_LOCATION}}"
+
+        # 确保本地 scratches 目录存在
+        mkdir -p "{{.GOLAND_SCRATCHES_PATH}}"
+
+        # 检查是否已经链接
+        if [ -L "{{.GOLAND_CLOUD_PATH}}" ]; then
+          echo "✓ Cloud scratches already linked for GoLand {{.GOLAND_VERSION}}"
+          exit 0
+        fi
+
+        # 如果存在非链接的 cloud 目录，提示用户
+        if [ -d "{{.GOLAND_CLOUD_PATH}}" ] && [ ! -L "{{.GOLAND_CLOUD_PATH}}" ]; then
+          echo "⚠ Cloud scratches directory exists, but is not linked for GoLand {{.GOLAND_VERSION}}"
+          echo "  Please backup and remove: {{.GOLAND_CLOUD_PATH}}"
+          exit 1
+        fi
+
+        # 创建符号链接
+        ln -s "{{.ICLOUD_SCRATCHES_LOCATION}}" "{{.GOLAND_CLOUD_PATH}}"
+        echo "✓ Cloud scratches linked for GoLand {{.GOLAND_VERSION}}"
+        echo ""
+        echo "Now you can:"
+        echo "- Put files you want to sync in: {{.GOLAND_SCRATCHES_PATH}}/cloud/"
+        echo "- Keep local-only files in: {{.GOLAND_SCRATCHES_PATH}}/"
+        echo "- Access synced files from any device via the cloud subdirectory"
+
+  unlink:
+    desc: 停止云端同步
+    cmds:
+      - |
+        if [ ! -L "{{.GOLAND_CLOUD_PATH}}" ]; then
+          echo "✓ No cloud scratches link found for GoLand {{.GOLAND_VERSION}}"
+          exit 0
+        fi
+
+        echo "Removing cloud scratches link..."
+        rm -f "{{.GOLAND_CLOUD_PATH}}"
+        echo "✓ Cloud scratches unlinked for GoLand {{.GOLAND_VERSION}}"
+        echo ""
+        echo "Note: Your local scratches remain untouched"
+        echo "iCloud files are still available at: {{.ICLOUD_SCRATCHES_LOCATION}}"
+
+
+  #  backup:
+  #    desc: "Backup current GoLand scratches"
+  #    cmds:
+  #      - |
+  #        BACKUP_DIR="{{.HOME}}/Desktop/goland-scratches-backup-$(date +%Y%m%d-%H%M%S)"
+  #        mkdir -p "$BACKUP_DIR"
+  #
+  #        echo "Creating backup at: $BACKUP_DIR"
+  #
+  #        if [ -d "{{.GOLAND_SCRATCHES_PATH}}" ] && [ ! -L "{{.GOLAND_SCRATCHES_PATH}}" ]; then
+  #          echo "Backing up local GoLand {{.GOLAND_VERSION}} scratches..."
+  #          cp -r "{{.GOLAND_SCRATCHES_PATH}}" "$BACKUP_DIR/GoLand{{.GOLAND_VERSION}}-scratches"
+  #          echo "✓ Backup completed: $BACKUP_DIR"
+  #        elif [ -L "{{.GOLAND_SCRATCHES_PATH}}" ] && [ -d "{{.ICLOUD_SCRATCHES_LOCATION}}" ]; then
+  #          echo "Backing up synced GoLand {{.GOLAND_VERSION}} scratches from iCloud..."
+  #          cp -r "{{.ICLOUD_SCRATCHES_LOCATION}}" "$BACKUP_DIR/GoLand{{.GOLAND_VERSION}}-scratches"
+  #          echo "✓ Backup completed: $BACKUP_DIR"
+  #        else
+  #          echo "✓ No scratches directory found to backup"
+  #        fi
+
+  # 强制同步 iCloud 文件
+#  force-sync:
+#    desc: "Force iCloud sync"
+#    cmds:
+#      - |
+#        if [ ! -d "{{.ICLOUD_SCRATCHES_LOCATION}}" ]; then
+#          echo "✗ iCloud scratches directory not found"
+#          exit 1
+#        fi
+#
+#        if command -v brctl >/dev/null 2>&1; then
+#          echo "Forcing iCloud sync..."
+#          brctl download "{{.ICLOUD_SCRATCHES_LOCATION}}"
+#          echo "✓ iCloud sync completed"
+#        else
+#          echo "⚠ brctl command not available, files will sync automatically"
+#        fi

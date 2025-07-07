@@ -1,6 +1,8 @@
 ---
 version: '3'
 
+dir: '{{.USER_WORKING_DIR}}'
+
 includes:
   # All includes working properly
   git: taskfile/devops/Taskfile.git.yml
@@ -29,3 +31,4 @@ includes:
   me: taskfile/mac/Taskfile.me.yml
   alfred: taskfile/mac/Taskfile.alfred.yml
   pnpm: taskfile/mac/Taskfile.pnpm.yml
+  goland: taskfile/mac/Taskfile.goland.yml
