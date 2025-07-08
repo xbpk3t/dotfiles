@@ -1,5 +1,24 @@
+--- === TaskList ===
+---
+--- 多任务 Hammerspoon menubar 管理器
+--- 提供任务管理、倒计时、数据持久化等功能
+---
+--- Download: [https://github.com/your-repo/TaskList.spoon](https://github.com/your-repo/TaskList.spoon)
+
+local obj = {}
+obj.__index = obj
+
+-- Metadata
+obj.name = "TaskList"
+obj.version = "1.0.0"
+obj.author = "Your Name <your.email@example.com>"
+obj.homepage = "https://github.com/your-repo/TaskList.spoon"
+obj.license = "MIT - https://opensource.org/licenses/MIT"
+
+obj.logger = hs.logger.new('TaskList')
+
 -- 多任务 Hammerspoon menubar 管理器
-local menubar = hs.menubar.new()
+local menubar = nil  -- 初始化为 nil，在 start() 中创建
 local tasks = {}  -- 存储所有任务
 local currentTaskId = nil  -- 当前选中的任务ID
 local maxTasks = 20  -- 最大任务数量
@@ -442,11 +461,11 @@ local function addTask()
 
     -- 第一步：获取任务名称
     local button, taskName = hs.dialog.textPrompt(
-        "添加新任务 - 步骤 1/3",
-        "请输入任务名称:",
-        "",
-        "下一步",
-        "取消"
+            "添加新任务 - 步骤 1/3",
+            "请输入任务名称:",
+            "",
+            "下一步",
+            "取消"
     )
     if button ~= "下一步" or not taskName or taskName == "" then
         return
@@ -454,11 +473,11 @@ local function addTask()
 
     -- 第二步：获取日期
     local button2, dateStr = hs.dialog.textPrompt(
-        "添加新任务 - 步骤 2/3",
-        "请输入日期 (格式: YYYY-MM-DD):",
-        getCurrentDate(),
-        "下一步",
-        "取消"
+            "添加新任务 - 步骤 2/3",
+            "请输入日期 (格式: YYYY-MM-DD):",
+            getCurrentDate(),
+            "下一步",
+            "取消"
     )
     if button2 ~= "下一步" then
         return
@@ -475,11 +494,11 @@ local function addTask()
 
     -- 第三步：获取预计耗时
     local button3, estimatedStr = hs.dialog.textPrompt(
-        "添加新任务 - 步骤 3/3",
-        "请输入预计耗时 (几个E1f，每个E1f=40分钟):",
-        "1",
-        "完成",
-        "取消"
+            "添加新任务 - 步骤 3/3",
+            "请输入预计耗时 (几个E1f，每个E1f=40分钟):",
+            "1",
+            "完成",
+            "取消"
     )
     if button3 ~= "完成" then
         return
@@ -525,11 +544,11 @@ local function editTask(index)
 
     -- 第一步：编辑任务名称
     local button, newName = hs.dialog.textPrompt(
-        "编辑任务 - 步骤 1/3",
-        "修改任务名称:",
-        task.name,
-        "下一步",
-        "取消"
+            "编辑任务 - 步骤 1/3",
+            "修改任务名称:",
+            task.name,
+            "下一步",
+            "取消"
     )
     if button ~= "下一步" then return end
 
@@ -544,11 +563,11 @@ local function editTask(index)
 
     -- 第二步：编辑日期
     local button2, newDate = hs.dialog.textPrompt(
-        "编辑任务 - 步骤 2/3",
-        "修改日期 (格式: YYYY-MM-DD):",
-        task.date,
-        "下一步",
-        "取消"
+            "编辑任务 - 步骤 2/3",
+            "修改日期 (格式: YYYY-MM-DD):",
+            task.date,
+            "下一步",
+            "取消"
     )
     if button2 ~= "下一步" then return end
 
@@ -563,11 +582,11 @@ local function editTask(index)
 
     -- 第三步：编辑预计耗时
     local button3, estimatedStr = hs.dialog.textPrompt(
-        "编辑任务 - 步骤 3/3",
-        "修改预计耗时 (几个E1f):",
-        tostring(task.estimatedTime),
-        "完成",
-        "取消"
+            "编辑任务 - 步骤 3/3",
+            "修改预计耗时 (几个E1f):",
+            tostring(task.estimatedTime),
+            "完成",
+            "取消"
     )
     if button3 ~= "完成" then return end
 
@@ -622,10 +641,10 @@ local function completeTask(index)
 
     local task = tasks[index]
     local button = hs.dialog.blockAlert(
-        "完成任务",
-        "确定要完成任务 \"" .. task.name .. "\" 吗？",
-        "完成",
-        "取消"
+            "完成任务",
+            "确定要完成任务 \"" .. task.name .. "\" 吗？",
+            "完成",
+            "取消"
     )
     if button == "完成" then
         stopTask()
@@ -664,10 +683,10 @@ local function deleteTask(index)
 
     local task = tasks[index]
     local button = hs.dialog.blockAlert(
-        "删除任务",
-        "确定要删除任务 \"" .. task.name .. "\" 吗？\n注意：此操作不可恢复！",
-        "删除",
-        "取消"
+            "删除任务",
+            "确定要删除任务 \"" .. task.name .. "\" 吗？\n注意：此操作不可恢复！",
+            "删除",
+            "取消"
     )
     if button == "删除" then
         -- 如果删除的是当前任务，停止任务
@@ -926,11 +945,11 @@ end
 -- 自定义日期导出
 local function exportCustomDateTasks()
     local button, dateStr = hs.dialog.textPrompt(
-        "导出已完成任务",
-        "请输入要导出的日期 (格式: YYYY-MM-DD):",
-        getCurrentDate(),
-        "导出",
-        "取消"
+            "导出已完成任务",
+            "请输入要导出的日期 (格式: YYYY-MM-DD):",
+            getCurrentDate(),
+            "导出",
+            "取消"
     )
     if button ~= "导出" then return end
 
@@ -1069,7 +1088,7 @@ local function createMenu()
             },
 
             {
---                 title = "本周 (w" .. select(3, getThisWeekRange()) .. " " .. select(1, getThisWeekRange()) .. " - " .. select(2, getThisWeekRange()) .. ")",
+                --                 title = "本周 (w" .. select(3, getThisWeekRange()) .. " " .. select(1, getThisWeekRange()) .. " - " .. select(2, getThisWeekRange()) .. ")",
                 title = "本周",
                 fn = exportThisWeekTasks
             },
@@ -1109,48 +1128,122 @@ local function createMenu()
     return menu
 end
 
--- 设置菜单
-menubar:setMenu(createMenu)
+--- TaskList:start()
+--- Method
+--- 启动 TaskList
+---
+--- Parameters:
+---  * None
+---
+--- Returns:
+---  * The TaskList object
+function obj:start()
+    -- 创建 menubar
+    menubar = hs.menubar.new()
 
--- 点击菜单栏图标时快速添加任务
-menubar:setClickCallback(function()
-    addTask()
-end)
+    -- 设置菜单
+    menubar:setMenu(createMenu)
 
--- 初始化
-loadTasks()
-sortTasks()
-updateMenubar()
+    -- 点击菜单栏图标时快速添加任务
+    menubar:setClickCallback(function()
+        addTask()
+    end)
 
--- 如果有活跃任务但没有当前任务，选择第一个活跃任务
-if not currentTaskId then
-    local activeTasks = getActiveTasks()
-    if #activeTasks > 0 then
-        currentTaskId = activeTasks[1].task.id
+    -- 初始化
+    loadTasks()
+    sortTasks()
+    updateMenubar()
+
+    -- 如果有活跃任务但没有当前任务，选择第一个活跃任务
+    if not currentTaskId then
+        local activeTasks = getActiveTasks()
+        if #activeTasks > 0 then
+            currentTaskId = activeTasks[1].task.id
+        end
     end
+
+    -- 如果有当前任务，启动任务
+    local currentTask = findTaskById(currentTaskId)
+    if currentTask and not currentTask.isDone then
+        -- 如果任务还没有开始时间，则启动任务
+        if not currentTask.startTime then
+            startTask()
+        end
+
+        -- 启动对应的倒计时
+        local countdownMinutes = calculateCountdownTime(currentTask)
+        startCountdown(countdownMinutes)
+    end
+
+    -- 设置定时器，每分钟更新一次任务实际时间
+    obj.updateTimer = hs.timer.new(60, function()
+        updateTaskActualTime()
+    end)
+    obj.updateTimer:start()
+
+    hs.notify.new({
+        title = "TaskList",
+        informativeText = "多任务管理器已启动",
+        withdrawAfter = 3
+    }):send()
+
+    obj.logger.i("TaskList started")
+    return self
 end
 
--- 如果有当前任务，启动任务
-local currentTask = findTaskById(currentTaskId)
-if currentTask and not currentTask.isDone then
-    -- 如果任务还没有开始时间，则启动任务
-    if not currentTask.startTime then
-        startTask()
+--- TaskList:stop()
+--- Method
+--- 停止 TaskList
+---
+--- Parameters:
+---  * None
+---
+--- Returns:
+---  * The TaskList object
+function obj:stop()
+    if menubar then
+        menubar:delete()
+        menubar = nil
     end
 
-    -- 启动对应的倒计时
-    local countdownMinutes = calculateCountdownTime(currentTask)
-    startCountdown(countdownMinutes)
+    if countdownTimer then
+        countdownTimer:stop()
+        countdownTimer = nil
+    end
+
+    if obj.updateTimer then
+        obj.updateTimer:stop()
+        obj.updateTimer = nil
+    end
+
+    -- 保存数据
+    saveTasks()
+
+    obj.logger.i("TaskList stopped")
+    return self
 end
 
--- 设置定时器，每分钟更新一次任务实际时间
-local updateTimer = hs.timer.new(60, function()
-    updateTaskActualTime()
-end)
-updateTimer:start()
+--- TaskList:bindHotkeys(mapping)
+--- Method
+--- 绑定热键
+---
+--- Parameters:
+---  * mapping - 热键映射表
+---
+--- Returns:
+---  * The TaskList object
+function obj:bindHotkeys(mapping)
+    local def = {
+        toggle_pause = function() togglePause() end,
+        add_task = function() addTask() end,
+        show_tasks = function()
+            if menubar then
+                menubar:popupMenu(hs.mouse.absolutePosition())
+            end
+        end
+    }
+    hs.spoons.bindHotkeysToSpec(def, mapping)
+    return self
+end
 
-hs.notify.new({
-    title = "任务管理器",
-    informativeText = "多任务管理器已启动",
-    withdrawAfter = 3
-}):send()
+return obj
