@@ -1,3 +1,8 @@
+# ===== UTF-8 编码设置 =====
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+export LC_CTYPE=en_US.UTF-8
+
 # ===== 基础设置 =====
 HISTFILE=~/.zsh_history   # 历史记录文件
 HISTSIZE=10000            # 内存中保存的历史数量
@@ -10,6 +15,9 @@ alias ..='cd ..'           # 返回上级目录
 alias ...='cd ../..'       # 返回上两级目录
 alias ll='ls -lh'          # 长列表格式
 alias l='ls -lah'          # 详细列表（含隐藏文件）
+
+# Vim 别名确保UTF-8支持
+alias vim='LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 vim'
 
 # 在terminal输入文件名，可以直接用指定IDE打开该文件
 alias -s {md,go,json,cs,ts,html,yaml,yml,python,sql}=goland

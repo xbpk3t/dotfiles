@@ -21,6 +21,7 @@
     ~/.bash_profile: .bash_profile
     ~/.gitignore_global: .gitignore_global
     ~/.profile: .profile
+    ~/.vimrc: .vimrc
 
     # 目录链接
     ~/.hammerspoon: .hammerspoon

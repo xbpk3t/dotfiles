@@ -19,6 +19,7 @@ tasks:
     #  des: Mac Cleaner. 这个比Clean-macOS好用点，不过都用不到了。普通OS本身就不适合有“对OS清洁有强迫症”的群体，所以比较什么cleaner对清洁更彻底，也就毫无意义了。平时用tencent-lemon就足够了。没必要求全责备。
     #  rel:
     #    - url: https://github.com/MarioCatuogno/Clean-macOS
+  cleanup:
 
 
 
