@@ -1,8 +1,6 @@
 ---
 version: '3'
 
-
-
 tasks:
   # [fastfetch-cli/fastfetch: A maintained, feature-rich and performance oriented, neofetch like system information tool.](https://github.com/fastfetch-cli/fastfetch) 因为neofetch的性能差（因为基于bash实现）、并且已经EOL了，所以选择 fastfetch
   fetch:
@@ -37,8 +35,3 @@ tasks:
   # [nicolargo/glances](https://github.com/nicolargo/glances)
   top:
     cmd: glances # 更易用的top/htop，还支持web模式。但是其核心是“轻量级monitor系统”，glances还分可以分为server模式和client模式，所有slave机器都需要安装glances的server，master开启client模式就可以收集所有slave的数据（类似prometheus这样的pull模式）。所以也可以理解为局域网下的prom（glances不适合在公网做monitor），感觉意思不大。
-
-  # 修改dotbot配置之后，执行同步
-  dotbot:
-    cmd: dotbot -c install.conf.yaml
-    dir: '{{.USER_WORKING_DIR}}'

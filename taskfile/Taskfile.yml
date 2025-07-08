@@ -7,6 +7,8 @@ includes:
   # All includes working properly
   git: taskfile/devops/Taskfile.git.yml
   brew: taskfile/mac/Taskfile.brew.yml
+  dotbot: taskfile/mac/Taskfile.dotbot.yml
+
   go: taskfile/go/Taskfile.go.yml
   k3d: taskfile/k8s/Taskfile.k3d.yml
   docker: taskfile/k8s/Taskfile.docker.yml

@@ -1,11 +1,8 @@
 version: "3"
 
 #- brew commands
-#- /cleanup/outdated/doctor/commands # 一些brew全局命令
 #- brew update -vvv # 更新homebrew
-#- brew install/uninstall
 #- brew upgrade # 用来升级brew的formula（不支持cask）
-#- brew list --<cask|formula> # brew remove
 #- brew services list/run/start/stop/restart/cleanup
 #- brew tap # 查看所有已经tapped的repo
 #- brew tap/untap <user/repo> # 添加/移除 新tap
@@ -15,29 +12,47 @@ version: "3"
 #- brew link/unlink <service>
 #- brew deps/uses <pkg> --tree --installed # 查看 pkg 的上游包（依赖包）/ 下游包（被依赖包）
 #- brew leaves # 列出不被任何包依赖的包
-#- brew update-reset # To undo all changes you have made to any of Homebrew’s repositories, It will revert to the upstream state on all Homebrew’s repositories.
-#- brew autoremove # Uninstall formulae that were only installed as a dependency of another formula and are now no longer needed
-#- brew bundle dump --describe --force --file='./Brewfile' # backup brew formulae and cask
-#- brew bundle # 根据Brewfile恢复homebrew中的软件
-#- brew bundle install --file='./Brewfile'
-#- brew cu -facy # true
+
 #- brew graph --installed | fdp -Tpng -ograph.png
-
-
-#- des: brew upgrade只能升级formulae，不支持cask。那怎么才能upgrade cask呢?
-#  url: https://github.com/buo/homebrew-cask-upgrade
 #- des: brew graph提供的依赖关系不是可视化的，怎么可视化查看homebrew的formulae之间的依赖关系?
 #  url: https://github.com/martido/homebrew-graph
+
+vars:
+  BREWFILE: $HOME/Desktop/dotfiles/Brewfile
 
 
 tasks:
   default:
-    desc: x
     cmds:
       - task: upgrade
       - task: cleanup
-      - task: details
+      - task: info
       - brew doctor
+
+  install:
+    internal: true
+    desc: check, if not then install
+    cmds:
+      - echo "⚠️  正在安装 Homebrew..."
+      - /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    preconditions:
+      - sh: '[ "$(uname)" = "Darwin" ]'
+        msg: "此任务仅支持 macOS 系统"
+      - sh: '! command -v brew &> /dev/null'
+        msg: "Homebrew 已安装，无需重复安装"
+
+  ensure:
+    internal: true
+    desc: 确保 Homebrew 已安装（如果未安装则自动安装）
+    cmds:
+      - |
+        if ! command -v brew &> /dev/null; then
+          echo "⚠️  Homebrew 未安装，正在安装..."
+          task install
+        else
+          echo "✅ Homebrew 已安装"
+        fi
+
 
   check-size:
     cmds:
@@ -46,7 +61,8 @@ tasks:
       - du -sh docs/* | sort -h
 
   upgrade:
-    desc: ddd
+    internal: true
+    desc: upgrade brew and outdated formulae
     cmds:
       - brew update -vvv
       - brew upgrade
@@ -54,17 +70,12 @@ tasks:
       - task: cask-upgrade
 
   info:
+    internal: true
     cmds:
       - brew config
       - git -C "$(brew --repo)" remote -v # 查看brew镜像源
       - brew --prefix # 用来查看bin path和cask path
 
-
-
-  bundle:
-    cmds:
-      - brew bundle dump --describe --force --file='./Brewfile'
-    desc: bundle to Brewfile
 
   cleanup:
     desc: 清除所有brew本地缓存
@@ -72,14 +83,15 @@ tasks:
       - brew cleanup -n
       - brew cleanup -s # 清理
       - brew services cleanup
-      - brew autoremove
+      - brew autoremove # Uninstall formulae that were only installed as a dependency of another formula and are now no longer needed
 
 
-
+  #- des: brew upgrade只能升级formulae，不支持cask。那怎么才能upgrade cask呢?
+  #  url: https://github.com/buo/homebrew-cask-upgrade
   cask-upgrade:
+    internal: true
     desc: 更新cask（也就是所有app）
-    cmds:
-      - brew cu -facy
+    cmd: brew cu -facy
     preconditions:
       - brew tap buo/cask-upgrade
 
@@ -95,3 +107,15 @@ tasks:
     cmds:
       - brew uses {{.CLI_ARGS}} --tree --installed
     silent: true
+
+
+
+  bundle-backup:
+    internal: true
+    cmd: brew bundle dump --describe --force --file={{.BREWFILE}}
+    desc: backup brew formulae and cask to Brewfile
+
+  bundle-restore:
+    internal: true
+    cmd: brew bundle install --file="{{.BREWFILE}}"
+    desc: install

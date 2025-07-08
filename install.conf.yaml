@@ -17,6 +17,10 @@
     # 单个文件链接
     ~/.zshrc: .zshrc
     ~/.bashrc: .bashrc
+    ~/.gitconfig: .gitconfig
+    ~/.bash_profile: .bash_profile
+    ~/.gitignore_global: .gitignore_global
+    ~/.profile: .profile
 
     # 目录链接
     ~/.hammerspoon: .hammerspoon

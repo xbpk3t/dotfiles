@@ -1,0 +1,27 @@
+---
+
+version: "3"
+
+
+
+tasks:
+  # 修改dotbot配置之后，执行同步
+  apply:
+    cmd: dotbot -c install.conf.yaml
+    dir: '{{.USER_WORKING_DIR}}'
+
+  clone:
+    desc: 📥 克隆或更新 dotfiles 仓库
+    internal: true
+    cmds:
+      - |
+        if [[ -d "$HOME/Desktop/dotfiles" ]]; then
+          echo "📂 dotfiles 目录已存在，正在更新..."
+          git -C "$HOME/Desktop/dotfiles" pull origin main || git -C "$HOME/Desktop/dotfiles" pull origin master
+        else
+          echo "📥 克隆 dotfiles 仓库..."
+          git clone https://github.com/xbpk3t/dotfiles.git "$HOME/Desktop/dotfiles"
+        fi
+    preconditions:
+      - sh: command -v git
+        msg: "Git 未安装，请先安装 Git"

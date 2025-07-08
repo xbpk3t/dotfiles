@@ -1,0 +1,24 @@
+[user]
+	name = XBPk3T
+	email = yyzw@live.com
+[core]
+	excludesfile = /Users/lhgtqb7bll/.gitignore_global
+	autocrlf = input
+	# 避免File mode changed from 100644 (Regular) to 100775 (Executable)这样的问题
+	filemode = false
+[init]
+	defaultBranch = main
+[alias]
+	la = log --pretty=format:'%C(yellow)%h%Creset %C(green)(%cd)%Creset %C(bold blue)<%cn>%Creset%C(red)%d%Creset %C(white)%s%Creset' --date=format-local:'%Y-%m-%d %H:%M:%S' --graph --all
+[credential "https://github.com"]
+	helper =
+	helper = !/usr/local/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper =
+	helper = !/usr/local/bin/gh auth git-credential
+[http]
+	proxy = http://127.0.0.1:7890
+[https]
+	proxy = http://127.0.0.1:7890
+[pull]
+	rebase = true

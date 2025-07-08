@@ -1,0 +1,10 @@
+
+# files
+*~
+.DS_Store
+*.log
+.gitkeep
+
+
+# dir
+.idea
