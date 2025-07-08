@@ -2,31 +2,49 @@
 version: '3'
 
 includes:
-  brew: Taskfile.brew.yml
-  mac: Taskfile.mac.yml
-  dotbot: Taskfile.dotbot.yml
+  brew:
+    taskfile: Taskfile.brew.yml
+    internal: true
+  mac:
+    taskfile: Taskfile.mac.yml
+    internal: true
+  dotbot:
+    taskfile: Taskfile.dotbot.yml
+    internal: true
 
 
 tasks:
-  automation-setup:
+  default:
     desc: 🚀 自动化setup macOS开发环境 - 完整的开发环境配置工具
-    cmds:
-      - task: dotfiles-setup
-      - task: brew:ensure
-      - task: brew:bundle-restore
-      - task: macos-config
+    interactive: true
+    silent: true
+    cmd: |
+      SELECTED=$(gum choose "1-dotfiles-setup" "2-brew-setup" "3-macos-config")
+
+      for choice in $SELECTED; do
+        case $choice in
+          "1-dotfiles-setup") task mac-setup:dotfiles-setup ;;
+          "2-brew-setup") task brew:bundle-restore ;;
+          "3-macos-config") task mac-setup:macos-config ;;
+        esac
+      done
+#    cmds:
+#      - task: dotfiles-setup
+#      - task: brew:bundle-restore
+#      - task: macos-config
+
 
   dotfiles-setup:
     desc: 📁 设置 dotfiles 配置（dotbot）
-    internal: true
+    # internal: true
     cmds:
-      - task: dotbot:clone
+      - task: dotbot:clone # 注意此时使用macos内置git来clone，后面我们会用brew的git替换掉。所以不存在“鸡生蛋、蛋生鸡”的依赖循环问题。
       - task: dotbot:apply
 
 
   macos-config:
+    # internal: true
     desc: ⚙️ 配置 macOS 系统偏好设置
-    internal: true
     cmds:
       - task: macos-dock
       - task: macos-finder
@@ -40,10 +58,10 @@ tasks:
     cmds:
       - echo "🎯 配置 Dock..."
       # 设置 Dock 图标大小
-      - defaults write com.apple.dock tilesize -int 48
+      - defaults write com.apple.dock tilesize -int 4
       # 启用 Dock 放大效果
-      - defaults write com.apple.dock magnification -bool true
-      - defaults write com.apple.dock largesize -int 64
+      - defaults write com.apple.dock magnification -bool false
+      - defaults write com.apple.dock largesize -int 32
       # 设置 Dock 位置到左侧
       - defaults write com.apple.dock orientation -string "left"
       # 自动隐藏 Dock

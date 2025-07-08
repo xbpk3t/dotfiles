@@ -1,6 +1,6 @@
 ---
+version: '3'
 
-version: "3"
 output: prefixed
 silent: true
 
@@ -43,13 +43,13 @@ tasks:
   #     - task -l
   #   silent: true
 
-  k3d:create:
+  create:
     prefix: ⚙️ > create
     desc: create k3d cluster
     cmds:
       - k3d cluster create --config=cluster/config.yaml
 
-  k3d:create:dev:
+  create:dev:
     prefix: ⚙️ > create
     desc: create k3d cluster (devcontainers)
     deps:
@@ -57,25 +57,25 @@ tasks:
     cmds:
       - sed -i -e "s/0.0.0.0/host.docker.internal/g" ${HOME}/.kube/config
 
-  k3d:destroy:
+  destroy:
     prefix: ⚙️ > destroy
     desc: destroy k3d cluster
     cmds:
       - "k3d cluster delete {{.CLUSTER_NAME}}"
 
-  k3d:start:
+  start:
     prefix: ⚙️ > start
     desc: starts knative environment
     cmds:
       - "k3d cluster start {{.CLUSTER_NAME}}"
 
-  k3d:stop:
+  stop:
     prefix: ⚙️ > stop
     desc: stop knative environment
     cmds:
       - "k3d cluster stop {{.CLUSTER_NAME}}"
 
-  k3d:test:
+  test:
     prefix: ⚙️ > test
     desc: test argo cd
     cmds:
