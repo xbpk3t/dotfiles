@@ -1,3 +1,6 @@
+require "modules/bluetooth"
+local wifiAudio = require("modules/mute")
+
 local tasklist = require("modules/tasklist")
 -- local shortcut = require("modules/test_shortcut")
 
