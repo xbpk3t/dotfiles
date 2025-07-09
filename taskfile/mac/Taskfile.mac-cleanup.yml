@@ -1,0 +1,498 @@
+---
+
+version: '3'
+
+# ref [mac-cleanup/mac-cleanup-py: 👨‍💻 Python cleanup script for macOS](https://github.com/mac-cleanup/mac-cleanup-py)
+
+vars:
+  # Task descriptions mapping
+  TASK_DESCRIPTIONS:
+    map:
+      trash: "Emptying the Trash 🗑 on all mounted volumes and the main HDD"
+      system_caches: "Clearing System Cache Files"
+      system_log: "Clearing System Log Files"
+      jetbrains: "Clearing all application log files from JetBrains"
+      adobe: "Clearing Adobe Cache Files"
+      chrome: "Clearing Google Chrome Cache Files"
+      ios_apps: "Cleaning up iOS Applications"
+      ios_backups: "Removing iOS Device Backups"
+      xcode: "Cleaning up XCode Derived Data and Archives"
+      xcode_simulators: "Cleaning up iOS Simulators"
+      dropbox: "Clearing Dropbox 📦 Cache Files"
+      google_drive: "Clearing Google Drive File Stream Cache Files"
+      composer: "Cleaning up composer"
+      steam: "Clearing Steam Cache, Log, and Temp Files"
+      minecraft: "Clearing Minecraft Cache and Log Files"
+      lunarclient: "Deleting Lunar Client logs and caches"
+      wget_logs: "Deleting Wget log and hosts file"
+      cacher: "Deleting Cacher logs"
+      android: "Deleting Android cache"
+      gradle: "Clearing Gradle caches"
+      kite: "Deleting Kite logs"
+      brew: "Cleaning up Homebrew Cache"
+      gem: "Cleaning up any old versions of gems"
+      docker: "Cleaning up Docker"
+      pyenv: "Removing Pyenv-VirtualEnv Cache"
+      npm: "Cleaning up npm cache"
+      pnpm: "Cleaning up pnpm Cache"
+      yarn: "Cleaning up Yarn Cache"
+      bun: "Cleaning up Bun Cache"
+      pod: "Cleaning up Pod Cache"
+      go: "Clearing Go module cache"
+      microsoft_teams: "Deleting Microsoft Teams logs and caches"
+      poetry: "Deleting Poetry cache"
+      java_cache: "Deleting Java heap dumps"
+      dns_cache: "Cleaning up DNS cache"
+      inactive_memory: "Purging inactive memory"
+      telegram: "Clear old Telegram cache"
+      conan: "Clearing conan cache"
+      nuget_cache: "Emptying the .nuget folder's content of the current user"
+      obsidian_caches: "Deleting all cache folders of Obsidian"
+      ea_caches: "Deleting all cache folders of the EA App"
+      chromium_caches: "Deleting all cache folders of Chromium"
+      arc: "Deleting all cache, cookies, history, site data of Arc Browser"
+
+  # File paths for each cleanup task
+  trash:
+    - "/Volumes/*/.Trashes/*"
+    - "~/.Trash/*"
+
+  system_caches:
+    - "~/Library/Caches/*"
+    - "/private/var/folders/bh/*/*/*/*"
+
+  system_log:
+    - "/private/var/log/asl/*.asl"
+    - "/Library/Logs/DiagnosticReports/*"
+    - "/Library/Logs/CreativeCloud/*"
+    - "/Library/Logs/Adobe/*"
+    - "/Library/Logs/adobegc.log"
+    - "~/Library/Containers/com.apple.mail/Data/Library/Logs/Mail/*"
+    - "~/Library/Logs/CoreSimulator/*"
+
+  jetbrains:
+    - "~/Library/Logs/JetBrains/*/"
+
+  adobe:
+    - "~/Library/Application Support/Adobe/Common/Media Cache Files/*"
+
+  chrome:
+    - "~/Library/Application Support/Google/Chrome/Default/Application Cache/*"
+
+  ios_apps:
+    - "~/Music/iTunes/iTunes Media/Mobile Applications/*"
+
+  ios_backups:
+    - "~/Library/Application Support/MobileSync/Backup/*"
+
+  xcode:
+    - "~/Library/Developer/Xcode/DerivedData/*"
+    - "~/Library/Developer/Xcode/Archives/*"
+    - "~/Library/Developer/Xcode/iOS Device Logs/*"
+
+  xcode_simulators:
+    - "~/Library/Developer/CoreSimulator/Devices/*/data/[!Library|var|tmp|Media]*"
+    - "~/Library/Developer/CoreSimulator/Devices/*/data/Library/[!PreferencesCaches|Caches|AddressBook|Trial]*"
+    - "~/Library/Developer/CoreSimulator/Devices/*/data/Library/Caches/*"
+    - "~/Library/Developer/CoreSimulator/Devices/*/data/Library/AddressBook/AddressBook*"
+
+  dropbox:
+    - "~/Dropbox/.dropbox.cache/*"
+
+  google_drive:
+    - "~/Library/Application Support/Google/DriveFS/[0-9a-zA-Z]*/content_cache"
+
+  composer:
+    - "~/Library/Caches/composer"
+
+  steam:
+    - "~/Library/Application Support/Steam/appcache"
+    - "~/Library/Application Support/Steam/depotcache"
+    - "~/Library/Application Support/Steam/logs"
+    - "~/Library/Application Support/Steam/steamapps/shadercache"
+    - "~/Library/Application Support/Steam/steamapps/temp"
+    - "~/Library/Application Support/Steam/steamapps/download"
+
+  minecraft:
+    - "~/Library/Application Support/minecraft/logs"
+    - "~/Library/Application Support/minecraft/crash-reports"
+    - "~/Library/Application Support/minecraft/webcache"
+    - "~/Library/Application Support/minecraft/webcache2"
+    - "~/Library/Application Support/minecraft/*.log"
+    - "~/Library/Application Support/minecraft/launcher_cef_log.txt"
+    - "~/Library/Application Support/minecraft/command_history.txt"
+    - "~/Library/Application Support/minecraft/.mixin.out"
+
+  lunarclient:
+    - "~/.lunarclient/game-cache"
+    - "~/.lunarclient/launcher-cache"
+    - "~/.lunarclient/logs"
+    - "~/.lunarclient/offline/*/logs"
+    - "~/.lunarclient/offline/files/*/logs"
+
+  wget_logs:
+    - "~/wget-log"
+    - "~/.wget-hsts"
+
+  cacher:
+    - "~/.cacher/logs"
+
+  android:
+    - "~/.android/cache"
+
+  gradle:
+    - "~/.gradle/caches"
+
+  kite:
+    - "~/.kite/logs"
+
+  brew:
+    - "$(brew --cache)"
+
+  gem: []
+
+  docker: []
+
+  pyenv:
+    - "$PYENV_VIRTUALENV_CACHE_PATH"
+
+  npm:
+    - "~/.npm/*"
+
+  pnpm:
+    - "~/.pnpm-store/*"
+
+  yarn:
+    - "~/Library/Caches/yarn"
+
+  bun:
+    - "~/.bun/install/cache"
+
+  pod:
+    - "~/Library/Caches/CocoaPods"
+
+  go:
+    - "~/go/pkg/mod"
+
+  dns_cache: []
+
+  inactive_memory: []
+
+  telegram:
+    - "~/Library/Group Containers/*.ru.keepcoder.Telegram/stable/account-*/postbox/db"
+
+  microsoft_teams:
+    - "~/Library/Application Support/Microsoft/Teams/IndexedDB"
+    - "~/Library/Application Support/Microsoft/Teams/Cache"
+    - "~/Library/Application Support/Microsoft/Teams/Application Cache"
+    - "~/Library/Application Support/Microsoft/Teams/Code Cache"
+    - "~/Library/Application Support/Microsoft/Teams/blob_storage"
+    - "~/Library/Application Support/Microsoft/Teams/databases"
+    - "~/Library/Application Support/Microsoft/Teams/gpucache"
+    - "~/Library/Application Support/Microsoft/Teams/Local Storage"
+    - "~/Library/Application Support/Microsoft/Teams/tmp"
+    - "~/Library/Application Support/Microsoft/Teams/*logs*.txt"
+    - "~/Library/Application Support/Microsoft/Teams/watchdog"
+    - "~/Library/Application Support/Microsoft/Teams/*watchdog*.json"
+
+  poetry:
+    - "~/Library/Caches/pypoetry"
+
+  java_cache:
+    - "~/*.hprof"
+
+  conan:
+    - "~/.conan2/p/"
+
+  nuget_cache:
+    - "~/.nuget/packages/"
+
+  obsidian_caches:
+    - "~/Library/Application Support/obsidian/Cache/"
+    - "~/Library/Application Support/obsidian/Code Cache/"
+    - "~/Library/Application Support/obsidian/DawnGraphiteCache/"
+    - "~/Library/Application Support/obsidian/DawnWebGPUCache/"
+    - "~/Library/Application Support/obsidian/*.log"
+
+  ea_caches:
+    - "~/Library/Application Support/Electronic Arts/EA app/IGOCache/"
+    - "~/Library/Application Support/Electronic Arts/EA app/Logs/"
+    - "~/Library/Application Support/Electronic Arts/EA app/OfflineCache/"
+    - "~/Library/Application Support/Electronic Arts/EA app/CEF/BrowserCache/EADesktop/Cache/"
+    - "~/Library/Application Support/Electronic Arts/EA app/CEF/BrowserCache/EADesktop/Code Cache/"
+    - "~/Library/Application Support/Electronic Arts/EA app/CEF/BrowserCache/EADesktop/DawnCache/"
+    - "~/Library/Application Support/Electronic Arts/EA app/CEF/BrowserCache/EADesktop/GPUCache/"
+
+  chromium_caches:
+    - "~/Library/Application Support/Chromium/GraphiteDawnCache/"
+    - "~/Library/Application Support/Chromium/GrShaderCache/"
+    - "~/Library/Application Support/Chromium/ShaderCache/"
+    - "~/Library/Application Support/Chromium/Default/DawnCache/"
+    - "~/Library/Application Support/Chromium/Default/GPUCache/"
+
+  arc:
+    - "~/Library/Caches/Arc"
+    - "~/Library/Caches/CloudKit/company.thebrowser.Browser"
+    - "~/Library/Caches/company.thebrowser.Browser"
+    - "~/Library/Application Support/Arc/User Data/Default/History"
+    - "~/Library/Application Support/Arc/User Data/Default/History-journal"
+    - "~/Library/Application Support/Arc/User Data/Default/Cookies"
+    - "~/Library/Application Support/Arc/User Data/Default/Cookies-journal"
+    - "~/Library/Application Support/Arc/User Data/Default/Web Data"
+    - "~/Library/Application Support/Arc/User Data/Default/Web Data-journal"
+
+tasks:
+  default:
+    interactive: true
+    silent: true
+    desc: "🧹 Interactive macOS cleanup tool - select multiple cleanup tasks"
+    cmds:
+      - |
+        echo "🧹 macOS Cleanup Tool"
+        echo "Select cleanup tasks (use Space to select, Enter to confirm):"
+        echo ""
+
+        SELECTED=$(gum choose --no-limit --height 25 \
+          "trash" \
+          "system_caches" \
+          "system_log" \
+          "jetbrains" \
+          "adobe" \
+          "chrome" \
+          "ios_apps" \
+          "ios_backups" \
+          "xcode" \
+          "xcode_simulators" \
+          "dropbox" \
+          "google_drive" \
+          "composer" \
+          "steam" \
+          "minecraft" \
+          "lunarclient" \
+          "wget_logs" \
+          "cacher" \
+          "android" \
+          "gradle" \
+          "kite" \
+          "brew" \
+          "gem" \
+          "docker" \
+          "pyenv" \
+          "npm" \
+          "pnpm" \
+          "yarn" \
+          "bun" \
+          "pod" \
+          "go" \
+          "microsoft_teams" \
+          "poetry" \
+          "java_cache" \
+          "dns_cache" \
+          "inactive_memory" \
+          "telegram" \
+          "conan" \
+          "nuget_cache" \
+          "obsidian_caches" \
+          "ea_caches" \
+          "chromium_caches" \
+          "arc")
+
+        if [ -z "$SELECTED" ]; then
+          echo "No tasks selected. Exiting."
+          exit 0
+        fi
+
+        echo ""
+        echo "Selected tasks:"
+        echo "$SELECTED"
+        echo ""
+
+        if gum confirm "Proceed with cleanup?"; then
+          for task in $SELECTED; do
+            echo "🔄 Running: $task"
+            task mac-cleanup:cleanup TASK_NAME=$task
+            echo "✅ Completed: $task"
+            echo ""
+          done
+          echo "🎉 All selected cleanup tasks completed!"
+        else
+          echo "Cleanup cancelled."
+        fi
+
+  # Generic cleanup task that works with all cleanup types
+  cleanup:
+    silent: true
+    desc: "Execute cleanup for a specific task"
+    vars:
+      TASK_NAME: '{{.TASK_NAME | default ""}}'
+      TASK_DESC: '{{index .TASK_DESCRIPTIONS .TASK_NAME}}'
+      TASK_PATHS: '{{index . .TASK_NAME}}'
+    cmds:
+      - |
+        if [ -z "{{.TASK_NAME}}" ]; then
+          echo "Error: TASK_NAME is required"
+          exit 1
+        fi
+
+        echo "{{.TASK_DESC}}"
+
+        # Handle special cases that need confirmation
+        case "{{.TASK_NAME}}" in
+          "system_caches")
+            if ! gum confirm "ALL USER CACHE will be DELETED, including Poetry, Jetbrains, Cocoa, yarn, Composer etc. Continue?"; then
+              echo "System cache cleanup cancelled."
+              exit 0
+            fi
+            ;;
+          "xcode_simulators")
+            if ! gum confirm "All Xcode simulators will be pruned. Continue?"; then
+              echo "Xcode simulator cleanup cancelled."
+              exit 0
+            fi
+            ;;
+          "gradle")
+            if ! gum confirm "Gradle cache will be removed. It is chunky and kinda long to reinstall. Continue?"; then
+              echo "Gradle cache cleanup cancelled."
+              exit 0
+            fi
+            ;;
+          "docker")
+            if ! gum confirm "Stopped containers, dangling images, unused networks, volumes, and build cache will be deleted. Continue?"; then
+              echo "Docker cleanup cancelled."
+              exit 0
+            fi
+            ;;
+          "poetry")
+            if ! gum confirm "All non-local Poetry venvs will be deleted. Continue?"; then
+              echo "Poetry cache cleanup cancelled."
+              exit 0
+            fi
+            ;;
+          "java_cache")
+            if ! gum confirm "All heap dumps (.hprof) in HOME dir will be deleted. Continue?"; then
+              echo "Java heap dump cleanup cancelled."
+              exit 0
+            fi
+            ;;
+          "telegram")
+            if ! gum confirm "Telegram cache will be deleted. Once reopened, cache will be rebuild smaller. Continue?"; then
+              echo "Telegram cache cleanup cancelled."
+              exit 0
+            fi
+            ;;
+          "nuget_cache")
+            if ! gum confirm "Deleting nuget packages probably will cause a lot of files being redownloaded! Continue?"; then
+              echo "NuGet cache cleanup cancelled."
+              exit 0
+            fi
+            ;;
+        esac
+      - |
+        # Handle special command-based cleanup tasks
+        case "{{.TASK_NAME}}" in
+          "xcode_simulators")
+            if command -v xcrun >/dev/null 2>&1; then
+              osascript -e 'tell application "com.apple.CoreSimulator.CoreSimulatorService" to quit' 2>/dev/null || true
+              osascript -e 'tell application "iOS Simulator" to quit' 2>/dev/null || true
+              osascript -e 'tell application "Simulator" to quit' 2>/dev/null || true
+              xcrun simctl shutdown all 2>/dev/null || true
+              xcrun simctl erase all
+            fi
+            ;;
+          "google_drive")
+            killall 'Google Drive File Stream' 2>/dev/null || true
+            ;;
+          "composer")
+            if command -v composer >/dev/null 2>&1; then
+              composer clearcache --no-interaction
+            fi
+            ;;
+          "brew")
+            if command -v brew >/dev/null 2>&1; then
+              brew cleanup -s
+              BREW_CACHE_PATH=$(brew --cache)
+              rm -rf "$BREW_CACHE_PATH"
+              brew tap --repair
+            fi
+            ;;
+          "gem")
+            if command -v gem >/dev/null 2>&1; then
+              gem cleanup
+            fi
+            ;;
+          "docker")
+            if command -v docker >/dev/null 2>&1; then
+              CLOSE_DOCKER=false
+              if ! docker ps >/dev/null 2>&1; then
+                open -jga Docker
+                CLOSE_DOCKER=true
+                sleep 5
+              fi
+              docker system prune -af
+              if [ "$CLOSE_DOCKER" = true ]; then
+                killall Docker 2>/dev/null || true
+              fi
+            fi
+            ;;
+          "npm")
+            if command -v npm >/dev/null 2>&1; then
+              npm cache clean --force
+            fi
+            ;;
+          "pnpm")
+            if command -v pnpm >/dev/null 2>&1; then
+              pnpm store prune &>/dev/null
+            fi
+            ;;
+          "yarn")
+            if command -v yarn >/dev/null 2>&1; then
+              yarn cache clean --force
+            fi
+            ;;
+          "bun")
+            if command -v bun >/dev/null 2>&1; then
+              bun pm cache rm
+            fi
+            ;;
+          "pod")
+            if command -v pod >/dev/null 2>&1; then
+              pod cache clean --all
+            fi
+            ;;
+          "go")
+            if command -v go >/dev/null 2>&1; then
+              go clean -modcache
+            fi
+            ;;
+          "dns_cache")
+            sudo dscacheutil -flushcache
+            sudo killall -HUP mDNSResponder
+            ;;
+          "inactive_memory")
+            sudo purge
+            ;;
+          "telegram")
+            REOPEN_TELEGRAM=false
+            if ps aux | grep '[T]elegram' >/dev/null; then
+              REOPEN_TELEGRAM=true
+              killall -KILL Telegram
+            fi
+            ;;
+          "conan")
+            conan remove "*" -c
+            ;;
+        esac
+      - |
+        {{range index . .TASK_NAME}}echo "Removing: {{.}}"
+        rm -rf "{{.}}"
+        {{end}}
+      - |
+        # Handle post-cleanup actions
+        case "{{.TASK_NAME}}" in
+          "telegram")
+            if [ "$REOPEN_TELEGRAM" = true ]; then
+              open /Applications/Telegram.app
+            fi
+            ;;
+        esac
+      # 注意用 for...cmd 会有[]的问题，暂时无法解决，所以直接range处理
