@@ -4,6 +4,7 @@ version: '3'
 includes:
   # All includes working properly
   git: taskfile/devops/Taskfile.git.yml
+  linters: taskfile/devops/Taskfile.linters.yml
 
   go: taskfile/go/Taskfile.go.yml
   k3d: taskfile/k8s/Taskfile.k3d.yml

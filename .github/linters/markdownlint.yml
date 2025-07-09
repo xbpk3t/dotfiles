@@ -1,0 +1,63 @@
+---
+
+# markdownlint -f -c .github/linters/markdownlint.yml .
+
+# 代码块是否执行markdownlint检查
+# 默认 true
+#code_blocks: false
+# 将 focusMode 设为 true 后，插件就不会检查光标所在的当前行
+focusMode: true
+
+# header规则，默认一致即可，修改为必须#定义header
+MD003:
+  style: atx
+# 默认无序列表用-进行缩进
+MD004:
+  style: dash
+# 无序列表缩进，默认把所有tab转化为space，自定义缩进4格（默认缩进2格）
+# 缩进2格还是4格？
+# 缩进2个空格可以使嵌套列表的内容与父列表内容的开头在列表标记后使用单个空格时保持一致。缩进4个空格与代码块一致，并且使编辑者更容易实现。此外，这对于需要4位缩进的多重markdown解析器可能是一个兼容性问题。更多信息
+# MD007:
+#  indent: 4
+# 硬标签，使用空格，而非tab进行缩进
+MD010:
+  ignore_code_languages: ["plantuml", "puml"]
+# 多个连续的空白行，不应出现一行以上的空行（规则没毛病，但是不适用）
+# 太多no-multiple-blanks Multiple consecutive blank lines [Expected: 5; Actual: 6]报错
+MD012:
+  maximum: 99
+# 每行字符数，默认一行最长80个字符
+MD013: false
+#  header不能重复: 设置为siblings_only同级header不能重复
+MD024:
+  siblings_only: true
+# 同一文档中具有多个一级header
+MD025: false
+# MD028/no-blanks-blockquote Blank line inside blockquote
+MD028: false
+# 每当markdown文档中使用原始HTML时，都会触发此规则。需要使用md，而非html代码。
+
+# MD033:
+#  allowed_elements: ['details', 'summary', 'span', 'HighlightGreen', 'Tabs', 'TabItem', 'div', 'h3']
+MD033: false
+# add angle brackets around the URL
+# URL -> <URL>
+MD034: false
+# 某行如果emphasis的话，应该设置为标题
+MD036: false
+# ` some text`
+# `some text `
+# `some text`
+MD038: false
+# 第一行应该是一级header
+MD041: false
+# 专业名字应有正确的大小写，需要自定义指定专业名字（实在没必要）
+MD044: false
+# 文件结尾应该有一行空行
+MD047: false
+
+# 文档内跳转，找不到对应的toc会触发该规则（但是偶尔会抽风，所以加上该规则）
+# [markdownlint/md051.md · DavidAnson/markdownlint](https://github.com/DavidAnson/markdownlint/blob/main/doc/md051.md)
+# 统一使用span标签跳转，注释该规则
+# docs/zzz/running.md:159:96 MD051/link-fragments Link fragments should be valid [Context: "[运动安全](#运动
+MD051: false

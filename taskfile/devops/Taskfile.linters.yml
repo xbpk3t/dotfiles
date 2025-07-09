@@ -1,0 +1,82 @@
+---
+
+version: '3'
+
+vars:
+  CENTRAL_CONFIG_PATH: "{{.USER_WORKING_DIR}}/linters"
+  TARGET_DIR: "{{.USER_WORKING_DIR}}/.github/linters"
+
+tasks:
+  # TODO 之后是否需要做个config来处理不同项目和linters之间的映射关系？现在会把所有配置都同步到该repo里
+  default:
+    desc: 将中央配置同步到当前项目
+    cmds:
+      - echo "🔄 同步linter配置..."
+      - task: check
+      - mkdir -p "{{.TARGET_DIR}}"
+      - task: sync-config
+        vars:
+          CONFIG_TYPE: markdownlint
+      - task: sync-config
+        vars:
+          CONFIG_TYPE: yamllint
+      - task: sync-config
+        vars:
+          CONFIG_TYPE: golangci-lint
+      - echo "🎉 所有linter配置已同步完成"
+    silent: false
+
+  check:
+    internal: true
+    desc: 检查本地linter配置与中央配置的差异
+    vars:
+      DIFF_FILES: ""
+    cmds:
+      - echo "🔍 检查linter配置差异..."
+      - task: check-config
+        vars:
+          CONFIG_TYPE: markdownlint
+      - task: check-config
+        vars:
+          CONFIG_TYPE: yamllint
+      - task: check-config
+        vars:
+          CONFIG_TYPE: golangci-lint
+    silent: false
+
+  check-config:
+    internal: true
+    vars:
+      CENTRAL_FILE: "{{.CENTRAL_CONFIG_PATH}}/{{.CONFIG_TYPE}}.yml"
+      TARGET_FILE: "{{.TARGET_DIR}}/{{.CONFIG_TYPE}}.yml"
+    cmds:
+      - |
+        if [ ! -f "{{.CENTRAL_FILE}}" ]; then
+          echo "❌ 中央配置文件不存在: {{.CONFIG_TYPE}}.yml"
+          exit 1
+        fi
+
+        if [ ! -f "{{.TARGET_FILE}}" ]; then
+          echo "ℹ️ {{.CONFIG_TYPE}} 配置文件不存在，将会创建"
+          exit 0
+        fi
+
+        if ! diff -q "{{.TARGET_FILE}}" "{{.CENTRAL_FILE}}" >/dev/null 2>&1; then
+          echo "⚠️ {{.CONFIG_TYPE}} 配置与中央配置不一致"
+          echo "   请手动检查差异: diff {{.TARGET_FILE}} {{.CENTRAL_FILE}}"
+          exit 1
+        else
+          echo "✅ {{.CONFIG_TYPE}} 配置一致"
+        fi
+
+  sync-config:
+    internal: true
+    vars:
+      CENTRAL_FILE: "{{.CENTRAL_CONFIG_PATH}}/{{.CONFIG_TYPE}}.yml"
+      TARGET_FILE: "{{.TARGET_DIR}}/{{.CONFIG_TYPE}}.yml"
+    status:
+      - test ! -f "{{.CENTRAL_FILE}}"
+    cmds:
+      - echo "同步 {{.CONFIG_TYPE}} 配置..."
+      - cp "{{.CENTRAL_FILE}}" "{{.TARGET_FILE}}"
+      - echo "✅ {{.CONFIG_TYPE}} 配置已同步"
