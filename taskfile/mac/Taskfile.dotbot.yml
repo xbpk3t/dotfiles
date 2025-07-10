@@ -6,7 +6,7 @@ version: "3"
 
 tasks:
   # 修改dotbot配置之后，执行同步
-  apply:
+  default:
     cmd: dotbot -c install.conf.yaml
     dir: '{{.USER_WORKING_DIR}}'
 

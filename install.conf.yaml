@@ -27,3 +27,4 @@
     ~/.hammerspoon: .hammerspoon
     ~/taskfile: taskfile
     ~/Taskfile.yml: taskfile/Taskfile.yml
+    ~/.config/nix-darwin: nix-darwin

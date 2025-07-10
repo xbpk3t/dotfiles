@@ -1,0 +1,9 @@
+alfred
+android-platform-tools
+goland
+google-chrome
+hammerspoon
+hyperconnect
+mihomo-party
+tencent-lemon
+wechat
