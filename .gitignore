@@ -2,3 +2,6 @@
 .DS_Store
 .hammerspoon/.DS_Store
 /.hammerspoon/tasks_data.json
+
+# Nix store paths
+/nix/store/

@@ -1,0 +1,235 @@
+version: '3'
+
+# Nix-Darwin management tasks
+# Converted from rich-demo Justfile with additional migration functionality
+
+vars:
+  NIX_DARWIN_DIR: '{{.ROOT_DIR}}/../../nix-darwin'
+  HOSTNAME:
+    sh: scutil --get ComputerName | tr ' ' '-' | tr '[:upper:]' '[:lower:]'
+  SYSTEM:
+    sh: |
+      if [[ $(uname -m) == "arm64" ]]; then
+        echo "aarch64-darwin"
+      else
+        echo "x86_64-darwin"
+      fi
+  # Default cleanup days for maintenance tasks
+  CLEANUP_DAYS: '{{.CLEANUP_DAYS | default "7"}}'
+  # Nix store path
+  NIX_STORE_PATH: '/nix/store'
+  # System profile path
+  SYSTEM_PROFILE: '/nix/var/nix/profiles/system'
+
+tasks:
+  default:
+    desc: "List all nix-darwin tasks"
+    cmd: task --list-all
+    silent: true
+
+  # Darwin related commands
+  darwin-set-proxy:
+    desc: "Set proxy for faster nix builds (optional)"
+    dir: '{{.NIX_DARWIN_DIR}}'
+    cmds:
+      - |
+        if [ -f scripts/darwin_set_proxy.py ]; then
+          sudo python3 scripts/darwin_set_proxy.py
+        else
+          echo "Proxy script not found, skipping..."
+        fi
+    silent: true
+
+  darwin:
+    desc: "Build and switch to nix-darwin configuration"
+    dir: '{{.NIX_DARWIN_DIR}}'
+    deps: [darwin-set-proxy]
+    cmds:
+      - echo "🚀 Building nix-darwin configuration for {{.HOSTNAME}} ({{.SYSTEM}})..."
+      - nix build .#darwinConfigurations.{{.HOSTNAME}}.system --extra-experimental-features 'nix-command flakes'
+      - echo "🔄 Switching to new configuration..."
+      - sudo darwin-rebuild switch --flake .#{{.HOSTNAME}}
+      - echo "✅ nix-darwin configuration applied successfully!"
+
+  darwin-debug:
+    desc: "Build and switch with verbose output for debugging"
+    dir: '{{.NIX_DARWIN_DIR}}'
+    deps: [darwin-set-proxy]
+    cmds:
+      - echo "🐛 Building nix-darwin configuration with debug output..."
+      - nix build .#darwinConfigurations.{{.HOSTNAME}}.system --show-trace --verbose --extra-experimental-features 'nix-command flakes'
+      - echo "🔄 Switching with debug output..."
+      - sudo darwin-rebuild switch --flake .#{{.HOSTNAME}} --show-trace --verbose
+
+  # Migration tasks (from apply-migration.sh)
+  migrate:
+    desc: "Apply nix-darwin migration and cleanup Homebrew packages"
+    deps: [darwin]
+    cmds:
+      - task: cleanup-homebrew
+      - task: verify-migration
+
+  cleanup-homebrew:
+    desc: "Remove packages that have been migrated to nix"
+    vars:
+      PACKAGES_TO_REMOVE: "go gum helm neovim fzf atuin git"
+    cmds:
+      - echo "🧹 Cleaning up migrated Homebrew packages..."
+      - for: {var: PACKAGES_TO_REMOVE, split: ' '}
+        cmd: |
+          if brew list --formula | grep -q "^{{.ITEM}}$"; then
+            echo "  Removing {{.ITEM}}..."
+            brew uninstall "{{.ITEM}}" || echo "    Warning: Could not uninstall {{.ITEM}}"
+          else
+            echo "  {{.ITEM}} not installed, skipping"
+          fi
+      - echo "✅ Homebrew cleanup completed"
+
+  verify-migration:
+    desc: "Verify that migrated packages are working"
+    vars:
+      COMMANDS_TO_CHECK: "go gum helm nvim fzf atuin git"
+    cmds:
+      - echo "🔍 Verifying migration results..."
+      - echo "Checking nix packages:"
+      - for: {var: COMMANDS_TO_CHECK, split: ' '}
+        cmd: |
+          if command -v "{{.ITEM}}" >/dev/null 2>&1; then
+            echo "  ✅ {{.ITEM}}: $(which "{{.ITEM}}")"
+          else
+            echo "  ❌ {{.ITEM}}: not found"
+          fi
+      - task: verify-shell-config
+      - task: verify-system-config
+
+  verify-shell-config:
+    desc: "Verify shell configuration"
+    internal: true
+    cmds:
+      - echo "Checking shell configuration:"
+      - echo "  Current shell:" "$SHELL"
+      - echo "  zsh version:" "$(zsh --version 2>/dev/null || echo 'not found')"
+
+  verify-system-config:
+    desc: "Verify system configuration"
+    internal: true
+    cmds:
+      - echo "Checking system configuration:"
+      - echo "  Dock icon size:" "$(defaults read com.apple.dock tilesize 2>/dev/null || echo 'not set')"
+      - echo "  Finder show hidden files:" "$(defaults read com.apple.finder AppleShowAllFiles 2>/dev/null || echo 'not set')"
+
+  # Nix related commands
+  update:
+    desc: "Update all flake inputs"
+    dir: '{{.NIX_DARWIN_DIR}}'
+    cmds:
+      - nix flake update
+
+  update-input:
+    desc: "Update specific flake input (usage: task nix:update-input INPUT=nixpkgs)"
+    dir: '{{.NIX_DARWIN_DIR}}'
+    cmds:
+      - nix flake update "{{.INPUT}}"
+    requires:
+      vars: [INPUT]
+
+  history:
+    desc: "List all generations of the system profile"
+    cmds:
+      - nix profile history --profile /nix/var/nix/profiles/system
+
+  repl:
+    desc: "Open a nix repl with the flake"
+    dir: '{{.NIX_DARWIN_DIR}}'
+    cmds:
+      - nix repl -f flake:nixpkgs
+
+  clean:
+    desc: "Remove system generations older than specified days (default: 7)"
+    cmds:
+      - echo "🧹 Cleaning old system generations (older than {{.CLEANUP_DAYS}} days)..."
+      - sudo nix profile wipe-history --profile "{{.SYSTEM_PROFILE}}" --older-than "{{.CLEANUP_DAYS}}d"
+      - echo "✅ System generations cleaned"
+
+  clean-home:
+    desc: "Clean home-manager generations"
+    internal: true
+    cmds:
+      - echo "🧹 Cleaning home-manager generations..."
+      - nix profile wipe-history --profile ~/.local/state/nix/profiles/home-manager --older-than "{{.CLEANUP_DAYS}}d" 2>/dev/null || echo "No home-manager profile found"
+
+  gc:
+    desc: "Garbage collect unused nix store entries"
+    cmds:
+      - echo "🗑️  Running garbage collection (older than {{.CLEANUP_DAYS}} days)..."
+      - sudo nix-collect-garbage --delete-older-than "{{.CLEANUP_DAYS}}d"
+      - nix-collect-garbage --delete-older-than "{{.CLEANUP_DAYS}}d"
+      - echo "✅ Garbage collection completed"
+
+  optimize:
+    desc: "Optimize nix store to save disk space"
+    cmds:
+      - echo "🔧 Optimizing Nix store..."
+      - nix store optimise
+      - echo "✅ Store optimization completed"
+
+  disk-usage:
+    desc: "Show disk usage information"
+    cmds:
+      - echo "💾 Disk Usage Information:"
+      - echo "Nix store size:"
+      - du -sh "{{.NIX_STORE_PATH}}" 2>/dev/null || echo "  Could not read nix store size"
+      - echo "Home directory size:"
+      - du -sh ~ 2>/dev/null || echo "  Could not read home directory size"
+
+  maintenance:
+    desc: "Run full maintenance (clean + gc + optimize)"
+    deps: [disk-usage]
+    cmds:
+      - echo "🛠️  Running full maintenance..."
+      - task: clean
+      - task: clean-home
+      - task: gc
+      - task: optimize
+      - task: disk-usage
+      - echo "✅ Full maintenance completed"
+
+  fmt:
+    desc: "Format nix files in the repository"
+    dir: '{{.NIX_DARWIN_DIR}}'
+    cmds:
+      - nix fmt
+
+  gcroot:
+    desc: "Show all auto gc roots in the nix store"
+    cmds:
+      - ls -al /nix/var/nix/gcroots/auto/
+
+  # Utility tasks
+  info:
+    desc: "Show system information"
+    cmds:
+      - echo "System Information:"
+      - echo "  Hostname:" "{{.HOSTNAME}}"
+      - echo "  System:" "{{.SYSTEM}}"
+      - echo "  Nix-Darwin Dir:" "{{.NIX_DARWIN_DIR}}"
+      - echo "  Current User:" "$(whoami)"
+      - echo "  macOS Version:" "$(sw_vers -productVersion)"
+      - echo "  Nix Version:" "$(nix --version 2>/dev/null || echo 'not found')"
+
+  check-config:
+    desc: "Check nix-darwin configuration syntax"
+    dir: '{{.NIX_DARWIN_DIR}}'
+    cmds:
+      - echo "🔍 Checking configuration syntax..."
+      - nix flake check
+      - echo "✅ Configuration syntax is valid"
+
+#  status:
+#    desc: "Show comprehensive system status"
+#    silent: true
+#    cmds:
+#      - task: info
+#      - task: disk-usage
+#      - echo "Recent system generations:"
+#      - nix profile history --profile "{{.SYSTEM_PROFILE}}" | head -10 || echo "  Could not read system profile history"

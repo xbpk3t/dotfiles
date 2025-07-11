@@ -44,83 +44,11 @@ tasks:
 
   macos-config:
     # internal: true
-    desc: ⚙️ 配置 macOS 系统偏好设置
+    desc: ⚙️ 配置 macOS 系统偏好设置 (已迁移到 nix-darwin)
     cmds:
-      - task: macos-dock
-      - task: macos-finder
-      - task: macos-keyboard
-      - task: macos-trackpad
-      - task: macos-security
+      - echo "⚠️  macOS 系统配置已迁移到 nix-darwin"
+      - echo "请运行 darwin-rebuild switch --flake ~/.config/nix-darwin"
 
-  macos-dock:
-    desc: 🎯 配置 Dock 设置
-    internal: true
-    cmds:
-      - echo "🎯 配置 Dock..."
-      # 设置 Dock 图标大小
-      - defaults write com.apple.dock tilesize -int 4
-      # 启用 Dock 放大效果
-      - defaults write com.apple.dock magnification -bool false
-      - defaults write com.apple.dock largesize -int 32
-      # 设置 Dock 位置到左侧
-      - defaults write com.apple.dock orientation -string "left"
-      # 自动隐藏 Dock
-      - defaults write com.apple.dock autohide -bool true
-      - defaults write com.apple.dock autohide-delay -float 0
-      # 移除所有默认应用
-      - defaults write com.apple.dock persistent-apps -array
-      # 重启 Dock
-      - killall Dock
-
-  macos-finder:
-    desc: 📁 配置 Finder 设置
-    internal: true
-    cmds:
-      - echo "📁 配置 Finder..."
-      # 显示隐藏文件
-      - defaults write com.apple.finder AppleShowAllFiles -bool true
-      # 显示文件扩展名
-      - defaults write NSGlobalDomain AppleShowAllExtensions -bool true
-      # 显示路径栏
-      - defaults write com.apple.finder ShowPathbar -bool true
-      # 显示状态栏
-      - defaults write com.apple.finder ShowStatusBar -bool true
-      # 默认搜索当前文件夹
-      - defaults write com.apple.finder FXDefaultSearchScope -string "SCcf"
-      # 避免在网络卷上创建 .DS_Store 文件
-      - defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
-      # 重启 Finder
-      - killall Finder
-
-  macos-keyboard:
-    desc: ⌨️ 配置键盘设置
-    internal: true
-    cmds:
-      - echo "⌨️ 配置键盘..."
-      # 设置键盘重复速度
-      - defaults write NSGlobalDomain KeyRepeat -int 2
-      - defaults write NSGlobalDomain InitialKeyRepeat -int 15
-      # 启用全键盘访问
-      - defaults write NSGlobalDomain AppleKeyboardUIMode -int 3
-
-  macos-trackpad:
-    desc: 🖱️ 配置触控板设置
-    internal: true
-    cmds:
-      - echo "🖱️ 配置触控板..."
-      # 启用轻点点击
-      - defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool true
-      - defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
-      # 启用三指拖拽
-      - defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerDrag -bool true
-
-  macos-security:
-    desc: 🔒 配置安全设置
-    internal: true
-    cmds:
-      - echo "🔒 配置安全设置..."
-      # 要求密码立即生效
-      - defaults write com.apple.screensaver askForPassword -int 1
-      - defaults write com.apple.screensaver askForPasswordDelay -int 0
-      # 启用防火墙
-      - sudo defaults write /Library/Preferences/com.apple.alf globalstate -int 1
+# macOS 配置任务已迁移到 nix-darwin
+# 这些任务现在通过 nix-darwin 的 system.defaults 配置
+# 运行 darwin-rebuild switch --flake ~/.config/nix-darwin 来应用配置
