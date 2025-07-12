@@ -2,7 +2,7 @@
 
 {
   environment.systemPackages = with pkgs; [
-    # Go 语言
+    # Go 语言工具
     # go - 由 home-manager 管理
     gofumpt
     golangci-lint
@@ -26,7 +26,7 @@
     # Rust
     rustup
 
-    # 其他语言工具
+    # 编译工具链
     gcc
     clang-tools
     nasm
@@ -40,12 +40,9 @@
     tailwindcss
     tailwindcss-language-server
 
+    # 其他语言
     # php
-
-    # Elixir
     # elixir
-
-    # Android 开发
     # android-tools
   ];
 }

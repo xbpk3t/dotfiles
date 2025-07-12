@@ -14,9 +14,10 @@
     # 文件处理
     tree
     bat
-    eza
     fd
     ripgrep
+    file
+    which
 
     # 系统监控
     # htop
@@ -36,5 +37,10 @@
     # 其他实用工具
     watch
     rsync
+    cowsay
+
+    # 基础开发工具
+    go
+    gum
   ];
 }

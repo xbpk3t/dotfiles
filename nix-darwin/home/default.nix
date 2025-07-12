@@ -1,8 +1,9 @@
-{ username, ... }:
+{ username, inputs, ... }:
 
 {
   # import sub modules
   imports = [
+    inputs.nixvim.homeManagerModules.nixvim
     ./shell.nix
     ./core.nix
     ./git.nix

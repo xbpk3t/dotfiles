@@ -24,7 +24,6 @@ includes:
   k8s: taskfile/k8s/Taskfile.k8s.yml
 
   mac: taskfile/mac/Taskfile.mac.yml
-  mac-setup: taskfile/mac/Taskfile.mac-setup.yml
   mac-cleanup: taskfile/mac/Taskfile.mac-cleanup.yml
   brew: taskfile/mac/Taskfile.brew.yml
   dotbot: taskfile/mac/Taskfile.dotbot.yml

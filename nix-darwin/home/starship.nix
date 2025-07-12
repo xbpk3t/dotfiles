@@ -20,44 +20,6 @@
         truncation_length = 3;
         truncation_symbol = "…/";
       };
-
-      # Git configuration
-      git_branch = {
-        symbol = "🌱 ";
-        truncation_length = 20;
-        truncation_symbol = "…";
-      };
-
-      git_status = {
-        conflicted = "🏳";
-        ahead = "🏎💨";
-        behind = "😰";
-        diverged = "😵";
-        up_to_date = "✓";
-        untracked = "🤷";
-        stashed = "📦";
-        modified = "📝";
-        staged = "[++\($count\)](green)";
-        renamed = "👅";
-        deleted = "🗑";
-      };
-
-      # Language-specific configurations
-      golang = {
-        symbol = "🐹 ";
-      };
-
-      nodejs = {
-        symbol = "⬢ ";
-      };
-
-      python = {
-        symbol = "🐍 ";
-      };
-
-      rust = {
-        symbol = "🦀 ";
-      };
     };
   };
 }

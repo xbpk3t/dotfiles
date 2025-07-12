@@ -16,12 +16,18 @@
       ".." = "cd ..";
       "..." = "cd ../..";
       # modern replacements
-      ls = "eza";
       cat = "bat";
       find = "fd";
       grep = "rg";
       vim = "LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 nvim";
+      # zensh style aliases
+      c = "clear";
     };
+    # 启用zsh插件
+    autosuggestion.enable = true;
+    enableCompletion = true;
+    syntaxHighlighting.enable = true;
+
     initContent = ''
       # ===== UTF-8 编码设置 =====
       export LANG=en_US.UTF-8
@@ -37,10 +43,7 @@
         source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
       fi
 
-      # Initialize atuin for shell history
-      if command -v atuin >/dev/null 2>&1; then
-        eval "$(atuin init zsh)"
-      fi
+
 
       # Environment variables
       ZSH_DISABLE_COMPFIX=true
@@ -61,7 +64,7 @@
       # ===== 键盘绑定 =====
       bindkey -e
 
-      # Keybindings
+      # Keybindings (zensh style)
       bindkey '^p' history-search-backward
       bindkey '^n' history-search-forward
       bindkey '^[w' kill-region
@@ -118,6 +121,20 @@
       enable = true;
       hidden = true;
       ignores = [".git/" "node_modules/"];
+    };
+
+    # Atuin shell history
+    atuin = {
+      enable = true;
+      enableZshIntegration = true;
+      settings = {
+        auto_sync = true;
+        sync_frequency = "5m";
+        search_mode = "prefix";
+        filter_mode = "global";
+        style = "compact";
+        inline_height = 40;
+      };
     };
   };
 }

@@ -39,6 +39,12 @@
 
     # Keep nix-homebrew for compatibility
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
+
+    # nixvim for neovim configuration
+    nixvim = {
+      url = "github:nix-community/nixvim";
+      inputs.nixpkgs.follows = "nixpkgs-darwin";
+    };
   };
 
   # The `outputs` function will return all the build results of the flake.
@@ -52,6 +58,7 @@
     darwin,
     home-manager,
     nix-homebrew,
+    nixvim,
     ...
   }: let
     # User configuration - with fallback for build environment
@@ -62,26 +69,18 @@
     # Hostname - update this to match your system's hostname (run `hostname` to check)
     hostname = "lHGtQdeMacBook-Pro-2";
 
-    specialArgs =
-      inputs
-      // {
-        inherit username useremail hostname;
-      };
+    specialArgs = {
+      inherit inputs username useremail hostname;
+    };
   in {
     darwinConfigurations."${hostname}" = darwin.lib.darwinSystem {
       inherit system specialArgs;
       modules = [
         ./modules/nix-core.nix
         ./modules/system.nix
-        ./modules/apps.nix
         ./modules/homebrew.nix
         ./modules/host-users.nix
-        ./modules/development.nix
-        ./modules/utilities.nix
-        ./modules/networking.nix
-        ./modules/security.nix
-        ./modules/languages.nix
-        ./modules/media.nix
+        ./pkg
 
         # nix-homebrew integration
         nix-homebrew.darwinModules.nix-homebrew

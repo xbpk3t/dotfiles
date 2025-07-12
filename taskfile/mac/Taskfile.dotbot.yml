@@ -5,13 +5,13 @@ version: "3"
 
 
 tasks:
-  # 修改dotbot配置之后，执行同步
   default:
+    desc: 修改dotbot配置之后，执行同步
     cmd: dotbot -c install.conf.yaml
     dir: '{{.USER_WORKING_DIR}}'
 
   clone:
-    desc: 📥 克隆或更新 dotfiles 仓库
+    desc: 克隆或更新 dotfiles 仓库
     internal: true
     cmds:
       - |
