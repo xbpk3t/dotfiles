@@ -197,3 +197,115 @@ tasks:
   # [composerize/composerize：🏃→ 🎼 docker 运行 asdlksjfksdf > docker-composerize up --- composerize/composerize: 🏃→🎼 docker run asdlksjfksdf > docker-composerize up](https://github.com/composerize/composerize)
   composerize:
     desc: 把 Dockerfile 转为 dc
+
+
+
+
+  # 容器内存占用查看任务
+  # 如何查看 docker 容器的内存占用？
+  check-mem:
+    silent: true
+    desc: 查看指定容器的内存占用详情
+    cmd: |
+      CONTAINER_NAME={{.CLI_ARGS}}
+      if [ -z "$CONTAINER_NAME" ]; then
+        echo "错误：请提供容器名称作为参数"
+        exit 1
+      fi
+
+      # 获取容器完整ID
+      CONTAINER_ID=$(docker inspect -f '{{.Id}}' $CONTAINER_NAME)
+
+      # 内存指标路径
+      MEM_PATH="/sys/fs/cgroup/memory/docker/$CONTAINER_ID"
+
+      # 读取内存指标
+      USED_BYTES=$(cat $MEM_PATH/memory.usage_in_bytes)
+      LIMIT_BYTES=$(cat $MEM_PATH/memory.limit_in_bytes)
+      MAX_USED=$(cat $MEM_PATH/memory.max_usage_in_bytes)
+
+      # 转换为可读格式
+      USED_READABLE=$(numfmt --to=iec-i --suffix=B $USED_BYTES)
+      LIMIT_READABLE=$(numfmt --to=iec-i --suffix=B $LIMIT_BYTES)
+      MAX_READABLE=$(numfmt --to=iec-i --suffix=B $MAX_USED)
+      PERCENT=$(awk "BEGIN {printf \"%.1f\", $USED_BYTES/$LIMIT_BYTES*100}")
+
+      echo "容器: $CONTAINER_NAME (ID: ${CONTAINER_ID:0:12})"
+      echo "当前用量: $USED_READABLE"
+      echo "峰值用量: $MAX_READABLE"
+      echo "内存限制: $LIMIT_READABLE"
+      echo "使用率: $PERCENT%"
+
+
+
+  # 容器CPU利用率计算任务
+  # [如何正确获取容器的CPU利用率？ - 开发内功修炼@张彦飞 - 分享我的技术日常思考，和大伙儿一起共同成长！](https://kfngxl.cn/index.php/archives/642/) 这个问题有两个解决思路。思路之一是使用 lxcfs，将容器中的 /proc/stat 替换掉。这样 top 等命令就不再显示的是宿主机的 cpu 利用率了，而是容器的。思路之二是直接使用 cgroup 提供的伪文件来进行统计，这些伪文件一般位于 /sys/fs/cgroup/... 路径。kubelet 中集成的 cadvisor 就是采用上述方案来上报容器 cpu 利用率的打点信息的。
+  # 容器 cpu 使用率的指标项为什么比物理机上少了 nice/irq/softirq？ # 这个问题的根本原因是容器 cpu 利用率的指标项 user、system 和宿主机的同名指标项根本就不是一个东西。容器将所有用户态时间都记录到了 user 指标项，系统态时间都记录到了 system。容器中的 user 指标：在指标含义上等同于宿主机的 user + nice 容器中的 system 指标：在指标含义上等同于宿主机的 system + irq + softirq
+  check-cpu:
+    silent: true
+    desc: 计算容器CPU利用率（采样1秒）
+    cmd: |
+      CONTAINER_NAME={{.CLI_ARGS}}
+      if [ -z "$CONTAINER_NAME" ]; then
+        echo "错误：请提供容器名称作为参数"
+        exit 1
+      fi
+
+      # 获取容器完整ID
+      CONTAINER_ID=$(docker inspect -f '{{.Id}}' $CONTAINER_NAME)
+
+      # CPU指标路径
+      CPU_PATH="/sys/fs/cgroup/cpu/docker/$CONTAINER_ID"
+
+      # 获取系统CPU核心数
+      CPU_CORES=$(nproc)
+
+      # 记录起始CPU时间
+      START_CPU=$(cat $CPU_PATH/cpuacct.usage)
+      sleep 1
+      END_CPU=$(cat $CPU_PATH/cpuacct.usage)
+
+      # 计算差值（纳秒）
+      CPU_DELTA=$((END_CPU - START_CPU))
+
+      # 计算公式：((ΔCPU时间 / 1000000000) / CPU核心数) * 100%
+      USAGE_PERCENT=$(awk "BEGIN {printf \"%.1f\", ($CPU_DELTA / 1000000000 / $CPU_CORES) * 100}")
+
+      echo "容器: $CONTAINER_NAME (ID: ${CONTAINER_ID:0:12})"
+      echo "采样周期: 1 秒"
+      echo "CPU 核心: $CPU_CORES"
+      echo "CPU 利用率: $USAGE_PERCENT%"
+
+
+  # docker 里怎么抓包？ # 三条命令，先docker inspect获取容器id，然后 nsenter进入容器空间，最后用tcpdump抓包指定网卡
+  capture:
+    desc: 在Docker容器网络命名空间中抓包
+    env:
+      # 默认抓包参数，可被覆盖
+      TCPDUMP_ARGS: '-i eth0 -w capture.pcap'
+    cmds:
+      # 获取容器PID
+      - |
+        set -e
+        if ! docker inspect "{{.CONTAINER}}" &>/dev/null; then
+          echo "错误：容器 '{{.CONTAINER}}' 不存在或未运行"
+          exit 1
+        fi
+        export PID=$(docker inspect -f '{{.State.Pid}}' "{{.CONTAINER}}")
+
+      # 执行抓包
+      - |
+        echo "在容器 {{.CONTAINER}} 的网络空间抓包(CTRL+C停止)..."
+        echo "参数: {{.TCPDUMP_ARGS}}"
+        nsenter -t $PID -n tcpdump {{.TCPDUMP_ARGS}}
+    silent: true
+    sources:
+      # 添加环境文件支持
+      - .env
+
+
+    # 检查容器状态的辅助任务
+    check:
+      desc: 检查容器是否存在
+      cmds:
+        - docker inspect {{.CONTAINER}}

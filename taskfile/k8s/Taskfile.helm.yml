@@ -1,38 +1,436 @@
 ---
 version: "3"
 
-#- helm completion
-#- helm create
-#- helm dependency
-#- helm env
-#- helm install <bitnami/mysql> # 安装指定服务
-#- helm uninstall
-#- helm lint
-#- helm ls # helm list 的 alias
-#- helm package # 把Chart目录打包为Chart归档文件
-#- helm pull
-#- helm push
-#- helm registry
-#- helm show [chart|crds|readme|values|all] <bitnami/mysql> # 获取Chart相关信息
-#- helm get [hooks|manifest|notes|values|all] # 获取Release相关信息
-#- helm status # 用来追踪release状态 helm status happy-panda
-#- helm template
-#- helm upgrade
-#- helm verify
-#- helm search # helm search repo bitnami
-#- helm repo list
-#- helm repo add <name> <url> # 添加chart仓库
-#- helm repo update # 确保我们拿到最新的charts列表
-#- helm history # 查看某个Release的版本记录
-#- helm rollback # 把某个Release回滚到某个版本
-#- helm plugin [install|uninstall|update] <pkg> # helm plugin update dashboard
-#- helm plugin list
-#- helm completion [bash|fish|powershell|zsh] # 为指定的shell生成自动补全脚本
-#- helm registry [login|logout] # 登录或登出注册表
-#- helm diff upgrade my-release stable/postgresql --values values.yaml # databus23/helm-diff, used to show a diff explaining what a helm upgrade would change
+# Helm Taskfile - Comprehensive Helm ecosystem automation
+# Covers: helm, helmfile, chart-releaser, helm-diff
+#
+# Tools:
+# - helm: https://helm.sh/ - Kubernetes package manager
+# - helmfile: https://github.com/helmfile/helmfile - Deploy multiple charts with environment management
+# - chart-releaser: https://github.com/helm/chart-releaser - Host Helm Charts via GitHub Pages and Releases
+# - helm-diff: https://github.com/databus23/helm-diff - Preview helm upgrade changes
 
+vars:
+  CHART_DIR: "charts"
+  VALUES_FILE: "values.yaml"
+  NAMESPACE: "default"
+  RELEASE_NAME: "{{.CLI_ARGS}}"
+  CHART_NAME: "{{.CLI_ARGS}}"
+  REPO_NAME: "{{.CLI_ARGS}}"
+  REPO_URL: "{{.CLI_ARGS}}"
+  GITHUB_OWNER: "{{.GITHUB_OWNER}}"
+  GITHUB_REPO: "{{.GITHUB_REPO}}"
+  GITHUB_TOKEN: "{{.GITHUB_TOKEN}}"
 
+tasks:
+  default:
+    desc: "显示可用的 Helm 相关任务"
+    cmd: task --list-all
 
-#- helmfile apply
-#- helmfile build
-#- helmfile list
+  # ========================
+  # Helm Repository Management
+  # ========================
+  repo:add:
+    desc: "添加 Helm 仓库"
+    cmds:
+      - helm repo add {{.REPO_NAME}} {{.REPO_URL}}
+      - helm repo update
+      - echo "✅ 仓库 {{.REPO_NAME}} 添加成功"
+    requires:
+      vars: [REPO_NAME, REPO_URL]
+
+  repo:update:
+    desc: "更新所有 Helm 仓库"
+    cmds:
+      - helm repo update
+      - echo "✅ 所有仓库更新完成"
+
+  repo:list:
+    desc: "列出已添加的 Helm 仓库"
+    cmd: helm repo list
+
+  repo:remove:
+    desc: "移除 Helm 仓库"
+    cmds:
+      - helm repo remove {{.REPO_NAME}}
+      - echo "✅ 仓库 {{.REPO_NAME}} 移除成功"
+    requires:
+      vars: [REPO_NAME]
+
+  # ========================
+  # Chart Development & Management
+  # ========================
+  chart:create:
+    desc: "创建新的 Helm Chart"
+    cmds:
+      - helm create {{.CHART_NAME}}
+      - echo "✅ Chart {{.CHART_NAME}} 创建成功"
+    requires:
+      vars: [CHART_NAME]
+
+  chart:lint:
+    desc: "检查 Chart 语法和最佳实践"
+    cmds:
+      - helm lint {{.CHART_DIR}}/{{.CHART_NAME}}
+      - echo "✅ Chart {{.CHART_NAME}} 语法检查完成"
+    requires:
+      vars: [CHART_NAME]
+
+  chart:package:
+    desc: "打包 Chart 为 .tgz 文件"
+    cmds:
+      - helm package {{.CHART_DIR}}/{{.CHART_NAME}}
+      - echo "✅ Chart {{.CHART_NAME}} 打包完成"
+    requires:
+      vars: [CHART_NAME]
+
+  chart:template:
+    desc: "渲染 Chart 模板（不部署）"
+    cmds:
+      - helm template {{.RELEASE_NAME}} {{.CHART_DIR}}/{{.CHART_NAME}} --values {{.VALUES_FILE}} --namespace {{.NAMESPACE}}
+    requires:
+      vars: [RELEASE_NAME, CHART_NAME]
+
+  chart:dependency:
+    desc: "管理 Chart 依赖"
+    cmds:
+      - helm dependency update {{.CHART_DIR}}/{{.CHART_NAME}}
+      - echo "✅ Chart {{.CHART_NAME}} 依赖更新完成"
+    requires:
+      vars: [CHART_NAME]
+
+  # ========================
+  # Release Management
+  # ========================
+  install:
+    desc: "安装 Helm Release"
+    cmds:
+      - task: _validate-release-params
+      - helm install {{.RELEASE_NAME}} {{.CHART_DIR}}/{{.CHART_NAME}} --values {{.VALUES_FILE}} --namespace {{.NAMESPACE}} --create-namespace
+      - echo "✅ Release {{.RELEASE_NAME}} 安装成功"
+    requires:
+      vars: [RELEASE_NAME, CHART_NAME]
+
+  upgrade:
+    desc: "升级 Helm Release"
+    cmds:
+      - task: _validate-release-params
+      - helm upgrade {{.RELEASE_NAME}} {{.CHART_DIR}}/{{.CHART_NAME}} --values {{.VALUES_FILE}} --namespace {{.NAMESPACE}}
+      - echo "✅ Release {{.RELEASE_NAME}} 升级成功"
+    requires:
+      vars: [RELEASE_NAME, CHART_NAME]
+
+  uninstall:
+    desc: "卸载 Helm Release"
+    cmds:
+      - helm uninstall {{.RELEASE_NAME}} --namespace {{.NAMESPACE}}
+      - echo "✅ Release {{.RELEASE_NAME}} 卸载成功"
+    requires:
+      vars: [RELEASE_NAME]
+
+  list:
+    desc: "列出所有 Helm Releases"
+    cmd: helm list --all-namespaces
+
+  status:
+    desc: "查看 Release 状态"
+    cmds:
+      - helm status {{.RELEASE_NAME}} --namespace {{.NAMESPACE}}
+    requires:
+      vars: [RELEASE_NAME]
+
+  history:
+    desc: "查看 Release 历史版本"
+    cmds:
+      - helm history {{.RELEASE_NAME}} --namespace {{.NAMESPACE}}
+    requires:
+      vars: [RELEASE_NAME]
+
+  rollback:
+    desc: "回滚 Release 到指定版本"
+    cmds:
+      - helm rollback {{.RELEASE_NAME}} {{.REVISION}} --namespace {{.NAMESPACE}}
+      - echo "✅ Release {{.RELEASE_NAME}} 回滚到版本 {{.REVISION}} 成功"
+    requires:
+      vars: [RELEASE_NAME, REVISION]
+
+  # ========================
+  # Internal Helper Tasks
+  # ========================
+  _validate-release-params:
+    internal: true
+    desc: "验证 Release 参数"
+    cmds:
+      - 'test -n "{{.RELEASE_NAME}}" || (echo "错误: RELEASE_NAME 不能为空" && exit 1)'
+      - 'test -n "{{.CHART_NAME}}" || (echo "错误: CHART_NAME 不能为空" && exit 1)'
+      - 'test -f "{{.VALUES_FILE}}" || echo "警告: VALUES_FILE {{.VALUES_FILE}} 不存在，将使用默认值"'
+    silent: true
+
+  # ========================
+  # Helm Plugin Management
+  # ========================
+  plugin:install:
+    desc: "安装 Helm 插件"
+    cmds:
+      - helm plugin install {{.PLUGIN_URL}}
+      - echo "✅ 插件安装成功"
+    requires:
+      vars: [PLUGIN_URL]
+
+  plugin:list:
+    desc: "列出已安装的 Helm 插件"
+    cmd: helm plugin list
+
+  plugin:update:
+    desc: "更新 Helm 插件"
+    cmds:
+      - helm plugin update {{.PLUGIN_NAME}}
+      - echo "✅ 插件 {{.PLUGIN_NAME}} 更新成功"
+    requires:
+      vars: [PLUGIN_NAME]
+
+  plugin:uninstall:
+    desc: "卸载 Helm 插件"
+    cmds:
+      - helm plugin uninstall {{.PLUGIN_NAME}}
+      - echo "✅ 插件 {{.PLUGIN_NAME}} 卸载成功"
+    requires:
+      vars: [PLUGIN_NAME]
+
+  # ========================
+  # Helm-Diff Plugin Tasks
+  # ========================
+  diff:install:
+    desc: "安装 helm-diff 插件"
+    cmds:
+      - helm plugin install https://github.com/databus23/helm-diff
+      - echo "✅ helm-diff 插件安装成功"
+    status:
+      - helm plugin list | grep -q diff
+
+  diff:upgrade:
+    desc: "预览 helm upgrade 会产生的变化"
+    deps: [diff:install]
+    cmds:
+      - task: _validate-release-params
+      - helm diff upgrade {{.RELEASE_NAME}} {{.CHART_DIR}}/{{.CHART_NAME}} --values {{.VALUES_FILE}} --namespace {{.NAMESPACE}} --color
+    requires:
+      vars: [RELEASE_NAME, CHART_NAME]
+
+  diff:release:
+    desc: "比较两个 Release 的差异"
+    deps: [diff:install]
+    cmds:
+      - helm diff release {{.RELEASE1}} {{.RELEASE2}} --namespace {{.NAMESPACE}} --color
+    requires:
+      vars: [RELEASE1, RELEASE2]
+
+  diff:revision:
+    desc: "比较 Release 的不同版本"
+    deps: [diff:install]
+    cmds:
+      - helm diff revision {{.RELEASE_NAME}} {{.REVISION1}} {{.REVISION2}} --namespace {{.NAMESPACE}} --color
+    requires:
+      vars: [RELEASE_NAME, REVISION1, REVISION2]
+
+  diff:rollback:
+    desc: "预览 helm rollback 会产生的变化"
+    deps: [diff:install]
+    cmds:
+      - helm diff rollback {{.RELEASE_NAME}} {{.REVISION}} --namespace {{.NAMESPACE}} --color
+    requires:
+      vars: [RELEASE_NAME, REVISION]
+
+  # ========================
+  # Helmfile Tasks
+  # ========================
+  helmfile:install:
+    desc: "安装 helmfile"
+    cmds:
+      - |
+        if ! command -v helmfile &> /dev/null; then
+          echo "正在安装 helmfile..."
+          if [[ "$OSTYPE" == "darwin"* ]]; then
+            brew install helmfile
+          else
+            curl -L https://github.com/helmfile/helmfile/releases/latest/download/helmfile_linux_amd64.tar.gz | tar xz
+            sudo mv helmfile /usr/local/bin/
+          fi
+          echo "✅ helmfile 安装成功"
+        else
+          echo "✅ helmfile 已安装"
+        fi
+    status:
+      - command -v helmfile
+
+  helmfile:apply:
+    desc: "应用 helmfile 配置"
+    deps: [helmfile:install]
+    cmds:
+      - task: _validate-helmfile
+      - helmfile apply --environment {{.ENVIRONMENT | default "default"}}
+      - echo "✅ Helmfile 应用成功"
+
+  helmfile:sync:
+    desc: "同步 helmfile 状态"
+    deps: [helmfile:install]
+    cmds:
+      - task: _validate-helmfile
+      - helmfile sync --environment {{.ENVIRONMENT | default "default"}}
+      - echo "✅ Helmfile 同步成功"
+
+  helmfile:destroy:
+    desc: "销毁 helmfile 管理的资源"
+    deps: [helmfile:install]
+    cmds:
+      - task: _validate-helmfile
+      - helmfile destroy --environment {{.ENVIRONMENT | default "default"}}
+      - echo "✅ Helmfile 资源销毁成功"
+
+  helmfile:diff:
+    desc: "显示 helmfile 变更预览"
+    deps: [helmfile:install, diff:install]
+    cmds:
+      - task: _validate-helmfile
+      - helmfile diff --environment {{.ENVIRONMENT | default "default"}} --color
+
+  helmfile:template:
+    desc: "渲染 helmfile 模板"
+    deps: [helmfile:install]
+    cmds:
+      - task: _validate-helmfile
+      - helmfile template --environment {{.ENVIRONMENT | default "default"}}
+
+  helmfile:list:
+    desc: "列出 helmfile 管理的 releases"
+    deps: [helmfile:install]
+    cmds:
+      - task: _validate-helmfile
+      - helmfile list --environment {{.ENVIRONMENT | default "default"}}
+
+  # ========================
+  # Chart Releaser Tasks
+  # ========================
+  cr:install:
+    desc: "安装 chart-releaser"
+    cmds:
+      - |
+        if ! command -v cr &> /dev/null; then
+          echo "正在安装 chart-releaser..."
+          if [[ "$OSTYPE" == "darwin"* ]]; then
+            brew install chart-releaser
+          else
+            curl -sSLo cr.tar.gz "https://github.com/helm/chart-releaser/releases/latest/download/chart-releaser_$(uname -s)_$(uname -m).tar.gz"
+            tar -xzf cr.tar.gz
+            sudo mv cr /usr/local/bin/
+            rm cr.tar.gz
+          fi
+          echo "✅ chart-releaser 安装成功"
+        else
+          echo "✅ chart-releaser 已安装"
+        fi
+    status:
+      - command -v cr
+
+  cr:package:
+    desc: "打包 Charts 用于发布"
+    deps: [cr:install]
+    cmds:
+      - task: _validate-cr-params
+      - cr package {{.CHART_DIR}}
+      - echo "✅ Charts 打包完成"
+
+  cr:upload:
+    desc: "上传 Chart 包到 GitHub Releases"
+    deps: [cr:install]
+    cmds:
+      - task: _validate-cr-params
+      - cr upload --owner {{.GITHUB_OWNER}} --git-repo {{.GITHUB_REPO}} --token {{.GITHUB_TOKEN}} --skip-existing
+      - echo "✅ Charts 上传到 GitHub Releases 成功"
+
+  cr:index:
+    desc: "生成 Chart 仓库索引"
+    deps: [cr:install]
+    cmds:
+      - task: _validate-cr-params
+      - cr index --owner {{.GITHUB_OWNER}} --git-repo {{.GITHUB_REPO}} --token {{.GITHUB_TOKEN}} --push
+      - echo "✅ Chart 仓库索引生成成功"
+
+  cr:release:
+    desc: "完整的 Chart 发布流程"
+    deps: [cr:install]
+    cmds:
+      - task: cr:package
+      - task: cr:upload
+      - task: cr:index
+      - echo "✅ Chart 发布流程完成"
+
+  # ========================
+  # Composite Workflow Tasks
+  # ========================
+  deploy:
+    desc: "完整的部署流程（lint -> diff -> install/upgrade）"
+    cmds:
+      - task: chart:lint
+      - task: diff:upgrade
+      - |
+        if helm list -n {{.NAMESPACE}} | grep -q {{.RELEASE_NAME}}; then
+          task upgrade
+        else
+          task install
+        fi
+      - task: status
+    requires:
+      vars: [RELEASE_NAME, CHART_NAME]
+
+  dev:setup:
+    desc: "开发环境设置（安装必要工具）"
+    cmds:
+      - task: diff:install
+      - task: helmfile:install
+      - task: cr:install
+      - echo "✅ 开发环境设置完成"
+
+  search:
+    desc: "搜索 Helm Charts"
+    cmds:
+      - helm search repo {{.SEARCH_TERM}}
+    requires:
+      vars: [SEARCH_TERM]
+
+  show:
+    desc: "显示 Chart 信息"
+    cmds:
+      - helm show chart {{.CHART_NAME}}
+      - echo "---"
+      - helm show values {{.CHART_NAME}}
+    requires:
+      vars: [CHART_NAME]
+
+  # ========================
+  # Additional Helper Tasks
+  # ========================
+  _validate-helmfile:
+    internal: true
+    desc: "验证 helmfile 配置"
+    cmds:
+      - 'test -f "helmfile.yaml" || (echo "错误: helmfile.yaml 不存在" && exit 1)'
+    silent: true
+
+  _validate-cr-params:
+    internal: true
+    desc: "验证 Chart Releaser 参数"
+    cmds:
+      - 'test -n "{{.GITHUB_OWNER}}" || (echo "错误: GITHUB_OWNER 不能为空" && exit 1)'
+      - 'test -n "{{.GITHUB_REPO}}" || (echo "错误: GITHUB_REPO 不能为空" && exit 1)'
+      - 'test -n "{{.GITHUB_TOKEN}}" || (echo "错误: GITHUB_TOKEN 不能为空" && exit 1)'
+      - 'test -d "{{.CHART_DIR}}" || (echo "错误: CHART_DIR {{.CHART_DIR}} 不存在" && exit 1)'
+    silent: true
+
+  _check-tools:
+    internal: true
+    desc: "检查必要工具是否安装"
+    cmds:
+      - 'command -v helm >/dev/null 2>&1 || (echo "错误: helm 未安装" && exit 1)'
+      - echo "✅ 工具检查通过"
+    silent: true
