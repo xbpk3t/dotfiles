@@ -23,27 +23,10 @@ vars:
 
 tasks:
   default:
-    desc: "List all nix-darwin tasks"
-    cmd: task --list-all
-    silent: true
-
-  # Darwin related commands
-  darwin-set-proxy:
-    desc: "Set proxy for faster nix builds (optional)"
-    dir: '{{.NIX_DARWIN_DIR}}'
-    cmds:
-      - |
-        if [ -f scripts/darwin_set_proxy.py ]; then
-          sudo python3 scripts/darwin_set_proxy.py
-        else
-          echo "Proxy script not found, skipping..."
-        fi
-    silent: true
 
   darwin:
     desc: "Build and switch to nix-darwin configuration"
     dir: '{{.NIX_DARWIN_DIR}}'
-    deps: [darwin-set-proxy]
     cmds:
       - echo "🚀 Building nix-darwin configuration for {{.HOSTNAME}} ({{.SYSTEM}})..."
       - nix build .#darwinConfigurations.{{.HOSTNAME}}.system --extra-experimental-features 'nix-command flakes'
@@ -54,7 +37,6 @@ tasks:
   darwin-debug:
     desc: "Build and switch with verbose output for debugging"
     dir: '{{.NIX_DARWIN_DIR}}'
-    deps: [darwin-set-proxy]
     cmds:
       - echo "🐛 Building nix-darwin configuration with debug output..."
       - nix build .#darwinConfigurations.{{.HOSTNAME}}.system --show-trace --verbose --extra-experimental-features 'nix-command flakes'

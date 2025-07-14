@@ -2,17 +2,6 @@
 
 {
   environment.systemPackages = with pkgs; [
-    # 版本控制
-    # git - 由 home-manager 管理
-    gh
-    git-lfs
-    git-quick-stats
-    gitleaks
-    gitlint
-    bfg-repo-cleaner
-    ugit
-    git-who
-
     # 构建和任务工具
     go-task
     dotbot

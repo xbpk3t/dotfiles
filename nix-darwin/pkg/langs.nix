@@ -3,7 +3,8 @@
 {
   environment.systemPackages = with pkgs; [
     # Go 语言工具
-    # go - 由 home-manager 管理
+    go
+    gum
     gofumpt
     golangci-lint
     goreleaser
@@ -25,16 +26,6 @@
 
     # Rust
     rustup
-
-    # 编译工具链
-    gcc
-    clang-tools
-    nasm
-    automake
-    cmake
-    binutils
-    gobject-introspection
-    gnumake
 
     # Web 开发
     tailwindcss

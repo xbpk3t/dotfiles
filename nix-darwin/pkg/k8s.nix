@@ -17,3 +17,5 @@
     # minikube  # 可能导致qemu依赖，暂时移除
   ];
 }
+
+# TODO [nix-community/nixhelm: This is a collection of helm charts in a nix-digestable format. [maintainers=@farcaller, @e1senh0rn]](https://github.com/nix-community/nixhelm) 用nixhelm安装helm相关
