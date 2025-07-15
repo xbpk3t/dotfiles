@@ -21,8 +21,7 @@ tasks:
       - pnpm add {{.CLI_ARGS}}
     desc: "pnpm add package"
 
-  global-add:
-    dir: '{{.USER_WORKING_DIR}}'
+  add-global:
     cmds:
       - pnpm add -g {{.CLI_ARGS}}
     desc: "pnpm global install"

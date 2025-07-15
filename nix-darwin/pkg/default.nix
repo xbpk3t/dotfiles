@@ -38,14 +38,34 @@
       watch
       rsync
       cowsay
+
+
+      # GPG 和加密
+      gnupg
+      pinentry_mac
+
+      # 证书和密钥管理
+      openssl
+
+
+      # 基础媒体处理
+      ffmpeg
+
+      # 音频处理
+      # sox
+      # lame
+
+      # 图像处理
+      imagemagick
+      exiftool
     ];
 
   imports = [
     ./network.nix
-    ./security.nix
     ./db.nix
-    ./media.nix
     ./langs.nix
+    ./ts.nix
+    ./golang.nix
     ./tools.nix
     ./git.nix
     ./test.nix

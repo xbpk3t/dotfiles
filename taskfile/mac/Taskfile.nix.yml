@@ -23,6 +23,9 @@ vars:
 
 tasks:
   default:
+    cmd: sudo darwin-rebuild switch --flake .
+    interactive: true
+
 
   darwin:
     desc: "Build and switch to nix-darwin configuration"

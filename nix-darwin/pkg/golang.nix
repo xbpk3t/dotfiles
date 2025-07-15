@@ -4,6 +4,8 @@
   environment.systemPackages = with pkgs; [
     # Go 语言工具
     # go - 由 home-manager 管理
+    go
+    gum
     gofumpt
     golangci-lint
     goreleaser

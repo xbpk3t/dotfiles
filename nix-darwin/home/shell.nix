@@ -55,7 +55,10 @@
       fi
 
       export BUN_INSTALL=$HOME/.bun
-      export PATH="$HOME/go/bin:$BUN_INSTALL/bin:$PATH"
+
+      # PNPM 全局配置
+      export PNPM_HOME="$HOME/.local/share/pnpm"
+      export PATH="$HOME/go/bin:$BUN_INSTALL/bin:$PNPM_HOME:$PATH"
 
       # SSH_AUTH_SOCK set to GPG to enable using gpgagent as the ssh agent.
       export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
