@@ -2,6 +2,8 @@
 
 {
     environment.systemPackages = with pkgs; [
+      fastfetch
+
       # 基础工具
       coreutils
       findutils
@@ -39,11 +41,6 @@
       rsync
       cowsay
 
-
-      # GPG 和加密
-      gnupg
-      pinentry_mac
-
       # 证书和密钥管理
       openssl
 
@@ -66,7 +63,7 @@
     ./langs.nix
     ./ts.nix
     ./golang.nix
-    ./tools.nix
+    ./devops.nix
     ./git.nix
     ./test.nix
     ./k8s.nix

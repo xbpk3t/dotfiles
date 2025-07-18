@@ -11,8 +11,8 @@ obj.__index = obj
 -- Metadata
 obj.name = "TaskList"
 obj.version = "1.0.0"
-obj.author = "Your Name <your.email@example.com>"
-obj.homepage = "https://github.com/your-repo/TaskList.spoon"
+obj.author = "yyzw@live.com"
+obj.homepage = "http://lucc.dev/"
 obj.license = "MIT - https://opensource.org/licenses/MIT"
 
 obj.logger = hs.logger.new('TaskList')
@@ -151,7 +151,7 @@ local function isValidDate(dateStr)
     return true
 end
 
--- 计算评分 (1-5分)
+-- 计算评分 (1-5分，整数制)
 local function calculateScore(task)
     if not task.isDone or task.estimatedTime == 0 then
         return 0
@@ -160,19 +160,69 @@ local function calculateScore(task)
     local timeRatio = task.actualTime / (task.estimatedTime * 40) -- 40分钟为一个单位
     local baseScore = 3 -- 基础分数
 
-    -- 根据时间比例调整分数
-    if timeRatio <= 0.8 then
-        baseScore = baseScore + 1.5  -- 提前完成
+    -- 1. 时间效率评分 (权重: 60%)
+    local timeScore = 0
+    if timeRatio <= 0.5 then
+        timeScore = 2  -- 极快完成 (5分)
+    elseif timeRatio <= 0.8 then
+        timeScore = 1  -- 提前完成 (4分)
     elseif timeRatio <= 1.0 then
-        baseScore = baseScore + 0.5  -- 按时完成
+        timeScore = 0  -- 按时完成 (3分)
     elseif timeRatio <= 1.2 then
-        baseScore = baseScore - 0.5  -- 轻微超时
+        timeScore = -1 -- 轻微超时 (2分)
+    elseif timeRatio <= 1.5 then
+        timeScore = -2 -- 中度超时 (1分)
+    elseif timeRatio <= 2.0 then
+        timeScore = -2 -- 严重超时 (1分)
     else
-        baseScore = baseScore - 1.5  -- 严重超时
+        timeScore = -2 -- 极度超时 (1分)
     end
 
+    -- 2. 任务复杂度评分 (权重: 20%)
+    local complexityBonus = 0
+    if task.estimatedTime >= 3 then
+        complexityBonus = 1  -- 复杂任务完成加分
+    elseif task.estimatedTime >= 2 then
+        complexityBonus = 0  -- 中等任务无加分
+    else
+        complexityBonus = 0  -- 简单任务无加分
+    end
+
+    -- 3. 完成时间评分 (权重: 10%)
+    local timeOfDayBonus = 0
+    if task.doneAt then
+        local hour = tonumber(task.doneAt:match("(%d%d):"))
+        if hour and hour >= 9 and hour <= 18 then
+            timeOfDayBonus = 0  -- 工作时间完成，无额外加分
+        elseif hour and (hour >= 19 and hour <= 22) then
+            timeOfDayBonus = 0  -- 晚上完成，无额外加分
+        else
+            timeOfDayBonus = -1 -- 深夜或早晨完成，扣分
+        end
+    end
+
+    -- 4. 任务及时性评分 (权重: 10%)
+    local timelinessBonus = 0
+    if task.date and task.doneAt then
+        local taskDate = task.date
+        local doneDate = task.doneAt:match("^(%d%d%d%d%-%d%d%-%d%d)")
+        if doneDate == taskDate then
+            timelinessBonus = 0  -- 当天完成，无额外加分
+        elseif doneDate > taskDate then
+            timelinessBonus = -1 -- 延期完成，扣分
+        else
+            timelinessBonus = 1  -- 提前完成，加分
+        end
+    end
+
+    -- 综合计算最终分数
+    local finalScore = baseScore + timeScore + complexityBonus + timeOfDayBonus + timelinessBonus
+
     -- 确保分数在1-5范围内
-    return math.max(1, math.min(5, math.floor(baseScore + 0.5)))
+    finalScore = math.max(1, math.min(5, finalScore))
+
+    -- 返回整数分数
+    return math.floor(finalScore + 0.5)
 end
 
 -- 前置声明函数，解决函数调用顺序问题
@@ -913,24 +963,45 @@ local function exportThisWeekTasks()
         return timeA < timeB
     end)
 
-    -- 生成YAML格式
-    local yaml = "- week: w" .. weekNum .. " " .. mondayStr .. " - " .. todayStr .. "\n  task:\n"
+    -- 按日期分组
+    local tasksByDate = {}
     for _, task in ipairs(completedTasks) do
-        yaml = yaml .. "    - name: " .. task.name .. "\n"
-        if task.doneAt then
-            yaml = yaml .. "      doneAt: " .. task.doneAt .. "\n"
+        local completedDate = task.doneAt:match("^(%d%d%d%d%-%d%d%-%d%d)")
+        if not tasksByDate[completedDate] then
+            tasksByDate[completedDate] = {}
         end
-        if task.estimatedTime and task.estimatedTime > 0 then
-            yaml = yaml .. "      PD: " .. (task.estimatedTime * 40) .. "min\n"
+        table.insert(tasksByDate[completedDate], task)
+    end
+
+    -- 生成YAML格式
+    local yaml = "- week: w" .. weekNum .. " (" .. mondayStr .. " - " .. todayStr .. ")\n  task:\n"
+
+    -- 按日期顺序输出
+    local dates = {}
+    for date, _ in pairs(tasksByDate) do
+        table.insert(dates, date)
+    end
+    table.sort(dates)
+
+    for _, date in ipairs(dates) do
+        yaml = yaml .. "    - date: " .. date .. "\n      task:\n"
+        for _, task in ipairs(tasksByDate[date]) do
+            yaml = yaml .. "        - name: " .. task.name .. "\n"
+            if task.doneAt then
+                yaml = yaml .. "          doneAt: " .. task.doneAt .. "\n"
+            end
+            if task.estimatedTime and task.estimatedTime > 0 then
+                yaml = yaml .. "          PD: " .. (task.estimatedTime * 40) .. "min\n"
+            end
+            if task.actualTime and task.actualTime > 0 then
+                yaml = yaml .. "          AD: " .. task.actualTime .. "min\n"
+            end
+            local score = calculateScore(task)
+            if score > 0 then
+                yaml = yaml .. "          score: " .. score .. "\n"
+            end
+            yaml = yaml .. "\n"
         end
-        if task.actualTime and task.actualTime > 0 then
-            yaml = yaml .. "      AD: " .. task.actualTime .. "min\n"
-        end
-        local score = calculateScore(task)
-        if score > 0 then
-            yaml = yaml .. "      score: " .. score .. "\n"
-        end
-        yaml = yaml .. "\n"
     end
 
     -- 复制到剪贴板
