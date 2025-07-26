@@ -27,6 +27,7 @@ local tasks = dofile(spoonPath .. "/tasks.lua")
 local countdown = dofile(spoonPath .. "/countdown.lua")
 local export = dofile(spoonPath .. "/export.lua")
 local menu = dofile(spoonPath .. "/menu.lua")
+local cronTask = dofile(spoonPath .. "/cron_task.lua")
 
 -- 全局状态变量
 local menubar = nil  -- 初始化为 nil，在 start() 中创建
@@ -81,6 +82,10 @@ end
 -- 加载任务数据
 local function loadTasks()
     taskList, currentTaskId = data.loadTasks()
+
+    -- 加载和集成cron任务
+    local cronTaskFilePath = spoonPath .. "/CronTask.yml"
+    taskList = cronTask.loadAndIntegrateCronTasks(taskList, cronTaskFilePath)
 end
 
 -- 保存任务数据

@@ -12,5 +12,7 @@
     # php
     # elixir
     # android-tools
+
+    lua
   ];
 }
