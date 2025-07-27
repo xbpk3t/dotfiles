@@ -9,7 +9,7 @@
       "goland"
       "google-chrome"
       "hammerspoon"
-      "hyperconnect"
+      # "hyperconnect"
       "tencent-lemon"
       "wechat"
       "kilvn/homebrew-schedule/clashx-meta"

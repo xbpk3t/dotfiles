@@ -124,20 +124,56 @@ function cronTask.filterCronTasks(cronTasks)
     return filteredTasks
 end
 
+-- 计算 CronTask 的标准化日期和时间
+local function calculateCronTaskDateTime(cronType)
+    local now = os.time()
+    local baseType = getBaseType(string.gsub(cronType, "^@", ""))
+
+    if baseType == "daily" or string.match(baseType, "daily$") then
+        -- daily 类型：使用当天的 00:00:00
+        local currentDate = utils.getCurrentDate()
+        local year, month, day = currentDate:match("^(%d%d%d%d)-(%d%d)-(%d%d)$")
+        local dayStart = os.time({year = tonumber(year), month = tonumber(month), day = tonumber(day), hour = 0, min = 0, sec = 0})
+        return currentDate, math.floor(dayStart * 1000)
+    elseif baseType == "weekly" or string.match(baseType, "weekly$") then
+        -- weekly 类型：使用本周六的 00:00:00
+        local currentWeekday = tonumber(os.date("%w", now)) -- 0=Sunday, 1=Monday, ..., 6=Saturday
+        local daysToSaturday = (6 - currentWeekday) % 7
+        local saturday = now + daysToSaturday * 24 * 60 * 60
+        local saturdayDate = os.date("%Y-%m-%d", saturday)
+        local year, month, day = saturdayDate:match("^(%d%d%d%d)-(%d%d)-(%d%d)$")
+        local saturdayStart = os.time({year = tonumber(year), month = tonumber(month), day = tonumber(day), hour = 0, min = 0, sec = 0})
+        return saturdayDate, math.floor(saturdayStart * 1000)
+    else
+        -- 其他类型：使用当前日期和时间
+        local currentDate = utils.getCurrentDate()
+        return currentDate, math.floor(hs.timer.secondsSinceEpoch() * 1000)
+    end
+end
+
 -- 将过滤后的cron任务转换为TaskList任务格式
 function cronTask.convertToTaskListFormat(filteredCronTasks)
     local taskListTasks = {}
-    local currentDate = utils.getCurrentDate()
 
     for _, cronTaskRes in ipairs(filteredCronTasks) do
         -- 生成任务名称，包含类型前缀
         local taskName = cronTaskRes.type .. " " .. cronTaskRes.task
 
-        -- 使用当前时间戳作为addTime，确保唯一性
-        local addTime = math.floor(hs.timer.secondsSinceEpoch() * 1000)
+        -- 计算标准化的日期和添加时间，确保幂等性
+        local taskDate, addTime = calculateCronTaskDateTime(cronTaskRes.type)
 
-        -- 创建任务
-        local newTask = tasks.createTask(taskName, currentDate, 1) -- 默认1个E1f
+        -- 手动创建任务，使用标准化的 addTime
+        local newTask = {
+            id = utils.generateTaskId(addTime, taskName, taskDate, 1),
+            name = taskName,
+            date = taskDate,
+            addTime = addTime,
+            estimatedTime = 1, -- 默认1个E1f
+            actualTime = 0,
+            isDone = false,
+            doneAt = nil,
+            startTime = nil
+        }
 
         -- 标记为cron任务，用于识别和去重
         newTask.isCronTask = true
@@ -152,10 +188,9 @@ end
 
 -- 检查任务是否已存在（用于去重）
 function cronTask.isTaskExists(taskList, cronTask)
-    local taskName = cronTask.cronType .. " " .. cronTask.originalTask
-
+    -- 使用 ID 进行精确匹配，确保相同日期的相同任务不重复
     for _, existingTask in ipairs(taskList) do
-        if existingTask.isCronTask and existingTask.name == taskName then
+        if existingTask.isCronTask and existingTask.id == cronTask.id then
             return true
         end
     end

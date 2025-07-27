@@ -8,6 +8,27 @@ local utils = dofile(hs.configdir .. "/Spoons/TaskList.spoon/utils.lua")
 local scoring = dofile(hs.configdir .. "/Spoons/TaskList.spoon/scoring.lua")
 local notifications = dofile(hs.configdir .. "/Spoons/TaskList.spoon/notifications.lua")
 
+-- 配置不导出的 CronTask 类型
+local EXCLUDED_CRON_TYPES = {
+    "daily",
+    "2daily",
+    -- 可以根据需要添加更多类型
+}
+
+-- 检查任务是否应该被排除在导出之外
+local function shouldExcludeFromExport(task)
+    if task.isCronTask and task.cronType then
+        -- 移除 @ 前缀进行比较
+        local cleanCronType = task.cronType:gsub("^@", "")
+        for _, excludedType in ipairs(EXCLUDED_CRON_TYPES) do
+            if cleanCronType == excludedType then
+                return true
+            end
+        end
+    end
+    return false
+end
+
 -- 通用导出函数
 function export.exportTasksForDate(tasks, dateStr, dateLabel)
     if not utils.isValidDate(dateStr) then
@@ -18,7 +39,7 @@ function export.exportTasksForDate(tasks, dateStr, dateLabel)
     -- 查找在指定日期完成的任务（按完成时间而不是任务日期）
     local completedTasks = {}
     for _, task in ipairs(tasks) do
-        if task.isDone and task.doneAt then
+        if task.isDone and task.doneAt and not shouldExcludeFromExport(task) then
             -- 提取完成日期（doneAt 格式：YYYY-MM-DD HH:MM）
             local completedDate = task.doneAt:match("^(%d%d%d%d%-%d%d%-%d%d)")
             if completedDate == dateStr then
@@ -71,7 +92,7 @@ function export.exportThisWeekTasks(tasks)
     -- 查找本周完成的任务
     local completedTasks = {}
     for _, task in ipairs(tasks) do
-        if task.isDone and task.doneAt then
+        if task.isDone and task.doneAt and not shouldExcludeFromExport(task) then
             local completedDate = task.doneAt:match("^(%d%d%d%d%-%d%d%-%d%d)")
             if completedDate and completedDate >= mondayStr and completedDate <= todayStr then
                 table.insert(completedTasks, task)

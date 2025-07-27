@@ -269,6 +269,24 @@ local function deleteTask(index)
     end
 end
 
+-- 手动重新加载 CronTask 的函数
+local function reloadCronTasks()
+    local cronTaskFilePath = spoonPath .. "/CronTask.yml"
+    local oldTaskCount = #taskList
+    taskList = cronTask.loadAndIntegrateCronTasks(taskList, cronTaskFilePath)
+    local newTaskCount = #taskList
+
+    if newTaskCount > oldTaskCount then
+        tasks.sortTasks(taskList)
+        updateMenubar()
+        saveTasks()
+        notifications.sendNotification("CronTask",
+            string.format("已重新加载，新增 %d 个周期任务", newTaskCount - oldTaskCount), 3)
+    else
+        notifications.sendNotification("CronTask", "重新加载完成，没有新任务", 3)
+    end
+end
+
 -- 创建菜单项
 local function createMenu()
     local callbacks = {
@@ -277,6 +295,7 @@ local function createMenu()
         completeTask = completeTask,
         deleteTask = deleteTask,
         addTask = addTask,
+        reloadCronTasks = reloadCronTasks,
         getCountdownState = function() return countdown.getCountdownState() end,
         toggleCountdown = function() return countdown.toggleCountdown() end,
         exit = function()
@@ -345,6 +364,27 @@ function obj:start()
     end)
     obj.updateTimer:start()
 
+    -- 检查并加载新 CronTask 的函数
+    local function checkAndLoadCronTasks()
+        local cronTaskFilePath = spoonPath .. "/CronTask.yml"
+        local oldTaskCount = #taskList
+        taskList = cronTask.loadAndIntegrateCronTasks(taskList, cronTaskFilePath)
+        local newTaskCount = #taskList
+
+        if newTaskCount > oldTaskCount then
+            tasks.sortTasks(taskList)
+            updateMenubar()
+            saveTasks()
+            notifications.sendNotification("CronTask",
+                string.format("已加载 %d 个新的周期任务", newTaskCount - oldTaskCount), 3)
+        end
+    end
+
+    -- 设置定时器，每小时检查并加载新的 CronTask
+    -- TODO 可能也不需要这个cron来执行？如果需要在每次开盖之后执行，那就做成事件触发好了
+    obj.cronCheckTimer = hs.timer.new(3600, checkAndLoadCronTasks) -- 每小时检查一次
+    obj.cronCheckTimer:start()
+
     notifications.sendNotification("TaskList", "多任务管理器已启动", 3)
 
     obj.logger.i("TaskList started")
@@ -374,6 +414,11 @@ function obj:stop()
     if obj.updateTimer then
         obj.updateTimer:stop()
         obj.updateTimer = nil
+    end
+
+    if obj.cronCheckTimer then
+        obj.cronCheckTimer:stop()
+        obj.cronCheckTimer = nil
     end
 
     -- 保存数据

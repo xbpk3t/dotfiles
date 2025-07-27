@@ -25,6 +25,7 @@ tasks:
   default:
     cmd: sudo darwin-rebuild switch --flake .
     interactive: true
+    dir: ~/.config/nix-darwin
 
 
   darwin:
