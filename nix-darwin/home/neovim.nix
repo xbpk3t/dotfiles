@@ -92,7 +92,7 @@
     # 颜色主题
     colorschemes.base16 = {
       enable = true;
-      colorscheme = "default-dark";
+      colorscheme = "default-light";
     };
 
     # 键盘映射

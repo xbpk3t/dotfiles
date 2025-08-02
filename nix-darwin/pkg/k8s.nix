@@ -3,19 +3,20 @@
 {
   environment.systemPackages = with pkgs; [
     # 容器和虚拟化
-    docker
-    docker-compose
-    docker-credential-helpers
+#    docker
+#    docker-compose
+#    docker-credential-helpers
     # colima
+    podman
 
     # Kubernetes 工具
-    # helm - 在macOS上不可用，由 home-manager 管理
+    # containerd  # minikube 内置了 containerd，不需要单独安装
+    minikube
+    # helm 相关工具由 nixhelm 提供
     # helmfile
     # kompose
     # kube-linter
     kubectx
-    # minikube  # 可能导致qemu依赖，暂时移除
+    kubectl
   ];
 }
-
-# TODO [nix-community/nixhelm: This is a collection of helm charts in a nix-digestable format. [maintainers=@farcaller, @e1senh0rn]](https://github.com/nix-community/nixhelm) 用nixhelm安装helm相关

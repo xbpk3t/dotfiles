@@ -3,7 +3,7 @@
 version: '3'
 
 vars:
-  CENTRAL_CONFIG_PATH: "{{.USER_WORKING_DIR}}/linters"
+  CENTRAL_CONFIG_PATH: "{{.TASKFILE_DIR}}/linters"
   TARGET_DIR: "{{.USER_WORKING_DIR}}/.github/linters"
 
 tasks:
@@ -24,7 +24,7 @@ tasks:
         vars:
           CONFIG_TYPE: golangci-lint
       - echo "🎉 所有linter配置已同步完成"
-    silent: false
+    silent: true
 
   check:
     internal: true
@@ -46,6 +46,7 @@ tasks:
 
   check-config:
     internal: true
+    silent: true
     vars:
       CENTRAL_FILE: "{{.CENTRAL_CONFIG_PATH}}/{{.CONFIG_TYPE}}.yml"
       TARGET_FILE: "{{.TARGET_DIR}}/{{.CONFIG_TYPE}}.yml"
@@ -68,6 +69,7 @@ tasks:
         else
           echo "✅ {{.CONFIG_TYPE}} 配置一致"
         fi
+
 
   sync-config:
     internal: true

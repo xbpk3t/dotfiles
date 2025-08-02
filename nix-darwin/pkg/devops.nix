@@ -15,7 +15,11 @@
     # shellcheck
     # yamllint
     # markdownlint-cli
-    # lychee
+    urlscan
+    lychee
+
+    cloudflared # cloudflare tunnel
+    ngrok
 
     # 环境管理
     # direnv

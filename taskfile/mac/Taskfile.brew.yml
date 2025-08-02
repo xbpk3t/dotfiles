@@ -37,7 +37,7 @@ tasks:
     cmds:
       - task: upgrade
       - task: cleanup
-      - task: details
+      - task: info
       - brew doctor
 
   install:
@@ -72,7 +72,6 @@ tasks:
   info:
     cmds:
       - brew config
-      - git -C "$(brew --repo)" remote -v # 查看brew镜像源
       - brew --prefix # 用来查看bin path和cask path
 
 

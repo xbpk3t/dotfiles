@@ -45,6 +45,12 @@
       url = "github:nix-community/nixvim";
       inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
+
+    # nixhelm for helm charts management
+    nixhelm = {
+      url = "github:nix-community/nixhelm";
+      inputs.nixpkgs.follows = "nixpkgs-darwin";
+    };
   };
 
   # The `outputs` function will return all the build results of the flake.
@@ -59,6 +65,7 @@
     home-manager,
     nix-homebrew,
     nixvim,
+    nixhelm,
     ...
   }: let
     # User configuration - with fallback for build environment

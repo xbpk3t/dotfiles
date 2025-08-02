@@ -1,0 +1,263 @@
+---
+
+# golangci-lint configuration
+# https://golangci-lint.run/usage/configuration/
+# 基于《100 Go Mistakes and How to Avoid Them》的完整配置
+
+# 配置文件版本
+version: 2
+
+run:
+  timeout: 5m
+  issues-exit-code: 1
+  tests: true
+  skip-dirs:
+    - vendor
+    - node_modules
+  skip-files:
+    - ".*\\.pb\\.go$"
+    - ".*_test\\.go$"
+
+output:
+  format: colored-line-number
+  print-issued-lines: true
+  print-linter-name: true
+
+linters:
+  enable:
+    # ===== 代码及工程组织 (1-16) =====
+    - revive          # #1(变量隐藏), #4(getter/setter), #5(接口污染), #6(接口位置), #7(接口返回值), #8(any滥用), #13(工具包), #15(文档缺失)
+    - gocritic        # #2(嵌套过深), #9(泛型使用), #10(类型嵌套), #11(function option), #16(linter检查)
+    - gocyclo         # #2(认知复杂度)
+    - funlen          # #2(函数长度)
+    - gochecknoinits  # #3(init函数误用)
+    - depguard        # #12(包组织), #14(包名冲突)
+
+    # ===== 数据类型 (17-29) =====
+    - gocritic        # #17(八进制字面量), #18(整数溢出), #19(浮点数理解), #20(切片长度容量), #21(切片初始化), #22(nil切片), #23(切片判空), #24(切片拷贝), #25(append副作用), #26(切片泄漏), #27(map初始化), #28(map泄漏), #29(值比较)
+
+    # ===== 控制结构 (30-35) =====
+    - copyloopvar     # #30(range变量拷贝), #32(range指针), #63(循环变量捕获)
+    - gocritic        # #31(range计算), #33(map迭代), #34(break语句), #35(循环defer)
+
+    # ===== 字符串 (36-41) =====
+    - gocritic        # #36(rune理解), #37(字符串遍历), #38(trim误用), #39(字符串拼接), #40(字符串转换), #41(子字符串泄漏)
+
+    # ===== 函数和方法 (42-48) =====
+    - revive          # #42(接收器类型), #43(命名返回值), #44(返回值副作用)
+    - gocritic        # #46(文件名参数), #47(defer计算), #48(panic滥用)
+
+    # ===== 错误处理 (49-54) =====
+    - errcheck        # #53(忽略错误)
+    - gocritic        # #49(错误包装时机), #50(错误类型比较), #51(错误值比较), #52(重复错误处理), #54(defer错误)
+
+    # ===== 并发基础 (55-59) =====
+    - gocritic        # #55(goroutine泄漏), #56(并发性能), #57(select随机性), #58(通知channel), #59(channel尺寸)
+
+    # ===== Context包 (60-62) =====
+    - contextcheck    # #60(Context误解), #61(错误Context传递)
+    - gocritic        # #62(循环变量捕获)
+
+    # ===== 标准库 (63-81) =====
+    - gocritic        # #63(循环变量), #64(select随机), #65(通知channel), #66(channel尺寸), #67(channel尺寸), #68(字符串格式化), #69(字符串拼接), #70(切片初始化), #71(切片容量), #72(切片拷贝), #73(切片泄漏), #74(sync类型拷贝), #75(时间常量), #76(时间处理), #77(JSON处理), #78(SQL错误), #79(资源关闭), #80(HTTP返回), #81(默认HTTP Client)
+    - bodyclose       # #79(HTTP body关闭)
+    - containedctx    # #60(Context使用)
+
+    # ===== 测试 (82-90) =====
+    - gocritic        # #82(测试分类), #83(race检测), #84(并行测试), #85(表驱动测试), #86(测试sleep), #87(时间处理), #88(测试工具), #89(基准测试), #90(测试特性)
+    - gocognit        # #90(测试复杂度)
+
+    # ===== 优化技术 (91-100) =====
+    - gocritic        # #91(CPU缓存), #92(false sharing), #93(指令级并行), #94(数据对齐), #95(堆栈分配), #96(内存分配), #97(内联), #98(诊断工具), #99(GC工作), #100(Docker性能)
+
+    # ===== 通用检查器 =====
+    - dogsled         # 下划线变量
+    - dupl            # 重复代码
+    - goconst         # 魔法数字
+    - gosec           # 安全漏洞
+    - govet           # 官方vet工具
+    - ineffassign     # 无效赋值
+    - lll             # 行长度
+    - misspell        # 拼写错误
+    - staticcheck     # 静态分析
+    - unused          # 未使用代码
+    - whitespace      # 空白字符
+
+linters-settings:
+  # ===== gocritic 详细配置 =====
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - experimental
+      - opinionated
+      - performance
+      - style
+    enabled-checks:
+      # 控制结构相关
+      - rangeExprCopy    # #31(range目标计算)
+      - elseif           # #2(嵌套优化)
+      - dupSubExpr       # #39(字符串拼接)
+      - appendAssign     # #25(append副作用)
+      - unslice          # #24(切片拷贝)
+      - truncateCmp      # #19(浮点比较)
+      - badCall          # #38(trim误用)
+      - dupImport        # #14(重复导入)
+      - octalLiteral     # #17(八进制字面量)
+      - whyNoLint        # 禁用注释说明
+      - wrapperFunc      # 包装函数
+      - ifElseChain      # if-else链
+
+      # 错误处理相关
+      - errorWrap        # #49(错误包装)
+      - errorStrings     # #50(错误字符串)
+      - dupError         # #52(重复错误)
+
+      # 并发相关
+      - deferInLoop      # #35(循环defer)
+      - exitAfterDefer   # defer后退出
+      - goDefer          # defer使用
+
+      # 性能相关
+      - hugeParam        # 大参数传递
+      - hugeVal          # 大值传递
+      - indexOnlyLoop    # 仅索引循环
+      - mapKey           # map键类型
+      - rangeValCopy     # range值拷贝
+      - sliceClear       # 切片清空
+      - sliceHeader      # 切片头
+      - stringXbytes     # 字符串字节转换
+
+      # 代码质量相关
+      - assignOp         # 赋值操作
+      - boolExprSimplify # 布尔表达式简化
+      - builtinShadow    # 内置函数阴影
+      - captLocal        # 局部变量捕获
+      - caseOrder        # case顺序
+      - codegenComment   # 代码生成注释
+      - commentedOutCode # 注释代码
+      - defaultCaseOrder # default case顺序
+      - dupBranchBody    # 重复分支体
+      - dupCase          # 重复case
+      - emptyFallthrough # 空fallthrough
+      - emptyStringTest  # 空字符串测试
+      - flagDeref        # flag解引用
+      - flagName         # flag名称
+      - importShadow     # 导入阴影
+      - initClause       # init子句
+      - mapClear         # map清空
+      - methodExprCall   # 方法表达式调用
+      - nilValReturn     # nil值返回
+      - paramTypeCombine # 参数类型组合
+      - ptrToRefParam    # 指针引用参数
+      - regexpMust       # 正则表达式must
+      - singleCaseSwitch # 单case switch
+      - sloppyLen        # 草率的len
+      - sloppyReassign   # 草率的重赋值
+      - stringConcat     # 字符串连接
+      - stringLitConv    # 字符串字面量转换
+      - switchTrue       # switch true
+      - timeExpr         # 时间表达式
+      - typeAssertChain  # 类型断言链
+      - typeDefFirst     # 类型定义优先
+      - typeSwitchVar    # 类型switch变量
+      - underef          # 解引用
+      - unlambda         # 无lambda
+      - valSwap           # 值交换
+      - weakCond         # 弱条件
+      - yodaStyleExpr    # Yoda风格表达式
+
+    disabled-checks:
+      - dupImport
+      - ifElseChain
+      - octalLiteral
+      - whyNoLint
+      - wrapperFunc
+
+    # 特定规则配置
+    settings:
+      rangeExprCopy:
+        sizeThreshold: 32  # #21(切片预分配) 超过32字节强制预分配
+      truncateCmp:
+        epsilon: 0.001     # #19(浮点比较精度)
+      hugeParam:
+        sizeThreshold: 80  # #95(堆栈分配) 大参数阈值
+      hugeVal:
+        sizeThreshold: 80  # #95(堆栈分配) 大值阈值
+
+  # ===== revive 配置 =====
+  revive:
+    # 针对《100个错误》的规则配置
+    rules:
+      - name: banned-imports    # #13(禁止工具包)
+        arguments: ["common", "util", "shared", "pkg"]
+        severity: error
+
+      - name: package-comments  # #15(文档缺失)
+        severity: error
+
+      - name: getter-return      # #4(getter规范)
+        arguments: [true]
+
+      - name: receiver-naming    # #42(接收器命名)
+        arguments: ["[a-zA-Z]+"]
+
+      - name: cognitive-complexity # #2(认知复杂度)
+        arguments: [7]
+
+      - name: exported           # #15(导出函数文档)
+        arguments: [true]
+
+      - name: var-naming         # #1(变量命名)
+        arguments: ["^[a-zA-Z_][a-zA-Z0-9_]*$"]
+
+      - name: interface-bloat    # #5(接口污染)
+        arguments: [5]
+
+  # ===== 其他linter配置 =====
+  gocognit:
+    min-complexity: 10  # #90(测试函数复杂度阈值)
+
+  govet:
+    check-shadowing: true  # #1(变量隐藏)
+
+  gocyclo:
+    min-complexity: 15  # #2(循环复杂度)
+
+  dupl:
+    threshold: 100
+
+  goconst:
+    min-len: 2
+    min-occurrences: 2
+
+  misspell:
+    locale: US
+
+  lll:
+    line-length: 140
+
+  # ===== 性能相关配置 =====
+  staticcheck:
+    go: "1.24"  # 支持最新的Go特性
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - funlen
+        - goconst
+        - gocognit
+    - linters:
+        - lll
+      source: "^//go:generate "
+    - linters:
+        - goconst
+      source: "^// nolint:"
+  exclude-use-default: false
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  new: false
+
+severity:
+  default-severity: error
+  case-sensitive: false

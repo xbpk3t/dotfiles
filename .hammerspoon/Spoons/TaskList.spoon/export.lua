@@ -12,6 +12,10 @@ local notifications = dofile(hs.configdir .. "/Spoons/TaskList.spoon/notificatio
 local EXCLUDED_CRON_TYPES = {
     "daily",
     "2daily",
+    "weekly",
+    "2weekly",
+    "4weekly",
+    "yearly"
     -- 可以根据需要添加更多类型
 }
 
@@ -167,7 +171,9 @@ function export.exportCustomDateTasks(tasks)
             "导出",
             "取消"
     )
-    if button ~= "导出" then return end
+    if button ~= "导出" then
+        return
+    end
 
     export.exportTasksForDate(tasks, dateStr, nil)
 end

@@ -17,7 +17,7 @@ vars:
       ios_apps: "Cleaning up iOS Applications"
       ios_backups: "Removing iOS Device Backups"
       xcode: "Cleaning up XCode Derived Data and Archives"
-      xcode_simulators: "Cleaning up iOS Simulators"
+#      xcode_simulators: "Cleaning up iOS Simulators"
       dropbox: "Clearing Dropbox 📦 Cache Files"
       google_drive: "Clearing Google Drive File Stream Cache Files"
       composer: "Cleaning up composer"
@@ -344,12 +344,6 @@ tasks:
               exit 0
             fi
             ;;
-          "xcode_simulators")
-            if ! gum confirm "All Xcode simulators will be pruned. Continue?"; then
-              echo "Xcode simulator cleanup cancelled."
-              exit 0
-            fi
-            ;;
           "gradle")
             if ! gum confirm "Gradle cache will be removed. It is chunky and kinda long to reinstall. Continue?"; then
               echo "Gradle cache cleanup cancelled."
@@ -390,15 +384,6 @@ tasks:
       - |
         # Handle special command-based cleanup tasks
         case "{{.TASK_NAME}}" in
-          "xcode_simulators")
-            if command -v xcrun >/dev/null 2>&1; then
-              osascript -e 'tell application "com.apple.CoreSimulator.CoreSimulatorService" to quit' 2>/dev/null || true
-              osascript -e 'tell application "iOS Simulator" to quit' 2>/dev/null || true
-              osascript -e 'tell application "Simulator" to quit' 2>/dev/null || true
-              xcrun simctl shutdown all 2>/dev/null || true
-              xcrun simctl erase all
-            fi
-            ;;
           "google_drive")
             killall 'Google Drive File Stream' 2>/dev/null || true
             ;;
