@@ -1,7 +1,7 @@
 { pkgs, username, ... }:
 
 {
-  # macOS 系统偏好设置 - 从 Taskfile 迁移
+  # macOS 系统偏好设置
   system.primaryUser = username;
   system.defaults = {
     # Dock 设置

@@ -7,7 +7,6 @@ vars:
   TARGET_DIR: "{{.USER_WORKING_DIR}}/.github/linters"
 
 tasks:
-  # TODO 之后是否需要做个config来处理不同项目和linters之间的映射关系？现在会把所有配置都同步到该repo里
   default:
     desc: 将中央配置同步到当前项目
     cmds:

@@ -56,13 +56,8 @@ tasks:
       - pnpm outdated
     desc: "pnpm outdated"
 
-
-  #- url: https://github.com/dylang/npm-check
-  #  des: 可以认为 npm-check = depcheck + npm-check-updates. 可以用来检查并自动更新dependency，也支持检查unused依赖项. Check for outdated, incorrect, and unused dependencies in package.json.
   #- url: https://github.com/depcheck/depcheck
   #  des: depcheck = npm-check, 但是只能查找unused dep
-  #- url: https://github.com/raineorshine/npm-check-updates
-  #  des: 顾名思义，相当于 `npm-check -u`，用来检查pkg版本是否有新版本. 支持brew安装。`ncu -u`
   # [webpro-nl/knip: ✂️ Find unused files, dependencies and exports in your JavaScript and TypeScript projects. Knip it before you ship it!](https://github.com/webpro-nl/knip)
   depcheck:
     cmds:

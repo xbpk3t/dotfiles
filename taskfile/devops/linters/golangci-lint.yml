@@ -83,6 +83,16 @@ linters:
     - unused          # 未使用代码
     - whitespace      # 空白字符
 
+    # ===== 补充的最佳实践检查器 =====
+    - gochecknoglobals # 全局变量检查 - 避免使用全局变量
+    - forbidigo       # 禁止特定标识符 - 可配置禁止的标识符
+    - nestif          # 嵌套if检查 - 避免过深的if嵌套
+    - noctx           # 没有context的HTTP请求 - 强制使用context
+    - testpackage     # 测试包检查 - 测试文件应该使用独立的包
+    - wastedassign    # 浪费的赋值 - 检测无用的赋值操作
+    - wrapcheck       # 错误包装检查 - 确保错误被正确包装
+    - errorlint       # 错误处理检查 - 检查错误处理的最佳实践
+
 linters-settings:
   # ===== gocritic 详细配置 =====
   gocritic:
@@ -166,6 +176,21 @@ linters-settings:
       - weakCond         # 弱条件
       - yodaStyleExpr    # Yoda风格表达式
 
+      # 补充的最佳实践检查
+      - mapIter          # map迭代时修改检查 - 不要边遍历map边写入key
+      - rangeValCopy     # range值拷贝检查 - 避免不必要的拷贝
+      - sliceClear       # 切片清空检查 - 使用正确的清空方式
+      - sliceHeader      # 切片头检查 - 避免切片头泄漏
+      - stringXbytes     # 字符串字节转换检查 - 优化字符串操作
+      - hugeParam        # 大参数检查 - 方法入参超过2个时使用复合类型
+      - hugeVal          # 大值检查 - 避免传递大值
+      - indexOnlyLoop    # 仅索引循环检查 - 优化循环性能
+      - mapKey           # map键类型检查 - 使用map[K]struct{}表示set
+      - nilValReturn     # nil值返回检查 - 避免返回nil值
+      - ptrToRefParam    # 指针引用参数检查 - 避免不必要的指针传递
+      - unlambda         # 无lambda检查 - 简化函数调用
+      - valSwap           # 值交换检查 - 使用更简洁的交换方式
+
     disabled-checks:
       - dupImport
       - ifElseChain
@@ -213,6 +238,34 @@ linters-settings:
       - name: interface-bloat    # #5(接口污染)
         arguments: [5]
 
+      # 补充的最佳实践规则
+      - name: function-length    # 函数长度限制 - 单一职责原则
+        arguments: [50]
+
+      - name: max-public-structs # 最大公共结构体数量 - 避免过度暴露
+        arguments: [10]
+
+      - name: package-lock       # 包锁定 - 避免循环依赖
+        arguments: [true]
+
+      - name: range              # range使用检查 - 优化range使用
+        arguments: [true]
+
+      - name: struct-tag         # 结构体标签检查 - 规范标签使用
+        arguments: [true]
+
+      - name: unnecessary-stmt   # 不必要的语句检查 - 简化代码
+        arguments: [true]
+
+      - name: unused-receiver    # 未使用的接收器检查 - 避免无用的方法
+        arguments: [true]
+
+      - name: var-naming         # 变量命名检查 - 规范命名
+        arguments: ["^[a-zA-Z_][a-zA-Z0-9_]*$"]
+
+      - name: exported           # 导出检查 - 避免过度导出
+        arguments: [true]
+
   # ===== 其他linter配置 =====
   gocognit:
     min-complexity: 10  # #90(测试函数复杂度阈值)
@@ -239,6 +292,45 @@ linters-settings:
   # ===== 性能相关配置 =====
   staticcheck:
     go: "1.24"  # 支持最新的Go特性
+
+  # ===== 补充的最佳实践配置 =====
+  gochecknoglobals:
+    # 允许的全局变量类型
+    allow: ["errors", "sync.Once", "init"]
+
+  forbidigo:
+    # 禁止使用的标识符
+    forbid:
+      - id: "fmt.Print"           # 禁止使用fmt.Print，应该使用fmt.Printf或fmt.Println
+        msg: "use fmt.Printf or fmt.Println instead of fmt.Print"
+      - id: "os.Exit"             # 禁止在main函数外使用os.Exit
+        msg: "use log.Fatal or return error instead of os.Exit"
+      - id: "panic"               # 禁止使用panic
+        msg: "use error return instead of panic"
+
+  nestif:
+    min-complexity: 4  # 嵌套if的复杂度阈值
+
+  noctx:
+    # 检查没有context的HTTP请求
+    include: ["net/http"]
+
+  testpackage:
+    # 测试包检查配置
+    skip-imports: ["testing"]
+
+  wrapcheck:
+    # 错误包装检查配置
+    ignoreSigs:
+      - "fmt\\.Errorf"
+      - "errors\\.Wrap"
+      - "errors\\.Wrapf"
+
+  errorlint:
+    # 错误处理检查配置
+    errorf: true
+    asserts: true
+    comparison: true
 
 issues:
   exclude-rules:

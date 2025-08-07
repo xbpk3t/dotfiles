@@ -2,17 +2,31 @@
 
 {
   environment.systemPackages = with pkgs; [
-    # Go 语言工具
-    # go - 由 home-manager 管理
     go
+    gotools # goimports
+
     gum
+
     gofumpt
     golangci-lint
-    goreleaser
+    gosec
+
     protoc-gen-go
     protoc-gen-go-grpc
-    gopls
-    golines
+    gopls # https://github.com/golang/tools includes modernize
+    golines # https://github.com/segmentio/golines
     goimports-reviser
+
+    cobra-cli
+    nilaway
+    go-swag # = swaggo/swag
+    goreleaser
+
+    go-mockery # https://github.com/vektra/mockery
+
+    templ # https://github.com/a-h/templ
+    go-migrate # https://github.com/golang-migrate/migrate
+
+    gomodifytags # https://github.com/fatih/gomodifytags
   ];
 }

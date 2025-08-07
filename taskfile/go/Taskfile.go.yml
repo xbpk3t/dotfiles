@@ -155,7 +155,7 @@ tasks:
       - echo "Generating test coverage..."
       - set -o pipefail # 同时使用 tparse 和覆盖率检测
       - go test -json -covermode=atomic -coverpkg=./... -coverprofile coverage.out ./... | tparse
-#      - go test -v ./... -covermode=atomic -coverpkg=./... -coverprofile coverage.out
+      #      - go test -v ./... -covermode=atomic -coverpkg=./... -coverprofile coverage.out
       - go tool cover -html coverage.out -o coverage.html
     silent: true
     dir: '{{.USER_WORKING_DIR}}'
@@ -188,19 +188,7 @@ tasks:
 
   pre-install:
     cmds:
-      - go install go.uber.org/nilaway/cmd/nilaway@latest
-      - go install github.com/swaggo/swag/cmd/swag@latest
-      - go install github.com/dkorunic/betteralign/cmd/betteralign@latest
-      - go install github.com/goreleaser/goreleaser@latest
-      - go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
-      - go install github.com/a-h/templ/cmd/templ@latest
-      - go install github.com/vektra/mockery/v2@latest
-      - go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.58.1
-      - go install github.com/segmentio/golines@latest
-      - go install golang.org/x/tools/cmd/goimports@latest
-      - go install github.com/securego/gosec/v2/cmd/gosec@latest
-      - go install mvdan.cc/gofumpt@latest
-      - go install github.com/spf13/cobra-cli@latest
+      - go install github.com/dkorunic/betteralign/cmd/@latest
     preconditions:
       - ls -1 $(go env GOPATH)/bin # 列出所有go install安装的bin (cli工具)
 
@@ -254,9 +242,9 @@ tasks:
       - cmd: explorer http://{{.SITE}}/swagger/index.html
         platforms: [windows]
 
-#- url: https://github.com/ko-build/ko
-#  doc: https://ko.build/
-#  des: 专门用来打包golang应用容器的image的工具，被很多k8s生态下的主流OSS使用
+  #- url: https://github.com/ko-build/ko
+  #  doc: https://ko.build/
+  #  des: 专门用来打包golang应用容器的image的工具，被很多k8s生态下的主流OSS使用
   ko:
     desc: 打包golang应用的image
 
@@ -274,11 +262,9 @@ tasks:
 
 
 
-# TODO
-#- url: https://github.com/fatih/gomodifytags
-#  des: 用来给struct添加tags的cli工具，挺实用
+  # TODO
   add-tags:
-    desc: "为指定结构体添加 JSON 标签（驼峰式）"
+    desc: "用来给struct添加tags的cli工具"
     vars:
       FILE: "path/to/file.go"  # 替换为目标文件路径
       STRUCT: "User"           # 替换为结构体名称
@@ -287,9 +273,9 @@ tasks:
 
 
 
-# TODO
-#- url: https://github.com/cuonglm/gocmt
-#  des: Add missing comment on exported function, method, type, constant, variable in go file. 可以说是非常实用了
+  # TODO
+  #- url: https://github.com/cuonglm/gocmt
+  #  des: Add missing comment on exported function, method, type, constant, variable in go file. 可以说是非常实用了
   add-comments:
     desc: "为导出元素添加缺失注释"
     vars:
@@ -298,11 +284,8 @@ tasks:
       - gocmt -i {{.TARGET}}
 
 
-# [golang/tools: [mirror] Go Tools](https://github.com/golang/tools)
-# 【gopls/modernize】 # [11个现代Go特性：用gopls/modernize让你的代码焕然一新 | Tony Bai](https://tonybai.com/2025/04/15/embrace-modern-go-style-with-gopls-modernize/)
+  # 【gopls/modernize】 # [11个现代Go特性：用gopls/modernize让你的代码焕然一新 | Tony Bai](https://tonybai.com/2025/04/15/embrace-modern-go-style-with-gopls-modernize/)
   modernize:
-    status:
-      - command -v modernize # go install golang.org/x/tools/gopls/internal/analysis/modernize/cmd/modernize@latest
     cmds:
       - modernize -fix ./... # TODO
 

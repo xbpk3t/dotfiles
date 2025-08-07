@@ -9,8 +9,6 @@
     fping
     nmap
     inetutils
-    # libpcap
-    # sshpass
 
     # 网络安全
     subfinder
@@ -21,9 +19,5 @@
 
     # 云存储和同步
     rclone
-
-    # 下载工具
-    aria2 # A lightweight multi-protocol & multi-source command-line download utility
-    socat # replacement of openbsd-netcat
   ];
 }

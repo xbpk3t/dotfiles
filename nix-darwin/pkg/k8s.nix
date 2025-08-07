@@ -3,19 +3,15 @@
 {
   environment.systemPackages = with pkgs; [
     # 容器和虚拟化
-#    docker
-#    docker-compose
-#    docker-credential-helpers
-    # colima
     podman
 
     # Kubernetes 工具
-    # containerd  # minikube 内置了 containerd，不需要单独安装
     minikube
-    # helm 相关工具由 nixhelm 提供
+    # helm # helm在macos上不支持用nix安装
     # helmfile
-    # kompose
-    # kube-linter
+    kompose
+    kube-linter # https://github.com/stackrox/kube-linter
+
     kubectx
     kubectl
   ];
