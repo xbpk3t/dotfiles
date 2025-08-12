@@ -1,0 +1,72 @@
+---
+
+version: '3'
+
+vars:
+  CONFIG_FILE: .cf-terraforming.yaml
+  ZONE_ID: 1c07a1b84d8273f4dfa6c3adce513f94
+  OUTPUT_DIR: ./terraform
+
+tasks:
+  default:
+    desc: Run all Terraform generation tasks
+    deps:
+      - init
+      - generate
+
+  init:
+    desc: Initialize the Terraform directory
+    cmds:
+      - mkdir -p {{.OUTPUT_DIR}}
+      - terraform init {{.OUTPUT_DIR}}
+
+  generate:
+    desc: Generate Terraform configurations for specified Cloudflare resources
+    dir: '{{.USER_WORKING_DIR}}'
+#    silent: true
+    cmds:
+      - echo "Generating Terraform configuration for Cloudflare"
+      - for:
+          - cloudflare_dns_record                       # DNS
+#          - cloudflare_hostname_tls_setting
+
+          - cloudflare_workers_script               # Workers 配置
+          - cloudflare_workers_kv_namespace         # Workers 配置
+#          - cloudflare_workers_cron_trigger
+          - cloudflare_workers_custom_domain
+#          - cloudflare_workers_deployment
+          - cloudflare_workers_for_platforms_dispatch_namespace
+          - cloudflare_workers_kv_namespace
+#          - cloudflare_workers_script_subdomain
+
+          - cloudflare_pages_project                # Workers 配置
+          - cloudflare_workers_for_platforms_dispatch_namespace  # Workers 配置
+          - cloudflare_d1_database                  # 数据库配置
+          - cloudflare_email_routing_address        # Mail 配置
+          - cloudflare_email_routing_catch_all      # Mail 配置
+          - cloudflare_email_routing_dns            # Mail 配置
+          - cloudflare_email_routing_rule           # Mail 配置
+          - cloudflare_email_routing_settings       # Mail 配置
+        cmd: |
+          output=$(cf-terraforming --verbose generate -c {{.CONFIG_FILE}} --resource-type "{{.ITEM}}" --zone {{.ZONE_ID}} 2>/dev/null)
+          if echo "$output" | grep -q "resource"; then
+          echo "$output" > {{.ITEM}}.tf
+          echo "Generated {{.ITEM}}.tf"
+          else
+          echo "No valid configuration for {{.ITEM}}, skipping file generation"
+          fi
+
+
+  clean:
+    desc: Clean up generated Terraform files
+    cmds:
+      - rm -rf {{.OUTPUT_DIR}}/*.tf
+
+  #  validate:
+  #    desc: Validate generated Terraform configurations
+  #    dir: {{.OUTPUT_DIR}}
+  #    cmds:
+  #      - terraform validate
+
+  apply:
+    cmd: tofu apply -auto-approve

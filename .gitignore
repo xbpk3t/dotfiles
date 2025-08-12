@@ -5,3 +5,7 @@
 
 # Nix store paths
 /nix/store/
+
+
+# tf
+/tf/.cf-terraforming.yaml

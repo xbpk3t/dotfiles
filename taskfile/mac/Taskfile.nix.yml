@@ -15,7 +15,7 @@ vars:
         echo "x86_64-darwin"
       fi
   # Default cleanup days for maintenance tasks
-  CLEANUP_DAYS: '{{.CLEANUP_DAYS | default "3"}}'
+  CLEANUP_DAYS: '{{.CLEANUP_DAYS | default "1"}}'
   # Nix store path
   NIX_STORE_PATH: '/nix/store'
   # System profile path

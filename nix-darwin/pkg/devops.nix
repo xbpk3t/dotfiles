@@ -7,6 +7,11 @@
     dotbot
     pre-commit
 
+
+    # CICD
+    terraform
+    cf-terraforming
+
     # 代码质量和分析
     shellcheck
     yamllint

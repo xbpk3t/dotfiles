@@ -15,7 +15,7 @@ vars:
 #- rclone check <local-path> r2:<bucket>/<r2-path> --dry-run --size-only --one-way # rclone check docs r2:hhacking/docs --size-only --one-way 上传完成后 check 文件是否全部上传
 #- rclone sync r2:<bucket> <local-path> # 用来下载远程，需要注意的是因为sync命令的本质是mapping，所以会删掉该文件夹下其他文件，一定要注意。另外，上面的r2指的是rclone.conf中的group key
 #- rclone delete --dry-run r2:hhacking/x # 用来删除指定文件夹，cloudflare不支持该操作
-#- rclone purge
+#- rclone purge 清空整个bucket
 #- rclone mkdir
 #- rclone rmdir
 #- rclone rmdirs

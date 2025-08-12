@@ -16,7 +16,7 @@ includes:
   wrangler: taskfile/devops/Taskfile.wrangler.yml
   rclone: taskfile/devops/Taskfile.rclone.yml
   tcpdump: taskfile/devops/Taskfile.tcpdump.yml
-  tofu: taskfile/devops/Taskfile.tofu.yml
+  tf: taskfile/devops/Taskfile.tf.yml
   #  gz: taskfile/go/Taskfile.gz.yml # TODO 这个有bug暂时注释掉
   mk: taskfile/k8s/Taskfile.minikube.yml
   dc: taskfile/k8s/Taskfile.docker-compose.yml

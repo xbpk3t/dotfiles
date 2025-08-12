@@ -107,8 +107,6 @@ repos:
       - id: terraform_fmt
         args:
           - --args=-diff
-      - id: terraform_docs
-      - id: terraform_tflint
 
   #  - repo: local
   #    hooks:

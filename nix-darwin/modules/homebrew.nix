@@ -4,6 +4,9 @@
   # 保留部分 GUI 应用使用 Homebrew
   homebrew = {
     enable = true;
+    taps = [
+     "kilvn/homebrew-schedule"
+    ];
     casks = [
       "alfred"
       "goland"

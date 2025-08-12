@@ -146,6 +146,45 @@
       }
     ];
 
+    # 安装常用插件
+    plugins = {
+      # 文件树插件，支持 Git 状态显示
+      nvim-tree = {
+        enable = true;
+        openOnSetup = false; # 启动时不自动打开
+        git.enable = true; # 启用 Git 集成
+      };
+
+      # 模糊查找插件，依赖系统中的 fzf 工具
+      fzf-vim = {
+        enable = true;
+      };
+
+      # 语法高亮和代码解析
+      treesitter = {
+        enable = true;
+        ensureInstalled = [ "c" "lua" "python" "javascript" "nix" ]; # 指定语言
+        indent = true;
+      };
+
+      # 状态栏美化
+      lualine = {
+        enable = true;
+        theme = "auto"; # 自动适配主题
+      };
+
+      # 自动补全括号
+      autopairs = {
+        enable = true;
+      };
+    };
+
+    # 额外插件（如果需要自定义插件）
+    extraPlugins = with pkgs.vimPlugins; [
+      vim-sensible # 提供合理的默认配置
+      vim-commentary # 快速注释代码
+    ];
+
     # 额外配置
     extraConfigVim = ''
       " 中文支持增强设置
