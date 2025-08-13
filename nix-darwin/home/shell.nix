@@ -22,6 +22,7 @@
       vim = "LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 nvim";
       # zensh style aliases
       c = "clear";
+      docker = "podman";
     };
     # 启用zsh插件
     autosuggestion.enable = true;

@@ -20,12 +20,12 @@ obj.logger = hs.logger.new('ChromeTabLimit')
 --- ChromeTabLimit.enabled
 --- Variable
 --- 是否启用标签页限制功能
-obj.enabled = false
+obj.enabled = true
 
 --- ChromeTabLimit.maxTabs
 --- Variable
 --- 最大允许的标签页数量
-obj.maxTabs = 10
+obj.maxTabs = 20
 
 --- ChromeTabLimit.checkInterval
 --- Variable

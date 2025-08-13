@@ -9,7 +9,8 @@
 
 
     # CICD
-    terraform
+    ansible
+    opentofu
     cf-terraforming
 
     # 代码质量和分析

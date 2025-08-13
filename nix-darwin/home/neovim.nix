@@ -128,6 +128,22 @@
       { mode = "n"; key = "<leader>tn"; action = ":tabnew<CR>"; options.desc = "新建标签页"; }
       { mode = "n"; key = "<leader>tc"; action = ":tabclose<CR>"; options.desc = "关闭标签页"; }
       { mode = "n"; key = "<leader>to"; action = ":tabonly<CR>"; options.desc = "只保留当前标签页"; }
+
+      # 文件树操作
+      { mode = "n"; key = "<leader>e"; action = ":NvimTreeToggle<CR>"; options.desc = "切换文件树"; }
+      { mode = "n"; key = "<leader>o"; action = ":NvimTreeFocus<CR>"; options.desc = "聚焦文件树"; }
+
+      # LSP 操作
+      { mode = "n"; key = "gd"; action = "<cmd>lua vim.lsp.buf.definition()<CR>"; options.desc = "跳转到定义"; }
+      { mode = "n"; key = "gr"; action = "<cmd>lua vim.lsp.buf.references()<CR>"; options.desc = "查找引用"; }
+      { mode = "n"; key = "K"; action = "<cmd>lua vim.lsp.buf.hover()<CR>"; options.desc = "显示悬停信息"; }
+      { mode = "n"; key = "<leader>rn"; action = "<cmd>lua vim.lsp.buf.rename()<CR>"; options.desc = "重命名"; }
+      { mode = "n"; key = "<leader>ca"; action = "<cmd>lua vim.lsp.buf.code_action()<CR>"; options.desc = "代码操作"; }
+
+      # Git 操作
+      { mode = "n"; key = "<leader>gs"; action = ":Gitsigns stage_hunk<CR>"; options.desc = "暂存当前块"; }
+      { mode = "n"; key = "<leader>gu"; action = ":Gitsigns undo_stage_hunk<CR>"; options.desc = "撤销暂存"; }
+      { mode = "n"; key = "<leader>gp"; action = ":Gitsigns preview_hunk<CR>"; options.desc = "预览更改"; }
     ];
 
     # 自动命令
@@ -148,6 +164,9 @@
 
     # 安装常用插件
     plugins = {
+      # 图标支持 (必须显式启用)
+      web-devicons.enable = true;
+
       # 文件树插件，支持 Git 状态显示
       nvim-tree = {
         enable = true;
@@ -155,34 +174,143 @@
         git.enable = true; # 启用 Git 集成
       };
 
-      # 模糊查找插件，依赖系统中的 fzf 工具
-      fzf-vim = {
-        enable = true;
-      };
-
       # 语法高亮和代码解析
       treesitter = {
         enable = true;
-        ensureInstalled = [ "c" "lua" "python" "javascript" "nix" ]; # 指定语言
-        indent = true;
+        settings = {
+          ensure_installed = [ "c" "lua" "python" "javascript" "nix" "bash" "json" "yaml" ];
+          indent.enable = true;
+          highlight.enable = true;
+        };
       };
 
       # 状态栏美化
       lualine = {
         enable = true;
-        theme = "auto"; # 自动适配主题
+        settings = {
+          options = {
+            theme = "auto"; # 自动适配主题
+            component_separators = { left = ""; right = ""; };
+            section_separators = { left = ""; right = ""; };
+          };
+        };
       };
 
-      # 自动补全括号
-      autopairs = {
+      # LSP 支持
+      lsp = {
         enable = true;
+        servers = {
+          # Nix 语言服务器
+          nil_ls.enable = true;
+          # Python 语言服务器
+          pyright.enable = true;
+          # JavaScript/TypeScript 语言服务器
+          ts_ls.enable = true;
+          # Lua 语言服务器
+          lua_ls.enable = true;
+          # Bash 语言服务器
+          bashls.enable = true;
+        };
+      };
+
+      # 自动补全
+      cmp = {
+        enable = true;
+        autoEnableSources = true;
+        settings = {
+          snippet.expand = "function(args) require('luasnip').lsp_expand(args.body) end";
+          sources = [
+            { name = "nvim_lsp"; }
+            { name = "luasnip"; }
+            { name = "buffer"; }
+            { name = "path"; }
+          ];
+          mapping = {
+            "<C-b>" = "cmp.mapping.scroll_docs(-4)";
+            "<C-f>" = "cmp.mapping.scroll_docs(4)";
+            "<C-Space>" = "cmp.mapping.complete()";
+            "<C-e>" = "cmp.mapping.abort()";
+            "<CR>" = "cmp.mapping.confirm({ select = true })";
+            "<Tab>" = "cmp.mapping(cmp.mapping.select_next_item(), {'i', 's'})";
+            "<S-Tab>" = "cmp.mapping(cmp.mapping.select_prev_item(), {'i', 's'})";
+          };
+        };
+      };
+
+      # 代码片段
+      luasnip.enable = true;
+
+      # Git 集成
+      gitsigns = {
+        enable = true;
+        settings = {
+          signs = {
+            add.text = "+";
+            change.text = "~";
+            delete.text = "_";
+            topdelete.text = "‾";
+            changedelete.text = "~";
+          };
+        };
+      };
+
+      # 模糊查找
+      telescope = {
+        enable = true;
+        keymaps = {
+          "<leader>ff" = "find_files";
+          "<leader>fg" = "live_grep";
+          "<leader>fb" = "buffers";
+          "<leader>fh" = "help_tags";
+        };
+      };
+
+      # 缩进线
+      indent-blankline = {
+        enable = true;
+        settings = {
+          indent = {
+            char = "│";
+          };
+          scope = {
+            enabled = true;
+          };
+        };
+      };
+
+      # 括号匹配高亮
+      rainbow-delimiters.enable = true;
+
+      # 自动配对括号
+      nvim-autopairs.enable = true;
+
+      # 注释插件
+      comment.enable = true;
+
+      # 终端集成
+      toggleterm = {
+        enable = true;
+        settings = {
+          size = 20;
+          open_mapping = "[[<c-\\>]]";
+          hide_numbers = true;
+          shade_filetypes = [];
+          shade_terminals = true;
+          shading_factor = 2;
+          start_in_insert = true;
+          insert_mappings = true;
+          persist_size = true;
+          direction = "float";
+          close_on_exit = true;
+          shell = "zsh";
+        };
       };
     };
 
     # 额外插件（如果需要自定义插件）
     extraPlugins = with pkgs.vimPlugins; [
       vim-sensible # 提供合理的默认配置
-      vim-commentary # 快速注释代码
+      # vim-commentary 已被 comment.nvim 替代
     ];
 
     # 额外配置
