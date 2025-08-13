@@ -22,6 +22,16 @@ if not success1 then
     print("AudioControl 错误:", err1)
 end
 
+local success2, err2 = pcall(function()
+    hs.loadSpoon("ChromeTabLimit")
+    spoon.ChromeTabLimit:start()
+end)
+if not success2 then
+    hs.alert.show("ChromeTabLimit 加载失败")
+    print("ChromeTabLimit 错误:", err2)
+end
+
+
 -- 任务列表 Spoon
 local success3, err3 = pcall(function()
     hs.loadSpoon("TaskList")
@@ -31,6 +41,9 @@ if not success3 then
     hs.alert.show("TaskList 加载失败")
     print("TaskList 错误:", err3)
 end
+
+
+
 
 
 -- TODO 把指定APP放到指定monitor 的组合动作 [dotfiles/hammerspoon/spectacle.lua at master · rkalis/dotfiles](https://github.com/rkalis/dotfiles/blob/master/hammerspoon/spectacle.lua)

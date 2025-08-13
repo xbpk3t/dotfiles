@@ -2,16 +2,16 @@ fail_fast: false
 default_stages: [pre-commit, pre-push]
 
 repos:
-# Disabled meta hooks due to nix environment compatibility issues
-#  - repo: meta
-#    hooks:
-#      - id: identity
-#        exclude: ^/nix/store/
-#      - id: check-useless-excludes
-#        exclude: ^/nix/store/
+  # Disabled meta hooks due to nix environment compatibility issues
+  #  - repo: meta
+  #    hooks:
+  #      - id: identity
+  #        exclude: ^/nix/store/
+  #      - id: check-useless-excludes
+  #        exclude: ^/nix/store/
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: check-toml
       - id: end-of-file-fixer
@@ -50,15 +50,15 @@ repos:
         stages: [pre-push]
 
   - repo: https://github.com/rhysd/actionlint
-    rev: v1.6.25
+    rev: v1.7.7
     hooks:
       - id: actionlint
 
-#  - repo: https://github.com/shellcheck-py/shellcheck-py
-#    rev: v0.10.0.1
-#    hooks:
-#      - id: shellcheck
-#        types: [shell]
+  #  - repo: https://github.com/shellcheck-py/shellcheck-py
+  #    rev: v0.10.0.1
+  #    hooks:
+  #      - id: shellcheck
+  #        types: [shell]
 
   #  - repo: https://github.com/pre-commit/mirrors-eslint
   #    rev: v9.29.0
@@ -88,7 +88,7 @@ repos:
         language: python
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.5.0
+    rev: v0.12.8
     hooks:
       - id: ruff
         types: [python]
@@ -100,10 +100,11 @@ repos:
     hooks:
       - id: gitleaks
         name: Scan Secrets
-        entry: gitleaks detect --source . -v
+        entry: gitleaks detect --source . -v && gitleaks dir . -v
+
 
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.99.4
+    rev: v1.100.0
     hooks:
       - id: terraform_fmt
         args:
@@ -119,13 +120,13 @@ repos:
   #        files: ^components/dashboard/
 
   - repo: https://github.com/hadolint/hadolint
-    rev: v2.12.0
+    rev: v2.13.1-beta
     hooks:
       - id: hadolint
 
 
   - repo: https://github.com/golangci/golangci-lint
-    rev: v2.1.6
+    rev: v2.3.1
     hooks:
       - id: golangci-lint-config-verify
       - id: golangci-lint
@@ -135,7 +136,7 @@ repos:
       - id: golangci-lint-full
 
   - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v2.1.2
+    rev: v4.0.0-alpha.8
     hooks:
       - id: prettier
         files: ^docs/

@@ -8,3 +8,11 @@ tasks:
   # [jsdelivr/globalping-cli: A simple CLI tool to run networking commands remotely from hundreds of globally distributed servers](https://github.com/jsdelivr/globalping-cli)
   global-ping:
     cmd: globalping ping {{.CLI_ARGS}}
+
+  # [xykt/NetQuality: 网络质量检测脚本 - Network Quality Check Script](https://github.com/xykt/NetQuality) 一键检测网络质量的开源脚本。这是一个方便的网络质量测试脚本，能够快速评估网络质量和性能，支持中英双语、三网 TCP 大包延迟、回程路由、网速测试、国际互联等功能。
+  NetQuality:
+    cmd: podman run --rm --net=host -it xykt/check -N && docker rmi xykt/check > /dev/null 2>&1
+
+  # [oneclickvirt/ecs](https://github.com/oneclickvirt/ecs) 融合怪脚本。VPS主机必用工具。
+  ecs:
+    cmd: podman run --rm spiritlhl/goecs:latest -menu=false -l zh

@@ -71,3 +71,8 @@ tasks:
 #    preconditions:
 #      - ansible-playbook -v playbook/centos.yml --list-hosts # 查看脚本影响到的hosts
 #      - ansible-playbook --check playbook/centos.yml -i hosts # 预执行，查看playbook语法是否正确，以及在目标服务器上是否能够执行成功;(但是并不保证一定能够执行成功)
+
+
+
+
+  # [chusiang/ansible-managed-node.dockerfile: Building the Docker image with run the OpenSSH daemon and Python for Ansible.](https://github.com/chusiang/ansible-managed-node.dockerfile) 用来在本地玩ansible

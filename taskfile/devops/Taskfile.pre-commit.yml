@@ -69,7 +69,7 @@ tasks:
       if [ -n "{{.CLI_ARGS}}" ]; then
         pre-commit run {{.CLI_ARGS}}
       else
-        SELECTED=$(gum choose "yamllint" "markdownlint")
+        SELECTED=$(gum choose "yamllint" "markdownlint" "gitleaks")
         if [[ -n "$SELECTED" ]]; then
           pre-commit run "$SELECTED"
         fi
