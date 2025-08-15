@@ -30,7 +30,7 @@
       # 时间配置
       # "loginwindow.GuestEnabled" = false; # 此选项在新版本中不可用
       AppleICUForce24HourTime = true;
-      AppleInterfaceStyle = "Dark";
+      AppleInterfaceStyle = null; # Dark or null
 
       # 键盘设置
       KeyRepeat = 2; # 设置为最快

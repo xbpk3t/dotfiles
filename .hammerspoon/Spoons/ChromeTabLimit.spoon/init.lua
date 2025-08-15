@@ -30,7 +30,7 @@ obj.maxTabs = 20
 --- ChromeTabLimit.checkInterval
 --- Variable
 --- 检查间隔（秒）
-obj.checkInterval = 5
+obj.checkInterval = 10
 
 --- ChromeTabLimit.chromeAppName
 --- Variable

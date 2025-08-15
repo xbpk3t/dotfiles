@@ -2,6 +2,9 @@
 version: '3'
 
 
+vars:
+  GALAXY_CLI: ansible-galaxy
+
 #- ansible all -m ping -u bruce # 检查所有的远程主机，是否以 bruce 用户创建了 ansible 主机可以访问的环境
 #- ansible all -a "/bin/echo hello" # 在所有的远程主机上，以当前 bash 的同名用户，在远程主机执行“echo bash”
 #- ansible all -m user -a "name=foo password=<crypted password here>" # 添加用户
@@ -17,14 +20,6 @@ version: '3'
 #- ansible all -m command -a 'echo Hello World on Docker.' # 确保 ssh 能够连接所有目标服务器 (请一定确认 ssh 连接已建立，因为未建立 ssh 连接也会成功)
 
 
-#  search	搜索角色/集合	ansible-galaxy search "nginx"
-#  install	安装角色或集合	ansible-galaxy install geerlingguy.nginx
-#  collection install	安装集合（如Docker管理）	ansible-galaxy collection install community.docker --force
-#  list	列出已安装的角色/集合	ansible-galaxy list
-#  init	初始化新角色目录结构	ansible-galaxy init my_role
-#  remove	删除本地角色/集合	ansible-galaxy remove geerlingguy.nginx
-#  info	查看角色/集合详情	ansible-galaxy info community.general
-#  install -r	按文件批量安装	ansible-galaxy install -r requirements.yml
 
 
 
@@ -51,28 +46,38 @@ tasks:
     cmds:
       - ansible-playbook -v playbook/centos.yml -i hosts # 执行并查看输出细节
 
-#      - # ansible-playbook -v playbook/helloworld.yml -i hosts
-#      - # ansible-playbook -v playbook/k8s.yml -i hosts
-#      - # ansible-playbook -v playbook/hk.yml -i hosts
-#      - ansible-playbook playbook/centos.yml -i hosts -l ip
-#      - ansible-playbook playbook/vps.yml -i hosts -l ip
-#
-#      - ansible-galaxy install gantsign.oh-my-zsh # 需要先fetch remote roles
-#
-#      # [Ansible Galaxy - samdoran.caddy](https://galaxy.ansible.com/ui/standalone/roles/samdoran/caddy/)
-#      - ansible-galaxy role install samdoran.caddy
-#
-#      # [gantsign/ansible-role-oh-my-zsh: Ansible role for installing and configuring oh-my-zsh](https://github.com/gantsign/ansible-role-oh-my-zsh)
+  #      - # ansible-playbook -v playbook/helloworld.yml -i hosts
+  #      - # ansible-playbook -v playbook/k8s.yml -i hosts
+  #      - # ansible-playbook -v playbook/hk.yml -i hosts
+  #      - ansible-playbook playbook/centos.yml -i hosts -l ip
+  #      - ansible-playbook playbook/vps.yml -i hosts -l ip
+  #
+  #      - ansible-galaxy install gantsign.oh-my-zsh # 需要先fetch remote roles
+  #
+  #      # [Ansible Galaxy - samdoran.caddy](https://galaxy.ansible.com/ui/standalone/roles/samdoran/caddy/)
+  #      - ansible-galaxy role install samdoran.caddy
+  #
 
-#      # [Ansible Galaxy - fesaille.gh](https://galaxy.ansible.com/ui/standalone/roles/fesaille/gh/)
-#      - ansible-galaxy role install fesaille.gh
-#
-#      - ansible asb -m copy -a "src=/home/wfq/playbook/pb_shell.sh dest=/home/wfq/playbook/" # 把文件cp到目标机器
-#    preconditions:
-#      - ansible-playbook -v playbook/centos.yml --list-hosts # 查看脚本影响到的hosts
-#      - ansible-playbook --check playbook/centos.yml -i hosts # 预执行，查看playbook语法是否正确，以及在目标服务器上是否能够执行成功;(但是并不保证一定能够执行成功)
+  #      # [Ansible Galaxy - fesaille.gh](https://galaxy.ansible.com/ui/standalone/roles/fesaille/gh/)
+  #      - ansible-galaxy role install fesaille.gh
+  #
+  #      - ansible asb -m copy -a "src=/home/wfq/playbook/pb_shell.sh dest=/home/wfq/playbook/" # 把文件cp到目标机器
+  #    preconditions:
+  #      - ansible-playbook -v playbook/centos.yml --list-hosts # 查看脚本影响到的hosts
+  #      - ansible-playbook --check playbook/centos.yml -i hosts # 预执行，查看playbook语法是否正确，以及在目标服务器上是否能够执行成功;(但是并不保证一定能够执行成功)
+
+  #  search
+  #  install
+  #  collection install	安装集合（如Docker管理）	ansible-galaxy collection install community.docker --force
+  #  list	列出已安装的角色/集合	ansible-galaxy list
+  #  init	初始化新角色目录结构	ansible-galaxy init my_role
+  #  remove	删除本地角色/集合	ansible-galaxy remove geerlingguy.nginx
+  #  info	查看角色/集合详情	ansible-galaxy info community.general
+  #  install -r	按文件批量安装	ansible-galaxy install -r requirements.yml
 
 
 
 
   # [chusiang/ansible-managed-node.dockerfile: Building the Docker image with run the OpenSSH daemon and Python for Ansible.](https://github.com/chusiang/ansible-managed-node.dockerfile) 用来在本地玩ansible
+  setup:
+    cmd: docker run --name server1 -d -P chusiang/ansible-managed-node:centos-7

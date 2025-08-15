@@ -4,7 +4,7 @@ version: '3'
 # Converted from rich-demo Justfile with additional migration functionality
 
 vars:
-  NIX_DARWIN_DIR: '{{.ROOT_DIR}}/../../nix-darwin'
+  NIX_DIR: './nix'
   HOSTNAME:
     sh: scutil --get ComputerName | tr ' ' '-' | tr '[:upper:]' '[:lower:]'
   SYSTEM:
@@ -25,12 +25,12 @@ tasks:
   default:
     cmd: sudo darwin-rebuild switch --flake .
     interactive: true
-    dir: ~/.config/nix-darwin
+    dir: '{{.NIX_DIR}}'
 
 
   darwin:
     desc: "Build and switch to nix-darwin configuration"
-    dir: '{{.NIX_DARWIN_DIR}}'
+    dir: '{{.NIX_DIR}}'
     cmds:
       - echo "🚀 Building nix-darwin configuration for {{.HOSTNAME}} ({{.SYSTEM}})..."
       - nix build .#darwinConfigurations.{{.HOSTNAME}}.system --extra-experimental-features 'nix-command flakes'
@@ -40,7 +40,7 @@ tasks:
 
   darwin-debug:
     desc: "Build and switch with verbose output for debugging"
-    dir: '{{.NIX_DARWIN_DIR}}'
+    dir: '{{.NIX_DIR}}'
     cmds:
       - echo "🐛 Building nix-darwin configuration with debug output..."
       - nix build .#darwinConfigurations.{{.HOSTNAME}}.system --show-trace --verbose --extra-experimental-features 'nix-command flakes'
@@ -107,13 +107,13 @@ tasks:
   # Nix related commands
   update:
     desc: "Update all flake inputs"
-    dir: '{{.NIX_DARWIN_DIR}}'
+    dir: '{{.NIX_DIR}}'
     cmds:
       - nix flake update
 
   update-input:
     desc: "Update specific flake input (usage: task nix:update-input INPUT=nixpkgs)"
-    dir: '{{.NIX_DARWIN_DIR}}'
+    dir: '{{.NIX_DIR}}'
     cmds:
       - nix flake update "{{.INPUT}}"
     requires:
@@ -126,7 +126,7 @@ tasks:
 
   repl:
     desc: "Open a nix repl with the flake"
-    dir: '{{.NIX_DARWIN_DIR}}'
+    dir: '{{.NIX_DIR}}'
     cmds:
       - nix repl -f flake:nixpkgs
 
@@ -182,7 +182,7 @@ tasks:
 
   fmt:
     desc: "Format nix files in the repository"
-    dir: '{{.NIX_DARWIN_DIR}}'
+    dir: '{{.NIX_DIR}}'
     cmds:
       - nix fmt
 
@@ -198,14 +198,14 @@ tasks:
       - echo "System Information:"
       - echo "  Hostname:" "{{.HOSTNAME}}"
       - echo "  System:" "{{.SYSTEM}}"
-      - echo "  Nix-Darwin Dir:" "{{.NIX_DARWIN_DIR}}"
+      - echo "  Nix Dir:" "{{.NIX_DIR}}"
       - echo "  Current User:" "$(whoami)"
       - echo "  macOS Version:" "$(sw_vers -productVersion)"
       - echo "  Nix Version:" "$(nix --version 2>/dev/null || echo 'not found')"
 
   check-config:
     desc: "Check nix-darwin configuration syntax"
-    dir: '{{.NIX_DARWIN_DIR}}'
+    dir: '{{.NIX_DIR}}'
     cmds:
       - echo "🔍 Checking configuration syntax..."
       - nix flake check
