@@ -98,8 +98,7 @@
       ./modules/host-users.nix
       ./modules/stylix.nix
       ./pkg
-      # TODO: Add shared modules after testing
-      # ./modules/shared
+      ./modules/shared
     ];
 
   in {

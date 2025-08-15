@@ -1,0 +1,126 @@
+version: '3'
+
+vars:
+  COMPOSE_FILE: "../../devenv/docker-compose.yml"
+  COMPOSE_CMD: '{{.COMPOSE_CMD | default "podman-compose"}}'
+  ENV_FILE: '{{.ENV_FILE | default "../../devenv/.env"}}'
+  COMPOSE_FULL_CMD: '{{.COMPOSE_CMD | default "podman-compose"}} -f {{.COMPOSE_FILE}} --env-file {{.ENV_FILE}}'
+
+tasks:
+  dc-up:
+    desc: Build images and start all services
+    cmds:
+      - "{{.COMPOSE_FULL_CMD}} --profile full up -d --build"
+
+  dc-down:
+    desc: Stop and remove all containers
+    cmds:
+      - "{{.COMPOSE_FULL_CMD}} down"
+
+  dc-logs:
+    desc: View service logs (real-time tracking)
+    cmds:
+      - "{{.COMPOSE_FULL_CMD}} logs -tf --tail {{.LINES | default 50}} {{.SERVICE}}"
+
+  dc-exec:
+    desc: Enter container terminal
+    cmds:
+      - "{{.COMPOSE_FULL_CMD}} exec {{.SERVICE}} {{.SHELL | default \"/bin/bash\"}}"
+
+  dc-ps:
+    desc: View running container status
+    cmds:
+      - "{{.COMPOSE_FULL_CMD}} ps"
+
+  dc-config:
+    desc: Validate and view compose configuration
+    cmds:
+      - "{{.COMPOSE_FULL_CMD}} config"
+
+  dev:
+    desc: Start development environment (golang + basic databases)
+    cmds:
+      - "{{.COMPOSE_FULL_CMD}} --profile dev --profile db up -d"
+
+  db:
+    desc: Start database services (mysql, redis, etcd)
+    cmds:
+      - "{{.COMPOSE_FULL_CMD}} --profile db up -d"
+
+  monitor:
+    desc: Start monitoring services (prometheus, grafana, alertmanager)
+    cmds:
+      - "{{.COMPOSE_FULL_CMD}} --profile monitor up -d"
+
+  pag:
+    desc: Start PAG monitoring stack (prometheus, alertmanager, grafana, nodeexporter, cadvisor, pushgateway, caddy)
+    cmds:
+      - "{{.COMPOSE_FULL_CMD}} --profile pag up -d"
+
+  trace:
+    desc: Start tracing (jaeger)
+    cmds:
+      - "{{.COMPOSE_FULL_CMD}} --profile trace up -d"
+
+  ms:
+    desc: Start microservice components (etcd, dtm)
+    cmds:
+      - "{{.COMPOSE_FULL_CMD}} --profile ms up -d"
+
+  analytics:
+    desc: Start analytics database (clickhouse)
+    cmds:
+      - "{{.COMPOSE_FULL_CMD}} --profile analytics up -d"
+
+  full:
+    desc: Start all services
+    cmds:
+      - "{{.COMPOSE_FULL_CMD}} --profile full up -d"
+
+  pag-dev:
+    desc: PAG monitoring development environment (dev + db + pag)
+    cmds:
+      - "{{.COMPOSE_FULL_CMD}} --profile dev --profile db --profile pag up -d"
+
+  init:
+    desc: Initialize development environment (create .env file)
+    cmds:
+      - cp ../../devenv/.env.example {{.ENV_FILE}}
+      - echo "Please edit {{.ENV_FILE}} to configure your environment variables"
+
+  init-project:
+    desc: Initialize project-specific environment configuration
+    cmds:
+      - cp ../../devenv/.env.example {{.ENV_FILE}}
+      - echo "Created project environment config file {{.ENV_FILE}}"
+
+  clean:
+    desc: Clean all containers, networks and volumes
+    cmds:
+      - "{{.COMPOSE_FULL_CMD}} down -v --remove-orphans"
+      - "podman system prune -f"
+
+  health:
+    desc: Check all service health status
+    cmds:
+      - "{{.COMPOSE_FULL_CMD}} ps --format table"
+
+  stop-pag:
+    desc: Stop PAG monitoring stack
+    cmds:
+      - "{{.COMPOSE_FULL_CMD}} stop prometheus grafana alertmanager nodeexporter cadvisor pushgateway caddy"
+
+  logs-prometheus:
+    desc: View Prometheus logs
+    cmds:
+      - "{{.COMPOSE_FULL_CMD}} logs -f prometheus"
+
+  logs-grafana:
+    desc: View Grafana logs
+    cmds:
+      - "{{.COMPOSE_FULL_CMD}} logs -f grafana"
+
+  logs-alertmanager:
+    desc: View AlertManager logs
+    cmds:
+      - "{{.COMPOSE_FULL_CMD}} logs -f alertmanager"

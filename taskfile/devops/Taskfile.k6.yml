@@ -1,1 +1,114 @@
 ---
+version: '3'
+
+vars:
+  # 默认测试脚本名称
+  SCRIPT: "script.js"
+  # 虚拟用户数
+  VUS: "10"
+  # 测试持续时间
+  DURATION: "30s"
+  # 输出文件
+  OUTPUT_FILE: "results.json"
+  # 是否启用 Web Dashboard
+  ENABLE_DASHBOARD: "false"
+  # 本地监听地址
+  ADDRESS: "localhost:5665"
+
+tasks:
+  default:
+    desc: "显示 k6 帮助信息"
+    cmds:
+      - k6
+
+  install:
+    desc: "在 macOS 上使用 brew 安装 k6"
+    cmds:
+      - brew install k6
+    preconditions:
+      - sh: 'command -v brew'
+        msg: "需要安装 Homebrew"
+
+  run:
+    desc: "运行默认测试脚本"
+    cmds:
+      - |
+        {{if eq .ENABLE_DASHBOARD "true"}}K6_WEB_DASHBOARD=true {{end}}k6 run {{.SCRIPT}}
+
+  run-local:
+    desc: "使用指定的虚拟用户数和持续时间运行测试"
+    cmds:
+      - |
+        {{if eq .ENABLE_DASHBOARD "true"}}K6_WEB_DASHBOARD=true {{end}}k6 run --vus {{.VUS}} --duration {{.DURATION}} {{.SCRIPT}}
+
+  run-stages:
+    desc: "运行多阶段测试（在脚本中定义 stages）"
+    cmds:
+      - |
+        {{if eq .ENABLE_DASHBOARD "true"}}K6_WEB_DASHBOARD=true {{end}}k6 run {{.SCRIPT}}
+
+  run-with-output:
+    desc: "运行测试并将结果输出到文件"
+    cmds:
+      - |
+        k6 run {{.SCRIPT}} --out json={{.OUTPUT_FILE}}
+
+  dashboard:
+    desc: "启用 Web 仪表板运行测试"
+    cmds:
+      - K6_WEB_DASHBOARD=true k6 run {{.SCRIPT}}
+    vars:
+      ENABLE_DASHBOARD: "true"
+
+  cloud:
+    desc: "在 k6 Cloud 上运行测试"
+    cmds:
+      - k6 cloud {{.SCRIPT}}
+    preconditions:
+      - sh: 'command -v k6'
+        msg: "需要安装 k6"
+
+  inspect:
+    desc: "检查脚本或存档"
+    cmds:
+      - k6 inspect {{.SCRIPT}}
+
+  inspect-with-thresholds:
+    desc: "检查脚本中的阈值"
+    cmds:
+      - k6 inspect --thresholds {{.SCRIPT}}
+
+  status:
+    desc: "显示测试状态"
+    cmds:
+      - k6 status
+
+  stats:
+    desc: "显示测试指标"
+    cmds:
+      - k6 stats
+
+  pause:
+    desc: "暂停正在运行的测试"
+    cmds:
+      - k6 pause
+
+  resume:
+    desc: "恢复已暂停的测试"
+    cmds:
+      - k6 resume
+
+  scale:
+    desc: "扩展正在运行的测试"
+    cmds:
+      - k6 scale --vus {{.VUS}} --duration {{.DURATION}}
+
+  version:
+    desc: "显示 k6 版本"
+    cmds:
+      - k6 version
+
+  help:
+    desc: "显示 k6 帮助"
+    cmds:
+      - k6 help

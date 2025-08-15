@@ -9,3 +9,4 @@
 
 # tf
 /tf/.cf-terraforming.yaml
+/devenv/.env

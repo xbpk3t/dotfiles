@@ -15,13 +15,13 @@
     };
 
     # Ops user (from ansible disk.yml)
-    ops = {
-      description = "Operations user";
-      group = "ops";
-      shell = "/bin/bash";
-      createHome = true;
-      # Platform-specific configuration in platform modules
-    };
+#    ops = {
+#      description = "Operations user";
+#      group = "ops";
+#      shell = "/bin/bash";
+#      createHome = true;
+#      # Platform-specific configuration in platform modules
+#    };
   };
 
   # Enable zsh system-wide

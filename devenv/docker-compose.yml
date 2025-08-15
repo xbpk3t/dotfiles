@@ -1,0 +1,324 @@
+version: '3.8'
+
+# YAML 锚点定义 - 公共配置模板
+x-common-variables: &common-variables
+  TZ: ${TZ:-Asia/Shanghai}
+
+x-common-logging: &common-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+x-common-restart: &common-restart
+  restart: unless-stopped
+
+x-backend-network: &backend-network
+  networks:
+    - backend
+
+# 网络配置
+networks:
+  backend:
+    driver: ${NETWORKS_DRIVER:-bridge}
+    name: devenv_backend
+
+# 卷配置
+volumes:
+  mysql_data:
+    name: devenv_mysql_data
+  redis_data:
+    name: devenv_redis_data
+  clickhouse_data:
+    name: devenv_clickhouse_data
+  clickhouse_logs:
+    name: devenv_clickhouse_logs
+  prometheus_data:
+    name: devenv_prometheus_data
+  grafana_data:
+    name: devenv_grafana_data
+
+# 服务容器配置
+services:
+#  # 开发环境 - Golang
+#  golang:
+#    profiles: ["dev", "full"]
+#    build:
+#      context: ./golang
+#    container_name: devenv_golang
+#    environment:
+#      <<: *common-variables
+#    privileged: true
+#    volumes:
+#      - ${CODE_PATH_HOST:-../}:/usr/src/code
+#    ports:
+#      - "${GOLANG_PORT_8000:-8000}:8000"
+#      - "${GOLANG_PORT_8001:-8001}:8001"
+#      - "${GOLANG_PORT_8002:-8002}:8002"
+#      - "${GOLANG_PORT_8003:-8003}:8003"
+#      - "${GOLANG_PORT_9000:-9000}:9000"
+#      - "${GOLANG_PORT_9001:-9001}:9001"
+#      - "${GOLANG_PORT_9002:-9002}:9002"
+#      - "${GOLANG_PORT_9003:-9003}:9003"
+#    stdin_open: true
+#    tty: true
+#    <<: [*backend-network, *common-restart]
+#    logging: *common-logging
+
+  # 数据库服务
+  etcd:
+    profiles: ["db", "full", "ms"]
+    image: bitnami/etcd:latest
+    container_name: devenv_etcd
+    environment:
+      <<: *common-variables
+      ALLOW_NONE_AUTHENTICATION: true
+      ETCD_ADVERTISE_CLIENT_URLS: http://etcd:2379
+    ports:
+      - "${ETCD_PORT:-2379}:2379"
+    <<: [*backend-network, *common-restart]
+    logging: *common-logging
+    healthcheck:
+      test: ["CMD", "etcdctl", "endpoint", "health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  mysql:
+    profiles: ["db", "full"]
+    image: mysql:${MYSQL_VERSION:-5.7}
+    container_name: devenv_mysql
+    environment:
+      <<: *common-variables
+      MYSQL_USER: ${MYSQL_USERNAME:-devuser}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-devpass}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpass}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-devdb}
+    command: [
+      '--character-set-server=utf8mb4',
+      '--collation-server=utf8mb4_unicode_ci',
+      '--default-authentication-plugin=mysql_native_password'
+    ]
+    privileged: true
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    <<: [*backend-network, *common-restart]
+    logging: *common-logging
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  redis:
+    profiles: ["db", "full", "cache"]
+    image: redis:${REDIS_VERSION:-7-alpine}
+    container_name: devenv_redis
+    environment:
+      <<: *common-variables
+    volumes:
+      - redis_data:/data
+      - ./configs/redis.sh:/usr/local/bin/redis-optimize.sh:ro
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    <<: [*backend-network, *common-restart]
+    logging: *common-logging
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # 监控服务 - PAG Stack (Prometheus, AlertManager, Grafana)
+  prometheus:
+    profiles: ["monitor", "full", "pag"]
+    image: prom/prometheus:${PROMETHEUS_VERSION:-v2.17.1}
+    container_name: devenv_prometheus
+    environment:
+      <<: *common-variables
+    volumes:
+      - ./configs/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./configs/prometheus/alert.rules:/etc/prometheus/alert.rules:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=${PROMETHEUS_RETENTION:-200h}'
+      - '--web.enable-lifecycle'
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    <<: [*backend-network, *common-restart]
+    logging: *common-logging
+
+  alertmanager:
+    profiles: ["monitor", "full", "pag"]
+    image: prom/alertmanager:${ALERTMANAGER_VERSION:-v0.20.0}
+    container_name: devenv_alertmanager
+    environment:
+      <<: *common-variables
+    volumes:
+      - ./configs/alertmanager/alertmanager.yml:/etc/alertmanager/config.yml:ro
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+      - '--storage.path=/alertmanager'
+    ports:
+      - "${ALERTMANAGER_PORT:-9093}:9093"
+    <<: [*backend-network, *common-restart]
+    logging: *common-logging
+
+  grafana:
+    profiles: ["monitor", "full", "pag"]
+    image: grafana/grafana:${GRAFANA_VERSION:-6.7.2}
+    container_name: devenv_grafana
+    environment:
+      <<: *common-variables
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./configs/grafana:/etc/grafana/provisioning:ro
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+    <<: [*backend-network, *common-restart]
+    logging: *common-logging
+
+  # Node Exporter - 主机指标收集器
+  nodeexporter:
+    profiles: ["monitor", "full", "pag"]
+    image: prom/node-exporter:${NODE_EXPORTER_VERSION:-v0.18.1}
+    container_name: devenv_nodeexporter
+    environment:
+      <<: *common-variables
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
+    ports:
+      - "${NODE_EXPORTER_PORT:-9100}:9100"
+    <<: [*backend-network, *common-restart]
+    logging: *common-logging
+
+  # cAdvisor - 容器指标收集器 (在 macOS + Podman 环境下暂时禁用)
+  # cadvisor:
+  #   profiles: ["monitor", "full", "pag"]
+  #   image: gcr.io/google-containers/cadvisor:${CADVISOR_VERSION:-v0.34.0}
+  #   container_name: devenv_cadvisor
+  #   environment:
+  #     <<: *common-variables
+  #   volumes:
+  #     - /:/rootfs:ro
+  #     - /var/run:/var/run:rw
+  #     - /sys:/sys:ro
+  #     # 支持 Podman - 在 macOS 上使用 Podman 路径
+  #     - /var/lib/containers:/var/lib/containers:ro
+  #   ports:
+  #     - "${CADVISOR_PORT:-8080}:8080"
+  #   <<: [*backend-network, *common-restart]
+  #   logging: *common-logging
+
+  # Pushgateway - 推送网关
+  pushgateway:
+    profiles: ["monitor", "full", "pag"]
+    image: prom/pushgateway:${PUSHGATEWAY_VERSION:-v1.2.0}
+    container_name: devenv_pushgateway
+    environment:
+      <<: *common-variables
+    ports:
+      - "${PUSHGATEWAY_PORT:-9091}:9091"
+    <<: [*backend-network, *common-restart]
+    logging: *common-logging
+
+  # Caddy - 反向代理和认证
+  caddy:
+    profiles: ["monitor", "full", "pag"]
+    image: stefanprodan/caddy:${CADDY_VERSION:-latest}
+    container_name: devenv_caddy
+    environment:
+      <<: *common-variables
+      ADMIN_USER: ${CADDY_ADMIN_USER:-admin}
+      ADMIN_PASSWORD: ${CADDY_ADMIN_PASSWORD:-admin}
+    volumes:
+      - ./configs/caddy:/etc/caddy:ro
+    ports:
+      - "${CADDY_GRAFANA_PORT:-3001}:3000"
+      - "${CADDY_PROMETHEUS_PORT:-9099}:9090"
+      - "${CADDY_ALERTMANAGER_PORT:-9094}:9093"
+      - "${CADDY_PUSHGATEWAY_PORT:-9092}:9091"
+    depends_on:
+      - prometheus
+      - grafana
+      - alertmanager
+      - pushgateway
+    <<: [*backend-network, *common-restart]
+    logging: *common-logging
+
+  # 链路追踪
+  jaeger:
+    profiles: ["trace", "full"]
+    image: jaegertracing/all-in-one:${JAEGER_VERSION:-1.28}
+    container_name: devenv_jaeger
+    environment:
+      <<: *common-variables
+      COLLECTOR_OTLP_ENABLED: true
+    ports:
+      - "${JAEGER_PORT:-16686}:16686"
+      - "${JAEGER_OTLP_PORT:-4317}:4317"
+      - "${JAEGER_OTLP_HTTP_PORT:-4318}:4318"
+    <<: [*backend-network, *common-restart]
+    logging: *common-logging
+
+  # 分布式事务管理
+  dtm:
+    profiles: ["ms", "full"]
+    image: yedf/dtm:latest
+    container_name: devenv_dtm
+    environment:
+      <<: *common-variables
+    entrypoint:
+      - "/app/dtm/dtm"
+      - "-c=/app/dtm/configs/config.yaml"
+    volumes:
+      - ./configs/dtm-config.yml:/app/dtm/configs/config.yaml:ro
+    ports:
+      - "${DTM_HTTP_PORT:-36789}:36789"
+      - "${DTM_GRPC_PORT:-36790}:36790"
+    depends_on:
+      etcd:
+        condition: service_healthy
+    <<: [*backend-network, *common-restart]
+    logging: *common-logging
+
+  # 分析数据库
+  clickhouse:
+    profiles: ["analytics", "full"]
+    image: clickhouse/clickhouse-server:${CLICKHOUSE_VERSION:-23.8}
+    container_name: devenv_clickhouse
+    environment:
+      <<: *common-variables
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-gotomicro}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-clickhouse}
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    ports:
+      - "${CLICKHOUSE_HTTP_PORT:-8123}:8123"
+      - "${CLICKHOUSE_TCP_PORT:-9000}:9000"
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+      - clickhouse_logs:/var/log/clickhouse-server
+    <<: [*backend-network, *common-restart]
+    logging: *common-logging
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8123/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

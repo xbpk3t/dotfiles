@@ -16,18 +16,6 @@
     unzip
     rsync
     screen
-    tmux
-
-    # Network tools
-    net-tools
-    telnet
-    traceroute
-    bind # for dig, nslookup
-
-    # System monitoring
-    iotop
-    sysstat
-    lsof
 
     # Development tools
     gcc
@@ -41,14 +29,10 @@
     # Security tools
     openssl
 
-    # Process management
-    psmisc # killall, pstree, etc
-
     # Modern replacements (better than ansible versions)
     bat # better cat
     fd # better find
     ripgrep # better grep
-    exa # better ls
 
     # GitHub CLI (from ansible packages.yml)
     gh

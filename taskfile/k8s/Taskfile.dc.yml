@@ -1,0 +1,307 @@
+---
+version: '3'
+
+
+#- docker-compose logs -tf --tail 10
+#- docker-compose up --detach --build <container-name> # 在docker-compose中重新启动单个容器
+#- docker-compose down && docker-compose up --build -d
+#- docker compose up -d --build # 启动服务，重新编译镜像，最有用的命令
+#- docker compose build # 进行所需的服务镜像构建
+#- docker compose config # 查看docker-compose配置文件
+#- docker compose down # 停掉服务，删除容器，不删除镜像 docker stop container && docker rm container
+#- docker compose events # 接受服务之间的互动事件，如进行健康检查等
+#- docker compose exec # 进入容器，或者对某个容器执行命令
+#- docker compose images # 列出所有镜像
+#- docker compose top # 显示各个容器内运行的进程
+
+
+#- url: https://github.com/lavie/runlike
+#  des: 类似chrome 之于 copy as curl，用来一键生成非常复杂的docker run命令。快速获取 Docker 容器启动命令的工具。这是一个用于解析运行中容器的工具，可自动生成对应的 docker run 启动命令。它能够提取容器的配置信息，包括端口绑定、映射卷、环境变量、网络设置等，适用于复制、调试或迁移容器的场景。 # 具体情况如下，事情要从上周的一次事故说起，我们用 docker 部署的程序有一点问题，要马上回滚到上一个版本。这个 docker 是一个比较复杂的和 BPF 有关的程序，启动时候需要设置很多 mount 和 environments，docker run 的命令特别长。所以我用 Ansible 来配置好这些变量，然后启动 docker，一个实例要花费 3～5 分钟才能启动。同事突然说，某实例他手动启动了，当时我就震惊了，怎么手速这么快？！请教了一下，原来是用的 runlike 工具。这个工具的原理是，`docker inspect <container-name> | runlike --stdin` ，就会生成这个容器的 docker run 命令。
+
+
+#- url: https://github.com/containers/skopeo
+#  des: 一个命令行工具，用于在不同的容器镜像仓库之间复制、检查和删除容器镜像
+
+
+
+tasks:
+  # ===========================================
+  # 基础 Docker Compose 操作
+  # ===========================================
+
+  dc-up:
+    desc: 构建镜像并启动所有服务
+    dir: devenv
+    cmds:
+      - "{{.COMPOSE_CMD}} --profile full up -d --build"
+    vars:
+      COMPOSE_CMD: '{{.COMPOSE_CMD | default "podman-compose"}}'
+
+  dc-down:
+    desc: 停止并删除所有容器
+    dir: devenv
+    cmds:
+      - "{{.COMPOSE_CMD}} down"
+    vars:
+      COMPOSE_CMD: '{{.COMPOSE_CMD | default "podman-compose"}}'
+
+  dc-logs:
+    desc: 查看服务日志（实时跟踪）
+    dir: devenv
+    cmds:
+      - "{{.COMPOSE_CMD}} logs -tf --tail {{.LINES | default 50}} {{.SERVICE}}"
+    vars:
+      COMPOSE_CMD: '{{.COMPOSE_CMD | default "podman-compose"}}'
+
+  dc-exec:
+    desc: 进入容器终端
+    dir: devenv
+    cmds:
+      - "{{.COMPOSE_CMD}} exec {{.SERVICE}} {{.SHELL | default \"/bin/bash\"}}"
+    vars:
+      COMPOSE_CMD: '{{.COMPOSE_CMD | default "podman-compose"}}'
+
+  dc-ps:
+    desc: 查看运行中的容器状态
+    dir: devenv
+    cmds:
+      - "{{.COMPOSE_CMD}} ps"
+    vars:
+      COMPOSE_CMD: '{{.COMPOSE_CMD | default "podman-compose"}}'
+
+  dc-restart:
+    desc: 重启指定服务
+    dir: devenv
+    cmds:
+      - "{{.COMPOSE_CMD}} restart {{.SERVICE}}"
+    vars:
+      COMPOSE_CMD: '{{.COMPOSE_CMD | default "podman-compose"}}'
+
+  # ===========================================
+  # Profile 基础服务组合
+  # ===========================================
+
+  dev:
+    desc: 启动开发环境 (golang + 基础数据库)
+    dir: devenv
+    cmds:
+      - "{{.COMPOSE_CMD}} --profile dev --profile db up -d"
+    vars:
+      COMPOSE_CMD: '{{.COMPOSE_CMD | default "podman-compose"}}'
+
+  db:
+    desc: 启动数据库服务 (mysql, redis, etcd)
+    dir: devenv
+    cmds:
+      - "{{.COMPOSE_CMD}} --profile db up -d"
+    vars:
+      COMPOSE_CMD: '{{.COMPOSE_CMD | default "podman-compose"}}'
+
+  cache:
+    desc: 启动缓存服务 (redis)
+    dir: devenv
+    cmds:
+      - "{{.COMPOSE_CMD}} --profile cache up -d"
+    vars:
+      COMPOSE_CMD: '{{.COMPOSE_CMD | default "podman-compose"}}'
+
+  monitor:
+    desc: 启动监控服务 (prometheus, grafana)
+    cmds:
+      - "{{.COMPOSE_CMD}} --profile monitor up -d"
+    vars:
+      COMPOSE_CMD: '{{.COMPOSE_CMD | default "podman-compose"}}'
+
+  trace:
+    desc: 启动链路追踪 (jaeger)
+    cmds:
+      - "{{.COMPOSE_CMD}} --profile trace up -d"
+    vars:
+      COMPOSE_CMD: '{{.COMPOSE_CMD | default "podman-compose"}}'
+
+  ms:
+    desc: 启动微服务组件 (etcd, dtm)
+    cmds:
+      - "{{.COMPOSE_CMD}} --profile ms up -d"
+    vars:
+      COMPOSE_CMD: '{{.COMPOSE_CMD | default "podman-compose"}}'
+
+  analytics:
+    desc: 启动分析数据库 (clickhouse)
+    cmds:
+      - "{{.COMPOSE_CMD}} --profile analytics up -d"
+    vars:
+      COMPOSE_CMD: '{{.COMPOSE_CMD | default "podman-compose"}}'
+
+  full:
+    desc: 启动所有服务
+    cmds:
+      - "{{.COMPOSE_CMD}} --profile full up -d"
+    vars:
+      COMPOSE_CMD: '{{.COMPOSE_CMD | default "podman-compose"}}'
+
+  # ===========================================
+  # 高级操作任务
+  # ===========================================
+
+  dc-build:
+    desc: 重新构建指定服务镜像
+    cmds:
+      - "{{.COMPOSE_CMD}} build {{.SERVICE}}"
+    vars:
+      COMPOSE_CMD: '{{.COMPOSE_CMD | default "podman-compose"}}'
+
+  dc-pull:
+    desc: 拉取最新镜像
+    cmds:
+      - "{{.COMPOSE_CMD}} pull"
+    vars:
+      COMPOSE_CMD: '{{.COMPOSE_CMD | default "podman-compose"}}'
+
+  dc-config:
+    desc: 验证并查看 compose 配置
+    cmds:
+      - "{{.COMPOSE_CMD}} config"
+    vars:
+      COMPOSE_CMD: '{{.COMPOSE_CMD | default "podman-compose"}}'
+
+  dc-top:
+    desc: 显示容器内运行的进程
+    cmds:
+      - "{{.COMPOSE_CMD}} top {{.SERVICE}}"
+    vars:
+      COMPOSE_CMD: '{{.COMPOSE_CMD | default "podman-compose"}}'
+
+  dc-events:
+    desc: 实时显示容器事件
+    cmds:
+      - "{{.COMPOSE_CMD}} events"
+    vars:
+      COMPOSE_CMD: '{{.COMPOSE_CMD | default "podman-compose"}}'
+
+  # ===========================================
+  # 常用服务组合场景
+  # ===========================================
+
+  web-dev:
+    desc: Web开发环境 (dev + db + manage)
+    cmds:
+      - "{{.COMPOSE_CMD}} --profile dev --profile db --profile manage up -d"
+    vars:
+      COMPOSE_CMD: '{{.COMPOSE_CMD | default "podman-compose"}}'
+
+  api-dev:
+    desc: API开发环境 (dev + db + trace)
+    cmds:
+      - "{{.COMPOSE_CMD}} --profile dev --profile db --profile trace up -d"
+    vars:
+      COMPOSE_CMD: '{{.COMPOSE_CMD | default "podman-compose"}}'
+
+  micro-dev:
+    desc: 微服务开发环境 (dev + ms + trace + monitor)
+    cmds:
+      - "{{.COMPOSE_CMD}} --profile dev --profile ms --profile trace --profile monitor up -d"
+    vars:
+      COMPOSE_CMD: '{{.COMPOSE_CMD | default "podman-compose"}}'
+
+  data-dev:
+    desc: 数据开发环境 (db + analytics + manage)
+    cmds:
+      - "{{.COMPOSE_CMD}} --profile db --profile analytics --profile manage up -d"
+    vars:
+      COMPOSE_CMD: '{{.COMPOSE_CMD | default "podman-compose"}}'
+
+  # ===========================================
+  # 环境管理
+  # ===========================================
+
+  init:
+    desc: 初始化开发环境 (创建 .env 文件)
+    cmds:
+      - cp devenv/.env.example devenv/.env
+      - echo "请编辑 devenv/.env 文件来配置你的环境变量"
+
+  clean:
+    desc: 清理所有容器、网络和卷
+    cmds:
+      - "{{.COMPOSE_CMD}} down -v --remove-orphans"
+      - "{{.COMPOSE_CMD}} system prune -f"
+    vars:
+      COMPOSE_CMD: '{{.COMPOSE_CMD | default "podman-compose"}}'
+
+  reset:
+    desc: 重置环境 (停止所有服务并清理数据)
+    cmds:
+      - "{{.COMPOSE_CMD}} down -v --remove-orphans"
+      - "{{.COMPOSE_CMD}} --profile full up -d --build"
+    vars:
+      COMPOSE_CMD: '{{.COMPOSE_CMD | default "podman-compose"}}'
+
+  health:
+    desc: 检查所有服务健康状态
+    cmds:
+      - "{{.COMPOSE_CMD}} ps --format table"
+    vars:
+      COMPOSE_CMD: '{{.COMPOSE_CMD | default "podman-compose"}}'
+
+
+
+  # ===========================================
+  # 工具集成
+  # ===========================================
+
+  # [etolbakov/excalidocker-rs: Convert your docker-compose into excalidraw](https://github.com/etolbakov/excalidocker-rs)
+  dc2exd:
+    desc: 将 docker-compose 转换为 excalidraw 图表
+    status:
+      - command -v excalidocker
+    preconditions:
+      - sh: command -v excalidocker
+        msg: "请先安装 excalidocker: brew install etolbakov/taps/excalidocker"
+    cmds:
+      - cd devenv && excalidocker --input-path docker-compose.yml --output-path ../docs/devenv-architecture.excalidraw
+
+  # [kubernetes/kompose：将 Compose 转换为 Kubernetes](https://github.com/kubernetes/kompose)
+  kompose:
+    desc: 将 docker-compose 转换为 k8s 配置
+    status:
+      - command -v kompose
+    preconditions:
+      - sh: command -v kompose
+        msg: "请先安装 kompose: brew install kompose"
+    cmds:
+      - cd devenv && kompose convert
+
+# ===========================================
+# 使用说明和示例
+# ===========================================
+#
+# 基础用法:
+#   task dc:dev              # 启动开发环境
+#   task dc:db               # 只启动数据库服务
+#   task dc:manage           # 启动数据库管理工具
+#   task dc:full             # 启动所有服务
+#
+# 高级用法:
+#   task dc:web-dev          # Web开发场景
+#   task dc:api-dev          # API开发场景
+#   task dc:micro-dev        # 微服务开发场景
+#   task dc:data-dev         # 数据开发场景
+#
+# 环境变量:
+#   COMPOSE_CMD=docker-compose task dc:dev    # 使用 docker-compose 而不是 podman-compose
+#   SERVICE=mysql task dc:logs                # 查看 mysql 服务日志
+#   LINES=100 task dc:logs                    # 查看最近100行日志
+#   SHELL=/bin/sh task dc:exec SERVICE=redis  # 使用 sh 进入 redis 容器
+#
+# 端口访问:
+#   MySQL管理:     http://localhost:8080
+#   Redis管理:     http://localhost:8081
+#   ETCD管理:      http://localhost:8082
+#   Grafana:       http://localhost:3000 (admin/admin)
+#   Prometheus:    http://localhost:9090
+#   Jaeger:        http://localhost:16686
+#   ClickHouse:    http://localhost:8123
+#
+# 配置文件:
+#   复制 devenv/.env.example 为 devenv/.env 并根据需要修改配置
