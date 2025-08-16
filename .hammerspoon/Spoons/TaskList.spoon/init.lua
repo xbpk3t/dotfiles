@@ -42,7 +42,8 @@ local function updateMenubar()
 
         local currentTask = tasks.findTaskById(taskList, currentTaskId)
         if currentTask and not currentTask.isDone then
-            local taskName = currentTask.name
+            -- 清理任务名称，处理多行字符串
+            local taskName = utils.sanitizeString(currentTask.name)
 
             -- 使用 UTF-8 安全的字符串截取
             local maxLength = 20
@@ -194,45 +195,112 @@ end
 
 local function editTask(index)
     if not taskList[index] or taskList[index].isDone then return end
-    -- 编辑任务的实现可以后续添加
-    notifications.sendNotification("功能提示", "编辑任务功能待实现", 3)
+
+    local task = taskList[index]
+
+    -- 第一步：编辑任务名称
+    local button1, newName = hs.dialog.textPrompt(
+            "编辑任务 - 步骤 1/3",
+            "请输入新的任务名称:",
+            task.name,
+            "下一步",
+            "取消"
+    )
+    if button1 ~= "下一步" then
+        return
+    end
+
+    if newName == "" then
+        notifications.sendNotification("输入错误", "任务名称不能为空", 3)
+        return
+    end
+
+    -- 第二步：编辑日期
+    local button2, newDate = hs.dialog.textPrompt(
+            "编辑任务 - 步骤 2/3",
+            "请输入新的日期 (格式: YYYY-MM-DD):",
+            task.date,
+            "下一步",
+            "取消"
+    )
+    if button2 ~= "下一步" then
+        return
+    end
+
+    if not utils.isValidDate(newDate) then
+        notifications.sendNotification("输入错误", "日期格式错误", 3)
+        return
+    end
+
+    -- 第三步：编辑预计耗时
+    local button3, newEstimatedStr = hs.dialog.textPrompt(
+            "编辑任务 - 步骤 3/3",
+            "请输入新的预计耗时 (几个E1f，每个E1f=40分钟):",
+            tostring(task.estimatedTime),
+            "完成",
+            "取消"
+    )
+    if button3 ~= "完成" then
+        return
+    end
+
+    local newEstimatedTime = tonumber(newEstimatedStr) or task.estimatedTime
+    if newEstimatedTime < 1 then
+        newEstimatedTime = 1
+    end
+
+    -- 更新任务信息
+    local oldName = task.name
+    task.name = newName
+    task.date = newDate
+    task.estimatedTime = newEstimatedTime
+
+    -- 重新生成任务ID（因为内容改变了）
+    task.id = utils.generateTaskId(task.addTime, newName, newDate, newEstimatedTime)
+
+    -- 如果这是当前任务，更新当前任务ID
+    if currentTaskId == task.id then
+        currentTaskId = task.id
+    end
+
+    -- 重新排序任务
+    tasks.sortTasks(taskList)
+
+    updateMenubar()
+    saveTasks()
+
+    notifications.sendNotification("任务管理器",
+        string.format("任务已更新: %s -> %s", oldName, newName), 3)
 end
 
 local function completeTask(index)
     if not taskList[index] or taskList[index].isDone then return end
 
     local task = taskList[index]
-    local button = hs.dialog.blockAlert(
-            "完成任务",
-            "确定要完成任务 \"" .. task.name .. "\" 吗？",
-            "完成",
-            "取消"
-    )
-    if button == "完成" then
-        tasks.stopTask(task)
-        tasks.completeTask(task)
 
-        -- 如果这是当前任务，清除当前任务ID
-        if task.id == currentTaskId then
-            countdown.stopCountdown(currentTaskId)
-            currentTaskId = nil
-            -- 尝试选择下一个活跃任务
-            local activeTasks = tasks.getActiveTasks(taskList)
-            if #activeTasks > 0 then
-                for i, activeTask in ipairs(activeTasks) do
-                    if activeTask.index ~= index then
-                        currentTaskId = activeTask.task.id
-                        break
-                    end
+    -- 直接完成任务，不需要弹窗确认
+    tasks.stopTask(task)
+    tasks.completeTask(task)
+
+    -- 如果这是当前任务，清除当前任务ID
+    if task.id == currentTaskId then
+        countdown.stopCountdown(currentTaskId)
+        currentTaskId = nil
+        -- 尝试选择下一个活跃任务
+        local activeTasks = tasks.getActiveTasks(taskList)
+        if #activeTasks > 0 then
+            for i, activeTask in ipairs(activeTasks) do
+                if activeTask.index ~= index then
+                    currentTaskId = activeTask.task.id
+                    break
                 end
             end
         end
-
-        updateMenubar()
-        saveTasks()
-        notifications.sendNotification("任务完成",
-            "任务已完成！评分: " .. scoring.calculateScore(task) .. "/5", 5)
     end
+
+    updateMenubar()
+    saveTasks()
+    -- 移除弹窗通知，保持菜单打开状态
 end
 
 local function deleteTask(index)
@@ -385,9 +453,70 @@ function obj:start()
     obj.cronCheckTimer = hs.timer.new(3600, checkAndLoadCronTasks) -- 每小时检查一次
     obj.cronCheckTimer:start()
 
+    -- 绑定快捷键
+    obj:setupHotkeys()
+
     notifications.sendNotification("TaskList", "多任务管理器已启动", 3)
 
     obj.logger.i("TaskList started")
+    return self
+end
+
+--- TaskList:setupHotkeys()
+--- Method
+--- 设置快捷键
+---
+--- Parameters:
+---  * None
+---
+--- Returns:
+---  * The TaskList object
+function obj:setupHotkeys()
+    -- 绑定 Option+Control+P 来暂停/恢复倒计时
+    obj.pauseHotkey = hs.hotkey.bind({"alt", "ctrl"}, "p", function()
+        obj.logger.i("Pause hotkey triggered")
+        print("TaskList: Pause hotkey triggered")  -- 添加控制台日志
+
+        local success = countdown.toggleCountdown()
+        if success then
+            local countdownState = countdown.getCountdownState()
+            local status = countdownState.isPaused and "已暂停" or "已恢复"
+            notifications.sendNotification("倒计时控制", "倒计时" .. status, 2)
+            obj.logger.i("Countdown toggled: " .. status)
+            print("TaskList: Countdown toggled: " .. status)
+        else
+            notifications.sendNotification("倒计时控制", "当前没有运行中的倒计时", 2)
+            obj.logger.i("No active countdown to toggle")
+            print("TaskList: No active countdown to toggle")
+        end
+    end)
+
+    -- 绑定 Option+Control+D 来完成当前任务
+    obj.completeHotkey = hs.hotkey.bind({"alt", "ctrl"}, "d", function()
+        obj.logger.i("Complete task hotkey triggered")
+        print("TaskList: Complete task hotkey triggered")  -- 添加控制台日志
+
+        if currentTaskId then
+            local currentTask, index = tasks.findTaskById(taskList, currentTaskId)
+            if currentTask and not currentTask.isDone then
+                completeTask(index)
+                notifications.sendNotification("任务完成", "当前任务已完成: " .. utils.sanitizeString(currentTask.name), 3)
+                obj.logger.i("Current task completed: " .. currentTask.name)
+                print("TaskList: Current task completed: " .. currentTask.name)
+            else
+                notifications.sendNotification("任务完成", "当前任务已完成或不存在", 2)
+                obj.logger.i("Current task already completed or not found")
+                print("TaskList: Current task already completed or not found")
+            end
+        else
+            notifications.sendNotification("任务完成", "没有当前任务", 2)
+            obj.logger.i("No current task to complete")
+            print("TaskList: No current task to complete")
+        end
+    end)
+
+    obj.logger.i("Hotkeys setup completed")
+    print("TaskList: Hotkeys setup completed")
     return self
 end
 
@@ -421,6 +550,17 @@ function obj:stop()
         obj.cronCheckTimer = nil
     end
 
+    -- 清理快捷键
+    if obj.pauseHotkey then
+        obj.pauseHotkey:delete()
+        obj.pauseHotkey = nil
+    end
+
+    if obj.completeHotkey then
+        obj.completeHotkey:delete()
+        obj.completeHotkey = nil
+    end
+
     -- 保存数据
     saveTasks()
 
@@ -448,6 +588,7 @@ function obj:bindHotkeys(mapping)
         end
     }
     hs.spoons.bindHotkeysToSpec(def, mapping)
+
     return self
 end
 

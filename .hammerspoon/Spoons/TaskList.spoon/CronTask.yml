@@ -13,7 +13,6 @@
 - type: 2daily
   item:
     - task: 换袜子 + 内裤
-      time: "7:00"
 
 
 - type: weekly
@@ -37,13 +36,18 @@
 
 - type: 2weekly
   item:
-    - task: 【刷jav】
-    - task: 【打飞机】晚上洗澡的时候顺便
+    - task: 【刷jav】、【打飞机】晚上洗澡的时候顺便
+
 
 - type: 4weekly
   item:
-    - task: 【每月消费复盘】
     - task: 【理发】
+
+
+- type: 3monthly
+  item:
+    - task: 【每月消费复盘】
+
 
 - type: yearly
   item:

@@ -7,6 +7,7 @@ local menu = {}
 local utils = dofile(hs.configdir .. "/Spoons/TaskList.spoon/utils.lua")
 local tasks = dofile(hs.configdir .. "/Spoons/TaskList.spoon/tasks.lua")
 local export = dofile(hs.configdir .. "/Spoons/TaskList.spoon/export.lua")
+local notifications = dofile(hs.configdir .. "/Spoons/TaskList.spoon/notifications.lua")
 
 -- 创建菜单项
 function menu.createMenu(taskList, currentTaskId, maxTasks, callbacks)
@@ -17,7 +18,7 @@ function menu.createMenu(taskList, currentTaskId, maxTasks, callbacks)
     local currentTask = tasks.findTaskById(taskList, currentTaskId)
     if currentTask and not currentTask.isDone then
         table.insert(menuItems, {
-            title = "当前: " .. currentTask.name,
+            title = "当前: " .. utils.sanitizeString(currentTask.name),
             disabled = true
         })
         table.insert(menuItems, { title = "-" })
@@ -58,9 +59,9 @@ function menu.createMenu(taskList, currentTaskId, maxTasks, callbacks)
                 local index = activeTask.index
                 local prefix = (task.id == currentTaskId) and "● " or "○ "
 
-                -- 使用 UTF-8 安全的字符串截取
+                -- 清理任务名称并使用 UTF-8 安全的字符串截取
                 local maxLength = 50
-                local displayTask = task.name
+                local displayTask = utils.sanitizeString(task.name)  -- 清理多行字符串
                 local taskNameLength = 0
                 local i = 1
                 while i <= string.len(displayTask) do
@@ -73,13 +74,16 @@ function menu.createMenu(taskList, currentTaskId, maxTasks, callbacks)
                     i = i + byteCount
                 end
 
+                -- 简洁的单行样式，移除checkbox
+                local prefix = (task.id == currentTaskId) and "● " or "○ "
                 local taskTitle = "  " .. prefix .. displayTask
+
                 table.insert(menuItems, {
                     title = taskTitle,
+                    fn = function() if callbacks.selectTask then callbacks.selectTask(index) end end,  -- 默认点击选择任务
                     menu = {
-                        { title = "选为当前任务", fn = function() if callbacks.selectTask then callbacks.selectTask(index) end end },
-                        { title = "编辑任务", fn = function() if callbacks.editTask then callbacks.editTask(index) end end },
                         { title = "完成任务", fn = function() if callbacks.completeTask then callbacks.completeTask(index) end end },
+                        { title = "编辑任务", fn = function() if callbacks.editTask then callbacks.editTask(index) end end },
                         { title = "删除任务", fn = function() if callbacks.deleteTask then callbacks.deleteTask(index) end end }
                     }
                 })
@@ -93,7 +97,16 @@ function menu.createMenu(taskList, currentTaskId, maxTasks, callbacks)
         local countdownState = callbacks.getCountdownState()
         if countdownState.timer and countdownState.timer:running() then
             local pauseText = countdownState.isPaused and "▶️ 恢复倒计时" or "⏸️ 暂停倒计时"
-            table.insert(menuItems, { title = pauseText, fn = function() if callbacks.toggleCountdown then callbacks.toggleCountdown() end end })
+            table.insert(menuItems, { title = pauseText, fn = function()
+                if callbacks.toggleCountdown then
+                    local success = callbacks.toggleCountdown()
+                    if success then
+                        local newState = callbacks.getCountdownState()
+                        local status = newState.isPaused and "已暂停" or "已恢复"
+                        notifications.sendNotification("倒计时控制", "倒计时" .. status, 2)
+                    end
+                end
+            end })
             table.insert(menuItems, { title = "-" })
         end
     end

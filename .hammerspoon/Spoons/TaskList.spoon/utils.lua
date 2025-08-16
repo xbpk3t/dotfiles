@@ -114,4 +114,44 @@ function utils.generateTaskId(addTime, taskName, date, estimatedTime)
     return tostring(utils.simpleHash(content))
 end
 
+-- 清理字符串，将多行字符串转换为单行，处理特殊字符
+function utils.sanitizeString(str)
+    if type(str) ~= "string" then
+        return str
+    end
+
+    -- 替换换行符为空格
+    str = str:gsub("[\r\n]+", " ")
+
+    -- 替换制表符为空格
+    str = str:gsub("\t", " ")
+
+    -- 处理其他可能导致JSON解析问题的控制字符
+    str = str:gsub("[\001-\031\127]", " ")
+
+    -- 处理连续的空格
+    str = str:gsub("%s+", " ")
+
+    -- 去除首尾空格
+    str = str:match("^%s*(.-)%s*$")
+
+    return str
+end
+
+-- 为JSON导出清理任务名称
+function utils.sanitizeTaskName(taskName)
+    if type(taskName) ~= "string" then
+        return taskName
+    end
+
+    -- 使用sanitizeString处理基本的多行和特殊字符
+    local cleaned = utils.sanitizeString(taskName)
+
+    -- 额外处理JSON中的特殊字符
+    cleaned = cleaned:gsub('\\', '\\\\')  -- 转义反斜杠
+    cleaned = cleaned:gsub('"', '\\"')    -- 转义双引号
+
+    return cleaned
+end
+
 return utils

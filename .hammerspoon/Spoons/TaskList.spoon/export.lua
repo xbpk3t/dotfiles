@@ -67,7 +67,9 @@ function export.exportTasksForDate(tasks, dateStr, dateLabel)
     -- 生成YAML格式
     local yaml = "- date: " .. dateStr .. "\n  task:\n"
     for _, task in ipairs(completedTasks) do
-        yaml = yaml .. "    - name: " .. task.name .. "\n"
+        -- 清理任务名称，处理多行字符串
+        local cleanTaskName = utils.sanitizeString(task.name)
+        yaml = yaml .. "    - name: " .. cleanTaskName .. "\n"
         if task.doneAt then
             yaml = yaml .. "      doneAt: " .. task.doneAt .. "\n"
         end
@@ -139,7 +141,9 @@ function export.exportThisWeekTasks(tasks)
     for _, date in ipairs(dates) do
         yaml = yaml .. "    - date: " .. date .. "\n      task:\n"
         for _, task in ipairs(tasksByDate[date]) do
-            yaml = yaml .. "        - name: " .. task.name .. "\n"
+            -- 清理任务名称，处理多行字符串
+            local cleanTaskName = utils.sanitizeString(task.name)
+            yaml = yaml .. "        - name: " .. cleanTaskName .. "\n"
             if task.doneAt then
                 yaml = yaml .. "          doneAt: " .. task.doneAt .. "\n"
             end

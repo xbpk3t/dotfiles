@@ -63,8 +63,22 @@ end
 
 -- 保存任务数据
 function data.saveTasks(tasks, currentTaskId)
+    -- 深拷贝任务列表并清理任务名称
+    local cleanedTasks = {}
+    for i, task in ipairs(tasks) do
+        local cleanedTask = {}
+        for key, value in pairs(task) do
+            if key == "name" then
+                cleanedTask[key] = utils.sanitizeTaskName(value)
+            else
+                cleanedTask[key] = value
+            end
+        end
+        cleanedTasks[i] = cleanedTask
+    end
+
     local data_content = {
-        tasks = tasks,
+        tasks = cleanedTasks,
         currentTaskId = currentTaskId
     }
     local file = io.open(dataFile, "w")

@@ -38,9 +38,9 @@ tasks:
 
   # 上传操作 ====================================================
   upload:
-    desc: 上传文件到远程（默认启用模拟执行）
+    desc: 上传文件到远程（默认启用模拟执行） # 注意这里使用 sync，而非copy，因为我需要local和remote完全一致。copy只会把local新增和修改的文件上传到remote，但是不删除remote原文件。
     cmds:
-      - rclone copy {{.LOCAL_PATH}} {{.RCLONE_REMOTE}}:{{.BUCKET}}/{{if .REMOTE_PATH}}{{.REMOTE_PATH}}{{else}}docs{{end}} --progress {{.DRY_RUN_FLAG}}
+      - rclone sync --update --checksum {{.LOCAL_PATH}} {{.RCLONE_REMOTE}}:{{.BUCKET}} --verbose --progress {{.DRY_RUN_FLAG}}
     vars:
       REMOTE_PATH: ""  # 可选：指定远程子目录
 
@@ -49,6 +49,12 @@ tasks:
     cmds:
       - task: upload
         vars: {DRY_RUN_FLAG: ""}
+
+  upload-docs:
+    aliases: [docs, ud]
+    cmds:
+      - task: upload
+        vars: {LOCAL_PATH: "~/Desktop/docs-images", RCLONE_REMOTE: "r2", BUCKET: docs, DRY_RUN_FLAG: ""}
 
   # 验证操作 ====================================================
   verify:

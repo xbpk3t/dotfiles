@@ -19,7 +19,7 @@ includes:
   tf: taskfile/devops/Taskfile.tf.yml
   #  gz: taskfile/go/Taskfile.gz.yml # TODO 这个有bug暂时注释掉
   mk: taskfile/k8s/Taskfile.minikube.yml
-  dc: taskfile/k8s/Taskfile.docker-compose.yml
+  dc: taskfile/k8s/Taskfile.dc.yml
   helm: taskfile/k8s/Taskfile.helm.yml
   k8s: taskfile/k8s/Taskfile.k8s.yml
 

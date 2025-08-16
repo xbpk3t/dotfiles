@@ -111,8 +111,6 @@ end
 function countdown.toggleCountdown()
     if countdownTimer and countdownTimer:running() then
         isPaused = not isPaused
-        local status = isPaused and "暂停" or "恢复"
-        notifications.sendNotification("倒计时" .. status, "倒计时已" .. status, 2)
         return true
     end
     return false
