@@ -4,7 +4,7 @@ version: '3'
 # Converted from rich-demo Justfile with additional migration functionality
 
 vars:
-  NIX_DIR: './nix'
+  NIX_DIR: '.'
   HOSTNAME:
     sh: scutil --get ComputerName | tr ' ' '-' | tr '[:upper:]' '[:lower:]'
   SYSTEM:
@@ -14,38 +14,94 @@ vars:
       else
         echo "x86_64-darwin"
       fi
+  OS:
+    sh: uname
+  USERNAME:
+    sh: whoami
   # Default cleanup days for maintenance tasks
   CLEANUP_DAYS: '{{.CLEANUP_DAYS | default "1"}}'
   # Nix store path
   NIX_STORE_PATH: '/nix/store'
   # System profile path
   SYSTEM_PROFILE: '/nix/var/nix/profiles/system'
+  # Colors for output
+  GREEN: '\033[1;32m'
+  YELLOW: '\033[1;33m'
+  RED: '\033[1;31m'
+  NC: '\033[0m'
 
 tasks:
   default:
-    # cmd: sudo darwin-rebuild switch --flake .
-    cmd: sudo darwin-rebuild switch --offline --flake .
+    desc: "构建并切换到当前系统配置"
+    cmds:
+      - task: build-switch
+
+  # === 核心构建任务 ===
+  build:
+    desc: "构建系统配置（不切换）"
+    dir: '{{.NIX_DIR}}'
+    cmds:
+      - echo -e "{{.YELLOW}}正在为 {{.HOSTNAME}} ({{.SYSTEM}}) 构建 {{.OS}} 配置...{{.NC}}"
+      - |
+        if [[ "{{.OS}}" == "Darwin" ]]; then
+          nix build .#darwinConfigurations.{{.HOSTNAME}}.system --extra-experimental-features 'nix-command flakes'
+        else
+          nix build .#nixosConfigurations.{{.HOSTNAME}}.config.system.build.toplevel --extra-experimental-features 'nix-command flakes'
+        fi
+      - echo -e "{{.GREEN}}构建完成！{{.NC}}"
+
+  build-switch:
+    desc: "构建并切换到新配置"
+    dir: '{{.NIX_DIR}}'
+    cmds:
+      - echo -e "{{.YELLOW}}正在构建并切换 {{.OS}} 配置...{{.NC}}"
+      - |
+        if [[ "{{.OS}}" == "Darwin" ]]; then
+          sudo darwin-rebuild switch --flake .#{{.HOSTNAME}}
+        else
+          sudo nixos-rebuild switch --flake .#{{.HOSTNAME}}
+        fi
+      - echo -e "{{.GREEN}}切换到新配置完成！{{.NC}}"
+
+  # === 配置设置 ===
+  apply:
+    desc: "交互式用户配置设置（替代 apps/apply）"
+    dir: '{{.NIX_DIR}}'
     interactive: true
-    dir: ~/.config/nix-darwin
+    cmds:
+      - echo "=== Nix Configuration Setup ==="
+      - task: check-prerequisites
+      - task: build-switch
+      - echo "Configuration applied successfully!"
+
+  check-prerequisites:
+    desc: "检查系统先决条件"
+    internal: true
+    cmds:
+      - echo "Checking prerequisites..."
+      - git config --get user.name || echo "Git user.name not configured"
+      - git config --get user.email || echo "Git user.email not configured"
+      - which nix || echo "Nix not found in PATH"
+      - echo "Prerequisites check complete"
 
 
   darwin:
-    desc: "Build and switch to nix-darwin configuration"
+    desc: "构建并切换到 nix-darwin 配置"
     dir: '{{.NIX_DIR}}'
     cmds:
-      - echo "🚀 Building nix-darwin configuration for {{.HOSTNAME}} ({{.SYSTEM}})..."
+      - echo -e "{{.YELLOW}}🚀 正在为 {{.HOSTNAME}} ({{.SYSTEM}}) 构建 nix-darwin 配置...{{.NC}}"
       - nix build .#darwinConfigurations.{{.HOSTNAME}}.system --extra-experimental-features 'nix-command flakes'
-      - echo "🔄 Switching to new configuration..."
+      - echo -e "{{.YELLOW}}🔄 正在切换到新配置...{{.NC}}"
       - sudo darwin-rebuild switch --flake .#{{.HOSTNAME}}
-      - echo "✅ nix-darwin configuration applied successfully!"
+      - echo -e "{{.GREEN}}✅ nix-darwin 配置应用成功！{{.NC}}"
 
   darwin-debug:
-    desc: "Build and switch with verbose output for debugging"
+    desc: "使用详细输出构建并切换（用于调试）"
     dir: '{{.NIX_DIR}}'
     cmds:
-      - echo "🐛 Building nix-darwin configuration with debug output..."
+      - echo -e "{{.YELLOW}}🐛 正在使用调试输出构建 nix-darwin 配置...{{.NC}}"
       - nix build .#darwinConfigurations.{{.HOSTNAME}}.system --show-trace --verbose --extra-experimental-features 'nix-command flakes'
-      - echo "🔄 Switching with debug output..."
+      - echo -e "{{.YELLOW}}🔄 正在使用调试输出切换...{{.NC}}"
       - sudo darwin-rebuild switch --flake .#{{.HOSTNAME}} --show-trace --verbose
 
   # Migration tasks (from apply-migration.sh)

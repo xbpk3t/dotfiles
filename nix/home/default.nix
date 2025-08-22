@@ -1,4 +1,4 @@
-{ username, inputs, ... }:
+{ username ? "lhgtqb7bll", inputs ? {}, pkgs, lib, ... }:
 
 {
   # import sub modules
@@ -7,7 +7,6 @@
     ./shell.nix
     ./core.nix
     ./git.nix
-    ./starship.nix
     ./neovim.nix
     ./gpg.nix
     # 添加SSH配置模块
@@ -18,7 +17,10 @@
   # paths it should manage.
   home = {
     username = username;
-    homeDirectory = "/Users/${username}";
+    # Set home directory based on the system type
+    homeDirectory = lib.mkForce (if pkgs.stdenv.isDarwin
+                                then "/Users/${username}"
+                                else "/home/${username}");
 
     # This value determines the Home Manager release that your
     # configuration is compatible with. This helps avoid breakage

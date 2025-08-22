@@ -3,6 +3,9 @@
 
 {
   imports = [
+    ../../shared/packages.nix
+
+    ./locale.nix
     ./boot.nix
     ./networking.nix
     ./services.nix

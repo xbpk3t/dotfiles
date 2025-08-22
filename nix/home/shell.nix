@@ -54,10 +54,6 @@
       export PNPM_HOME="$HOME/.local/share/pnpm"
       export PATH="$HOME/go/bin:$BUN_INSTALL/bin:$PNPM_HOME:$PATH"
 
-      # SSH_AUTH_SOCK set to GPG to enable using gpgagent as the ssh agent.
-      export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
-      gpgconf --launch gpg-agent
-
       # ===== 键盘绑定 =====
       bindkey -e
 

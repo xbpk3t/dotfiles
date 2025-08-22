@@ -47,11 +47,7 @@
       inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
 
-    # stylix for system-wide theming
-    stylix = {
-      url = "github:danth/stylix";
-      inputs.nixpkgs.follows = "nixpkgs-darwin";
-    };
+
   };
 
   outputs = inputs @ {
@@ -62,7 +58,6 @@
     nix-homebrew,
     nixvim,
     nixhelm,
-    stylix,
     ...
   }: let
     # User configuration
@@ -90,15 +85,20 @@
       system = linuxSystem;
     };
 
-    # Darwin-specific modules (keeping existing structure for now)
+    # Darwin-specific modules (updated structure)
     darwinModules = [
       ./modules/nix-core.nix
-      ./modules/system.nix
-      ./modules/homebrew.nix
       ./modules/host-users.nix
-      ./modules/stylix.nix
-      ./pkg
-      ./modules/shared
+      ./modules/darwin
+    ];
+
+    # NixOS-specific modules
+    nixosModules = [
+      ./modules/nix-core.nix
+      # ./modules/host-users.nix  # Darwin-specific, not needed for NixOS
+      ./modules/nixos
+      ./modules/shared/packages.nix  # Add shared packages
+      # ./modules/stylix.nix  # Temporarily disabled due to GitHub API limits
     ];
 
   in {
@@ -120,9 +120,6 @@
             };
           }
 
-          # stylix for system-wide theming
-          stylix.darwinModules.stylix
-
           # home manager
           home-manager.darwinModules.home-manager
           {
@@ -137,7 +134,64 @@
       };
     };
 
-    # TODO: NixOS configurations will be added after Darwin migration is complete
+    # NixOS configurations
+    nixosConfigurations = {
+      # Test NixOS system - minimal configuration
+      "nixos-test" = nixpkgs-darwin.lib.nixosSystem {
+        system = linuxSystem;
+        specialArgs = linuxSpecialArgs // {
+          hostname = "nixos-test";
+        };
+        modules = [
+          # Only minimal modules to avoid conflicts - excluding boot.nix
+          ./modules/nixos/locale.nix
+          ./modules/nixos/networking.nix
+          ./modules/nixos/security.nix
+          ./modules/nixos/users.nix
+          # Host-specific configuration
+          ./hosts/nixos
+          # home manager for NixOS
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.extraSpecialArgs = linuxSpecialArgs // {
+              hostname = "nixos-test";
+            };
+            home-manager.backupFileExtension = "hm-bak";
+            home-manager.users.${username} = import ./home;
+          }
+        ];
+      };
+
+      # Minimal NixOS system configuration
+      "nixos-test-minimal" = nixpkgs-darwin.lib.nixosSystem {
+        system = linuxSystem;
+        specialArgs = linuxSpecialArgs // {
+          hostname = "nixos-test-minimal";
+        };
+        modules = [
+          # Only minimal modules to avoid conflicts - excluding boot.nix
+          ./modules/nixos/locale.nix
+          ./modules/nixos/networking.nix
+          ./modules/nixos/security.nix
+          ./modules/nixos/users.nix
+          # Host-specific configuration
+          ./hosts/nixos
+          # home manager for NixOS
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.extraSpecialArgs = linuxSpecialArgs // {
+              hostname = "nixos-test-minimal";
+            };
+            home-manager.backupFileExtension = "hm-bak";
+            home-manager.users.${username} = import ./home;
+          }
+        ];
+      };
+    };
 
     # Development shell
     devShells.${darwinSystem}.default = nixpkgs-darwin.legacyPackages.${darwinSystem}.mkShell {

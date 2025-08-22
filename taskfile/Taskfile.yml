@@ -27,7 +27,6 @@ includes:
   mac-cleanup: taskfile/mac/Taskfile.mac-cleanup.yml
   brew: taskfile/mac/Taskfile.brew.yml
   dotbot: taskfile/mac/Taskfile.dotbot.yml
-  nix: taskfile/mac/Taskfile.nix.yml
 
   img: taskfile/mac/Taskfile.img.yml
   trzsz: taskfile/mac/Taskfile.trzsz.yml

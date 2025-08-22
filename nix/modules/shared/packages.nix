@@ -1,12 +1,14 @@
-# Cross-platform package management
-# Migrated from ansible/roles/common/tasks/packages.yml
-{ pkgs, lib, ... }:
+# Cross-platform shared package management
+# Contains packages common to all platforms but not in minimal set
+# Organized by category in a single systemPackages definition
+{ pkgs, ... }:
 
 {
-  # Common packages across all platforms
-  # Equivalent to ansible common_packages + system_packages
   environment.systemPackages = with pkgs; [
-    # Basic utilities (from ansible common_packages)
+    # System information
+    fastfetch
+
+    # Basic utilities
     git
     curl
     wget
@@ -14,6 +16,13 @@
     htop
     tree
     unzip
+
+    # Modern replacements
+    bat # better cat
+    fd # better find
+    ripgrep # better grep
+
+    # System utilities
     rsync
     screen
 
@@ -22,26 +31,20 @@
     gnumake
     cmake
 
-    # Archive tools
+    # Archive and file tools
     zip
     dos2unix
 
     # Security tools
     openssl
 
-    # Modern replacements (better than ansible versions)
-    bat # better cat
-    fd # better find
-    ripgrep # better grep
+    # Version control and collaboration
+    gh  # GitHub CLI
 
-    # GitHub CLI (from ansible packages.yml)
-    gh
-
-    # Additional useful tools
+    # Data processing tools
     jq
     yq
-
-    dateutils # 操作日期和时间表达式 dateadd、datediff、strptime
+    dateutils  # 操作日期和时间表达式 dateadd、datediff、strptime
   ];
 
   # Platform-specific package additions will be handled in platform modules
