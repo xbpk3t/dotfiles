@@ -2,6 +2,16 @@
   # Zsh shell 配置
   programs.zsh = {
     enable = true;
+
+    oh-my-zsh = {
+      enable = true;
+      theme = "robbyrussell";
+      plugins = [
+        "git"
+        "sudo"
+      ];
+    };
+
     history = {
       size = 10000;
       save = 10000;
@@ -10,11 +20,6 @@
       share = true;
     };
     shellAliases = {
-      # 基础别名
-      ll = "ls -lh";
-      l = "ls -lah";
-      ".." = "cd ..";
-      "..." = "cd ../..";
       # modern replacements
       cat = "bat";
       find = "fd";
@@ -22,7 +27,6 @@
       vim = "LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 nvim";
       # zensh style aliases
       c = "clear";
-      docker = "podman";
     };
     # 启用zsh插件
     autosuggestion.enable = true;
@@ -30,21 +34,10 @@
     syntaxHighlighting.enable = true;
 
     initContent = ''
-      # ===== UTF-8 编码设置 =====
-      export LANG=en_US.UTF-8
-      export LC_ALL=en_US.UTF-8
-      export LC_CTYPE=en_US.UTF-8
-
-      # ===== 终端美化 =====
-      export CLICOLOR=1
-      export LSCOLORS=ExFxBxDxCxegedabagacad
-
       # 加载 Nix 环境
       if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
         source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
       fi
-
-
 
       # Environment variables
       ZSH_DISABLE_COMPFIX=true
@@ -74,24 +67,6 @@
       bindkey '^[w' kill-region
 
       zle_highlight+=(paste:none)
-
-      # ===== 历史记录设置 =====
-      setopt INC_APPEND_HISTORY
-      setopt appendhistory
-      setopt sharehistory
-      setopt hist_ignore_space
-      setopt hist_ignore_all_dups
-      setopt hist_save_no_dups
-      setopt hist_ignore_dups
-      setopt hist_find_no_dups
-      setopt HIST_IGNORE_DUPS
-
-      # ===== 目录操作函数 =====
-      mkcd() { mkdir -p "$1" && cd "$1" }
-
-      # ===== robbyrussell 风格提示符 =====
-      # 经典 robbyrussell 样式: ➜  directory-name
-      PROMPT='%F{green}➜%f  %F{cyan}%1~%f '
 
       # ===== 文件后缀别名 =====
       # 在terminal输入文件名，可以直接用指定IDE打开该文件

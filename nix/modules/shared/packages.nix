@@ -41,9 +41,7 @@
     jq
     yq
 
-    # Container tools
-    podman # docker alternative
-    podman-compose
+    dateutils # 操作日期和时间表达式 dateadd、datediff、strptime
   ];
 
   # Platform-specific package additions will be handled in platform modules

@@ -61,6 +61,7 @@ linters:
     # ===== 标准库 (63-81) =====
     - gocritic        # #63(循环变量), #64(select随机), #65(通知channel), #66(channel尺寸), #67(channel尺寸), #68(字符串格式化), #69(字符串拼接), #70(切片初始化), #71(切片容量), #72(切片拷贝), #73(切片泄漏), #74(sync类型拷贝), #75(时间常量), #76(时间处理), #77(JSON处理), #78(SQL错误), #79(资源关闭), #80(HTTP返回), #81(默认HTTP Client)
     - bodyclose       # #79(HTTP body关闭)
+    - sqlclosecheck   # 防止CLOSE_WAIT，保证资源释放
     - containedctx    # #60(Context使用)
 
     # ===== 测试 (82-90) =====

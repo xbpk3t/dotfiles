@@ -23,7 +23,8 @@ vars:
 
 tasks:
   default:
-    cmd: sudo darwin-rebuild switch --flake .
+    # cmd: sudo darwin-rebuild switch --flake .
+    cmd: sudo darwin-rebuild switch --offline --flake .
     interactive: true
     dir: ~/.config/nix-darwin
 

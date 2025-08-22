@@ -51,6 +51,9 @@ vars:
       ea_caches: "Deleting all cache folders of the EA App"
       chromium_caches: "Deleting all cache folders of Chromium"
       arc: "Deleting all cache, cookies, history, site data of Arc Browser"
+      podman: "Deleting Podman Cache and Config files"
+
+
 
   # File paths for each cleanup task
   trash:
@@ -240,6 +243,12 @@ vars:
     - "~/Library/Application Support/Arc/User Data/Default/Cookies-journal"
     - "~/Library/Application Support/Arc/User Data/Default/Web Data"
     - "~/Library/Application Support/Arc/User Data/Default/Web Data-journal"
+
+  podman:
+    - "~/.config/containers/"
+    - "~/Library/Caches/containers/"
+
+
 
 tasks:
   default:

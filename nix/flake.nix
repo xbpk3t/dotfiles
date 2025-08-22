@@ -129,6 +129,8 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.extraSpecialArgs = darwinSpecialArgs;
+            # 添加备份文件扩展名设置
+            home-manager.backupFileExtension = "hm-bak";
             home-manager.users.${username} = import ./home;
           }
         ];

@@ -9,9 +9,18 @@
     fping
     nmap
     inetutils
+    mtr
+    nexttrace # 可视化路由跟踪工具
+
+
+
+    # disk
+    ncdu
 
     # 网络安全
     subfinder
+    naabu # https://github.com/projectdiscovery/naabu 端口扫描工具
+
 
     # 性能测试
     # vegeta

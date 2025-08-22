@@ -1,0 +1,21 @@
+---
+version: "3"
+
+
+tasks:
+  rmc:
+    cmd: podman rm -r -a
+  rmi:
+    cmd: podman rmi --all
+
+  k8s:
+    cmd: podman generate kube
+
+  play:
+    cmd: podman play kube
+
+
+  machine:
+    cmds:
+      - podman machine list
+      - podman system connection list

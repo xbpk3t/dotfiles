@@ -20,3 +20,24 @@ tasks:
   # [batfish/batfish: Batfish is a network configuration analysis tool that can find bugs and guarantee the correctness of (planned or current) network configurations. It enables network engineers to rapidly and safely evolve their network, without fear of outages or security breaches.](https://github.com/batfish/batfish) 一个网络配置分析工具，用于验证和测试网络配置的正确性
   batfish:
     cmd: docker run --name batfish -v batfish-data:/data -p 8888:8888 -p 9997:9997 -p 9996:9996 batfish/allinone
+
+  # [mr-karan/doggo: :dog: Command-line DNS Client for Humans. Written in Golang](https://github.com/mr-karan/doggo)
+  doggo:
+    cmd: doggo {{.CLI_ARGS}}
+
+
+  # [ycd/dstp: 🧪 Run common networking tests against any site.](https://github.com/ycd/dstp) 用于测试和监控TCP/HTTP连接
+  dstp:
+
+  # [monasticacademy/httptap: View HTTP/HTTPS requests made by any Linux program](https://github.com/monasticacademy/httptap) 无代理抓包工具
+  httptap:
+
+  # https://github.com/nxtrace/NTrace-core
+  nexttrace:
+    desc: 可视化路由跟踪工具
+
+  # [pouriyajamshidi/tcping: Ping TCP ports using tcping. Inspired by Linux's ping utility. Written in Go](https://github.com/pouriyajamshidi/tcping)
+  tcping:
+
+  # [hanshuaikang/Nping: 🏎 Nping mean NB Ping, A Ping Tool in Rust with Real-Time Data and Visualizations](https://github.com/hanshuaikang/Nping) 多地址并发 Ping 工具。基于 Rust 开发使用 ICMP 协议的 Ping 工具, 支持多地址并发 Ping, 可视化图表展示, 数据实时更新等特性。Rust 的多地址并发 Ping 工具。这是一个用 Rust 开发的可视化 Ping 工具，支持同时对多个目标地址并发 Ping 操作。它提供了分区折线图和表格视图等可视化展示，支持实时动态展示延迟、丢包率等性能指标，同时兼容 IPv4 和 IPv6 网络环境。
+  nping:

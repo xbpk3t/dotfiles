@@ -10,6 +10,8 @@
     ./starship.nix
     ./neovim.nix
     ./gpg.nix
+    # 添加SSH配置模块
+    ./ssh.nix
   ];
 
   # Home Manager needs a bit of information about you and the
