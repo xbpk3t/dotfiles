@@ -1,16 +1,10 @@
-# Minimal NixOS test system configuration
+# Minimal NixOS configuration for VM
 { config, pkgs, lib, username, hostname, ... }:
 
 {
-  # Boot configuration for VM - disable systemd-boot and use GRUB
-  boot.loader = {
-    systemd-boot.enable = lib.mkForce false;
-    efi.canTouchEfiVariables = lib.mkForce false;
-    grub = {
-      enable = true;
-      device = "/dev/sda";
-    };
-  };
+  # Disable bootloader entirely for VM
+  boot.loader.grub.enable = false;
+  boot.loader.systemd-boot.enable = false;
 
   # File systems
   fileSystems."/" = {
@@ -20,30 +14,22 @@
 
   # Networking
   networking.hostName = hostname;
-  networking.useDHCP = lib.mkDefault true;
+  networking.useDHCP = true;
 
-  # SSH - minimal configuration
-  services.openssh = {
-    enable = true;
-    settings = {
-      PasswordAuthentication = true;
-      PermitRootLogin = "yes";
-    };
-  };
+  # SSH
+  services.openssh.enable = true;
 
-  # System packages
-  environment.systemPackages = with pkgs; [
-    fastfetch
-    neofetch
-    vim
-    git
-  ];
+  # Enable zsh at system level
+  programs.zsh.enable = true;
 
-  # User configuration
+  # User configuration - use the passed username parameter
   users.users.${username} = {
     isNormalUser = true;
+    uid = 1000;
     password = "nixos";
     extraGroups = [ "wheel" ];
+    home = "/home/${username}";
+    shell = pkgs.zsh;
   };
 
   users.users.root.password = "nixos";

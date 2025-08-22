@@ -82,6 +82,8 @@
 
     # Linux special args
     linuxSpecialArgs = commonSpecialArgs // {
+      username = "luck";
+      hostname = "nixos-test";
       system = linuxSystem;
     };
 
@@ -136,58 +138,26 @@
 
     # NixOS configurations
     nixosConfigurations = {
-      # Test NixOS system - minimal configuration
-      "nixos-test" = nixpkgs-darwin.lib.nixosSystem {
+      # Test NixOS system - minimal configuration for VM
+      "nixos" = nixpkgs-darwin.lib.nixosSystem {
         system = linuxSystem;
         specialArgs = linuxSpecialArgs // {
-          hostname = "nixos-test";
+          hostname = "nixos";
         };
         modules = [
-          # Only minimal modules to avoid conflicts - excluding boot.nix
-          ./modules/nixos/locale.nix
-          ./modules/nixos/networking.nix
-          ./modules/nixos/security.nix
-          ./modules/nixos/users.nix
-          # Host-specific configuration
-          ./hosts/nixos
+          # Host-specific configuration (minimal VM config)
+          ./hosts/nixos/default.nix
+          ./modules/shared/packages.nix
           # home manager for NixOS
           home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.extraSpecialArgs = linuxSpecialArgs // {
-              hostname = "nixos-test";
+              hostname = "nixos";
             };
             home-manager.backupFileExtension = "hm-bak";
-            home-manager.users.${username} = import ./home;
-          }
-        ];
-      };
-
-      # Minimal NixOS system configuration
-      "nixos-test-minimal" = nixpkgs-darwin.lib.nixosSystem {
-        system = linuxSystem;
-        specialArgs = linuxSpecialArgs // {
-          hostname = "nixos-test-minimal";
-        };
-        modules = [
-          # Only minimal modules to avoid conflicts - excluding boot.nix
-          ./modules/nixos/locale.nix
-          ./modules/nixos/networking.nix
-          ./modules/nixos/security.nix
-          ./modules/nixos/users.nix
-          # Host-specific configuration
-          ./hosts/nixos
-          # home manager for NixOS
-          home-manager.nixosModules.home-manager
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.extraSpecialArgs = linuxSpecialArgs // {
-              hostname = "nixos-test-minimal";
-            };
-            home-manager.backupFileExtension = "hm-bak";
-            home-manager.users.${username} = import ./home;
+            home-manager.users.luck = import ./home;
           }
         ];
       };
