@@ -1,4 +1,4 @@
-{ username ? "lhgtqb7bll", inputs ? {}, pkgs, lib, ... }:
+{ username ? "luck", inputs ? {}, pkgs, lib, ... }:
 
 {
   # import sub modules
@@ -16,7 +16,7 @@
   # Home Manager needs a bit of information about you and the
   # paths it should manage.
   home = {
-    username = username;
+    inherit username;
     # Set home directory based on the system type
     homeDirectory = lib.mkForce (if pkgs.stdenv.isDarwin
                                 then "/Users/${username}"

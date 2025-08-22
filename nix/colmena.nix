@@ -9,7 +9,7 @@
   };
 
   # Production server (replaces ansible hk-server-01)
-  hk-server-01 = { name, nodes, ... }: {
+  hk-server-01 = { name, ... }: {
     deployment = {
       targetHost = "47.79.17.202";
       targetPort = 22;
@@ -32,7 +32,7 @@
   };
 
   # Test container (replaces ansible centos7-test)
-  centos7-test = { name, nodes, ... }: {
+  centos7-test = { name, ... }: {
     deployment = {
       targetHost = "localhost";
       targetPort = 34225;

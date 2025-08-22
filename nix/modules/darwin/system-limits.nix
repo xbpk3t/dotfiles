@@ -1,8 +1,6 @@
 # Darwin system limits configuration
 # Migrated from ansible/roles/common/tasks/ulimit.yml
-{ ... }:
-
-{
+_: {
   # macOS system limits (equivalent to ansible ulimit.yml)
   # Note: macOS handles limits differently than Linux
 

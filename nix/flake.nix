@@ -51,18 +51,15 @@
   };
 
   outputs = inputs @ {
-    self,
     nixpkgs-darwin,
     darwin,
     home-manager,
     nix-homebrew,
-    nixvim,
-    nixhelm,
     ...
   }: let
     # User configuration
     username = let envUser = builtins.getEnv "USER"; in
-      if envUser != "" then envUser else "lhgtqb7bll";
+      if envUser != "" then envUser else "luck";
     useremail = "yyzw@live.com";
 
     # System configurations
@@ -82,8 +79,6 @@
 
     # Linux special args
     linuxSpecialArgs = commonSpecialArgs // {
-      username = "luck";
-      hostname = "nixos-test";
       system = linuxSystem;
     };
 
@@ -125,12 +120,14 @@
           # home manager
           home-manager.darwinModules.home-manager
           {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.extraSpecialArgs = darwinSpecialArgs;
-            # 添加备份文件扩展名设置
-            home-manager.backupFileExtension = "hm-bak";
-            home-manager.users.${username} = import ./home;
+            home-manager = {
+                useGlobalPkgs = true;
+                useUserPackages = true;
+                extraSpecialArgs = darwinSpecialArgs;
+                # 添加备份文件扩展名设置
+                backupFileExtension = "hm-bak";
+                users.${username} = import ./home;
+            };
           }
         ];
       };
@@ -138,26 +135,62 @@
 
     # NixOS configurations
     nixosConfigurations = {
-      # Test NixOS system - minimal configuration for VM
-      "nixos" = nixpkgs-darwin.lib.nixosSystem {
+      # Test NixOS system - minimal configuration
+      "nixos-test" = nixpkgs-darwin.lib.nixosSystem {
         system = linuxSystem;
         specialArgs = linuxSpecialArgs // {
-          hostname = "nixos";
+          hostname = "nixos-test";
         };
         modules = [
-          # Host-specific configuration (minimal VM config)
-          ./hosts/nixos/default.nix
-          ./modules/shared/packages.nix
+          # Only minimal modules to avoid conflicts - excluding boot.nix
+          ./modules/nixos/locale.nix
+          ./modules/nixos/networking.nix
+          ./modules/nixos/security.nix
+          ./modules/nixos/users.nix
+          # Host-specific configuration
+          ./hosts/nixos
           # home manager for NixOS
           home-manager.nixosModules.home-manager
           {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.extraSpecialArgs = linuxSpecialArgs // {
-              hostname = "nixos";
+            home-manager = {
+                useGlobalPkgs = true;
+                useUserPackages = true;
+                extraSpecialArgs = linuxSpecialArgs // {
+                              hostname = "nixos-test";
+                            };
+                backupFileExtension = "hm-bak";
+                users.${username} = import ./home;
             };
-            home-manager.backupFileExtension = "hm-bak";
-            home-manager.users.luck = import ./home;
+          }
+        ];
+      };
+
+      # Minimal NixOS system configuration
+      "nixos-test-minimal" = nixpkgs-darwin.lib.nixosSystem {
+        system = linuxSystem;
+        specialArgs = linuxSpecialArgs // {
+          hostname = "nixos-test-minimal";
+        };
+        modules = [
+          # Only minimal modules to avoid conflicts - excluding boot.nix
+          ./modules/nixos/locale.nix
+          ./modules/nixos/networking.nix
+          ./modules/nixos/security.nix
+          ./modules/nixos/users.nix
+          # Host-specific configuration
+          ./hosts/nixos
+          # home manager for NixOS
+          home-manager.nixosModules.home-manager
+          {
+            home-manager = {
+                useGlobalPkgs = true;
+                useUserPackages = true;
+                extraSpecialArgs = linuxSpecialArgs // {
+                  hostname = "nixos-test-minimal";
+                };
+                backupFileExtension = "hm-bak";
+                users.${username} = import ./home;
+            };
           }
         ];
       };

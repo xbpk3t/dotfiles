@@ -1,4 +1,4 @@
-{...}: {
+_: {
   # Zsh shell 配置
   programs.zsh = {
     enable = true;

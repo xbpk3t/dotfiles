@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+_: {
   # 环境变量
   home.sessionVariables = {
     EDITOR = "nvim";

@@ -1,20 +1,22 @@
-{ pkgs, username, ... }:
+{ username, ... }:
 
 {
   # macOS 系统偏好设置
-  system.primaryUser = username;
-  system.defaults = {
-    # Dock 设置
-    dock = {
-      tilesize = 4;
-      magnification = false;
-      largesize = 32;
-      orientation = "left";
-      autohide = true;
-      autohide-delay = 0.0;
-      # 移除所有默认应用
-      persistent-apps = [];
-    };
+  system = {
+    primaryUser = username;
+    defaults = {
+      # Dock 设置
+      dock = {
+        tilesize = 4;
+        magnification = false;
+        largesize = 32;
+        orientation = "left";
+        autohide = true;
+        autohide-delay = 0.0;
+        # 移除所有默认应用
+        persistent-apps = [];
+      };
+  };
 
     # Finder 设置
     finder = {

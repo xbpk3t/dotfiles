@@ -1,8 +1,6 @@
 # Darwin directory structure management
 # Migrated from ansible/roles/common/tasks/disk.yml
-{ ... }:
-
-{
+_: {
   # Create standard directories on macOS
   # Note: macOS doesn't have systemd-tmpfiles, so we use launchd
 

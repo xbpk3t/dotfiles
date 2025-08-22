@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+_: {
   programs.git = {
     enable = true;
     userName = "XBPk3T";
