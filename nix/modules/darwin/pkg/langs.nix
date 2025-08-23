@@ -41,8 +41,6 @@
     templ # https://github.com/a-h/templ
     go-migrate # https://github.com/golang-migrate/migrate
 
-    gomodifytags # https://github.com/fatih/gomodifytags
-
     # ts
     # Node.js 生态
     nodejs

@@ -43,12 +43,6 @@ if not success3 then
 end
 
 
-
-
-
--- TODO 把指定APP放到指定monitor 的组合动作 [dotfiles/hammerspoon/spectacle.lua at master · rkalis/dotfiles](https://github.com/rkalis/dotfiles/blob/master/hammerspoon/spectacle.lua)
-
-
 -- ========================================
 -- 系统功能
 -- ========================================

@@ -204,12 +204,8 @@ tasks:
   #- url: https://github.com/gruntwork-io/fetch
   #  des: 非常好用的工具，用来直接拉取github的指定folder（注意只能用于github）。工具很好，但是不适合日常使用，3个required参数，用起来有点麻烦。
   fetch:
-
-
-  # 啥时候用 git bisect? 怎么用? # start, (bad, good), reset
-  # TODO 能否写个 taskfile的task，让我更方便地使用这个命令？另外，是否有什么第三方工具可以更方便地实现类似功能？
-  bisect:
-
+    desc: 下载指定文件夹（使用 gruntwork-io/fetch）
+    cmd: fetch --repo="{{.CLI_ARGS}}" --branch="main" .
 
 
   #  - git gc 是啥意思？有啥用？ # [git clean - Reduce Git repository size - Stack Overflow](https://stackoverflow.com/questions/2116778/reduce-git-repository-size)
@@ -218,10 +214,7 @@ tasks:
 
 
 
-  # TODO 现在还没想好有什么需要的workflow，之后再搞
   #- url: https://github.com/cli/cli
-  #  doc: https://docs.github.com/en # 只需要这么一个就可以了，什么actions, pages之类的从这里打开即可
-  #  des: GitHub’s official command line tool
   # [Manual | GitHub CLI](https://cli.github.com/manual/)
   gist:clear: # 注意list默认只有10条，--limit则可以自定义条数
     desc: 清空所有gist
@@ -234,19 +227,9 @@ tasks:
   gist:list:
     cmd: gh gist list
 
-  gist:test:
-    cmds:
-      - task: gist:list
-
-
-
   # 我现在main分支的代码挂了，我怎么把代码切到之前的某个正常commit，并且把这部分新增的commit切到一个新branch？操作的具体流程 # git checkout -b <new-branch> <existed-branch> && git reset --hard <commit-id> && git push -f
 
-
-
   # 怎么判断某个热门开源项目是不是草台班子，有啥技巧 # [那些年，我被坑过的开源项目【让编程再次伟大#19】_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV1u7mjYpETD/) 11:20 这段，牛逼。按 comments desc查看issue，在吵的
-
-
 
   # git config --global pull.rebase true # 设置 pull 时自动 rebase（避免意外合并提交）
 

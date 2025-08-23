@@ -12,8 +12,6 @@
     opentofu
     cf-terraforming
 
-    # nix
-    colmena
 
     # 代码质量和分析
     shellcheck

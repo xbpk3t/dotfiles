@@ -87,6 +87,7 @@ repos:
         types: [yaml]
         language: python
 
+
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.12.8
     hooks:
@@ -194,3 +195,10 @@ repos:
         types: [go]
         language: golang
         entry: nilaway ./...
+
+
+  - repo: https://github.com/astro/deadnix
+    rev: v1.2.1
+    hooks:
+      - id: deadnix
+        args: [--edit]

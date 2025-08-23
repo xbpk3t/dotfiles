@@ -1,0 +1,6 @@
+---
+
+version: '3'
+
+includes:
+  nix: ./nix/Taskfile.yml

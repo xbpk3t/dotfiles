@@ -210,7 +210,7 @@ tasks:
     desc: "Garbage collect unused nix store entries"
     cmds:
       - echo "🗑️  Running garbage collection (older than {{.CLEANUP_DAYS}} days)..."
-      - sudo nix-collect-garbage --delete-older-than "{{.CLEANUP_DAYS}}d"
+      # - sudo nix-collect-garbage --delete-older-than "{{.CLEANUP_DAYS}}d"
       - nix-collect-garbage --delete-older-than "{{.CLEANUP_DAYS}}d"
       - echo "✅ Garbage collection completed"
 

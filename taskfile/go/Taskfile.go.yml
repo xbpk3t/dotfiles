@@ -261,33 +261,11 @@ tasks:
       - gomajor get all
 
 
-
-  # TODO
-  add-tags:
-    desc: "用来给struct添加tags的cli工具"
-    vars:
-      FILE: "path/to/file.go"  # 替换为目标文件路径
-      STRUCT: "User"           # 替换为结构体名称
-    cmds:
-      - gomodifytags -file {{.FILE}} -struct {{.STRUCT}} -add-tags json -transform camelcase -w
-
-
-
-  # TODO
-  #- url: https://github.com/cuonglm/gocmt
-  #  des: Add missing comment on exported function, method, type, constant, variable in go file. 可以说是非常实用了
-  add-comments:
-    desc: "为导出元素添加缺失注释"
-    vars:
-      TARGET: "path/to/directory"  # 替换为目标目录或文件
-    cmds:
-      - gocmt -i {{.TARGET}}
-
-
   # 【gopls/modernize】 # [11个现代Go特性：用gopls/modernize让你的代码焕然一新 | Tony Bai](https://tonybai.com/2025/04/15/embrace-modern-go-style-with-gopls-modernize/)
   modernize:
+    dir: '{{.USER_WORKING_DIR}}'
     cmds:
-      - modernize -fix ./... # TODO
+      - modernize -fix ./...
 
   # [quasilyte/qbenchstat: My personal, slightly improved version of benchstat utility](https://github.com/quasilyte/qbenchstat) Better benchstat. Support "Colored output" and "significance test". 单次的基准测试，往往没有统计意义，所以我们需要使用 benchstat 工具进行一组基准测试，用来查看基准值的稳定程度
   benchstat:

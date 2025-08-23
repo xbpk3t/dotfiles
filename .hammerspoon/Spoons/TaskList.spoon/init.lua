@@ -449,7 +449,6 @@ function obj:start()
     end
 
     -- 设置定时器，每小时检查并加载新的 CronTask
-    -- TODO 可能也不需要这个cron来执行？如果需要在每次开盖之后执行，那就做成事件触发好了
     obj.cronCheckTimer = hs.timer.new(3600, checkAndLoadCronTasks) -- 每小时检查一次
     obj.cronCheckTimer:start()
 

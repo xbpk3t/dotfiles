@@ -165,7 +165,6 @@
     devShells.${darwinSystem}.default = nixpkgs-darwin.legacyPackages.${darwinSystem}.mkShell {
       buildInputs = with nixpkgs-darwin.legacyPackages.${darwinSystem}; [
         home-manager
-        # TODO: Add colmena and nixos-rebuild when NixOS support is added
       ];
     };
 
