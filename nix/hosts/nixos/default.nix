@@ -1,22 +1,37 @@
 # Minimal NixOS test system configuration
-{ username, hostname, ... }:
+{ username, hostname, pkgs, lib, ... }:
 
 {
-  # Boot configuration for VM - disable systemd-boot and use GRUB
-  boot.loader = {
-    systemd-boot.enable = false;
-    efi.canTouchEfiVariables = false;
-    grub = {
-      enable = true;
-      device = "/dev/sda";
+  # Boot configuration for VM - disable bootloader for virtualized environments
+  boot = {
+    loader = {
+      systemd-boot = {
+        enable = false;
+        configurationLimit = 10;
+      };
+      efi.canTouchEfiVariables = false;
+      grub = {
+        enable = false;
+        device = "nodev";
+      };
     };
+
+    # Virtualization-specific settings
+    initrd.availableKernelModules = [ "ata_piix" "uhci_hcd" "virtio_pci" "virtio_scsi" "sd_mod" "sr_mod" ];
+    initrd.kernelModules = [ ];
+    kernelModules = [ "kvm-intel" ];
+    extraModulePackages = [ ];
   };
+
 
   # File systems
   fileSystems."/" = {
     device = "/dev/disk/by-label/nixos";
     fsType = "ext4";
   };
+
+  # Swap
+  swapDevices = [ ];
 
   # Networking
   networking.hostName = hostname;

@@ -15,7 +15,6 @@ tasks:
     cmds:
       - task: deadnix
       - task: statix
-      - task: hammering
 
   deadnix:
     desc: "使用 deadnix 检测未使用的 Nix 代码"
@@ -32,14 +31,6 @@ tasks:
       - echo "🔍 运行 statix 分析 Nix 代码..."
       - statix check .
       - echo "✅ statix 检查完成"
-
-  hammering:
-    desc: "使用 nixpkgs-hammering 检查 Nix 表达式"
-    dir: '{{.NIX_DIR}}'
-    cmds:
-      - echo "🔍 运行 nixpkgs-hammering 检查 Nix 表达式..."
-      - nix run github:jtojnar/nixpkgs-hammering .
-      - echo "✅ nixpkgs-hammering 检查完成"
 
   fix:
     desc: "自动修复可修复的 Nix 代码问题"

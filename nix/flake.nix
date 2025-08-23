@@ -136,17 +136,12 @@
     # NixOS configurations
     nixosConfigurations = {
       # Test NixOS system - minimal configuration
-      "nixos-test" = nixpkgs-darwin.lib.nixosSystem {
+      "nixos" = nixpkgs-darwin.lib.nixosSystem {
         system = linuxSystem;
         specialArgs = linuxSpecialArgs // {
-          hostname = "nixos-test";
+          hostname = "nixos";
         };
         modules = [
-          # Only minimal modules to avoid conflicts - excluding boot.nix
-          ./modules/nixos/locale.nix
-          ./modules/nixos/networking.nix
-          ./modules/nixos/security.nix
-          ./modules/nixos/users.nix
           # Host-specific configuration
           ./hosts/nixos
           # home manager for NixOS
@@ -156,38 +151,8 @@
                 useGlobalPkgs = true;
                 useUserPackages = true;
                 extraSpecialArgs = linuxSpecialArgs // {
-                              hostname = "nixos-test";
+                              hostname = "nixos";
                             };
-                backupFileExtension = "hm-bak";
-                users.${username} = import ./home;
-            };
-          }
-        ];
-      };
-
-      # Minimal NixOS system configuration
-      "nixos-test-minimal" = nixpkgs-darwin.lib.nixosSystem {
-        system = linuxSystem;
-        specialArgs = linuxSpecialArgs // {
-          hostname = "nixos-test-minimal";
-        };
-        modules = [
-          # Only minimal modules to avoid conflicts - excluding boot.nix
-          ./modules/nixos/locale.nix
-          ./modules/nixos/networking.nix
-          ./modules/nixos/security.nix
-          ./modules/nixos/users.nix
-          # Host-specific configuration
-          ./hosts/nixos
-          # home manager for NixOS
-          home-manager.nixosModules.home-manager
-          {
-            home-manager = {
-                useGlobalPkgs = true;
-                useUserPackages = true;
-                extraSpecialArgs = linuxSpecialArgs // {
-                  hostname = "nixos-test-minimal";
-                };
                 backupFileExtension = "hm-bak";
                 users.${username} = import ./home;
             };
