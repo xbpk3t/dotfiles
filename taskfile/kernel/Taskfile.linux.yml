@@ -1,133 +1,124 @@
 ---
+version: '3'
 
-# TODO
+tasks:
+  # Process management tasks
+  ps:
+    desc: Report a snapshot of current processes
+    cmd: ps aux
 
+  kill-port:
+    desc: Kill processes running on a specific port
+    cmd: lsof -t -i :{{.port}} | xargs kill
+    vars:
+      port: "{{.port | default 8080}}"
 
+  # Network diagnostic tasks
+  dig:
+    desc: DNS lookup utility
+    cmd: dig {{.domain}}
+    vars:
+      domain: "{{.domain}}"
 
-#- ps
-#- lsof -t -i :8080 | xargs kill # 怎么kill指定端口的pid？
-#- dig
-#- kill
-#- alias
-#- unalias
-#- setenv
-#- groups
-#- whoami
-#- tar
-#- gzip
-#- zip
-#- ln
-#- curl
-#- transfer files (ffff, xxx, zzz)
-#- wget
-#- rsync
-#- scp
-#- sort (sort -t ':' -k 3, 以第三栏进行排序)
-#- uniq (cat+sort+uniq很常用，把文件排序之后，再去重)
-#- awk
-#- nmap(用来扫描局域网下的IP地址)
-#- read file (cat/head/tail/more/less)
-#
-#- cat <string> > <filename> # write (cover file)
-#- cat <string> >> <filename> # write (append file)
-#- cat /dev/null > {cursor} # 用cat命令清空文件
-#- cat <filename> | sort | uniq -c | sort -k1,1nr | head -10 # 统计文件中出现次数最多的前10个单词
-#
-#- sar
-#- sar <type> <type-param> <interval> <count> # 只有type参数必填，其他可选. 类型: 比如CPU、内存、网络. 类型参数: 有的类型带有参数，有的没有。这里的DEV，代表的是监控网卡信息. 时间间隔，表示多少秒采样一次数据，这里的1就是1秒. 次数，表示采样的次数。比如时间间隔是3，采样次数是4，那么sar命令将会阻塞12秒钟"]
-#- sar -u # CPU利用率
-#- sar -q # CPU负载
-#- sar -I # CPU中断
-#- sar -w # CPU上下文切换
-#- sar -r # 内存利用率
-#- sar -S # swap交换分区
-#- sar -v # 内核使用情况
-#- sar -B # 内存分页
-#- sar -d # 相当于iostat
-#
-#- netstat 显示网络连接，路由表和网络接口信息
-#- iostat 用来查看 Linux 的 IO 负载情况
-#- vmstat 实时显示网络流量和包数
-#- numastat
-#
-#- iperf3
-#- iperf3 -c 192.168.30.2 # 测试 TCP 吞吐量
-#- xxx # 测试 UDP 吞吐量
-#- iperf3 -c 192.168.0.120 -P 30 -t 60 # 测试多线程 TCP 吞吐量
-#- iperf3 -u -c 192.168.1.1 -b 5M -P 30 -t 60 # 测试多线程 UDP 吞吐量
-#- iperf3 -c 192.168.0.120 -d -t 60 # 进行上下行带宽（TCP双向传输）
-#- iperf3 -u -c 192.168.1.1 -b 100M -d -t 60 # 测试上下行带宽（UDP双向传输）
-#
-#- systemctl start|stop|restart|status|enable|disable <service> # 比如 systemctl status crond 检查crond是否启动 # enable 设置开机自启/ disable 取消
-#- systemctl list-unit-files | grep enable # 查看所有的开机自启项，也可以 systemctl list-unit-files | grep <service> 来查看某个service是否开机自启
-#
-#- history 展示最近20条命令//展示从第n个到最后一个的全部命令//在
-##  - ["history -20 -1", "display the last 20 commands"]
-##  - ["history 1 20", "display the first 20 commands"]
-##  - ["history 1", "display all commands(from first to last)"]
-##  - ["history 10600", "display from n to last"]
-##  - ["history -E", "with timestamp format"]
-##  - ["history -i", "with timestamp format"]
-#
-#- open命令：
-##  - ["open -t <filename>", "使用默认编辑器打开文件"]
-##  - ["open -e <filename>", "使用“文本编辑器”打开文件"]
-##  - ["open -a <editor> <filename>", "使用“指定应用程序”打开文件，比如 open -a goland，使用goland打开文件"]
-#
-#- 用来查看某个命令是否是系统自带命令 # type <command>
-#
-##    - ["ip=$(ifconfig en0 | grep 'inet .*'  | sed 's/^.*inet//g' | sed 's/ netmask.*//g') && echo $ip"]
-##    - ['echo -e "$(cmd)"', "使用 `echo -e`+双引号，避免（换行符等）特殊字符问题（保证特殊字符不会丢失）"]
-## echo -n, echo默认换行，使用echo -n 可以解决字符串被换行的问题
-##    - ["sed -n '1w <output-file>' <input-file>", "把input-file的第一行写入output-file"]
+  # File operations tasks
+  create-file:
+    desc: Create or overwrite a file with content
+    cmd: echo "{{.content}}" > {{.filename}}
+    vars:
+      content: '{{.content}}'
+      filename: '{{.filename | default "output.txt"}}'
 
 
-#- topic: network
-#  qs:
-#    - linux命令，查看端口占用，cpu负载，内存占用，如何发送信号给一个进程
-#    - iproute2
-#    - ip link show # 显示出所有可用网络接口的列表
-#    - ip neigh # 查看内核的ARP表
-#    - ip addr show # 相当于net-tools中的ifconfig
+  append-file:
+    desc: Append content to a file
+    cmd: echo "{{.content}}" >> {{.filename}}
+    vars:
+      content: '{{.content | default ""}}'
+      filename: '{{.filename | default "output.txt"}}'
 
 
-#- topic: linux性能监控命令
-#  qs:
-#    - "***kernel性能问题排查的checklist (uptime, dmesg | tail, vmstat, mpstat -P ALL, pidstat, iostat -xz, free -m, sar -n DEV, sar -n TCP,ETCP)***" # [Linux性能问题排查60s - MySpace](https://www.hitzhangjie.pro/blog/2023-09-08-linux%E6%80%A7%E8%83%BD%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A560s/)
-#    - 整个系统范围内的CPU负载如何，CPU使用率如何，单个CPU的使用率呢？ # [服务器性能优化的正确姿势（好文推荐）](https://mp.weixin.qq.com/s/E01HoRkgoCv8dLFfW0HTvA#tocbar--8amiiq)
-#    - CPU负载的并发程度如何？是单线程吗？有多少线程？
-#    - 哪个应用程序在使用CPU，使用了多少？
-#    - 哪个内核线程在使用CPU，使用了多少？
-#    - 中断的CPU用量有多少？
-#    - 用户空间和内核空间使用CPU的调用路径是什么样的？
-#    - 遇到了什么类型的停滞周期？
-#
-#    - linux, top, metrics. How to use sar? # top (CPU(us, sy, ni, id, wa, hi, si, st) process(PRI, NI, VIRT, RES, SHR, S, %CPU, %MEM, TIME+))
-#
-#    - "***top 都返回哪些指标？每项指标什么意思？***"
-#    # 上面概览列中的 CPU 数据：
-#    #
-#    #- us(user cpu time) 用户空间占用 CPU 百分比
-#    #- sy(system cpu time) 内核空间占用 CPU 百分比
-#    #- ni(nice cpu time) 用户进程空间内改变过优先级的进程占用 CPU 百分比
-#    #- id(idle) 空闲 CPU 百分比
-#    #- wa(iowait) 等待输入输出的 CPU 时间百分比
-#    #- hi(hardware irq) 硬件中断
-#    #- si(software irq) 软件中断
-#    #- st(steal time) 实时
-#    #
-#    #下面表格的参数：
-#    #
-#    #- PRI：进程的优先级
-#    #- NI(NICE)：进程的优先级别值，默认的为 0，可以进行调整
-#    #- VIRT：进程占用的虚拟内存值
-#    #- RES(resident size)：进程占用的物理内存
-#    #- SHR：进程占用的共享内存
-#    #- S：进程的运行状况，（WSRZ）R 表示正在运行、S 表示休眠，等待唤醒、Z 表示僵死状态
-#    #- %CPU：该进程占用的 CPU 使用率
-#    #- %MEM：该进程占用的物理内存和总内存的百分比
-#    #- TIME+：该进程启动后占用的总的 CPU 时间
-#
-#    - top 命令的sy过高或者cs过高，分别代表什么? # 如果 sy 占用太高，有可能是`上下文切换和中断`太频繁了。sy = sys time 系统CPU时间。这是指CPU在执行系统调用或内核代码时所花费的时间。如果sy的值很高，可能意味着系统调用非常频繁，这可能是由于上下文切换（context switching）和中断（interrupts）导致的。上下文切换发生在进程或线程从运行状态切换到就绪状态或相反时，而中断则是由于外部事件（如硬件设备请求服务）或内部事件（如定时器到期）引起的CPU状态改变。2、如果 cs 太高，那就是`线程或者进程开的太多`了。cs = context switch 即上下文切换次数。这是指操作系统在进程或线程之间切换执行权的次数。如果cs的值很高，通常意味着有大量的进程或线程在运行，这可能导致操作系统频繁地进行上下文切换，从而影响系统性能。
-#
-#    - free，有swap情况，明显free > available；没有swap情况available > free # [一次监控内存的猜想 - jame_xhs's blog](https://www.jxhs.me/2022/04/10/%E4%B8%80%E6%AC%A1%E7%9B%91%E6%8E%A7%E5%86%85%E5%AD%98%E7%9A%84%E7%8C%9C%E6%83%B3/) 官网下 linux对内存定义的详细描述，free里面是会算部分的swap进去，但是available没算swap。
+  clear-file:
+    desc: Clear the contents of a file
+    cmd: cat /dev/null > {{.filename}}
+    vars:
+      filename: '{{.filename | default "output.txt"}}'
+
+  top-words:
+    desc: Show the top 10 most frequent words in a file
+    cmd: cat {{.filename}} | sort | uniq -c | sort -k1,1nr | head -10
+    vars:
+      filename: '{{.filename | default "output.txt"}}'
+
+  # System performance monitoring tasks
+  sar-cpu:
+    desc: Monitor CPU utilization
+    cmd: sar -u {{.interval}} {{.count}}
+    vars:
+      interval: '{{.interval | default "1"}}'
+      count: '{{.count | default "5"}}'
+
+  sar-memory:
+    desc: Monitor memory utilization
+    cmd: sar -r {{.interval}} {{.count}}
+    vars:
+      interval: '{{.interval | default "1"}}'
+      count: '{{.count | default "5"}}'
+
+  sar-network:
+    desc: Monitor network device statistics
+    cmd: sar -n DEV {{.interval}} {{.count}}
+    vars:
+      interval: '{{.interval | default "1"}}'
+      count: '{{.count | default "5"}}'
+
+  whoami:
+    desc: Print the current user ID
+    cmd: whoami
+
+  # - history - Show recent commands
+  # - history -20 -1 # Display the last 20 commands
+  # - history 1 20 # Display the first 20 commands
+  # - history 1 # Display all commands (from first to last)
+  # - history 10600 # Display from n to last
+  # - history -E # With timestamp format # 1  25.8.2025 09:55  touch .zshrc
+  # - history -i # With timestamp format #  1  2025-08-25 09:55  touch .zshrc
+  history:
+    cmd: history -i ｜ grep {{.str}}
+
+  tree:
+    cmd: tree -L 1
+    dir: '{{.USER_WORKING_DIR}}'
+    interactive: true
+
+
+  # Other commands that don't need individual tasks:
+  # - alias - Create aliases for commands
+  # - unalias - Remove aliases
+  # - setenv - Set environment variables
+  # - tar - Manipulate tar archives
+  # - gzip - Compress/uncompress files
+  # - zip - Package and compress files
+  # - ln - Make links between files
+  # - curl - Transfer data from or to a server
+  # - transfer files (ffff, xxx, zzz) - File transfer utilities
+  # - wget - Non-interactive network downloader
+  # - rsync - Remote file synchronization
+  # - scp - Secure copy files
+  # - sort - Sort lines of text files
+  # - uniq - Report or omit repeated lines
+  # - awk - Pattern scanning and processing language
+  # - read file (cat/head/tail/more/less) - File reading utilities
+
+  # - systemctl list-unit-files | grep enable # View all auto-start items, or use systemctl list-unit-files | grep <service> to check if a specific service auto-starts
+
+  # - open command:
+  # - open -t <filename> # Open file with default editor
+  # - open -e <filename> # Open file with "Text Editor"
+  # - open -a <editor> <filename> # Open file with "specified application", e.g. open -a goland to open file with goland
+  #
+  # - Type command to check if a command is a built-in system command # type <command>
+  #
+  # - ip=$(ifconfig en0 | grep 'inet .*'  | sed 's/^.*inet//g' | sed 's/ netmask.*//g') && echo $ip
+  # - echo -e "$(cmd)" # Use `echo -e`+double quotes to avoid special character issues (ensure special characters are not lost)
+  # - echo -n # Echo without newline, use echo -n to prevent strings from being wrapped
+  # - sed -n '1w <output-file>' <input-file> # Write the first line of input-file to output-file

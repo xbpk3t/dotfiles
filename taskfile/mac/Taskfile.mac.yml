@@ -57,3 +57,8 @@ tasks:
   # [nicolargo/glances](https://github.com/nicolargo/glances)
   top:
     cmd: glances # 更易用的top/htop，还支持web模式。但是其核心是“轻量级monitor系统”，glances还分可以分为server模式和client模式，所有slave机器都需要安装glances的server，master开启client模式就可以收集所有slave的数据（类似prometheus这样的pull模式）。所以也可以理解为局域网下的prom（glances不适合在公网做monitor），感觉意思不大。
+
+  # [network-quality/community: A place (wiki) to coordinate the activity of the community of people interested in the network-quality project.](https://github.com/network-quality/community)
+  nq:
+    desc: macos内置speedtest命令
+    cmd: networkQuality

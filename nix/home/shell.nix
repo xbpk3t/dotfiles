@@ -109,6 +109,12 @@ _: {
         filter_mode = "global";
         style = "compact";
         inline_height = 40;
+        dialect = "us"; # date format used, either "us" or "uk"
+        timezone = "local";
+        show_preview = true;
+        history_filter = [
+          "__jetbrains_intellij_run_generator.*"
+        ];
       };
     };
   };

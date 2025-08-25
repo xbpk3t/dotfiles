@@ -1,10 +1,11 @@
+---
 version: "3"
 
 # 全局环境变量配置
-env:
-  USER_WORKING_DIR: .  # 默认当前目录，可通过命令行覆盖
-  API_FILE: "*.api"    # 默认API文件匹配模式
-  PROTO_FILE: "*.proto" # 默认Proto文件匹配模式
+#env:
+#  USER_WORKING_DIR: .  # 默认当前目录，可通过命令行覆盖
+#  API_FILE: "*.api"    # 默认API文件匹配模式
+#  PROTO_FILE: "*.proto" # 默认Proto文件匹配模式
 
 
 
@@ -100,7 +101,6 @@ tasks:
     vars:
       PROJECT_NAME: "myapp"
       MODEL_SQL: "models.sql"
-
 
   swag:
     cmd: goctl api plugin -plugin goctl-swagger="swagger -filename demo.json" -api demo.api -dir .

@@ -2,19 +2,102 @@
 version: '3'
 
 
+vars:
+  REPO: github.com/xbpk3t/docs-alfred
+  OUTPUT: docs-alfred.alfredworkflow
+  FLAGS: -X {{.REPO}}/cmd.EnabledAutoUpdate={{.ENABLED_AUTO_UPDATE}}
+  ENABLED_AUTO_UPDATE: "false"
 
+
+#  url: https://github.com/cage1016/ak
+#  doc: https://kaichu.io/zh-tw/posts/golang-alfred-workflow-generator-ak/
+#  des: cli工具，基于awgo+cobra实现，用来初始化workflow，提高开发效率。使用ak开发alfred workflow，开发阶段就不需要手动替换bin了，直接make build即可。发布阶段，不需要在本地打包、导出再上传，直接在cicd打包，非常简单。
+#  qs:
+#    - 为啥应该用ak来开发alfred workflow? (没使用 ak 脚手架之前，开发alfred workflow的开发流程和release流程? 使用 ak脚手架之后呢?)
+#    - 执行 `make link` 可以操作对应 alfred 的具体原理 # 执行后，给对应 workflow 创建软链接
+#    - ak bugs (go-bindata, unlink symbolic link error, release tag) # [found the following issues that I'd like to discuss with you · Issue #4 · cage1016/ak](https://github.com/cage1016/ak/issues/4)
+# Commented out to prevent auto-execution when included
 tasks:
+  default:
+    desc: Build And Pack.
+    cmds:
+      - task: release
+        vars:
+          ARCH: amd64
+      - task: release
+        vars:
+          ARCH: arm64
+      - lipo -create -output .workflow/exe exe_amd64 exe_arm64
+      - rm  exe_amd64
+      - rm  exe_arm64
 
-  #  url: https://github.com/cage1016/ak
-  #  doc: https://kaichu.io/zh-tw/posts/golang-alfred-workflow-generator-ak/
-  #  des: cli工具，基于awgo+cobra实现，用来初始化workflow，提高开发效率。使用ak开发alfred workflow，开发阶段就不需要手动替换bin了，直接make build即可。发布阶段，不需要在本地打包、导出再上传，直接在cicd打包，非常简单。
-  #  qs:
-  #    - 为啥应该用ak来开发alfred workflow? (没使用 ak 脚手架之前，开发alfred workflow的开发流程和release流程? 使用 ak脚手架之后呢?)
-  #    - 执行 `make link` 可以操作对应 alfred 的具体原理 # 执行后，给对应 workflow 创建软链接
-  #    - ak bugs (go-bindata, unlink symbolic link error, release tag) # [found the following issues that I'd like to discuss with you · Issue #4 · cage1016/ak](https://github.com/cage1016/ak/issues/4)
-  # Commented out to prevent auto-execution when included
-  # default:
-  #   status:
-  #     - command -v ak
-  #   preconditions:
-  #     - go install github.com/cage1016/ak@latest
+      # pack
+      - cd .workflow
+      - zip -r ../"{{.OUTPUT}}" .
+      - cd ..
+      - echo "artifact=$(echo "{{.OUTPUT}}")" >> $GITHUB_ENV
+    preconditions:
+      - task: check
+        msg: Check ak Is Installed Or Not.
+
+
+  check:
+    status:
+      - command -v ak
+    cmd: go install github.com/cage1016/ak@latest
+
+
+  generate:
+    desc: "go generate"
+    cmds:
+      - |
+        if ! command -v go-bindata > /dev/null 2>&1; then
+          echo "requires 'go-bindata' (go get -u github.com/kevinburke/go-bindata/go-bindata)"
+          exit 1
+        fi
+        go generate ./...
+
+  release:
+    cmds:
+      - GOOS=darwin GOARCH={{.ARCH}} CGO_ENABLED=1 go build -ldflags "-s -w {{.FLAGS}}" -o exe_{{.ARCH}}
+
+
+
+  test:
+    desc: "run tests"
+    cmds:
+      - go test -v -race -cover -coverprofile coverage.txt -covermode=atomic ./...
+
+  build:
+    desc: "build the binary"
+    cmds:
+      - ak alfred build -l "{{.FLAGS}}"
+
+  info:
+    desc: "show alfred workflow info"
+    cmds:
+      - ak alfred info
+
+  link:
+    desc: "link alfred workflow"
+    cmds:
+      - ak alfred link
+
+  unlink:
+    desc: "unlink alfred workflow"
+    cmds:
+      - ak alfred unlink
+
+  pack:
+    desc: "pack alfred workflow"
+    cmds:
+      - ak alfred pack
+
+  help:
+    desc: "this help"
+    cmds:
+      - |
+        awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_0-9-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST) | sort
+
+  tag:
+    cmd: echo "tag=$(jq -r '.release.tag_name' "${GITHUB_EVENT_PATH}" | sed s/^v//)" >> $GITHUB_ENV

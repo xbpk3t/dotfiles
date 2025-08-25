@@ -4,52 +4,24 @@ version: '3'
 dir: '{{.USER_WORKING_DIR}}'
 
 
-#- git config --list # 其实就是.gitconfig
-#- 'git commit -m "<type>(<scope>): <subject> <footer>" -m "Description <body>"' # 'git commit -m "fix(sms): 修复短信到达率问题 fix #12, fix #13, fix #14" -m "通过xxx修复该bug"'
-#- git log --graph --date=short # 查看提交记录，相当于glods
-#- glods --grep <keywords> # 搜索提交记录，非常好用
+
 #- git reflog # reflog 是一个本地结构，它记录了 HEAD 和分支引用在过去指向的位置。reflog 信息没法与其他任何人共享，每个人都是自己特有的 reflog。重要的一点是，它不是永久保存的，有一个可配置的过期时间，reflog 中过期的信息会被自动删除。我们在使用reset后，部分代码会丢失，如果这时想找回这些代码，就可以使用reflog
-#- git remote rm origin && git remote add origin <url> # git 怎么修改远程仓库地址
+
 #- git rm -r --cached . # 忽略规则不生效，清空git缓存，撤销已经写到缓存区文件的修改
-#- git push -f # 强制推送
 #- git checkout . # 放弃本地所有修改
-#- git remote -v # 查看git的远程仓库地址
-#- git diff <filename>
-#- git diff .
-#- git diff --cached . # 展示和暂存区的差异，而git diff .展示和工作区的差异
+
+
 #- git reset [--mixed | --soft | --hard] <起始点的父提交> # 三种reset type，默认mixed 回退到某个版本，本地会保留源码，回退 commit 和 index 信息，若要提交重新 commit。soft 回退到某个版本，只回退了 commit 的信息，不会恢复到 index file 一级，若要提交重新 commit。Hard 彻底回退到某个版本，本地的源码也会变为上一个版本的内容。
 #- git reset HEAD~3
 #- git reset --merge # 用来撤销合并，也可以与mixed/soft/hard搭配使用
 #- git rebase -i HEAD~n # 合并前n个commit。需要注意的是，编辑时把pick改为s即可，记得第一个不要修改（需要父commit）
-#- git stash
-#- git filter-branch
-#- git cherry-pick
-#- git work-together
-#- git config -f .gitmodules submodule.xxx.ignore dirty # 忽略子模块的脏commit
-#- git clone url path --recursive # clone包含submodule的repo
-#- git blame <filename> -L 10,20 # 查看10到20行，blame命令 我们往往通过blame查到具体是哪个人修改了某文件到某块代码，找到这个背锅侠。也可以使用 'git blame <filename> -L:<func_name>'
-#- git grep -n -p <str> # 从当前branch中查找指定字符串，相比于 'git grep -n <str>' 会显示匹配行以及上下几行的内容
-#- git grep -n -p <str> <commit号/tag号> # 从指定commit中查找指定字符串
-#- git rev-list --all | xargs git grep <str> # 从所有历史commit中查找指定字符串
-#- git count-objects -v # 查看git仓库大小
-#- git rev-list --objects --all | grep "$(git verify-pack -v .git/objects/pack/*.idx | sort -k 3 -n | tail -10 | awk '{print$1}')"
-#- git filter-branch --force --index-filter 'git rm -rf --cached --ignore-unmatch <filename>' --prune-empty --tag-name-filter cat -- --all # 怎么从所有git记录中查找指定字符串？？？ 需要按照上面输出的大文件，指定文件或者文件夹
-#- |
-#  git filter-branch --force --index-filter \
-#  'git rm -rf --cached --ignore-unmatch '"$(gitleaks detect --source . -v | awk -F': ' '/^File:/ {print $2}' | sort -u | tr '\n' ' ')" \
-#  --prune-empty --tag-name-filter cat -- --all
-#
-#- git push origin --force --all && rm -rf .git/refs/original/ && git reflog expire --expire=now --all && git gc --prune=now # [git 查找大文件，删除大文件写公司的一个内部项目，前期没配置好.gitignore导致整个git仓库达到1.1G，查了 - 掘金](https://juejin.cn/post/6844904046797520909) 怎么压缩 git 项目？push后，并清除本地缓存。删除之后会有大量输出，显示已经从各自历史log中剔除掉关于这个大文件的信息，之后可以使用gc命令再次压缩。一定要执行“清除缓存”。另外，之后最好从远程重新拉取。
-#- git maintenance run --task=gc --task=loose-objects --task=pack-refs && git prune # used to reduce git repo size, equal to 'git gc'
-#- git push --force --all --tags # gp默认只有main分支，如果使用git push --all就可以推送所有branch，使用git push --all --tags可以顺便推送所有tag
-#- git log -S <str> # 从所有commit的内容中查找str
-#- "删除远程所有标签？ `git tag -l | xargs -I {} git push origin :refs/tags/{}`"
-#- "怎么删除本地所有标签？ `git tag -l | xargs git tag -d`"
 
 
-#- gh cache list
-#- gh workflow list # "Get workflow-id, nor workflow-name. NOTICE: As long as add test branch, you can trigger by workflow_dispatch event"
-#- gh workflow run <workflow-id> --ref <branch-name> # Trigger by test branch. eg. gh workflow run 75843747 --ref test
+vars:
+  GH_TOKEN:
+    sh: gh auth token
+#  COMMIT_HASH:
+#    sh: git rev-parse HEAD
 
 
 
@@ -69,34 +41,16 @@ tasks:
   #   - git push -u origin main
   # silent: false
 
-  #- url: https://github.com/sinclairtarget/git-who
-  #  des: 一个开源的命令行工具，显示 Git 仓库的提交者统计。
-  #- url: https://github.com/git-quick-stats/git-quick-stats
-  #- url: https://github.com/IonicaBizau/git-stats
-  # 安装 git-quick-stats
-  install-git-quick-stats:
-    status:
-      - command -v git-quick-stats >> /dev/null
-    cmds:
-      - brew install git-quick-stats
-      - echo "✅ git-quick-stats 安装完成"
-    silent: true
 
-  # 安装 git-who
-  install-git-who:
-    status:
-      - command -v git-who >> /dev/null
-    cmds:
-      - brew install git-who
-      - echo "✅ git-who 安装完成"
-    silent: true
+  config:
+    desc:  # 其实就是.gitconfig
+    cmd: git config --list
+    interactive: true
+
 
   # 主报告任务
   analyze:
     desc: 在控制台显示完整的Git仓库分析报告
-    deps:
-      - install-git-quick-stats
-      - install-git-who
     preconditions:
       - 'test -d .git || { echo "错误: 当前目录不是Git仓库"; exit 1; }'
     cmds:
@@ -124,20 +78,13 @@ tasks:
   # 怎么修改（上一次commit的，以及指定commit的） commit message? # git rebase -i：修改某次 commit 的 message。
   undo:
     desc: "使用 ugit 撤销上一次 Git 操作（支持交互式菜单）"
-    cmds:
-      # 若未指定操作类型，进入交互式菜单
-      - if [ -z "{{.CLI_ARGS}}"]; then
-        ugit;
-        else
-        ugit undo {{.CLI_ARGS}};
-        fi
-    # 支持直接指定操作类型（如 `task undo commit`）
-    examples: |
-      task undo          # 进入交互式菜单选择撤销类型
-      task undo commit   # 撤销最后一次 commit
-      task undo add      # 撤销 git add 操作
-      task undo push     # 强制撤销最后一次 push
-      task undo branch-D # 恢复误删的分支
+    silent: true
+    cmd: |
+      if [ -z "{{.CLI_ARGS}}"]; then
+      ugit;
+      else
+      ugit undo {{.CLI_ARGS}};
+      fi
     dir: '{{.USER_WORKING_DIR}}'
 
   #- 操作场景: 【回滚本地未提交代码】丢弃未暂存更改
@@ -166,34 +113,15 @@ tasks:
 
 
 
+  # https://github.com/newren/git-filter-repo
+  rewrite:
+    desc: 怎么压缩 git 项目？
+    cmds:
+      - #- url: https://github.com/kubernetes/git-sync
+        #  des: 怎么保证repo和其upstream同步?
 
 
-  # TODO
-  #- des: 怎么压缩 git 项目？
-  #  url: https://github.com/newren/git-filter-repo # rewrite git repository history. Another filter-branch.
-
-
-  #- url: https://github.com/kubernetes/git-sync
-  #  des: 怎么保证repo和其upstream同步?
-
-
-  # 我们可以用 bfg, git-filter-repo, 以及git内置的git filter-branch 这三种工具来压缩 git 项目，分别怎么用？哪个更方便呢？ # [git 查找大文件，删除大文件 - 掘金](https://juejin.cn/post/6844904046797520909)
-  #- bfg --delete-files id_{dsa,rsa} # 删除所有含有 'id_rsa' or 'id_dsa' 的文件
-  #- bfg --strip-blobs-bigger-than 50M # 删除所有超过50MB的blobs文件
-  #- bfg --replace-text <filepath> --no-blob-cprotection # 替换文件中的敏感信息（不删除文件）
-  #- url: https://github.com/rtyley/bfg-repo-cleaner
-  #  des: bfg, 经过测试，发现 bfg 只能修改 commit 历史，但是无法直接修改当前文件
-  bfg:
-    desc: 怎么在不重建项目的情况下，清除git历史（如何移除历史密钥） # TODO 好像gfr更好用
-
-
-
-
-
-
-
-
-  # fork 后如何同步源的最新代码：我fork出来的分支，怎么同步后来父分支的更新？ # [Syncing a fork - GitHub Docs](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork) git remote add <upstream> && git fetch <upstream> && git checkout main && git merge <upstream>/master
+      # fork 后如何同步源的最新代码：我fork出来的分支，怎么同步后来父分支的更新？ # [Syncing a fork - GitHub Docs](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork) git remote add <upstream> && git fetch <upstream> && git checkout main && git merge <upstream>/master
   sync-upstream:
 
 
@@ -205,11 +133,19 @@ tasks:
   #  des: 非常好用的工具，用来直接拉取github的指定folder（注意只能用于github）。工具很好，但是不适合日常使用，3个required参数，用起来有点麻烦。
   fetch:
     desc: 下载指定文件夹（使用 gruntwork-io/fetch）
-    cmd: fetch --repo="{{.CLI_ARGS}}" --branch="main" .
+    preconditions:
+      - sh: command -v fetch
+      - sh: command -v gh
+    vars:
+      DEFAULT_BRANCH:
+        sh: gh repo view {{.CLI_ARGS}} --json defaultBranchRef --jq .defaultBranchRef.name
+    cmd: fetch --repo="{{.CLI_ARGS}}" --github-oauth-token={{.GH_TOKEN}} --branch="{{.DEFAULT_BRANCH}}" .
+    dir: '{{.USER_WORKING_DIR}}'
+    interactive: true
 
 
   #  - git gc 是啥意思？有啥用？ # [git clean - Reduce Git repository size - Stack Overflow](https://stackoverflow.com/questions/2116778/reduce-git-repository-size)
-#  - If I delete a git branch, whether .git folder size will decrease or not? git gc # git gc --prune=now
+  #  - If I delete a git branch, whether .git folder size will decrease or not? git gc # git gc --prune=now
   git-gc:
 
 
@@ -235,8 +171,44 @@ tasks:
 
 
   size:
+    desc: 显示 Git 对象大小信息
+    interactive: true
+    cmds:
+      - git count-objects -v
+      - git remote -v # 查看git的远程仓库地址
+    dir: '{{.USER_WORKING_DIR}}'
+
+
+  size-top:
+    desc: 查看repo里的TopK大小的文件
+    cmd: git verify-pack -v .git/objects/pack/*.idx | sort -k 3 -n | tail -{{.size}} | awk '{print$1}' | xargs -I {} sh -c 'git rev-list --objects --all | grep {}' || true
+    interactive: true
+    dir: '{{.USER_WORKING_DIR}}'
     vars:
-      GIT_SIZE:
-        sh: "git count-objects -v"
-    cmd: "{{.GIT_SIZE}}"
+      size: "{{.size | default 20}}"
+
+  #- git log --graph --date=short # 查看提交记录，相当于 glods
+  #- glods --grep <keywords> # 搜索提交记录，非常好用
+  glods:
+
+
+
+
+  #- git grep -n -p <str> # 从当前branch中查找指定字符串，相比于 'git grep -n <str>' 会显示匹配行以及上下几行的内容
+  #- git grep -n -p <str> <commit号/tag号> # 从指定commit中查找指定字符串
+  #- git rev-list --all | xargs git grep <str> # 从所有历史commit中查找指定字符串
+  search:
+    desc: 从所有历史commit中查找指定字符串
+    cmd: git rev-list --all | xargs git grep {{.str}}
+    vars:
+      str: '{{.str}}'
+    interactive: true
+    silent: true
+    dir: '{{.USER_WORKING_DIR}}'
+
+
+  #- git remote rm origin && git remote add origin <url> # git 怎么修改远程仓库地址
+  modify-origin:
+    desc: 修改远程仓库地址
+    cmd: git remote rm origin && git remote add origin {{.CLI_ARGS}}
     dir: '{{.USER_WORKING_DIR}}'

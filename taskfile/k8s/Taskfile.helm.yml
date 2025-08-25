@@ -25,7 +25,7 @@ vars:
 
 
 
-# TODO 需要一个用来执行helm的CICD的task
+# 需要一个用来执行helm的CICD的task
 # Helmfile apply -> 调用 helm install/upgrade -> 使用 helm-diff 对比变更 -> chart-releaser 发布 Chart
 
 

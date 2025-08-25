@@ -26,7 +26,6 @@ _: {
         defaultBranch = "main";
       };
       alias = {
-        la = "log --pretty=format:'%C(yellow)%h%Creset %C(green)(%cd)%Creset %C(bold blue)<%cn>%Creset%C(red)%d%Creset %C(white)%s%Creset' --date=format-local:'%Y-%m-%d %H:%M:%S' --graph --all";
       };
       credential = {
         "https://github.com" = {

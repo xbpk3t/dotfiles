@@ -2,8 +2,38 @@
 version: '3'
 
 
+#   - linux commands, check port occupancy, CPU load, memory usage, how to send signals to a process
+#   - iproute2
+
 
 tasks:
+
+  ip-link:
+    desc: Show / manipulate link devices
+    cmd: ip link show
+
+  ip-neigh:
+    desc: Show / manipulate neighbour objects
+    cmd: ip neigh
+
+  ip-addr:
+    desc: Show / manipulate protocol address
+    cmd: ip addr show
+
+  # nmap - Network discovery and security auditing
+  nmap:
+
+
+  # - iperf3 - Network performance measurement tool
+  # - iperf3 -c 192.168.30.2 # Test TCP throughput
+  # - xxx # Test UDP throughput
+  # - iperf3 -c 192.168.0.120 -P 30 -t 60 # Test multi-threaded TCP throughput
+  # - iperf3 -u -c 192.168.1.1 -b 5M -P 30 -t 60 # Test multi-threaded UDP throughput
+  # - iperf3 -c 192.168.0.120 -d -t 60 # Perform bidirectional TCP throughput test
+  # - iperf3 -u -c 192.168.1.1 -b 100M -d -t 60 # Test bidirectional UDP throughput
+  iperf:
+
+
 
   # [jsdelivr/globalping-cli: A simple CLI tool to run networking commands remotely from hundreds of globally distributed servers](https://github.com/jsdelivr/globalping-cli)
   global-ping:

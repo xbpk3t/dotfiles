@@ -89,11 +89,11 @@
     # git
     # gh is in shared/packages.nix
     git-lfs
-    git-quick-stats
+    git-quick-stats # https://github.com/git-quick-stats/git-quick-stats
     gitleaks
     gitlint
     bfg-repo-cleaner
     ugit
-    git-who
+    git-who # https://github.com/sinclairtarget/git-who 一个开源的命令行工具，显示 Git 仓库的提交者统计。
   ];
 }

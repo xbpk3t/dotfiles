@@ -1,0 +1,62 @@
+---
+service: '3'
+
+# - sar <type> <type-param> <interval> <count> # Only type parameter is required, others are optional. Types: e.g. CPU, memory, network. Type parameters: some types have parameters, some don't. DEV here represents monitoring network card information. Time interval represents how many seconds to sample data, 1 here means 1 second. Count represents the number of samples. For example, if time interval is 3 and sample count is 4, the sar command will block for 12 seconds
+# - sar -q # CPU load
+# - sar -I # CPU interrupts
+# - sar -w # CPU context switches
+# - sar -S # Swap partition
+# - sar -v # Kernel usage
+# - sar -B # Memory paging
+# - sar -d # Equivalent to iostat
+#
+# - netstat - Display network connections, routing tables, and network interface information
+# - iostat - View Linux IO load
+# - vmstat - Display real-time network traffic and packet count
+# - numastat - NUMA statistics
+
+
+  # - topic: linux performance monitoring commands
+  #   qs:
+  #   - "***kernel performance issue troubleshooting checklist (uptime, dmesg | tail, vmstat, mpstat -P ALL, pidstat, iostat -xz, free -m, sar -n DEV, sar -n TCP,ETCP)***" # [Linux Performance Issue Troubleshooting 60s - MySpace](https://www.hitzhangjie.pro/blog/2023-09-08-linux%E6%80%A7%E8%83%BD%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A560s/)
+  #   - What is the overall system-wide CPU load? How about CPU usage? Usage of individual CPUs?
+  #   - How concurrent is the CPU load? Is it single-threaded? How many threads?
+  #   - Which application is using the CPU and how much?
+  #   - Which kernel thread is using the CPU and how much?
+  #   - How much CPU usage is due to interrupts?
+  #   - What are the user space and kernel space CPU calling paths?
+  #   - What types of stall cycles are encountered?
+  #
+  #   - linux, top, metrics. How to use sar? # top (CPU(us, sy, ni, id, wa, hi, si, st) process(PRI, NI, VIRT, RES, SHR, S, %CPU, %MEM, TIME+))
+  #
+  #   - "***What metrics does top return? What does each metric mean?***"
+  #   # Overview column CPU data:
+  #   #
+  #   # - us(user cpu time) Percentage of CPU time spent in user space
+  #   # - sy(system cpu time) Percentage of CPU time spent in kernel space
+  #   # - ni(nice cpu time) Percentage of CPU time spent on user processes with adjusted priority
+  #   # - id(idle) Percentage of idle CPU time
+  #   # - wa(iowait) Percentage of CPU time waiting for I/O
+  #   # - hi(hardware irq) Hardware interrupts
+  #   # - si(software irq) Software interrupts
+  #   # - st(steal time) Steal time
+  #   #
+  #   # Table parameters:
+  #   #
+  #   # - PRI: Process priority
+  #   # - NI(NICE): Process priority value, default is 0, can be adjusted
+  #   # - VIRT: Virtual memory used by the process
+  #   # - RES(resident size): Physical memory used by the process
+  #   # - SHR: Shared memory used by the process
+  #   # - S: Process running status (WSRZ) R means running, S means sleeping, waiting to be awakened, Z means zombie state
+  #   # - %CPU: CPU usage of the process
+  #   # - %MEM: Percentage of physical memory and total memory used by the process
+  #   # - TIME+: Total CPU time used by the process since startup
+  #
+  #   - What do high sy or cs values in the top command represent? # If sy is too high, it may be due to `context switching and interrupts` being too frequent. sy = sys time System CPU time. This refers to the time the CPU spends executing system calls or kernel code. If the sy value is high, it may mean that system calls are very frequent, which may be due to context switching and interrupts. Context switching occurs when a process or thread switches from running state to ready state or vice versa, while interrupts are CPU state changes caused by external events (such as hardware device service requests) or internal events (such as timer expiration). 2. If cs is too high, then `too many threads or processes` are running. cs = context switch Number of context switches. This refers to the number of times the operating system switches execution rights between processes or threads. If the cs value is high, it usually means that there are a large number of processes or threads running, which may cause the operating system to frequently perform context switching, thus affecting system performance.
+  #
+#   - free, with swap, obviously free > available; without swap available > free # [A memory monitoring guess - jame_xhs's blog](https://www.jxhs.me/2022/04/10/%E4%B8%80%E6%AC%A1%E7%9B%91%E6%8E%A7%E5%86%85%E5%AD%98%E7%9A%84%E7%8C%9C%E6%83%B3/) Official Linux memory definition description, free will calculate part of swap, but available does not calculate swap.
+
+
+
+tasks:
