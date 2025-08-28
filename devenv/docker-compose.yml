@@ -40,30 +40,30 @@ volumes:
 
 # 服务容器配置
 services:
-#  # 开发环境 - Golang
-#  golang:
-#    profiles: ["dev", "full"]
-#    build:
-#      context: ./golang
-#    container_name: devenv_golang
-#    environment:
-#      <<: *common-variables
-#    privileged: true
-#    volumes:
-#      - ${CODE_PATH_HOST:-../}:/usr/src/code
-#    ports:
-#      - "${GOLANG_PORT_8000:-8000}:8000"
-#      - "${GOLANG_PORT_8001:-8001}:8001"
-#      - "${GOLANG_PORT_8002:-8002}:8002"
-#      - "${GOLANG_PORT_8003:-8003}:8003"
-#      - "${GOLANG_PORT_9000:-9000}:9000"
-#      - "${GOLANG_PORT_9001:-9001}:9001"
-#      - "${GOLANG_PORT_9002:-9002}:9002"
-#      - "${GOLANG_PORT_9003:-9003}:9003"
-#    stdin_open: true
-#    tty: true
-#    <<: [*backend-network, *common-restart]
-#    logging: *common-logging
+  #  # 开发环境 - Golang
+  #  golang:
+  #    profiles: ["dev", "full"]
+  #    build:
+  #      context: ./golang
+  #    container_name: devenv_golang
+  #    environment:
+  #      <<: *common-variables
+  #    privileged: true
+  #    volumes:
+  #      - ${CODE_PATH_HOST:-../}:/usr/src/code
+  #    ports:
+  #      - "${GOLANG_PORT_8000:-8000}:8000"
+  #      - "${GOLANG_PORT_8001:-8001}:8001"
+  #      - "${GOLANG_PORT_8002:-8002}:8002"
+  #      - "${GOLANG_PORT_8003:-8003}:8003"
+  #      - "${GOLANG_PORT_9000:-9000}:9000"
+  #      - "${GOLANG_PORT_9001:-9001}:9001"
+  #      - "${GOLANG_PORT_9002:-9002}:9002"
+  #      - "${GOLANG_PORT_9003:-9003}:9003"
+  #    stdin_open: true
+  #    tty: true
+  #    <<: [*backend-network, *common-restart]
+  #    logging: *common-logging
 
   # 数据库服务
   etcd:
@@ -209,23 +209,22 @@ services:
     <<: [*backend-network, *common-restart]
     logging: *common-logging
 
-  # cAdvisor - 容器指标收集器 (在 macOS + Podman 环境下暂时禁用)
-  # cadvisor:
-  #   profiles: ["monitor", "full", "pag"]
-  #   image: gcr.io/google-containers/cadvisor:${CADVISOR_VERSION:-v0.34.0}
-  #   container_name: devenv_cadvisor
-  #   environment:
-  #     <<: *common-variables
-  #   volumes:
-  #     - /:/rootfs:ro
-  #     - /var/run:/var/run:rw
-  #     - /sys:/sys:ro
-  #     # 支持 Podman - 在 macOS 上使用 Podman 路径
-  #     - /var/lib/containers:/var/lib/containers:ro
-  #   ports:
-  #     - "${CADVISOR_PORT:-8080}:8080"
-  #   <<: [*backend-network, *common-restart]
-  #   logging: *common-logging
+  # cAdvisor - 容器指标收集器
+  cadvisor:
+    profiles: ["monitor", "full", "pag"]
+    image: gcr.io/google-containers/cadvisor:${CADVISOR_VERSION:-v0.34.0}
+    container_name: devenv_cadvisor
+    environment:
+      <<: *common-variables
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    ports:
+      - "${CADVISOR_PORT:-8080}:8080"
+    <<: [*backend-network, *common-restart]
+    logging: *common-logging
 
   # Pushgateway - 推送网关
   pushgateway:
@@ -301,7 +300,7 @@ services:
 
   # 分析数据库
   clickhouse:
-    profiles: ["analytics", "full"]
+    profiles: ["ck", "full"]
     image: clickhouse/clickhouse-server:${CLICKHOUSE_VERSION:-23.8}
     container_name: devenv_clickhouse
     environment:

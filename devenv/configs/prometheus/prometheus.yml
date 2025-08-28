@@ -20,11 +20,10 @@ scrape_configs:
     static_configs:
       - targets: ['nodeexporter:9100']
 
-  # cAdvisor 在 macOS + Podman 环境下暂时禁用
-  # - job_name: 'cadvisor'
-  #   scrape_interval: 5s
-  #   static_configs:
-  #     - targets: ['cadvisor:8080']
+  - job_name: 'cadvisor'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['cadvisor:8080']
 
   - job_name: 'prometheus'
     scrape_interval: 10s

@@ -1,8 +1,6 @@
 version: "3"
 
 # autoupdate          Auto-update pre-commit config to the latest repos' versions.
-# clean               Clean out pre-commit files.
-# gc                  Clean unused cached repos.
 # init-templatedir    Install hook script in a directory intended for use with `git config init.templateDir`.
 # install             Install the pre-commit script.
 # install-hooks       Install hook environments for all environments in the config file. You may find `pre-commit install --install-
@@ -22,8 +20,19 @@ tasks:
     cmds:
       - pre-commit run --all-files  # 检查所有文件（非暂存区）
     dir: '{{.USER_WORKING_DIR}}'
-    preconditions:
+    interactive: true
+    defer:
       - task: update-hooks
+
+
+  update-hooks:
+    desc: 更新远程仓库版本
+    internal: true
+    cmds:
+      - pre-commit autoupdate
+    dir: '{{.USER_WORKING_DIR}}'
+
+
 
   # 新增维护任务
   maintain:
@@ -53,15 +62,8 @@ tasks:
       - pre-commit try-repo {{.CLI_ARGS}}  # 测试新仓库
     dir: '{{.USER_WORKING_DIR}}'
 
-  # 原有任务优化
-  #  hook:
-  #    cmds:
-  #      - pre-commit run {{.CLI_ARGS}}  # 支持指定钩子/文件
-  #    dir: '{{.USER_WORKING_DIR}}'
-
-
   hook:
-    desc: "交互式选择或直接运行检查"
+    desc: 执行指定hook（交互式选择或直接运行检查）
     interactive: true
     silent: true
     dir: '{{.USER_WORKING_DIR}}'
@@ -74,9 +76,3 @@ tasks:
           pre-commit run "$SELECTED"
         fi
       fi
-
-
-  update-hooks: # 重命名更准确
-    cmds:
-      - pre-commit autoupdate  # 更新远程仓库版本
-    dir: '{{.USER_WORKING_DIR}}'

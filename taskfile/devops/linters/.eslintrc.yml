@@ -1,0 +1,61 @@
+---
+
+
+# Specify language options, replacing the deprecated `env` property
+languageOptions:
+  globals:
+    node: true        # Enable Node.js globals
+    es2021: true      # Enable ES2021 globals
+  parser: "@typescript-eslint/parser"  # Use TypeScript parser
+
+# Extend recommended configurations
+extends:
+  - eslint:recommended
+  - plugin:@typescript-eslint/recommended
+  - plugin:import/recommended
+  - plugin:import/typescript
+  - prettier # Disables ESLint rules that conflict with Prettier
+
+# Specify plugins
+plugins:
+  - "@typescript-eslint"
+  - import
+  - functional
+  - no-commented-code
+  - todo-plz
+  - prettier
+
+
+# Define custom rules
+rules:
+  # Enforce naming conventions for variables and classes
+  "@typescript-eslint/naming-convention":
+    - error
+    - selector: variable
+      format: [camelCase, UPPER_CASE]
+    - selector: class
+      format: [PascalCase]
+
+  # Limit the number of function parameters to 3
+  max-params: [error, 3]
+
+  # Enforce import order with grouping and newlines
+  import/order:
+    - error
+    - groups: [builtin, external, internal, parent, sibling, index]
+      newlines-between: always
+
+  # Prevent unused variables
+  "@typescript-eslint/no-unused-vars": error
+
+  # Prevent implicit global variables
+  no-implicit-globals: error
+  "@typescript-eslint/no-magic-numbers": [error, {ignore: [0, 1]}]
+  "@typescript-eslint/explicit-member-accessibility": [error, {accessibility: "explicit"}]
+  "@typescript-eslint/prefer-readonly": error
+  "@typescript-eslint/return-this": error
+  "@typescript-eslint/promise-function-async": error
+  "@typescript-eslint/no-floating-promises": error
+  "functional/no-loop-statement": error
+  "no-commented-code": error
+  "todo-plz/require-todo-issue": error

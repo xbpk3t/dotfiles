@@ -52,6 +52,11 @@ obj.checkTimer = nil
 obj.currentAlert = nil
 obj.appWatcher = nil
 
+
+local spoonPath = hs.configdir .. "/Spoons/TaskList.spoon"
+local notifications = dofile(spoonPath .. "/notifications.lua")
+
+
 -- 获取 Chrome 标签页数量
 local function getChromeTabCount()
     local script = [[
@@ -145,17 +150,17 @@ local function handleTabLimitExceeded(tabCount, excessCount)
         local closedCount = closeExcessTabs(excessCount)
         if closedCount > 0 then
             local successMessage = string.format("已自动关闭 %d 个标签页", closedCount)
-            obj.currentAlert = hs.alert.show(successMessage, nil, nil, 3)
+            obj.currentAlert = notifications.sendNotification(successMessage, nil, nil, 3)
             obj.logger.i(successMessage)
         else
             -- 如果无法自动关闭，显示手动提醒
             local manualMessage = "无法自动关闭标签页，请手动关闭"
-            obj.currentAlert = hs.alert.show(manualMessage, nil, nil, obj.alertDuration > 0 and obj.alertDuration or "infinite")
+            obj.currentAlert = notifications.sendNotification(manualMessage, nil, nil, obj.alertDuration > 0 and obj.alertDuration or "infinite")
             obj.logger.w(manualMessage)
         end
     else
         -- 仅显示提醒，不自动关闭
-        obj.currentAlert = hs.alert.show(message, nil, nil, obj.alertDuration > 0 and obj.alertDuration or "infinite")
+        obj.currentAlert = notifications.sendNotification(message, nil, nil, obj.alertDuration > 0 and obj.alertDuration or "infinite")
         obj.logger.w("Tab limit exceeded, showing alert only")
     end
 end
@@ -275,12 +280,12 @@ function obj:toggle()
     if self.enabled then
         self:stop()
         self.enabled = false
-        hs.alert.show("ChromeTabLimit 已禁用")
+        notifications.sendNotification("ChromeTabLimit 已禁用")
         self.logger.i("ChromeTabLimit disabled")
     else
         self.enabled = true
         self:start()
-        hs.alert.show("ChromeTabLimit 已启用")
+        notifications.sendNotification("ChromeTabLimit 已启用")
         self.logger.i("ChromeTabLimit enabled")
     end
     return self
@@ -330,7 +335,7 @@ function obj:bindHotkeys(mapping)
             checkTabLimit()
         end,
         show_status = function()
-            hs.alert.show(self:getStatus(), nil, nil, 5)
+            notifications.sendNotification(self:getStatus(), nil, nil, 5)
         end
     }
     hs.spoons.bindHotkeysToSpec(def, mapping)

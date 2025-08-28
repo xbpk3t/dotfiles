@@ -1,10 +1,13 @@
 version: '3'
 
+env:
+  dir: '{{.USER_WORKING_DIR}}'
+
 vars:
-  COMPOSE_FILE: "../../devenv/docker-compose.yml"
-  COMPOSE_CMD: '{{.COMPOSE_CMD | default "podman-compose"}}'
-  ENV_FILE: '{{.ENV_FILE | default "../../devenv/.env"}}'
-  COMPOSE_FULL_CMD: '{{.COMPOSE_CMD | default "podman-compose"}} -f {{.COMPOSE_FILE}} --env-file {{.ENV_FILE}}'
+  COMPOSE_FILE: "./devenv/docker-compose.yml"
+  COMPOSE_CMD: '{{.COMPOSE_CMD | default "docker-compose"}}'
+  ENV_FILE: '{{.ENV_FILE | default "./devenv/.env"}}'
+  COMPOSE_FULL_CMD: '{{.COMPOSE_CMD | default "docker-compose"}} -f {{.COMPOSE_FILE}} --env-file {{.ENV_FILE}}'
 
 tasks:
   dc-up:
@@ -67,10 +70,10 @@ tasks:
     cmds:
       - "{{.COMPOSE_FULL_CMD}} --profile ms up -d"
 
-  analytics:
+  ck:
     desc: Start analytics database (clickhouse)
     cmds:
-      - "{{.COMPOSE_FULL_CMD}} --profile analytics up -d"
+      - "{{.COMPOSE_FULL_CMD}} --profile ck up -d"
 
   full:
     desc: Start all services
@@ -98,7 +101,7 @@ tasks:
     desc: Clean all containers, networks and volumes
     cmds:
       - "{{.COMPOSE_FULL_CMD}} down -v --remove-orphans"
-      - "podman system prune -f"
+      - "docker system prune -f"
 
   health:
     desc: Check all service health status

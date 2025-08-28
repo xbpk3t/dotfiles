@@ -89,7 +89,7 @@ repos:
 
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.12.8
+    rev: v0.12.10
     hooks:
       - id: ruff
         types: [python]
@@ -97,7 +97,7 @@ repos:
         types: [python]
 
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.19.2
+    rev: v8.28.0
     hooks:
       - id: gitleaks
         name: Scan Secrets
@@ -127,7 +127,7 @@ repos:
 
 
   - repo: https://github.com/golangci/golangci-lint
-    rev: v2.3.1
+    rev: v2.4.0
     hooks:
       - id: golangci-lint-config-verify
       - id: golangci-lint
@@ -198,7 +198,7 @@ repos:
 
 
   - repo: https://github.com/astro/deadnix
-    rev: v1.2.1
+    rev: v1.3.1
     hooks:
       - id: deadnix
         args: [--edit]

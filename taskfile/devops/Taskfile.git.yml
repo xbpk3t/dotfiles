@@ -139,7 +139,8 @@ tasks:
     vars:
       DEFAULT_BRANCH:
         sh: gh repo view {{.CLI_ARGS}} --json defaultBranchRef --jq .defaultBranchRef.name
-    cmd: fetch --repo="{{.CLI_ARGS}}" --github-oauth-token={{.GH_TOKEN}} --branch="{{.DEFAULT_BRANCH}}" .
+      REPO_NAME: '{{.CLI_ARGS | splitList "/" | last}}'
+    cmd: fetch --repo="{{.CLI_ARGS}}" --github-oauth-token={{.GH_TOKEN}} --branch="{{.DEFAULT_BRANCH}}" {{.REPO_NAME}}
     dir: '{{.USER_WORKING_DIR}}'
     interactive: true
 

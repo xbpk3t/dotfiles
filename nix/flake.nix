@@ -90,13 +90,6 @@
     ];
 
     # NixOS-specific modules
-    nixosModules = [
-      ./modules/nix-core.nix
-      # ./modules/host-users.nix  # Darwin-specific, not needed for NixOS
-      ./modules/nixos
-      ./modules/shared/packages.nix  # Add shared packages
-      # ./modules/stylix.nix  # Temporarily disabled due to GitHub API limits
-    ];
 
   in {
     # Darwin configurations

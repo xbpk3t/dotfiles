@@ -3,7 +3,9 @@
 {
   environment.systemPackages = with pkgs; [
     # Python
+    python313
     uv
+
 
     # Rust
     rustup
