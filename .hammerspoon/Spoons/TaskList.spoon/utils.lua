@@ -82,6 +82,26 @@ function utils.getThisWeekRange()
     return mondayStr, todayStr, weekNum
 end
 
+-- 获取上周的日期范围（上周一到上周日）
+function utils.getLastWeekRange()
+    local today = os.time()
+    local todayWeekday = tonumber(os.date("%w", today)) -- 0=Sunday, 1=Monday, ...
+
+    -- 计算上周一的日期
+    local mondayOffset = (todayWeekday == 0) and 6 or (todayWeekday - 1)
+    local thisMonday = today - mondayOffset * 24 * 60 * 60
+    local lastMonday = thisMonday - 7 * 24 * 60 * 60
+    local lastSunday = thisMonday - 24 * 60 * 60
+
+    local mondayStr = os.date("%Y-%m-%d", lastMonday)
+    local sundayStr = os.date("%Y-%m-%d", lastSunday)
+
+    -- 计算上周的周数
+    local weekNum = tonumber(os.date("%W", lastMonday))
+
+    return mondayStr, sundayStr, weekNum
+end
+
 -- 获取当前时间字符串
 function utils.getCurrentTime()
     return os.date("%H:%M")

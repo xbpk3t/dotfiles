@@ -22,7 +22,7 @@ local spoonPath = hs.configdir .. "/Spoons/TaskList.spoon"
 local utils = dofile(spoonPath .. "/utils.lua")
 local data = dofile(spoonPath .. "/data.lua")
 local scoring = dofile(spoonPath .. "/scoring.lua")
-local notifications = dofile(spoonPath .. "/notifications.lua")
+local notifs = dofile(spoonPath .. "/tasklist_notifs.lua")
 local tasks = dofile(spoonPath .. "/tasks.lua")
 local countdown = dofile(spoonPath .. "/countdown.lua")
 local export = dofile(spoonPath .. "/export.lua")
@@ -98,7 +98,7 @@ end
 local function addTask()
     local activeTasks = tasks.getActiveTasks(taskList)
     if #activeTasks >= maxTasks then
-        notifications.sendNotification("任务管理器", "活跃任务数量已达上限 (" .. maxTasks .. ")", 5)
+        notifs.taskLimitReached(maxTasks)
         return
     end
 
@@ -127,7 +127,7 @@ local function addTask()
     end
 
     if not utils.isValidDate(dateStr) then
-        notifications.sendNotification("输入错误", "日期格式错误，请使用 YYYY-MM-DD 格式", 5)
+        notifs.dateFormatError()
         return
     end
 
@@ -156,7 +156,7 @@ local function addTask()
     updateMenubar()
     saveTasks()
 
-    notifications.sendNotification("任务管理器", "任务已添加: " .. taskName, 3)
+    notifs.taskAdded(taskName)
 end
 
 -- 任务管理函数
@@ -182,13 +182,13 @@ local function selectTask(index)
     -- 检查是否有保存的倒计时时间
     local minutes, seconds = countdown.resumeTaskCountdown(taskList[index].id, updateMenubar)
     if minutes and seconds then
-        notifications.sendNotification("恢复任务",
+        notifs.sendNotification("恢复任务:",
                 string.format("已恢复: %s (剩余: %d:%02d)", taskList[index].name, minutes, seconds), 3)
     else
         -- 计算新的倒计时时间
         local countdownMinutes = countdown.calculateCountdownTime(taskList[index])
         countdown.startCountdown(countdownMinutes, currentTaskId, updateMenubar)
-        notifications.sendNotification("当前任务",
+        notifs.sendNotification("当前任务:",
                 "已设置: " .. taskList[index].name .. " (倒计时: " .. countdownMinutes .. "分钟)", 3)
     end
     updateMenubar()
@@ -215,7 +215,7 @@ local function editTask(index)
     end
 
     if newName == "" then
-        notifications.sendNotification("输入错误", "任务名称不能为空", 3)
+        notifs.taskNameEmpty()
         return
     end
 
@@ -232,7 +232,7 @@ local function editTask(index)
     end
 
     if not utils.isValidDate(newDate) then
-        notifications.sendNotification("输入错误", "日期格式错误", 3)
+        notifs.dateFormatError()
         return
     end
 
@@ -273,8 +273,7 @@ local function editTask(index)
     updateMenubar()
     saveTasks()
 
-    notifications.sendNotification("任务管理器",
-            string.format("任务已更新: %s -> %s", oldName, newName), 3)
+    notifs.sendNotification("任务已更新: " .. oldName .. " -> " .. newName)
 end
 
 local function completeTask(index)
@@ -306,8 +305,7 @@ local function completeTask(index)
 
     updateMenubar()
     saveTasks()
-    notifications.sendNotification("任务完成",
-            "任务已完成！评分: " .. scoring.calculateScore(task) .. "/5", 5)
+    notifs.taskCompleted("任务已完成！评分: " .. scoring.calculateScore(task) .. "/5")
 end
 
 local function deleteTask(index)
@@ -342,7 +340,7 @@ local function deleteTask(index)
 
         updateMenubar()
         saveTasks()
-        notifications.sendNotification("任务管理器", "任务已删除", 3)
+        notifs.taskDeleted()
     end
 end
 
@@ -357,10 +355,9 @@ local function reloadCronTasks()
         tasks.sortTasks(taskList)
         updateMenubar()
         saveTasks()
-        notifications.sendNotification("CronTask",
-                string.format("已重新加载，新增 %d 个周期任务", newTaskCount - oldTaskCount), 3)
+        notifs.cronTaskLoaded(newTaskCount - oldTaskCount)
     else
-        notifications.sendNotification("CronTask", "重新加载完成，没有新任务", 3)
+        notifs.cronTaskLoaded(0)
     end
 end
 
@@ -456,8 +453,7 @@ function obj:start()
             tasks.sortTasks(taskList)
             updateMenubar()
             saveTasks()
-            notifications.sendNotification("CronTask",
-                    string.format("已加载 %d 个新的周期任务", newTaskCount - oldTaskCount), 3)
+            notifs.cronTaskLoaded(newTaskCount - oldTaskCount)
         end
     end
 
@@ -468,7 +464,7 @@ function obj:start()
     -- 绑定快捷键
     obj:setupHotkeys()
 
-    notifications.sendNotification("TaskList", "多任务管理器已启动", 3)
+    notifs.started()
 
     obj.logger.i("TaskList started")
     return self
@@ -493,11 +489,11 @@ function obj:setupHotkeys()
         if success then
             local countdownState = countdown.getCountdownState()
             local status = countdownState.isPaused and "已暂停" or "已恢复"
-            notifications.sendNotification("倒计时控制", "倒计时" .. status, 2)
+            notifs.countdownStatus(status)
             obj.logger.i("Countdown toggled: " .. status)
             print("TaskList: Countdown toggled: " .. status)
         else
-            notifications.sendNotification("倒计时控制", "当前没有运行中的倒计时", 2)
+            notifications.sendInfo("当前没有运行中的倒计时")
             obj.logger.i("No active countdown to toggle")
             print("TaskList: No active countdown to toggle")
         end
@@ -512,16 +508,16 @@ function obj:setupHotkeys()
             local currentTask, index = tasks.findTaskById(taskList, currentTaskId)
             if currentTask and not currentTask.isDone then
                 completeTask(index)
-                notifications.sendNotification("任务完成", "当前任务已完成: " .. utils.sanitizeString(currentTask.name), 3)
+                notifications.taskCompleted(utils.sanitizeString(currentTask.name))
                 obj.logger.i("Current task completed: " .. currentTask.name)
                 print("TaskList: Current task completed: " .. currentTask.name)
             else
-                notifications.sendNotification("任务完成", "当前任务已完成或不存在", 2)
+                notifications.sendInfo("当前任务已完成或不存在")
                 obj.logger.i("Current task already completed or not found")
                 print("TaskList: Current task already completed or not found")
             end
         else
-            notifications.sendNotification("任务完成", "没有当前任务", 2)
+            notifications.noCurrentTask()
             obj.logger.i("No current task to complete")
             print("TaskList: No current task to complete")
         end

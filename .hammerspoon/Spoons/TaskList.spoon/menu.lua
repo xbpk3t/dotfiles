@@ -7,7 +7,7 @@ local menu = {}
 local utils = dofile(hs.configdir .. "/Spoons/TaskList.spoon/utils.lua")
 local tasks = dofile(hs.configdir .. "/Spoons/TaskList.spoon/tasks.lua")
 local export = dofile(hs.configdir .. "/Spoons/TaskList.spoon/export.lua")
-local notifications = dofile(hs.configdir .. "/Spoons/TaskList.spoon/notifications.lua")
+local notifs = dofile(hs.configdir .. "/Spoons/TaskList.spoon/tasklist_notifs.lua")
 
 -- 创建菜单项
 function menu.createMenu(taskList, currentTaskId, maxTasks, callbacks)
@@ -103,7 +103,7 @@ function menu.createMenu(taskList, currentTaskId, maxTasks, callbacks)
                     if success then
                         local newState = callbacks.getCountdownState()
                         local status = newState.isPaused and "已暂停" or "已恢复"
-                        notifications.sendNotification("倒计时控制", "倒计时" .. status, 2)
+                        notifs.countdownStatus(status)
                     end
                 end
             end })
@@ -120,6 +120,7 @@ function menu.createMenu(taskList, currentTaskId, maxTasks, callbacks)
             { title = "今天 (" .. utils.getCurrentDate() .. ")", fn = function() export.exportTasksForDate(taskList, utils.getCurrentDate(), "今天") end },
             { title = "昨天 (" .. utils.getYesterdayDate() .. ")", fn = function() export.exportTasksForDate(taskList, utils.getYesterdayDate(), "昨天") end },
             { title = "本周", fn = function() export.exportThisWeekTasks(taskList) end },
+            { title = "上周", fn = function() export.exportLastWeekTasks(taskList) end },
             { title = "自定义", fn = function() export.exportCustomDateTasks(taskList) end },
         }
     })

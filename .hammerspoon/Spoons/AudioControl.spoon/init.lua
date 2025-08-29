@@ -47,8 +47,7 @@ obj.lastSSID = nil
 obj.lastHeadphoneState = nil
 obj.wifiWatcher = nil
 
-local spoonPath = hs.configdir .. "/Spoons/TaskList.spoon"
-local notifications = dofile(spoonPath .. "/notifications.lua")
+local notifs = dofile(hs.configdir .. "/Spoons/AudioControl.spoon/notifs.lua")
 
 -- 检查当前 SSID 是否在受信任列表中
 local function isSSIDTrusted(ssid)
@@ -126,17 +125,18 @@ local function handleAudioControl()
     if headphoneStateChanged then
       if headphoneConnected then
         -- 耳机连接：禁用音频控制
-          notifications.sendNotification("耳机已连接：禁用音频控制")
+        notifs.headphoneConnected()
         obj.logger.i("Headphone connected, disabling audio control")
       else
         -- 耳机断开：重新应用 WiFi 规则
+        notifs.headphoneDisconnected()
         if isTrusted then
           setVolume(obj.trustedVolume)
-            notifications.sendNotification("【耳机已断开】重新应用 WiFi 规则")
+          notifs.trustedNetworkActivated()
           obj.logger.i("Headphone disconnected, restored trusted network volume")
         else
           setVolume(obj.untrustedVolume)
-            notifications.sendNotification("【耳机已断开】muted for untrusted network")
+          notifs.untrustedNetworkMuted()
           obj.logger.i("Headphone disconnected, muted for untrusted network")
         end
       end
@@ -147,12 +147,14 @@ local function handleAudioControl()
       if isTrusted and not wasTrusted then
         -- 从不受信任网络切换到受信任网络
         setVolume(obj.trustedVolume)
-        notifications.sendNotification("Connected to trusted network: " .. (currentSSID or "Unknown"))
+        notifs.wifiConnected(currentSSID)
+        notifs.trustedNetworkActivated()
         obj.logger.i("Connected to trusted network: " .. (currentSSID or "Unknown"))
       elseif not isTrusted and wasTrusted then
         -- 从受信任网络切换到不受信任网络
         setVolume(obj.untrustedVolume)
-          notifications.sendNotification("Connected to untrusted network - Audio muted")
+        notifs.wifiDisconnected(obj.lastSSID)
+        notifs.untrustedNetworkMuted()
         obj.logger.i("Connected to untrusted network, audio muted")
       elseif not isTrusted and not wasTrusted then
         -- 在不受信任网络之间切换，确保保持静音
@@ -236,13 +238,13 @@ function obj:bindHotkeys(mapping)
       device:setOutputMuted(not device:outputMuted())
       showVolumeIndicator()
     end,
-    show_status = function()
+            show_status = function()
       local currentSSID = hs.wifi.currentNetwork()
       local headphoneConnected = isHeadphoneConnected()
       local status = string.format("WiFi: %s | Headphone: %s",
         currentSSID or "None",
         headphoneConnected and "Connected" or "Disconnected")
-      notifications.sendNotification(status)
+      notifs.statusInfo(status)
     end
   }
   hs.spoons.bindHotkeysToSpec(def, mapping)

@@ -4,7 +4,7 @@
 ---
 
 local countdown = {}
-local notifications = dofile(hs.configdir .. "/Spoons/TaskList.spoon/notifications.lua")
+local notifs = dofile(hs.configdir .. "/Spoons/TaskList.spoon/tasklist_notifs.lua")
 
 -- 倒计时状态变量
 local countdownTimer = nil
@@ -52,7 +52,7 @@ end
 -- 启动倒计时
 function countdown.startCountdown(minutes, currentTaskId, updateMenubarCallback)
     if countdownTimer and countdownTimer:running() then
-        notifications.sendNotification("倒计时提醒", "倒计时已在运行中", 3)
+        notifs.sendInfo("倒计时已在运行中")
         return
     end
 
@@ -80,7 +80,7 @@ function countdown.startCountdown(minutes, currentTaskId, updateMenubarCallback)
                     taskCountdowns[currentTaskId] = remainingSeconds
                 end
 
-                notifications.sendNotification("⏰ 倒计时结束", "任务时间到！自动续期40分钟", 10, "Glass")
+                notifs.countdownAutoExtended()
 
                 if updateMenubarCallback then
                     updateMenubarCallback()
@@ -89,7 +89,7 @@ function countdown.startCountdown(minutes, currentTaskId, updateMenubarCallback)
         end
     end)
 
-    notifications.sendNotification("倒计时启动", "已启动 " .. minutes .. " 分钟倒计时", 3)
+    notifs.countdownStarted(minutes)
 end
 
 -- 停止倒计时
@@ -112,7 +112,7 @@ function countdown.toggleCountdown()
     if countdownTimer and countdownTimer:running() then
         isPaused = not isPaused
         local status = isPaused and "暂停" or "恢复"
-        notifications.sendNotification("倒计时" .. status, "倒计时已" .. status, 2)
+        notifs.countdownStatus("已" .. status)
         return true
     end
     return false
@@ -146,7 +146,7 @@ function countdown.resumeTaskCountdown(taskId, updateMenubarCallback)
                         taskCountdowns[taskId] = remainingSeconds
                     end
 
-                    notifications.sendNotification("⏰ 倒计时结束", "任务时间到！自动续期40分钟", 10, "Glass")
+                    notifs.countdownAutoExtended()
 
                     if updateMenubarCallback then
                         updateMenubarCallback()
