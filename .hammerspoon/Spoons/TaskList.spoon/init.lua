@@ -161,7 +161,9 @@ end
 
 -- 任务管理函数
 local function selectTask(index)
-    if not taskList[index] or taskList[index].isDone then return end
+    if not taskList[index] or taskList[index].isDone then
+        return
+    end
 
     -- 如果有正在进行的任务，停止任务
     local currentTask = tasks.findTaskById(taskList, currentTaskId)
@@ -181,20 +183,22 @@ local function selectTask(index)
     local minutes, seconds = countdown.resumeTaskCountdown(taskList[index].id, updateMenubar)
     if minutes and seconds then
         notifications.sendNotification("恢复任务",
-            string.format("已恢复: %s (剩余: %d:%02d)", taskList[index].name, minutes, seconds), 3)
+                string.format("已恢复: %s (剩余: %d:%02d)", taskList[index].name, minutes, seconds), 3)
     else
         -- 计算新的倒计时时间
         local countdownMinutes = countdown.calculateCountdownTime(taskList[index])
         countdown.startCountdown(countdownMinutes, currentTaskId, updateMenubar)
         notifications.sendNotification("当前任务",
-            "已设置: " .. taskList[index].name .. " (倒计时: " .. countdownMinutes .. "分钟)", 3)
+                "已设置: " .. taskList[index].name .. " (倒计时: " .. countdownMinutes .. "分钟)", 3)
     end
     updateMenubar()
     saveTasks()
 end
 
 local function editTask(index)
-    if not taskList[index] or taskList[index].isDone then return end
+    if not taskList[index] or taskList[index].isDone then
+        return
+    end
 
     local task = taskList[index]
 
@@ -270,11 +274,13 @@ local function editTask(index)
     saveTasks()
 
     notifications.sendNotification("任务管理器",
-        string.format("任务已更新: %s -> %s", oldName, newName), 3)
+            string.format("任务已更新: %s -> %s", oldName, newName), 3)
 end
 
 local function completeTask(index)
-    if not taskList[index] or taskList[index].isDone then return end
+    if not taskList[index] or taskList[index].isDone then
+        return
+    end
 
     local task = taskList[index]
 
@@ -300,11 +306,14 @@ local function completeTask(index)
 
     updateMenubar()
     saveTasks()
-    -- 移除弹窗通知，保持菜单打开状态
+    notifications.sendNotification("任务完成",
+            "任务已完成！评分: " .. scoring.calculateScore(task) .. "/5", 5)
 end
 
 local function deleteTask(index)
-    if not taskList[index] then return end
+    if not taskList[index] then
+        return
+    end
 
     local task = taskList[index]
     local button = hs.dialog.blockAlert(
@@ -349,7 +358,7 @@ local function reloadCronTasks()
         updateMenubar()
         saveTasks()
         notifications.sendNotification("CronTask",
-            string.format("已重新加载，新增 %d 个周期任务", newTaskCount - oldTaskCount), 3)
+                string.format("已重新加载，新增 %d 个周期任务", newTaskCount - oldTaskCount), 3)
     else
         notifications.sendNotification("CronTask", "重新加载完成，没有新任务", 3)
     end
@@ -364,8 +373,12 @@ local function createMenu()
         deleteTask = deleteTask,
         addTask = addTask,
         reloadCronTasks = reloadCronTasks,
-        getCountdownState = function() return countdown.getCountdownState() end,
-        toggleCountdown = function() return countdown.toggleCountdown() end,
+        getCountdownState = function()
+            return countdown.getCountdownState()
+        end,
+        toggleCountdown = function()
+            return countdown.toggleCountdown()
+        end,
         exit = function()
             menubar:delete()
             menubar = nil
@@ -444,7 +457,7 @@ function obj:start()
             updateMenubar()
             saveTasks()
             notifications.sendNotification("CronTask",
-                string.format("已加载 %d 个新的周期任务", newTaskCount - oldTaskCount), 3)
+                    string.format("已加载 %d 个新的周期任务", newTaskCount - oldTaskCount), 3)
         end
     end
 
@@ -472,7 +485,7 @@ end
 ---  * The TaskList object
 function obj:setupHotkeys()
     -- 绑定 Option+Control+P 来暂停/恢复倒计时
-    obj.pauseHotkey = hs.hotkey.bind({"alt", "ctrl"}, "p", function()
+    obj.pauseHotkey = hs.hotkey.bind({ "alt", "ctrl" }, "p", function()
         obj.logger.i("Pause hotkey triggered")
         print("TaskList: Pause hotkey triggered")  -- 添加控制台日志
 
@@ -491,7 +504,7 @@ function obj:setupHotkeys()
     end)
 
     -- 绑定 Option+Control+D 来完成当前任务
-    obj.completeHotkey = hs.hotkey.bind({"alt", "ctrl"}, "d", function()
+    obj.completeHotkey = hs.hotkey.bind({ "alt", "ctrl" }, "d", function()
         obj.logger.i("Complete task hotkey triggered")
         print("TaskList: Complete task hotkey triggered")  -- 添加控制台日志
 
@@ -578,8 +591,12 @@ end
 ---  * The TaskList object
 function obj:bindHotkeys(mapping)
     local def = {
-        toggle_pause = function() countdown.toggleCountdown() end,
-        add_task = function() addTask() end,
+        toggle_pause = function()
+            countdown.toggleCountdown()
+        end,
+        add_task = function()
+            addTask()
+        end,
         show_tasks = function()
             if menubar then
                 menubar:popupMenu(hs.mouse.absolutePosition())

@@ -14,6 +14,17 @@ version: "3"
 # validate-manifest   Validate .pre-commit-hooks.yaml files
 # help                Show help for a specific command.
 
+vars:
+  HOOKS:
+    - yamllint
+    - golangci-lint
+    - golangci-lint-full
+    - markdownlint
+    - nilaway
+    - betteralign
+    - gitleaks
+
+
 tasks:
   # Commented out to prevent auto-execution when included
   default:
@@ -25,9 +36,8 @@ tasks:
       - task: update-hooks
 
 
-  update-hooks:
+  update:
     desc: 更新远程仓库版本
-    internal: true
     cmds:
       - pre-commit autoupdate
     dir: '{{.USER_WORKING_DIR}}'
@@ -71,7 +81,7 @@ tasks:
       if [ -n "{{.CLI_ARGS}}" ]; then
         pre-commit run {{.CLI_ARGS}}
       else
-        SELECTED=$(gum choose "yamllint" "markdownlint" "gitleaks")
+        SELECTED=$(echo "{{join "\n" .HOOKS}}" | gum choose || echo "")
         if [[ -n "$SELECTED" ]]; then
           pre-commit run "$SELECTED"
         fi

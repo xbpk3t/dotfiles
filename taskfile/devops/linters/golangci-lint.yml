@@ -219,7 +219,9 @@ linters-settings:
         severity: error
 
       - name: package-comments  # #15(文档缺失)
-        severity: error
+        severity: warning
+        disabled: true
+        exclude: [""]
 
       - name: getter-return      # #4(getter规范)
         arguments: [true]

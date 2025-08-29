@@ -1,3 +1,4 @@
+---
 version: '3'
 
 env:
@@ -6,84 +7,80 @@ env:
 vars:
   COMPOSE_FILE: "./devenv/docker-compose.yml"
   COMPOSE_CMD: '{{.COMPOSE_CMD | default "docker-compose"}}'
-  ENV_FILE: '{{.ENV_FILE | default "./devenv/.env"}}'
+  ENV_FILE: '{{.ENV_FILE | default "./devenv/project1.env"}}'
   COMPOSE_FULL_CMD: '{{.COMPOSE_CMD | default "docker-compose"}} -f {{.COMPOSE_FILE}} --env-file {{.ENV_FILE}}'
+  ALL_PROFILES:
+    - dev
+    - db
+    - pag
+    - trace
+    - ms
+    - ck
+    - n9e
+    - n8n
 
 tasks:
-  dc-up:
-    desc: Build images and start all services
+  up:
+    desc: Build images and start services with selected profile
+    interactive: true
     cmds:
-      - "{{.COMPOSE_FULL_CMD}} --profile full up -d --build"
+      - task: docker-compose-action
+        vars:
+          ACTION: up -d --build
+    preconditions:
+      - sh: '[ -n "{{.CLI_ARGS}}" ] || [ -n "{{.SELECTED_PROFILE}}" ]'
+        msg: "未选择 profile"
 
-  dc-down:
-    desc: Stop and remove all containers
+  logs:
+    desc: View service logs with selected profile
+    interactive: true
     cmds:
-      - "{{.COMPOSE_FULL_CMD}} down"
+      - task: docker-compose-action
+        vars:
+          ACTION: logs -f --tail {{.LINES | default 50}} {{.SERVICE}}
 
-  dc-logs:
-    desc: View service logs (real-time tracking)
+  exec:
+    desc: Enter container terminal with selected service
+    interactive: true
+    vars:
+      SELECTED_SERVICE:
+        sh: SERVICES=$({{.COMPOSE_FULL_CMD}} ps --services 2>/dev/null); if [ -n "$SERVICES" ]; then echo "选择要进入的 service:" >&2; echo "$SERVICES" | gum choose || echo ""; else echo "" > /dev/stderr; echo ""; fi
     cmds:
-      - "{{.COMPOSE_FULL_CMD}} logs -tf --tail {{.LINES | default 50}} {{.SERVICE}}"
+      - |
+        {{if .CLI_ARGS}}
+          {{.COMPOSE_FULL_CMD}} exec {{.CLI_ARGS}} {{.SHELL | default "/bin/bash"}}
+        {{else}}
+          {{.COMPOSE_FULL_CMD}} exec {{.SELECTED_SERVICE}} {{.SHELL | default "/bin/bash"}}
+        {{end}}
 
-  dc-exec:
-    desc: Enter container terminal
-    cmds:
-      - "{{.COMPOSE_FULL_CMD}} exec {{.SERVICE}} {{.SHELL | default \"/bin/bash\"}}"
+  docker-compose-action:
+    interactive: true
+    silent: true
+    cmd: |
+      {{if .CLI_ARGS}}
+        {{.COMPOSE_FULL_CMD}} --profile {{.CLI_ARGS}} {{.ACTION}}
+      {{else}}
+        echo "选择要操作的 profile:" >&2
+        SELECTED_PROFILE=$(echo "{{join "\n" .ALL_PROFILES}}" | gum choose || echo "")
+        if [ -n "$SELECTED_PROFILE" ]; then
+          {{.COMPOSE_FULL_CMD}} --profile $SELECTED_PROFILE {{.ACTION}}
+        else
+          echo "未选择 profile" >&2
+          exit 1
+        fi
+      {{end}}
 
-  dc-ps:
+
+  ps:
     desc: View running container status
     cmds:
       - "{{.COMPOSE_FULL_CMD}} ps"
 
-  dc-config:
+  config:
     desc: Validate and view compose configuration
     cmds:
       - "{{.COMPOSE_FULL_CMD}} config"
 
-  dev:
-    desc: Start development environment (golang + basic databases)
-    cmds:
-      - "{{.COMPOSE_FULL_CMD}} --profile dev --profile db up -d"
-
-  db:
-    desc: Start database services (mysql, redis, etcd)
-    cmds:
-      - "{{.COMPOSE_FULL_CMD}} --profile db up -d"
-
-  monitor:
-    desc: Start monitoring services (prometheus, grafana, alertmanager)
-    cmds:
-      - "{{.COMPOSE_FULL_CMD}} --profile monitor up -d"
-
-  pag:
-    desc: Start PAG monitoring stack (prometheus, alertmanager, grafana, nodeexporter, cadvisor, pushgateway, caddy)
-    cmds:
-      - "{{.COMPOSE_FULL_CMD}} --profile pag up -d"
-
-  trace:
-    desc: Start tracing (jaeger)
-    cmds:
-      - "{{.COMPOSE_FULL_CMD}} --profile trace up -d"
-
-  ms:
-    desc: Start microservice components (etcd, dtm)
-    cmds:
-      - "{{.COMPOSE_FULL_CMD}} --profile ms up -d"
-
-  ck:
-    desc: Start analytics database (clickhouse)
-    cmds:
-      - "{{.COMPOSE_FULL_CMD}} --profile ck up -d"
-
-  full:
-    desc: Start all services
-    cmds:
-      - "{{.COMPOSE_FULL_CMD}} --profile full up -d"
-
-  pag-dev:
-    desc: PAG monitoring development environment (dev + db + pag)
-    cmds:
-      - "{{.COMPOSE_FULL_CMD}} --profile dev --profile db --profile pag up -d"
 
   init:
     desc: Initialize development environment (create .env file)
@@ -107,23 +104,3 @@ tasks:
     desc: Check all service health status
     cmds:
       - "{{.COMPOSE_FULL_CMD}} ps --format table"
-
-  stop-pag:
-    desc: Stop PAG monitoring stack
-    cmds:
-      - "{{.COMPOSE_FULL_CMD}} stop prometheus grafana alertmanager nodeexporter cadvisor pushgateway caddy"
-
-  logs-prometheus:
-    desc: View Prometheus logs
-    cmds:
-      - "{{.COMPOSE_FULL_CMD}} logs -f prometheus"
-
-  logs-grafana:
-    desc: View Grafana logs
-    cmds:
-      - "{{.COMPOSE_FULL_CMD}} logs -f grafana"
-
-  logs-alertmanager:
-    desc: View AlertManager logs
-    cmds:
-      - "{{.COMPOSE_FULL_CMD}} logs -f alertmanager"
