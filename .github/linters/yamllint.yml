@@ -1,6 +1,6 @@
 ---
-
 # [Rules — yamllint 1.29.0 documentation](https://yamllint.readthedocs.io/en/stable/rules.html)
+
 extends: default
 yaml-files:
   - "*.yml"

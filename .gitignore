@@ -9,5 +9,5 @@
 
 # tf
 /tf/.cf-terraforming.yaml
-/devenv/.env
-/devenv/configs/nightingale/mysqldata/
+/devenv/dc/.env
+/devenv/dc/configs/mysql/mysqldata/

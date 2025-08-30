@@ -11,7 +11,7 @@ x-common-logging: &common-logging
     max-file: "3"
 
 x-common-restart: &common-restart
-  restart: "no"
+  restart: no
 
 x-backend-network: &backend-network
   networks:
@@ -348,11 +348,11 @@ services:
     <<: [*backend-network, *common-restart]
     logging: *common-logging
     depends_on:
-      nightingale-mysql:
+      n9e-mysql:
         condition: service_healthy
-      nightingale-redis:
+      n9e-redis:
         condition: service_healthy
-      nightingale-victoriametrics:
+      n9e-victoriametrics:
         condition: service_started
 
   n9e-mysql:
@@ -439,66 +439,55 @@ services:
         condition: service_started
 
 
-  # Core Prometheus Exporters
+  # 核心 Prometheus Exporters
+  # 恢复传统的独立 exporter 配置
+
+  # Blackbox Exporter - 黑盒监控 (HTTP/TCP/ICMP)
   blackbox_exporter:
     profiles: ["n9e"]
     image: "prom/blackbox-exporter:latest"
-    container_name: "blackbox_exporter"
+    container_name: "devenv_blackbox_exporter"
     hostname: "blackbox_exporter"
-    restart: always
     environment:
-      TZ: Asia/Shanghai
-    ports:
-      - "9115:9115"
-    networks:
-      - nightingale
+      <<: *common-variables
+    volumes:
+      - ./configs/nightingale/etc-blackbox:/config:ro
     command:
       - "--config.file=/config/blackbox.yml"
-    volumes:
-      - ./etc-blackbox:/config
+    ports:
+      - "${BLACKBOX_EXPORTER_PORT:-9115}:9115"
+    <<: [*backend-network, *common-restart]
+    logging: *common-logging
 
+  # Redis Exporter - Redis 监控
   redis_exporter:
     profiles: ["n9e"]
     image: "oliver006/redis_exporter:latest"
-    container_name: "redis_exporter"
+    container_name: "devenv_redis_exporter"
     hostname: "redis_exporter"
-    restart: always
     environment:
-      TZ: Asia/Shanghai
-      REDIS_ADDR: redis:6379
+      <<: *common-variables
+      REDIS_ADDR: n9e-redis:6379
       REDIS_PASSWORD: ""
     ports:
-      - "9121:9121"
-    networks:
-      - nightingale
+      - "${REDIS_EXPORTER_PORT:-9121}:9121"
+    <<: [*backend-network, *common-restart]
+    logging: *common-logging
     depends_on:
-      - redis
+      - n9e-redis
 
+  # SSL Exporter - SSL/TLS 证书监控
   ssl_exporter:
     profiles: ["n9e"]
     image: "ribbybibby/ssl_exporter:latest"
-    container_name: "ssl_exporter"
+    container_name: "devenv_ssl_exporter"
     hostname: "ssl_exporter"
-    restart: always
     environment:
-      TZ: Asia/Shanghai
+      <<: *common-variables
     ports:
-      - "9219:9219"
-    networks:
-      - nightingale
-
-  cprobe:
-    profiles: ["n9e"]
-    image: "cprobe/cprobe:latest"
-    container_name: "cprobe"
-    hostname: "cprobe"
-    restart: always
-    environment:
-      TZ: Asia/Shanghai
-    ports:
-      - "8080:8080"
-    networks:
-      - nightingale
+      - "${SSL_EXPORTER_PORT:-9219}:9219"
+    <<: [*backend-network, *common-restart]
+    logging: *common-logging
 
 
   # n8n PostgreSQL 数据库

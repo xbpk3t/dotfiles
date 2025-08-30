@@ -1,10 +1,8 @@
 version: "3"
 
-# autoupdate          Auto-update pre-commit config to the latest repos' versions.
 # init-templatedir    Install hook script in a directory intended for use with `git config init.templateDir`.
 # install             Install the pre-commit script.
-# install-hooks       Install hook environments for all environments in the config file. You may find `pre-commit install --install-
-# hooks` more useful.
+# install-hooks       Install hook environments for all environments in the config file. You may find `pre-commit install --install-hooks` more useful.
 # migrate-config      Migrate list configuration to new map configuration.
 # run                 Run hooks.
 # sample-config       Produce a sample .pre-commit-config.yaml file
@@ -15,6 +13,7 @@ version: "3"
 # help                Show help for a specific command.
 
 vars:
+  PC_CLI: pre-commit
   HOOKS:
     - yamllint
     - golangci-lint
@@ -26,50 +25,43 @@ vars:
 
 
 tasks:
-  # Commented out to prevent auto-execution when included
   default:
-    cmds:
-      - pre-commit run --all-files  # 检查所有文件（非暂存区）
+    cmd: "{{.PC_CLI}} run --all-files"  # 检查所有文件（非暂存区）
     dir: '{{.USER_WORKING_DIR}}'
     interactive: true
     defer:
-      - task: update-hooks
+      - task: update
 
 
   update:
     desc: 更新远程仓库版本
-    cmds:
-      - pre-commit autoupdate
+    cmd: '{{.PC_CLI}} autoupdate'
     dir: '{{.USER_WORKING_DIR}}'
-
+    internal: true
 
 
   # 新增维护任务
   maintain:
     cmds:
-      - pre-commit clean  # 清理缓存
-      - pre-commit gc     # 垃圾回收
-      - pre-commit install-hooks  # 重装钩子
+      - "{{.PC_CLI}} clean"  # 清理缓存
+      - "{{.PC_CLI}} gc"     # 垃圾回收
+      - "{{.PC_CLI}} install-hooks"  # 重装钩子
     dir: '{{.USER_WORKING_DIR}}'
 
   init-template:
-    cmds:
-      - pre-commit init-templatedir {{.CLI_ARGS}}  # 初始化Git模板
+    cmd: "{{.PC_CLI}} init-templatedir {{.CLI_ARGS}}"  # 初始化Git模板
     dir: '{{.USER_WORKING_DIR}}'
 
   uninstall:
-    cmds:
-      - pre-commit uninstall  # 卸载钩子
+    cmd: "{{.PC_CLI}} uninstall"  # 卸载钩子
     dir: '{{.USER_WORKING_DIR}}'
 
   migrate:
-    cmds:
-      - pre-commit migrate-config  # 配置文件迁移
+    cmd: '{{.PC_CLI}} migrate-config'  # 配置文件迁移
     dir: '{{.USER_WORKING_DIR}}'
 
   try-repo:
-    cmds:
-      - pre-commit try-repo {{.CLI_ARGS}}  # 测试新仓库
+    cmd: '{{.PC_CLI}} try-repo {{.CLI_ARGS}}'  # 测试新仓库
     dir: '{{.USER_WORKING_DIR}}'
 
   hook:
@@ -79,10 +71,10 @@ tasks:
     dir: '{{.USER_WORKING_DIR}}'
     cmd: |
       if [ -n "{{.CLI_ARGS}}" ]; then
-        pre-commit run {{.CLI_ARGS}}
+        {{.PC_CLI}} run {{.CLI_ARGS}}
       else
         SELECTED=$(echo "{{join "\n" .HOOKS}}" | gum choose || echo "")
         if [[ -n "$SELECTED" ]]; then
-          pre-commit run "$SELECTED"
+          {{.PC_CLI}} run "$SELECTED"
         fi
       fi

@@ -272,6 +272,82 @@ zh:
   cloudwatch_aws_rds_write_throughput_sample_count: rds 写入吞吐量样本计数
   cloudwatch_aws_rds_write_throughput_sum: rds 写入吞吐量总和
 
+  # [blackbox_exporter]
+  probe_dns_lookup_time_seconds: DNS查找所用时间（秒）
+  probe_duration_seconds: 探测完成所用时间（秒）
+  probe_failed_due_to_regex: 由于正则表达式导致探测失败
+  probe_http_content_length: HTTP响应内容长度
+  probe_http_duration_seconds: HTTP请求各阶段的持续时间，包含所有重定向
+  probe_http_redirects: 重定向数量
+  probe_http_ssl: 最终重定向是否使用了SSL
+  probe_http_status_code: HTTP响应状态码
+  probe_http_version: HTTP响应版本
+  probe_ip_addr_hash: IP地址的哈希值，用于检测IP地址变化
+  probe_ip_protocol: 探测IP协议是IPv4还是IPv6
+  probe_ssl_earliest_cert_expiry: 最早的SSL证书到期时间（Unix时间戳）
+  probe_ssl_last_chain_expiry_timestamp_seconds: 最后一个SSL链到期时间戳（秒）
+  probe_ssl_last_chain_info: 包含SSL叶子证书信息
+  probe_success: 探测是否成功
+  probe_tcp_failed_connects: TCP连接失败次数
+  probe_tcp_success: TCP探测是否成功
+  probe_tls_version_info: 使用的TLS版本信息
+
+  # [ssl_exporter]
+  ssl_cert_not_after: SSL证书到期日期（Unix时间戳）
+  ssl_cert_not_before: SSL证书开始日期（Unix时间戳）
+  ssl_cert_subject_common_name: SSL证书主题的通用名称
+  ssl_cert_issuer_common_name: SSL证书颁发者的通用名称
+  ssl_cert_serial_number: SSL证书序列号
+  ssl_cert_version: SSL证书版本
+  ssl_cert_signature_algorithm: SSL证书签名算法
+  ssl_cert_public_key_algorithm: SSL证书公钥算法
+  ssl_cert_public_key_length: SSL证书公钥长度（位）
+  ssl_probe_success: SSL探测是否成功
+  ssl_probe_duration_seconds: SSL探测完成所用时间（秒）
+
+  # [cprobe]
+  cprobe_up: cprobe服务是否正常运行（1为正常，0为异常）
+  cprobe_scrape_duration_seconds: 抓取持续时间（秒）
+  cprobe_scrape_samples_scraped: 抓取的样本数量
+  cprobe_scrape_samples_post_metric_relabeling: 指标重标记后剩余的样本数量
+  cprobe_scrape_series_added: 抓取期间添加的序列数量
+  cprobe_target_interval_length_seconds: 目标间隔长度（秒）
+  cprobe_target_scrapes_exceeded_sample_limit_total: 达到样本限制的抓取总数
+  cprobe_target_scrapes_sample_duplicate_timestamp_total: 具有重复时间戳的抓取总数
+  cprobe_target_scrapes_sample_out_of_bounds_total: 样本超出边界的抓取总数
+  cprobe_target_scrapes_sample_out_of_order_total: 样本无序的抓取总数
+  cprobe_target_sync_length_seconds: 目标同步持续时间（秒）
+  cprobe_tsdb_compactions_failed_total: 失败的压缩总数
+  cprobe_tsdb_compactions_total: 压缩总数
+  cprobe_tsdb_compactions_triggered_total: 触发的压缩总数
+  cprobe_tsdb_head_chunks: 头部块中的块数量
+  cprobe_tsdb_head_chunks_created_total: 在头部创建的块总数
+  cprobe_tsdb_head_chunks_removed_total: 从头部移除的块总数
+  cprobe_tsdb_head_gc_duration_seconds: 头部垃圾回收持续时间（秒）
+  cprobe_tsdb_head_max_time: 头部块中的最大时间戳
+  cprobe_tsdb_head_min_time: 头部块中的最小时间戳
+  cprobe_tsdb_head_samples_appended_total: 追加到头部的样本总数
+  cprobe_tsdb_head_series: 头部块中的序列数量
+  cprobe_tsdb_head_series_created_total: 在头部创建的序列总数
+  cprobe_tsdb_head_series_not_found_total: 在头部未找到的序列总数
+  cprobe_tsdb_head_series_removed_total: 从头部移除的序列总数
+  cprobe_tsdb_head_truncations_failed_total: 失败的头部截断总数
+  cprobe_tsdb_head_truncations_total: 头部截断总数
+  cprobe_tsdb_lowest_timestamp: TSDB中的最低时间戳
+  cprobe_tsdb_out_of_bound_samples_total: 超出边界的样本总数
+  cprobe_tsdb_out_of_order_samples_total: 无序样本总数
+  cprobe_tsdb_reloads_failures_total: TSDB重载失败总数
+  cprobe_tsdb_reloads_total: TSDB重载总数
+  cprobe_tsdb_size_retentions_total: 基于大小的保留总数
+  cprobe_tsdb_symbol_table_size_bytes: 符号表大小（字节）
+  cprobe_tsdb_time_retentions_total: 基于时间的保留总数
+  cprobe_tsdb_tombstone_cleanup_seconds: 墓碑清理持续时间（秒）
+  cprobe_tsdb_vertical_compactions_total: 垂直压缩总数
+  cprobe_tsdb_wal_corruptions_total: WAL损坏总数
+  cprobe_tsdb_wal_fsync_duration_seconds: WAL fsync持续时间（秒）
+  cprobe_tsdb_wal_truncations_failed_total: 失败的WAL截断总数
+  cprobe_tsdb_wal_truncations_total: WAL截断总数
+
 en:
   ip_conntrack_count: the number of entries in the conntrack table（unit：int, count）
   ip_conntrack_max: the max capacity of the conntrack table（unit：int, size）
@@ -772,3 +848,79 @@ en:
   zk_avg_latency: Average time in milliseconds for requests to be processed
   zk_min_latency: Maximum time in milliseconds for a request to be processed
   zk_max_latency: Minimum time in milliseconds for a request to be processed
+
+  # [blackbox_exporter]
+  probe_dns_lookup_time_seconds: Returns the time taken for probe dns lookup in seconds
+  probe_duration_seconds: Returns how long the probe took to complete in seconds
+  probe_failed_due_to_regex: Indicates if probe failed due to regex
+  probe_http_content_length: Length of http content response
+  probe_http_duration_seconds: Duration of http request by phase, summed over all redirects
+  probe_http_redirects: The number of redirects
+  probe_http_ssl: Indicates if SSL was used for the final redirect
+  probe_http_status_code: Response HTTP status code
+  probe_http_version: Returns the version of HTTP of the probe response
+  probe_ip_addr_hash: Specifies the hash of IP address. It's useful to detect if the IP address changes
+  probe_ip_protocol: Specifies whether probe ip protocol is IP4 or IP6
+  probe_ssl_earliest_cert_expiry: Returns earliest SSL cert expiry in unixtime
+  probe_ssl_last_chain_expiry_timestamp_seconds: Returns last SSL chain expiry in timestamp seconds
+  probe_ssl_last_chain_info: Contains SSL leaf certificate information
+  probe_success: Displays whether or not the probe was a success
+  probe_tcp_failed_connects: The number of TCP connections that failed
+  probe_tcp_success: Displays whether or not the TCP probe was a success
+  probe_tls_version_info: Contains the TLS version used
+
+  # [ssl_exporter]
+  ssl_cert_not_after: The expiry date of the SSL certificate as a Unix timestamp
+  ssl_cert_not_before: The start date of the SSL certificate as a Unix timestamp
+  ssl_cert_subject_common_name: The common name of the SSL certificate subject
+  ssl_cert_issuer_common_name: The common name of the SSL certificate issuer
+  ssl_cert_serial_number: The serial number of the SSL certificate
+  ssl_cert_version: The version of the SSL certificate
+  ssl_cert_signature_algorithm: The signature algorithm of the SSL certificate
+  ssl_cert_public_key_algorithm: The public key algorithm of the SSL certificate
+  ssl_cert_public_key_length: The length of the SSL certificate public key in bits
+  ssl_probe_success: Whether or not the SSL probe succeeded
+  ssl_probe_duration_seconds: How long the SSL probe took to complete in seconds
+
+  # [cprobe]
+  cprobe_up: Whether the cprobe service is up (1) or down (0)
+  cprobe_scrape_duration_seconds: Duration of the scrape in seconds
+  cprobe_scrape_samples_scraped: Number of samples scraped
+  cprobe_scrape_samples_post_metric_relabeling: Number of samples remaining after metric relabeling
+  cprobe_scrape_series_added: Number of series added during the scrape
+  cprobe_target_interval_length_seconds: The interval length in seconds
+  cprobe_target_scrapes_exceeded_sample_limit_total: Total number of scrapes that hit the sample limit
+  cprobe_target_scrapes_sample_duplicate_timestamp_total: Total number of scrapes with duplicate timestamps
+  cprobe_target_scrapes_sample_out_of_bounds_total: Total number of scrapes with samples out of bounds
+  cprobe_target_scrapes_sample_out_of_order_total: Total number of scrapes with samples out of order
+  cprobe_target_sync_length_seconds: Duration of the target sync in seconds
+  cprobe_tsdb_compactions_failed_total: Total number of failed compactions
+  cprobe_tsdb_compactions_total: Total number of compactions
+  cprobe_tsdb_compactions_triggered_total: Total number of triggered compactions
+  cprobe_tsdb_head_chunks: Number of chunks in the head block
+  cprobe_tsdb_head_chunks_created_total: Total number of chunks created in the head
+  cprobe_tsdb_head_chunks_removed_total: Total number of chunks removed from the head
+  cprobe_tsdb_head_gc_duration_seconds: Duration of head garbage collection in seconds
+  cprobe_tsdb_head_max_time: Maximum timestamp in the head block
+  cprobe_tsdb_head_min_time: Minimum timestamp in the head block
+  cprobe_tsdb_head_samples_appended_total: Total number of samples appended to the head
+  cprobe_tsdb_head_series: Number of series in the head block
+  cprobe_tsdb_head_series_created_total: Total number of series created in the head
+  cprobe_tsdb_head_series_not_found_total: Total number of series not found in the head
+  cprobe_tsdb_head_series_removed_total: Total number of series removed from the head
+  cprobe_tsdb_head_truncations_failed_total: Total number of failed head truncations
+  cprobe_tsdb_head_truncations_total: Total number of head truncations
+  cprobe_tsdb_lowest_timestamp: Lowest timestamp in the TSDB
+  cprobe_tsdb_out_of_bound_samples_total: Total number of out of bound samples
+  cprobe_tsdb_out_of_order_samples_total: Total number of out of order samples
+  cprobe_tsdb_reloads_failures_total: Total number of TSDB reload failures
+  cprobe_tsdb_reloads_total: Total number of TSDB reloads
+  cprobe_tsdb_size_retentions_total: Total number of size-based retentions
+  cprobe_tsdb_symbol_table_size_bytes: Size of the symbol table in bytes
+  cprobe_tsdb_time_retentions_total: Total number of time-based retentions
+  cprobe_tsdb_tombstone_cleanup_seconds: Duration of tombstone cleanup in seconds
+  cprobe_tsdb_vertical_compactions_total: Total number of vertical compactions
+  cprobe_tsdb_wal_corruptions_total: Total number of WAL corruptions
+  cprobe_tsdb_wal_fsync_duration_seconds: Duration of WAL fsync in seconds
+  cprobe_tsdb_wal_truncations_failed_total: Total number of failed WAL truncations
+  cprobe_tsdb_wal_truncations_total: Total number of WAL truncations

@@ -1,7 +1,5 @@
 ---
 
-# markdownlint -f -c .github/linters/markdownlint.yml .
-
 # 代码块是否执行markdownlint检查
 # 默认 true
 #code_blocks: false
