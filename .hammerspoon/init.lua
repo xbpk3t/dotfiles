@@ -24,7 +24,7 @@ end
 
 local success2, err2 = pcall(function()
     hs.loadSpoon("ChromeTabLimit")
-    hs.alert.show("TaskList 加载成功")
+    hs.alert.show("ChromeTabLimit 加载成功")
     spoon.ChromeTabLimit:start()
 end)
 if not success2 then

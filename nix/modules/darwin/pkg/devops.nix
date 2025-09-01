@@ -23,7 +23,7 @@
 
     cloudflared # cloudflare tunnel
 
-    # wrangler # 执行时会卡住
+    wrangler # https://github.com/cloudflare/workers-sdk
 
     # 环境管理
     direnv
@@ -81,6 +81,7 @@
 
     # 图像处理
     imagemagick
+    webp
     exiftool
 
     # Docker

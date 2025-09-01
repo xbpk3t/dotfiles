@@ -1,21 +1,24 @@
 ---
 version: "3"
 
+vars:
+  PODMAN: podman
+
 
 tasks:
   rmc:
-    cmd: podman rm -r -a
+    cmd: '{{.PODMAN}} rm -r -a'
   rmi:
-    cmd: podman rmi --all
+    cmd: '{{.PODMAN}} rmi --all'
 
   k8s:
-    cmd: podman generate kube
+    cmd: '{{.PODMAN}} generate kube'
 
   play:
-    cmd: podman play kube
+    cmd: '{{.PODMAN}} play kube'
 
 
   machine:
     cmds:
-      - podman machine list
-      - podman system connection list
+      - '{{.PODMAN}} machine list'
+      - '{{.PODMAN}} system connection list'

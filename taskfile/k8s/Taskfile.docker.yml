@@ -44,6 +44,7 @@ version: "3"
 #  des: 一个命令行工具，用于在不同的容器镜像仓库之间复制、检查和删除容器镜像
 
 vars:
+  DOCKER: docker
   IMAGE_NAME: "my-app"
   IMAGE_TAG: "latest"
   DOCKERFILE: "Dockerfile"

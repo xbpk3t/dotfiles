@@ -10,26 +10,6 @@ version: "3"
 
 
 tasks:
-  update:
-    desc: Update all installed dependencies
-    summary: |
-      task update
-    cmds:
-      - brew update
-      - brew upgrade
-      - brew cleanup
-
-  install:
-    desc: Install all dependencies using HomeBrew
-    summary: |
-      Must have Task installed (brew install go-task)
-      task setup
-    cmds:
-      - task: update
-      - brew install ffmpeg
-      - brew install imagemagick
-      - brew install webp
-
   j2p:
     desc: jpg-to-png
     dir: '{{.USER_WORKING_DIR}}'

@@ -1,8 +1,7 @@
 ---
+# ref [mac-cleanup/mac-cleanup-py: 👨‍💻 Python cleanup script for macOS](https://github.com/mac-cleanup/mac-cleanup-py)
 
 version: '3'
-
-# ref [mac-cleanup/mac-cleanup-py: 👨‍💻 Python cleanup script for macOS](https://github.com/mac-cleanup/mac-cleanup-py)
 
 vars:
   # Task descriptions mapping

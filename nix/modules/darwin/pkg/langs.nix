@@ -48,6 +48,7 @@
     nodejs
     nodePackages.eslint
     nodePackages.pnpm
+    nodePackages.serve # https://github.com/vercel/serve 用来preview本地打包好的dist文件（vite可以直接vite preview）
     tsx
 
     # Web 开发

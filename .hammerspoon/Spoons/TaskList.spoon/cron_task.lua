@@ -144,6 +144,13 @@ local function calculateCronTaskDateTime(cronType)
         local year, month, day = saturdayDate:match("^(%d%d%d%d)-(%d%d)-(%d%d)$")
         local saturdayStart = os.time({year = tonumber(year), month = tonumber(month), day = tonumber(day), hour = 0, min = 0, sec = 0})
         return saturdayDate, math.floor(saturdayStart * 1000)
+    elseif baseType == "monthly" or string.match(baseType, "monthly$") then
+        -- monthly 类型：使用当月1号的 00:00:00
+        local currentDate = utils.getCurrentDate()
+        local year, month, day = currentDate:match("^(%d%d%d%d)-(%d%d)-(%d%d)$")
+        local monthStart = os.time({year = tonumber(year), month = tonumber(month), day = 1, hour = 0, min = 0, sec = 0})
+        local monthStartDate = os.date("%Y-%m-%d", monthStart)
+        return monthStartDate, math.floor(monthStart * 1000)
     else
         -- 其他类型：使用当前日期和时间
         local currentDate = utils.getCurrentDate()
