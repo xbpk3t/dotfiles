@@ -17,6 +17,34 @@ vars:
   TASK_CMD: "task"
   # GoLand路径
   GOLAND_CMD: "/Applications/GoLand.app/Contents/MacOS/goland"
+  # 需要处理的linter文件列表
+  LINTERS_TO_PROCESS:
+    sh: |
+      # 获取dotfiles中的linter文件（包含隐藏文件）
+      DOTFILES_FILES=""
+      DOTFILES_DIR="$HOME/Desktop/dotfiles/.github/linters"
+      if [ -d "$DOTFILES_DIR" ]; then
+        DOTFILES_FILES=$(ls -A "$DOTFILES_DIR" 2>/dev/null | grep -v '^\.\.\$' | grep -v '^\.\$' | tr '\n' ' ')
+      fi
+
+      # 获取项目中的linter文件（包含隐藏文件）
+      PROJECT_FILES=""
+      if [ -d "{{.PROJECT_DIR}}/.github/linters" ]; then
+        PROJECT_FILES=$(ls -A "{{.PROJECT_DIR}}/.github/linters" 2>/dev/null | grep -v '^\.\.\$' | grep -v '^\.\$' | tr '\n' ' ')
+      fi
+
+      # 计算交集：只有当项目中存在且dotfiles中也有对应配置时才处理
+      LINTERS_TO_PROCESS=""
+      for proj_file in $PROJECT_FILES; do
+        for dot_file in $DOTFILES_FILES; do
+          if [ "$proj_file" = "$dot_file" ]; then
+            LINTERS_TO_PROCESS="$LINTERS_TO_PROCESS $proj_file"
+            break
+          fi
+        done
+      done
+
+      echo "$LINTERS_TO_PROCESS" | tr ' ' '\n' | grep -v '^$' | tr '\n' ' ' | sed 's/[[:space:]]*$//'
 
 tasks:
   default:
@@ -45,47 +73,6 @@ tasks:
           echo "📁 发现现有linter配置目录"
         fi
 
-  # 扫描linter文件并计算交集
-  scan-linter-files:
-    internal: true
-    silent: true
-    interactive: true
-    desc: 扫描linter文件并计算需要处理的交集
-    cmds:
-      - |
-        echo "🔍 扫描需要处理的linter文件..."
-
-        # 获取dotfiles中的linter文件（包含隐藏文件）
-        DOTFILES_FILES=""
-        DOTFILES_DIR="$HOME/Desktop/dotfiles/.github/linters"
-        if [ -d "$DOTFILES_DIR" ]; then
-          DOTFILES_FILES=$(ls -A "$DOTFILES_DIR" 2>/dev/null | grep -v '^\.\.$' | grep -v '^\.$' | tr '\n' ' ')
-        fi
-
-        # 获取项目中的linter文件（包含隐藏文件）
-        PROJECT_FILES=""
-        if [ -d "{{.PROJECT_DIR}}/.github/linters" ]; then
-          PROJECT_FILES=$(ls -A "{{.PROJECT_DIR}}/.github/linters" 2>/dev/null | grep -v '^\.\.$' | grep -v '^\.$' | tr '\n' ' ')
-        fi
-
-        echo "📋 dotfiles中的linter文件: $DOTFILES_FILES"
-        echo "📋 项目中的linter文件: $PROJECT_FILES"
-
-        # 计算交集：只有当项目中存在且dotfiles中也有对应配置时才处理
-        LINTERS_TO_PROCESS=""
-        for proj_file in $PROJECT_FILES; do
-          for dot_file in $DOTFILES_FILES; do
-            if [ "$proj_file" = "$dot_file" ]; then
-              LINTERS_TO_PROCESS="$LINTERS_TO_PROCESS $proj_file"
-              break
-            fi
-          done
-        done
-
-        # 保存到临时文件
-        echo "$LINTERS_TO_PROCESS" | tr ' ' '\n' | grep -v '^$' > "{{.TMP_FILE}}"
-
-        echo "✅ 需要处理的linter文件 (交集): $(cat {{.TMP_FILE}} | tr '\n' ' ')"
 
   # 处理所有配置文件
   process-configs:
@@ -93,71 +80,141 @@ tasks:
     interactive: true
     silent: true
     desc: 处理所有linter配置文件
-    deps: [scan-linter-files]
+    deps: [scan-project]
+    preconditions:
+      - sh: test -d "{{.DOTFILES_LINTERS}}"
+        msg: "❌ dotfiles linters目录不存在: {{.DOTFILES_LINTERS}}"
+      - sh: test -d "{{.PROJECT_DIR}}/.github/linters"
+        msg: "❌ 项目linters目录不存在"
+    vars:
+      LINTERS_LIST:
+        sh: echo "{{.LINTERS_TO_PROCESS}}"
     cmds:
+      - echo "⚙️ 处理配置文件..."
       - |
-        echo "⚙️  处理配置文件..."
-        if [ ! -f "{{.TMP_FILE}}" ]; then
-          echo "❌ 没有找到需要处理的linter文件列表"
-          exit 1
+        LINTERS="{{.LINTERS_LIST}}"
+        if [ -z "$LINTERS" ]; then
+          echo "⚠️  没有找到需要处理的linter文件"
+          exit 0
         fi
+      - for:
+          var: LINTERS_LIST
+          split: ' '
+          as: LINTER_FILE
+        task: process-single-linter
+        vars:
+          LINTER_FILE: '{{.LINTER_FILE}}'
 
-        while IFS= read -r linter_file; do
-          if [ -n "$linter_file" ] && [ "$linter_file" != "" ]; then
-            echo "📄 处理 $linter_file..."
-            {{.TASK_CMD}} --taskfile {{.TASKFILE_PATH}} process-single-config LINTER_FILE="$linter_file"
+
+
+  process-single-linter:
+    internal: true
+    silent: true
+    interactive: true
+    desc: 处理单个linter配置文件
+    preconditions:
+      - sh: test -n "{{.LINTER_FILE}}"
+        msg: "❌ LINTER_FILE 参数为空"
+      - sh: test -f "{{.DOTFILES_LINTERS}}/{{.LINTER_FILE}}"
+        msg: "⚠️  跳过: dotfiles中不存在 {{.LINTER_FILE}}"
+    vars:
+      DOTFILES_CONFIG: "{{.DOTFILES_LINTERS}}/{{.LINTER_FILE}}"
+      PROJECT_CONFIG: "{{.PROJECT_DIR}}/.github/linters/{{.LINTER_FILE}}"
+    cmds:
+      - echo "📄 处理 {{.LINTER_FILE}}..."
+      - |
+        # 检查项目中是否已存在该配置文件
+        if [ -f "{{.PROJECT_CONFIG}}" ]; then
+          # 文件存在，检查是否相同
+          if diff -q "{{.DOTFILES_CONFIG}}" "{{.PROJECT_CONFIG}}" >/dev/null 2>&1; then
+            echo "✅ {{.LINTER_FILE}} 已同步，跳过"
+          else
+            echo "⚠️  {{.LINTER_FILE}} 存在差异"
+            echo ""
+            echo "🔄 {{.LINTER_FILE}} 存在冲突，请选择操作:"
+            echo ""
+
+            # 使用gum提供交互选择
+            CHOICE=$(gum choose \
+              "覆盖项目配置 (使用dotfiles版本)" \
+              "查看差异 (使用GoLand)" \
+              "跳过此文件" \
+              --header="选择操作:")
+
+            case "$CHOICE" in
+              "覆盖项目配置 (使用dotfiles版本)")
+                echo "📋 覆盖 {{.LINTER_FILE}}"
+                cp "{{.DOTFILES_CONFIG}}" "{{.PROJECT_CONFIG}}"
+                echo "✅ {{.LINTER_FILE}} 已覆盖"
+                ;;
+              "查看差异 (使用GoLand)")
+                echo "🔍 打开GoLand查看差异..."
+                {{.GOLAND_CMD}} diff "{{.PROJECT_CONFIG}}" "{{.DOTFILES_CONFIG}}"
+                echo "ℹ️  请手动处理差异后重新运行任务"
+                ;;
+              "跳过此文件")
+                echo "⏭️  跳过 {{.LINTER_FILE}}"
+                ;;
+              *)
+                echo "❌ 无效选择，跳过 {{.LINTER_FILE}}"
+                ;;
+            esac
           fi
-        done < "{{.TMP_FILE}}"
-
-
+        else
+          # 文件不存在，直接复制
+          echo "📋 复制 {{.LINTER_FILE}} 到项目"
+          cp "{{.DOTFILES_CONFIG}}" "{{.PROJECT_CONFIG}}"
+          echo "✅ {{.LINTER_FILE}} 已复制"
+        fi
 
   process-single-config:
     silent: true
     interactive: true
+    internal: true
     desc: 处理单个linter配置文件
+    preconditions:
+      - sh: test -n "{{.LINTER_FILE}}"
+        msg: "❌ LINTER_FILE 参数为空"
+      - sh: test -f "{{.DOTFILES_LINTERS}}/{{.LINTER_FILE}}"
+        msg: "⚠️  跳过: dotfiles中不存在 {{.LINTER_FILE}}"
     vars:
-      DOTFILES_DIR: "$HOME/Desktop/dotfiles/.github/linters"
-      DOTFILES_CONFIG: "{{.DOTFILES_DIR}}/{{.LINTER_FILE}}"
+      DOTFILES_CONFIG: "{{.DOTFILES_LINTERS}}/{{.LINTER_FILE}}"
       PROJECT_CONFIG: "{{.PROJECT_DIR}}/.github/linters/{{.LINTER_FILE}}"
     cmds:
+      - echo "📄 处理 {{.LINTER_FILE}}..."
       - |
-        echo "📄 处理 {{.LINTER_FILE}}..."
-
-        # 检查dotfiles中是否存在该配置文件
-        if [ ! -f "{{.DOTFILES_CONFIG}}" ]; then
-          echo "⚠️  跳过: dotfiles中不存在 {{.LINTER_FILE}}"
-        else
-          # 检查项目中是否已存在该配置文件
-          if [ -f "{{.PROJECT_CONFIG}}" ]; then
-            # 文件存在，检查是否相同
-            if diff -q "{{.DOTFILES_CONFIG}}" "{{.PROJECT_CONFIG}}" >/dev/null 2>&1; then
-              echo "✅ {{.LINTER_FILE}} 已同步，跳过"
-            else
-              echo "⚠️  {{.LINTER_FILE}} 存在差异"
-              {{.TASK_CMD}} --taskfile {{.TASKFILE_PATH}} handle-conflict LINTER_FILE="{{.LINTER_FILE}}"
-            fi
+        # 检查项目中是否已存在该配置文件
+        if [ -f "{{.PROJECT_CONFIG}}" ]; then
+          # 文件存在，检查是否相同
+          if diff -q "{{.DOTFILES_CONFIG}}" "{{.PROJECT_CONFIG}}" >/dev/null 2>&1; then
+            echo "✅ {{.LINTER_FILE}} 已同步，跳过"
           else
-            # 文件不存在，直接复制
-            echo "📋 复制 {{.LINTER_FILE}} 到项目"
-            cp "{{.DOTFILES_CONFIG}}" "{{.PROJECT_CONFIG}}"
-            echo "✅ {{.LINTER_FILE}} 已复制"
+            echo "⚠️  {{.LINTER_FILE}} 存在差异"
+            task handle-conflict LINTER_FILE="{{.LINTER_FILE}}"
           fi
+        else
+          # 文件不存在，直接复制
+          echo "📋 复制 {{.LINTER_FILE}} 到项目"
+          cp "{{.DOTFILES_CONFIG}}" "{{.PROJECT_CONFIG}}"
+          echo "✅ {{.LINTER_FILE}} 已复制"
         fi
 
   handle-conflict:
-    silent: true
     interactive: true
     desc: 处理配置文件冲突
+    preconditions:
+      - sh: test -n "{{.LINTER_FILE}}"
+        msg: "❌ LINTER_FILE 参数为空"
+      - sh: test -f "{{.DOTFILES_LINTERS}}/{{.LINTER_FILE}}"
+        msg: "❌ dotfiles中不存在 {{.LINTER_FILE}}"
+      - sh: test -f "{{.PROJECT_DIR}}/.github/linters/{{.LINTER_FILE}}"
+        msg: "❌ 项目中不存在 {{.LINTER_FILE}}"
     vars:
-      DOTFILES_DIR: "$HOME/Desktop/dotfiles/.github/linters"
-      DOTFILES_CONFIG: "{{.DOTFILES_DIR}}/{{.LINTER_FILE}}"
+      DOTFILES_CONFIG: "{{.DOTFILES_LINTERS}}/{{.LINTER_FILE}}"
       PROJECT_CONFIG: "{{.PROJECT_DIR}}/.github/linters/{{.LINTER_FILE}}"
     cmds:
+      - echo "🔄 {{.LINTER_FILE}} 存在冲突，请选择操作:"
       - |
-        echo ""
-        echo "🔄 {{.LINTER_FILE}} 存在冲突，请选择操作:"
-        echo ""
-
         # 使用gum提供交互选择
         CHOICE=$(gum choose \
           "覆盖项目配置 (使用dotfiles版本)" \
@@ -189,24 +246,31 @@ tasks:
     silent: true
     interactive: true
     desc: 列出当前项目的linter配置文件
+    vars:
+      PROJECT_LINTERS_DIR: "{{.PROJECT_DIR}}/.github/linters"
     cmds:
       - echo "📁 当前项目linter配置文件:"
-      - ls -la {{.PROJECT_DIR}}/.github/linters/ 2>/dev/null || echo "❌ .github/linters目录不存在"
+      - |
+        if [ -d "{{.PROJECT_LINTERS_DIR}}" ]; then
+          ls -la "{{.PROJECT_LINTERS_DIR}}/"
+        else
+          echo "❌ .github/linters目录不存在"
+        fi
 
   list-dotfiles:
     internal: true
     silent: true
     interactive: true
     desc: 列出dotfiles中的linter配置文件
+    preconditions:
+      - sh: test -d "{{.DOTFILES_LINTERS}}"
+        msg: "❌ dotfiles linters目录不存在: {{.DOTFILES_LINTERS}}"
     cmds:
-      - |
-        echo "📁 dotfiles linter配置文件:"
-        DOTFILES_DIR="$HOME/Desktop/dotfiles/.github/linters"
-        ls -la "$DOTFILES_DIR"/
+      - echo "📁 dotfiles linter配置文件:"
+      - ls -la "{{.DOTFILES_LINTERS}}/"
 
   # 验证配置
   validate:
-    internal: true
     silent: true
     interactive: true
     desc: 验证linter配置文件
@@ -220,34 +284,52 @@ tasks:
     internal: true
     silent: true
     interactive: true
+    preconditions:
+      - sh: test -d "{{.DOTFILES_LINTERS}}"
+        msg: "❌ dotfiles linters目录不存在: {{.DOTFILES_LINTERS}}"
+    vars:
+      DOTFILES_FILES:
+        sh: ls -A "{{.DOTFILES_LINTERS}}" 2>/dev/null | grep -v '^\.\.$' | grep -v '^\.$' | tr '\n' ' ' | sed 's/[[:space:]]*$//' || echo ""
     cmds:
+      - echo "📋 验证dotfiles配置..."
       - |
-        echo "📋 验证dotfiles配置..."
-        DOTFILES_DIR="$HOME/Desktop/dotfiles/.github/linters"
-        if [ ! -d "$DOTFILES_DIR" ]; then
-          echo "❌ dotfiles linters目录不存在: $DOTFILES_DIR"
-          exit 1
+        DOTFILES_LIST="{{.DOTFILES_FILES}}"
+        if [ -z "$DOTFILES_LIST" ]; then
+          echo "⚠️  dotfiles中没有linter文件"
+          exit 0
         fi
-        # 动态获取dotfiles中的所有linter文件
-        DOTFILES_FILES=$(ls -A "$DOTFILES_DIR" 2>/dev/null | grep -v '^\.\.$' | grep -v '^\.$')
-        for linter in $DOTFILES_FILES; do
-          echo "✅ $linter 存在"
-        done
+      - for:
+          var: DOTFILES_FILES
+          split: ' '
+          as: LINTER_FILE
+        cmd: echo "✅ {{.LINTER_FILE}} 存在"
 
   validate-project:
     internal: true
     silent: true
     interactive: true
+    preconditions:
+      - sh: test -d "{{.PROJECT_LINTERS_DIR}}"
+        msg: "⚠️  项目linters目录不存在"
+    vars:
+      PROJECT_LINTERS_DIR: "{{.PROJECT_DIR}}/.github/linters"
+      PROJECT_FILES:
+        sh: |
+          if [ -d "{{.PROJECT_DIR}}/.github/linters" ]; then
+            ls -A "{{.PROJECT_DIR}}/.github/linters" 2>/dev/null | grep -v '^\.\.$' | grep -v '^\.$' | tr '\n' ' ' | sed 's/[[:space:]]*$//' || echo ""
+          else
+            echo ""
+          fi
     cmds:
+      - echo "📋 验证项目配置..."
       - |
-        echo "📋 验证项目配置..."
-        PROJECT_DIR="{{.PROJECT_DIR}}/.github/linters"
-        if [ ! -d "$PROJECT_DIR" ]; then
-          echo "⚠️  项目linters目录不存在"
-        else
-          # 动态获取项目中的所有linter文件
-          PROJECT_FILES=$(ls -A "$PROJECT_DIR" 2>/dev/null | grep -v '^\.\.$' | grep -v '^\.$')
-          for linter in $PROJECT_FILES; do
-            echo "✅ $linter 存在"
-          done
+        PROJECT_LIST="{{.PROJECT_FILES}}"
+        if [ -z "$PROJECT_LIST" ]; then
+          echo "⚠️  项目中没有linter文件"
+          exit 0
         fi
+      - for:
+          var: PROJECT_FILES
+          split: ' '
+          as: LINTER_FILE
+        cmd: echo "✅ {{.LINTER_FILE}} 存在"

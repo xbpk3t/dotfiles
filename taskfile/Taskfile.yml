@@ -42,6 +42,9 @@ includes:
   pnpm: taskfile/mac/Taskfile.pnpm.yml
   goland: taskfile/mac/Taskfile.goland.yml
 
+  apify: taskfile/works/Taskfile.apify.yml
+  sec: taskfile/works/Taskfile.sec.yml
+
 
 tasks:
   default:

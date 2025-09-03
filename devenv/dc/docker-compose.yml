@@ -11,7 +11,7 @@ x-common-logging: &common-logging
     max-file: "3"
 
 x-common-restart: &common-restart
-  restart: no
+  restart: "no"
 
 x-backend-network: &backend-network
   networks:

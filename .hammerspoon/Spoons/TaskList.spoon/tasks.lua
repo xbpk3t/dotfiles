@@ -39,7 +39,7 @@ function tasks.getActiveTasks(taskList)
 end
 
 -- 创建新任务
-function tasks.createTask(taskName, dateStr, estimatedTime)
+function tasks.createTask(taskName, dateStr, estimatedTime, review)
     local addTime = math.floor(hs.timer.secondsSinceEpoch() * 1000) -- 任务添加时间（精确到毫秒）
     local newTask = {
         id = utils.generateTaskId(addTime, taskName, dateStr, estimatedTime),
@@ -50,7 +50,8 @@ function tasks.createTask(taskName, dateStr, estimatedTime)
         actualTime = 0,
         isDone = false,
         doneAt = nil,
-        startTime = nil
+        startTime = nil,
+        review = review or ""  -- 新增复盘字段，可选
     }
     return newTask
 end

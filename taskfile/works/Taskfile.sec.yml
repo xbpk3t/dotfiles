@@ -1,0 +1,9 @@
+---
+version: '3'
+
+vars:
+  KATANA: katana
+
+tasks:
+  katana:
+    cmd: "{{.KATANA}} -u https://www.baidu.com -d 3 -mr '.*\\.(htm|html)$' -o output.txt -elog error.log" # 注意这里 .*\\.(htm|html)$ 里的\是YAML转义

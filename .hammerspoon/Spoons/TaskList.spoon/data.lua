@@ -53,6 +53,7 @@ function data.loadTasks()
                     task.isDone = task.isDone or false
                     task.doneAt = task.doneAt or task.deletedAt or nil
                     task.startTime = task.startTime or nil
+                    task.review = task.review or ""  -- 添加 review 字段兼容性
                 end
             end
         end

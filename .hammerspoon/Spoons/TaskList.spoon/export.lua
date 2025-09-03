@@ -60,6 +60,25 @@ local function generateTaskYaml(task, indent)
     if score > 0 then
         yaml = yaml .. indent .. "  score: " .. score .. "\n"
     end
+    if task.review and task.review ~= "" then
+        -- 处理多行 review，确保 YAML 格式正确
+        local reviewLines = {}
+        for line in task.review:gmatch("[^\r\n]+") do
+            table.insert(reviewLines, line)
+        end
+        if #reviewLines > 0 then
+            if #reviewLines == 1 then
+                -- 单行 review
+                yaml = yaml .. indent .. "  review: " .. utils.sanitizeString(reviewLines[1]) .. "\n"
+            else
+                -- 多行 review
+                yaml = yaml .. indent .. "  review: |\n"
+                for _, line in ipairs(reviewLines) do
+                    yaml = yaml .. indent .. "    " .. utils.sanitizeString(line) .. "\n"
+                end
+            end
+        end
+    end
     return yaml .. "\n"
 end
 

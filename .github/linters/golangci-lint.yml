@@ -241,7 +241,23 @@ linters-settings: # ===== gocritic 详细配置 =====
     asserts: true
     comparison: true
 
+  # [securego/gosec: Golang security checker](https://github.com/securego/gosec)
+  gosec:
+    excludes:
+      - G104 # 部分error不需要处理
+      - G107 # http请求时不能使用动态url，关闭
+      - G115 # 整数转换误报
+      - G204 # 命令执行误报
+      - G304 # 文件包含误报
+      - G307 # Deferring a method which returns an error
+
+
+
 issues:
+  exclude-use-default: false
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  new: false
   exclude-files:
     - ".*\\.pb\\.go$"
     - ".*_test\\.go$"
@@ -249,6 +265,8 @@ issues:
     - vendor
     - node_modules
   exclude-rules:
+
+    # 只在测试文件中忽略函数长度检查
     - path: _test\.go
       linters:
         - funlen
@@ -259,28 +277,20 @@ issues:
     - linters:
         - lll
       source: "^//go:generate "
+
+    # 只在包含特定注释的代码行忽略常量检查
     - linters:
         - goconst
       source: "^// nolint:"
+
     # 排除大部分revive的过于严格的规则
+    # 只在错误信息匹配特定模式时忽略
     - linters:
         - revive
       text: "(should have comment or be unexported|exported.*should have comment|package-comments|blank-imports|redefines-builtin-id|stutters|comment on exported.*should be of the form|var-naming)"
-    # 排除gosec的误报
-    - linters:
-        - gosec
-      text: "G304"  # 文件包含误报
-    - linters:
-        - gosec
-      text: "G115"  # 整数转换误报
-    - linters:
-        - gosec
-      text: "G204"  # 命令执行误报
-    # funlen阈值已调整，无需额外排除
-  exclude-use-default: false
-  max-issues-per-linter: 0
-  max-same-issues: 0
-  new: false
+
+
+
 
 severity:
   default-severity: error
