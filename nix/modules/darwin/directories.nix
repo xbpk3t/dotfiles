@@ -1,5 +1,6 @@
 # Darwin directory structure management
 # Migrated from ansible/roles/common/tasks/disk.yml
+# Contains directory configuration that can be shared between multiple hosts
 _: {
   # Create standard directories on macOS
   # Note: macOS doesn't have systemd-tmpfiles, so we use launchd
@@ -28,4 +29,6 @@ _: {
       StandardErrorPath = "/var/log/create-directories.log";
     };
   };
+
+  # Note: Host-specific directory configurations should be added per-host
 }

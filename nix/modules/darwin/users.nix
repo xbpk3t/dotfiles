@@ -1,26 +1,15 @@
 # Darwin user configuration
-{ username, ... }:
+# Contains user configuration that can be shared between multiple hosts
+{ ... }:
 
 {
-  # User configuration for macOS
-  users.users = {
-    # Main user (already exists on macOS)
-    ${username} = {
-      home = "/Users/${username}";
-      description = username;
-      shell = "/run/current-system/sw/bin/zsh";
-    };
+  # Shared user configuration patterns for macOS
+  users.users = { };
 
-    # Ops user (from ansible disk.yml)
-    # Note: Creating users on macOS requires different approach
-    ops = {
-      home = "/Users/ops";
-      description = "Operations user";
-      shell = "/bin/bash";
-      # Note: Group membership on macOS is handled differently
-    };
-  };
-
-  # Note: macOS user/group management is more complex than Linux
-  # Additional configuration may be needed for full compatibility
+  # Note: Host-specific user settings should be configured per-host
+  # Examples of host-specific settings:
+  # - User home directories
+  # - User descriptions
+  # - User shells
+  # - Specific user accounts like 'ops'
 }

@@ -46,6 +46,28 @@ vars:
 
       echo "$LINTERS_TO_PROCESS" | tr ' ' '\n' | grep -v '^$' | tr '\n' ' ' | sed 's/[[:space:]]*$//'
 
+  # 可配置的同步文件列表
+  SYNC_FILES_CONFIG:
+    - ".pre-commit-config.yaml"
+
+
+  # 需要处理的单文件列表
+  SINGLE_FILES_TO_PROCESS:
+    sh: |
+      SINGLE_FILES=""
+      DOTFILES_ROOT="$HOME/Desktop/dotfiles"
+
+      # 从配置列表中检查每个文件
+      for file in {{.SYNC_FILES_CONFIG | join " "}}; do
+        if [ -f "$DOTFILES_ROOT/$file" ]; then
+          if [ -f "{{.PROJECT_DIR}}/$file" ]; then
+            SINGLE_FILES="$SINGLE_FILES $file"
+          fi
+        fi
+      done
+
+      echo "$SINGLE_FILES" | tr ' ' '\n' | grep -v '^$' | tr '\n' ' ' | sed 's/[[:space:]]*$//'
+
 tasks:
   default:
     desc: 应用dotfiles的linter配置到当前项目
@@ -55,6 +77,7 @@ tasks:
       - echo "🚀 开始应用linter配置..."
       - task: scan-project
       - task: process-configs
+      - task: process-single-files
       - echo "✅ linter配置应用完成"
 
   # 扫描当前项目的linters配置
@@ -278,6 +301,7 @@ tasks:
       - echo "🔍 验证配置文件..."
       - task: validate-dotfiles
       - task: validate-project
+      - task: validate-single-files
       - echo "✅ 验证完成"
 
   validate-dotfiles:
@@ -333,3 +357,110 @@ tasks:
           split: ' '
           as: LINTER_FILE
         cmd: echo "✅ {{.LINTER_FILE}} 存在"
+
+  # 处理单文件
+  process-single-files:
+    internal: true
+    interactive: true
+    silent: true
+    desc: 处理单文件配置
+    vars:
+      SINGLE_FILES_LIST:
+        sh: echo "{{.SINGLE_FILES_TO_PROCESS}}"
+    cmds:
+      - echo "📁 处理单文件配置..."
+      - |
+        SINGLE_FILES="{{.SINGLE_FILES_LIST}}"
+        if [ -z "$SINGLE_FILES" ]; then
+          echo "⚠️  没有找到需要处理的单文件"
+          exit 0
+        fi
+      - for:
+          var: SINGLE_FILES_LIST
+          split: ' '
+          as: SINGLE_FILE
+        task: process-single-file
+        vars:
+          SINGLE_FILE: '{{.SINGLE_FILE}}'
+
+  process-single-file:
+    internal: true
+    silent: true
+    interactive: true
+    desc: 处理单个配置文件
+    preconditions:
+      - sh: test -n "{{.SINGLE_FILE}}"
+        msg: "❌ SINGLE_FILE 参数为空"
+      - sh: test -f "{{.DOTFILES_ROOT}}/{{.SINGLE_FILE}}"
+        msg: "⚠️  跳过: dotfiles中不存在 {{.SINGLE_FILE}}"
+    vars:
+      DOTFILES_CONFIG: "{{.DOTFILES_ROOT}}/{{.SINGLE_FILE}}"
+      PROJECT_CONFIG: "{{.PROJECT_DIR}}/{{.SINGLE_FILE}}"
+    cmds:
+      - echo "📄 处理 {{.SINGLE_FILE}}..."
+      - |
+        # 检查项目中是否已存在该配置文件
+        if [ -f "{{.PROJECT_CONFIG}}" ]; then
+          # 文件存在，检查是否相同
+          if diff -q "{{.DOTFILES_CONFIG}}" "{{.PROJECT_CONFIG}}" >/dev/null 2>&1; then
+            echo "✅ {{.SINGLE_FILE}} 已同步，跳过"
+          else
+            echo "⚠️  {{.SINGLE_FILE}} 存在差异"
+            echo ""
+            echo "🔄 {{.SINGLE_FILE}} 存在冲突，请选择操作:"
+            echo ""
+
+            # 使用gum提供交互选择
+            CHOICE=$(gum choose \
+              "覆盖项目配置 (使用dotfiles版本)" \
+              "查看差异 (使用GoLand)" \
+              "跳过此文件" \
+              --header="选择操作:")
+
+            case "$CHOICE" in
+              "覆盖项目配置 (使用dotfiles版本)")
+                echo "📋 覆盖 {{.SINGLE_FILE}}"
+                cp "{{.DOTFILES_CONFIG}}" "{{.PROJECT_CONFIG}}"
+                echo "✅ {{.SINGLE_FILE}} 已覆盖"
+                ;;
+              "查看差异 (使用GoLand)")
+                echo "🔍 打开GoLand查看差异..."
+                {{.GOLAND_CMD}} diff "{{.PROJECT_CONFIG}}" "{{.DOTFILES_CONFIG}}"
+                echo "ℹ️  请手动处理差异后重新运行任务"
+                ;;
+              "跳过此文件")
+                echo "⏭️  跳过 {{.SINGLE_FILE}}"
+                ;;
+              *)
+                echo "❌ 无效选择，跳过 {{.SINGLE_FILE}}"
+                ;;
+            esac
+          fi
+        else
+          # 文件不存在，直接复制
+          echo "📋 复制 {{.SINGLE_FILE}} 到项目"
+          cp "{{.DOTFILES_CONFIG}}" "{{.PROJECT_CONFIG}}"
+          echo "✅ {{.SINGLE_FILE}} 已复制"
+        fi
+
+  validate-single-files:
+    internal: true
+    silent: true
+    interactive: true
+    desc: 验证单文件配置
+    vars:
+      SINGLE_FILES_LIST:
+        sh: echo "{{.SINGLE_FILES_TO_PROCESS}}"
+    cmds:
+      - echo "📋 验证单文件配置..."
+      - |
+        SINGLE_FILES="{{.SINGLE_FILES_LIST}}"
+        if [ -z "$SINGLE_FILES" ]; then
+          echo "⚠️  没有找到需要验证的单文件"
+          exit 0
+        fi
+      - for:
+          var: SINGLE_FILES_LIST
+          split: ' '
+          as: SINGLE_FILE
+        cmd: echo "✅ {{.SINGLE_FILE}} 存在"

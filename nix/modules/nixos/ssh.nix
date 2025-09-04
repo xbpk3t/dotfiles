@@ -1,0 +1,36 @@
+# NixOS SSH service configuration
+# Based on Linux-Optimizer project configurations for Ubuntu/Debian/CentOS/Fedora
+{ ... }:
+
+{
+  # SSH optimization
+  services.openssh = {
+    enable = true;
+    settings = {
+      # Additional SSH optimizations from Linux-Optimizer
+      # Disable DNS lookup to speed up connections
+      UseDNS = false;
+      # Enable compression
+      Compression = true;
+      # Set strong ciphers
+      Ciphers = [
+        "aes256-ctr"
+        "chacha20-poly1305@openssh.com"
+      ];
+      # Enable TCP keep-alive messages
+      TCPKeepAlive = true;
+      # Configure client keep-alive messages (3000 seconds)
+      ClientAliveInterval = 3000;
+      # Set maximum client alive count (100)
+      ClientAliveCountMax = 100;
+      # Allow TCP forwarding
+      AllowTcpForwarding = true;
+      # Enable gateway ports
+      GatewayPorts = true;
+      # Enable tunneling
+      PermitTunnel = true;
+      # Enable X11 graphical interface forwarding
+      X11Forwarding = true;
+    };
+  };
+}

@@ -95,7 +95,7 @@
     # Darwin configurations
     darwinConfigurations = {
       # Local macOS machine
-      "lHGtQdeMacBook-Pro-2" = darwin.lib.darwinSystem {
+      "macos" = darwin.lib.darwinSystem {
         system = darwinSystem;
         specialArgs = darwinSpecialArgs;
         modules = darwinModules ++ [
