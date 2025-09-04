@@ -9,10 +9,8 @@
     ./system.nix
     ./homebrew.nix
     ./nix-core.nix
-    ./stylix.nix
     ./host-users.nix
     ./launchd.nix
-    ./networking.nix
     # Package definitions
     ./pkg
   ];

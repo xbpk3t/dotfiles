@@ -59,7 +59,7 @@
   }: let
     # User configuration
     username = let envUser = builtins.getEnv "USER"; in
-      if envUser != "" then envUser else "luck";
+      if envUser != "" then envUser else "lhgtqb7bll";
     useremail = "yyzw@live.com";
 
     # System configurations
@@ -84,8 +84,6 @@
 
     # Darwin-specific modules (updated structure)
     darwinModules = [
-      ./modules/nix-core.nix
-      ./modules/host-users.nix
       ./modules/darwin
     ];
 
@@ -95,7 +93,7 @@
     # Darwin configurations
     darwinConfigurations = {
       # Local macOS machine
-      "macos" = darwin.lib.darwinSystem {
+      "luck" = darwin.lib.darwinSystem {
         system = darwinSystem;
         specialArgs = darwinSpecialArgs;
         modules = darwinModules ++ [
@@ -105,7 +103,7 @@
             nix-homebrew = {
               enable = true;
               enableRosetta = false;
-              user = username;
+              user = "lhgtqb7bll";
               autoMigrate = true;
             };
           }
@@ -122,6 +120,9 @@
                 users.${username} = import ./home;
             };
           }
+
+          # Import host-specific configuration
+          ./hosts/darwin
         ];
       };
     };

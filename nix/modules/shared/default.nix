@@ -4,6 +4,5 @@
 {
   imports = [
     ./packages.nix
-    ./networking.nix
   ];
 }

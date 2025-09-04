@@ -60,10 +60,10 @@
         TrackpadThreeFingerDrag = true;
       };
     };
-
-    # System state version - this is host-specific and should not be changed after initial installation
-    system.stateVersion = 6;
   };
+
+  # System state version - this is host-specific and should not be changed after initial installation
+  system.stateVersion = 6;
 
   # Host-specific user configuration
   users.users = {

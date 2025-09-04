@@ -7,15 +7,16 @@ _: {
     ];
     casks = [
       "alfred"
+      "kilvn/homebrew-schedule/clashx-meta"
       "goland"
       "google-chrome"
       "hammerspoon"
-      # "hyperconnect"
-      "tencent-lemon"
-      "wechat"
-      "kilvn/homebrew-schedule/clashx-meta"
-      "reqable"
       "orbstack"
+      "reqable"
+      "tencent-lemon"
+      "tencent-meeting"
+      "wechat"
+      "wireshark-app"
     ];
     onActivation = {
       cleanup = "zap"; # 只安装nix配置的pkg，除此之外全部移除
