@@ -14,7 +14,6 @@ _: {
       "orbstack"
       "reqable"
       "tencent-lemon"
-      "tencent-meeting"
       "wechat"
       "wireshark-app"
     ];

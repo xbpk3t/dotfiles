@@ -2,65 +2,33 @@
 version: "3"
 
 
-#- pnpm list -g # 查看所有全局包列表
-#- pnpm root -g # 查看全局包位置
 #- pnpm config set prefix <目标目录> # 修改全局包位置
 #- pnpm install -g <pkg> # 全局安装
 #- pnpm rm -g <pkg> # 全局卸载，相当于npm uninstall，rm是uninstall的alias，需要注意的是只写pkg名就可以了，不要加version. 比如 npm rm -g create-react-app.
 
 tasks:
-  install:
-    dir: '{{.USER_WORKING_DIR}}'
+  config:
     cmds:
-      - pnpm install
-    desc: "pnpm install"
+      - echo "所有全局包列表:"
+      - pnpm list -g
+      - echo "全局包位置:"
+      - pnpm root -g
+      - echo "【存储管理】store位置:"
+      - pnpm store path
 
-  add:
-    dir: '{{.USER_WORKING_DIR}}'
+  optimize:
     cmds:
-      - pnpm add {{.CLI_ARGS}}
-    desc: "pnpm add package"
+      - pnpm store prune # 移除所有全局unused pkg
 
-  add-global:
-    cmds:
-      - pnpm add -g {{.CLI_ARGS}}
-    desc: "pnpm global install"
-
-  build:
-    dir: '{{.USER_WORKING_DIR}}'
-    cmds:
-      - pnpm run build
-    desc: "pnpm run build"
-
-  dev:
-    dir: '{{.USER_WORKING_DIR}}'
-    cmds:
-      - pnpm run dev
-    desc: "pnpm run dev"
-
-  test:
-    dir: '{{.USER_WORKING_DIR}}'
-    cmds:
-      - pnpm test
-    desc: "pnpm test"
-
-  update:
-    dir: '{{.USER_WORKING_DIR}}'
-    cmds:
-      - pnpm update
-    desc: "pnpm update"
-
-  outdated:
-    dir: '{{.USER_WORKING_DIR}}'
-    cmds:
-      - pnpm outdated
-    desc: "pnpm outdated"
 
   #- url: https://github.com/depcheck/depcheck
   #  des: depcheck = npm-check, 但是只能查找unused dep
   # [webpro-nl/knip: ✂️ Find unused files, dependencies and exports in your JavaScript and TypeScript projects. Knip it before you ship it!](https://github.com/webpro-nl/knip)
   depcheck:
+    desc: 更新
     cmds:
+      - pnpm outdated
+      - pnpm update --latest
       - knip --fix
       - task: install # post-fix需要重新install来uninstall这些unused依赖
       - npm-check -u
