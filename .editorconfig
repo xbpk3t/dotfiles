@@ -1,0 +1,9 @@
+# 针对所有文件的基础设置
+root = true
+
+
+
+# 针对 .nix 文件的缩进配置
+[*.nix]
+indent_style = space
+indent_size = 2

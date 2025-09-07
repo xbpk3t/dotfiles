@@ -28,6 +28,7 @@ includes:
   pkg: taskfile/kernel/Taskfile.pkg.yml
   linux: taskfile/kernel/Taskfile.linux.yml
   net: taskfile/kernel/Taskfile.network.yml
+  ssh: taskfile/kernel/Taskfile.ssh.yml
   tcpdump: taskfile/kernel/Taskfile.tcpdump.yml
 
 

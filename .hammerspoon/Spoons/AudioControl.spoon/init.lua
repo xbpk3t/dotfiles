@@ -109,49 +109,6 @@ local function setVolume(volume)
   hs.timer.doAfter(0.1, showVolumeIndicator)
 end
 
--- 处理耳机连接状态变化
-local function handleHeadphoneStateChange(connected)
-  if connected then
-    -- 耳机连接：禁用音频控制
-    notifs.headphoneConnected()
-    obj.logger.i("Headphone connected, disabling audio control")
-  else
-    -- 耳机断开：重新应用 WiFi 规则
-    notifs.headphoneDisconnected()
-    local isTrusted = isSSIDTrusted(hs.wifi.currentNetwork())
-    if isTrusted then
-      setVolume(obj.trustedVolume)
-      notifs.trustedNetworkActivated()
-      obj.logger.i("Headphone disconnected, restored trusted network volume")
-    else
-      setVolume(obj.untrustedVolume)
-      notifs.untrustedNetworkMuted()
-      obj.logger.i("Headphone disconnected, muted for untrusted network")
-    end
-  end
-end
-
--- 处理 WiFi 网络变化
-local function handleWiFiStateChange(currentSSID, wasTrusted, isTrusted)
-  if isTrusted and not wasTrusted then
-    -- 从不受信任网络切换到受信任网络
-    setVolume(obj.trustedVolume)
-    notifs.wifiConnected(currentSSID)
-    notifs.trustedNetworkActivated()
-    obj.logger.i("Connected to trusted network: " .. (currentSSID or "Unknown"))
-  elseif not isTrusted and wasTrusted then
-    -- 从受信任网络切换到不受信任网络
-    setVolume(obj.untrustedVolume)
-    notifs.wifiDisconnected(obj.lastSSID)
-    notifs.untrustedNetworkMuted()
-    obj.logger.i("Connected to untrusted network, audio muted")
-  elseif not isTrusted and not wasTrusted then
-    -- 在不受信任网络之间切换，确保保持静音
-    setVolume(obj.untrustedVolume)
-    obj.logger.i("Switched between untrusted networks, maintaining mute")
-  end
-end
-
 -- 主要逻辑处理函数
 local function handleAudioControl()
   local currentSSID = hs.wifi.currentNetwork()
@@ -167,12 +124,44 @@ local function handleAudioControl()
 
     -- 处理耳机状态变化
     if headphoneStateChanged then
-      handleHeadphoneStateChange(headphoneConnected)
+      if headphoneConnected then
+        -- 耳机连接：禁用音频控制
+        notifs.headphoneConnected()
+        obj.logger.i("Headphone connected, disabling audio control")
+      else
+        -- 耳机断开：重新应用 WiFi 规则
+        notifs.headphoneDisconnected()
+        if isTrusted then
+          setVolume(obj.trustedVolume)
+          notifs.trustedNetworkActivated()
+          obj.logger.i("Headphone disconnected, restored trusted network volume")
+        else
+          setVolume(obj.untrustedVolume)
+          notifs.untrustedNetworkMuted()
+          obj.logger.i("Headphone disconnected, muted for untrusted network")
+        end
+      end
     end
 
     -- 处理 WiFi 网络变化（仅在未连接耳机时）
     if ssidChanged and not headphoneConnected then
-      handleWiFiStateChange(currentSSID, wasTrusted, isTrusted)
+      if isTrusted and not wasTrusted then
+        -- 从不受信任网络切换到受信任网络
+        setVolume(obj.trustedVolume)
+        notifs.wifiConnected(currentSSID)
+        notifs.trustedNetworkActivated()
+        obj.logger.i("Connected to trusted network: " .. (currentSSID or "Unknown"))
+      elseif not isTrusted and wasTrusted then
+        -- 从受信任网络切换到不受信任网络
+        setVolume(obj.untrustedVolume)
+        notifs.wifiDisconnected(obj.lastSSID)
+        notifs.untrustedNetworkMuted()
+        obj.logger.i("Connected to untrusted network, audio muted")
+      elseif not isTrusted and not wasTrusted then
+        -- 在不受信任网络之间切换，确保保持静音
+        setVolume(obj.untrustedVolume)
+        obj.logger.i("Switched between untrusted networks, maintaining mute")
+      end
     end
 
     -- 更新状态
@@ -181,79 +170,39 @@ local function handleAudioControl()
   end
 end
 
--- 处理睡眠相关事件
-local function handleSleepEvents(eventType)
-  -- 系统即将睡眠或屏幕即将关闭，保存当前音量并静音
-  obj.preSleepVolume = hs.audiodevice.defaultOutputDevice():volume()
-  setVolume(obj.untrustedVolume)
-  obj.logger.i("System going to sleep or screen off, audio muted")
-end
-
--- 处理唤醒相关事件
-local function handleWakeEvents(eventType)
-  -- 系统唤醒或屏幕打开，恢复音频控制逻辑
-  handleAudioControl()
-  obj.logger.i("System wake or screen on, audio control restored")
-end
-
--- 处理屏保相关事件
-local function handleScreensaverEvents(eventType)
-  if eventType == hs.caffeinate.watcher.screensaverDidStart then
+-- 处理系统睡眠/唤醒事件
+local function handleCaffeinateEvent(eventType)
+  if eventType == hs.caffeinate.watcher.systemWillSleep or
+     eventType == hs.caffeinate.watcher.screensDidSleep then
+    -- 系统即将睡眠或屏幕即将关闭，保存当前音量并静音
+    obj.preSleepVolume = hs.audiodevice.defaultOutputDevice():volume()
+    setVolume(obj.untrustedVolume)
+    obj.logger.i("System going to sleep or screen off, audio muted")
+  elseif eventType == hs.caffeinate.watcher.systemDidWake or
+         eventType == hs.caffeinate.watcher.screensDidWake then
+    -- 系统唤醒或屏幕打开，恢复音频控制逻辑
+    handleAudioControl()
+    obj.logger.i("System wake or screen on, audio control restored")
+  elseif eventType == hs.caffeinate.watcher.screensaverDidStart then
     -- 屏幕保护程序启动，静音
     setVolume(obj.untrustedVolume)
     obj.logger.i("Screensaver started, audio muted")
-  else
+  elseif eventType == hs.caffeinate.watcher.screensaverDidStop then
     -- 屏幕保护程序停止，恢复音频控制逻辑
     handleAudioControl()
     obj.logger.i("Screensaver stopped, audio control restored")
-  end
-end
-
--- 处理锁定/解锁相关事件
-local function handleLockEvents(eventType)
-  if eventType == hs.caffeinate.watcher.screensDidLock then
+  elseif eventType == hs.caffeinate.watcher.screensDidLock then
     -- 屏幕锁定，静音
     setVolume(obj.untrustedVolume)
     obj.logger.i("Screen locked, audio muted")
-  else
+  elseif eventType == hs.caffeinate.watcher.screensDidUnlock then
     -- 屏幕解锁，恢复音频控制逻辑
     handleAudioControl()
     obj.logger.i("Screen unlocked, audio control restored")
-  end
-end
-
--- 处理关机相关事件
-local function handleShutdownEvents(eventType)
-  -- 系统即将关机或注销，静音
-  setVolume(obj.untrustedVolume)
-  obj.logger.i("System shutting down or logging out, audio muted")
-end
-
--- 处理系统睡眠/唤醒事件
-local function handleCaffeinateEvent(eventType)
-  -- 根据事件类型分发到不同的处理函数
-  if eventType == hs.caffeinate.watcher.systemWillSleep or
-     eventType == hs.caffeinate.watcher.screensDidSleep then
-    handleSleepEvents(eventType)
-  elseif eventType == hs.caffeinate.watcher.systemDidWake or
-         eventType == hs.caffeinate.watcher.screensDidWake then
-    handleWakeEvents(eventType)
-  elseif eventType == hs.caffeinate.watcher.screensaverDidStart or
-         eventType == hs.caffeinate.watcher.screensaverDidStop then
-    handleScreensaverEvents(eventType)
-  elseif eventType == hs.caffeinate.watcher.screensDidLock or
-         eventType == hs.caffeinate.watcher.screensDidUnlock then
-    handleLockEvents(eventType)
   elseif eventType == hs.caffeinate.watcher.systemWillPowerOff then
-    handleShutdownEvents(eventType)
-  end
-end
-
--- 音频设备回调函数
-local function audioDeviceCallback(event)
-  if event and (string.find(event, "dOut") or string.find(event, "dev")) then
-    -- 延迟一点执行，确保设备状态已更新
-    hs.timer.doAfter(0.5, handleAudioControl)
+    -- 系统即将关机或注销，静音
+    setVolume(obj.untrustedVolume)
+    obj.logger.i("System shutting down or logging out, audio muted")
   end
 end
 
@@ -276,6 +225,13 @@ function obj:start()
   self.caffeinateWatcher:start()
 
   -- 创建音频设备监听器
+  local function audioDeviceCallback(event)
+    if event and (string.find(event, "dOut") or string.find(event, "dev")) then
+      -- 延迟一点执行，确保设备状态已更新
+      hs.timer.doAfter(0.5, handleAudioControl)
+    end
+  end
+
   hs.audiodevice.watcher.setCallback(audioDeviceCallback)
   hs.audiodevice.watcher.start()
 
@@ -328,7 +284,7 @@ function obj:bindHotkeys(mapping)
       device:setOutputMuted(not device:outputMuted())
       showVolumeIndicator()
     end,
-    show_status = function()
+            show_status = function()
       local currentSSID = hs.wifi.currentNetwork()
       local headphoneConnected = isHeadphoneConnected()
       local status = string.format("WiFi: %s | Headphone: %s",

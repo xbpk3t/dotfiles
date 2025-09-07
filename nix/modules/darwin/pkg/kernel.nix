@@ -29,5 +29,8 @@
 
     # zzz
     atuin
+
+    # ssh
+    sshs
   ];
 }

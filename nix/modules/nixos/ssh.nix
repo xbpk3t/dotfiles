@@ -31,6 +31,14 @@
       PermitTunnel = true;
       # Enable X11 graphical interface forwarding
       X11Forwarding = true;
+
+      # 安全相关配置
+      # 禁用密码认证，只允许公钥认证
+      PasswordAuthentication = false;
+      # 禁止root用户直接登录
+      PermitRootLogin = "prohibit-password";
+      # 启用公钥认证
+      PubkeyAuthentication = true;
     };
   };
 }
