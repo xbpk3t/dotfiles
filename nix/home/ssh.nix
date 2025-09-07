@@ -38,12 +38,10 @@
         hostname = "ssh.github.com";
         user = "git";
         port = 443;
-        identityFile = "~/.ssh/id_github";
+        identityFile = "/etc/agenix/github-ssh-key";
         identitiesOnly = true;
       };
     };
   };
 
-  # 使用agenix管理SSH私钥
-  # home.file.".ssh/id_github".source = config.age.secrets.github-ssh-key.path;
 }

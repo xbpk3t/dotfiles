@@ -7,6 +7,7 @@ _: {
     ];
     casks = [
       "alfred"
+      "cursor"
       "kilvn/homebrew-schedule/clashx-meta"
       "goland"
       "google-chrome"

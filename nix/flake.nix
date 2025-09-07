@@ -13,7 +13,14 @@
     substituters = [
       # Query the mirror of USTC first, then official cache
       "https://mirrors.ustc.edu.cn/nix-channels/store"
+      "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store/"
+      "https://mirrors.bfsu.edu.cn/nix-channels/store"
       "https://cache.nixos.org"
+
+      "https://hyprland.cachix.org"
+      "https://cache.garnix.io" # add garnix cache form github loneros-nixos repo
+      "https://nix-community.cachix.org"
+      "https://loneros.cachix.org"
     ];
   };
 
@@ -47,7 +54,10 @@
       inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
 
-
+    agenix = {
+      url = "github:ryantm/agenix";
+      inputs.nixpkgs.follows = "nixpkgs-darwin";
+    };
   };
 
   outputs = inputs @ {
@@ -55,6 +65,7 @@
     darwin,
     home-manager,
     nix-homebrew,
+    agenix,
     ...
   }: let
     # User configuration
@@ -69,6 +80,7 @@
     # Common special args for all configurations
     commonSpecialArgs = {
       inherit username useremail inputs;
+      agenix = agenix;
     };
 
     # Darwin special args
@@ -121,8 +133,13 @@
             };
           }
 
+          agenix.darwinModules.default
+
           # Import host-specific configuration
           ./hosts/darwin
+
+          # Import secrets configuration
+          ./secrets/darwin.nix
         ];
       };
     };
@@ -145,12 +162,14 @@
                 useGlobalPkgs = true;
                 useUserPackages = true;
                 extraSpecialArgs = linuxSpecialArgs // {
-                              hostname = "nixos";
-                            };
+                  hostname = "nixos";
+                };
                 backupFileExtension = "hm-bak";
                 users.${username} = import ./home;
             };
           }
+
+          agenix.darwinModules.default
         ];
       };
     };
