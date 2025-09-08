@@ -27,6 +27,7 @@
     deadnix # https://github.com/astro/deadnix
     statix # https://github.com/oppiliappan/statix
     age # https://github.com/FiloSottile/age 用来处理 agenix
+    sops
 
     # zzz
     atuin

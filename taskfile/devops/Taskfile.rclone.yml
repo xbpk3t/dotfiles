@@ -54,7 +54,6 @@ tasks:
   # 配置相关===========
   config:
     desc: 查看 rclone 相关配置
-    internal: true
     interactive: true
     silent: true
     cmds:

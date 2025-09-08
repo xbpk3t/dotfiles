@@ -2,7 +2,7 @@ version: '3'
 
 includes:
   nix-lint: ./Taskfile.nix.yml
-  agenix: ./Taskfile.agenix.yml
+  age: ./secrets/Taskfile.yml
 
 
 # Nix-Darwin management tasks

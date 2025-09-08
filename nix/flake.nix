@@ -11,16 +11,15 @@
   # nixConfig affects the flake itself, not the system configuration
   nixConfig = {
     substituters = [
-      # Query the mirror of USTC first, then official cache
-      "https://mirrors.ustc.edu.cn/nix-channels/store"
-      "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store/"
-      "https://mirrors.bfsu.edu.cn/nix-channels/store"
-      "https://cache.nixos.org"
+    "https://mirrors.ustc.edu.cn/nix-channels/store"
+    "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store/"
+    "https://mirrors.bfsu.edu.cn/nix-channels/store"
+    "https://cache.nixos.org"
 
-      "https://hyprland.cachix.org"
-      "https://cache.garnix.io" # add garnix cache form github loneros-nixos repo
-      "https://nix-community.cachix.org"
-      "https://loneros.cachix.org"
+    "https://hyprland.cachix.org"
+    "https://cache.garnix.io" # add garnix cache form github loneros-nixos repo
+    "https://nix-community.cachix.org"
+    "https://loneros.cachix.org"
     ];
   };
 
@@ -54,8 +53,8 @@
       inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
 
-    agenix = {
-      url = "github:ryantm/agenix";
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
   };
@@ -65,7 +64,7 @@
     darwin,
     home-manager,
     nix-homebrew,
-    agenix,
+    sops-nix,
     ...
   }: let
     # User configuration
@@ -80,7 +79,7 @@
     # Common special args for all configurations
     commonSpecialArgs = {
       inherit username useremail inputs;
-      agenix = agenix;
+      sops-nix = sops-nix;
     };
 
     # Darwin special args
@@ -133,7 +132,7 @@
             };
           }
 
-          agenix.darwinModules.default
+          sops-nix.darwinModules.sops
 
           # Import host-specific configuration
           ./hosts/darwin
@@ -169,7 +168,7 @@
             };
           }
 
-          agenix.darwinModules.default
+          sops-nix.nixosModules.sops
         ];
       };
     };

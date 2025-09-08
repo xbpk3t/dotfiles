@@ -11,6 +11,8 @@
     ./gpg.nix
     # 添加SSH配置模块
     ./ssh.nix
+    # 添加rclone配置模块
+    ./rclone.nix
   ];
 
   # Home Manager needs a bit of information about you and the

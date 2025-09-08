@@ -6,10 +6,10 @@
 # Nix store paths
 /nix/store/
 
-# Age secrets - NEVER commit these!
+# nix secrets
 nix/secrets/age.key
 *.age.key
-
+nix/secrets/secrets_temp.yaml
 
 # tf
 /tf/.cf-terraforming.yaml

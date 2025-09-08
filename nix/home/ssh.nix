@@ -38,7 +38,7 @@
         hostname = "ssh.github.com";
         user = "git";
         port = 443;
-        identityFile = "/etc/agenix/github-ssh-key";
+        identityFile = "/etc/ssh/github/private_key";
         identitiesOnly = true;
       };
     };

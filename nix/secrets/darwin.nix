@@ -1,55 +1,64 @@
 {
   config,
-  pkgs,
-  agenix,
   username,
   ...
 }:
+
 {
+  # Enable sops
+  sops = {
+    defaultSopsFile = ./secrets.yaml;
+    age.keyFile = "/Users/${username}/Desktop/dotfiles/nix/secrets/age.key";
 
-  # enable logs for debugging
-  launchd.daemons."activate-agenix".serviceConfig = {
-    StandardErrorPath = "/Library/Logs/org.nixos.activate-agenix.stderr.log";
-    StandardOutPath = "/Library/Logs/org.nixos.activate-agenix.stdout.log";
-  };
-
-  environment.systemPackages = [
-    agenix.packages."${pkgs.system}".default
-  ];
-
-  # if you changed this key, you need to regenerate all encrypt files from the decrypt contents!
-  age.identityPaths = [
-    # Use the age key we generated
-    "/Users/${username}/Desktop/dotfiles/nix/secrets/age.key"
-  ];
-
-  age.secrets =
-    let
-      user_readable = {
-        mode = "0400";
+    # Define secrets
+    secrets = {
+      # Rclone R2 secrets
+      "rclone/r2/access_key_id" = {
         owner = username;
+        group = "staff";
+        mode = "0400";
       };
-    in
-    {
-      # GitHub SSH private key
-      "github-ssh-key" = {
-        file = ./github-ssh-key.age;
-      }
-      // user_readable;
-    };
+      "rclone/r2/secret_access_key" = {
+        owner = username;
+        group = "staff";
+        mode = "0400";
+      };
 
-  # place secrets in /etc/
-  environment.etc = {
-    "agenix/github-ssh-key" = {
-      source = config.age.secrets."github-ssh-key".path;
+      # SSH secrets
+      "ssh/github/private_key" = {
+        owner = username;
+        group = "staff";
+        mode = "0400";
+      };
     };
   };
 
-  # Set proper permissions for the SSH key
+  # Place secrets in /etc/ for easy access
+  environment.etc = {
+    "rclone/r2/access_key_id" = {
+      source = config.sops.secrets."rclone/r2/access_key_id".path;
+    };
+    "rclone/r2/secret_access_key" = {
+      source = config.sops.secrets."rclone/r2/secret_access_key".path;
+    };
+    "ssh/github/private_key" = {
+      source = config.sops.secrets."ssh/github/private_key".path;
+    };
+  };
+
+  # Set proper permissions for the secrets
   system.activationScripts.postActivation.text = ''
-    if [ -f /etc/agenix/github-ssh-key ]; then
-      chown ${username}:staff /etc/agenix/github-ssh-key
-      chmod 600 /etc/agenix/github-ssh-key
+    if [ -f /etc/rclone/r2/access_key_id ]; then
+      chown ${username}:staff /etc/rclone/r2/access_key_id
+      chmod 600 /etc/rclone/r2/access_key_id
+    fi
+    if [ -f /etc/rclone/r2/secret_access_key ]; then
+      chown ${username}:staff /etc/rclone/r2/secret_access_key
+      chmod 600 /etc/rclone/r2/secret_access_key
+    fi
+    if [ -f /etc/ssh/github/private_key ]; then
+      chown ${username}:staff /etc/ssh/github/private_key
+      chmod 600 /etc/ssh/github/private_key
     fi
   '';
 }

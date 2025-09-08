@@ -150,6 +150,11 @@ tasks:
   git-gc:
 
 
+  token:
+    silent: true
+    interactive: true
+    cmd: 'echo {{.GH_TOKEN}}'
+
 
   #- url: https://github.com/cli/cli
   # [Manual | GitHub CLI](https://cli.github.com/manual/)
