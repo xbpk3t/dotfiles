@@ -2,19 +2,22 @@
 {
   programs.ssh = {
     enable = true;
-    addKeysToAgent = "yes";
-
-    # Connection multiplexing
-    controlMaster = "auto";
-    controlPath = "/tmp/%r@%h:%p";
-    controlPersist = "yes";
-
-    # Hash known hosts for privacy
-    hashKnownHosts = true;
+    enableDefaultConfig = false;  # 禁用默认配置，手动设置
 
     matchBlocks = {
 
       "*" = {
+        # 全局选项移到 matchBlocks."*" 下
+        addKeysToAgent = "yes";
+
+        # Connection multiplexing
+        controlMaster = "auto";
+        controlPath = "/tmp/%r@%h:%p";
+        controlPersist = "yes";
+
+        # Hash known hosts for privacy
+        hashKnownHosts = true;
+
         # 连接保持活动设置
         serverAliveInterval = 15;
         serverAliveCountMax = 6;

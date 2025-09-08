@@ -7,7 +7,9 @@ tasks:
   default:
     desc: "运行所有 Nix linting 工具"
     cmds:
+      - echo "🔍 运行 Nix linting 工具..."
       - task: lint
+      - echo "✅ Nix linting 完成"
 
   lint:
     desc: "运行所有 Nix linting 工具"

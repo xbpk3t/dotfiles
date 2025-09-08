@@ -171,7 +171,9 @@
       nvim-tree = {
         enable = true;
         openOnSetup = false; # 启动时不自动打开
-        git.enable = true; # 启用 Git 集成
+        settings = {
+          git.enable = true; # 启用 Git 集成
+        };
       };
 
       # 语法高亮和代码解析

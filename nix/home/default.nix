@@ -3,7 +3,7 @@
 {
   # import sub modules
   imports = [
-    inputs.nixvim.homeManagerModules.nixvim
+    inputs.nixvim.homeModules.nixvim
     ./shell.nix
     ./core.nix
     ./git.nix

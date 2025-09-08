@@ -22,7 +22,7 @@
       };
     };
 
-    # 控制配置文件写入时机 - 在 sops 解密后写入
-    writeAfter = "postactivation";
+    # 让 rclone 配置在 sops-nix 解密后再生效
+    requiresUnit = "sops-nix.service";
   };
 }

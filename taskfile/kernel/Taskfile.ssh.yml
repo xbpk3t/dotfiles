@@ -58,3 +58,8 @@ tasks:
       - chmod 600 {{.SSH_KEY_DIR}}/id_{{.HOST_ALIAS}}
       - chmod 600 {{.SSH_KEY_DIR}}/id_{{.HOST_ALIAS}}.pub
       - chmod 644 {{.SSH_KEY_DIR}}/known_hosts
+
+
+  verify:
+    desc: "task -g ssh:verify PPK_PATH=/etc/ssh/github/private_key"
+    cmd: ssh-keygen -y -e -f {{.PPK_PATH}} >/dev/null && echo "格式合法" || echo "仍不合法"

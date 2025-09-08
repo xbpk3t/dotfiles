@@ -1,15 +1,15 @@
 version: '3'
 
 includes:
-  nix-lint: ./Taskfile.nix.yml
-  age: ./secrets/Taskfile.yml
+  lint: ./Taskfile.lint.yml
+  sk: ./secrets/Taskfile.yml
 
 
 # Nix-Darwin management tasks
 # Converted from rich-demo Justfile with additional migration functionality
 
 vars:
-  NIX_DIR: '.'
+  NIX_DIR: './nix'
   HOSTNAME:
     sh: scutil --get ComputerName | tr ' ' '-' | tr '[:upper:]' '[:lower:]'
   SYSTEM:
@@ -24,16 +24,17 @@ vars:
   USERNAME:
     sh: whoami
   # Default cleanup days for maintenance tasks
-  CLEANUP_DAYS: '{{.CLEANUP_DAYS | default "1"}}'
+  CLEANUP_DAYS: '{{.CLEANUP_DAYS | default "3"}}'
   # Nix store path
   NIX_STORE_PATH: '/nix/store'
   # System profile path
   SYSTEM_PROFILE: '/nix/var/nix/profiles/system'
-  # Colors for output
-  GREEN: '\033[1;32m'
-  YELLOW: '\033[1;33m'
-  RED: '\033[1;31m'
-  NC: '\033[0m'
+  # GitHub token pulled from gh CLI for GitHub API rate limits
+  GITHUB_TOKEN:
+    sh: gh auth token 2>/dev/null || echo ""
+
+env:
+  NIX_CONFIG: 'access-tokens = github.com={{.GITHUB_TOKEN}}'
 
 
 tasks:
@@ -45,140 +46,62 @@ tasks:
   # === 核心构建任务 ===
   build:
     desc: "构建系统配置（不切换）"
-    dir: '{{.NIX_DIR}}'
     cmds:
-      - echo -e "{{.YELLOW}}正在为 {{.HOSTNAME}} ({{.SYSTEM}}) 构建 {{.OS}} 配置...{{.NC}}"
+      - echo "正在为 {{.HOSTNAME}} ({{.SYSTEM}}) 构建 {{.OS}} 配置..."
       - |
         if [[ "{{.OS}}" == "Darwin" ]]; then
-          nix build .#darwinConfigurations.{{.HOSTNAME}}.system --extra-experimental-features 'nix-command flakes'
+          nix build ./nix#darwinConfigurations.{{.HOSTNAME}}.system --extra-experimental-features 'nix-command flakes'
         else
-          nix build .#nixosConfigurations.{{.HOSTNAME}}.config.system.build.toplevel --extra-experimental-features 'nix-command flakes'
+          nix build ./nix#nixosConfigurations.{{.HOSTNAME}}.config.system.build.toplevel --extra-experimental-features 'nix-command flakes'
         fi
-      - echo -e "{{.GREEN}}构建完成！{{.NC}}"
+      - echo "构建完成！"
 
   build-switch:
     desc: "构建并切换到新配置"
-    dir: '{{.NIX_DIR}}'
     cmds:
-      - echo -e "{{.YELLOW}}正在构建并切换 {{.OS}} 配置...{{.NC}}"
+      - echo "正在构建并切换 {{.OS}} 配置..."
       - |
         if [[ "{{.OS}}" == "Darwin" ]]; then
-          sudo darwin-rebuild switch --flake .#{{.HOSTNAME}}
+          sudo darwin-rebuild switch --flake ./nix#{{.HOSTNAME}}
         else
-          sudo nixos-rebuild switch --flake .#{{.HOSTNAME}}
+          sudo nixos-rebuild switch --flake ./nix#{{.HOSTNAME}}
         fi
-      - echo -e "{{.GREEN}}切换到新配置完成！{{.NC}}"
-
-  # === 配置设置 ===
-  apply:
-    desc: "交互式用户配置设置（替代 apps/apply）"
-    dir: '{{.NIX_DIR}}'
-    interactive: true
-    cmds:
-      - echo "=== Nix Configuration Setup ==="
-      - task: check-prerequisites
-      - task: build-switch
-      - echo "Configuration applied successfully!"
-
-  check-prerequisites:
-    desc: "检查系统先决条件"
-    internal: true
-    cmds:
-      - echo "Checking prerequisites..."
-      - git config --get user.name || echo "Git user.name not configured"
-      - git config --get user.email || echo "Git user.email not configured"
-      - which nix || echo "Nix not found in PATH"
-      - echo "Prerequisites check complete"
+      - echo "切换到新配置完成！"
 
 
   darwin:
     desc: "构建并切换到 nix-darwin 配置"
-    dir: '{{.NIX_DIR}}'
     cmds:
-      - echo -e "{{.YELLOW}}🚀 正在为 {{.HOSTNAME}} ({{.SYSTEM}}) 构建 nix-darwin 配置...{{.NC}}"
-      - nix build .#darwinConfigurations.{{.HOSTNAME}}.system --extra-experimental-features 'nix-command flakes'
-      - echo -e "{{.YELLOW}}🔄 正在切换到新配置...{{.NC}}"
-      - sudo darwin-rebuild switch --flake .#{{.HOSTNAME}}
-      - echo -e "{{.GREEN}}✅ nix-darwin 配置应用成功！{{.NC}}"
+      - echo "🚀 正在为 {{.HOSTNAME}} ({{.SYSTEM}}) 构建 nix-darwin 配置..."
+      - nix build ./nix#darwinConfigurations.{{.HOSTNAME}}.system --extra-experimental-features 'nix-command flakes'
+      - echo "🔄 正在切换到新配置..."
+      - sudo darwin-rebuild switch --flake ./nix#{{.HOSTNAME}}
+      - echo "✅ nix-darwin 配置应用成功！"
 
   darwin-debug:
     desc: "使用详细输出构建并切换（用于调试）"
-    dir: '{{.NIX_DIR}}'
     cmds:
-      - echo -e "{{.YELLOW}}🐛 正在使用调试输出构建 nix-darwin 配置...{{.NC}}"
-      - nix build .#darwinConfigurations.{{.HOSTNAME}}.system --show-trace --verbose --extra-experimental-features 'nix-command flakes'
-      - echo -e "{{.YELLOW}}🔄 正在使用调试输出切换...{{.NC}}"
-      - sudo darwin-rebuild switch --flake .#{{.HOSTNAME}} --show-trace --verbose
-
-  # Migration tasks (from apply-migration.sh)
-  migrate:
-    desc: "Apply nix-darwin migration and cleanup Homebrew packages"
-    deps: [darwin]
-    cmds:
-      - task: cleanup-homebrew
-      - task: verify-migration
-
-  cleanup-homebrew:
-    desc: "Remove packages that have been migrated to nix"
-    vars:
-      PACKAGES_TO_REMOVE: "go gum helm neovim fzf atuin git"
-    cmds:
-      - echo "🧹 Cleaning up migrated Homebrew packages..."
-      - for: {var: PACKAGES_TO_REMOVE, split: ' '}
-        cmd: |
-          if brew list --formula | grep -q "^{{.ITEM}}$"; then
-            echo "  Removing {{.ITEM}}..."
-            brew uninstall "{{.ITEM}}" || echo "    Warning: Could not uninstall {{.ITEM}}"
-          else
-            echo "  {{.ITEM}} not installed, skipping"
-          fi
-      - echo "✅ Homebrew cleanup completed"
-
-  verify-migration:
-    desc: "Verify that migrated packages are working"
-    vars:
-      COMMANDS_TO_CHECK: "go gum helm nvim fzf atuin git"
-    cmds:
-      - echo "🔍 Verifying migration results..."
-      - echo "Checking nix packages:"
-      - for: {var: COMMANDS_TO_CHECK, split: ' '}
-        cmd: |
-          if command -v "{{.ITEM}}" >/dev/null 2>&1; then
-            echo "  ✅ {{.ITEM}}: $(which "{{.ITEM}}")"
-          else
-            echo "  ❌ {{.ITEM}}: not found"
-          fi
-      - task: verify-shell-config
-      - task: verify-system-config
-
-  verify-shell-config:
-    desc: "Verify shell configuration"
-    internal: true
-    cmds:
-      - echo "Checking shell configuration:"
-      - echo "  Current shell:" "$SHELL"
-      - echo "  zsh version:" "$(zsh --version 2>/dev/null || echo 'not found')"
-
-  verify-system-config:
-    desc: "Verify system configuration"
-    internal: true
-    cmds:
-      - echo "Checking system configuration:"
-      - echo "  Dock icon size:" "$(defaults read com.apple.dock tilesize 2>/dev/null || echo 'not set')"
-      - echo "  Finder show hidden files:" "$(defaults read com.apple.finder AppleShowAllFiles 2>/dev/null || echo 'not set')"
+      - echo "🐛 正在使用调试输出构建 nix-darwin 配置..."
+      - nix build ./nix#darwinConfigurations.{{.HOSTNAME}}.system --show-trace --verbose --extra-experimental-features 'nix-command flakes'
+      - echo "🔄 正在使用调试输出切换..."
+      - sudo darwin-rebuild switch --flake ./nix#{{.HOSTNAME}} --show-trace --verbose
 
   # Nix related commands
   update:
-    desc: "Update all flake inputs"
-    dir: '{{.NIX_DIR}}'
+    desc: "更新所有 flake 到最新版本，并查看更新内容"
     cmds:
-      - nix flake update
+      - task: upgrade-nix
+      - nix flake update # nix flake update --flake ./nix
+      - nix flake show
+
+
+  upgrade-nix:
+    cmd: nix upgrade-nix
 
   update-input:
     desc: "Update specific flake input (usage: task nix:update-input INPUT=nixpkgs)"
-    dir: '{{.NIX_DIR}}'
     cmds:
-      - nix flake update "{{.INPUT}}"
+      - nix flake lock --update-input "{{.INPUT}}" ./nix
     requires:
       vars: [INPUT]
 
@@ -189,11 +112,35 @@ tasks:
 
   repl:
     desc: "Open a nix repl with the flake"
-    dir: '{{.NIX_DIR}}'
     cmds:
-      - nix repl -f flake:nixpkgs
+      - bash -lc 'cd nix && nix repl -f flake:nixpkgs'
+
+  fmt:
+    desc: "Format nix files in the repository"
+    dir: './nix'
+    cmds:
+      - nix fmt
+
+  check-config:
+    desc: "Check nix-darwin configuration syntax"
+    cmds:
+      - echo "🔍 Checking configuration syntax..."
+      - nix flake check ./nix
+      - echo "✅ Configuration syntax is valid"
+
+
+  prune:
+    desc:
+    cmds:
+      - task: clean
+      - task: clean-home
+      - task: gc
+
 
   clean:
+    internal: true
+    interactive: true
+    silent: true
     desc: "Remove system generations older than specified days (default: 7)"
     cmds:
       - echo "🧹 Cleaning old system generations (older than {{.CLEANUP_DAYS}} days)..."
@@ -201,13 +148,18 @@ tasks:
       - echo "✅ System generations cleaned"
 
   clean-home:
-    desc: "Clean home-manager generations"
     internal: true
+    interactive: true
+    silent: true
+    desc: "Clean home-manager generations"
     cmds:
       - echo "🧹 Cleaning home-manager generations..."
       - nix profile wipe-history --profile ~/.local/state/nix/profiles/home-manager --older-than "{{.CLEANUP_DAYS}}d" 2>/dev/null || echo "No home-manager profile found"
 
   gc:
+    internal: true
+    interactive: true
+    silent: true
     desc: "Garbage collect unused nix store entries"
     cmds:
       - echo "🗑️  Running garbage collection (older than {{.CLEANUP_DAYS}} days)..."
@@ -215,71 +167,6 @@ tasks:
       - nix-collect-garbage --delete-older-than "{{.CLEANUP_DAYS}}d"
       - echo "✅ Garbage collection completed"
 
-  optimize:
-    desc: "Optimize nix store to save disk space"
-    cmds:
-      - echo "🔧 Optimizing Nix store..."
-      - nix store optimise
-      - echo "✅ Store optimization completed"
-
-  disk-usage:
-    desc: "Show disk usage information"
-    cmds:
-      - echo "💾 Disk Usage Information:"
-      - echo "Nix store size:"
-      - du -sh "{{.NIX_STORE_PATH}}" 2>/dev/null || echo "  Could not read nix store size"
-      - echo "Home directory size:"
-      - du -sh ~ 2>/dev/null || echo "  Could not read home directory size"
-
-  maintenance:
-    desc: "Run full maintenance (clean + gc + optimize)"
-    deps: [disk-usage]
-    cmds:
-      - echo "🛠️  Running full maintenance..."
-      - task: clean
-      - task: clean-home
-      - task: gc
-      - task: optimize
-      - task: disk-usage
-      - echo "✅ Full maintenance completed"
-
-  fmt:
-    desc: "Format nix files in the repository"
-    dir: '{{.NIX_DIR}}'
-    cmds:
-      - nix fmt
-
-  gcroot:
-    desc: "Show all auto gc roots in the nix store"
-    cmds:
-      - ls -al /nix/var/nix/gcroots/auto/
-
-  # Utility tasks
-  info:
-    desc: "Show system information"
-    cmds:
-      - echo "System Information:"
-      - echo "  Hostname:" "{{.HOSTNAME}}"
-      - echo "  System:" "{{.SYSTEM}}"
-      - echo "  Nix Dir:" "{{.NIX_DIR}}"
-      - echo "  Current User:" "$(whoami)"
-      - echo "  macOS Version:" "$(sw_vers -productVersion)"
-      - echo "  Nix Version:" "$(nix --version 2>/dev/null || echo 'not found')"
-
-  check-config:
-    desc: "Check nix-darwin configuration syntax"
-    dir: '{{.NIX_DIR}}'
-    cmds:
-      - echo "🔍 Checking configuration syntax..."
-      - nix flake check
-      - echo "✅ Configuration syntax is valid"
-
-  lint:
-    desc: "运行所有 Nix linting 工具"
-    cmds:
-      - echo "🔍 运行 Nix linting 工具..."
-      - task: nix-lint:lint
-      - echo "✅ Nix linting 完成"
 
 #  status:
 #    desc: "Show comprehensive system status"

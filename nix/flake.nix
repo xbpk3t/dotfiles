@@ -21,6 +21,10 @@
     "https://nix-community.cachix.org"
     "https://loneros.cachix.org"
     ];
+
+    # 防止关键包被垃圾回收清理
+    keep-outputs = true;
+    keep-derivations = true;
   };
 
   inputs = {
