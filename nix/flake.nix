@@ -136,13 +136,13 @@
             };
           }
 
-          sops-nix.darwinModules.sops
+          # sops-nix.darwinModules.sops
 
           # Import host-specific configuration
           ./hosts/darwin
 
           # Import secrets configuration
-          ./secrets/darwin.nix
+          # ./secrets/darwin.nix
         ];
       };
     };

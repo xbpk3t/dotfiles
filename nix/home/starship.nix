@@ -12,11 +12,12 @@
       right_format = "$cmd_duration$env_var";
 
       # Inserts a blank line between shell prompts
-      add_newline = false;
+      add_newline = true;
 
       # Replace the '❯' symbol in the prompt with '➜'
       character = {
         success_symbol = "[➜](bold green)";
+        error_symbol = "[➜](bold red)";
       };
 
       # Disable the package module, hiding it from the prompt completely
@@ -38,14 +39,14 @@
         style = "bold #82AAFF";
       };
 
-      env_var = {
-        all_proxy = {
-          variable = "all_proxy";
-          format = "[$env_value]($style) ";
-          default = "";
-          style = "bold #82AAFF";
-        };
-      };
+#      env_var = {
+#        all_proxy = {
+#          variable = "all_proxy";
+#          format = "[$env_value]($style) ";
+#          default = "";
+#          style = "bold #82AAFF";
+#        };
+#      };
 
       cmd_duration = {
         format = "[$duration]($style) ";
@@ -60,35 +61,35 @@
       };
 
       os = {
-        disabled = false;
-        symbols = {
-          Ubuntu = "󰕈 ";
-        };
+        disabled = true;
+#        symbols = {
+#          Ubuntu = "󰕈 ";
+#        };
       };
 
-      rust = {
-        format = "[$symbol($version )]($style)";
-      };
-
-      nodejs = {
-        format = "[$symbol($version )]($style)";
-      };
-
-      lua = {
-        format = "[$symbol($version )]($style)";
-      };
-
-      golang = {
-        format = "[$symbol($version )]($style)";
-      };
-
-      c = {
-        format = "[$symbol($version(-$name) )]($style)";
-      };
-
-      ruby = {
-        format = "[$symbol($version )]($style)";
-      };
+#      rust = {
+#        format = "[$symbol($version )]($style)";
+#      };
+#
+#      nodejs = {
+#        format = "[$symbol($version )]($style)";
+#      };
+#
+#      lua = {
+#        format = "[$symbol($version )]($style)";
+#      };
+#
+#      golang = {
+#        format = "[$symbol($version )]($style)";
+#      };
+#
+#      c = {
+#        format = "[$symbol($version(-$name) )]($style)";
+#      };
+#
+#      ruby = {
+#        format = "[$symbol($version )]($style)";
+#      };
     };
   };
 }

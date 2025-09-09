@@ -28,12 +28,12 @@
   # 添加有用的 jq 别名到 shell
   programs.zsh.shellAliases = {
     # 格式化 JSON
-    jqp = "jq '.'";
-    # 紧凑输出
-    jqc = "jq -c";
-    # 按键排序
-    jqs = "jq -S";
-    # 原始输出（不带引号）
-    jqr = "jq -r";
+#    jqp = "jq '.'";
+#    # 紧凑输出
+#    jqc = "jq -c";
+#    # 按键排序
+#    jqs = "jq -S";
+#    # 原始输出（不带引号）
+#    jqr = "jq -r";
   };
 }

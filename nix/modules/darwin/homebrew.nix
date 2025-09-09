@@ -6,7 +6,7 @@ _: {
      "kilvn/homebrew-schedule"
     ];
     brews = [
-      "cloudflare-wrangler"
+      # "cloudflare-wrangler"
     ];
     casks = [
       "alfred"

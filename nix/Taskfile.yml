@@ -2,7 +2,9 @@ version: '3'
 
 includes:
   lint: ./Taskfile.lint.yml
-  sk: ./secrets/Taskfile.yml
+  sk:
+    taskfile: ./secrets/Taskfile.yml
+    dir: ./secrets
 
 
 # Nix-Darwin management tasks
@@ -32,6 +34,22 @@ vars:
   # GitHub token pulled from gh CLI for GitHub API rate limits
   GITHUB_TOKEN:
     sh: gh auth token 2>/dev/null || echo ""
+  # Dynamic rebuild command based on OS
+  REBUILD_CMD:
+    sh: |
+      if [[ "{{.OS}}" == "Darwin" ]]; then
+        echo "darwin-rebuild"
+      else
+        echo "nixos-rebuild"
+      fi
+  # Dynamic build target based on OS
+  BUILD_TARGET:
+    sh: |
+      if [[ "{{.OS}}" == "Darwin" ]]; then
+        echo "darwinConfigurations.{{.HOSTNAME}}.system"
+      else
+        echo "nixosConfigurations.{{.HOSTNAME}}.config.system.build.toplevel"
+      fi
 
 env:
   NIX_CONFIG: 'access-tokens = github.com={{.GITHUB_TOKEN}}'
@@ -48,24 +66,14 @@ tasks:
     desc: "构建系统配置（不切换）"
     cmds:
       - echo "正在为 {{.HOSTNAME}} ({{.SYSTEM}}) 构建 {{.OS}} 配置..."
-      - |
-        if [[ "{{.OS}}" == "Darwin" ]]; then
-          nix build ./nix#darwinConfigurations.{{.HOSTNAME}}.system --extra-experimental-features 'nix-command flakes'
-        else
-          nix build ./nix#nixosConfigurations.{{.HOSTNAME}}.config.system.build.toplevel --extra-experimental-features 'nix-command flakes'
-        fi
+      - nix build ./nix#{{.BUILD_TARGET}} --extra-experimental-features 'nix-command flakes'
       - echo "构建完成！"
 
   build-switch:
     desc: "构建并切换到新配置"
     cmds:
       - echo "正在构建并切换 {{.OS}} 配置..."
-      - |
-        if [[ "{{.OS}}" == "Darwin" ]]; then
-          sudo darwin-rebuild switch --flake ./nix#{{.HOSTNAME}}
-        else
-          sudo nixos-rebuild switch --flake ./nix#{{.HOSTNAME}}
-        fi
+      - sudo {{.REBUILD_CMD}} switch --flake ./nix#{{.HOSTNAME}}
       - echo "切换到新配置完成！"
 
 
@@ -73,18 +81,18 @@ tasks:
     desc: "构建并切换到 nix-darwin 配置"
     cmds:
       - echo "🚀 正在为 {{.HOSTNAME}} ({{.SYSTEM}}) 构建 nix-darwin 配置..."
-      - nix build ./nix#darwinConfigurations.{{.HOSTNAME}}.system --extra-experimental-features 'nix-command flakes'
+      - nix build ./nix#{{.BUILD_TARGET}} --extra-experimental-features 'nix-command flakes'
       - echo "🔄 正在切换到新配置..."
-      - sudo darwin-rebuild switch --flake ./nix#{{.HOSTNAME}}
+      - sudo {{.REBUILD_CMD}} switch --flake ./nix#{{.HOSTNAME}}
       - echo "✅ nix-darwin 配置应用成功！"
 
   darwin-debug:
     desc: "使用详细输出构建并切换（用于调试）"
     cmds:
-      - echo "🐛 正在使用调试输出构建 nix-darwin 配置..."
-      - nix build ./nix#darwinConfigurations.{{.HOSTNAME}}.system --show-trace --verbose --extra-experimental-features 'nix-command flakes'
+      - echo "🐛 正在使用调试输出构建 {{.OS}} 配置..."
+      - nix build ./nix#{{.BUILD_TARGET}} --show-trace --verbose --extra-experimental-features 'nix-command flakes'
       - echo "🔄 正在使用调试输出切换..."
-      - sudo darwin-rebuild switch --flake ./nix#{{.HOSTNAME}} --show-trace --verbose
+      - sudo {{.REBUILD_CMD}} switch --flake ./nix#{{.HOSTNAME}} --show-trace --verbose
 
   # Nix related commands
   update:

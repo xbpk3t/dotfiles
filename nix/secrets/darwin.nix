@@ -8,7 +8,7 @@
   # Enable sops
   sops = {
     defaultSopsFile = ./secrets.yaml;
-    age.keyFile = "/var/lib/sops-nix/key.txt";
+    age.keyFile = "/Users/${username}/.config/sops/age/keys.txt";
 
     # Define secrets
     secrets = {

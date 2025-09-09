@@ -65,15 +65,15 @@
   # 添加 gh 相关的 shell 别名
   programs.zsh.shellAliases = {
     # GitHub 快捷操作
-    ghpc = "gh pr create --web";
-    ghpv = "gh pr view --web";
-    ghiv = "gh issue view --web";
-    ghic = "gh issue create --web";
-    ghrv = "gh repo view --web";
-
-    # 快速克隆
-    ghc = "gh repo clone";
-    # 查看当前仓库状态
-    ghs = "gh status";
+#    ghpc = "gh pr create --web";
+#    ghpv = "gh pr view --web";
+#    ghiv = "gh issue view --web";
+#    ghic = "gh issue create --web";
+#    ghrv = "gh repo view --web";
+#
+#    # 快速克隆
+#    ghc = "gh repo clone";
+#    # 查看当前仓库状态
+#    ghs = "gh status";
   };
 }
