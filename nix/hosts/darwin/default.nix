@@ -71,7 +71,8 @@
     ${username} = {
       home = "/Users/${username}";
       description = username;
-      shell = "/run/current-system/sw/bin/zsh";
+#      shell = "/run/current-system/sw/bin/bash";
+      shell = "/etc/profiles/per-user/${username}/bin/bash";
     };
 
     # Ops user (from ansible disk.yml)
@@ -85,6 +86,14 @@
 
   # Host-specific Nix settings
   nix.settings.trusted-users = [ username ];
+
+  # Ensure bash is available in /etc/shells for chsh
+  environment.shells = [
+    "/etc/profiles/per-user/${username}/bin/bash"
+    "/run/current-system/sw/bin/bash"
+    "/bin/bash"
+    "/usr/bin/bash"
+  ];
 
   # Import shared and Darwin-specific modules
   imports = [

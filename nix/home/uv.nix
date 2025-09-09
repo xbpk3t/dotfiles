@@ -47,20 +47,20 @@
   };
 
   # 添加有用的 UV 别名
-  programs.zsh.shellAliases = {
-    # 快速安装包
-    uvi = "uv add";
-    # 移除包
-    uvr = "uv remove";
-    # 列出已安装的包
-    uvl = "uv pip list";
-    # 显示包信息
-    uvs = "uv pip show";
-    # 运行 Python 脚本
-    uvrun = "uv run";
-    # 同步依赖
-    uvsync = "uv sync";
-    # 锁定依赖
-    uvlock = "uv lock";
+  programs.bash.shellAliases = {
+#    # 快速安装包
+#    uvi = "uv add";
+#    # 移除包
+#    uvr = "uv remove";
+#    # 列出已安装的包
+#    uvl = "uv pip list";
+#    # 显示包信息
+#    uvs = "uv pip show";
+#    # 运行 Python 脚本
+#    uvrun = "uv run";
+#    # 同步依赖
+#    uvsync = "uv sync";
+#    # 锁定依赖
+#    uvlock = "uv lock";
   };
 }

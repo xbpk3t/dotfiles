@@ -86,6 +86,10 @@ tasks:
       - sudo {{.REBUILD_CMD}} switch --flake ./nix#{{.HOSTNAME}}
       - echo "✅ nix-darwin 配置应用成功！"
 
+  build-z: # 遇到 error: public key is not valid
+    cmd: sudo darwin-rebuild switch --option substituters "https://cache.nixos.org/" --option trusted-public-keys "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=" --flake .#luck
+
+
   darwin-debug:
     desc: "使用详细输出构建并切换（用于调试）"
     cmds:

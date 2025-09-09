@@ -57,14 +57,14 @@
   };
 
   # 添加常用的 pandoc 别名
-  programs.zsh.shellAliases = {
-    # Markdown 转 HTML
-    md2html = "pandoc -f markdown -t html5 -o";
-    # Markdown 转 PDF
-    md2pdf = "pandoc -f markdown -t pdf -o";
-    # Markdown 转 Word
-    md2docx = "pandoc -f markdown -t docx -o";
-    # HTML 转 Markdown
-    html2md = "pandoc -f html -t markdown -o";
+  programs.bash.shellAliases = {
+#    # Markdown 转 HTML
+#    md2html = "pandoc -f markdown -t html5 -o";
+#    # Markdown 转 PDF
+#    md2pdf = "pandoc -f markdown -t pdf -o";
+#    # Markdown 转 Word
+#    md2docx = "pandoc -f markdown -t docx -o";
+#    # HTML 转 Markdown
+#    html2md = "pandoc -f html -t markdown -o";
   };
 }

@@ -2,9 +2,9 @@
 
 {
   programs.direnv = {
-    enable = true;
+    enable = false;
     # 启用 nix-direnv 集成以提高性能
-    nix-direnv.enable = true;
+    nix-direnv.enable = false;
 
     # 自动允许 .envrc 文件（可选，安全考虑建议设为 false）
     # stdlib = ''

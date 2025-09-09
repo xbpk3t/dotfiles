@@ -1,6 +1,6 @@
 _: {
   programs.gpg = {
-    enable = true;
+    enable = false;
     settings = {
       # 基本设置
       default-key = "yyzw@live.com";
@@ -39,7 +39,7 @@ _: {
   };
 
   services.gpg-agent = {
-    enable = true;
+    enable = false;
     enableSshSupport = true;
     defaultCacheTtl = 1800;
     maxCacheTtl = 7200;

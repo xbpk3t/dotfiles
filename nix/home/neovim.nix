@@ -305,7 +305,7 @@
           persist_size = true;
           direction = "float";
           close_on_exit = true;
-          shell = "zsh";
+          shell = "bash";
         };
       };
     };

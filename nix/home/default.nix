@@ -4,25 +4,28 @@
   # import sub modules
   imports = [
     inputs.nixvim.homeModules.nixvim
-    ./zsh.nix
+    ./bash.nix
     ./core.nix
     ./git.nix
     ./neovim.nix
-    ./gpg.nix
+
     # 添加SSH配置模块
     ./ssh.nix
     # 添加rclone配置模块
     ./rclone.nix
     # 新增的工具配置模块
-    ./direnv.nix
+
     ./fastfetch.nix
     ./gh.nix
     ./go.nix
     ./jq.nix
     ./pandoc.nix
     ./ripgrep.nix
-    ./starship.nix
     ./uv.nix
+
+    ./starship.nix
+    ./gpg.nix
+    ./direnv.nix
   ];
 
   # Home Manager needs a bit of information about you and the

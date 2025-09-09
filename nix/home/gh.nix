@@ -63,7 +63,7 @@
   };
 
   # 添加 gh 相关的 shell 别名
-  programs.zsh.shellAliases = {
+  programs.bash.shellAliases = {
     # GitHub 快捷操作
 #    ghpc = "gh pr create --web";
 #    ghpv = "gh pr view --web";

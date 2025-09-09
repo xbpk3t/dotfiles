@@ -1,0 +1,193 @@
+{lib, pkgs, ...}: {
+  programs.bash = {
+    enable = true;
+
+    # 禁用 bash completion 以提升性能（对应 zsh 的 enableCompletion = false）
+    enableCompletion = false;
+
+    # 历史记录配置
+    # 使用默认的 bash 历史设置，不启用 Atuin（保持简单和快速）
+    historySize = 10000;        # 内存中保存的历史条数
+    historyFileSize = 10000;    # 文件中保存的历史条数
+    historyControl = ["ignoredups"];  # 忽略重复命令
+    historyIgnore = [
+      "ls" "cd" "pwd" "exit" "history"
+      "__jetbrains_intellij_run_generator.*"
+    ];
+
+    # 基于原 zsh 的别名配置
+    shellAliases = {
+      # 目录导航
+      # 注意：bash 不支持 "-" 作为别名，使用函数替代
+      "..." = "../..";
+      "...." = "../../..";
+      "....." = "../../../..";
+      "......" = "../../../../..";
+      # 注意：bash 不支持 zsh 的 cd -1, cd -2 等数字历史导航
+
+      # 权限和基础命令
+      "_" = "sudo ";
+      "c" = "clear";
+
+      # 现代工具替代
+      "cat" = "bat";
+      "find" = "fd --hidden";  # 使用 fd 替代 find，显示隐藏文件
+      "grep" = "rg";
+
+      # 文件操作
+      "l" = "ls -lah";
+      "la" = "ls -lAh";
+      "ll" = "ls -lh";
+      "ls" = "ls -G";
+      "lsa" = "ls -lah";
+      "md" = "mkdir -p";
+      "rd" = "rmdir";
+
+
+      # 编辑器
+      "vim" = "LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 nvim";
+    };
+
+    # 环境变量（对应 zsh 的 sessionVariables）
+    sessionVariables = {
+      EDITOR = "nvim";
+      BUN_INSTALL = "$HOME/.bun";
+      PNPM_HOME = "$HOME/.local/share/pnpm";
+      PATH = "$HOME/go/bin:$BUN_INSTALL/bin:$PNPM_HOME:$PATH";
+    } // (lib.optionalAttrs (pkgs.stdenv.isDarwin) {
+      # 用来抑制 macOS 终端中显示的 "The default interactive shell is now zsh"
+      BASH_SILENCE_DEPRECATION_WARNING = "1";
+    });
+
+    # bash 的 shell 选项设置（性能优化）
+    shellOptions = [
+      # 历史相关选项
+      "histappend"      # 追加历史而不是覆盖
+      "histverify"      # 历史展开时先验证
+
+      # 性能和便利性选项
+      "checkwinsize"    # 检查窗口大小变化
+      "cdspell"         # 自动纠正 cd 的拼写错误
+      "autocd"          # 启用自动 cd 功能（直接输入目录名进入）
+      # "dirspell"      # 这个选项在某些 bash 版本中不存在，注释掉
+
+      # 其他选项
+      # "globstar"      # 不启用 ** glob
+    ];
+
+    # 初始化配置（对应 zsh 的 initContent）
+    initExtra = ''
+      # ===== Locale 设置 =====
+      # 修复 setlocale 警告
+      export LC_ALL=en_US.UTF-8
+      export LANG=en_US.UTF-8
+      export LC_COLLATE=en_US.UTF-8
+
+      # ===== Bash 性能优化设置 =====
+      # 禁用可能慢的 completion 功能
+      complete -r  # 清除所有 completion 定义
+
+      # 设置更快的 PS1 prompt（简单高效）
+      PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+
+      # 优化历史设置
+      HISTCONTROL=ignoreboth:erasedups
+      HISTTIMEFORMAT="%Y-%m-%d %H:%M:%S "
+
+      # ===== 函数定义 =====
+      # 替代 zsh 的 cd - 功能
+      cd() {
+        if [[ "$1" == "-" ]]; then
+          builtin cd -
+        else
+          builtin cd "$@"
+        fi
+      }
+
+      # mkcd 函数：创建目录并进入
+      mkcd() {
+        if [[ $# -eq 0 ]]; then
+          echo "Usage: mkcd <directory>"
+          return 1
+        fi
+        mkdir -p "$1" && cd "$1"
+      }
+
+      # ===== 键盘绑定 =====
+      # 启用 vi 模式（对应 zsh 的 defaultKeymap = "viins"）
+      set -o vi
+
+      # ===== 文件后缀处理 =====
+      # Bash 不直接支持 zsh 的 alias -s 功能
+      # 如果需要类似功能，可以通过函数实现
+      # 注释掉以提升启动性能，如果需要可以手动启用
+      # open_with_goland() {
+      #   case "$1" in
+      #     *.md|*.go|*.json|*.ts|*.html|*.yaml|*.yml|*.py|*.sql)
+      #       goland "$1" ;;
+      #     *)
+      #       echo "Unsupported file type" ;;
+      #   esac
+      # }
+
+      # ===== 性能优化 =====
+      # 减少不必要的路径扫描
+      unset MAILCHECK  # 禁用邮件检查
+
+      # 如果确实需要补全，可以选择性启用最基本的
+      # complete -d cd  # 只为 cd 启用目录补全
+    '';
+
+    # 登录时执行的额外命令（对应 zsh 的 loginExtra）
+    profileExtra = ''
+      # 加载 Nix 环境（如果需要）
+      if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
+        source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+      fi
+    '';
+
+    # bash 退出时执行的命令
+    logoutExtra = ''
+      # 清理临时文件或执行其他清理操作
+      # 目前保持空白以最大化性能
+    '';
+  };
+
+  # Modern shell tools 配置保持与 zsh 一致
+  programs = {
+    # A cat(1) clone with syntax highlighting and Git integration
+    bat = {
+      enable = true;
+      config = {
+        theme = "TwoDark";
+        style = "numbers,changes,header";
+      };
+    };
+
+    # A simple, fast and user-friendly alternative to find
+    fd = {
+      enable = true;
+      hidden = true;
+      ignores = [".git/" "node_modules/"];
+    };
+
+    # Atuin shell history
+    atuin = {
+      enable = true;
+      enableBashIntegration = true;
+      settings = {
+        auto_sync = false;
+        search_mode = "prefix";
+        filter_mode = "global";
+        style = "compact";
+        inline_height = 20;
+        dialect = "us";
+        timezone = "local";
+        show_preview = false;
+        history_filter = [
+          "__jetbrains_intellij_run_generator.*"
+        ];
+      };
+    };
+  };
+}
