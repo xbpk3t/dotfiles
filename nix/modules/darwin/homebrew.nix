@@ -5,6 +5,9 @@ _: {
     taps = [
      "kilvn/homebrew-schedule"
     ];
+    brews = [
+      "cloudflare-wrangler"
+    ];
     casks = [
       "alfred"
       "cursor"

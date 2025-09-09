@@ -130,7 +130,7 @@ tasks:
 
 
   prune:
-    desc:
+    desc: clean + gc # 可以把这套流程看作 “先扔到垃圾桶，再清空垃圾桶”。只 clean不 gc，空间不会回来；只 gc不 clean，因为很多旧世代仍然引用着旧包，也清理不掉多少东西。
     cmds:
       - task: clean
       - task: clean-home
@@ -141,7 +141,7 @@ tasks:
     internal: true
     interactive: true
     silent: true
-    desc: "Remove system generations older than specified days (default: 7)"
+    desc: 清理 system generations，注意不会立即删除软件包本身
     cmds:
       - echo "🧹 Cleaning old system generations (older than {{.CLEANUP_DAYS}} days)..."
       - sudo nix profile wipe-history --profile "{{.SYSTEM_PROFILE}}" --older-than "{{.CLEANUP_DAYS}}d"
@@ -151,7 +151,7 @@ tasks:
     internal: true
     interactive: true
     silent: true
-    desc: "Clean home-manager generations"
+    desc: 清理 home-manager generations，同样不会立即删除软件包本身
     cmds:
       - echo "🧹 Cleaning home-manager generations..."
       - nix profile wipe-history --profile ~/.local/state/nix/profiles/home-manager --older-than "{{.CLEANUP_DAYS}}d" 2>/dev/null || echo "No home-manager profile found"
@@ -160,7 +160,7 @@ tasks:
     internal: true
     interactive: true
     silent: true
-    desc: "Garbage collect unused nix store entries"
+    desc: 真正删除所有未被引用的软件包，释放磁盘空间。
     cmds:
       - echo "🗑️  Running garbage collection (older than {{.CLEANUP_DAYS}} days)..."
       # - sudo nix-collect-garbage --delete-older-than "{{.CLEANUP_DAYS}}d"

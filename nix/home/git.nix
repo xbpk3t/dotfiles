@@ -27,14 +27,15 @@ _: {
       };
       alias = {
       };
-      credential = {
-        "https://github.com" = {
-          helper = "!/usr/local/bin/gh auth git-credential";
-        };
-        "https://gist.github.com" = {
-          helper = "!/usr/local/bin/gh auth git-credential";
-        };
-      };
+      # 凭证配置由 programs.gh 自动管理，无需手动配置
+      # credential = {
+      #   "https://github.com" = {
+      #     helper = "!/usr/local/bin/gh auth git-credential";
+      #   };
+      #   "https://gist.github.com" = {
+      #     helper = "!/usr/local/bin/gh auth git-credential";
+      #   };
+      # };
       http = {
         proxy = "http://127.0.0.1:7890";
       };

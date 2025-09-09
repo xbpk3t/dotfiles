@@ -272,10 +272,11 @@
         enable = true;
         settings = {
           indent = {
-            char = "│";
+            char = "|";  # 使用简单的竖线字符，宽度为 1
           };
           scope = {
             enabled = true;
+            char = "|";  # 作用域也使用相同字符
           };
         };
       };

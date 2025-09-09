@@ -13,6 +13,16 @@
     ./ssh.nix
     # 添加rclone配置模块
     ./rclone.nix
+    # 新增的工具配置模块
+    ./direnv.nix
+    ./fastfetch.nix
+    ./gh.nix
+    ./go.nix
+    ./jq.nix
+    ./pandoc.nix
+    ./ripgrep.nix
+    ./starship.nix
+    ./uv.nix
   ];
 
   # Home Manager needs a bit of information about you and the
