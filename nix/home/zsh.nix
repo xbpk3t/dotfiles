@@ -145,19 +145,6 @@ _: {
       alias -s yml=goland
       alias -s python=goland
       alias -s sql=goland
-
-      # sudo 插件功能（ESC ESC 添加 sudo）
-      sudo-command-line() {
-          [[ -z $BUFFER ]] && zle up-history
-          if [[ $BUFFER == sudo\ * ]]; then
-              LBUFFER="${LBUFFER#sudo }"
-          else
-              LBUFFER="sudo $LBUFFER"
-          fi
-      }
-      zle -N sudo-command-line
-      # 双击 ESC 添加/移除 sudo
-      bindkey "\e\e" sudo-command-line
     '';
 
   };

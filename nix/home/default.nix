@@ -4,7 +4,7 @@
   # import sub modules
   imports = [
     inputs.nixvim.homeModules.nixvim
-    ./shell.nix
+    ./zsh.nix
     ./core.nix
     ./git.nix
     ./neovim.nix
