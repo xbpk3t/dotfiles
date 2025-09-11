@@ -3,7 +3,7 @@
     enable = true;
 
     # 禁用 bash completion 以提升性能（对应 zsh 的 enableCompletion = false）
-    enableCompletion = false;
+    enableCompletion = true;
 
     # 历史记录配置
     # 使用默认的 bash 历史设置，不启用 Atuin（保持简单和快速）
@@ -73,6 +73,8 @@
 
       # 其他选项
       # "globstar"      # 不启用 ** glob
+
+      "nocaseglob" # 处理忽略大小写的通配符（例如， cat read* ）
     ];
 
     # 初始化配置（对应 zsh 的 initContent）
@@ -81,11 +83,14 @@
       # 修复 setlocale 警告
       export LC_ALL=en_US.UTF-8
       export LANG=en_US.UTF-8
-      export LC_COLLATE=en_US.UTF-8
+      # 修复 LC_COLLATE 错误，使用系统支持的值
+      export LC_COLLATE=C
 
       # ===== Bash 性能优化设置 =====
       # 禁用可能慢的 completion 功能
-      complete -r  # 清除所有 completion 定义
+      # complete -r  # 清除所有 completion 定义
+
+
 
       # 设置更快的 PS1 prompt（简单高效）
       PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
@@ -117,6 +122,9 @@
       # 启用 vi 模式（对应 zsh 的 defaultKeymap = "viins"）
       set -o vi
 
+      # 启用不区分大小写的制表符补全。跟 nocaseglob 搭配使用。
+      bind 'set completion-ignore-case on'
+
       # ===== 文件后缀处理 =====
       # Bash 不直接支持 zsh 的 alias -s 功能
       # 如果需要类似功能，可以通过函数实现
@@ -133,9 +141,6 @@
       # ===== 性能优化 =====
       # 减少不必要的路径扫描
       unset MAILCHECK  # 禁用邮件检查
-
-      # 如果确实需要补全，可以选择性启用最基本的
-      # complete -d cd  # 只为 cd 启用目录补全
     '';
 
     # 登录时执行的额外命令（对应 zsh 的 loginExtra）

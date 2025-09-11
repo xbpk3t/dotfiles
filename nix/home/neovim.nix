@@ -10,7 +10,7 @@
     opts = {
       # 显示设置
       number = true;                    # 显示行号
-      relativenumber = true;            # 显示相对行号
+      relativenumber = false;           # 显示相对行号
       cursorline = true;                # 高亮当前行
       cursorcolumn = true;              # 高亮当前列
       ruler = true;                     # 显示标尺

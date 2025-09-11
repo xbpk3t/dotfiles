@@ -166,6 +166,7 @@ vars:
 
   yarn:
     - "~/Library/Caches/yarn"
+    - "~/Library/Caches/Yarn"
 
   bun:
     - "~/.bun/install/cache"
@@ -226,6 +227,7 @@ vars:
     - "~/Library/Application Support/Electronic Arts/EA app/CEF/BrowserCache/EADesktop/GPUCache/"
 
   chromium_caches:
+    - "~/Library/Application Support/Chromium/"
     - "~/Library/Application Support/Chromium/GraphiteDawnCache/"
     - "~/Library/Application Support/Chromium/GrShaderCache/"
     - "~/Library/Application Support/Chromium/ShaderCache/"
@@ -247,6 +249,8 @@ vars:
     - "~/.config/containers/"
     - "~/Library/Caches/containers/"
 
+  rancher:
+    - "~/Library/Caches/rancher-desktop"
 
 
 tasks:

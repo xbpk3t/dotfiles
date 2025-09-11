@@ -90,6 +90,12 @@ tasks:
     dir: '{{.USER_WORKING_DIR}}'
     interactive: true
 
+#- 如果某个url需要auth才能访问，怎么在curl中添加token? # curl -H "X-Auth-Token: " url
+#- "***怎么在本地执行远程 vps 上的远程脚本（curl 方式执行 shell 脚本时如何传参（不具名参数和具名参数分别怎么传参））？***" # [通过命令下载执行恶意代码](https://juejin.cn/post/6950955375931686942) 由于直接调用了bash命令，因此在远程脚本需要传递具名参数时，为了区分是bash命令的参数还是远程脚本的，可以使用--作为区分，可以理解为分割线，--前面的比如-s属于bash，后面的-x abc -y xyz属于远程脚本的参数. curl -L <url> | bash -s -- -x abc -y xyz
+  curl:
+
+
+
 
   # Other commands that don't need individual tasks:
   # - alias - Create aliases for commands

@@ -97,101 +97,33 @@ vars:
       unknown_remove: "echo '不支持的发行版或未实现的包管理器'"
 
 tasks:
-  # 显示当前系统信息
-  info:
-    desc: 显示当前系统和包管理器信息
+
+  run:*:
     silent: true
+    vars:
+      SERVICE: '{{index .MATCH 0}}'
+    requires:
+      vars:
+        - name: SERVICE
+          enum:
+            - info # 显示当前系统和包管理器信息
+            - sync # 同步软件包仓库
+            - search # 搜索软件包
+            - search_file # 搜索包含特定文件的软件包
+            - show # 查看软件包信息
+            - upgrade # 更新系统（安装所有可用更新）
+            - install # 安装软件包
+            - list_installed # 查看已安装软件包
+            - list_package # 查看特定已安装软件包信息
+            - list_upgradable # 查看可升级软件包
+            - remove # 删除软件包及依赖
     cmds:
+      - echo "Starting {{.SERVICE}}"
       - task: execute
         vars:
-          ACTION: info
-
-  # 同步软件包仓库
-  sync:
-    desc: 同步软件包仓库
-    silent: true
-    cmds:
-      - task: execute
-        vars:
-          ACTION: sync
-
-  # 搜索软件包
-  search:
-    desc: 搜索软件包
-    cmds:
-      - task: execute
-        vars:
-          ACTION: search
+          ACTION: "{{.SERVICE}}"
           ARGS: "{{.CLI_ARGS}}"
 
-  # 搜索包含特定文件的软件包
-  search-file:
-    desc: 搜索包含特定文件的软件包
-    cmds:
-      - task: execute
-        vars:
-          ACTION: search_file
-          ARGS: "{{.CLI_ARGS}}"
-
-  # 查看软件包信息
-  show:
-    desc: 查看软件包信息
-    cmds:
-      - task: execute
-        vars:
-          ACTION: show
-          ARGS: "{{.CLI_ARGS}}"
-
-  # 更新系统
-  upgrade:
-    desc: 更新系统（安装所有可用更新）
-    cmds:
-      - task: execute
-        vars:
-          ACTION: upgrade
-
-  # 安装软件包
-  install:
-    desc: 安装软件包
-    cmds:
-      - task: execute
-        vars:
-          ACTION: install
-          ARGS: "{{.CLI_ARGS}}"
-
-  # 查看已安装软件包
-  list-installed:
-    desc: 查看所有已安装软件包
-    cmds:
-      - task: execute
-        vars:
-          ACTION: list_installed
-
-  # 查看特定已安装软件包信息
-  list-package:
-    desc: 查看特定已安装软件包信息
-    cmds:
-      - task: execute
-        vars:
-          ACTION: list_package
-          ARGS: "{{.CLI_ARGS}}"
-
-  # 查看可升级软件包
-  list-upgradable:
-    desc: 查看可升级软件包
-    cmds:
-      - task: execute
-        vars:
-          ACTION: list_upgradable
-
-  # 删除软件包
-  remove:
-    desc: 删除软件包及依赖
-    cmds:
-      - task: execute
-        vars:
-          ACTION: remove
-          ARGS: "{{.CLI_ARGS}}"
 
   # 执行命令的模板任务
   execute:

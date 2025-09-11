@@ -13,17 +13,14 @@ version: '3'
 
 tasks:
   # Commented out to prevent auto-execution when included
-  # default:
-  #   desc: 默认上传操作（支持文件夹）
-  #   cmds:
-  #     - task: status
-  #       ignore_error: true
-  #     - task: upload
-
-  status:
-    desc: 检测trzsz-go是否安装
+  default:
+    desc: 默认上传操作（支持文件夹）
     cmds:
-      - command -v trzsz >/dev/null && echo "✔ trzsz-go已安装" || exit 1
+      - task: upload
+    preconditions:
+      - sh: "command -v trzsz"
+        msg: 检测trzsz-go是否安装
+
 
   install:
     desc: 安装trzsz-go（通过Homebrew）

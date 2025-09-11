@@ -42,10 +42,12 @@ tasks:
 
   # 新增维护任务
   maintain:
+    desc: 对全局Pre-commit的hook进行 clean+gc+重装 操作
     cmds:
       - "{{.PC_CLI}} clean"  # 清理缓存
       - "{{.PC_CLI}} gc"     # 垃圾回收
       - "{{.PC_CLI}} install-hooks"  # 重装钩子
+      - task: update
     dir: '{{.USER_WORKING_DIR}}'
 
   init-template:
@@ -67,14 +69,8 @@ tasks:
   hook:
     desc: 执行指定hook（交互式选择或直接运行检查）
     interactive: true
-    silent: true
     dir: '{{.USER_WORKING_DIR}}'
-    cmd: |
-      if [ -n "{{.CLI_ARGS}}" ]; then
-        {{.PC_CLI}} run {{.CLI_ARGS}}
-      else
-        SELECTED=$(echo "{{join "\n" .HOOKS}}" | gum choose || echo "")
-        if [[ -n "$SELECTED" ]]; then
-          {{.PC_CLI}} run "$SELECTED"
-        fi
-      fi
+    cmd: '{{.PC_CLI}} run {{.SELECTED}}'
+    vars:
+      SELECTED:
+        sh: gum choose {{.HOOKS | join " "}}

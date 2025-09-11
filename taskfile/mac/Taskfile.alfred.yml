@@ -27,6 +27,7 @@ tasks:
       - task: release
         vars:
           ARCH: arm64
+
       - lipo -create -output .workflow/exe exe_amd64 exe_arm64
       - rm  exe_amd64
       - rm  exe_arm64
@@ -37,67 +38,29 @@ tasks:
       - cd ..
       - echo "artifact=$(echo "{{.OUTPUT}}")" >> $GITHUB_ENV
     preconditions:
-      - task: check
-        msg: Check ak Is Installed Or Not.
+      - sh: command -v ak
+        msg: 需要安装ak (go install github.com/cage1016/ak@latest)
 
-
-  check:
-    status:
-      - command -v ak
-    cmd: go install github.com/cage1016/ak@latest
-
-
-  generate:
-    desc: "go generate"
-    cmds:
-      - |
-        if ! command -v go-bindata > /dev/null 2>&1; then
-          echo "requires 'go-bindata' (go get -u github.com/kevinburke/go-bindata/go-bindata)"
-          exit 1
-        fi
-        go generate ./...
 
   release:
     cmds:
       - GOOS=darwin GOARCH={{.ARCH}} CGO_ENABLED=1 go build -ldflags "-s -w {{.FLAGS}}" -o exe_{{.ARCH}}
-
-
-
-  test:
-    desc: "run tests"
-    cmds:
-      - go test -v -race -cover -coverprofile coverage.txt -covermode=atomic ./...
 
   build:
     desc: "build the binary"
     cmds:
       - ak alfred build -l "{{.FLAGS}}"
 
-  info:
-    desc: "show alfred workflow info"
+  run:*:
+    vars:
+      SERVICE: '{{index .MATCH 0}}'
+    requires:
+      vars:
+        - name: SERVICE
+          enum: [info, link, unlink, pack]
     cmds:
-      - ak alfred info
-
-  link:
-    desc: "link alfred workflow"
-    cmds:
-      - ak alfred link
-
-  unlink:
-    desc: "unlink alfred workflow"
-    cmds:
-      - ak alfred unlink
-
-  pack:
-    desc: "pack alfred workflow"
-    cmds:
-      - ak alfred pack
-
-  help:
-    desc: "this help"
-    cmds:
-      - |
-        awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_0-9-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST) | sort
+      - echo "Starting {{.SERVICE}}"
+      - ak alfred {{.SERVICE}}
 
   tag:
     cmd: echo "tag=$(jq -r '.release.tag_name' "${GITHUB_EVENT_PATH}" | sed s/^v//)" >> $GITHUB_ENV

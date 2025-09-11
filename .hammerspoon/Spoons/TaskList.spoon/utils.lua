@@ -64,42 +64,64 @@ function utils.getYesterdayDate()
     return os.date("%Y-%m-%d", os.time() - 24 * 60 * 60)
 end
 
--- 获取本周的日期范围（周一到今天）
-function utils.getThisWeekRange()
+-- 获取指定年份和周数的日期范围
+-- year: 年份 (例如: 2025)
+-- weekNum: 周数 (0-53)
+-- 返回该周的周一和周日日期，以及实际的周数
+function utils.getWeekRange(year, weekNum)
+    -- 获取该年第一周的周一（第一个周四所在的周）
+    local jan1 = os.time({year=year, month=1, day=1, hour=12})
+    local jan1Weekday = tonumber(os.date("%w", jan1))
+
+    -- 计算该年的第一个周四
+    local firstThursdayOffset = (4 - jan1Weekday - 1 + 7) % 7
+    local firstThursday = jan1 + firstThursdayOffset * 24 * 60 * 60
+
+    -- 计算该周四所在周的周一
+    local firstMonday = firstThursday - 3 * 24 * 60 * 60
+
+    -- 计算指定周的周一和周日
+    local targetMonday = firstMonday + weekNum * 7 * 24 * 60 * 60
+    local targetSunday = targetMonday + 6 * 24 * 60 * 60
+
+    local mondayStr = os.date("%Y-%m-%d", targetMonday)
+    local sundayStr = os.date("%Y-%m-%d", targetSunday)
+
+    -- 实际周数可能与输入不同，因为ISO周的计算方式
+    local actualWeekNum = tonumber(os.date("%W", targetMonday))
+
+    return mondayStr, sundayStr, actualWeekNum
+end
+
+-- 获取相对于当前周的日期范围
+-- offset: 相对于当前周的偏移量，例如：
+--   0 表示当前周
+--  -1 表示上周
+--  -2 表示上上周
+--   1 表示下周
+--   2 表示下下周
+-- 以此类推
+function utils.getRelativeWeekRange(offset)
+    offset = offset or 0
     local today = os.time()
     local todayWeekday = tonumber(os.date("%w", today)) -- 0=Sunday, 1=Monday, ...
 
     -- 计算本周一的日期
     local mondayOffset = (todayWeekday == 0) and 6 or (todayWeekday - 1)
-    local monday = today - mondayOffset * 24 * 60 * 60
-
-    local mondayStr = os.date("%Y-%m-%d", monday)
-    local todayStr = os.date("%Y-%m-%d", today)
-
-    -- 计算周数
-    local weekNum = tonumber(os.date("%W", today))
-
-    return mondayStr, todayStr, weekNum
-end
-
--- 获取上周的日期范围（上周一到上周日）
-function utils.getLastWeekRange()
-    local today = os.time()
-    local todayWeekday = tonumber(os.date("%w", today)) -- 0=Sunday, 1=Monday, ...
-
-    -- 计算上周一的日期
-    local mondayOffset = (todayWeekday == 0) and 6 or (todayWeekday - 1)
     local thisMonday = today - mondayOffset * 24 * 60 * 60
-    local lastMonday = thisMonday - 7 * 24 * 60 * 60
-    local lastSunday = thisMonday - 24 * 60 * 60
 
-    local mondayStr = os.date("%Y-%m-%d", lastMonday)
-    local sundayStr = os.date("%Y-%m-%d", lastSunday)
+    -- 计算目标周的周一
+    local targetMonday = thisMonday + offset * 7 * 24 * 60 * 60
 
-    -- 计算上周的周数
-    local weekNum = tonumber(os.date("%W", lastMonday))
+    -- 计算目标周的周日
+    local targetSunday = targetMonday + 6 * 24 * 60 * 60
 
-    return mondayStr, sundayStr, weekNum
+    local mondayStr = os.date("%Y-%m-%d", targetMonday)
+    local sundayStr = os.date("%Y-%m-%d", targetSunday)
+    local weekNum = tonumber(os.date("%W", targetMonday))
+    local year = tonumber(os.date("%Y", targetMonday))
+
+    return mondayStr, sundayStr, weekNum, year
 end
 
 -- 获取当前时间字符串

@@ -186,17 +186,12 @@ function export.exportTasksForRange(tasks, startDate, endDate, rangeLabel)
     notifs.exportCompleted(rangeLabel or (startDate .. " - " .. endDate), #completedTasks)
 end
 
--- 导出本周已完成任务（向后兼容）
-function export.exportThisWeekTasks(tasks)
-    local mondayStr, todayStr, weekNum = utils.getThisWeekRange()
-    local rangeLabel = "week: w" .. weekNum .. " (" .. mondayStr .. " - " .. todayStr .. ")"
-    export.exportTasksForRange(tasks, mondayStr, todayStr, rangeLabel)
-end
-
--- 导出上周已完成任务
-function export.exportLastWeekTasks(tasks)
-    local mondayStr, sundayStr, weekNum = utils.getLastWeekRange()
-    local rangeLabel = "last_week: w" .. weekNum .. " (" .. mondayStr .. " - " .. sundayStr .. ")"
+-- 导出指定年份和周数的任务
+-- year: 年份 (例如: 2025)
+-- week: 周数 (0-53)
+function export.exportWeekTasks(tasks, year, week)
+    local mondayStr, sundayStr, actualWeekNum = utils.getWeekRange(year, week)
+    local rangeLabel = "week: " .. year .. " w" .. actualWeekNum .. " (" .. mondayStr .. " - " .. sundayStr .. ")"
     export.exportTasksForRange(tasks, mondayStr, sundayStr, rangeLabel)
 end
 

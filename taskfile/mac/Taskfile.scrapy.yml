@@ -2,16 +2,30 @@
 version: '3'
 
 
-#- scrapy fetch # 查看爬取过程，生成日志
-#- scrapy run # 运行一个单独的爬虫程序
-#- scrapy shell # 启动shell交互终端
-#- scrapy startproject # 创建项目
-#- scrapy version
-#- scrapy view <url> # 非常实用的命令
-#- scrapy settings
-#- scrapy genspider -l # 创建爬虫文件，可以选择basic，crawl，csvfeed，xmlfeed
-#- scrapy check # 用来测试某个爬虫
-#- scrapy crawl # 运行某个爬虫
-#- scrapy list # 显示当前可用的所有爬虫
-#- scrapy parse # 获取给定的URL并使用处理它的爬虫解析它，使用通过--callback选项传递的方法，或者parse如果没有给出
-#- scrapy bench # 测试本地硬件性能
+
+
+tasks:
+
+  #- scrapy fetch # 查看爬取过程，生成日志
+  #- scrapy run # 运行一个单独的爬虫程序
+  #- scrapy shell # 启动shell交互终端
+  #- scrapy startproject # 创建项目
+  #- scrapy version
+  #- scrapy view <url> # 非常实用的命令
+  #- scrapy settings
+  #- scrapy genspider -l # 创建爬虫文件，可以选择basic，crawl，csvfeed，xmlfeed
+  #- scrapy check # 用来测试某个爬虫
+  #- scrapy crawl # 运行某个爬虫
+  #- scrapy list # 显示当前可用的所有爬虫
+  #- scrapy parse # 获取给定的URL并使用处理它的爬虫解析它，使用通过--callback选项传递的方法，或者parse如果没有给出
+  #- scrapy bench # 测试本地硬件性能
+  run:*:
+    vars:
+      SERVICE: '{{index .MATCH 0}}'
+    requires:
+      vars:
+        - name: SERVICE
+          enum: [fetch, run, shell, startproject, version, view, settings, check, crawl, list, parse, bench]
+    cmds:
+      - echo "Starting {{.SERVICE}}"
+      - scrapy {{.SERVICE}}

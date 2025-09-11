@@ -119,8 +119,14 @@ function menu.createMenu(taskList, currentTaskId, maxTasks, callbacks)
         menu = {
             { title = "今天 (" .. utils.getCurrentDate() .. ")", fn = function() export.exportTasksForDate(taskList, utils.getCurrentDate(), "今天") end },
             { title = "昨天 (" .. utils.getYesterdayDate() .. ")", fn = function() export.exportTasksForDate(taskList, utils.getYesterdayDate(), "昨天") end },
-            { title = "本周", fn = function() export.exportThisWeekTasks(taskList) end },
-            { title = "上周", fn = function() export.exportLastWeekTasks(taskList) end },
+            { title = "本周", fn = function()
+                local _, _, weekNum, year = utils.getRelativeWeekRange(0)
+                export.exportWeekTasks(taskList, year, weekNum)
+            end },
+            { title = "上周", fn = function()
+                local _, _, weekNum, year = utils.getRelativeWeekRange(-1)
+                export.exportWeekTasks(taskList, year, weekNum)
+            end },
             { title = "自定义", fn = function() export.exportCustomDateTasks(taskList) end },
         }
     })

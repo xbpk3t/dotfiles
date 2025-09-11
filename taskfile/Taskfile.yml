@@ -5,13 +5,12 @@ includes:
   git: taskfile/devops/Taskfile.git.yml
   linters: taskfile/devops/Taskfile.linters.yml
   ansible: taskfile/devops/Taskfile.ansible.yml
-  gr: taskfile/devops/Taskfile.goreleaser.yml
+  gor: taskfile/devops/Taskfile.goreleaser.yml
   caddy: taskfile/devops/Taskfile.caddy.yml
   pc: taskfile/devops/Taskfile.pre-commit.yml
   wrangler: taskfile/devops/Taskfile.wrangler.yml
   rclone: taskfile/devops/Taskfile.rclone.yml
   tf: taskfile/devops/Taskfile.tf.yml
-
 
   gz: taskfile/go/Taskfile.gz.yml
   go: taskfile/go/Taskfile.go.yml
@@ -29,6 +28,7 @@ includes:
   monitor: taskfile/kernel/Taskfile.monitor.yml
   pkg: taskfile/kernel/Taskfile.pkg.yml
   net: taskfile/kernel/Taskfile.network.yml
+  shell: taskfile/kernel/Taskfile.shell.yml
   ssh: taskfile/kernel/Taskfile.ssh.yml
   tcpdump: taskfile/kernel/Taskfile.tcpdump.yml
 
@@ -42,9 +42,7 @@ includes:
   me: taskfile/mac/Taskfile.me.yml
   alfred: taskfile/mac/Taskfile.alfred.yml
   pnpm: taskfile/mac/Taskfile.pnpm.yml
-  goland: taskfile/mac/Taskfile.goland.yml
 
-  apify: taskfile/works/Taskfile.apify.yml
   sec: taskfile/works/Taskfile.sec.yml
 
 

@@ -1,8 +1,9 @@
 { pkgs, ... }:
 
 {
-  # Disable nix-darwin's management of the Nix installation for Determinate compatibility
-  nix.enable = false;
+  # Enable nix-darwin's management of the Nix installation for Determinate compatibility
+  nix.enable = true;
+  nix.settings.experimental-features = [ "nix-command" "flakes" ]; # Add 'flakes' if you're using flakes
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
@@ -15,9 +16,6 @@
 
     # 保护 home-manager
     home-manager
-
-    # 保护开发工具
-    alejandra  # nix formatter
   ];
 
   # Note: Nix settings, garbage collection, and optimization are managed by Determinate Nix

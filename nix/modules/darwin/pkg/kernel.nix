@@ -34,5 +34,8 @@
 
     # ssh
     sshs
+
+    # shell
+    bash-completion
   ];
 }

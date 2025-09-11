@@ -146,6 +146,3 @@ tasks:
 #        else
 #          echo "⚠ brctl command not available, files will sync automatically"
 #        fi
-
-  # [新型真●一键激活JetBrains全家桶方式，不需要手动下载任何文件(懒人福利)！idea/win/linux/mac - 开发调优 - LINUX DO](https://linux.do/t/topic/694120)
-  license:

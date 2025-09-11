@@ -183,8 +183,5 @@
         home-manager
       ];
     };
-
-    # nix code formatter
-    formatter.${darwinSystem} = nixpkgs-darwin.legacyPackages.${darwinSystem}.alejandra;
   };
 }

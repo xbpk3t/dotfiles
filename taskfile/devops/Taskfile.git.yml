@@ -20,8 +20,14 @@ dir: '{{.USER_WORKING_DIR}}'
 vars:
   GH_TOKEN:
     sh: gh auth token
-#  COMMIT_HASH:
-#    sh: git rev-parse HEAD
+  COMMIT_HASH:
+    sh: |
+      if [ -d .git ] || git rev-parse --git-dir > /dev/null 2>&1; then
+        git rev-parse HEAD
+      else
+        echo ""
+      fi
+    msg: commit hash not found
 
 
 
