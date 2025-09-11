@@ -1,6 +1,10 @@
-{ username ? "luck", inputs ? {}, pkgs, lib, ... }:
-
 {
+  username ? "luck",
+  inputs ? {},
+  pkgs,
+  lib,
+  ...
+}: {
   # import sub modules
   imports = [
     inputs.nixvim.homeModules.nixvim
@@ -33,9 +37,11 @@
   home = {
     inherit username;
     # Set home directory based on the system type
-    homeDirectory = lib.mkForce (if pkgs.stdenv.isDarwin
-                                then "/Users/${username}"
-                                else "/home/${username}");
+    homeDirectory = lib.mkForce (
+      if pkgs.stdenv.isDarwin
+      then "/Users/${username}"
+      else "/home/${username}"
+    );
 
     # This value determines the Home Manager release that your
     # configuration is compatible with. This helps avoid breakage

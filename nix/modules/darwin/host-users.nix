@@ -1,10 +1,8 @@
-{ ... }:
-
-{
+{...}: {
   # Shared host user configuration patterns for Darwin systems
   # Note: NixOS systems have their own user configuration in modules/nixos/users.nix
 
-  users.users = { };
+  users.users = {};
 
   # Shared Nix settings
   nix.settings = {

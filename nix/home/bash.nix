@@ -1,4 +1,8 @@
-{lib, pkgs, ...}: {
+{
+  lib,
+  pkgs,
+  ...
+}: {
   programs.bash = {
     enable = true;
 
@@ -7,11 +11,15 @@
 
     # 历史记录配置
     # 使用默认的 bash 历史设置，不启用 Atuin（保持简单和快速）
-    historySize = 10000;        # 内存中保存的历史条数
-    historyFileSize = 10000;    # 文件中保存的历史条数
-    historyControl = ["ignoredups"];  # 忽略重复命令
+    historySize = 10000; # 内存中保存的历史条数
+    historyFileSize = 10000; # 文件中保存的历史条数
+    historyControl = ["ignoredups"]; # 忽略重复命令
     historyIgnore = [
-      "ls" "cd" "pwd" "exit" "history"
+      "ls"
+      "cd"
+      "pwd"
+      "exit"
+      "history"
       "__jetbrains_intellij_run_generator.*"
     ];
 
@@ -31,7 +39,7 @@
 
       # 现代工具替代
       "cat" = "bat";
-      "find" = "fd --hidden";  # 使用 fd 替代 find，显示隐藏文件
+      "find" = "fd --hidden"; # 使用 fd 替代 find，显示隐藏文件
       "grep" = "rg";
 
       # 文件操作
@@ -43,32 +51,33 @@
       "md" = "mkdir -p";
       "rd" = "rmdir";
 
-
       # 编辑器
       "vim" = "LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 nvim";
     };
 
     # 环境变量（对应 zsh 的 sessionVariables）
-    sessionVariables = {
-      EDITOR = "nvim";
-      BUN_INSTALL = "$HOME/.bun";
-      PNPM_HOME = "$HOME/.local/share/pnpm";
-      PATH = "$HOME/go/bin:$BUN_INSTALL/bin:$PNPM_HOME:$PATH";
-    } // (lib.optionalAttrs (pkgs.stdenv.isDarwin) {
-      # 用来抑制 macOS 终端中显示的 "The default interactive shell is now zsh"
-      BASH_SILENCE_DEPRECATION_WARNING = "1";
-    });
+    sessionVariables =
+      {
+        EDITOR = "nvim";
+        BUN_INSTALL = "$HOME/.bun";
+        PNPM_HOME = "$HOME/.local/share/pnpm";
+        PATH = "$HOME/go/bin:$BUN_INSTALL/bin:$PNPM_HOME:$PATH";
+      }
+      // (lib.optionalAttrs (pkgs.stdenv.isDarwin) {
+        # 用来抑制 macOS 终端中显示的 "The default interactive shell is now zsh"
+        BASH_SILENCE_DEPRECATION_WARNING = "1";
+      });
 
     # bash 的 shell 选项设置（性能优化）
     shellOptions = [
       # 历史相关选项
-      "histappend"      # 追加历史而不是覆盖
-      "histverify"      # 历史展开时先验证
+      "histappend" # 追加历史而不是覆盖
+      "histverify" # 历史展开时先验证
 
       # 性能和便利性选项
-      "checkwinsize"    # 检查窗口大小变化
-      "cdspell"         # 自动纠正 cd 的拼写错误
-      "autocd"          # 启用自动 cd 功能（直接输入目录名进入）
+      "checkwinsize" # 检查窗口大小变化
+      "cdspell" # 自动纠正 cd 的拼写错误
+      "autocd" # 启用自动 cd 功能（直接输入目录名进入）
       # "dirspell"      # 这个选项在某些 bash 版本中不存在，注释掉
 
       # 其他选项
@@ -80,10 +89,11 @@
     # 初始化配置（对应 zsh 的 initContent）
     initExtra = ''
       # ===== Locale 设置 =====
-      # 修复 setlocale 警告
-      export LC_ALL=en_US.UTF-8
+      # 使用推荐的最小集合，避免 LC_ALL 覆盖导致的异常
+      unset LC_ALL
       export LANG=en_US.UTF-8
-      # 修复 LC_COLLATE 错误，使用系统支持的值
+      export LC_CTYPE=en_US.UTF-8
+      # 使用 C 排序避免找不到本地化定义
       export LC_COLLATE=C
 
       # ===== Bash 性能优化设置 =====

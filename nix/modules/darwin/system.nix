@@ -1,10 +1,8 @@
-{ ... }:
-
-{
+{...}: {
   # Shared macOS system preferences
   system = {
     # Shared system defaults
-    defaults = { };
+    defaults = {};
   };
 
   # System state version - this is host-specific and should not be changed after initial installation

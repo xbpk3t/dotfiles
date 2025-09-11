@@ -1,8 +1,11 @@
 # Minimal NixOS test system configuration
 # This file contains host-specific configurations that should not be shared between different machines
-{ username, hostname, lib, ... }:
-
 {
+  username,
+  hostname,
+  lib,
+  ...
+}: {
   # Host-specific networking configuration
   networking = {
     # Set the hostname for this specific machine
@@ -27,10 +30,10 @@
     };
 
     # Virtualization-specific kernel modules
-    initrd.availableKernelModules = [ "ata_piix" "uhci_hcd" "virtio_pci" "virtio_scsi" "sd_mod" "sr_mod" ];
-    initrd.kernelModules = [ ];
-    kernelModules = [ "kvm-intel" ];
-    extraModulePackages = [ ];
+    initrd.availableKernelModules = ["ata_piix" "uhci_hcd" "virtio_pci" "virtio_scsi" "sd_mod" "sr_mod"];
+    initrd.kernelModules = [];
+    kernelModules = ["kvm-intel"];
+    extraModulePackages = [];
 
     # File systems specific to this host
     fileSystems."/" = {
@@ -49,7 +52,7 @@
     # Set default password
     password = "nixos";
     # Add user to wheel group for sudo access
-    extraGroups = [ "wheel" ];
+    extraGroups = ["wheel"];
   };
 
   # Set root user password

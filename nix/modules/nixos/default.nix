@@ -1,7 +1,5 @@
 # NixOS-specific modules
-{ ... }:
-
-{
+{...}: {
   imports = [
     ./boot.nix
     ./networking.nix
@@ -10,5 +8,6 @@
     ./users.nix
     ./swap.nix
     ./limits.nix
+    ./systemd.nix
   ];
 }

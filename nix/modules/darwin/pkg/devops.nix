@@ -1,6 +1,4 @@
-{ pkgs, ... }:
-
-{
+{pkgs, ...}: {
   environment.systemPackages = with pkgs; [
     # 构建和任务工具
     go-task
@@ -11,7 +9,6 @@
     ansible
     opentofu
     cf-terraforming
-
 
     # 代码质量和分析
     shellcheck

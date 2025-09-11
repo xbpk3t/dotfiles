@@ -1,8 +1,5 @@
 # NixOS networking configuration
-{ ... }:
-
-{
-
+{...}: {
   # Network optimization - Complete Linux server optimization parameters
   # Based on Linux-Optimizer project configurations for Ubuntu/Debian/CentOS/Fedora
   boot.kernel.sysctl = {

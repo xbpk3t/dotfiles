@@ -9,7 +9,7 @@ _: {
     command = "/bin/launchctl limit maxfiles 1048576 1048576";
     serviceConfig = {
       Label = "limit.maxfiles";
-      ProgramArguments = [ "/bin/launchctl" "limit" "maxfiles" "1048576" "1048576" ];
+      ProgramArguments = ["/bin/launchctl" "limit" "maxfiles" "1048576" "1048576"];
       RunAtLoad = true;
     };
   };
@@ -18,7 +18,7 @@ _: {
     command = "/bin/launchctl limit maxproc 32768 32768";
     serviceConfig = {
       Label = "limit.maxproc";
-      ProgramArguments = [ "/bin/launchctl" "limit" "maxproc" "32768" "32768" ];
+      ProgramArguments = ["/bin/launchctl" "limit" "maxproc" "32768" "32768"];
       RunAtLoad = true;
     };
   };

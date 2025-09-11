@@ -1,7 +1,5 @@
 # Darwin-specific modules
-{ ... }:
-
-{
+{...}: {
   imports = [
     ./system-limits.nix
     ./directories.nix

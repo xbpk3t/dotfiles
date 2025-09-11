@@ -4,55 +4,70 @@ version: '3'
 vars:
   RCLONE: "rclone"
   RCLONE_REMOTE: "r2"                     # rclone.conf 中的存储配置名
-  BUCKET: "docs"                      # 默认存储桶名
-  LOCAL_PATH: "{{.USER_WORKING_DIR}}/docs" # 默认本地路径（自动获取当前目录）
-  DOCS_IMAGES_PATH: "{{.HOME}}/Desktop/docs-images"
-  DRY_RUN_FLAG: "--dry-run"               # 默认启用模拟执行
+
 
 
 tasks:
-  # 上传相关============
   default:
     desc: 上传本地文件到远程
     cmds:
-      - task: "{{.TASK}}"
+      - task: '{{.TASK}}'
     vars:
       TASK:
-        sh: gum choose upload-docs
+        sh: gum choose sync-docs bisync-scratches
         msg: 选择待上传的bucket
 
-  upload-docs:
+  sync:
     internal: true
-    aliases: [docs, ud]
+    desc: rclone sync 操作
     cmds:
-      - task: upload
-    defer:
-      - task: verify
-    vars:
-      LOCAL_PATH: "~/Desktop/docs-images"
-      RCLONE_REMOTE: "r2"
-      BUCKET: docs
-      DRY_RUN_FLAG: ""
+      - '{{.RCLONE}} sync --update --checksum --fast-list --transfers 30 --s3-upload-concurrency 30 "{{.LOCAL_PATH}}" "{{.RCLONE_REMOTE}}:{{.BUCKET}}" --verbose --progress {{.DRY_RUN_FLAG}}'
 
-  upload:
-    interactive: true
+  bisync:
     internal: true
-    desc: 上传文件到远程（默认启用模拟执行） # 注意这里使用 sync，而非copy，因为我需要local和remote完全一致。copy只会把local新增和修改的文件上传到remote，但是不删除remote原文件。
+    desc: rclone bisync 操作
     cmds:
-      - '{{.RCLONE}} sync --update --checksum --fast-list --transfers 30 --s3-upload-concurrency 30 {{.DOCS_IMAGES_PATH}} {{.RCLONE_REMOTE}}:{{.BUCKET}} --verbose --progress {{.DRY_RUN_FLAG}}'
-    vars:
-      REMOTE_PATH: ""  # 可选：指定远程子目录
+      - '{{.RCLONE}} bisync "{{.LOCAL_PATH}}" "{{.RCLONE_REMOTE}}:scratches" --create-empty-src-dirs --verbose --progress {{.DRY_RUN_FLAG}}'
+    requires:
+      vars: [RCLONE, LOCAL_PATH, RCLONE_REMOTE, DRY_RUN_FLAG]
 
-  verify:
+
+  check:
     internal: true
-    desc: 校验本地与远程文件一致性
+    desc: rclone check 操作
     cmds:
-      - '{{.RCLONE}} check {{.LOCAL_PATH}} {{.RCLONE_REMOTE}}:{{.BUCKET}}/{{if .REMOTE_PATH}}{{.REMOTE_PATH}}{{else}}docs{{end}} --size-only --one-way {{.DRY_RUN_FLAG}}'
+      - '{{.RCLONE}} check "{{.LOCAL_PATH}}" "{{.RCLONE_REMOTE}}:{{.BUCKET}}" --size-only --one-way {{.DRY_RUN_FLAG}}'
+    requires:
+      vars: [RCLONE, LOCAL_PATH, RCLONE_REMOTE, BUCKET, DRY_RUN_FLAG]
 
 
+  # 公开任务
+  sync-docs:
+    desc: 同步 docs 到远程（用于 systemd）
+    cmds:
+      - task: sync
+        vars:
+          DRY_RUN_FLAG: ""
+          BUCKET: "docs"
+          LOCAL_PATH: "{{.HOME}}/Desktop/docs-images"
 
 
-  # 配置相关===========
+  bisync-scratches:
+    desc: 双向同步 scratches 到 R2
+    cmds:
+      - task: bisync
+        vars:
+          LOCAL_PATH:
+            sh: |
+              jb="{{.HOME}}/Library/Application Support/JetBrains"
+              first=$(ls -1d "$jb"/GoLand* 2>/dev/null | head -n1 || true)
+              if [ -n "$first" ]; then
+                printf "%s/scratches\n" "$first"
+              fi
+          DRY_RUN_FLAG: ""
+          BUCKET: "scratches"
+
+
   config:
     desc: 查看 rclone 相关配置
     interactive: true
@@ -68,36 +83,33 @@ tasks:
       - '{{.RCLONE}} lsl {{.RCLONE_REMOTE}}:{{.BUCKET}}/{{.TARGET_PATH}}'
 
 
-  # 下载操作 ====================================================
-  download:
+  rev-sync:
+    alias: [download]
+    internal: true
     desc: "⚠️ 同步远程文件到本地（会删除本地多余文件）"
     cmds:
       - '{{.RCLONE}} sync {{.RCLONE_REMOTE}}:{{.BUCKET}}/{{.REMOTE_PATH}} {{.LOCAL_PATH}} {{.DRY_RUN_FLAG}}'
     vars:
       REMOTE_PATH: "docs"  # 指定远程路径
 
-  download-safe:
-    desc: 复制下载（不删除本地文件）
-    cmds:
-      - '{{.RCLONE}} copy {{.RCLONE_REMOTE}}:{{.BUCKET}}/{{.REMOTE_PATH}} {{.LOCAL_PATH}} --progress'
-    vars:
-      REMOTE_PATH: "docs"
 
-  # 删除操作 ====================================================
-  delete-dir:
+  delete:
+    internal: true
     desc: "🔥 删除远程文件夹内容（默认模拟执行）"
     cmds:
       - '{{.RCLONE}} delete {{.RCLONE_REMOTE}}:{{.BUCKET}}/{{.TARGET_PATH}} {{.DRY_RUN_FLAG}}'
     vars:
       TARGET_PATH: "x"  # 需删除的路径
 
-  purge-dir:
+  purge:
+    internal: true
     desc: "🔥 彻底删除远程文件夹（包括目录本身）"
     cmds:
       - '{{.RCLONE}} purge {{.RCLONE_REMOTE}}:{{.BUCKET}}/{{.TARGET_PATH}} {{.DRY_RUN_FLAG}}'
 
 
-  remove-empty-dirs:
+  rmdirs:
+    internal: true
     desc: 删除所有空目录
     cmds:
       - '{{.RCLONE}} rmdirs {{.RCLONE_REMOTE}}:{{.BUCKET}}/{{.BASE_PATH}} -v'

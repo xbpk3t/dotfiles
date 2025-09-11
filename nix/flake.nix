@@ -11,15 +11,15 @@
   # nixConfig affects the flake itself, not the system configuration
   nixConfig = {
     substituters = [
-    "https://mirrors.ustc.edu.cn/nix-channels/store"
-    "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store/"
-    "https://mirrors.bfsu.edu.cn/nix-channels/store"
-    "https://cache.nixos.org"
+      "https://mirrors.ustc.edu.cn/nix-channels/store"
+      "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store/"
+      "https://mirrors.bfsu.edu.cn/nix-channels/store"
+      "https://cache.nixos.org"
 
-    "https://hyprland.cachix.org"
-    "https://cache.garnix.io" # add garnix cache form github loneros-nixos repo
-    "https://nix-community.cachix.org"
-    "https://loneros.cachix.org"
+      "https://hyprland.cachix.org"
+      "https://cache.garnix.io" # add garnix cache form github loneros-nixos repo
+      "https://nix-community.cachix.org"
+      "https://loneros.cachix.org"
     ];
 
     # 防止关键包被垃圾回收清理
@@ -72,8 +72,12 @@
     ...
   }: let
     # User configuration
-    username = let envUser = builtins.getEnv "USER"; in
-      if envUser != "" then envUser else "lhgtqb7bll";
+    username = let
+      envUser = builtins.getEnv "USER";
+    in
+      if envUser != ""
+      then envUser
+      else "lhgtqb7bll";
     useremail = "yyzw@live.com";
 
     # System configurations
@@ -87,23 +91,25 @@
     };
 
     # Darwin special args
-    darwinSpecialArgs = commonSpecialArgs // {
-      hostname = "MacBook-Pro";
-      system = darwinSystem;
-    };
+    darwinSpecialArgs =
+      commonSpecialArgs
+      // {
+        hostname = "MacBook-Pro";
+        system = darwinSystem;
+      };
 
     # Linux special args
-    linuxSpecialArgs = commonSpecialArgs // {
-      system = linuxSystem;
-    };
+    linuxSpecialArgs =
+      commonSpecialArgs
+      // {
+        system = linuxSystem;
+      };
 
     # Darwin-specific modules (updated structure)
     darwinModules = [
       ./modules/darwin
     ];
-
     # NixOS-specific modules
-
   in {
     # Darwin configurations
     darwinConfigurations = {
@@ -111,39 +117,41 @@
       "luck" = darwin.lib.darwinSystem {
         system = darwinSystem;
         specialArgs = darwinSpecialArgs;
-        modules = darwinModules ++ [
-          # nix-homebrew integration
-          nix-homebrew.darwinModules.nix-homebrew
-          {
-            nix-homebrew = {
-              enable = true;
-              enableRosetta = false;
-              user = "lhgtqb7bll";
-              autoMigrate = true;
-            };
-          }
+        modules =
+          darwinModules
+          ++ [
+            # nix-homebrew integration
+            nix-homebrew.darwinModules.nix-homebrew
+            {
+              nix-homebrew = {
+                enable = true;
+                enableRosetta = false;
+                user = "lhgtqb7bll";
+                autoMigrate = true;
+              };
+            }
 
-          # home manager
-          home-manager.darwinModules.home-manager
-          {
-            home-manager = {
+            # home manager
+            home-manager.darwinModules.home-manager
+            {
+              home-manager = {
                 useGlobalPkgs = true;
                 useUserPackages = true;
                 extraSpecialArgs = darwinSpecialArgs;
                 # 添加备份文件扩展名设置
                 backupFileExtension = "hm-bak";
                 users.${username} = import ./home;
-            };
-          }
+              };
+            }
 
-          # sops-nix.darwinModules.sops
+            # sops-nix.darwinModules.sops
 
-          # Import host-specific configuration
-          ./hosts/darwin
+            # Import host-specific configuration
+            ./hosts/darwin
 
-          # Import secrets configuration
-          # ./secrets/darwin.nix
-        ];
+            # Import secrets configuration
+            # ./secrets/darwin.nix
+          ];
       };
     };
 
@@ -152,9 +160,11 @@
       # Test NixOS system - minimal configuration
       "nixos" = nixpkgs-darwin.lib.nixosSystem {
         system = linuxSystem;
-        specialArgs = linuxSpecialArgs // {
-          hostname = "nixos";
-        };
+        specialArgs =
+          linuxSpecialArgs
+          // {
+            hostname = "nixos";
+          };
         modules = [
           # Host-specific configuration
           ./hosts/nixos
@@ -162,13 +172,15 @@
           home-manager.nixosModules.home-manager
           {
             home-manager = {
-                useGlobalPkgs = true;
-                useUserPackages = true;
-                extraSpecialArgs = linuxSpecialArgs // {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              extraSpecialArgs =
+                linuxSpecialArgs
+                // {
                   hostname = "nixos";
                 };
-                backupFileExtension = "hm-bak";
-                users.${username} = import ./home;
+              backupFileExtension = "hm-bak";
+              users.${username} = import ./home;
             };
           }
 

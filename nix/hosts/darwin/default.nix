@@ -1,8 +1,6 @@
 # Darwin host configuration
 # This file contains host-specific configurations that should not be shared between different machines
-{ username, ... }:
-
-{
+{username, ...}: {
   # Host-specific system configuration
   system = {
     # Set the primary user for this specific machine
@@ -71,7 +69,7 @@
     ${username} = {
       home = "/Users/${username}";
       description = username;
-#      shell = "/run/current-system/sw/bin/bash";
+      #      shell = "/run/current-system/sw/bin/bash";
       shell = "/etc/profiles/per-user/${username}/bin/bash";
     };
 
@@ -85,7 +83,7 @@
   };
 
   # Host-specific Nix settings
-  nix.settings.trusted-users = [ username ];
+  nix.settings.trusted-users = [username];
 
   # Ensure bash is available in /etc/shells for chsh
   environment.shells = [

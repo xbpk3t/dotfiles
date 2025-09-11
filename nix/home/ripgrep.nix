@@ -1,6 +1,4 @@
-{ ... }:
-
-{
+{...}: {
   programs.ripgrep = {
     enable = true;
 
@@ -25,20 +23,20 @@
 
   # 添加 ripgrep 别名到 shell
   programs.bash.shellAliases = {
-#    # 搜索时包含隐藏文件
-#    rgh = "rg --hidden";
-#    # 只搜索文件名
-#    rgf = "rg --files | rg";
-#    # 搜索并显示上下文
-#    rgc = "rg -C 3";
-#    # 搜索特定文件类型
-#    rgjs = "rg -t js";
-#    rggo = "rg -t go";
-#    rgpy = "rg -t py";
-#    rgmd = "rg -t md";
-#    # 统计匹配数
-#    rgcount = "rg -c";
-#    # 只显示匹配的文件名
-#    rgfiles = "rg -l";
+    #    # 搜索时包含隐藏文件
+    #    rgh = "rg --hidden";
+    #    # 只搜索文件名
+    #    rgf = "rg --files | rg";
+    #    # 搜索并显示上下文
+    #    rgc = "rg -C 3";
+    #    # 搜索特定文件类型
+    #    rgjs = "rg -t js";
+    #    rggo = "rg -t go";
+    #    rgpy = "rg -t py";
+    #    rgmd = "rg -t md";
+    #    # 统计匹配数
+    #    rgcount = "rg -c";
+    #    # 只显示匹配的文件名
+    #    rgfiles = "rg -l";
   };
 }

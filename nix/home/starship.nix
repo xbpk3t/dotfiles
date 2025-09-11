@@ -1,6 +1,4 @@
-{ ... }:
-
-{
+{...}: {
   programs.starship = {
     enable = true;
 
@@ -39,14 +37,14 @@
         style = "bold #82AAFF";
       };
 
-#      env_var = {
-#        all_proxy = {
-#          variable = "all_proxy";
-#          format = "[$env_value]($style) ";
-#          default = "";
-#          style = "bold #82AAFF";
-#        };
-#      };
+      #      env_var = {
+      #        all_proxy = {
+      #          variable = "all_proxy";
+      #          format = "[$env_value]($style) ";
+      #          default = "";
+      #          style = "bold #82AAFF";
+      #        };
+      #      };
 
       cmd_duration = {
         format = "[$duration]($style) ";
@@ -62,34 +60,34 @@
 
       os = {
         disabled = true;
-#        symbols = {
-#          Ubuntu = "󰕈 ";
-#        };
+        #        symbols = {
+        #          Ubuntu = "󰕈 ";
+        #        };
       };
 
-#      rust = {
-#        format = "[$symbol($version )]($style)";
-#      };
-#
-#      nodejs = {
-#        format = "[$symbol($version )]($style)";
-#      };
-#
-#      lua = {
-#        format = "[$symbol($version )]($style)";
-#      };
-#
-#      golang = {
-#        format = "[$symbol($version )]($style)";
-#      };
-#
-#      c = {
-#        format = "[$symbol($version(-$name) )]($style)";
-#      };
-#
-#      ruby = {
-#        format = "[$symbol($version )]($style)";
-#      };
+      #      rust = {
+      #        format = "[$symbol($version )]($style)";
+      #      };
+      #
+      #      nodejs = {
+      #        format = "[$symbol($version )]($style)";
+      #      };
+      #
+      #      lua = {
+      #        format = "[$symbol($version )]($style)";
+      #      };
+      #
+      #      golang = {
+      #        format = "[$symbol($version )]($style)";
+      #      };
+      #
+      #      c = {
+      #        format = "[$symbol($version(-$name) )]($style)";
+      #      };
+      #
+      #      ruby = {
+      #        format = "[$symbol($version )]($style)";
+      #      };
     };
   };
 }

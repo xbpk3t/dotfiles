@@ -1,6 +1,4 @@
-{ ... }:
-
-{
+{...}: {
   programs.go = {
     enable = true;
 
@@ -8,10 +6,10 @@
     # package = pkgs.go; # 可以显式指定版本
 
     # GOPATH 设置
-    goPath = "go";  # 相对于 home 目录，即 ~/go
+    goPath = "go"; # 相对于 home 目录，即 ~/go
 
     # GOPROXY 设置
-    goPrivate = [ "*.corp.example.com" "rsc.io/private" ]; # 私有模块设置
+    goPrivate = ["*.corp.example.com" "rsc.io/private"]; # 私有模块设置
   };
 
   # 在 shell 中设置额外的 Go 相关环境变量

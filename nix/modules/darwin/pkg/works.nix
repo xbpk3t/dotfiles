@@ -1,13 +1,10 @@
-{ pkgs, ... }:
-
-{
+{pkgs, ...}: {
   environment.systemPackages = with pkgs; [
     # crawler
     katana
 
     # test
     k6
-
 
     # markdown
     python313Packages.markitdown # https://github.com/microsoft/markitdown 把 microsoft office文档转成md

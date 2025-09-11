@@ -1,6 +1,4 @@
-{ pkgs, ... }:
-
-{
+{pkgs, ...}: {
   environment.systemPackages = with pkgs; [
     # 网络工具 (excluding wget/curl which are in minimal)
     mosh
@@ -26,6 +24,8 @@
 
     deadnix # https://github.com/astro/deadnix
     statix # https://github.com/oppiliappan/statix
+    alejandra # https://github.com/kamadorueda/alejandra
+
     age # https://github.com/FiloSottile/age 用来处理 agenix
     sops
 

@@ -1,9 +1,7 @@
-{ pkgs, ... }:
-
-{
+{pkgs, ...}: {
   programs.rclone = {
     enable = true;
-    package = pkgs.rclone;  # 可选：覆盖默认包
+    package = pkgs.rclone; # 可选：覆盖默认包
 
     remotes = {
       r2 = {

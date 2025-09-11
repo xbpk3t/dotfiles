@@ -1,9 +1,7 @@
-{ pkgs, ... }:
-
-{
+{pkgs, ...}: {
   # Enable nix-darwin's management of the Nix installation for Determinate compatibility
   nix.enable = true;
-  nix.settings.experimental-features = [ "nix-command" "flakes" ]; # Add 'flakes' if you're using flakes
+  nix.settings.experimental-features = ["nix-command" "flakes"]; # Add 'flakes' if you're using flakes
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;

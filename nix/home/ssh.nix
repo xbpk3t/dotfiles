@@ -1,11 +1,9 @@
-{ ... }:
-{
+{...}: {
   programs.ssh = {
     enable = true;
-    enableDefaultConfig = false;  # 禁用默认配置，手动设置
+    enableDefaultConfig = false; # 禁用默认配置，手动设置
 
     matchBlocks = {
-
       "*" = {
         # 全局选项移到 matchBlocks."*" 下
         addKeysToAgent = "yes";

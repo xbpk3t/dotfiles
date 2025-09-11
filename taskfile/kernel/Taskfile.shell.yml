@@ -1,0 +1,84 @@
+---
+version: '3'
+
+vars:
+  DEFAULT_SHELL_PATH:
+    sh: echo $SHELL # 显示为用户设置的默认 Shell（定义在 /etc/passwd 中），但不一定是当前 Shell
+  CURRENT_SHELL_PATH:
+    sh: echo $0 # 显示当前会话正在使用的 Shell 名称（如 bash, zsh）
+  SHELLS:
+    sh: grep -v '^#' /etc/shells # 列出目前所有可用的shell
+
+
+tasks:
+  current-shell:
+    desc: 显示当前正在使用的shell
+    cmds:
+      - echo "当前会话正在使用的Shell:"
+      - ps -p $$
+      - echo "当前Shell的完整路径:"
+      - |
+        if [ -f /proc/$$/exe ]; then
+          readlink /proc/$$/exe
+        else
+          echo "此系统不支持 /proc/$$/exe"
+        fi
+
+  default-shell:
+    desc: 显示用户的默认shell
+    cmds:
+      - echo "用户默认的Shell {{.DEFAULT_SHELL_PATH}}"
+
+  list-shells:
+    desc: 列出系统所有可用的合法shell
+    interactive: true
+    cmds:
+      - for:
+          var: SHELLS
+          as: SHELL
+        cmd: "{{.SHELL}} --version 2>/dev/null || echo not support"
+    preconditions:
+      - sh: command -v chsh
+        msg: chsh not found
+
+
+  shell-env:
+    desc: 查看与shell相关的环境变量
+    cmds:
+      - echo "与Shell相关的环境变量:"
+      - env | grep -i shell
+
+  switch:
+    desc: 临时切换当前会话的 Shell。退出（exit）后恢复原 Shell，不影响默认设置
+    cmd: exec zsh
+
+  change:
+    desc: 永久修改默认shell（需要重新登录生效）
+    cmds:
+      - chsh -s {{.SELECTED}}
+    vars:
+      SELECTED:
+        sh: gum choose {{.SHELLS | splitLines | join " "}} # {{.SHELLS | catLines | trim}} 这里需要注意因为SHELLS返回的并非数组，而是一个多行字符串，所以需要splitLines处理为数组
+        msg: 选择指定shell
+    requires:
+      vars: [SHELLS]
+
+
+  test:
+    desc: 测试bash启动时间
+    interactive: true
+    cmds:
+      - time bash -i -c exit
+      - time zsh -i -c exit
+
+  start:*:*:
+    vars:
+      SERVICE: '{{index .MATCH 0}}'
+      REPLICAS: '{{index .MATCH 1}}'
+    cmds:
+      - echo "Starting {{.SERVICE}} with {{.REPLICAS}} replicas"
+  start:*:
+    vars:
+      SERVICE: '{{index .MATCH 0}}'
+    cmds:
+      - echo "Starting {{.SERVICE}}"

@@ -73,7 +73,7 @@ tasks:
     desc: "构建并切换到新配置"
     cmds:
       - echo "正在构建并切换 {{.OS}} 配置..."
-      - sudo {{.REBUILD_CMD}} switch --flake .#{{.HOSTNAME}}
+      - sudo {{.REBUILD_CMD}} switch --flake ./nix#{{.HOSTNAME}}
       - echo "切换到新配置完成！"
 
 

@@ -3,7 +3,7 @@ _: {
   homebrew = {
     enable = true;
     taps = [
-     "kilvn/homebrew-schedule"
+      "kilvn/homebrew-schedule"
     ];
     brews = [
       # "cloudflare-wrangler"

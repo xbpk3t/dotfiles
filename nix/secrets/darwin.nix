@@ -2,9 +2,7 @@
   config,
   username,
   ...
-}:
-
-{
+}: {
   # Enable sops
   sops = {
     defaultSopsFile = ./secrets.yaml;

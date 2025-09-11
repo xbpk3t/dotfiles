@@ -1,9 +1,7 @@
 # Cross-platform shared package management
 # Contains packages common to all platforms but not in minimal set
 # Organized by category in a single systemPackages definition
-{ pkgs, ... }:
-
-{
+{pkgs, ...}: {
   environment.systemPackages = with pkgs; [
     # System information
     fastfetch
@@ -39,12 +37,12 @@
     openssl
 
     # Version control and collaboration
-    gh  # GitHub CLI
+    gh # GitHub CLI
 
     # Data processing tools
     jq
     yq
-    dateutils  # 操作日期和时间表达式 dateadd、datediff、strptime
+    dateutils # 操作日期和时间表达式 dateadd、datediff、strptime
   ];
 
   # Platform-specific package additions will be handled in platform modules

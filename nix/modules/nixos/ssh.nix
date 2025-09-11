@@ -1,8 +1,6 @@
 # NixOS SSH service configuration
 # Based on Linux-Optimizer project configurations for Ubuntu/Debian/CentOS/Fedora
-{ ... }:
-
-{
+{...}: {
   # SSH optimization
   services.openssh = {
     enable = true;

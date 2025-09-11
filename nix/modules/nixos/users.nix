@@ -1,10 +1,8 @@
 # NixOS user management
 # Contains user configuration that can be shared between multiple hosts
-{ ... }:
-
-{
+{...}: {
   # Shared user configuration patterns
-  users.users = { };
+  users.users = {};
 
   # Shared security configuration
   security = {

@@ -1,21 +1,19 @@
 # NixOS boot configuration
 # Contains boot configuration that can be shared between multiple hosts
-{ ... }:
-
-{
+{...}: {
   # Shared boot configuration
   boot = {
     # Shared kernel modules
-    initrd.kernelModules = [ ];
-    kernelModules = [ ];
-    extraModulePackages = [ ];
+    initrd.kernelModules = [];
+    kernelModules = [];
+    extraModulePackages = [];
   };
 
   # Shared file systems configuration
-  fileSystems = { };
+  fileSystems = {};
 
   # Shared swap configuration
-  swapDevices = [ ];
+  swapDevices = [];
 
   # Shared system state version
   # Note: This should be host-specific and is kept here as an example
