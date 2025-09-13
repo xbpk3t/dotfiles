@@ -2,8 +2,19 @@
 version: "3"
 
 tasks:
+#  default:
+#    desc: "显示可用的任务"
+#    silent: true
+#    interactive: true
+#    cmd: task -l
+
+
   default:
-    desc: "显示可用的任务"
-    silent: true
-    interactive: true
-    cmd: task -l
+    cmds:
+      - echo "Running Using Docker"
+      - for:
+          - rsshub
+          - caddy
+          - watchtower
+        cmd: cd {{ .ITEM }} && docker-compose up --build -d
+      - echo "Done!"

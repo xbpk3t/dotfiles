@@ -34,8 +34,12 @@
 
     # ssh
     sshs
+    termscp
 
     # shell
     bash-completion
+
+    # rename
+    rnr # https://github.com/ismaelgv/rnr # FIXME 添加rnr的taskfile
   ];
 }

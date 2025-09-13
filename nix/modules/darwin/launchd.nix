@@ -4,7 +4,7 @@
   ...
 }: {
   # 双向同步 scratches 到 R2 (每20分钟一次)
-  launchd.daemons.rclone-bisync-scratches = {
+  launchd.agents.rclone-bisync-scratches = {
     serviceConfig = {
       Label = "local.rclone.bisync.scratches";
       ProgramArguments = [
@@ -13,23 +13,24 @@
         "rclone:bisync-scratches"
       ];
       StartInterval = 1200; # 每20分钟执行一次
-      StandardOutPath = "/var/log/rclone-bisync-scratches.log";
-      StandardErrorPath = "/var/log/rclone-bisync-scratches.log";
+      StandardOutPath = "/Users/${config.system.primaryUser}/Library/Logs/rclone-bisync-scratches.log";
+      StandardErrorPath = "/Users/${config.system.primaryUser}/Library/Logs/rclone-bisync-scratches.log";
       EnvironmentVariables = {
         PATH = "/run/current-system/sw/bin:/usr/bin:/bin:/usr/sbin:/sbin";
+        RCLONE_CONFIG = "/Users/${config.system.primaryUser}/.config/rclone/rclone.conf";
       };
       WorkingDirectory = "/Users/${config.system.primaryUser}";
     };
   };
 
   # 同步 docs 到 R2 (每天一次)
-  launchd.daemons.rclone-sync-docs = {
+  launchd.agents.rclone-sync-docs-images = {
     serviceConfig = {
-      Label = "local.rclone.sync.docs";
+      Label = "local.rclone.sync.docs-images";
       ProgramArguments = [
         "${pkgs.go-task}/bin/task"
         "-g"
-        "rclone:sync-docs"
+        "rclone:sync-docs-images"
       ];
       StartCalendarInterval = [
         {
@@ -38,10 +39,14 @@
           Minute = 0;
         }
       ];
-      StandardOutPath = "/var/log/rclone-sync-docs.log";
-      StandardErrorPath = "/var/log/rclone-sync-docs.log";
+      RunAtLoad = true; # 开机时立即执行一次（plist 加载时触发，防止关机错过 sync）
+      ThrottleInterval = 86400; # 24小时防重。若不足24小时 → 跳过（避免重复）
+
+      StandardOutPath = "/Users/${config.system.primaryUser}/Library/Logs/rclone-sync-docs-images.log";
+      StandardErrorPath = "/Users/${config.system.primaryUser}/Library/Logs/rclone-sync-docs-images.log";
       EnvironmentVariables = {
         PATH = "/run/current-system/sw/bin:/usr/bin:/bin:/usr/sbin:/sbin";
+        RCLONE_CONFIG = "/Users/${config.system.primaryUser}/.config/rclone/rclone.conf";
       };
       WorkingDirectory = "/Users/${config.system.primaryUser}";
     };

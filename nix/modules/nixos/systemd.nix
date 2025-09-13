@@ -1,7 +1,4 @@
-{
-  pkgs,
-  ...
-}: {
+{pkgs, ...}: {
   # 双向同步 scratches 到 R2 (每20分钟一次)
   systemd.user.services.rclone-bisync-scratches = {
     description = "Rclone bisync scratches to R2";

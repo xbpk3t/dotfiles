@@ -92,25 +92,6 @@ function menu.createMenu(taskList, currentTaskId, maxTasks, callbacks)
         table.insert(menuItems, { title = "-" })
     end
 
-    -- 倒计时控制选项
-    if callbacks.getCountdownState then
-        local countdownState = callbacks.getCountdownState()
-        if countdownState.timer and countdownState.timer:running() then
-            local pauseText = countdownState.isPaused and "▶️ 恢复倒计时" or "⏸️ 暂停倒计时"
-            table.insert(menuItems, { title = pauseText, fn = function()
-                if callbacks.toggleCountdown then
-                    local success = callbacks.toggleCountdown()
-                    if success then
-                        local newState = callbacks.getCountdownState()
-                        local status = newState.isPaused and "已暂停" or "已恢复"
-                        notifs.countdownStatus(status)
-                    end
-                end
-            end })
-            table.insert(menuItems, { title = "-" })
-        end
-    end
-
     -- 操作选项
     table.insert(menuItems, { title = "➕ 添加新任务", fn = function() if callbacks.addTask then callbacks.addTask() end end })
 

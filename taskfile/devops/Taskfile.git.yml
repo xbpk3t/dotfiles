@@ -123,11 +123,22 @@ tasks:
   rewrite:
     desc: 怎么压缩 git 项目？
     cmds:
-      - #- url: https://github.com/kubernetes/git-sync
-        #  des: 怎么保证repo和其upstream同步?
+      # - git rev-list --objects --all | grep "$(git verify-pack -v .git/objects/pack/*.idx | sort -k 3 -n | tail -10 | awk '{print$1}')"
+
+      # --path: 指定要操作的路径
+      # --invert-paths: 反转选择，即“删除这些路径，保留其他所有”
+      # --force: 强制运行（因为filter-repo默认在非全新克隆的仓库上运行会提示风险）
+      - git filter-repo --path {{.FILES}} --invert-paths --force
+
+      # 推送到远程（因为历史已经改变，必须强制推送）
+      - git push origin --force --all
+    requires:
+      vars: [FILES]
 
 
-      # fork 后如何同步源的最新代码：我fork出来的分支，怎么同步后来父分支的更新？ # [Syncing a fork - GitHub Docs](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork) git remote add <upstream> && git fetch <upstream> && git checkout main && git merge <upstream>/master
+  #- url: https://github.com/kubernetes/git-sync
+  #  des: 怎么保证repo和其upstream同步?
+  # fork 后如何同步源的最新代码：我fork出来的分支，怎么同步后来父分支的更新？ # [Syncing a fork - GitHub Docs](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork) git remote add <upstream> && git fetch <upstream> && git checkout main && git merge <upstream>/master
   sync-upstream:
 
 
@@ -164,16 +175,18 @@ tasks:
 
   #- url: https://github.com/cli/cli
   # [Manual | GitHub CLI](https://cli.github.com/manual/)
-  gist:clear: # 注意list默认只有10条，--limit则可以自定义条数
+  gist:clear:
     desc: 清空所有gist
-    cmd: |
-      gh gist list --limit 100 | awk '{print $1}' | while read gist_id; do
-          gh gist clone "$gist_id" && gh gist delete --yes "$gist_id"
-      done
-    dir: '{{.USER_WORKING_DIR}}'
-
-  gist:list:
-    cmd: gh gist list
+    interactive: true
+    cmds:
+      - "echo gist numbers: {{.GIST_LIST | splitLines | len}}"
+      - for:
+          var: GIST_LIST
+          split: "\n"
+        cmd: "gh gist delete --yes {{.ITEM}}"
+    vars:
+      GIST_LIST:
+        sh: gh gist list --limit 100 | awk '{print $1}'
 
   # 我现在main分支的代码挂了，我怎么把代码切到之前的某个正常commit，并且把这部分新增的commit切到一个新branch？操作的具体流程 # git checkout -b <new-branch> <existed-branch> && git reset --hard <commit-id> && git push -f
 

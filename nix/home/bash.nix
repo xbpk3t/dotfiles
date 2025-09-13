@@ -61,7 +61,7 @@
         EDITOR = "nvim";
         BUN_INSTALL = "$HOME/.bun";
         PNPM_HOME = "$HOME/.local/share/pnpm";
-        PATH = "$HOME/go/bin:$BUN_INSTALL/bin:$PNPM_HOME:$PATH";
+        PATH = "$HOME/.orbstack/bin:$HOME/go/bin:$BUN_INSTALL/bin:$PNPM_HOME:$PATH";
       }
       // (lib.optionalAttrs (pkgs.stdenv.isDarwin) {
         # 用来抑制 macOS 终端中显示的 "The default interactive shell is now zsh"

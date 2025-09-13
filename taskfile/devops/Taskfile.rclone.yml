@@ -14,7 +14,7 @@ tasks:
       - task: '{{.TASK}}'
     vars:
       TASK:
-        sh: gum choose sync-docs bisync-scratches
+        sh: gum choose sync-docs-images bisync-scratches
         msg: 选择待上传的bucket
 
   sync:
@@ -42,15 +42,15 @@ tasks:
 
 
   # 公开任务
-  sync-docs:
-    desc: 同步 docs 到远程（用于 systemd）
+  sync-docs-images:
+    desc: 同步 docs-images 到远程（用于 systemd）
     cmds:
       - task: sync
         vars:
           DRY_RUN_FLAG: ""
           BUCKET: "docs"
           LOCAL_PATH: "{{.HOME}}/Desktop/docs-images"
-
+      - echo "Execute sync-docs task success"
 
   bisync-scratches:
     desc: 双向同步 scratches 到 R2
@@ -66,7 +66,7 @@ tasks:
               fi
           DRY_RUN_FLAG: ""
           BUCKET: "scratches"
-
+      - echo "Execute bisync-scratches task success"
 
   config:
     desc: 查看 rclone 相关配置
