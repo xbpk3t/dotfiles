@@ -102,12 +102,13 @@ tasks:
   update:
     desc: "更新所有 flake 到最新版本，并查看更新内容"
     cmds:
-      - task: upgrade-nix
+      # - task: upgrade
       - nix flake update # nix flake update --flake ./nix
       - nix flake show
 
-  upgrade-nix:
-    cmd: nix upgrade-nix
+  upgrade:
+    cmds:
+      - sudo nix upgrade-nix
 
   update-input:
     desc: "Update specific flake input (usage: task nix:update-input INPUT=nixpkgs)"
