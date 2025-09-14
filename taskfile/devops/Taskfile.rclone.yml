@@ -21,15 +21,16 @@ tasks:
     internal: true
     desc: rclone sync 操作
     cmds:
-      - '{{.RCLONE}} sync --update --checksum --fast-list --transfers 30 --s3-upload-concurrency 30 "{{.LOCAL_PATH}}" "{{.RCLONE_REMOTE}}:{{.BUCKET}}" --verbose --progress {{.DRY_RUN_FLAG}}'
+#      - '{{.RCLONE}} sync --update --checksum --fast-list --transfers 30 --s3-upload-concurrency 30 "{{.LOCAL_PATH}}" "{{.RCLONE_REMOTE}}:{{.BUCKET}}" --stats=10s --progress {{.DRY_RUN_FLAG}}'
+      - '{{.RCLONE}} sync --update --checksum --fast-list --transfers 30 --s3-upload-concurrency 30 "{{.LOCAL_PATH}}" "{{.RCLONE_REMOTE}}:{{.BUCKET}}" --stats-one-line -v {{.DRY_RUN_FLAG}}'
 
   bisync:
     internal: true
     desc: rclone bisync 操作
     cmds:
-      - '{{.RCLONE}} bisync "{{.LOCAL_PATH}}" "{{.RCLONE_REMOTE}}:scratches" --create-empty-src-dirs --verbose --progress {{.DRY_RUN_FLAG}}'
+      - '{{.RCLONE}} bisync "{{.LOCAL_PATH}}" "{{.RCLONE_REMOTE}}:{{.BUCKET}}" --create-empty-src-dirs --resync --stats-one-line -v {{.DRY_RUN_FLAG}}'
     requires:
-      vars: [RCLONE, LOCAL_PATH, RCLONE_REMOTE, DRY_RUN_FLAG]
+      vars: [RCLONE, LOCAL_PATH, RCLONE_REMOTE, BUCKET, DRY_RUN_FLAG]
 
 
   check:
@@ -41,7 +42,6 @@ tasks:
       vars: [RCLONE, LOCAL_PATH, RCLONE_REMOTE, BUCKET, DRY_RUN_FLAG]
 
 
-  # 公开任务
   sync-docs-images:
     desc: 同步 docs-images 到远程（用于 systemd）
     cmds:
@@ -49,8 +49,12 @@ tasks:
         vars:
           DRY_RUN_FLAG: ""
           BUCKET: "docs"
-          LOCAL_PATH: "{{.HOME}}/Desktop/docs-images"
+          LOCAL_PATH: "$HOME/Desktop/docs-images"
       - echo "Execute sync-docs task success"
+    preconditions:
+      - sh: test -d "$HOME/Desktop/docs-images/"
+        msg: "Directory $HOME/Desktop/docs-images does not exist"
+
 
   bisync-scratches:
     desc: 双向同步 scratches 到 R2
@@ -59,14 +63,14 @@ tasks:
         vars:
           LOCAL_PATH:
             sh: |
-              jb="{{.HOME}}/Library/Application Support/JetBrains"
-              first=$(ls -1d "$jb"/GoLand* 2>/dev/null | head -n1 || true)
-              if [ -n "$first" ]; then
-                printf "%s/scratches\n" "$first"
-              fi
+              jb="$HOME/Library/Application Support/JetBrains"
+              ls -d "$jb"/*/scratches 2>/dev/null | head -n1
           DRY_RUN_FLAG: ""
           BUCKET: "scratches"
       - echo "Execute bisync-scratches task success"
+    preconditions:
+      - sh: test -d "$HOME/Library/Application Support/JetBrains"/*/scratches
+        msg: "No JetBrains IDE scratches directory found"
 
   config:
     desc: 查看 rclone 相关配置

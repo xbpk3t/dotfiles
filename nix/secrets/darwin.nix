@@ -7,6 +7,8 @@
   sops = {
     defaultSopsFile = ./secrets.yaml;
     age.keyFile = "/Users/${username}/.config/sops/age/keys.txt";
+    age.sshKeyPaths = []; # Disable SSH key import
+    gnupg.home = null; # Disable GPG key import
 
     # Define secrets
     secrets = {
@@ -28,6 +30,13 @@
         group = "staff";
         mode = "0400";
       };
+
+      # zAI API secrets
+      "claude/zai/token" = {
+        owner = username;
+        group = "staff";
+        mode = "0400";
+      };
     };
   };
 
@@ -41,6 +50,9 @@
     };
     "ssh/github/private_key" = {
       source = config.sops.secrets."ssh/github/private_key".path;
+    };
+    "claude/zai/token" = {
+      source = config.sops.secrets."claude/zai/token".path;
     };
   };
 
@@ -57,6 +69,10 @@
     if [ -f /etc/ssh/github/private_key ]; then
       chown ${username}:staff /etc/ssh/github/private_key
       chmod 600 /etc/ssh/github/private_key
+    fi
+    if [ -f /etc/claude/zai/token ]; then
+      chown ${username}:staff /etc/claude/zai/token
+      chmod 600 /etc/claude/zai/token
     fi
   '';
 }

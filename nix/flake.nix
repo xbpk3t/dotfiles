@@ -11,9 +11,9 @@
   # nixConfig affects the flake itself, not the system configuration
   nixConfig = {
     substituters = [
-      "https://mirrors.ustc.edu.cn/nix-channels/store"
-      "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store/"
-      "https://mirrors.bfsu.edu.cn/nix-channels/store"
+      # "https://mirrors.ustc.edu.cn/nix-channels/store"
+      # "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store/"
+      # "https://mirrors.bfsu.edu.cn/nix-channels/store"
       "https://cache.nixos.org"
 
       "https://hyprland.cachix.org"
@@ -144,13 +144,13 @@
               };
             }
 
-            # sops-nix.darwinModules.sops
+            sops-nix.darwinModules.sops
 
             # Import host-specific configuration
             ./hosts/darwin
 
             # Import secrets configuration
-            # ./secrets/darwin.nix
+            ./secrets/darwin.nix
           ];
       };
     };
