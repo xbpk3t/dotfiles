@@ -74,27 +74,19 @@
           "~/Desktop"
         ];
         allow = [
+          # === Web & Network Operations ===
           "WebFetch(domain:docs.anthropic.com)"
-          "Bash(rm:*)"
           "WebFetch(domain:github.com)"
-
-          "Bash(grep:*)"
-          "Bash(git add:*)"
-
-          "Bash(mv:*)"
-          "Bash(sed:*)"
-
-          "Bash(find:*)"
-          "Bash(rg:*)"
-          "Bash(git commit:*)"
-          "Bash(git status:*)"
-          "Bash(git diff:*)"
-          "Bash(git log:*)"
           "WebFetch(domain:api.github.com)"
           "WebFetch"
+          "WebSearch"
+
+          # === File System Operations ===
+          "Bash(rm:*)"
+          "Bash(mv:*)"
+          "Bash(cp:*)"
           "Bash(chmod:*)"
           "Bash(mkdir:*)"
-          "Bash(cp:*)"
           "Bash(ls:*)"
           "Bash(cd:*)"
           "Bash(pwd:*)"
@@ -102,24 +94,75 @@
           "Bash(cat:*)"
           "Bash(head:*)"
           "Bash(tail:*)"
+          "Bash(find:*)"
+          "Bash(grep:*)"
+          "Bash(rg:*)"
+          "Bash(sed:*)"
+          "mcp__filesystem__read_file"
+          "mcp__filesystem__read_text_file"
+          "mcp__filesystem__read_media_file"
+          "mcp__filesystem__read_multiple_files"
+          "mcp__filesystem__write_file"
+          "mcp__filesystem__edit_file"
+          "mcp__filesystem__create_directory"
+          "mcp__filesystem__list_directory"
+          "mcp__filesystem__list_directory_with_sizes"
+          "mcp__filesystem__directory_tree"
+          "mcp__filesystem__move_file"
+          "mcp__filesystem__search_files"
+          "mcp__filesystem__get_file_info"
+          "mcp__filesystem__list_allowed_directories"
 
+          # === Git & Version Control ===
+          "Bash(git add:*)"
+          "Bash(git commit:*)"
+          "Bash(git status:*)"
+          "Bash(git diff:*)"
+          "Bash(git log:*)"
+          "mcp__octocode__githubSearchCode"
+          "mcp__octocode__githubGetFileContent"
+          "mcp__octocode__githubViewRepoStructure"
+          "mcp__octocode__githubSearchRepositories"
+
+          # === Development Tools & Search ===
           "mcp__context7__resolve-library-id"
           "mcp__context7__get-library-docs"
-          "mcp__filesystem__list_directory"
-
-          "mcp__filesystem__edit_file"
-          "mcp__filesystem__search_files"
-
           "mcp__deepwiki__read_wiki_structure"
           "mcp__deepwiki__read_wiki_contents"
           "mcp__deepwiki__ask_question"
-
-          "mcp__octocode__githubSearchCode"
-          "mcp__octocode__githubSearchRepositories"
-          "mcp__octocode__githubViewRepoStructure"
-          "mcp__octocode__githubGetFileContent"
-
           "mcp__ddg__duckduckgo_web_search"
+
+          # === NixOS & Package Management ===
+          "mcp__nixos-mcp__nixos_search"
+          "mcp__nixos-mcp__nixos_info"
+          "mcp__nixos-mcp__nixos_channels"
+          "mcp__nixos-mcp__nixos_stats"
+          "mcp__nixos-mcp__home_manager_search"
+          "mcp__nixos-mcp__home_manager_info"
+          "mcp__nixos-mcp__home_manager_stats"
+          "mcp__nixos-mcp__home_manager_list_options"
+          "mcp__nixos-mcp__home_manager_options_by_prefix"
+          "mcp__nixos-mcp__darwin_search"
+          "mcp__nixos-mcp__darwin_info"
+          "mcp__nixos-mcp__darwin_stats"
+          "mcp__nixos-mcp__darwin_list_options"
+          "mcp__nixos-mcp__darwin_options_by_prefix"
+          "mcp__nixos-mcp__nixos_flakes_stats"
+          "mcp__nixos-mcp__nixos_flakes_search"
+          "mcp__nixos-mcp__nixhub_package_versions"
+          "mcp__nixos-mcp__nixhub_find_version"
+
+          # === Knowledge & Memory Management ===
+          "mcp__sequential-thinking__sequentialthinking"
+          "mcp__memory__create_entities"
+          "mcp__memory__create_relations"
+          "mcp__memory__add_observations"
+          "mcp__memory__delete_entities"
+          "mcp__memory__delete_observations"
+          "mcp__memory__delete_relations"
+          "mcp__memory__read_graph"
+          "mcp__memory__search_nodes"
+          "mcp__memory__open_nodes"
         ];
         ask = [
           "Bash(git push:*)"
@@ -311,11 +354,12 @@
   home.sessionVariables = {
     # 自定义 API 端点，用于连接到第三方模型服务
     ANTHROPIC_BASE_URL = "https://open.bigmodel.cn/api/anthropic";
-    # API 认证令牌 - 使用 sops 管理 (存储文件路径，避免时序问题)
-    ANTHROPIC_AUTH_TOKEN = "/etc/claude/zai/token";
+    # API 认证令牌 - 使用 sops 管理，通过 cat 命令读取文件内容
+    ANTHROPIC_AUTH_TOKEN = "$(cat /etc/claude/zai/token)";
   };
 
   # Shell 配置 - 添加 Claude Code 相关的 shell 功能
   programs.bash.initExtra = ''
+
   '';
 }
