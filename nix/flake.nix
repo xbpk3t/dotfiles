@@ -11,13 +11,9 @@
   # nixConfig affects the flake itself, not the system configuration
   nixConfig = {
     substituters = [
-      # "https://mirrors.ustc.edu.cn/nix-channels/store"
-      # "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store/"
-      # "https://mirrors.bfsu.edu.cn/nix-channels/store"
       "https://cache.nixos.org"
-
       "https://hyprland.cachix.org"
-      "https://cache.garnix.io" # add garnix cache form github loneros-nixos repo
+      "https://cache.garnix.io"
       "https://nix-community.cachix.org"
       "https://loneros.cachix.org"
     ];
@@ -64,136 +60,57 @@
   };
 
   outputs = inputs @ {
-    nixpkgs-darwin,
     darwin,
     home-manager,
     nix-homebrew,
     sops-nix,
     ...
   }: let
-    # User configuration
-    username = let
-      envUser = builtins.getEnv "USER";
-    in
-      if envUser != ""
-      then envUser
-      else "lhgtqb7bll";
-    useremail = "yyzw@live.com";
+    username = "lhgtqb7bll";
+    mail = builtins.getEnv "MAIL";
+    hostname = "MacBook-Pro";
 
-    # System configurations
-    darwinSystem = "x86_64-darwin"; # Intel Mac
-    linuxSystem = "x86_64-linux";
-
-    # Common special args for all configurations
-    commonSpecialArgs = {
-      inherit username useremail inputs;
+    specialArgs = {
+      inherit username mail hostname inputs;
       sops-nix = sops-nix;
     };
-
-    # Darwin special args
-    darwinSpecialArgs =
-      commonSpecialArgs
-      // {
-        hostname = "MacBook-Pro";
-        system = darwinSystem;
-      };
-
-    # Linux special args
-    linuxSpecialArgs =
-      commonSpecialArgs
-      // {
-        system = linuxSystem;
-      };
-
-    # Darwin-specific modules (updated structure)
-    darwinModules = [
-      ./modules/darwin
-    ];
-    # NixOS-specific modules
   in {
     # Darwin configurations
     darwinConfigurations = {
       # Local macOS machine
       "luck" = darwin.lib.darwinSystem {
-        system = darwinSystem;
-        specialArgs = darwinSpecialArgs;
-        modules =
-          darwinModules
-          ++ [
-            # nix-homebrew integration
-            nix-homebrew.darwinModules.nix-homebrew
-            {
-              nix-homebrew = {
-                enable = true;
-                enableRosetta = false;
-                user = "lhgtqb7bll";
-                autoMigrate = true;
-              };
-            }
-
-            # home manager
-            home-manager.darwinModules.home-manager
-            {
-              home-manager = {
-                useGlobalPkgs = true;
-                useUserPackages = true;
-                extraSpecialArgs = darwinSpecialArgs;
-                # 添加备份文件扩展名设置
-                backupFileExtension = "hm-bak";
-                users.${username} = import ./home;
-              };
-            }
-
-            sops-nix.darwinModules.sops
-
-            # Import host-specific configuration
-            ./hosts/darwin
-
-            # Import secrets configuration
-            ./secrets/darwin.nix
-          ];
-      };
-    };
-
-    # NixOS configurations
-    nixosConfigurations = {
-      # Test NixOS system - minimal configuration
-      "nixos" = nixpkgs-darwin.lib.nixosSystem {
-        system = linuxSystem;
-        specialArgs =
-          linuxSpecialArgs
-          // {
-            hostname = "nixos";
-          };
+        system = "x86_64-darwin";
+        inherit specialArgs;
         modules = [
-          # Host-specific configuration
-          ./hosts/nixos
-          # home manager for NixOS
-          home-manager.nixosModules.home-manager
+          ./modules/darwin
+          # nix-homebrew integration
+          nix-homebrew.darwinModules.nix-homebrew
+          {
+            nix-homebrew = {
+              enable = true;
+              enableRosetta = false;
+              user = username;
+              autoMigrate = true;
+            };
+          }
+          # home manager
+          home-manager.darwinModules.home-manager
           {
             home-manager = {
               useGlobalPkgs = true;
               useUserPackages = true;
-              extraSpecialArgs =
-                linuxSpecialArgs
-                // {
-                  hostname = "nixos";
-                };
+              extraSpecialArgs = specialArgs;
               backupFileExtension = "hm-bak";
               users.${username} = import ./home;
             };
           }
-
-          sops-nix.nixosModules.sops
+          sops-nix.darwinModules.sops
+          # Import host-specific configuration
+          ./hosts/darwin
+          # Import secrets configuration
+          ./secrets/darwin.nix
         ];
       };
-    };
-
-    # Development shell
-    devShells.${darwinSystem}.default = nixpkgs-darwin.legacyPackages.${darwinSystem}.mkShell {
-      buildInputs = with nixpkgs-darwin.legacyPackages.${darwinSystem}; [
-        home-manager
-      ];
     };
   };
 }

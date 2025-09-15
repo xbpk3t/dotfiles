@@ -1,5 +1,5 @@
 {
-  username ? "luck",
+  username,
   inputs ? {},
   pkgs,
   lib,

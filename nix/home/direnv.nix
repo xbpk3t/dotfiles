@@ -19,9 +19,4 @@
       };
     };
   };
-
-  # 添加 shell 集成
-  # programs.zsh.initContent = ''
-  #   # direnv 已经通过 programs.direnv 自动集成到 zsh
-  # '';
 }

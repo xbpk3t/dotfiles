@@ -1,8 +1,8 @@
-_: {
+{mail, ...}: {
   programs.git = {
     enable = true;
     userName = "XBPk3T";
-    userEmail = "yyzw@live.com";
+    userEmail = mail;
     lfs.enable = true;
 
     # 全局忽略文件配置

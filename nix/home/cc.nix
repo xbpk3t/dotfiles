@@ -113,6 +113,13 @@
           "mcp__deepwiki__read_wiki_structure"
           "mcp__deepwiki__read_wiki_contents"
           "mcp__deepwiki__ask_question"
+
+          "mcp__octocode__githubSearchCode"
+          "mcp__octocode__githubSearchRepositories"
+          "mcp__octocode__githubViewRepoStructure"
+          "mcp__octocode__githubGetFileContent"
+
+          "mcp__ddg__duckduckgo_web_search"
         ];
         ask = [
           "Bash(git push:*)"

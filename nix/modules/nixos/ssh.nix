@@ -24,7 +24,7 @@
       # Allow TCP forwarding
       AllowTcpForwarding = true;
       # Enable gateway ports
-      GatewayPorts = true;
+      GatewayPorts = "yes";
       # Enable tunneling
       PermitTunnel = true;
       # Enable X11 graphical interface forwarding

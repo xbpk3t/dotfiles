@@ -1,9 +1,9 @@
-_: {
+{mail, ...}: {
   programs.gpg = {
     enable = false;
     settings = {
       # 基本设置
-      default-key = "yyzw@live.com";
+      default-key = mail;
 
       # 密钥服务器设置
       keyserver = "hkps://keys.openpgp.org";

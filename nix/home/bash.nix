@@ -23,7 +23,6 @@
       "__jetbrains_intellij_run_generator.*"
     ];
 
-    # 基于原 zsh 的别名配置
     shellAliases = {
       # 目录导航
       # 注意：bash 不支持 "-" 作为别名，使用函数替代
@@ -55,13 +54,14 @@
       "vim" = "LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 nvim";
     };
 
-    # 环境变量（对应 zsh 的 sessionVariables）
+    # 环境变量
     sessionVariables =
       {
         EDITOR = "nvim";
         BUN_INSTALL = "$HOME/.bun";
         PNPM_HOME = "$HOME/.local/share/pnpm";
         PATH = "$HOME/.orbstack/bin:$HOME/go/bin:$BUN_INSTALL/bin:$PNPM_HOME:$PATH";
+        MAIL = "yyzw@live.com";
       }
       // (lib.optionalAttrs (pkgs.stdenv.isDarwin) {
         # 用来抑制 macOS 终端中显示的 "The default interactive shell is now zsh"
