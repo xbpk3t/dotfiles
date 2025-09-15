@@ -1,9 +1,28 @@
-{...}: {
+{pkgs, ...}: {
+  # Go 开发工具包安装
+  home.packages = with pkgs; [
+    gotools # goimports
+    gum
+    gofumpt
+    golangci-lint
+    gosec
+    protoc-gen-go
+    protoc-gen-go-grpc
+    gopls # https://github.com/golang/tools includes modernize
+    golines # https://github.com/segmentio/golines
+    goimports-reviser
+    cobra-cli
+    nilaway
+    go-swag # = swaggo/swag
+    goreleaser
+    go-mockery # https://github.com/vektra/mockery
+    templ # https://github.com/a-h/templ
+    go-migrate # https://github.com/golang-migrate/migrate
+  ];
+
+  # Go 运行时和配置
   programs.go = {
     enable = true;
-
-    # Go 版本将使用系统包中的版本
-    # package = pkgs.go; # 可以显式指定版本
 
     # Go 环境变量设置 (更新为新语法)
     env = {

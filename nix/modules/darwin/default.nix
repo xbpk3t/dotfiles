@@ -9,6 +9,8 @@
     ./nix-core.nix
     ./host-users.nix
     ./launchd.nix
+    # Stylix theming
+    ./stylix.nix
     # Package definitions
     ./pkg
   ];

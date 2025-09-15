@@ -1,5 +1,8 @@
 {pkgs, ...}: {
   environment.systemPackages = with pkgs; [
+    # Docker
+    hadolint
+
     # Kubernetes 工具
     minikube
     # helm # helm在macos上不支持用nix安装

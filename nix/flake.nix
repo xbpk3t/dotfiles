@@ -57,6 +57,12 @@
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
+
+    # Stylix theming system
+    stylix = {
+      url = "github:nix-community/stylix";
+      inputs.nixpkgs.follows = "nixpkgs-darwin";
+    };
   };
 
   outputs = inputs @ {
@@ -64,6 +70,7 @@
     home-manager,
     nix-homebrew,
     sops-nix,
+    stylix,
     ...
   }: let
     username = "lhgtqb7bll";
@@ -73,6 +80,7 @@
     specialArgs = {
       inherit username mail hostname inputs;
       sops-nix = sops-nix;
+      stylix = stylix;
     };
   in {
     # Darwin configurations
@@ -83,6 +91,8 @@
         inherit specialArgs;
         modules = [
           ./modules/darwin
+          # Stylix theming
+          stylix.darwinModules.stylix
           # nix-homebrew integration
           nix-homebrew.darwinModules.nix-homebrew
           {

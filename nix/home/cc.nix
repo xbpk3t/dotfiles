@@ -1,4 +1,17 @@
 {pkgs, ...}: {
+  # Claude CLI 环境变量配置
+  home.sessionVariables = {
+    # 自定义 API 端点，用于连接到第三方模型服务
+    ANTHROPIC_BASE_URL = "https://open.bigmodel.cn/api/anthropic";
+    # API 认证令牌 - 使用 sops 管理，通过 cat 命令读取文件内容
+    ANTHROPIC_AUTH_TOKEN = "$(cat /etc/claude/zai/token)";
+  };
+
+  # Shell 配置 - 添加 Claude Code 相关的 shell 功能
+  programs.bash.initExtra = ''
+
+  '';
+
   # Claude Code 程序配置
   programs.claude-code = {
     enable = true;
@@ -48,6 +61,28 @@
         type = "http";
         url = "https://mcp.context7.com/mcp";
       };
+
+      github = {
+        type = "http";
+        url = "https://api.githubcopilot.com/mcp/";
+      };
+
+      #      figma = {
+      #        type = "stdio";
+      #        command = "npx";
+      #        args = ["-y" "figma-developer-mcp" "--stdio"];
+      #      };
+      #
+      #      supabase = {
+      #        type = "stdio";
+      #        command = "supabase-mcp-server";
+      #      };
+      #
+      #      playwright = {
+      #        type = "stdio";
+      #        command = "npx";
+      #        args = ["@playwright/mcp@latest"];
+      #      };
     };
 
     # 编辑器和行为设置
@@ -163,6 +198,39 @@
           "mcp__memory__read_graph"
           "mcp__memory__search_nodes"
           "mcp__memory__open_nodes"
+
+          # === GitHub MCP Server Tools ===
+          "mcp__octocode__githubSearchCode"
+          "mcp__octocode__githubGetFileContent"
+          "mcp__octocode__githubViewRepoStructure"
+          "mcp__octocode__githubSearchRepositories"
+
+          # === Figma MCP Server Tools ===
+          "mcp__filesystem__read_file"
+          "mcp__filesystem__read_text_file"
+          "mcp__filesystem__read_media_file"
+          "mcp__filesystem__read_multiple_files"
+          "mcp__filesystem__write_file"
+          "mcp__filesystem__edit_file"
+          "mcp__filesystem__create_directory"
+          "mcp__filesystem__list_directory"
+          "mcp__filesystem__list_directory_with_sizes"
+          "mcp__filesystem__directory_tree"
+          "mcp__filesystem__move_file"
+          "mcp__filesystem__search_files"
+          "mcp__filesystem__get_file_info"
+          "mcp__filesystem__list_allowed_directories"
+
+          # === Supabase MCP Server Tools ===
+          "Bash(npx)"
+          "Bash(uvx)"
+          "Bash(pipx)"
+          "Bash(supabase-mcp-server)"
+
+          # === Playwright MCP Server Tools ===
+          "Bash(npx)"
+          "Bash(docker)"
+          "WebFetch"
         ];
         ask = [
           "Bash(git push:*)"
@@ -345,21 +413,4 @@
       '';
     };
   };
-
-  # 添加 Claude CLI 和相关工具包
-  home.packages = [
-  ];
-
-  # Claude CLI 环境变量配置
-  home.sessionVariables = {
-    # 自定义 API 端点，用于连接到第三方模型服务
-    ANTHROPIC_BASE_URL = "https://open.bigmodel.cn/api/anthropic";
-    # API 认证令牌 - 使用 sops 管理，通过 cat 命令读取文件内容
-    ANTHROPIC_AUTH_TOKEN = "$(cat /etc/claude/zai/token)";
-  };
-
-  # Shell 配置 - 添加 Claude Code 相关的 shell 功能
-  programs.bash.initExtra = ''
-
-  '';
 }

@@ -19,26 +19,6 @@
     # vegeta
     # speedtest-cli
 
-    # 云存储和同步
-    rclone
-
-    deadnix # https://github.com/astro/deadnix
-    statix # https://github.com/oppiliappan/statix
-    alejandra # https://github.com/kamadorueda/alejandra
-
-    age # https://github.com/FiloSottile/age 用来处理 agenix
-    sops
-
-    # zzz
-    atuin
-
-    # ssh
-    sshs
-    termscp
-
-    # shell
-    bash-completion
-
     # rename
     rnr # https://github.com/ismaelgv/rnr # FIXME 添加rnr的taskfile
   ];

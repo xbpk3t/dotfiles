@@ -9,16 +9,11 @@
   imports = [
     inputs.nixvim.homeModules.nixvim
     ./bash.nix
-    ./core.nix
     ./git.nix
     ./neovim.nix
 
-    # 添加SSH配置模块
     ./ssh.nix
-    # 添加rclone配置模块
     ./rclone.nix
-    # 新增的工具配置模块
-
     ./fastfetch.nix
     ./gh.nix
     ./go.nix
@@ -27,10 +22,13 @@
     ./ripgrep.nix
     ./uv.nix
 
-    ./starship.nix
     ./gpg.nix
     ./direnv.nix
     ./cc.nix
+
+    ./fzf.nix
+    ./nix.nix
+    ./yazi.nix
   ];
 
   # Home Manager needs a bit of information about you and the
@@ -53,6 +51,15 @@
     # the Home Manager release notes for a list of state version
     # changes in each release.
     stateVersion = "24.05";
+  };
+
+  # 环境变量
+  home.sessionVariables = {
+    EDITOR = "nvim";
+    BROWSER = "google-chrome";
+    LANG = "en_US.UTF-8";
+    LC_CTYPE = "en_US.UTF-8";
+    LC_COLLATE = "C"; # Avoids locale lookup errors
   };
 
   # Let Home Manager install and manage itself.

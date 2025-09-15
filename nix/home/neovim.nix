@@ -88,12 +88,6 @@
       mapleader = ","; # 设置leader键为逗号
     };
 
-    # 颜色主题
-    colorschemes.base16 = {
-      enable = true;
-      colorscheme = "default-light";
-    };
-
     # 键盘映射
     keymaps = [
       # 文件操作

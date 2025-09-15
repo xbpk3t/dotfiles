@@ -6,7 +6,7 @@
     pre-commit
 
     # CICD
-    ansible
+    # ansible  # Temporarily disabled due to hash mismatch in ncclient dependency
     opentofu
     cf-terraforming
 
@@ -22,16 +22,14 @@
 
     # wrangler # https://github.com/cloudflare/workers-sdk
 
-    # 环境管理
-    direnv
+    # 环境管理 (已移至 home-manager)
+    # direnv
 
     # API 工具
     grpcurl
 
     # 其他开发工具
     graphviz
-
-    fastfetch
 
     # 基础工具
     coreutils
@@ -44,9 +42,6 @@
 
     # 文件处理
     tree
-    bat
-    fd
-    ripgrep
     file
     which
 
@@ -56,10 +51,6 @@
     p7zip
     xz
     zstd
-
-    # 文本处理
-    jq
-    yq-go
 
     # 其他实用工具
     watch
@@ -79,18 +70,5 @@
     # 图像处理
     imagemagick
     exiftool
-
-    # Docker
-    hadolint
-
-    # git
-    # gh is in shared/packages.nix
-    git-lfs
-    git-quick-stats # https://github.com/git-quick-stats/git-quick-stats
-    gitleaks
-    gitlint
-    bfg-repo-cleaner
-    ugit
-    git-who # https://github.com/sinclairtarget/git-who 一个开源的命令行工具，显示 Git 仓库的提交者统计。
   ];
 }

@@ -1,4 +1,9 @@
-{...}: {
+{pkgs, ...}: {
+  home.packages = with pkgs; [
+    sshs
+    termscp
+  ];
+
   programs.ssh = {
     enable = true;
     enableDefaultConfig = false; # 禁用默认配置，手动设置

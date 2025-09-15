@@ -1,4 +1,18 @@
-{mail, ...}: {
+{
+  mail,
+  pkgs,
+  ...
+}: {
+  home.packages = with pkgs; [
+    git-lfs
+    git-quick-stats # https://github.com/git-quick-stats/git-quick-stats
+    gitleaks
+    gitlint
+    bfg-repo-cleaner
+    ugit
+    git-who # https://github.com/sinclairtarget/git-who 一个开源的命令行工具，显示 Git 仓库的提交者统计。
+  ];
+
   programs.git = {
     enable = true;
     userName = "XBPk3T";

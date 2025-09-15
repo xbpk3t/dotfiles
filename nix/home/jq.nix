@@ -1,4 +1,8 @@
-{...}: {
+{pkgs, ...}: {
+  home.packages = with pkgs; [
+    yq-go
+  ];
+
   programs.jq = {
     enable = true;
 
