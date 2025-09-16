@@ -3,7 +3,7 @@
   imports = [
     ./boot.nix
     ./networking.nix
-    ./packages.nix
+    ./pkgs.nix
     ./ssh.nix
     ./users.nix
     ./swap.nix

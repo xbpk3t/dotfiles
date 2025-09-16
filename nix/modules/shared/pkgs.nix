@@ -21,5 +21,17 @@
     cmake
 
     dateutils # 操作日期和时间表达式 dateadd、datediff、strptime
+
+    # 文件处理
+    tree
+    file
+    which
+
+    # 压缩工具
+    zip
+    unzip
+    p7zip
+    xz
+    zstd
   ];
 }
