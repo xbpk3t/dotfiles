@@ -5,13 +5,11 @@
 
   # Target-specific configurations
   # Enable theming for supported applications
-  #  stylix.targets = {
-  #    neovim.enable = true;
-  #    yazi.enable = true;
-  #    fzf.enable = true;
-  #    starship.enable = true;
-  #    # console.enable = true;
-  #  };
+  # Note: Using autoEnable instead of specific targets for compatibility
+  # stylix.targets = {
+  #   # Specific targets may not be available in current stylix version
+  #   # Let autoEnable handle the configuration automatically
+  # };
 
   # Color scheme configuration
   # Using Gruvbox Dark Hard - a popular terminal-friendly theme
@@ -37,9 +35,9 @@
       name = "JetBrainsMono Nerd Font";
     };
 
-    # Emoji font
+    # Emoji font - using noto-fonts-color-emoji for better compatibility
     emoji = {
-      package = pkgs.noto-fonts-emoji;
+      package = pkgs.noto-fonts-color-emoji;
       name = "Noto Color Emoji";
     };
   };

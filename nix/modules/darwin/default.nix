@@ -1,11 +1,10 @@
 # Darwin-specific modules
-{...}: {
+{pkgs, ...}: {
   imports = [
     ./directories.nix
-    ./homebrew.nix
+    ./brew.nix
     ./host-users.nix
     ./launchd.nix
-    ./pkgs.nix
     ./stylix.nix
     ./system.nix
     ./system-limits.nix
@@ -30,6 +29,10 @@
 
     # 保护 home-manager
     home-manager
+
+    # 字体包 - 确保在系统级别可用
+    nerd-fonts.jetbrains-mono
+    noto-fonts-color-emoji
   ];
 
   # Note: Nix settings, garbage collection, and optimization are managed by Determinate Nix
