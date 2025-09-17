@@ -1,59 +1,61 @@
 {pkgs, ...}: {
-  # Enable Stylix theming
-  stylix.enable = true;
-  stylix.autoEnable = true;
+  stylix = {
+    # Enable Stylix theming
+    enable = true;
+    autoEnable = true;
 
-  # Target-specific configurations
-  # Enable theming for supported applications
-  # Note: Using autoEnable instead of specific targets for compatibility
-  # stylix.targets = {
-  #   # Specific targets may not be available in current stylix version
-  #   # Let autoEnable handle the configuration automatically
-  # };
+    # Target-specific configurations
+    # Enable theming for supported applications
+    # Note: Using autoEnable instead of specific targets for compatibility
+    # stylix.targets = {
+    #   # Specific targets may not be available in current stylix version
+    #   # Let autoEnable handle the configuration automatically
+    # };
 
-  # Color scheme configuration
-  # Using Gruvbox Dark Hard - a popular terminal-friendly theme
-  stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-hard.yaml";
+    # Color scheme configuration
+    # Using Gruvbox Dark Hard - a popular terminal-friendly theme
+    base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-hard.yaml";
 
-  # Font configuration
-  stylix.fonts = {
-    # Monospace font for terminals and code
-    monospace = {
-      package = pkgs.nerd-fonts.jetbrains-mono;
-      name = "JetBrainsMono Nerd Font Mono";
+    # Font configuration
+    fonts = {
+      # Monospace font for terminals and code
+      monospace = {
+        package = pkgs.nerd-fonts.jetbrains-mono;
+        name = "JetBrainsMono Nerd Font Mono";
+      };
+
+      # Sans-serif font for UI elements
+      sansSerif = {
+        package = pkgs.nerd-fonts.jetbrains-mono;
+        name = "JetBrainsMono Nerd Font";
+      };
+
+      # Serif font (optional)
+      serif = {
+        package = pkgs.nerd-fonts.jetbrains-mono;
+        name = "JetBrainsMono Nerd Font";
+      };
+
+      # Emoji font - using noto-fonts-color-emoji for better compatibility
+      emoji = {
+        package = pkgs.noto-fonts-color-emoji;
+        name = "Noto Color Emoji";
+      };
     };
 
-    # Sans-serif font for UI elements
-    sansSerif = {
-      package = pkgs.nerd-fonts.jetbrains-mono;
-      name = "JetBrainsMono Nerd Font";
+    # Font sizes
+    fonts.sizes = {
+      applications = 12;
+      terminal = 14;
+      desktop = 12;
+      popups = 12;
     };
 
-    # Serif font (optional)
-    serif = {
-      package = pkgs.nerd-fonts.jetbrains-mono;
-      name = "JetBrainsMono Nerd Font";
+    # Home Manager integration settings
+    homeManagerIntegration = {
+      autoImport = true;
+      followSystem = true;
     };
-
-    # Emoji font - using noto-fonts-color-emoji for better compatibility
-    emoji = {
-      package = pkgs.noto-fonts-color-emoji;
-      name = "Noto Color Emoji";
-    };
-  };
-
-  # Font sizes
-  stylix.fonts.sizes = {
-    applications = 12;
-    terminal = 14;
-    desktop = 12;
-    popups = 12;
-  };
-
-  # Home Manager integration settings
-  stylix.homeManagerIntegration = {
-    autoImport = true;
-    followSystem = true;
   };
 
   # Cursor configuration

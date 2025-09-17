@@ -1,6 +1,6 @@
 {
-  config,
   pkgs,
+  username,
   ...
 }: {
   # 双向同步 scratches 到 R2 (每20分钟一次)
@@ -13,13 +13,14 @@
         "rclone:bisync-scratches"
       ];
       StartInterval = 1200; # 每20分钟执行一次
-      StandardOutPath = "/Users/${config.system.primaryUser}/Library/Logs/rclone-bisync-scratches.log";
-      StandardErrorPath = "/Users/${config.system.primaryUser}/Library/Logs/rclone-bisync-scratches.log";
+      StandardOutPath = "/Users/${username}/Library/Logs/rclone-bisync-scratches.log";
+      StandardErrorPath = "/Users/${username}/Library/Logs/rclone-bisync-scratches.log";
       EnvironmentVariables = {
-        PATH = "/run/current-system/sw/bin:/usr/bin:/bin:/usr/sbin:/sbin";
-        RCLONE_CONFIG = "/Users/${config.system.primaryUser}/.config/rclone/rclone.conf";
+        # Include the full PATH to access all user binaries including gh, rclone, etc.
+        PATH = "/etc/profiles/per-user/${username}/bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
+        RCLONE_CONFIG = "/Users/${username}/.config/rclone/rclone.conf";
       };
-      WorkingDirectory = "/Users/${config.system.primaryUser}";
+      WorkingDirectory = "/Users/${username}";
     };
   };
 
@@ -42,13 +43,14 @@
       RunAtLoad = true; # 开机时立即执行一次（plist 加载时触发，防止关机错过 sync）
       ThrottleInterval = 86400; # 24小时防重。若不足24小时 → 跳过（避免重复）
 
-      StandardOutPath = "/Users/${config.system.primaryUser}/Library/Logs/rclone-sync-docs-images.log";
-      StandardErrorPath = "/Users/${config.system.primaryUser}/Library/Logs/rclone-sync-docs-images.log";
+      StandardOutPath = "/Users/${username}/Library/Logs/rclone-sync-docs-images.log";
+      StandardErrorPath = "/Users/${username}/Library/Logs/rclone-sync-docs-images.log";
       EnvironmentVariables = {
-        PATH = "/run/current-system/sw/bin:/usr/bin:/bin:/usr/sbin:/sbin";
-        RCLONE_CONFIG = "/Users/${config.system.primaryUser}/.config/rclone/rclone.conf";
+        # Include the full PATH to access all user binaries including gh, rclone, etc.
+        PATH = "/etc/profiles/per-user/${username}/bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
+        RCLONE_CONFIG = "/Users/${username}/.config/rclone/rclone.conf";
       };
-      WorkingDirectory = "/Users/${config.system.primaryUser}";
+      WorkingDirectory = "/Users/${username}";
     };
   };
 }

@@ -1,42 +1,54 @@
 # Darwin host configuration
 # This file contains host-specific configurations that should not be shared between different machines
 {username, ...}: {
-  # System state version - this is host-specific and should not be changed after initial installation
-  system.stateVersion = 6;
-
-  # Host-specific user configuration
-  users.users = {
-    # Main user configuration for this specific machine
-    ${username} = {
-      home = "/Users/${username}";
-      description = username;
-      #      shell = "/run/current-system/sw/bin/bash";
-      shell = "/etc/profiles/per-user/${username}/bin/bash";
-    };
-
-    # Ops user (from ansible disk.yml)
-    # Note: Creating users on macOS requires different approach
-    ops = {
-      home = "/Users/ops";
-      description = "Operations user";
-      shell = "/bin/bash";
-    };
-  };
-
-  # Host-specific Nix settings
-  nix.settings.trusted-users = [username];
-
-  # Ensure bash is available in /etc/shells for chsh
-  environment.shells = [
-    "/etc/profiles/per-user/${username}/bin/bash"
-    "/run/current-system/sw/bin/bash"
-    "/bin/bash"
-    "/usr/bin/bash"
-  ];
-
-  # Import shared and Darwin-specific modules
+  # Import shared and Darwin-specific modules first
   imports = [
     ../../modules/darwin
     ../../modules/shared
   ];
+
+  # Host-specific overrides for system defaults
+  # These will override the defaults set in modules/darwin/system.nix
+  system.defaults = {
+    # Host-specific dock settings (overrides module defaults)
+    dock = {
+      tilesize = 2; #
+      largesize = 16; # 16 < size < 128
+      # Other dock settings will use module defaults
+    };
+
+    # Host-specific login window text
+    loginwindow = {
+      LoginwindowText = "Welcome to ${username}'s MacBook Pro";
+    };
+
+    # Any other host-specific system defaults can be added here
+    # They will override the module defaults due to import order
+  };
+
+  # Host-specific network configuration (overrides module defaults)
+  networking = {
+    hostName = "${username}";
+    computerName = "${username}";
+    localHostName = "${username}";
+  };
+
+  # Host-specific user overrides (if needed)
+  # users.users.${username}.description = "Custom description for this host";
+
+  # Host-specific Nix settings (if different from module defaults)
+  # nix.settings.trusted-users = [username "additional-user"];
+
+  # Host-specific launchd services (in addition to module defaults)
+  # launchd.agents = {
+  #   "host-specific-service" = {
+  #     serviceConfig = {
+  #       Label = "com.host.specific.service";
+  #       # ... service configuration
+  #     };
+  #   };
+  # };
+
+  # Any other host-specific configurations can be added here
+  # They will override or extend the module configurations
 }

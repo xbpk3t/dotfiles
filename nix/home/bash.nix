@@ -5,8 +5,10 @@
 }: {
   home.packages = with pkgs; [
     bash-completion
+    trash-cli # https://github.com/andreafrancia/trash-cli
   ];
 
+  programs.zsh.enable = false;
   programs.bash = {
     enable = true;
 
@@ -46,11 +48,9 @@
       "grep" = "rg";
 
       # 文件操作
-      "l" = "ls -lah";
-      "la" = "ls -lAh";
-      "ll" = "ls -lh";
-      "ls" = "ls -G";
-      "lsa" = "ls -lah";
+      ll = "eza -la";
+      la = "eza -a";
+      l = "eza";
       "md" = "mkdir -p";
       "rd" = "rmdir";
 
@@ -132,6 +132,17 @@
         mkdir -p "$1" && cd "$1"
       }
 
+      rm() {
+        if command -v trash-put &> /dev/null; then
+          trash-put "$@"
+        elif command -v trash &> /dev/null; then
+          trash "$@"
+        else
+          echo "Error: 'trash' command not found. Please install 'trash-cli' to use safe deletion."
+          return 1
+        fi
+      }
+
       # ===== 键盘绑定 =====
       # 启用 vi 模式（对应 zsh 的 defaultKeymap = "viins"）
       set -o vi
@@ -172,7 +183,6 @@
     '';
   };
 
-  # Modern shell tools 配置保持与 zsh 一致
   programs = {
     # A cat(1) clone with syntax highlighting and Git integration
     bat = {
@@ -181,6 +191,11 @@
       #        theme = "TwoDark";
       #        style = "numbers,changes,header";
       #      };
+    };
+    eza = {
+      enable = true;
+      enableBashIntegration = true;
+      git = true;
     };
 
     # A simple, fast and user-friendly alternative to find

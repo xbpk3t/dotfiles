@@ -11,25 +11,12 @@ vars:
 
 
 tasks:
-  current-shell:
-    desc: 显示当前正在使用的shell
-    cmds:
-      - echo "当前会话正在使用的Shell:"
-      - ps -p $$
-      - echo "当前Shell的完整路径:"
-      - |
-        if [ -f /proc/$$/exe ]; then
-          readlink /proc/$$/exe
-        else
-          echo "此系统不支持 /proc/$$/exe"
-        fi
-
   default-shell:
     desc: 显示用户的默认shell
     cmds:
       - echo "用户默认的Shell {{.DEFAULT_SHELL_PATH}}"
 
-  list-shells:
+  list:
     desc: 列出系统所有可用的合法shell
     interactive: true
     cmds:

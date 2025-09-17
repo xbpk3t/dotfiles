@@ -25,7 +25,7 @@ obj.enabled = true
 --- ChromeTabLimit.maxTabs
 --- Variable
 --- 最大允许的标签页数量
-obj.maxTabs = 20
+obj.maxTabs = 25
 
 --- ChromeTabLimit.checkInterval
 --- Variable

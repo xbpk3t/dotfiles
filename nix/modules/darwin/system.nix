@@ -1,66 +1,129 @@
-{username, ...}: {
-  # Shared macOS system preferences
+{
+  username,
+  lib,
+  ...
+}: {
+  # Shared macOS system preferences with default values
+  # Host-specific configurations can override these defaults
   system = {
-    # Set the primary user for this specific machine
-    primaryUser = username;
+    # Set the primary user for this specific machine (can be overridden)
+    primaryUser = lib.mkDefault username;
 
-    # System defaults specific to this host
+    # System defaults with mkDefault to allow host-specific overrides
     defaults = {
-      # Dock settings
+      # Dock settings (using mkDefault to allow host-specific overrides)
       dock = {
-        tilesize = 4;
-        magnification = false;
-        largesize = 32;
-        orientation = "left";
-        autohide = true;
-        autohide-delay = 0.0;
-        # Remove all default apps
-        persistent-apps = [];
+        tilesize = lib.mkDefault 32; # Smaller dock size as requested
+        magnification = lib.mkDefault false;
+        largesize = lib.mkDefault 48; # Adjusted proportionally
+        orientation = lib.mkDefault "left";
+        autohide = lib.mkDefault true;
+        autohide-delay = lib.mkDefault 0.0;
+        autohide-time-modifier = lib.mkDefault 0.0;
+        show-recents = lib.mkDefault false;
+        persistent-apps = lib.mkDefault [];
+        static-only = lib.mkDefault false;
+        launchanim = lib.mkDefault false;
       };
 
-      # Finder settings
+      # Finder settings (using mkDefault to allow host-specific overrides)
       finder = {
-        AppleShowAllFiles = true;
-        ShowPathbar = true;
-        ShowStatusBar = true;
-        FXDefaultSearchScope = "SCcf";
-        FXPreferredViewStyle = "clmv"; # Default column view
+        AppleShowAllFiles = lib.mkDefault true;
+        ShowPathbar = lib.mkDefault true;
+        ShowStatusBar = lib.mkDefault true;
+        FXDefaultSearchScope = lib.mkDefault "SCcf";
+        FXPreferredViewStyle = lib.mkDefault "clmv"; # Column view
+        CreateDesktop = lib.mkDefault false;
+        FXEnableExtensionChangeWarning = lib.mkDefault false;
+        _FXShowPosixPathInTitle = lib.mkDefault true;
+        QuitMenuItem = lib.mkDefault true;
+        AppleShowAllExtensions = lib.mkDefault true;
       };
 
-      # Global settings
+      # Global settings (using mkDefault to allow host-specific overrides)
       NSGlobalDomain = {
         # Time configuration
-        AppleICUForce24HourTime = true;
-        AppleInterfaceStyle = null; # Dark or null
+        AppleICUForce24HourTime = lib.mkDefault true;
+        AppleInterfaceStyle = lib.mkDefault null; # Dark or null for light mode
 
         # Keyboard settings
-        KeyRepeat = 2; # Set to fastest
-        InitialKeyRepeat = 15;
-        AppleKeyboardUIMode = 3;
+        KeyRepeat = lib.mkDefault 2; # Set to fastest
+        InitialKeyRepeat = lib.mkDefault 15;
+        AppleKeyboardUIMode = lib.mkDefault 3;
 
-        # Finder settings
-        AppleShowAllExtensions = true;
+        # Finder settings (removed duplicate AppleShowAllExtensions - already set in finder section)
+        NSNavPanelExpandedStateForSaveMode = lib.mkDefault true;
+        NSNavPanelExpandedStateForSaveMode2 = lib.mkDefault true;
+        PMPrintingExpandedStateForPrint = lib.mkDefault true;
+        PMPrintingExpandedStateForPrint2 = lib.mkDefault true;
 
         # Trackpad settings
+        "com.apple.trackpad.scaling" = lib.mkDefault 1.5;
+        "com.apple.mouse.tapBehavior" = lib.mkDefault 1;
+        "com.apple.trackpad.enableSecondaryClick" = lib.mkDefault true;
+
+        # Interface settings
+        ApplePressAndHoldEnabled = lib.mkDefault false;
+        AppleScrollerPagingBehavior = lib.mkDefault false;
+        AppleWindowTabbingMode = lib.mkDefault "manual";
+        NSAutomaticWindowAnimationsEnabled = lib.mkDefault false;
+        NSUseAnimatedFocusRing = lib.mkDefault false;
+
+        # Automatic spelling correction
+        NSAutomaticSpellingCorrectionEnabled = lib.mkDefault false;
+        NSAutomaticCapitalizationEnabled = lib.mkDefault false;
+        NSAutomaticDashSubstitutionEnabled = lib.mkDefault false;
+        NSAutomaticPeriodSubstitutionEnabled = lib.mkDefault false;
+        NSAutomaticQuoteSubstitutionEnabled = lib.mkDefault false;
       };
 
-      # Screensaver settings
+      # Screensaver settings (using mkDefault to allow host-specific overrides)
       screensaver = {
-        askForPassword = true;
-        askForPasswordDelay = 0;
+        askForPassword = lib.mkDefault true;
+        askForPasswordDelay = lib.mkDefault 0;
       };
 
-      # Trackpad settings
+      # Trackpad settings (using mkDefault to allow host-specific overrides)
       trackpad = {
-        Clicking = true;
-        TrackpadThreeFingerDrag = true;
+        Clicking = lib.mkDefault true;
+        TrackpadThreeFingerDrag = lib.mkDefault true;
+      };
+
+      # Window manager settings (using mkDefault to allow host-specific overrides)
+      WindowManager = {
+        AutoHide = lib.mkDefault false;
+        EnableStandardClickToShowDesktop = lib.mkDefault true;
+        EnableTiledWindowMargins = lib.mkDefault true;
+        EnableTilingByEdgeDrag = lib.mkDefault true;
+        EnableTilingOptionAccelerator = lib.mkDefault true;
+        EnableTopTilingByEdgeDrag = lib.mkDefault true;
+        GloballyEnabled = lib.mkDefault false;
+        HideDesktop = lib.mkDefault false;
+        StandardHideDesktopIcons = lib.mkDefault false;
+        StandardHideWidgets = lib.mkDefault false;
+        StageManagerHideWidgets = lib.mkDefault false;
+      };
+
+      # Mission control settings (using mkDefault to allow host-specific overrides)
+      spaces = {
+        spans-displays = lib.mkDefault false;
+      };
+
+      # Login window settings (using mkDefault to allow host-specific overrides)
+      loginwindow = {
+        GuestEnabled = lib.mkDefault false;
+        DisableConsoleAccess = lib.mkDefault false;
+        SHOWFULLNAME = lib.mkDefault true;
+        LoginwindowText = lib.mkDefault "Welcome to ${username}'s MacBook Pro";
       };
     };
   };
 
-  # System state version - this is host-specific and should not be changed after initial installation
-  system.stateVersion = 6;
+  # Time zone and locale settings (using mkDefault to allow host-specific overrides)
+  time = {
+    timeZone = lib.mkDefault "Asia/Shanghai";
+  };
 
-  # Enable zsh shell
-  programs.zsh.enable = false;
+  # System state version - this should be set per host, so using mkDefault
+  system.stateVersion = lib.mkDefault 6;
 }
