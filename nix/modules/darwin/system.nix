@@ -65,7 +65,8 @@
         # Interface settings
         ApplePressAndHoldEnabled = lib.mkDefault false;
         AppleScrollerPagingBehavior = lib.mkDefault false;
-        AppleWindowTabbingMode = lib.mkDefault "manual";
+        # 用来保证IDEA里多个项目设置为在同一窗口内以 Tab 形式打开
+        AppleWindowTabbingMode = lib.mkDefault "always";
         NSAutomaticWindowAnimationsEnabled = lib.mkDefault false;
         NSUseAnimatedFocusRing = lib.mkDefault false;
 

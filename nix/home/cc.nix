@@ -1,4 +1,28 @@
 {pkgs, ...}: {
+  # FIXME 怎么在codex、cc 之间复用这些commands和agents?
+  #  # 自动发现 cc 目录中的命令文件
+  #  subagentsDir = ./cc/subagents;
+  #  agents =
+  #    lib.mapAttrs'
+  #    (
+  #      fileName: _:
+  #        lib.nameValuePair
+  #        (lib.removeSuffix ".md" fileName)
+  #        (builtins.readFile (subagentsDir + "/${fileName}"))
+  #    )
+  #    (builtins.readDir subagentsDir);
+  #
+  #  commandsDir = ./cc/commands;
+  #  commands =
+  #    lib.mapAttrs'
+  #    (
+  #      fileName: _:
+  #        lib.nameValuePair
+  #        (lib.removeSuffix ".md" fileName)
+  #        (builtins.readFile (commandsDir + "/${fileName}"))
+  #    )
+  #    (builtins.readDir commandsDir);
+
   # Claude CLI 环境变量配置
   home.sessionVariables = {
     # 自定义 API 端点，用于连接到第三方模型服务
@@ -106,6 +130,15 @@
       github = {
         type = "http";
         url = "https://api.githubcopilot.com/mcp/";
+      };
+
+      claude-task-master = {
+        type = "stdio";
+        command = "npx";
+        args = ["-y" "task-master-ai"];
+        env = {
+          ANTHROPIC_API_KEY = "$(cat /etc/claude/zai/token)";
+        };
       };
 
       #      figma = {

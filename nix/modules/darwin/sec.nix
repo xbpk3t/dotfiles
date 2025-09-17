@@ -30,7 +30,7 @@
     Defaults passwd_tries=3
     Defaults badpass_message="Password incorrect, please try again"
     Defaults passprompt="[sudo] password for %p: "
-    Defaults secure_path="/run/current-system/sw/bin:/usr/bin:/bin"
+    Defaults secure_path="/etc/profiles/per-user/%p/bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 
     # Passwordless sudo for admin group (optional, uncomment if needed)
     # %admin ALL=(ALL) NOPASSWD: ALL

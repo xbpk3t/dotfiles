@@ -4,7 +4,8 @@
   ...
 }: {
   # 双向同步 scratches 到 R2 (每20分钟一次)
-  launchd.agents.rclone-bisync-scratches = {
+  # 使用系统级 daemon 而不是用户级 agent 来避免出现在登录项中
+  launchd.daemons.rclone-bisync-scratches = {
     serviceConfig = {
       Label = "local.rclone.bisync.scratches";
       ProgramArguments = [
@@ -25,7 +26,8 @@
   };
 
   # 同步 docs 到 R2 (每天一次)
-  launchd.agents.rclone-sync-docs-images = {
+  # 使用系统级 daemon 而不是用户级 agent 来避免出现在登录项中
+  launchd.daemons.rclone-sync-docs-images = {
     serviceConfig = {
       Label = "local.rclone.sync.docs-images";
       ProgramArguments = [

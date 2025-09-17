@@ -8,6 +8,31 @@
     trash-cli # https://github.com/andreafrancia/trash-cli
   ];
 
+  # 环境变量
+  home.sessionVariables =
+    {
+      EDITOR = "nvim";
+      BROWSER = "google-chrome";
+      LANG = "en_US.UTF-8";
+      LC_CTYPE = "en_US.UTF-8";
+      LC_COLLATE = "C"; # Avoids locale lookup errors
+      BUN_INSTALL = "$HOME/.bun";
+      PNPM_HOME = "$HOME/.local/share/pnpm";
+      MAIL = "yyzw@live.com";
+    }
+    // (lib.optionalAttrs (pkgs.stdenv.isDarwin) {
+      # 用来抑制 macOS 终端中显示的 "The default interactive shell is now zsh"
+      BASH_SILENCE_DEPRECATION_WARNING = "1";
+    });
+
+  # PATH 设置（使用 Home Manager 的正确方式）
+  home.sessionPath = [
+    "$HOME/.orbstack/bin"
+    "$HOME/go/bin"
+    "$BUN_INSTALL/bin"
+    "$PNPM_HOME/bin"
+  ];
+
   programs.zsh.enable = false;
   programs.bash = {
     enable = true;
@@ -57,20 +82,6 @@
       # 编辑器
       "vim" = "LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 nvim";
     };
-
-    # 环境变量
-    sessionVariables =
-      {
-        EDITOR = "nvim";
-        BUN_INSTALL = "$HOME/.bun";
-        PNPM_HOME = "$HOME/.local/share/pnpm";
-        PATH = "$HOME/.orbstack/bin:$HOME/go/bin:$BUN_INSTALL/bin:$PNPM_HOME:$PATH";
-        MAIL = "yyzw@live.com";
-      }
-      // (lib.optionalAttrs (pkgs.stdenv.isDarwin) {
-        # 用来抑制 macOS 终端中显示的 "The default interactive shell is now zsh"
-        BASH_SILENCE_DEPRECATION_WARNING = "1";
-      });
 
     # bash 的 shell 选项设置（性能优化）
     shellOptions = [

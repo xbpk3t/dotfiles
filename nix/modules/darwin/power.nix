@@ -7,7 +7,7 @@
 
   power = {
     restartAfterFreeze = true; # 系统冻结后自动重启
-    restartAfterPowerFailure = false; # 断电后自动开机
+    # restartAfterPowerFailure = false; # 断电后自动开机 [Option is not supported on all devices.] 我的机器不支持该key
     sleep = {
       allowSleepByPowerButton = true; # 允许电源键触发睡眠（macos本身默认就是短按电源键触发睡眠，所以使用true）
       computer = 20; # 20 分钟后系统睡眠
