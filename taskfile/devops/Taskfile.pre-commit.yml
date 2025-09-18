@@ -22,6 +22,9 @@ vars:
     - nilaway
     - betteralign
     - gitleaks
+    - statix-fix
+    - statix-check
+    - deadnix
 
 
 tasks:

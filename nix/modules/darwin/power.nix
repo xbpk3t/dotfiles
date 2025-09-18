@@ -1,6 +1,6 @@
 # Darwin power management configuration
 # macOS-specific power settings and optimizations
-{...}: {
+_: {
   # Power management settings
   # Note: Most power settings in macOS are managed through System Preferences
   # or pmset command line tool. nix-darwin has limited power management options.

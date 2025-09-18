@@ -1,7 +1,7 @@
 # NixOS system limits configuration
 # Based on Linux-Optimizer project configurations for Ubuntu/Debian/CentOS/Fedora
 # Contains system limits configuration that can be shared between multiple hosts
-{...}: {
+_: {
   # System limits optimization (ulimit settings)
   # Based on Linux-Optimizer /etc/profile configurations
   security.pam.loginLimits = [

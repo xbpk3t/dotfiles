@@ -94,8 +94,6 @@ tasks:
       - brew services cleanup
       - brew autoremove
 
-
-
   cask-upgrade:
     desc: 更新cask（也就是所有app）
     cmds:

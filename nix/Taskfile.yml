@@ -1,7 +1,6 @@
 version: '3'
 
 includes:
-  lint: ./Taskfile.lint.yml
   sk:
     taskfile: ./secrets/Taskfile.yml
     dir: ./secrets
@@ -57,9 +56,13 @@ env:
 
 tasks:
   default:
-    desc: "构建并切换到当前系统配置"
+    desc: 构建并切换到当前系统配置
     cmds:
+      - task: update
       - task: build-switch
+      - task: prune
+
+
 
   # === 核心构建任务 ===
   build:
@@ -73,7 +76,8 @@ tasks:
     desc: "构建并切换到新配置"
     cmds:
       - echo "正在构建并切换 {{.OS}} 配置..."
-      - sudo {{.REBUILD_CMD}} switch --flake ./nix#{{.HOSTNAME}}
+#      - sudo {{.REBUILD_CMD}} switch --flake .#{{.HOSTNAME}}
+      - sudo {{.REBUILD_CMD}} switch --flake .#luck # FIXME
       - echo "切换到新配置完成！"
 
 
@@ -129,15 +133,15 @@ tasks:
 
   fmt:
     desc: "Format nix files in the repository"
-    dir: './nix'
     cmds:
       - nix fmt
 
   check-config:
+    internal: true
     desc: "Check nix-darwin configuration syntax"
     cmds:
       - echo "🔍 Checking configuration syntax..."
-      - nix flake check ./nix
+      - nix flake check .
       - echo "✅ Configuration syntax is valid"
 
 

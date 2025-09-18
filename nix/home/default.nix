@@ -103,6 +103,9 @@
     # android-tools
 
     lua
+
+    # haskell
+    # cabal-install
   ];
 
   ts = with pkgs; [

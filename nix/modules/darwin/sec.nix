@@ -1,48 +1,50 @@
 # Darwin security configuration
 {pkgs, ...}: {
-  # PAM configuration
-  security.pam = {
-    services = {
-      sudo_local = {
-        enable = true;
-        touchIdAuth = true;
-        watchIdAuth = true;
+  security = {
+    # PAM configuration
+    pam = {
+      services = {
+        sudo_local = {
+          enable = true;
+          touchIdAuth = true;
+          watchIdAuth = true;
+        };
       };
     };
-  };
 
-  # Sudo configuration
-  security.sudo.extraConfig = ''
-    # Environment variables to preserve
-    Defaults env_keep += "EDITOR VISUAL PAGER"
-    Defaults env_keep += "HOME XDG_*"
-    Defaults env_keep += "SSH_AUTH_SOCK"
-    Defaults env_keep += "KUBECONFIG"
-    Defaults env_keep += "AWS_*"
-    Defaults env_keep += "GOOGLE_*"
-    Defaults env_keep += "DOCKER_*"
+    # Sudo configuration
+    sudo.extraConfig = ''
+      # Environment variables to preserve
+      Defaults env_keep += "EDITOR VISUAL PAGER"
+      Defaults env_keep += "HOME XDG_*"
+      Defaults env_keep += "SSH_AUTH_SOCK"
+      Defaults env_keep += "KUBECONFIG"
+      Defaults env_keep += "AWS_*"
+      Defaults env_keep += "GOOGLE_*"
+      Defaults env_keep += "DOCKER_*"
 
-    # Security settings
-    Defaults !tty_tickets
-    Defaults !insults
-    Defaults log_output
-    Defaults loglinelen=0
-    Defaults passwd_tries=3
-    Defaults badpass_message="Password incorrect, please try again"
-    Defaults passprompt="[sudo] password for %p: "
-    Defaults secure_path="/etc/profiles/per-user/%p/bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+      # Security settings
+      Defaults !tty_tickets
+      Defaults !insults
+      Defaults log_output
+      Defaults loglinelen=0
+      Defaults passwd_tries=3
+      Defaults badpass_message="Password incorrect, please try again"
+      Defaults passprompt="[sudo] password for %p: "
+      Defaults secure_path="/etc/profiles/per-user/%p/bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 
-    # Passwordless sudo for admin group (optional, uncomment if needed)
-    # %admin ALL=(ALL) NOPASSWD: ALL
-  '';
+      # Passwordless sudo for admin group (optional, uncomment if needed)
+      # %admin ALL=(ALL) NOPASSWD: ALL
+    '';
 
-  # Certificate management
-  security.pki = {
-    installCACerts = true;
-    certificateFiles = [
-      # Add custom CA certificates here
-      # ./certs/my-ca.crt
-    ];
+    # Certificate management
+    pki = {
+      installCACerts = true;
+      certificateFiles = [
+        # Add custom CA certificates here
+        # ./certs/my-ca.crt
+      ];
+    };
   };
 
   # GPG configuration

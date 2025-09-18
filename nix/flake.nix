@@ -79,8 +79,8 @@
 
     specialArgs = {
       inherit username mail hostname inputs;
-      sops-nix = sops-nix;
-      stylix = stylix;
+      inherit sops-nix;
+      inherit stylix;
     };
   in {
     # Darwin configurations

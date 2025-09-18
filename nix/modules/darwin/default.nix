@@ -3,14 +3,13 @@
   imports = [
     ./fonts.nix
     ./homebrew.nix
-    ./launchd.nix
     ./stylix.nix
     ./system.nix
-    ./system-limits.nix
     ./users.nix
     ./networking.nix
     ./power.nix
     ./sec.nix
+    ./launchd.nix
   ];
 
   # Enable nix-darwin's management of the Nix installation for Determinate compatibility

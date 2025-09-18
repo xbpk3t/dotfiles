@@ -19,7 +19,7 @@
 
     # Host-specific login window text
     loginwindow = {
-      LoginwindowText = "Welcome to ${username}'s MacBook Pro";
+      autoLoginUser = "luck"; # FIXME 仍然是目前username跟HOME不一致的问题，之后可以移除该配置
     };
 
     # Any other host-specific system defaults can be added here

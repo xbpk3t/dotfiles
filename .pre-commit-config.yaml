@@ -192,6 +192,21 @@ repos:
         language: golang
         entry: nilaway ./...
 
+      - id: statix-fix
+        name: Statix Fix
+        description: Fix files with statix
+        entry: statix fix ./nix
+        types: [nix]
+        pass_filenames: false
+        language: system
+
+      - id: statix-check
+        name: Statix Check
+        description: Check files for improvements with statix
+        entry: statix check ./nix
+        types: [nix]
+        pass_filenames: false
+        language: system
 
   - repo: https://github.com/astro/deadnix
     rev: v1.3.1

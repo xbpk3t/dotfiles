@@ -1,6 +1,6 @@
 # NixOS boot configuration
 # Contains boot configuration that can be shared between multiple hosts
-{...}: {
+_: {
   # Shared boot configuration
   boot = {
     # Shared kernel modules
