@@ -10,6 +10,7 @@
     ./power.nix
     ./sec.nix
     ./launchd.nix
+    # ./services.nix
   ];
 
   # Enable nix-darwin's management of the Nix installation for Determinate compatibility

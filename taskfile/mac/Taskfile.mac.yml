@@ -31,31 +31,6 @@ tasks:
   fetch:
     cmd: fastfetch
 
-
-  df:
-    cmd: df -lh # disk free
-
-  du:
-    cmd: du -sh * | sort -h # disk usage, 查看文件夹下各文件大小，并排序
-    dir: '{{.USER_WORKING_DIR}}'
-
-
-  hostname:
-    interactive: true
-    silent: true
-    desc: macos不同于其他linux distro，macos设计了三个名称，是为了在不同场景和应用层级中（用户界面、本地网络发现、系统网络配置）提供更精细和合适的标识
-    cmds:
-      - echo "【电脑名称】这是系统偏好设置中显示的名称，也是隔空投送等功能中他人看到的名称。核心标识。" # 这是给你看的。它是一个用户友好的、可读性高的名称，会显示在“关于本机”、共享设置、隔空投送（AirDrop）等图形界面中。你可以把它理解为这台电脑的“昵称”或“常用名”。
-      - scutil --get ComputerName
-      - echo "【主机名】主要用于系统内部和网络标识，初始默认为空或 localhost" # 这是给专业系统和网络服务看的。它是由管理员设置的、系统级的完整主机名（FQDN, Fully Qualified Domain Name），通常包含域名部分（如 myhost.example.com）。它可以被诸如远程登录（SSH）、网络文件系统（NFS）等许多底层 Unix 工具和网络服务使用。你的系统显示“未设置”，意味着 macOS 目前没有设定一个独立的、系统级的主机名，而是可能回退使用 LocalHostName 或其他名称。
-      - scutil --get HostName || true
-      - echo "【当前主机名】若 HostName 未设置，此命令可能返回 localhost"
-      - hostname
-      - echo "【本地主机名】这是用于本地 Bonjour 网络发现的名称，需配置 mDNS (如 Avahi)，通常以 .local 结尾" # 这是给本地网络上的其他 Apple 设备看的。它专门用于 Bonjour（mDNS）网络发现协议。Bonjour 允许你的 Mac 和其他苹果设备（如 iPhone、iPad、MacBook）在同一个局域网内无需配置就能相互发现和识别。你看到的 .local后缀就是 Bonjour 的典型特征。系统通常会自动从 ComputerName 生成一个合法的 LocalHostName（去除空格和特殊字符）。
-      - scutil --get LocalHostName
-
-
-
     #  - url: https://github.com/syncthing/syncthing
     #    des: 一个基于P2P实现的“远程同步文件”工具，提供GUI和CLI（通过web操作）两种下载方式，用homebrew安装，默认CLI。用这个就可以代替之前用的【坚果云】了 (Some time ago used Nutstore to sync code bidirectionally. I've also used other cloud service like icloud, dropbox, google-cloud to implement similar task.)。
 
@@ -68,11 +43,9 @@ tasks:
 
   # [network-quality/community: A place (wiki) to coordinate the activity of the community of people interested in the network-quality project.](https://github.com/network-quality/community)
 
-
   nq:
     desc: macos内置speedtest命令
     cmd: networkQuality
-
 
   # [新型真●一键激活JetBrains全家桶方式，不需要手动下载任何文件(懒人福利)！idea/win/linux/mac - 开发调优 - LINUX DO](https://linux.do/t/topic/694120)
   license:

@@ -9,9 +9,3 @@ version: '3'
 #- tcpdump -i eth0 -vnn src host 172.16.1.122 # 抓取源ip是172.16.1.122数据包
 #- tcpdump -i eth0 -vnn dst host 172.16.1.122 # 抓取目的ip是172.16.1.122数据包
 #- tcpdump -i eth0 -A 'tcp && port 80
-
-
-
-tasks:
-  info:
-    cmd: wrangler whoami # 无法推送到pages，怎么排查具体问题? 怎么查看wrangler权限设置?

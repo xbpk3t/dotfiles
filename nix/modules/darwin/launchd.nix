@@ -55,5 +55,51 @@
         WorkingDirectory = "/Users/${username}";
       };
     };
+
+    # 系统清理服务 (清理临时文件和缓存)
+    system-cleanup = {
+      serviceConfig = {
+        Label = "local.user.system.cleanup";
+        ProgramArguments = [
+          "${pkgs.bash}/bin/bash"
+          "-c"
+          ''
+            # 系统清理脚本
+            TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S")
+            LOG_FILE="/Users/${username}/Library/Logs/system-cleanup.log"
+
+            echo "$TIMESTAMP: Starting system cleanup" >> "$LOG_FILE"
+
+            # 清理 macOS 缓存文件 (注意：只清理安全的缓存)
+            find "/Users/${username}/Library/Caches" -type f -mtime +30 -delete >> "$LOG_FILE" 2>&1
+
+            # 清理旧的日志文件
+            find "/Users/${username}/Library/Logs" -name "*.log" -mtime +30 -size +10M -delete >> "$LOG_FILE" 2>&1
+
+            task -g brew:cleanup
+
+            task -g pnpm:cleanup
+
+            echo "$TIMESTAMP: System cleanup completed" >> "$LOG_FILE"
+          ''
+        ];
+        StartCalendarInterval = [
+          {
+            # 每周日凌晨2点执行
+            Weekday = 0;
+            Hour = 2;
+            Minute = 0;
+          }
+        ];
+        RunAtLoad = false;
+        StandardOutPath = "/Users/${username}/Library/Logs/system-cleanup.log";
+        StandardErrorPath = "/Users/${username}/Library/Logs/system-cleanup.log";
+        EnvironmentVariables = {
+          PATH = "/etc/profiles/per-user/${username}/bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
+          USER = username;
+        };
+        WorkingDirectory = "/Users/${username}";
+      };
+    };
   };
 }

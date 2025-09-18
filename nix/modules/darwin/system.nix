@@ -146,14 +146,15 @@
       };
 
       controlcenter = {
+        # Menubar上不展示以下服务
         AirDrop = lib.mkDefault false;
         NowPlaying = lib.mkDefault false;
+        Display = lib.mkDefault false;
+        Sound = lib.mkDefault false;
+        BatteryShowPercentage = lib.mkDefault false;
+        FocusModes = lib.mkDefault false;
 
-        BatteryShowPercentage = lib.mkDefault true;
         Bluetooth = lib.mkDefault true;
-        Display = lib.mkDefault true;
-        FocusModes = lib.mkDefault true;
-        Sound = lib.mkDefault true;
       };
 
       # https://mynixos.com/nix-darwin/options/system.defaults.screencapture

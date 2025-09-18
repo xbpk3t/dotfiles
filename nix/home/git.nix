@@ -15,7 +15,7 @@
 
   programs.git = {
     enable = true;
-    userName = "XBPk3T";
+    userName = "xbpk3t";
     userEmail = mail;
     lfs.enable = true;
 

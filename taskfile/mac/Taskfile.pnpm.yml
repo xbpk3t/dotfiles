@@ -16,7 +16,7 @@ tasks:
       - echo "【存储管理】store位置:"
       - pnpm store path
 
-  optimize:
+  cleanup:
     cmds:
       - pnpm store prune # 移除所有全局unused pkg
 

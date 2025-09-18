@@ -8,7 +8,6 @@ includes:
   gor: taskfile/devops/Taskfile.goreleaser.yml
   caddy: taskfile/devops/Taskfile.caddy.yml
   pc: taskfile/devops/Taskfile.pre-commit.yml
-  wrangler: taskfile/devops/Taskfile.wrangler.yml
   rclone: taskfile/devops/Taskfile.rclone.yml
   tf: taskfile/devops/Taskfile.tf.yml
 

@@ -39,46 +39,46 @@
 
     '';
 
-    codex = {
-      enable = true;
-      package = pkgs.codex;
-      #    settings = {
-      #      approval_policy = "on-request";
-      #      sandbox_mode = "workspace-write";
-      #      file_opener = "cursor";
-      #      tools = { web_search = true; };
-      #      mcp_servers = {
-      #        github = {
-      #          command = "github-mcp-server";
-      #          args = [ "stdio" ];
-      #          env = { GITHUB_PERSONAL_ACCESS_TOKEN = githubMcpToken; };
-      #        };
-      #        rails = {
-      #          command = "rails-mcp-server";
-      #          args = [ "stdio" ];
-      #          env = { };
-      #        };
-      #      };
-      #    };
-
-      #    settings = {
-      #        model = "gpt-5";
-      #        model_provider = "openai";
-      #        model_providers = {
-      #          openai = {
-      #            # Name of the provider that will be displayed in the Codex UI.
-      #            name = "OpenAI using Chat Completions";
-      #            base_url = "https://api.openai.com/v1";
-      #            env_key = "OPENAI_API_KEY";
-      #            wire_api = "chat";
-      #            query_params = {};
-      #          };
-      #        };
-      #    };
-      # Custom guidance for the agent(s)
-      custom-instructions = ''
-      '';
-    };
+    #    codex = {
+    #      enable = true;
+    #      package = pkgs.codex;
+    #      #    settings = {
+    #      #      approval_policy = "on-request";
+    #      #      sandbox_mode = "workspace-write";
+    #      #      file_opener = "cursor";
+    #      #      tools = { web_search = true; };
+    #      #      mcp_servers = {
+    #      #        github = {
+    #      #          command = "github-mcp-server";
+    #      #          args = [ "stdio" ];
+    #      #          env = { GITHUB_PERSONAL_ACCESS_TOKEN = githubMcpToken; };
+    #      #        };
+    #      #        rails = {
+    #      #          command = "rails-mcp-server";
+    #      #          args = [ "stdio" ];
+    #      #          env = { };
+    #      #        };
+    #      #      };
+    #      #    };
+    #
+    #      #    settings = {
+    #      #        model = "gpt-5";
+    #      #        model_provider = "openai";
+    #      #        model_providers = {
+    #      #          openai = {
+    #      #            # Name of the provider that will be displayed in the Codex UI.
+    #      #            name = "OpenAI using Chat Completions";
+    #      #            base_url = "https://api.openai.com/v1";
+    #      #            env_key = "OPENAI_API_KEY";
+    #      #            wire_api = "chat";
+    #      #            query_params = {};
+    #      #          };
+    #      #        };
+    #      #    };
+    #      # Custom guidance for the agent(s)
+    #      custom-instructions = ''
+    #      '';
+    #    };
 
     # Claude Code 程序配置
     claude-code = {

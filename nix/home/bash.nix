@@ -78,7 +78,7 @@
         # 文件操作
         ll = "eza -la";
         la = "eza -a";
-        l = "eza";
+        lls = "eza -la --sort=size --reverse --total-size";
         "md" = "mkdir -p";
         "rd" = "rmdir";
 

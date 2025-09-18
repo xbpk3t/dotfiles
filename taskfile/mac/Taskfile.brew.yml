@@ -40,21 +40,6 @@ tasks:
       - task: info
       - brew doctor
 
-  install:
-    desc: check, if not then install
-    cmds:
-      - |
-        if ! command -v brew &> /dev/null; then
-          echo "⚠️  正在安装 Homebrew..."
-          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-        else
-          echo "✅ Homebrew 已安装"
-        fi
-    preconditions:
-      - sh: '[ "$(uname)" = "Darwin" ]'
-        msg: "此任务仅支持 macOS 系统"
-
-
   check-size:
     cmds:
       - git count-objects -v
@@ -100,16 +85,3 @@ tasks:
       - brew cu -facy
     preconditions:
       - brew tap buo/cask-upgrade
-
-
-  deps:
-    desc: Show dependency tree for a package (provide package name)
-    cmds:
-      - brew deps {{.CLI_ARGS}} --tree --installed
-    silent: true
-
-  uses:
-    desc: Show reverse dependency tree for a package (provide package name)
-    cmds:
-      - brew uses {{.CLI_ARGS}} --tree --installed
-    silent: true
