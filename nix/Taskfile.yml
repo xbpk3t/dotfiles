@@ -194,6 +194,10 @@ tasks:
     cmd: nix-instantiate --parse {{.CLI_ARGS}} > /dev/null && echo "Bash.nix syntax is valid
 
 
+  rollback:
+    desc: 回滚到上一个generation
+    cmd: sudo nixos-rebuild switch --rollback #  sudo nixos-rebuild switch --generation 149
+
 #  status:
 #    desc: "Show comprehensive system status"
 #    silent: true

@@ -144,22 +144,371 @@
           };
         };
 
-        #      figma = {
-        #        type = "stdio";
-        #        command = "npx";
-        #        args = ["-y" "figma-developer-mcp" "--stdio"];
-        #      };
-        #
-        #      supabase = {
-        #        type = "stdio";
-        #        command = "supabase-mcp-server";
-        #      };
-        #
-        #      playwright = {
-        #        type = "stdio";
-        #        command = "npx";
-        #        args = ["@playwright/mcp@latest"];
-        #      };
+        # [johnhuang316/code-index-mcp](https://github.com/johnhuang316/code-index-mcp) 用于提高编写代码的效率和检索效率
+        code-index = {
+          type = "stdio";
+          command = "uvx";
+          args = ["code-index-mcp"];
+        };
+
+        # Microsoft Markitdown - Convert various file formats to Markdown (Useful for document processing)
+        markitdown = {
+          type = "stdio";
+          command = "npx";
+          args = ["-y" "@microsoft/markitdown-mcp"];
+        };
+
+        # GitHub Official MCP Server (Essential for GitHub integration)
+        github-mcp = {
+          type = "stdio";
+          command = "npx";
+          args = ["-y" "@github/github-mcp-server"];
+          env = {
+            GITHUB_PERSONAL_ACCESS_TOKEN = "$(cat /etc/claude/github-token)";
+          };
+        };
+
+        # Microsoft Playwright - Automate web browsers (Useful for testing and web automation)
+        playwright = {
+          type = "stdio";
+          command = "npx";
+          args = ["-y" "@microsoft/playwright-mcp"];
+        };
+
+        # Serena - Semantic code retrieval & editing (Useful for code analysis)
+        serena = {
+          type = "stdio";
+          command = "npx";
+          args = ["-y" "serena-mcp"];
+        };
+
+        # Firecrawl - Extract web data (Useful for web scraping and content extraction)
+        firecrawl = {
+          type = "stdio";
+          command = "npx";
+          args = ["-y" "@firecrawl/firecrawl-mcp-server"];
+          env = {
+            FIRECRAWL_API_KEY = "$(cat /etc/claude/firecrawl-token)";
+          };
+        };
+
+        # Notion Official MCP Server (Useful if you use Notion)
+        # notion = {
+        #   type = "stdio";
+        #   command = "npx";
+        #   args = ["-y" "@notionhq/notion-mcp-server"];
+        #   env = {
+        #     NOTION_TOKEN = "$(cat /etc/claude/notion-token)";
+        #   };
+        # };
+
+        # Unity - Control Unity Editor (Only if you work with Unity)
+        # unity = {
+        #   type = "stdio";
+        #   command = "npx";
+        #   args = ["-y" "@coplaydev/unity-mcp"];
+        # };
+
+        # Azure services integration (Enterprise cloud services - rarely used for personal projects)
+        # azure = {
+        #   type = "stdio";
+        #   command = "npx";
+        #   args = ["-y" "@azure/azure-mcp"];
+        #   env = {
+        #     AZURE_SUBSCRIPTION_ID = "$(cat /etc/claude/azure-subscription-id)";
+        #     AZURE_TENANT_ID = "$(cat /etc/claude/azure-tenant-id)";
+        #     AZURE_CLIENT_ID = "$(cat /etc/claude/azure-client-id)";
+        #     AZURE_CLIENT_SECRET = "$(cat /etc/claude/azure-client-secret)";
+        #   };
+        # };
+
+        # Stripe - Payment API integration (Only if you work with payments)
+        # stripe = {
+        #   type = "stdio";
+        #   command = "npx";
+        #   args = ["-y" "@stripe/agent-toolkit"];
+        #   env = {
+        #     STRIPE_API_KEY = "$(cat /etc/claude/stripe-api-key)";
+        #   };
+        # };
+
+        # Terraform - Infrastructure as Code (Useful for DevOps)
+        terraform = {
+          type = "stdio";
+          command = "npx";
+          args = ["-y" "@hashicorp/terraform-mcp-server"];
+        };
+
+        # Microsoft Learn - Official documentation (Useful for Microsoft tech docs)
+        # microsoft-learn = {
+        #   type = "stdio";
+        #   command = "npx";
+        #   args = ["-y" "@microsoftdocs/mcp"];
+        # };
+
+        # Azure DevOps (Microsoft-specific DevOps - rarely used outside Microsoft ecosystem)
+        # azure-devops = {
+        #   type = "stdio";
+        #   command = "npx";
+        #   args = ["-y" "@microsoft/azure-devops-mcp"];
+        #   env = {
+        #     AZURE_DEVOPS_TOKEN = "$(cat /etc/claude/azure-devops-token)";
+        #   };
+        # };
+
+        # Nuxt - Vite/Nuxt app understanding (Only if you use Nuxt.js)
+        # nuxt = {
+        #   type = "stdio";
+        #   command = "npx";
+        #   args = ["-y" "@antfu/nuxt-mcp"];
+        # };
+
+        # MongoDB - Database integration (Only if you use MongoDB)
+        # mongodb = {
+        #   type = "stdio";
+        #   command = "npx";
+        #   args = ["-y" "@mongodb/mongodb-mcp-server"];
+        #   env = {
+        #     MONGODB_URI = "$(cat /etc/claude/mongodb-uri)";
+        #   };
+        # };
+
+        # Elasticsearch - Search and analytics (Enterprise search - rarely used personally)
+        # elasticsearch = {
+        #   type = "stdio";
+        #   command = "npx";
+        #   args = ["-y" "@elastic/mcp-server-elasticsearch"];
+        #   env = {
+        #     ELASTICSEARCH_URL = "$(cat /etc/claude/elasticsearch-url)";
+        #     ELASTICSEARCH_API_KEY = "$(cat /etc/claude/elasticsearch-api-key)";
+        #   };
+        # };
+
+        # Neon - PostgreSQL database platform (Only if you use Neon specifically)
+        # neon = {
+        #   type = "stdio";
+        #   command = "npx";
+        #   args = ["-y" "@neondatabase/mcp-server-neon"];
+        #   env = {
+        #     NEON_API_KEY = "$(cat /etc/claude/neon-api-key)";
+        #   };
+        # };
+
+        # Chroma - Vector database (Only if you work with vector databases)
+        # chroma = {
+        #   type = "stdio";
+        #   command = "npx";
+        #   args = ["-y" "@chroma-core/chroma-mcp"];
+        #   env = {
+        #     CHROMA_URL = "$(cat /etc/claude/chroma-url)";
+        #   };
+        # };
+
+        # Sentry - Error tracking (Only if you use Sentry for error monitoring)
+        # sentry = {
+        #   type = "stdio";
+        #   command = "npx";
+        #   args = ["-y" "@getsentry/sentry-mcp"];
+        #   env = {
+        #     SENTRY_AUTH_TOKEN = "$(cat /etc/claude/sentry-token)";
+        #   };
+        # };
+
+        # Monday.com - Work management (Only if you use Monday.com)
+        # monday = {
+        #   type = "stdio";
+        #   command = "npx";
+        #   args = ["-y" "@mondaycom/mcp"];
+        #   env = {
+        #     MONDAY_API_KEY = "$(cat /etc/claude/monday-api-key)";
+        #   };
+        # };
+
+        # Azure AI Foundry (Microsoft-specific AI platform)
+        # azure-ai-foundry = {
+        #   type = "stdio";
+        #   command = "npx";
+        #   args = ["-y" "@azure-ai-foundry/mcp-foundry";
+        #   env = {
+        #     AZURE_AI_FOUNDRY_KEY = "$(cat /etc/claude/azure-ai-foundry-key)";
+        #   };
+        # };
+
+        # Imagesorcery - Local image processing (Useful for image manipulation)
+        imagesorcery = {
+          type = "stdio";
+          command = "npx";
+          args = ["-y" "@sunriseapps/imagesorcery-mcp"];
+        };
+
+        # Dynatrace - Observability platform (Enterprise monitoring)
+        # dynatrace = {
+        #   type = "stdio";
+        #   command = "npx";
+        #   args = ["-y" "@dynatrace-oss/dynatrace-mcp";
+        #   env = {
+        #     DYNATRACE_API_TOKEN = "$(cat /etc/claude/dynatrace-api-token)";
+        #     DYNATRACE_BASE_URL = "$(cat /etc/claude/dynatrace-base-url)";
+        #   };
+        # };
+
+        # Logfire - OpenTelemetry traces and metrics (Observability)
+        # logfire = {
+        #   type = "stdio";
+        #   command = "npx";
+        #   args = ["-y" "@pydantic/logfire-mcp";
+        #   env = {
+        #     LOGFIRE_API_KEY = "$(cat /etc/claude/logfire-api-key)";
+        #   };
+        # };
+
+        # Azure Kubernetes Service (Microsoft container service)
+        # aks = {
+        #   type = "stdio";
+        #   command = "npx";
+        #   args = ["-y" "@azure/aks-mcp";
+        #   env = {
+        #     AZURE_SUBSCRIPTION_ID = "$(cat /etc/claude/azure-subscription-id)";
+        #     AZURE_TENANT_ID = "$(cat /etc/claude/azure-tenant-id)";
+        #     AZURE_CLIENT_ID = "$(cat /etc/claude/azure-client-id)";
+        #     AZURE_CLIENT_SECRET = "$(cat /etc/claude/azure-client-secret)";
+        #   };
+        # };
+
+        # Hugging Face - Models and datasets (Very useful for AI/ML work)
+        huggingface = {
+          type = "stdio";
+          command = "npx";
+          args = ["-y" "@evalstate/hf-mcp-server"];
+          env = {
+            HF_TOKEN = "$(cat /etc/claude/huggingface-token)";
+          };
+        };
+
+        # Webflow - Web design platform (Only if you use Webflow)
+        # webflow = {
+        #   type = "stdio";
+        #   command = "npx";
+        #   args = ["-y" "@webflow/mcp-server";
+        #   env = {
+        #     WEBFLOW_API_TOKEN = "$(cat /etc/claude/webflow-token)";
+        #   };
+        # };
+
+        # Fabric Real-Time Intelligence (Microsoft analytics platform)
+        # fabric-rti = {
+        #   type = "stdio";
+        #   command = "npx";
+        #   args = ["-y" "@microsoft/fabric-rti-mcp";
+        #   env = {
+        #     FABRIC_API_KEY = "$(cat /etc/claude/fabric-api-key)";
+        #   };
+        # };
+
+        # Box - Enterprise content management (Enterprise file storage)
+        # box = {
+        #   type = "stdio";
+        #   command = "npx";
+        #   args = ["-y" "@box-community/mcp-server-box";
+        #   env = {
+        #     BOX_DEVELOPER_TOKEN = "$(cat /etc/claude/box-developer-token)";
+        #   };
+        # };
+
+        # Codacy - Code quality and security (Code analysis platform)
+        # codacy = {
+        #   type = "stdio";
+        #   command = "npx";
+        #   args = ["-y" "@codacy/codacy-mcp-server";
+        #   env = {
+        #     CODACY_API_TOKEN = "$(cat /etc/claude/codacy-api-token)";
+        #   };
+        # };
+
+        # Microsoft Clarity - Analytics (Web analytics)
+        # clarity = {
+        #   type = "stdio";
+        #   command = "npx";
+        #   args = ["-y" "@microsoft/clarity-mcp-server";
+        #   env = {
+        #     CLARITY_API_KEY = "$(cat /etc/claude/clarity-api-key)";
+        #   };
+        # };
+
+        # Postman - API development (Useful for API testing and development)
+        postman = {
+          type = "stdio";
+          command = "npx";
+          args = ["-y" "@postmanlabs/postman-mcp-server"];
+          env = {
+            POSTMAN_API_KEY = "$(cat /etc/claude/postman-api-key)";
+          };
+        };
+
+        # LaunchDarkly - Feature flags (Feature flag management)
+        # launchdarkly = {
+        #   type = "stdio";
+        #   command = "npx";
+        #   args = ["-y" "@launchdarkly/mcp-server";
+        #   env = {
+        #     LAUNCHDARKLY_API_KEY = "$(cat /etc/claude/launchdarkly-api-key)";
+        #   };
+        # };
+
+        # Atlassian - Jira and Confluence (Project management and documentation)
+        # atlassian = {
+        #   type = "stdio";
+        #   command = "npx";
+        #   args = ["-y" "@atlassian/atlassian-mcp-server";
+        #   env = {
+        #     ATLASSIAN_API_TOKEN = "$(cat /etc/claude/atlassian-api-token)";
+        #   };
+        # };
+
+        # Figma Dev Mode - Design context (Very useful for design-development workflow)
+        figma = {
+          type = "stdio";
+          command = "npx";
+          args = ["-y" "@figma/dev-mode-mcp-server"];
+          env = {
+            FIGMA_API_KEY = "$(cat /etc/claude/figma-api-key)";
+          };
+        };
+
+        # JFrog - DevOps platform (Artifact management)
+        # jfrog = {
+        #   type = "stdio";
+        #   command = "npx";
+        #   args = ["-y" "@jfrog/jfrog-mcp-server";
+        #   env = {
+        #     JFROG_URL = "$(cat /etc/claude/jfrog-url)";
+        #     JFROG_USERNAME = "$(cat /etc/claude/jfrog-username)";
+        #     JFROG_PASSWORD = "$(cat /etc/claude/jfrog-password)";
+        #   };
+        # };
+
+        # Microsoft Dev Box (Cloud development environment)
+        # devbox = {
+        #   type = "stdio";
+        #   command = "npx";
+        #   args = ["-y" "@microsoft/devbox-mcp-server";
+        #   env = {
+        #     AZURE_SUBSCRIPTION_ID = "$(cat /etc/claude/azure-subscription-id)";
+        #     AZURE_TENANT_ID = "$(cat /etc/claude/azure-tenant-id)";
+        #     AZURE_CLIENT_ID = "$(cat /etc/claude/azure-client-id)";
+        #     AZURE_CLIENT_SECRET = "$(cat /etc/claude/azure-client-secret)";
+        #   };
+        # };
+
+        # Zapier - Automation platform (Very useful for workflow automation)
+        zapier = {
+          type = "stdio";
+          command = "npx";
+          args = ["-y" "@zapier/zapier-mcp"];
+          env = {
+            ZAPIER_API_KEY = "$(cat /etc/claude/zapier-api-key)";
+          };
+        };
       };
 
       # 编辑器和行为设置
@@ -371,6 +720,10 @@
 
             This agent ensures code quality standards are maintained across the repository by leveraging the configured pre-commit hooks.
           '';
+
+          code-index = ''
+            Act as a coding agent with MCP capabilities and use only the installed default code-index-mcp server for code indexing, search, file location, and structural analysis. Prefer tool-driven operations over blind page-by-page scanning to reduce tokens and time. On first entering a directory or whenever the index is missing or stale, immediately issue: Please set the project path to , where defaults to the current working directory unless otherwise specified, to create or repair the index. After initialization, consistently use these tools: set_project_path (set/switch the index root), find_files (glob discovery, e.g., src/**/*.tsx), search_code_advanced (regex/fuzzy/file-pattern constrained cross-file search), get_file_summary (per-file structure/interface summary), and refresh_index (rebuild after refactors or bulk edits). Bias retrieval and understanding toward C/C++/Rust/TS/JS: default file patterns include *.c, *.cpp, *.h, *.hpp, *.rs, *.ts, *.tsx, *.js, *.jsx; first narrow with find_files, then use search_code_advanced; when understanding a specific file, call get_file_summary. Automatically run refresh_index after modifications, dependency updates, or large renames; if file watching isn’t available, prompt for a manual refresh to keep results fresh and accurate. For cross-language scenarios (e.g., C++↔Rust bindings, TS referencing native extensions), search in batches by language priority and merge results into an actionable plan with explicit file lists.Refresh the index after modifying the file to synchronize the status.
+          '';
         };
 
         commands = {
@@ -486,6 +839,43 @@
 
             First example directly implements issue #42. Second example creates a plan first and waits for approval before implementing.
 
+          '';
+          k8s-pag = ''
+            ---
+            name: k8s-pag
+            description: Manage PAG development environment in Kubernetes
+            args:
+              - name: action
+                description: Action to perform (setup|destroy|status|logs|shell)
+                required: true
+              - name: extra
+                description: Additional arguments for the action
+                required: false
+            ---
+
+            Manage the PAG (Prometheus + Alertmanager + Grafana) development environment using Kubernetes.
+
+            **Usage**: `/k8s-pag <action> [extra]`
+
+            **Actions**:
+            - `setup`: Initialize the Kubernetes development environment
+            - `destroy`: Clean up the development environment
+            - `status`: Check the status of all components
+            - `logs <pod>`: View logs for a specific pod
+            - `shell <pod>`: Get shell access to a specific pod
+
+            **Prerequisites**:
+            - Docker must be running
+            - kubectl must be configured
+            - Helm and Kustomize must be available
+
+            **Examples**:
+            ```
+            /k8s-pag setup                    # Set up the environment
+            /k8s-pag status                   # Check status
+            /k8s-pag logs prometheus-operator # View logs
+            /k8s-pag destroy                  # Clean up
+            ```
           '';
         };
       };

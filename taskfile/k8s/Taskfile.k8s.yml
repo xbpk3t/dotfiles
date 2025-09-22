@@ -3,6 +3,9 @@ version: "3"
 
 
 
+# FIXME [Kubectl cheatsheet list](https://gist.github.com/naviat/446d1be0a5a03bad1d7113d1abf082c7) 给k8s做个taskfile
+
+
 #- kubectl get <pods|ingress> # 显示一个或者多个资源, [查看 default 命名空间的数据]
 #- kubectl get no -o wide
 #- kubectl describe no
@@ -10,7 +13,7 @@ version: "3"
 #- kubectl get node -selector=[label]
 #- kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=='ExternalIP')].adress}'
 #- kubectl get po --shaw-labels
-#- kubectl get po -l app=nginx
+#- kubectl get po -l app=nginx·
 #- kubectl get pod [pod_name] -o yaml --export
 #- kubectl get pod [pod_name] -o yaml --export > nameoffline.yaml
 #- kubectl get pods --filed-selector status.phase=Running

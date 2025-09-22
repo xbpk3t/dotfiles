@@ -13,5 +13,7 @@ nix/secrets/secrets_temp.yaml
 
 # tf
 /tf/.cf-terraforming.yaml
-/devenv/dc/.env
-/devenv/dc/configs/mysql/mysqldata/
+/devenv2/dc/.env
+/devenv2/dc/configs/mysql/mysqldata/
+/nix-config/
+/zaneyos/

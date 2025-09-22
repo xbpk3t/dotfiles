@@ -86,14 +86,12 @@
     # Darwin configurations
     darwinConfigurations = {
       # Local macOS machine
-      "luck" = darwin.lib.darwinSystem {
+      "macos" = darwin.lib.darwinSystem {
         system = "x86_64-darwin";
         inherit specialArgs;
         modules = [
           ./modules/darwin
-          # Stylix theming
           stylix.darwinModules.stylix
-          # nix-homebrew integration
           nix-homebrew.darwinModules.nix-homebrew
           {
             nix-homebrew = {
@@ -115,10 +113,38 @@
             };
           }
           sops-nix.darwinModules.sops
-          # Import host-specific configuration
           ./hosts/darwin
-          # Import secrets configuration
           ./secrets/darwin.nix
+        ];
+      };
+    };
+
+    # NixOS configurations (commented out - Darwin-only setup)
+    nixosConfigurations = {
+      "nixos-me" = {};
+      "nixos-gs" = {};
+      "nixos-homelab" = {};
+
+      # Test NixOS system - minimal configuration
+      "nixos-cli" = nixpkgs-darwin.lib.nixosSystem {
+        system = linuxSystem;
+        specialArgs = linuxSpecialArgs;
+        modules = [
+          # Host-specific configuration
+          ./hosts/nixos
+          # home manager for NixOS
+          home-manager.nixosModules.home-manager
+          {
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              extraSpecialArgs = linuxSpecialArgs;
+              backupFileExtension = "hm-bak";
+              users.${username} = import ./home;
+            };
+          }
+
+          sops-nix.nixosModules.sops
         ];
       };
     };
