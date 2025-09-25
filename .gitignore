@@ -4,12 +4,12 @@
 /.hammerspoon/tasks_data.json
 
 # Nix store paths
-/nix/store/
+/store/
 
 # nix secrets
-nix/secrets/age.key
+secrets/age.key
 *.age.key
-nix/secrets/secrets_temp.yaml
+secrets/secrets_temp.yaml
 
 # tf
 /tf/.cf-terraforming.yaml
