@@ -135,27 +135,28 @@
       "nixos-gs" = {};
       "nixos-homelab" = {};
 
-      "nixos-cli" = nixpkgs-darwin.lib.nixosSystem {
-        system = linuxSystem;
-        specialArgs = linuxSpecialArgs;
-        modules = [
-          # Host-specific configuration
-          ./hosts/nixos
-          # home manager for NixOS
-          home-manager.nixosModules.home-manager
-          {
-            home-manager = {
-              useGlobalPkgs = true;
-              useUserPackages = true;
-              extraSpecialArgs = linuxSpecialArgs;
-              backupFileExtension = "hm-bak";
-              users.${username} = import ./home;
-            };
-          }
-
-          sops-nix.nixosModules.sops
-        ];
-      };
+      # FIXME 之后处理
+      #  "nixos-cli" = nixpkgs.lib.nixosSystem {
+      #    system = linuxSystem;
+      #    specialArgs = linuxSpecialArgs;
+      #    modules = [
+      #      # Host-specific configuration
+      #      ./hosts/nixos
+      #      # home manager for NixOS
+      #      home-manager.nixosModules.home-manager
+      #      {
+      #        home-manager = {
+      #          useGlobalPkgs = true;
+      #          useUserPackages = true;
+      #          extraSpecialArgs = linuxSpecialArgs;
+      #          backupFileExtension = "hm-bak";
+      #          users.${username} = import ./home;
+      #        };
+      #      }
+      #
+      #      sops-nix.nixosModules.sops
+      #    ];
+      #  };
     };
   };
 }
