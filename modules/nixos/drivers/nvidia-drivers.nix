@@ -12,6 +12,10 @@ in {
 
   config = mkIf cfg.enable {
     services.xserver.videoDrivers = ["nvidia"];
+
+    # Blacklist nouveau driver to prevent conflicts
+    boot.blacklistedKernelModules = ["nouveau"];
+
     hardware.nvidia = {
       # Modesetting is required.
       modesetting.enable = true;

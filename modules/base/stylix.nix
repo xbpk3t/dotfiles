@@ -12,12 +12,14 @@
     #   # Let autoEnable handle the configuration automatically
     # };
 
+    # image = "../../wallpapers/beautifulmountainscape.jpg";
+    polarity = "dark";
+
     targets = {
-      waybar.enable = false;
-      rofi.enable = false;
-      hyprland.enable = false;
-      hyprlock.enable = false;
-      ghostty.enable = false;
+      #      waybar.enable = false;
+      #      rofi.enable = false;
+      #      hyprland.enable = false;
+      #      hyprlock.enable = false;
       qt = {
         enable = true;
         platform = "qtct";

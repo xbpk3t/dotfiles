@@ -2,9 +2,6 @@
   inputs,
   mylib,
   username,
-  host,
-  profile,
-  mail,
   ...
 }: {
   # Home Manager system configuration
@@ -14,21 +11,25 @@
 
   # Pass special arguments to home-manager
   extraSpecialArgs = {
-    inherit inputs mylib username host profile mail;
+    inherit username inputs mylib;
+    hostname = "MacBook-Pro";
+    mail = "yyzw@live.com";
   };
 
   # User configuration
   users.${username} = {
     home = {
       inherit username;
-      homeDirectory = "/home/${username}";
+      homeDirectory = "/Users/${username}";
       stateVersion = "24.05";
     };
 
     # Let Home Manager install and manage itself.
     programs.home-manager.enable = true;
 
-    # Import base and NixOS-specific configurations
-    imports = [../base] ++ (mylib.scanPaths ./.);
+    # Import base configurations
+    imports = [
+      ../base
+    ];
   };
 }

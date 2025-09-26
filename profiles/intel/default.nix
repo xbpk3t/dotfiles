@@ -1,15 +1,15 @@
-{host, ...}: {
+{...}: {
   imports = [
-    ../../hosts/${host}
+    ../../../../hosts/nixos/default
     ../../modules/drivers
-    ../../modules/core
+    ../../core
   ];
   # Enable GPU Drivers
   drivers = {
     amdgpu.enable = false;
     nvidia.enable = false;
     nvidia-prime.enable = false;
-    intel.enable = false;
+    intel.enable = true;
   };
-  vm.guest-services.enable = true;
+  vm.guest-services.enable = false;
 }

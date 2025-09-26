@@ -1,13 +1,11 @@
-# NixOS-specific modules
-{...}: {
-  imports = [
-    ./boot.nix
-    ./networking.nix
-    ./pkgs.nix
-    ./ssh.nix
-    ./users.nix
-    ./swap.nix
-    ./limits.nix
-    ./systemd.nix
-  ];
+# Shared modules between all systems
+{
+  mylib,
+  profile,
+  ...
+}: {
+  imports =
+    [../base]
+    ++ (mylib.scanPaths ./.)
+    ++ (mylib.scanPaths ../../profiles/${profile});
 }

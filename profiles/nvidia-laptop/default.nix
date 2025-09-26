@@ -1,10 +1,10 @@
-{host, ...}: let
-  inherit (import ../../hosts/${host}/variables.nix) intelID nvidiaID;
+{...}: let
+  inherit (import ../../../../hosts/nixos/default/variables.nix) intelID nvidiaID;
 in {
   imports = [
-    ../../hosts/${host}
-    ../../modules/drivers
-    ../../modules/core
+    ../../../../hosts/nixos/default
+    ../../drivers
+    ../../core
   ];
   # Enable GPU Drivers
   drivers = {

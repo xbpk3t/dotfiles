@@ -1,9 +1,4 @@
-{host, ...}: let
-  inherit
-    (import ../../../hosts/${host}/variables.nix)
-    stylixImage
-    ;
-in {
+{...}: {
   wayland.windowManager.hyprland.settings = {
     exec-once = [
       "wl-paste --type text --watch cliphist store" # Saves text
@@ -19,7 +14,6 @@ in {
       "#wallsetter &"
       "pypr &"
       "nm-applet --indicator"
-      "sleep 1.0 && swww img ${stylixImage}"
     ];
   };
 }

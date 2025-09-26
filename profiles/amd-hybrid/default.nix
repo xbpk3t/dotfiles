@@ -1,10 +1,10 @@
-{host, ...}: let
-  inherit (import ../../hosts/${host}/variables.nix) amdgpuID nvidiaID;
+{...}: let
+  inherit (import ../../../../hosts/nixos/default/variables.nix) amdgpuID nvidiaID;
 in {
   imports = [
-    ../../hosts/${host}
+    ../../../../hosts/nixos/default
     ../../modules/drivers
-    ../../modules/core
+    ../../core
   ];
 
   # Enable AMD+NVIDIA hybrid drivers (Prime offload with AMD as primary)

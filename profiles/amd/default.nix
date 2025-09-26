@@ -1,8 +1,8 @@
-{host, ...}: {
+{...}: {
   imports = [
-    ../../hosts/${host}
+    ../../../../hosts/nixos/default
     ../../modules/drivers
-    ../../modules/core
+    ../../core
   ];
   # Enable GPU Drivers
   drivers = {

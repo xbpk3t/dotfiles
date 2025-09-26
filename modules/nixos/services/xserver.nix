@@ -1,5 +1,5 @@
-{host, ...}: let
-  inherit (import ../../hosts/${host}/variables.nix) keyboardLayout;
+{...}: let
+  inherit (import ../../../hosts/nixos/default/variables.nix) keyboardLayout;
 in {
   services.xserver = {
     enable = false;
