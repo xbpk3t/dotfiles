@@ -6,7 +6,7 @@
   programs = {
     rofi = {
       enable = true;
-      package = pkgs.rofi-wayland;
+      package = pkgs.rofi;
       extraConfig = {
         modi = "drun,filebrowser,run";
         show-icons = true;
@@ -57,7 +57,7 @@
         "imagebox" = {
           padding = mkLiteral "20px";
           background-color = mkLiteral "transparent";
-          background-image = mkLiteral ''url("~/Pictures/Wallpapers/Rainnight.jpg", height)'';
+          #          background-image = mkLiteral ''url("~/Pictures/Wallpapers/Rainnight.jpg", height)'';
           orientation = mkLiteral "vertical";
           children = map mkLiteral [
             "inputbar"

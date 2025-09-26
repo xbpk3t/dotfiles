@@ -4,7 +4,7 @@
   options,
   ...
 }: let
-  inherit (import ../../hosts/${host}/variables.nix) hostId;
+  inherit (import ../../../hosts/nixos/default/variables.nix) hostId;
 in {
   networking = {
     hostName = "${host}";

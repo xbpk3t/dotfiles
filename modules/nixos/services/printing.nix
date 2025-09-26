@@ -1,18 +1,16 @@
-{host, ...}: let
-  inherit (import ../../hosts/${host}/variables.nix) printEnable;
-in {
+{...}: {
   services = {
     printing = {
-      enable = printEnable;
+      enable = true;
       drivers = [
         # pkgs.hplipWithPlugin
       ];
     };
     avahi = {
-      enable = printEnable;
+      enable = true;
       nssmdns4 = true;
       openFirewall = true;
     };
-    ipp-usb.enable = printEnable;
+    ipp-usb.enable = true;
   };
 }

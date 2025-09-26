@@ -1,10 +1,9 @@
 # Darwin host configuration
 # This file contains host-specific configurations that should not be shared between different machines
 {myvars, ...}: {
-  # Import shared and Darwin-specific modules first
+  # Import Darwin-specific modules (which includes base modules)
   imports = [
     ../../modules/darwin
-    ../../modules/base
   ];
 
   # Host-specific overrides for system defaults

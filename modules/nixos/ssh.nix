@@ -7,7 +7,8 @@ _: {
     settings = {
       # Additional SSH optimizations from Linux-Optimizer
       # Disable DNS lookup to speed up connections
-      UseDNS = false;
+      #  UseDNS = false;
+
       # Enable compression
       Compression = true;
       # Set strong ciphers
@@ -38,5 +39,6 @@ _: {
       # 启用公钥认证
       PubkeyAuthentication = true;
     };
+    ports = [22];
   };
 }

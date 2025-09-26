@@ -5,6 +5,7 @@
 
     # Shell integrations
     enableBashIntegration = true;
+    enableZshIntegration = true;
 
     # Use the latest fzf package
     package = pkgs.fzf;
@@ -13,12 +14,26 @@
     defaultCommand = "fd --type f --hidden --follow --exclude .git --exclude node_modules";
 
     # Default options for fzf - keep it simple
+    #  defaultOptions = [
+    #    "--height=40%"
+    #    "--layout=reverse"
+    #    "--border"
+    #    "--cycle"
+    #    "--multi"
+    #  ];
+
     defaultOptions = [
-      "--height=40%"
+      "--margin=1"
       "--layout=reverse"
-      "--border"
-      "--cycle"
-      "--multi"
+      "--border=none"
+      "--info='hidden'"
+      "--header=''"
+      "--prompt='/ '"
+      "-i"
+      "--no-bold"
+      "--bind='enter:execute(nvim {})'"
+      "--preview='bat --style=numbers --color=always --line-range :500 {}'"
+      "--preview-window=right:60%:wrap"
     ];
 
     # File widget (CTRL-T) configuration

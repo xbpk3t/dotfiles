@@ -1,11 +1,10 @@
 {
   pkgs,
   lib,
-  host,
   config,
   ...
 }: let
-  inherit (import ../../../hosts/${host}/variables.nix) clock24h;
+  inherit (import ../../../hosts/nixos/default/variables.nix) clock24h;
 in
   with lib; {
     # Configure & Theme Waybar

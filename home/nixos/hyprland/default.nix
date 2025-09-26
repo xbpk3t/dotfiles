@@ -1,8 +1,6 @@
-{host, ...}: let
-  inherit (import ../../../hosts/${host}/variables.nix) animChoice;
-in {
+{...}: {
   imports = [
-    animChoice
+    ./animations-def.nix
     ./binds.nix
     ./env.nix
     ./exec-once.nix

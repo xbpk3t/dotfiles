@@ -40,6 +40,12 @@
       inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
 
+    # nvf for neovim configuration
+    nvf = {
+      url = "github:notashelf/nvf";
+      inputs.nixpkgs.follows = "nixpkgs-darwin";
+    };
+
     # nixhelm for helm charts management
     nixhelm = {
       url = "github:nix-community/nixhelm";
@@ -68,24 +74,38 @@
     nix-flatpak,
     sops-nix,
     stylix,
-    myvars,
     ...
   }: let
-    inherit (myvars) username;
-    inherit (myvars) mail;
+    # Create mylib utility functions
+    mylib = import ./lib/default.nix {lib = nixpkgs.lib;};
+
+    username = "luck";
+    mail = "yyzw@live.com";
     hostname = "MacBook-Pro";
 
-    specialArgs = {
+    # Special args for Darwin configurations
+    darwinSpecialArgs = {
       inherit username mail hostname inputs;
       inherit sops-nix;
       inherit stylix;
+      inherit mylib;
     };
+
+    # Special args for NixOS configurations
+    nixosSpecialArgs = {
+      inherit inputs mylib sops-nix;
+      username = "luck";
+      host = "default";
+      profile = "nvidia-laptop";
+      mail = "yyzw@live.com";
+    };
+    # Special args for both Darwin and NixOS configurations that need nvf
   in {
     # Darwin configurations
     darwinConfigurations = {
       "macos-ws" = darwin.lib.darwinSystem {
         system = "x86_64-darwin";
-        inherit specialArgs;
+        specialArgs = darwinSpecialArgs;
         modules = [
           ./modules/darwin
           stylix.darwinModules.stylix
@@ -101,17 +121,11 @@
           # home manager
           home-manager.darwinModules.home-manager
           {
-            home-manager = {
-              useGlobalPkgs = true;
-              useUserPackages = true;
-              extraSpecialArgs = specialArgs;
-              backupFileExtension = "hm-bak";
-              users.${username} = import ./home;
-            };
+            home-manager = (import ./home/darwin) darwinSpecialArgs;
           }
           sops-nix.darwinModules.sops
-          ./hosts/darwin
-          ./secrets/darwin.nix
+          ./hosts/darwine
+          ./secrets/default.nix
         ];
       };
     };
@@ -120,15 +134,17 @@
     nixosConfigurations = {
       "nixos-ws" = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
-        specialArgs = {
-          inherit inputs;
-          username = "luck";
-          host = "default";
-          profile = "amd-hybrid";
-        };
+        specialArgs = nixosSpecialArgs;
         modules = [
-          ./modules/nixos/profiles/amd-hybrid
           nix-flatpak.nixosModules.nix-flatpak
+          sops-nix.nixosModules.sops
+          stylix.nixosModules.stylix
+          home-manager.nixosModules.home-manager
+          {
+            home-manager = (import ./home/nixos) nixosSpecialArgs;
+          }
+          ./hosts/nixos/default
+          # nixvim.nixDarwinModules.nixvim
         ];
       };
 
