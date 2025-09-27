@@ -2,7 +2,7 @@
 # macOS-specific network settings and optimizations
 {
   lib,
-  username,
+  myvars,
   ...
 }: {
   # Basic networking configuration
@@ -15,9 +15,9 @@
 
   networking = {
     # Default network names (can be overridden by host-specific settings)
-    hostName = lib.mkDefault "${username}";
-    computerName = lib.mkDefault "${username}";
-    localHostName = lib.mkDefault "${username}";
+    hostName = lib.mkDefault "${myvars.username}";
+    computerName = lib.mkDefault "${myvars.username}";
+    localHostName = lib.mkDefault "${myvars.username}";
 
     # Network services configuration to suppress warnings
     # This tells nix-darwin which network services to manage

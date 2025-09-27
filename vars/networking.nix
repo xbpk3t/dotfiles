@@ -15,155 +15,162 @@
   ];
   prefixLength = 24;
 
-  hostsAddr = {
-    # ============================================
-    # Homelab's Physical Machines (KubeVirt Nodes)
-    # ============================================
-    kubevirt-shoryu = {
-      iface = "eno1";
-      ipv4 = "192.168.5.181";
-    };
-    kubevirt-shushou = {
-      iface = "eno1";
-      ipv4 = "192.168.5.182";
-    };
-    kubevirt-youko = {
-      iface = "eno1";
-      ipv4 = "192.168.5.183";
-    };
-
-    # ============================================
-    # Other VMs and Physical Machines
-    # ============================================
-    ai = {
-      # Desktop PC
-      iface = "enp5s0";
-      ipv4 = "192.168.5.100";
-      ipv6 = "fe80::10"; # Link-local Address
-    };
-    aquamarine = {
-      # VM
-      iface = "enp2s0";
-      ipv4 = "192.168.5.101";
-    };
-    ruby = {
-      # VM
-      iface = "enp2s0";
-      ipv4 = "192.168.5.102";
-    };
-    kana = {
-      # VM
-      iface = "enp2s0";
-      ipv4 = "192.168.5.103";
-    };
-    nozomi = {
-      # LicheePi 4A's wireless interface - RISC-V
-      iface = "wlan0";
-      ipv4 = "192.168.5.104";
-    };
-    yukina = {
-      # LicheePi 4A's wireless interface - RISC-V
-      iface = "wlan0";
-      ipv4 = "192.168.5.105";
-    };
-    chiaya = {
-      # VM
-      iface = "enp2s0";
-      ipv4 = "192.168.5.106";
-    };
-    suzu = {
-      # Orange Pi 5 - ARM
-      iface = "end1";
-      ipv4 = "192.168.5.107";
-    };
-    shoukei = {
-      # Apple M2 + NixOS
-      # Used only when at home
-      iface = "wlan0";
-      ipv4 = "192.168.5.108";
-      ipv6 = "fe80::11"; # Link-local Address
-    };
-    rakushun = {
-      # Orange Pi 5 - ARM
-      # RJ45 port 1 - enP4p65s0
-      # RJ45 port 2 - enP3p49s0
-      iface = "enP4p65s0";
-      ipv4 = "192.168.5.179";
-    };
-    suzi = {
-      iface = "enp2s0"; # fake iface, it's not used by the host
-      ipv4 = "192.168.5.178";
-      ipv6 = "fe80::8"; # Link-local Address, can be used as default gateway
-    };
-    mitsuha = {
-      iface = "enp2s0"; # fake iface, it's not used by the host
-      ipv4 = "192.168.5.177";
-    };
-
-    # ============================================
-    # Kubernetes Clusters
-    # ============================================
-    k3s-prod-1-master-1 = {
-      # VM
-      iface = "enp2s0";
-      ipv4 = "192.168.5.108";
-    };
-    k3s-prod-1-master-2 = {
-      # VM
-      iface = "enp2s0";
-      ipv4 = "192.168.5.109";
-    };
-    k3s-prod-1-master-3 = {
-      # VM
-      iface = "enp2s0";
-      ipv4 = "192.168.5.110";
-    };
-    k3s-prod-1-worker-1 = {
-      # VM
-      iface = "enp2s0";
-      ipv4 = "192.168.5.111";
-    };
-    k3s-prod-1-worker-2 = {
-      # VM
-      iface = "enp2s0";
-      ipv4 = "192.168.5.112";
-    };
-    k3s-prod-1-worker-3 = {
-      # VM
-      iface = "enp2s0";
-      ipv4 = "192.168.5.113";
-    };
-
-    k3s-test-1-master-1 = {
-      # KubeVirt VM
-      iface = "enp2s0";
-      ipv4 = "192.168.5.114";
-    };
-    k3s-test-1-master-2 = {
-      # KubeVirt VM
-      iface = "enp2s0";
-      ipv4 = "192.168.5.115";
-    };
-    k3s-test-1-master-3 = {
-      # KubeVirt VM
-      iface = "enp2s0";
-      ipv4 = "192.168.5.116";
-    };
+  # hostsAddr = {
+  # ============================================
+  # Homelab's Physical Machines (KubeVirt Nodes)
+  # ============== ==============================
+  kubevirt-shoryu = {
+    iface = "eno1";
+    ipv4 = "192.168.5.181";
+  };
+  kubevirt-shushou = {
+    iface = "eno1";
+    ipv4 = "192.168.5.182";
+  };
+  kubevirt-youko = {
+    iface = "eno1";
+    ipv4 = "192.168.5.183";
   };
 
-  hostsInterface =
-    lib.attrsets.mapAttrs (_key: val: {
-      interfaces."${val.iface}" = {
-        useDHCP = false;
-        ipv4.addresses = [
-          {
-            inherit prefixLength;
-            address = val.ipv4;
-          }
-        ];
-      };
-    })
-    hostsAddr;
+  # ============================================
+  # Other VMs and Physical Machines
+  # ============================================
+  ai = {
+    # Desktop PC
+    iface = "enp5s0";
+    ipv4 = "192.168.5.100";
+    ipv6 = "fe80::10"; # Link-local Address
+  };
+  aquamarine = {
+    # VM
+    iface = "enp2s0";
+    ipv4 = "192.168.5.101";
+  };
+  ruby = {
+    # VM
+    iface = "enp2s0";
+    ipv4 = "192.168.5.102";
+  };
+  kana = {
+    # VM
+    iface = "enp2s0";
+    ipv4 = "192.168.5.103";
+  };
+  nozomi = {
+    # LicheePi 4A's wireless interface - RISC-V
+    iface = "wlan0";
+    ipv4 = "192.168.5.104";
+  };
+  yukina = {
+    # LicheePi 4A's wireless interface - RISC-V
+    iface = "wlan0";
+    ipv4 = "192.168.5.105";
+  };
+  chiaya = {
+    # VM
+    iface = "enp2s0";
+    ipv4 = "192.168.5.106";
+  };
+  suzu = {
+    # Orange Pi 5 - ARM
+    iface = "end1";
+    ipv4 = "192.168.5.107";
+  };
+  shoukei = {
+    # Apple M2 + NixOS
+    # Used only when at home
+    iface = "wlan0";
+    ipv4 = "192.168.5.108";
+    ipv6 = "fe80::11"; # Link-local Address
+  };
+  rakushun = {
+    # Orange Pi 5 - ARM
+    # RJ45 port 1 - enP4p65s0
+    # RJ45 port 2 - enP3p49s0
+    iface = "enP4p65s0";
+    ipv4 = "192.168.5.179";
+  };
+  suzi = {
+    iface = "enp2s0"; # fake iface, it's not used by the host
+    ipv4 = "192.168.5.178";
+    ipv6 = "fe80::8"; # Link-local Address, can be used as default gateway
+  };
+  mitsuha = {
+    iface = "enp2s0"; # fake iface, it's not used by the host
+    ipv4 = "192.168.5.177";
+  };
+
+  # ============================================
+  # Kubernetes Clusters
+  # ============================================
+  k3s-prod-1-master-1 = {
+    # VM
+    iface = "enp2s0";
+    ipv4 = "192.168.5.108";
+  };
+  k3s-prod-1-master-2 = {
+    # VM
+    iface = "enp2s0";
+    ipv4 = "192.168.5.109";
+  };
+  k3s-prod-1-master-3 = {
+    # VM
+    iface = "enp2s0";
+    ipv4 = "192.168.5.110";
+  };
+  k3s-prod-1-worker-1 = {
+    # VM
+    iface = "enp2s0";
+    ipv4 = "192.168.5.111";
+  };
+  k3s-prod-1-worker-2 = {
+    # VM
+    iface = "enp2s0";
+    ipv4 = "192.168.5.112";
+  };
+  k3s-prod-1-worker-3 = {
+    # VM
+    iface = "enp2s0";
+    ipv4 = "192.168.5.113";
+  };
+
+  k3s-test-1-master-1 = {
+    # KubeVirt VM
+    iface = "enp2s0";
+    ipv4 = "192.168.5.114";
+  };
+  k3s-test-1-master-2 = {
+    # KubeVirt VM
+    iface = "enp2s0";
+    ipv4 = "192.168.5.115";
+  };
+  k3s-test-1-master-3 = {
+    # KubeVirt VM
+    iface = "enp2s0";
+    ipv4 = "192.168.5.116";
+  };
+
+  # NixOS Workstation
+  nixos-ws = {
+    # Workstation/VM
+    iface = "enp1s0";
+    ipv4 = "192.168.5.200";
+  };
+  # };
+
+  # hostsInterface =
+  #   lib.attrsets.mapAttrs (_key: val: {
+  #     interfaces."${val.iface}" = {
+  #       useDHCP = false;
+  #       ipv4.addresses = [
+  #         {
+  #           inherit prefixLength;
+  #           address = val.ipv4;
+  #         }
+  #       ];
+  #     };
+  #   })
+  #   hostsAddr;
 
   ssh = {
     # define the host alias for remote builders
@@ -175,17 +182,17 @@
     #   IdentityFile — the location of your SSH key authentication file for the account.
     # Format in details:
     #   https://www.ssh.com/academy/ssh/config
-    extraConfig =
-      lib.attrsets.foldlAttrs (
-        acc: host: val:
-          acc
-          + ''
-            Host ${host}
-              HostName ${val.ipv4}
-              Port 22
-          ''
-      ) ""
-      hostsAddr;
+    # extraConfig =
+    #   lib.attrsets.foldlAttrs (
+    #     acc: host: val:
+    #       acc
+    #       + ''
+    #         Host ${host}
+    #           HostName ${val.ipv4}
+    #           Port 22
+    #       ''
+    #   ) ""
+    #   hostsAddr;
 
     # this config will be written to /etc/ssh/ssh_known_hosts
     knownHosts =
@@ -196,8 +203,8 @@
       #   { x = "a"; y = "b"; }
       #     => { x = "bar-a"; y = "bar-b"; }
       lib.attrsets.mapAttrs
-      (host: value: {
-        hostNames = [host] ++ (lib.optional (hostsAddr ? host) hostsAddr.${host}.ipv4);
+      (_host: value: {
+        # hostNames = [host] ++ (lib.optional (hostsAddr ? host) hostsAddr.${host}.ipv4);
         inherit (value) publicKey;
       })
       {

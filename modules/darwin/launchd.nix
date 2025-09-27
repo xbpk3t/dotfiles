@@ -1,6 +1,6 @@
 {
+  myvars,
   pkgs,
-  username,
   ...
 }: {
   # 使用系统级 daemon 而不是用户级 agent 来避免出现在登录项中
@@ -15,14 +15,14 @@
           "rclone:bisync-scratches"
         ];
         StartInterval = 1200; # 每20分钟执行一次
-        StandardOutPath = "/Users/${username}/Library/Logs/rclone-bisync-scratches.log";
-        StandardErrorPath = "/Users/${username}/Library/Logs/rclone-bisync-scratches.log";
+        StandardOutPath = "/Users/${myvars.username}/Library/Logs/rclone-bisync-scratches.log";
+        StandardErrorPath = "/Users/${myvars.username}/Library/Logs/rclone-bisync-scratches.log";
         EnvironmentVariables = {
           # Include the full PATH to access all user binaries including gh, rclone, etc.
-          PATH = "/etc/profiles/per-user/${username}/bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
-          RCLONE_CONFIG = "/Users/${username}/.config/rclone/rclone.conf";
+          PATH = "/etc/profiles/per-user/${myvars.username}/bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
+          RCLONE_CONFIG = "/Users/${myvars.username}/.config/rclone/rclone.conf";
         };
-        WorkingDirectory = "/Users/${username}";
+        WorkingDirectory = "/Users/${myvars.username}";
       };
     };
 
@@ -45,14 +45,14 @@
         RunAtLoad = true; # 开机时立即执行一次（plist 加载时触发，防止关机错过 sync）
         ThrottleInterval = 86400; # 24小时防重。若不足24小时 → 跳过（避免重复）
 
-        StandardOutPath = "/Users/${username}/Library/Logs/rclone-sync-docs-images.log";
-        StandardErrorPath = "/Users/${username}/Library/Logs/rclone-sync-docs-images.log";
+        StandardOutPath = "/Users/${myvars.username}/Library/Logs/rclone-sync-docs-images.log";
+        StandardErrorPath = "/Users/${myvars.username}/Library/Logs/rclone-sync-docs-images.log";
         EnvironmentVariables = {
           # Include the full PATH to access all user binaries including gh, rclone, etc.
-          PATH = "/etc/profiles/per-user/${username}/bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
-          RCLONE_CONFIG = "/Users/${username}/.config/rclone/rclone.conf";
+          PATH = "/etc/profiles/per-user/${myvars.username}/bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
+          RCLONE_CONFIG = "/Users/${myvars.username}/.config/rclone/rclone.conf";
         };
-        WorkingDirectory = "/Users/${username}";
+        WorkingDirectory = "/Users/${myvars.username}";
       };
     };
 
@@ -66,15 +66,15 @@
           ''
             # 系统清理脚本
             TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S")
-            LOG_FILE="/Users/${username}/Library/Logs/system-cleanup.log"
+            LOG_FILE="/Users/${myvars.username}/Library/Logs/system-cleanup.log"
 
             echo "$TIMESTAMP: Starting system cleanup" >> "$LOG_FILE"
 
             # 清理 macOS 缓存文件 (注意：只清理安全的缓存)
-            find "/Users/${username}/Library/Caches" -type f -mtime +30 -delete >> "$LOG_FILE" 2>&1
+            find "/Users/${myvars.username}/Library/Caches" -type f -mtime +30 -delete >> "$LOG_FILE" 2>&1
 
             # 清理旧的日志文件
-            find "/Users/${username}/Library/Logs" -name "*.log" -mtime +30 -size +10M -delete >> "$LOG_FILE" 2>&1
+            find "/Users/${myvars.username}/Library/Logs" -name "*.log" -mtime +30 -size +10M -delete >> "$LOG_FILE" 2>&1
 
             task -g brew:cleanup
 
@@ -92,13 +92,13 @@
           }
         ];
         RunAtLoad = false;
-        StandardOutPath = "/Users/${username}/Library/Logs/system-cleanup.log";
-        StandardErrorPath = "/Users/${username}/Library/Logs/system-cleanup.log";
+        StandardOutPath = "/Users/${myvars.username}/Library/Logs/system-cleanup.log";
+        StandardErrorPath = "/Users/${myvars.username}/Library/Logs/system-cleanup.log";
         EnvironmentVariables = {
-          PATH = "/etc/profiles/per-user/${username}/bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
-          USER = username;
+          PATH = "/etc/profiles/per-user/${myvars.username}/bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
+          USER = myvars.username;
         };
-        WorkingDirectory = "/Users/${username}";
+        WorkingDirectory = "/Users/${myvars.username}";
       };
     };
   };

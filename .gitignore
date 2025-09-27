@@ -1,7 +1,5 @@
 .idea/
 .DS_Store
-.hammerspoon/.DS_Store
-/.hammerspoon/tasks_data.json
 
 # Nix store paths
 /store/
@@ -10,10 +8,3 @@
 secrets/age.key
 *.age.key
 secrets/secrets_temp.yaml
-
-# tf
-/tf/.cf-terraforming.yaml
-/devenv2/dc/.env
-/devenv2/dc/configs/mysql/mysqldata/
-/nix-config/
-/zaneyos/
