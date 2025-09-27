@@ -1,5 +1,5 @@
 {
-  username,
+  myvars,
   lib,
   ...
 }: {
@@ -7,7 +7,7 @@
   # Host-specific configurations can override these defaults
   system = {
     # Set the primary user for this specific machine (can be overridden)
-    primaryUser = lib.mkDefault username;
+    primaryUser = lib.mkDefault myvars.username;
 
     # System defaults with mkDefault to allow host-specific overrides
     defaults = {
@@ -134,7 +134,7 @@
 
       # Login window settings
       loginwindow = {
-        autoLoginUser = lib.mkDefault username;
+        autoLoginUser = lib.mkDefault myvars.username;
         GuestEnabled = lib.mkDefault false;
         DisableConsoleAccess = lib.mkDefault false;
         SHOWFULLNAME = lib.mkDefault true;

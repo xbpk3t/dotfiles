@@ -10,11 +10,10 @@
   nix.enable = true;
   nix.settings.experimental-features = ["nix-command" "flakes"]; # Add 'flakes' if you're using flakes
 
-  # Allow unfree packages
-  nixpkgs.config.allowUnfree = true;
-
-  # Allow broken packages
-  nixpkgs.config.allowBroken = true;
+  # Disable auto-optimise-store because of this issue:
+  #   https://github.com/NixOS/nix/issues/7273
+  # "error: cannot link '/nix/store/.tmp-link-xxxxx-xxxxx' to '/nix/store/.links/xxxx': File exists"
+  nix.settings.auto-optimise-store = false;
 
   # 声明式地保护关键包不被 GC 清理
   # 通过将关键包添加到系统包中，确保它们被系统 profile 引用

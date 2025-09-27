@@ -1,12 +1,12 @@
 {
   config,
-  username,
+  myvars,
   ...
 }: {
   # Enable sops
   sops = {
     defaultSopsFile = ./secrets.yaml;
-    age.keyFile = "/Users/${username}/.config/sops/age/keys.txt";
+    age.keyFile = "/Users/${myvars.username}/.config/sops/age/keys.txt";
     age.sshKeyPaths = []; # Disable SSH key import
     gnupg.home = null; # Disable GPG key import
 
@@ -14,26 +14,26 @@
     secrets = {
       # Rclone R2 secrets
       "rclone/r2/access_key_id" = {
-        owner = username;
+        owner = myvars.username;
         group = "staff";
         mode = "0400";
       };
       "rclone/r2/secret_access_key" = {
-        owner = username;
+        owner = myvars.username;
         group = "staff";
         mode = "0400";
       };
 
       # SSH secrets
       "ssh/github/private_key" = {
-        owner = username;
+        owner = myvars.username;
         group = "staff";
         mode = "0400";
       };
 
       # zAI API secrets
       "claude/zai/token" = {
-        owner = username;
+        owner = myvars.username;
         group = "staff";
         mode = "0400";
       };
@@ -59,19 +59,19 @@
   # Set proper permissions for the secrets
   system.activationScripts.postActivation.text = ''
     if [ -f /etc/rclone/r2/access_key_id ]; then
-      chown ${username}:staff /etc/rclone/r2/access_key_id
+      chown ${myvars.username}:staff /etc/rclone/r2/access_key_id
       chmod 600 /etc/rclone/r2/access_key_id
     fi
     if [ -f /etc/rclone/r2/secret_access_key ]; then
-      chown ${username}:staff /etc/rclone/r2/secret_access_key
+      chown ${myvars.username}:staff /etc/rclone/r2/secret_access_key
       chmod 600 /etc/rclone/r2/secret_access_key
     fi
     if [ -f /etc/ssh/github/private_key ]; then
-      chown ${username}:staff /etc/ssh/github/private_key
+      chown ${myvars.username}:staff /etc/ssh/github/private_key
       chmod 600 /etc/ssh/github/private_key
     fi
     if [ -f /etc/claude/zai/token ]; then
-      chown ${username}:staff /etc/claude/zai/token
+      chown ${myvars.username}:staff /etc/claude/zai/token
       chmod 600 /etc/claude/zai/token
     fi
   '';

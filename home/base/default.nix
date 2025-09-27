@@ -1,8 +1,7 @@
 {
-  username,
+  myvars,
   pkgs,
   lib,
-  mylib,
   ...
 }: let
   db = with pkgs; [
@@ -110,14 +109,13 @@
     # Node.js 生态
     nodejs
     nodePackages.eslint
-    nodePackages.pnpm
+    pnpm
     nodePackages.serve # https://github.com/vercel/serve 用来preview本地打包好的dist文件（vite可以直接vite preview）
     tsx
 
     # Web 开发
     tailwindcss
     tailwindcss-language-server
-
     npm-check # https://github.com/dylang/npm-check 可以认为 npm-check = depcheck + npm-check-updates. 可以用来检查并自动更新dependency，也支持检查unused依赖项. Check for outdated, incorrect, and unused dependencies in package.json.
     npm-check-updates # https://github.com/raineorshine/npm-check-updates 顾名思义，相当于 `npm-check -u`，用来检查pkg版本是否有新版本. 支持brew安装。`ncu -u`
   ];
@@ -224,19 +222,22 @@
 
   all = db ++ devops ++ kernel ++ langs ++ ts ++ k8s ++ test ++ markdown ++ sec;
 in {
+  # Temporarily inline core configuration to avoid Nix store path issues
+  # imports = [
+  #   ./core
+  # ];
+
   home.packages = all;
-  # import sub modules
-  imports = [../base] ++ (mylib.scanPaths ./.);
 
   # Home Manager needs a bit of information about you and the
   # paths it should manage.
   home = {
-    inherit username;
+    username = myvars.username;
     # Set home directory based on the system type
     homeDirectory = lib.mkForce (
       if pkgs.stdenv.isDarwin
-      then "/Users/${username}"
-      else "/home/${username}"
+      then "/Users/${myvars.username}"
+      else "/home/${myvars.username}"
     );
 
     # This value determines the Home Manager release that your
@@ -247,7 +248,7 @@ in {
     # You can update Home Manager without changing this value. See
     # the Home Manager release notes for a list of state version
     # changes in each release.
-    stateVersion = "24.05";
+    stateVersion = lib.mkDefault "24.05";
   };
 
   # Let Home Manager install and manage itself.

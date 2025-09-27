@@ -1,34 +1,37 @@
-{
-  inputs,
-  mylib,
-  username,
-  host,
-  profile,
-  mail,
-  ...
-}: {
-  # Home Manager system configuration
-  useGlobalPkgs = true;
-  useUserPackages = true;
-  backupFileExtension = "hm-bak";
+{myvars, ...}: {
+  # Home Manager needs a bit of information about you and the
+  # paths it should manage.
+  home = {
+    inherit (myvars) username;
 
-  # Pass special arguments to home-manager
-  extraSpecialArgs = {
-    inherit inputs mylib username host profile mail;
-  };
+    # This value determines the Home Manager release that your
+    # configuration is compatible with. This helps avoid breakage
+    # when a new Home Manager release introduces backwards
+    # incompatible changes.
+    #
+    # You can update Home Manager without changing this value. See
+    # the Home Manager release notes for a list of state version
+    # changes in each release.
+    stateVersion = "24.11";
 
-  # User configuration
-  users.${username} = {
-    home = {
-      inherit username;
-      homeDirectory = "/home/${username}";
-      stateVersion = "24.05";
+    # Basic session variables
+    sessionVariables = {
+      EDITOR = "nvim";
+      VISUAL = "nvim";
     };
-
-    # Let Home Manager install and manage itself.
-    programs.home-manager.enable = true;
-
-    # Import base and NixOS-specific configurations
-    imports = [../base] ++ (mylib.scanPaths ./.);
   };
+
+  # Basic packages and configurations can be added here
+  # For example:
+  # home.packages = [ pkgs.hello ];
+
+  # Import GUI and other configurations for this user
+  imports = [
+    ../base/default.nix
+    ../base/tui
+    ../base/gui
+    ./gui
+    # ./cli.nix
+    # ./development.nix
+  ];
 }
