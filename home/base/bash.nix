@@ -35,6 +35,7 @@
   };
 
   programs = {
+    # PLAN 之后可能会同时enable zsh和bash，再做个对比，暂时不开启
     zsh.enable = false;
     bash = {
       enable = true;

@@ -226,7 +226,7 @@
 in {
   home.packages = all;
   # import sub modules
-  imports = mylib.scanPaths ./.;
+  imports = [../base] ++ (mylib.scanPaths ./.);
 
   # Home Manager needs a bit of information about you and the
   # paths it should manage.

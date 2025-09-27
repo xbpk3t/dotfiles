@@ -28,8 +28,6 @@
     programs.home-manager.enable = true;
 
     # Import base configurations
-    imports = [
-      ../base
-    ];
+    imports = [../base] ++ (mylib.scanPaths ./.);
   };
 }
