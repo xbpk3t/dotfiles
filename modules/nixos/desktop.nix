@@ -48,6 +48,7 @@ in {
             };
           };
         };
+
         displayManager = {
           enable = false; # disable any display manager
           defaultSession = "none";

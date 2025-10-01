@@ -1,5 +1,17 @@
 {pkgs, ...}: {
-  environment.systemPackages = with pkgs; [go-task];
+  home.packages = with pkgs; [
+    (pkgs.go-task.overrideAttrs (oldAttrs: {
+      # 移除所有可能的冲突文件，保留 go-task 的功能
+      postInstall =
+        oldAttrs.postInstall or ""
+        + ''
+          # 删除所有 shell 补全文件，避免与 taskwarrior 冲突
+          rm -rf $out/share/fish/
+          rm -rf $out/share/zsh/
+          # 保留 bash completion，因为用户使用 bash
+        '';
+    }))
+  ];
 
   # FIXME
 

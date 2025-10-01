@@ -6,10 +6,9 @@
   package = pkgs.hyprland;
 in {
   xdg.configFile = let
-    mkSymlink = config.lib.file.mkOutOfStoreSymlink;
-    confPath = "${config.home.homeDirectory}/nix-config/home/nixos/gui/hyprland/conf";
+    confPath = ./conf;
   in {
-    "hypr/configs".source = mkSymlink confPath;
+    "hypr/configs".source = confPath;
   };
 
   # NOTE:
