@@ -4,7 +4,5 @@
 
   # 启用 Hyprland 作为主要的 Wayland 合成器
   modules.desktop.hyprland.enable = true;
-
-  # 如果你更喜欢 Niri，可以注释上面的行并取消注释下面这行
   # modules.desktop.niri.enable = true;
 }
