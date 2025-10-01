@@ -1,6 +1,7 @@
 {
   config,
   pkgs,
+  lib,
   ...
 }: {
   services.netdata = {
@@ -150,7 +151,7 @@
       RestartSec = "30s";
 
       # Resource limits
-      LimitNOFILE = 30000;
+      LimitNOFILE = lib.mkForce 30000;
 
       # Security settings
       PrivateTmp = true;

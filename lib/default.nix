@@ -4,25 +4,22 @@
   nixosSystem = import ./nixos.nix;
   attrs = import ./attrs.nix {inherit lib;};
 
+  # use path relative to the root of the project
+  relativeToRoot = lib.path.append ../.;
   # Custom utilities
   scanPaths = path:
     builtins.map (f: (path + "/${f}")) (
       builtins.attrNames (
         lib.attrsets.filterAttrs (
-          name: _type:
-          # Include directories only if they have a default.nix file
-            ((_type == "directory") && (builtins.pathExists (path + "/${name}/default.nix")))
+          path: _type:
+            (_type == "directory") # include directories
             || (
-              # Include .nix files except default.nix
-              (name != "default.nix")
-              && (lib.strings.hasSuffix ".nix" name)
+              (path != "default.nix") # ignore default.nix
+              && (lib.strings.hasSuffix ".nix" path) # include .nix files
             )
         ) (builtins.readDir path)
       )
     );
-
-  # use path relative to the root of the project
-  relativeToRoot = lib.path.append ../.;
 in {
   inherit
     macosSystem

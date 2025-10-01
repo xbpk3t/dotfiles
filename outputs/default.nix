@@ -13,9 +13,15 @@
     pkgs = import inputs.nixpkgs {
       inherit system;
       config.allowUnfree = true;
+      # 接受 NVIDIA 驱动license，否则无法build
+      config.nvidia.acceptLicense = true;
     };
   in {
-    inherit mylib myvars;
+    inherit
+      mylib
+      myvars
+      pkgs
+      ;
 
     # use unstable branch for some packages to get the latest updates
     pkgs-unstable = import inputs.nixpkgs-unstable or inputs.nixpkgs {
@@ -32,6 +38,12 @@
 
     # Add catppuccin for theme configuration
     catppuccin = inputs.catppuccin;
+
+    # Add nixvim for neovim configuration
+    nixvim = inputs.nixvim;
+
+    # Add vicinae for application launcher
+    vicinae = inputs.vicinae;
   };
 
   # This is the args for all the haumea modules in this folder.

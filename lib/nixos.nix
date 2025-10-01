@@ -29,7 +29,9 @@ in
           home-manager.users."${myvars.username}".imports =
             home-modules
             ++ [
-              inputs.catppuccin.homeManagerModules.catppuccin
+              inputs.catppuccin.homeModules.catppuccin
+              inputs.nixvim.homeModules.nixvim
+              inputs.vicinae.homeManagerModules.default
             ];
         }
       ]);

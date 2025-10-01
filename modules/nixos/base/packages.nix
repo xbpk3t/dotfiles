@@ -2,6 +2,10 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
+    # version control
+    git
+    gitMinimal # 确保 Git 在构建环境中可用
+
     # system call monitoring
     strace # system call monitoring
     ltrace # library call monitoring

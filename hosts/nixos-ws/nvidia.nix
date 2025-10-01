@@ -40,7 +40,4 @@
   #     # };
   #   })
   # ];
-
-  # 接受 NVIDIA 驱动license，否则无法build
-  nixpkgs.config.nvidia.acceptLicense = true;
 }

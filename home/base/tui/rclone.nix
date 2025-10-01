@@ -20,7 +20,7 @@
       };
     };
 
-    # 让 rclone 配置在 sops-nix 解密后再生效
-    requiresUnit = "sops-nix.service";
+    # 暂时移除 sops-nix 依赖，避免服务启动失败
+    # requiresUnit = "sops-nix.service";
   };
 }

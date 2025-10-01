@@ -183,10 +183,10 @@ in [
     # (flag "skip-at-startup")
   ])
 
-  (plain "layer-rule" [
-    (leaf "match" {namespace = "waybar";})
-    (leaf "opacity" 0.8)
-  ])
+  # (plain "layer-rule" [
+  #   (leaf "match" {namespace = "waybar";})
+  #   (leaf "opacity" 0.8)
+  # ])
 
   # Animation settings.
   (plain "animations" [
