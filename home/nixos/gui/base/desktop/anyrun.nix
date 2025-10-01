@@ -17,7 +17,8 @@ in {
   ];
 
   programs.anyrun = {
-    enable = true;
+    # Disabled in favor of vicinae
+    enable = false;
     # The package should come from the same flake as all the plugins to avoid breakage.
     package = anyrunPackages.anyrun;
     config = {

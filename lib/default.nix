@@ -10,10 +10,12 @@
       builtins.attrNames (
         lib.attrsets.filterAttrs (
           name: _type:
-            (_type == "directory") # include directories
+          # Include directories only if they have a default.nix file
+            ((_type == "directory") && (builtins.pathExists (path + "/${name}/default.nix")))
             || (
-              (name != "default.nix") # ignore default.nix
-              && (lib.strings.hasSuffix ".nix" name) # include .nix files
+              # Include .nix files except default.nix
+              (name != "default.nix")
+              && (lib.strings.hasSuffix ".nix" name)
             )
         ) (builtins.readDir path)
       )

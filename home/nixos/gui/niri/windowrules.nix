@@ -47,18 +47,18 @@ in [
   ])
 
   # --------------- 3Chatting ---------------
-  (plain "window-rule" [
-    (leaf "match" {app-id = "org.telegram.desktop";})
-    (leaf "open-on-workspace" "3chat")
-  ])
-  (plain "window-rule" [
-    (leaf "match" {app-id = "wechat";})
-    (leaf "open-on-workspace" "3chat")
-  ])
-  (plain "window-rule" [
-    (leaf "match" {app-id = "QQ";})
-    (leaf "open-on-workspace" "3chat")
-  ])
+  #  (plain "window-rule" [
+  #    (leaf "match" {app-id = "org.telegram.desktop";})
+  #    (leaf "open-on-workspace" "3chat")
+  #  ])
+  #  (plain "window-rule" [
+  #    (leaf "match" {app-id = "wechat";})
+  #    (leaf "open-on-workspace" "3chat")
+  #  ])
+  #  (plain "window-rule" [
+  #    (leaf "match" {app-id = "QQ";})
+  #    (leaf "open-on-workspace" "3chat")
+  #  ])
 
   # --------------- 4Gaming ---------------
 
