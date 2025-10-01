@@ -1,5 +1,3 @@
-{...}: {
-  imports = [
-    ./kitty.nix
-  ];
+{mylib, ...}: {
+  imports = mylib.scanPaths ./.;
 }

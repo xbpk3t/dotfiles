@@ -9,6 +9,16 @@
       "https://cache.garnix.io"
       "https://nix-community.cachix.org"
       "https://loneros.cachix.org"
+      "https://vicinae.cachix.org"
+    ];
+
+    trusted-public-keys = [
+      "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+      "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
+      "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
+      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+      "loneros.cachix.org-1:hhp1SqKJSLdBLSRLCLvPfh/CtGV+FJOde3NKbnZrIrY="
+      "vicinae.cachix.org-1:1kDrfienkGHPYbkpNj1mWTr7Fm1+zcenzgTizIcI3oc="
     ];
 
     # 防止关键包被垃圾回收清理
@@ -62,6 +72,12 @@
     # anyrun - a wayland launcher
     anyrun = {
       url = "github:anyrun-org/anyrun/v25.9.0";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # vicinae - a wayland launcher (alternative to anyrun)
+    vicinae = {
+      url = "github:vicinaehq/vicinae";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

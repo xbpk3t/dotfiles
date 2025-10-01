@@ -39,7 +39,7 @@ vars:
     - java_cache
     - dns_cache
     - inactive_memory
-    - telegram
+    # - telegram
     - conan
     - nuget_cache
     - obsidian_caches
@@ -64,7 +64,6 @@ vars:
       go: go clean -modcache
       dns_cache: sudo dscacheutil -flushcache && sudo killall -HUP mDNSResponder
       inactive_memory: sudo purge
-      telegram: REOPEN_TELEGRAM=false && if ps aux | grep '[T]elegram' >/dev/null; then REOPEN_TELEGRAM=true && killall -KILL Telegram; fi
       conan: conan remove "*" -c
 
 
@@ -197,9 +196,6 @@ vars:
 
   java_cache:
     - "~/*.hprof"
-
-  telegram:
-    - "~/Library/Group Containers/*.ru.keepcoder.Telegram/stable/account-*/postbox/db"
 
   conan:
     - "~/.conan2/p/"

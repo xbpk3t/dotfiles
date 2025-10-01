@@ -223,204 +223,204 @@
         "--hyperlink" # make paths clickable in some terminals
       ];
     };
-  };
 
-  # A simple, fast and user-friendly alternative to find
-  fd = {
-    enable = true;
-    hidden = true;
-    ignores = [".git/" "node_modules/"];
-  };
+    # A simple, fast and user-friendly alternative to find
+    fd = {
+      enable = true;
+      hidden = true;
+      ignores = [".git/" "node_modules/"];
+    };
 
-  # Atuin shell history
-  atuin = {
-    enable = true;
-    enableBashIntegration = true;
-    settings = {
-      auto_sync = false;
-      search_mode = "prefix";
-      filter_mode = "global";
-      style = "compact";
-      inline_height = 20;
-      dialect = "us";
-      timezone = "local";
-      show_preview = false;
-      history_filter = [
-        "__jetbrains_intellij_run_generator.*"
+    # Atuin shell history
+    atuin = {
+      enable = true;
+      enableBashIntegration = true;
+      settings = {
+        auto_sync = false;
+        search_mode = "prefix";
+        filter_mode = "global";
+        style = "compact";
+        inline_height = 20;
+        dialect = "us";
+        timezone = "local";
+        show_preview = false;
+        history_filter = [
+          "__jetbrains_intellij_run_generator.*"
+        ];
+      };
+    };
+
+    starship = {
+      enable = true;
+
+      enableBashIntegration = true;
+      enableZshIntegration = true;
+      enableNushellIntegration = true;
+
+      # 使用提供的 starship.toml 配置
+      settings = {
+        # Get editor completions based on the config schema
+        "$schema" = "https://starship.rs/config-schema.json";
+
+        right_format = "$cmd_duration$env_var";
+
+        # Inserts a blank line between shell prompts
+        add_newline = true;
+
+        # Replace the '❯' symbol in the prompt with '➜'
+        character = {
+          success_symbol = "[➜](bold green)";
+          error_symbol = "[➜](bold red)";
+        };
+
+        # Disable the package module, hiding it from the prompt completely
+        package = {
+          disabled = true;
+        };
+
+        directory = {
+          truncation_length = 0;
+          truncate_to_repo = false;
+          style = "bold #82AAFF";
+        };
+
+        git_branch = {
+          format = "[$symbol$branch(:$remote_branch)]($style) ";
+        };
+
+        git_status = {
+          style = "bold #82AAFF";
+        };
+
+        #      env_var = {
+        #        all_proxy = {
+        #          variable = "all_proxy";
+        #          format = "[$env_value]($style) ";
+        #          default = "";
+        #          style = "bold #82AAFF";
+        #        };
+        #      };
+
+        cmd_duration = {
+          format = "[$duration]($style) ";
+        };
+
+        hostname = {
+          disabled = true;
+        };
+
+        username = {
+          disabled = true;
+        };
+
+        os = {
+          disabled = true;
+          #        symbols = {
+          #          Ubuntu = "󰕈 ";
+          #        };
+        };
+
+        buf = {
+          symbol = " ";
+        };
+        c = {
+          symbol = " ";
+        };
+        directory = {
+          read_only = " 󰌾";
+        };
+        docker_context = {
+          symbol = " ";
+        };
+        fossil_branch = {
+          symbol = " ";
+        };
+        git_branch = {
+          symbol = " ";
+        };
+        golang = {
+          symbol = " ";
+        };
+        hg_branch = {
+          symbol = " ";
+        };
+        hostname = {
+          ssh_symbol = " ";
+        };
+        lua = {
+          symbol = " ";
+        };
+        memory_usage = {
+          symbol = "󰍛 ";
+        };
+        meson = {
+          symbol = "󰔷 ";
+        };
+        nim = {
+          symbol = "󰆥 ";
+        };
+        nix_shell = {
+          symbol = " ";
+        };
+        nodejs = {
+          symbol = " ";
+        };
+        ocaml = {
+          symbol = " ";
+        };
+        package = {
+          symbol = "󰏗 ";
+        };
+        python = {
+          symbol = " ";
+        };
+        rust = {
+          symbol = " ";
+        };
+        swift = {
+          symbol = " ";
+        };
+        zig = {
+          symbol = " ";
+        };
+
+        #      rust = {
+        #        format = "[$symbol($version )]($style)";
+        #      };
+        #
+        #      nodejs = {
+        #        format = "[$symbol($version )]($style)";
+        #      };
+        #
+        #      lua = {
+        #        format = "[$symbol($version )]($style)";
+        #      };
+        #
+        #      golang = {
+        #        format = "[$symbol($version )]($style)";
+        #      };
+        #
+        #      c = {
+        #        format = "[$symbol($version(-$name) )]($style)";
+        #      };
+        #
+        #      ruby = {
+        #        format = "[$symbol($version )]($style)";
+        #      };
+      };
+    };
+
+    htop = {
+      enable = true;
+    };
+
+    zoxide = {
+      enable = true;
+      enableZshIntegration = true;
+      enableBashIntegration = true;
+      options = [
+        "--cmd cd"
       ];
     };
-  };
-
-  starship = {
-    enable = true;
-
-    enableBashIntegration = true;
-    enableZshIntegration = true;
-    enableNushellIntegration = true;
-
-    # 使用提供的 starship.toml 配置
-    settings = {
-      # Get editor completions based on the config schema
-      "$schema" = "https://starship.rs/config-schema.json";
-
-      right_format = "$cmd_duration$env_var";
-
-      # Inserts a blank line between shell prompts
-      add_newline = true;
-
-      # Replace the '❯' symbol in the prompt with '➜'
-      character = {
-        success_symbol = "[➜](bold green)";
-        error_symbol = "[➜](bold red)";
-      };
-
-      # Disable the package module, hiding it from the prompt completely
-      package = {
-        disabled = true;
-      };
-
-      directory = {
-        truncation_length = 0;
-        truncate_to_repo = false;
-        style = "bold #82AAFF";
-      };
-
-      git_branch = {
-        format = "[$symbol$branch(:$remote_branch)]($style) ";
-      };
-
-      git_status = {
-        style = "bold #82AAFF";
-      };
-
-      #      env_var = {
-      #        all_proxy = {
-      #          variable = "all_proxy";
-      #          format = "[$env_value]($style) ";
-      #          default = "";
-      #          style = "bold #82AAFF";
-      #        };
-      #      };
-
-      cmd_duration = {
-        format = "[$duration]($style) ";
-      };
-
-      hostname = {
-        disabled = true;
-      };
-
-      username = {
-        disabled = true;
-      };
-
-      os = {
-        disabled = true;
-        #        symbols = {
-        #          Ubuntu = "󰕈 ";
-        #        };
-      };
-
-      buf = {
-        symbol = " ";
-      };
-      c = {
-        symbol = " ";
-      };
-      directory = {
-        read_only = " 󰌾";
-      };
-      docker_context = {
-        symbol = " ";
-      };
-      fossil_branch = {
-        symbol = " ";
-      };
-      git_branch = {
-        symbol = " ";
-      };
-      golang = {
-        symbol = " ";
-      };
-      hg_branch = {
-        symbol = " ";
-      };
-      hostname = {
-        ssh_symbol = " ";
-      };
-      lua = {
-        symbol = " ";
-      };
-      memory_usage = {
-        symbol = "󰍛 ";
-      };
-      meson = {
-        symbol = "󰔷 ";
-      };
-      nim = {
-        symbol = "󰆥 ";
-      };
-      nix_shell = {
-        symbol = " ";
-      };
-      nodejs = {
-        symbol = " ";
-      };
-      ocaml = {
-        symbol = " ";
-      };
-      package = {
-        symbol = "󰏗 ";
-      };
-      python = {
-        symbol = " ";
-      };
-      rust = {
-        symbol = " ";
-      };
-      swift = {
-        symbol = " ";
-      };
-      zig = {
-        symbol = " ";
-      };
-
-      #      rust = {
-      #        format = "[$symbol($version )]($style)";
-      #      };
-      #
-      #      nodejs = {
-      #        format = "[$symbol($version )]($style)";
-      #      };
-      #
-      #      lua = {
-      #        format = "[$symbol($version )]($style)";
-      #      };
-      #
-      #      golang = {
-      #        format = "[$symbol($version )]($style)";
-      #      };
-      #
-      #      c = {
-      #        format = "[$symbol($version(-$name) )]($style)";
-      #      };
-      #
-      #      ruby = {
-      #        format = "[$symbol($version )]($style)";
-      #      };
-    };
-  };
-
-  htop = {
-    enable = true;
-  };
-
-  zoxide = {
-    enable = true;
-    enableZshIntegration = true;
-    enableBashIntegration = true;
-    options = [
-      "--cmd cd"
-    ];
   };
 }
