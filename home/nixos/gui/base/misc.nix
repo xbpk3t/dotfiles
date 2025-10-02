@@ -23,9 +23,6 @@
     alacritty
     foot
 
-    # Network tools
-    clash-verge-rev
-
     # System utilities
     pavucontrol
 

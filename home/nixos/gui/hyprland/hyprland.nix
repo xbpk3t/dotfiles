@@ -1,10 +1,10 @@
 {pkgs, ...}: let
   package = pkgs.hyprland;
 
-  # 变量定义 - 参考 Peter 的配置风格
-  mod = "ALT"; # 使用 ALT 而不是 SUPER，与 darwin 上的 aerospace 保持一致
+  # 变量定义 - keyd 映射后物理 Alt 键变成了 Super
+  mod = "SUPER"; # keyd 映射：物理Alt → Super，所以用 SUPER
   files = "thunar";
-  browser = "chromium"; # 修复：使用 chromium 而不是 chromium-browser
+  browser = "chromium";
   terminal = "foot";
   menu = "vicinae";
 in {
@@ -37,8 +37,8 @@ in {
 
         # 终端和应用启动
         "alacritty" # 默认启动的终端
-        "clash-verge &" # 网络代理工具
         "${browser}" # 浏览器
+        "goland" # IDE
 
         # 工作区切换
         "sleep 3; hyprctl dispatch workspace 1"
@@ -61,7 +61,7 @@ in {
         # 关闭当前窗口
         "$mod, q, killactive"
 
-        # 终端启动器
+        # 终端启动器（注意：keyd映射后物理Alt键现在作为Super使用）
         "$mod, Return, exec, ${terminal}"
         "$mod SHIFT, Return, exec, alacritty"
         "$mod, d, exec, ${menu}"
@@ -79,10 +79,11 @@ in {
         ", XF86AudioPrev, exec, playerctl previous"
         ", XF86Search, exec, ${menu}"
 
-        # === 应用程序快捷启动 ===
-        "$mod, 1, exec, alacritty"
-        "$mod, 2, exec, chromium"
-        "$mod, 3, exec, goland"
+        # === 工作区快捷切换 ===
+        # 切换工作区（如果该工作区没有目标应用，则启动它）
+        "$mod, 1, exec, if [ $(hyprctl clients -j | jq 'map(select(.workspace.id == 1)) | length') -eq 0 ]; then alacritty; fi; hyprctl dispatch workspace 1"
+        "$mod, 2, exec, if [ $(hyprctl clients -j | jq 'map(select(.workspace.id == 2)) | length') -eq 0 ]; then chromium; fi; hyprctl dispatch workspace 2"
+        "$mod, 3, exec, if [ $(hyprctl clients -j | jq 'map(select(.workspace.id == 3)) | length') -eq 0 ]; then goland; fi; hyprctl dispatch workspace 3"
 
         # === 工作区管理 ===
         # 使用功能键切换工作区
@@ -336,12 +337,14 @@ in {
       # 工作区分配规则
       # ============================================================================
       windowrulev2 = [
-        # 终端
-        "workspace 1, class:^(foot)$"
-        "workspace 2, class:^(Alacritty)$"
+        # 终端 - alacritty在工作区1
+        "workspace 1, class:^(Alacritty)$"
 
         # 浏览器
-        "workspace 5, class:^(chromium-browser)$"
+        "workspace 2, class:^(chromium-browser)$"
+
+        # IDE - Goland可能的类名
+        "workspace 3, class:^(goland)$"
 
         # 浮动窗口
         "float, class:^(pulsemixer)$"
