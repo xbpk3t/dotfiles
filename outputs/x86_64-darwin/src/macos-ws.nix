@@ -5,6 +5,7 @@
   inputs,
   mylib,
   myvars,
+  lib,
   ...
 } @ args: let
   name = "macos-ws";
@@ -41,8 +42,9 @@
   systemArgs =
     args
     // {
-      inherit darwin-modules home-modules;
+      inherit darwin-modules home-modules lib;
+      system = "x86_64-darwin";
     };
 in {
-  darwinConfigurations.${name} = mylib.macos systemArgs;
+  darwinConfigurations.${name} = mylib.macosSystem systemArgs;
 }

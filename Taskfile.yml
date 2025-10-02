@@ -4,9 +4,8 @@ version: '3'
 
 includes:
   nix:
-    taskfile: ./nix/Taskfile.yml
-    dir: ./nix
-  dev: ./devenv/Taskfile.yml
+    taskfile: ./Taskfile.nix.yml
+#  dev: ./devenv/Taskfile.yml
 
 
 

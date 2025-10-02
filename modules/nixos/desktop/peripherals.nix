@@ -60,26 +60,26 @@
 
     # A key remapping daemon for linux.
     # https://github.com/rvaiya/keyd
-#    keyd = {
-#      enable = true;
-#      keyboards.default.settings = {
-#        main = {
-#          # overloads the capslock key to function as both escape (when tapped) and control (when held)
-#          capslock = "overload(control, esc)";
-#          esc = "capslock";
-#        };
-#      };
-#    };
+    #    keyd = {
+    #      enable = true;
+    #      keyboards.default.settings = {
+    #        main = {
+    #          # overloads the capslock key to function as both escape (when tapped) and control (when held)
+    #          capslock = "overload(control, esc)";
+    #          esc = "capslock";
+    #        };
+    #      };
+    #    };
 
     keyd = {
       enable = true;
       keyboards.default = {
-        ids = [ "*" ];  # 应用于所有键盘
+        ids = ["*"]; # 应用于所有键盘
         settings.main = {
-          leftcontrol = "fn";  # Windows Ctrl -> mac Fn
-          fn = "leftcontrol";  # Windows Fn -> mac Ctrl
-          leftmeta = "leftalt";  # Windows Super -> mac Option (Alt)
-          leftalt = "leftmeta";  # Windows Alt -> mac Cmd (Super/Meta)
+          leftcontrol = "fn"; # Windows Ctrl -> mac Fn
+          fn = "leftcontrol"; # Windows Fn -> mac Ctrl
+          leftmeta = "leftalt"; # Windows Super -> mac Option (Alt)
+          leftalt = "leftmeta"; # Windows Alt -> mac Cmd (Super/Meta)
         };
       };
     };

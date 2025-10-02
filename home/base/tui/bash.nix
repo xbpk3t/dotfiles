@@ -163,6 +163,8 @@
 
         # 启用不区分大小写的制表符补全。跟 nocaseglob 搭配使用。
         bind 'set completion-ignore-case on'
+        bind '"\C-y":"fastfetch\n"'
+
 
         # ===== 文件后缀处理 =====
         # Bash 不直接支持 zsh 的 alias -s 功能

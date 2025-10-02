@@ -194,7 +194,10 @@ tasks:
 
   rollback:
     desc: 回滚到上一个generation
-    cmd: sudo nixos-rebuild switch --rollback #  sudo nixos-rebuild switch --generation 149
+    cmd: sudo nixos-rebuild switch --rollback #  sudo nixos-rebuild switch --generation 149 # sudo darwin-rebuild switch --switch-generation 72
+
+
+
 
 #  status:
 #    desc: "Show comprehensive system status"
