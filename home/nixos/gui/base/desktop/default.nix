@@ -32,8 +32,6 @@
     networkmanagerapplet # provide GUI app: nm-connection-editor
   ];
 
-  
-  
   # screen locker
   programs.swaylock.enable = true;
 
