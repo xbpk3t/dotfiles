@@ -40,9 +40,11 @@
         emoji = ["Noto Color Emoji"];
       };
       antialias = true; # 抗锯齿
-      hinting.enable = false; # 禁止字体微调 - 高分辨率下没这必要
+      hinting.enable = true; # 禁止字体微调 - 高分辨率下没这必要
+      hinting.style = "medium"; # macOS-like 设置，提供平衡的锐化和平滑。"slight" 更轻柔，适合小字体；"full" 可能太锐利导致锯齿。
+
       subpixel = {
-        rgba = "rgb"; # IPS 屏幕使用 rgb 排列
+        rgba = "rgb"; # IPS 屏幕使用 rgb 排列 # 启用子像素渲染，提升清晰度（尤其在 LCD 屏上）。这接近 macOS 的 subpixel antialiasing
       };
     };
   };

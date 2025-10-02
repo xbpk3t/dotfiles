@@ -6,7 +6,7 @@
 }: {
   services.netdata = {
     enable = true;
-    package = pkgs.netdata;
+    package = pkgs.netdata.override {withCloudUi = true;};
 
     # Configuration file settings
     config = {
@@ -39,18 +39,39 @@
         "mode" = "static-threaded";
         "listen backlog" = "4096";
         "default port" = "19999";
-        "bind to" = "*";
+        "bind to" = "0.0.0.0:19999"; # 修复：明确指定绑定地址和端口
         "disconnect idle clients after seconds" = "60";
         "timeout for first request" = "60";
         "accept a streaming request every seconds" = "0";
         "respect do not track policy" = "no";
         "x-frame-options response header" = "";
-        "allow connections from" = "localhost *";
-        "allow dashboard from" = "localhost *";
-        "allow badges from" = "*";
-        "allow streaming from" = "*";
-        "allow netdata.conf from" = "localhost fd* 10.* 192.168.* 172.16.* 172.17.* 172.18.* 172.19.* 172.20.* 172.21.* 172.22.* 172.23.* 172.24.* 172.25.* 172.26.* 172.27.* 172.28.* 172.29.* 172.30.* 172.31.*";
-        "allow management from" = "localhost";
+        "access log" = "none";
+
+        # CORS 设置解决 origin URL 问题
+        "cors allowed origins" = "*";
+        "allow cross domain requests from" = "*";
+
+        # Web 服务器配置 - 指向正确的静态文件路径
+        "web files owner" = "root";
+        "web files group" = "root";
+
+        # 设置静态文件路径 - NixOS 中的 Netdata 静态文件通常在这里
+        "web root path" = "${pkgs.netdata}/share/netdata/web";
+
+        # Netdata 2.5+ 访问控制配置 - 解决 "file does not exist" 错误
+        "allow connections from" = "localhost *"; # 允许本地和任何IP连接
+        "allow dashboard from" = "localhost *"; # 允许访问dashboard
+        "allow management from" = "localhost"; # 只允许本地管理
+        "allow badges from" = "*"; # 允许badge访问
+        "allow streaming from" = "*"; # 允许数据流
+        "allow netdata.conf from" = "localhost"; # 只允许本地访问配置文件
+
+        # DNS解析设置 - Netdata 2.5+ 推荐设置
+        "allow connections by dns" = "heuristic";
+        "allow dashboard by dns" = "heuristic";
+        "allow management by dns" = "no";
+
+        # 启用gzip压缩
         "enable gzip compression" = "yes";
         "gzip compression strategy" = "default";
         "gzip compression level" = "3";
