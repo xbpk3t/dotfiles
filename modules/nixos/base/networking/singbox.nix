@@ -1,14 +1,16 @@
-{ config, lib, pkgs, ... }:
-
-with lib;
-
-let
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+with lib; let
   cfg = config.services.sing-box;
 
   # 订阅更新脚本
   updateConfig = pkgs.writeShellApplication {
     name = "update-singbox-config";
-    runtimeInputs = with pkgs; [ curl jq ];
+    runtimeInputs = with pkgs; [curl jq];
     text = ''
       set -euo pipefail
 
@@ -51,7 +53,6 @@ let
       echo "sing-box 配置更新完成"
     '';
   };
-
 in {
   options.services.sing-box = {
     subscription = {
@@ -171,8 +172,8 @@ in {
     # 自动更新服务
     systemd.services.sing-box-update = mkIf cfg.subscription.autoUpdate {
       description = "更新 sing-box 订阅配置";
-      after = [ "network-online.target" ];
-      wants = [ "network-online.target" ];
+      after = ["network-online.target"];
+      wants = ["network-online.target"];
 
       serviceConfig = {
         Type = "oneshot";
@@ -183,7 +184,7 @@ in {
 
     systemd.timers.sing-box-update = mkIf cfg.subscription.autoUpdate {
       description = "定时更新 sing-box 订阅";
-      wantedBy = [ "timers.target" ];
+      wantedBy = ["timers.target"];
       timerConfig = {
         OnCalendar = cfg.subscription.updateInterval;
         Persistent = true;
