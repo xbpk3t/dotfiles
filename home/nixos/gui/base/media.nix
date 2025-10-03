@@ -17,7 +17,7 @@
   ];
 
   programs.mpv = {
-    enable = true;
+    enable = lib.mkDefault false;
     defaultProfiles = ["gpu-hq"];
     scripts = [pkgs.mpvScripts.mpris];
   };

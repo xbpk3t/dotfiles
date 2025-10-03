@@ -37,14 +37,14 @@
       };
 
       # 入站配置 - 本地代理
-#      inbounds = [
-#        {
-#          type = "mixed";
-#          tag = "mixed-in";
-#          listen = "127.0.0.1";
-#          listen_port = 1080;
-#        }
-#      ];
+      #      inbounds = [
+      #        {
+      #          type = "mixed";
+      #          tag = "mixed-in";
+      #          listen = "127.0.0.1";
+      #          listen_port = 1080;
+      #        }
+      #      ];
 
       # 出站配置 - 基础配置
       outbounds = [
@@ -120,10 +120,10 @@
   };
 
   # 代理环境变量
-#  environment.sessionVariables = {
-#    HTTP_PROXY = "http://127.0.0.1:1080";
-#    HTTPS_PROXY = "http://127.0.0.1:1080";
-#    ALL_PROXY = "http://127.0.0.1:1080";
-#    no_proxy = "localhost,127.0.0.1,::1";
-#  };
+  #  environment.sessionVariables = {
+  #    HTTP_PROXY = "http://127.0.0.1:1080";
+  #    HTTPS_PROXY = "http://127.0.0.1:1080";
+  #    ALL_PROXY = "http://127.0.0.1:1080";
+  #    no_proxy = "localhost,127.0.0.1,::1";
+  #  };
 }

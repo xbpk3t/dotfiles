@@ -1,4 +1,8 @@
-{pkgs, mylib, ...}: {
+{
+  pkgs,
+  mylib,
+  ...
+}: {
   imports = mylib.scanPaths ./.;
 
   # wayland related

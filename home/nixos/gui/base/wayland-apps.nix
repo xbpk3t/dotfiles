@@ -1,7 +1,7 @@
 {pkgs, ...}: {
   programs = {
     # source code: https://github.com/nix-community/home-manager/blob/master/modules/programs/chromium.nix
-    google-chrome = {
+    chromium = {
       enable = true;
       package = pkgs.chromium;
 
@@ -53,10 +53,13 @@
         # Authenticator
         {id = "bhghoamapcdpbohphigoooaddinpkbai";}
 
-
         # Vimium (vim-like navigation)
         {id = "dbepggeogbaibhgnhhndojpepiihcmeb";}
       ];
+    };
+
+    firefox = {
+      enable = true;
     };
   };
 }
