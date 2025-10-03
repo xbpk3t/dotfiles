@@ -34,6 +34,7 @@ in {
         wayland.windowManager.hyprland.settings = cfg.settings;
       }
       (import ./hyprland.nix args)
+      (import ./hypridle.nix args)
       (import ./xdg.nix args)
     ]
   );

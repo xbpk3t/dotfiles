@@ -5,8 +5,11 @@
     enableDefaultPackages = false;
     fontDir.enable = true;
 
-    # fonts are defined in /modules/base/fonts.nix, used by both NixOS & Darwin.
-    # packages = [ ... ];
+    # Import shared fonts from modules/base/fonts.nix
+    packages = with pkgs; [
+      # The actual font packages are now in modules/base/fonts.nix
+      # This will be imported at the system level
+    ];
 
     fontconfig = {
       # User defined default fonts
@@ -14,7 +17,7 @@
       defaultFonts = {
         serif = [
           # 西文: 衬线字体（笔画末端有修饰(衬线)的字体，通常用于印刷。）
-          "Source Sans 3"
+          "Source Serif 4"
           # 中文: 宋体（港台称明體）
           "Source Han Serif SC" # 思源宋体
           "Source Han Serif TC"
@@ -22,7 +25,7 @@
         # SansSerif 也简写做 Sans, Sans 在法语中就是「without」或者「无」的意思
         sansSerif = [
           # 西文: 无衬线字体（指笔画末端没有修饰(衬线)的字体，通常用于屏幕显示）
-          "Source Serif 4"
+          "Source Sans 3"
           # 中文: 黑体
           "LXGW WenKai Screen" # 霞鹜文楷 屏幕阅读版
           "Source Han Sans SC" # 思源黑体
@@ -35,17 +38,86 @@
           "Source Han Mono SC" # 思源等宽
           "Source Han Mono TC"
           # 西文
-          "JetBrainsMono Nerd Font"
+          "JetBrains Mono"
         ];
         emoji = ["Noto Color Emoji"];
       };
-      antialias = true; # 抗锯齿
-      hinting.enable = true; # 禁止字体微调 - 高分辨率下没这必要
-      hinting.style = "medium"; # macOS-like 设置，提供平衡的锐化和平滑。"slight" 更轻柔，适合小字体；"full" 可能太锐利导致锯齿。
+
+      # Chrome/Wayland 字体优化设置
+      antialias = true; # 抗锯齿 - 必须启用以减少字体发虚
+
+      hinting = {
+        enable = true; # 启用字体微调 - 对 Chrome 发虚问题很重要
+        style = "slight"; # "slight" 更适合 Wayland 和 Chrome，减少发虚
+        # 可选值: "none", "slight", "medium", "full"
+        # "slight" 在高分辨率屏幕上提供最佳平衡
+      };
 
       subpixel = {
-        rgba = "rgb"; # IPS 屏幕使用 rgb 排列 # 启用子像素渲染，提升清晰度（尤其在 LCD 屏上）。这接近 macOS 的 subpixel antialiasing
+        rgba = "rgb"; # IPS 屏幕使用 rgb 排列
+        lcdfilter = "default"; # LCD 滤镜，改善子像素渲染
       };
+
+      # 针对特定字体的优化
+      localConf = ''
+        <?xml version='1.0'?>
+        <!DOCTYPE fontconfig SYSTEM 'fonts.dtd'>
+        <fontconfig>
+          <!-- Chrome/Chromium Wayland 字体优化 -->
+          <!-- 改善中文字体渲染 -->
+          <match target="font">
+            <test name="family">
+              <string>Source Han Sans SC</string>
+              <string>Source Han Sans TC</string>
+              <string>LXGW WenKai Screen</string>
+            </test>
+            <edit name="hintstyle" mode="assign">
+              <const>hintslight</const>
+            </edit>
+            <edit name="antialias" mode="assign">
+              <bool>true</bool>
+            </edit>
+            <edit name="rgba" mode="assign">
+              <const>rgb</const>
+            </edit>
+          </match>
+
+          <!-- 改善英文字体渲染 -->
+          <match target="font">
+            <test name="family">
+              <string>Source Sans 3</string>
+              <string>Source Serif 4</string>
+              <string>JetBrains Mono</string>
+            </test>
+            <edit name="hintstyle" mode="assign">
+              <const>hintslight</const>
+            </edit>
+            <edit name="antialias" mode="assign">
+              <bool>true</bool>
+            </edit>
+          </match>
+
+          <!-- 防止字体位图化 - 对 Chrome 很重要 -->
+          <match target="font">
+            <test name="pixelsize" compare="less_eq">
+              <double>16</double>
+            </test>
+            <edit name="embeddedbitmap" mode="assign">
+              <bool>false</bool>
+            </edit>
+          </match>
+
+          <!-- 改善小字体渲染 -->
+          <match target="font">
+            <test name="pixelsize" compare="less">
+              <double>10</double>
+            </test>
+            <edit name="autohint" mode="assign">
+              <bool>true</bool>
+            </edit>
+          </match>
+        </fontconfig>
+      '';
     };
   };
 

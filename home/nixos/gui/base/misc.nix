@@ -41,42 +41,4 @@
   # Install fonts at system-level, not user-level
   fonts.fontconfig.enable = false;
 
-  # Chromium browser configuration
-  programs.chromium = {
-    enable = true;
-    package = pkgs.chromium;
-
-    # Command line flags
-    commandLineArgs = [
-      # Enable Wayland support
-      "--enable-features=UseOzonePlatform"
-      "--ozone-platform=wayland"
-
-      # Performance
-      "--enable-gpu-rasterization"
-      "--enable-zero-copy"
-
-      # Privacy
-      "--disable-background-networking"
-      "--disable-sync"
-
-      # UI
-      "--force-dark-mode"
-    ];
-
-    # Extensions (using extension IDs from Chrome Web Store)
-    extensions = [
-      # uBlock Origin
-      {id = "cjpalhdlnbpafiamejdnhcphjbkeiagm";}
-
-      # Vimium (vim-like navigation)
-      {id = "dbepggeogbaibhgnhhndojpepiihcmeb";}
-
-      # Dark Reader
-      {id = "eimadpbcbfnmbkopoojfekhnkhdbieeh";}
-
-      # JSON Viewer
-      {id = "gbmdgpbipfallnflgajpaliibnhdgobh";}
-    ];
-  };
 }
