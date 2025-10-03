@@ -7,6 +7,7 @@
   browser = "chromium";
   terminal = "foot";
   menu = "vicinae";
+  menuZ = "anyrun";
 in {
   # 所有配置已经直接整合到 settings 中，不再需要 xdg.configFile 引用
 
@@ -56,6 +57,7 @@ in {
 
       # 所有键绑定统一配置
       # ============================================================================
+
       bind = [
         # === 系统操作 ===
         # 关闭当前窗口
@@ -65,6 +67,7 @@ in {
         "$mod, Return, exec, ${terminal}"
         "$mod SHIFT, Return, exec, alacritty"
         "$mod, d, exec, ${menu}"
+        "$mod, z, exec, ${menuZ}"
 
         # 硬件控制 - 使用 WirePlumber 进行音频控制
         # 参考: https://wiki.archlinux.org/title/WirePlumber
@@ -306,6 +309,11 @@ in {
         natural_scroll = 0;
         touchpad = {
           natural_scroll = 1;
+          # 滚动速度设置 - 调整这个值来改变上下滑动速度
+          # 大于 1.0 加速滚动，小于 1.0 减速滚动
+          # 大家普遍设置为0.2，但是我的touchpad比较小所以设置为0.4
+          scroll_factor = 0.4;
+
           # 关键设置：启用点击行为模式，这样可以用手指数量而不是位置来区分点击
           clickfinger_behavior = true;
           disable_while_typing = true;
