@@ -20,9 +20,6 @@ switches:
     # states: [ 中文, 英文 ]
   - name: full_shape
     # states: [ 半角, 全角 ]
-  - name: simplification
-    # states: [ 简, 繁 ]
-    reset: 0
   - name: ascii_punct
     # states: [ 。，, ．， ]
     reset: 0
@@ -57,7 +54,6 @@ engine:
     - lua_translator@calculator_translator
   filters:
     - simplifier
-    - simplifier@simplification
     - uniquifier
 
 speller:
@@ -84,10 +80,6 @@ history:
   size: 1 #重复前几次上屏
   initial_quality: 1 #首选
 
-simplification:
-  opencc_config: s2tw.json
-  option_name: simplification
-  tips: all #简繁对照
 
 custom_phraseVD:
   dictionary: ""
@@ -143,7 +135,6 @@ key_binder:
     - {accept: "Shift_R", send: Escape, when: composing}
     - {accept: "Shift+space", toggle: full_shape, when: always} #切换全半角
     - {accept: "Control+period", toggle: ascii_punct, when: always} #切换中英标点
-    - {accept: "Control+j", toggle: simplification, when: always} #切换简繁
 
 recognizer:
   import_preset: default

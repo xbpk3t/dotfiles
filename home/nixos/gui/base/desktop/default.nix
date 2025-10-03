@@ -1,8 +1,5 @@
-{pkgs, ...}: {
-  imports = [
-    ./nvidia.nix
-    ./vicinae.nix
-  ];
+{pkgs, mylib, ...}: {
+  imports = mylib.scanPaths ./.;
 
   # wayland related
   home.sessionVariables = {
@@ -35,6 +32,5 @@
   # screen locker
   programs.swaylock.enable = true;
 
-  # Hyprland idle daemon
-  services.hypridle.enable = true;
+  # Hyprland idle daemon 配置现在在 hyprland/hypridle.nix 中
 }

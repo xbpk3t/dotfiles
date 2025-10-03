@@ -163,7 +163,10 @@
 
         # 启用不区分大小写的制表符补全。跟 nocaseglob 搭配使用。
         bind 'set completion-ignore-case on'
-        bind '"\C-y":"fastfetch\n"'
+        bind '"\C-f":"fastfetch\n"'           # Ctrl+f: fastfetch
+        bind '"\C-y":"yazi\n"'                # Ctrl+y: yazi
+        bind '"\C-g":"fzf\n"'                 # Ctrl+g: fzf
+        bind '"\C-t":"btop\n"'                # Ctrl+t: btop
 
 
         # ===== 文件后缀处理 =====
