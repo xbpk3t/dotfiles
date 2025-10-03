@@ -14,10 +14,11 @@
     # vscode is configured in wayland-apps.nix
 
     # Media
-    vlc
+    # vlc
 
     # File managers
-    xfce.thunar
+    # FIXME 暂时禁用
+    # xfce.thunar
 
     # Terminal emulators
     alacritty
@@ -27,8 +28,8 @@
     pavucontrol
 
     # Image viewers
-    feh
-    imv
+    # feh
+    # imv
 
     # remote desktop(rdp connect)
     # FIXME 换成 rustdesk + frp + tailscale
@@ -40,5 +41,4 @@
   # allow fontconfig to discover fonts and configurations installed through home.packages
   # Install fonts at system-level, not user-level
   fonts.fontconfig.enable = false;
-
 }

@@ -30,9 +30,6 @@
       config.allowUnfree = true;
     };
 
-    # Add niri package for niri configuration modules
-    niri = pkgs.niri;
-
     # Add anyrun for anyrun configuration modules
     anyrun = inputs.anyrun;
 

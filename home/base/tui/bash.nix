@@ -259,15 +259,18 @@
       enable = true;
 
       enableBashIntegration = true;
-      enableZshIntegration = true;
-      enableNushellIntegration = true;
+      # enableZshIntegration = true;
 
       # 使用提供的 starship.toml 配置
       settings = {
         # Get editor completions based on the config schema
         "$schema" = "https://starship.rs/config-schema.json";
 
-        right_format = "$cmd_duration$env_var";
+        # 最极简的配置
+        #  format = "$all$character";
+        #  right_format = "$cmd_duration$env_var";
+        format = "$character";
+        right_format = "$all";
 
         # Inserts a blank line between shell prompts
         add_newline = true;
@@ -276,6 +279,14 @@
         character = {
           success_symbol = "[➜](bold green)";
           error_symbol = "[➜](bold red)";
+        };
+
+        # 开启time
+        time = {
+          disabled = false;
+          format = " [$time]($style)"; # 前面有空格，在路径行末尾显示
+          time_format = "%T"; # 24 小时制，显示小时:分钟:秒
+          style = "bright-cyan";
         };
 
         # Disable the package module, hiding it from the prompt completely
@@ -308,6 +319,8 @@
 
         cmd_duration = {
           format = "[$duration]($style) ";
+          min_time = 0; # 单位：ms，500ms 即 0.5 秒
+          style = "bold #82AAFF";
         };
 
         hostname = {

@@ -1,6 +1,6 @@
+{pkgs, ...}:
+# [Archlinux 笔记本省电设置 - 少数派](https://sspai.com/post/101744)
 {
-  # [Archlinux 笔记本省电设置 - 少数派](https://sspai.com/post/101744)
-
   # Disable power-profiles-daemon to avoid conflicts with TLP
   services.power-profiles-daemon.enable = false;
 
@@ -65,5 +65,15 @@
 
   # Kernel parameters for AMD CPUs: enable active mode for better power management
   # This assumes an AMD CPU; remove if using Intel
-  boot.kernelParams = ["amd_pstate=active"];
+  boot.kernelParams = [
+    "acpi_osi=Linux" # 告诉ACPI固件，当前运行linux。解决ACPI兼容性问题。
+    "intel_pstate=active" # passive/active 分别是 省电模式、性能模式。如果不填就是自动调度。
+  ];
+
+  # 使用 services.udev.extraRules 来设置默认亮度
+  # 这里要注意不同品牌的机器，这里的 /sys/class/leds/platform 这部分参数不同。之后再做优化。
+  # 默认关闭键盘背光灯
+  services.udev.extraRules = ''
+    SUBSYSTEM=="leds", ATTR{name}=="platform::kbd_backlight", RUN+="${pkgs.coreutils}/bin/echo 0 > /sys/class/leds/platform::kbd_backlight/brightness"
+  '';
 }
