@@ -26,7 +26,7 @@ in {
       x.fraction = 0.5; # at the middle of the screen
       # The vertical position.
       y.fraction = 0.05; # at the top of the screen
-      # The width of the runner.
+      # The width of the runne r.
       width.fraction = 0.3; # 30% of the screen
 
       hideIcons = false;
@@ -47,8 +47,20 @@ in {
         rink # A simple calculator plugin
         # symbols # Look up unicode symbols and custom user defined symbols.
         translate # ":zh <text to translate>" Quickly translate text using the Google Translate API.
-        niri-focus # Search for & focus the window via title/appid on Niri
+        # niri-focus # Search for & focus the window via title/appid on Niri
       ];
+    };
+
+    # 用 extraConfigFiles 注入自定义 RON（覆盖或追加）
+    extraConfigFiles = {
+      "keyboard.ron".text = ''
+        keyboard = {
+            Escape = "Close",
+            // 你可以加其他绑定，比如
+            // Down = "Next",
+            // Up = "Previous",
+        }
+      '';
     };
   };
 }

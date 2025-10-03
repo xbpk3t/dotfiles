@@ -1,4 +1,8 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  lib,
+  ...
+}: {
   #============================= Audio(PipeWire) =======================
 
   # List packages installed in system profile. To search, run:
@@ -47,8 +51,10 @@
   #================================= Misc =================================
 
   services = {
-    printing.enable = true; # Enable CUPS to print documents.
-    geoclue2.enable = true; # Enable geolocation services.
+    # Enable CUPS to print documents.
+    printing.enable = lib.mkDefault false;
+    # Enable geolocation services.
+    geoclue2.enable = lib.mkDefault false;
 
     udev.packages = with pkgs; [
       gnome-settings-daemon

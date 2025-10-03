@@ -3,7 +3,9 @@
 
   # 变量定义 - keyd 映射后物理 Alt 键变成了 Super
   mod = "SUPER"; # keyd 映射：物理Alt → Super，所以用 SUPER
-  files = "thunar";
+  # files = "thunar";
+
+  files = "yazi";
   browser = "chromium";
   terminal = "foot";
   menu = "vicinae";
