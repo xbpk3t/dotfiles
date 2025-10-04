@@ -18,6 +18,8 @@
     nix-tree # A TUI to visualize the dependency graph of a nix derivation
 
     colmena # NixOS 远程部署工具
+
+    nvd # https://mynixos.com/nixpkgs/package/nvd
   ];
 
   programs.nix-index = {

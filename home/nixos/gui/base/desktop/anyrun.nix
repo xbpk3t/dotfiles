@@ -27,13 +27,15 @@ in {
       # The vertical position.
       y.fraction = 0.05; # at the top of the screen
       # The width of the runne r.
-      width.fraction = 0.3; # 30% of the screen
+      width = {fraction = 0.5;}; # 30% of the screen
 
       hideIcons = false;
       ignoreExclusiveZones = false;
       layer = "overlay";
-      hidePluginInfo = false;
-      closeOnClick = true;
+      hidePluginInfo = true;
+
+      # if this isn't enabled you must press ESC to exit Anyrun
+      closeOnClick = false;
       showResultsImmediately = true;
       maxEntries = null;
 
@@ -53,14 +55,79 @@ in {
 
     # 用 extraConfigFiles 注入自定义 RON（覆盖或追加）
     extraConfigFiles = {
-      "keyboard.ron".text = ''
-        keyboard = {
-            Escape = "Close",
-            // 你可以加其他绑定，比如
-            // Down = "Next",
-            // Up = "Previous",
-        }
+      "applications.ron".text = ''
+        Config(
+          desktop_actions: false,
+          max_entries: 5,
+          terminal: Some("kitty"),
+        ) '';
+      "shell.ron".text = ''
+        Config(
+          prefix: ";",
+          shell: None,
+        )
+      '';
+      "kidex.ron".text = ''
+        Config(
+          max_entries: 3,
+        )
+      '';
+      "dictionary.ron".text = ''
+        Config(
+          prefix: ":",
+          max_entries: 5,
+        )
+      '';
+      "websearch.ron".text = ''
+        Config(
+          prefix: "/",
+          Custom(
+            name: "aliyun",
+            url: "https://account.aliyun.com/",
+          )
+          engines: [Google]
+        )
       '';
     };
+
+    extraCss = ''
+      * {
+          all: unset;
+          border-radius: 0;
+      }
+
+      window {
+          background: rgba(0, 0, 0, 0);
+          padding: 48px;
+      }
+
+      box.main {
+          margin: 48px;
+          padding: 24px;
+          background-color: rgba(31, 31, 31, .6);
+          box-shadow: 0 0 2px 1px rgba(26, 26, 26, 238);
+          border: 2px solid #fff;
+      }
+
+      text { /* I would center align the text, but GTK doesn't support it */
+          border-bottom: 2px solid #fff;
+          margin-bottom: 12px;
+          padding: 6px;
+          font-family: monospace;
+      }
+
+      .match {
+          padding: 4px;
+      }
+
+      .match:selected,
+      .match:hover {
+          background-color: rgba(255, 255, 255, .2);
+      }
+
+      label.match-title {
+          font-weight: bold;
+      }
+    '';
   };
 }

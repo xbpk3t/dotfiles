@@ -31,6 +31,9 @@
       # API 认证令牌 - 使用 sops 管理，通过 cat 命令读取文件内容
       ANTHROPIC_AUTH_TOKEN = "$(cat /etc/claude/zai/token)";
     };
+    shellAliases = {
+      cc = "claude --dangerously-skip-permissions";
+    };
   };
 
   programs = {

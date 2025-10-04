@@ -6,10 +6,10 @@
 
     settings = {
       general = {
-        # 锁屏后执行命令
-        lock_cmd = "${pkgs.swaylock}/bin/swaylock -f -c 000000";
-        # 休眠前执行命令
-        before_sleep_cmd = "${pkgs.swaylock}/bin/swaylock -f -c 000000";
+        # 锁屏后执行命令 - 使用配置好的 swaylock
+        lock_cmd = "swaylock";
+        # 休眠前执行命令 - 使用配置好的 swaylock
+        before_sleep_cmd = "swaylock";
         # 唤醒后执行命令 - 恢复显示器
         after_sleep_cmd = "${pkgs.hyprland}/bin/hyprctl dispatch dpms on";
         # 忽略 DBus 抑制（让系统管理器处理电源管理）
@@ -33,10 +33,10 @@
           on-resume = "${pkgs.hyprland}/bin/hyprctl dispatch dpms on";
         }
 
-        # 15 分钟 (900 秒) 后锁定屏幕
+        # 10 分钟 (600 秒) 后锁定屏幕 - 调整时间使其更合理
         {
-          timeout = 900;
-          on-timeout = "${pkgs.systemd}/bin/loginctl lock-session";
+          timeout = 600;
+          on-timeout = "swaylock";
         }
       ];
     };
