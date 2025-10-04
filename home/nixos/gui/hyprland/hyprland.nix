@@ -39,7 +39,7 @@ in {
         "fcitx5 -d --replace" # 启动 fcitx5 守护进程
 
         # 终端和应用启动
-        "alacritty" # 默认启动的终端
+        "wezterm" # 默认启动的终端
         "${browser}" # 浏览器
         "goland" # IDE
 
@@ -67,9 +67,9 @@ in {
 
         # 终端启动器（注意：keyd映射后物理Alt键现在作为Super使用）
         "$mod, Return, exec, ${terminal}"
-        "$mod SHIFT, Return, exec, alacritty"
         "$mod, d, exec, ${menu}"
-        "$mod, z, exec, ${menuZ}"
+        # [[Feature request] A way to close the prompt with a command? · Issue #103 · anyrun-org/anyrun](https://github.com/anyrun-org/anyrun/issues/103)
+        "$mod, z, exec, pgrep ${menuZ} && pkill ${menuZ} || ${menuZ}"
 
         # 硬件控制 - 使用 WirePlumber 进行音频控制
         # 参考: https://wiki.archlinux.org/title/WirePlumber
@@ -86,8 +86,8 @@ in {
 
         # === 工作区快捷切换 ===
         # 切换工作区（如果该工作区没有目标应用，则启动它）
-        "$mod, 1, exec, if [ $(hyprctl clients -j | jq 'map(select(.workspace.id == 1)) | length') -eq 0 ]; then alacritty; fi; hyprctl dispatch workspace 1"
-        "$mod, 2, exec, if [ $(hyprctl clients -j | jq 'map(select(.workspace.id == 2)) | length') -eq 0 ]; then chromium; fi; hyprctl dispatch workspace 2"
+        "$mod, 1, exec, if [ $(hyprctl clients -j | jq 'map(select(.workspace.id == 1)) | length') -eq 0 ]; then wezterm; fi; hyprctl dispatch workspace 1"
+        "$mod, 2, exec, if [ $(hyprctl clients -j | jq 'map(select(.workspace.id == 2)) | length') -eq 0 ]; then firefox; fi; hyprctl dispatch workspace 2"
         "$mod, 3, exec, if [ $(hyprctl clients -j | jq 'map(select(.workspace.id == 3)) | length') -eq 0 ]; then goland; fi; hyprctl dispatch workspace 3"
 
         # === 工作区管理 ===
@@ -348,7 +348,7 @@ in {
       # ============================================================================
       windowrulev2 = [
         # 终端 - alacritty在工作区1
-        "workspace 1, class:^(Alacritty)$"
+        "workspace 1, class:^(wezterm)$"
 
         # 浏览器
         "workspace 2, class:^(chromium-browser)$"

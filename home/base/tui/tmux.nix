@@ -5,7 +5,7 @@
     mouse = true;
     shell = "${pkgs.zsh}/bin/zsh";
     prefix = "C-a";
-    terminal = "alacritty";
+    terminal = "wezterm";
     keyMode = "vi";
 
     extraConfig = ''

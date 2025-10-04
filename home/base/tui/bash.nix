@@ -432,13 +432,19 @@
       enable = true;
     };
 
-    zoxide = {
-      enable = true;
-      enableZshIntegration = true;
-      enableBashIntegration = true;
-      options = [
-        "--cmd cd"
-      ];
-    };
+    #    zoxide = {
+    #      enable = true;
+    #      enableZshIntegration = true;
+    #      enableBashIntegration = true;
+    #      options = [
+    #        "--cmd cd"
+    #      ];
+    #    };
+
+    # 快速 tldr 客户端
+    #    tealdeer = {
+    #      enable = lib.mkDefault false;
+    #      enableAutoUpdates = false;
+    #    };
   };
 }
