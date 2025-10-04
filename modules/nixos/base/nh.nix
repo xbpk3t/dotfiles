@@ -1,4 +1,9 @@
-{lib, ...}: {
+{
+  lib,
+  pkgs,
+  myvars,
+  ...
+}: {
   # auto upgrade nix to the unstable version
   # https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/tools/package-management/nix/default.nix#L284
   # nix.package = pkgs.nixVersions.latest;
@@ -26,4 +31,21 @@
   # nix.extraOptions = ''
   #   !include ${config.sops.secrets.nix-access-tokens.path}
   # '';
+
+  # Nix Helper (nh) configuration
+  # https://github.com/viperML/nh
+  programs.nh = {
+    enable = true;
+    clean = {
+      enable = true;
+      extraArgs = "--keep-since 7d --keep 5";
+    };
+    flake = "/home/${myvars.username}/nix-config";
+  };
+
+  # Additional Nix management tools
+  environment.systemPackages = with pkgs; [
+    nix-output-monitor # Build progress visualization
+    nvd # Nix version diff tool
+  ];
 }

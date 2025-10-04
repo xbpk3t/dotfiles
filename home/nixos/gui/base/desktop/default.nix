@@ -33,8 +33,29 @@
     networkmanagerapplet # provide GUI app: nm-connection-editor
   ];
 
-  # screen locker
-  programs.swaylock.enable = true;
+  # Swaylock configuration - screen locker
+  programs.swaylock = {
+    enable = true;
+    settings = {
+      color = "808080";
+      font-size = 24;
 
-  # Hyprland idle daemon 配置现在在 hyprland/hypridle.nix 中
+      # Set the indicator to show the keyboard layout
+      show-keyboard-layout = true;
+
+      # Set the indicator colors
+      indicator-idle-visible = false;
+      indicator-radius = 100;
+      line-color = "ffffff";
+      show-failed-attempts = true;
+      inside-color="#FFFFFF";
+      ring-color="#AAAAAA";
+      key-hl-color="#FFFFFF";
+      separator-color="#000000";
+
+      clock = true;
+      datestr="%Y-%m-%d";
+      timestr="%H:%M";
+    };
+  };
 }

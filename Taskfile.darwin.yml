@@ -1,0 +1,71 @@
+version: '3'
+
+# macOS 专用任务
+
+vars:
+  HOSTNAME:
+    sh: scutil --get ComputerName | tr ' ' '-' | tr '[:upper:]' '[:lower:]'
+
+tasks:
+  # ==================== macOS 模板任务 ====================
+
+  darwin-build-template:
+    desc: "macOS 构建模板任务"
+    vars:
+      name: '{{.name}}'
+      mode: '{{.mode | default "default"}}'
+    cmds:
+      - echo "darwin-build '{{.name}}' in '{{.mode}}' mode..."
+      - echo "$(printf '=%.0s' {1..50})"
+      - |
+        TARGET="./nix#darwinConfigurations.{{.name}}.system"
+        if [[ "{{.mode}}" == "debug" ]]; then
+          nom build $TARGET --extra-experimental-features "nix-command flakes" --show-trace --verbose
+        else
+          nix build $TARGET --extra-experimental-features "nix-command flakes"
+        fi
+
+  darwin-switch-template:
+    desc: "macOS 切换模板任务"
+    vars:
+      name: '{{.name}}'
+      mode: '{{.mode | default "default"}}'
+    cmds:
+      - echo "darwin-switch '{{.name}}' in '{{.mode}}' mode..."
+      - echo "$(printf '=%.0s' {1..50})"
+      - |
+        if [[ "{{.mode}}" == "debug" ]]; then
+          sudo -E ./result/sw/bin/darwin-rebuild switch --flake "./nix#{{.name}}" --show-trace --verbose
+        else
+          sudo -E ./result/sw/bin/darwin-rebuild switch --flake "./nix#{{.name}}"
+        fi
+
+  darwin-rollback-template:
+    desc: "macOS 回滚模板任务"
+    cmds:
+      - ./result/sw/bin/darwin-rebuild --rollback
+
+  # ==================== macOS 实用任务 ====================
+
+  darwin-set-proxy:
+    desc: "设置系统代理"
+    cmds:
+      - echo "🌐 正在设置系统代理..."
+      - sudo python3 scripts/darwin_set_proxy.py
+      - sleep 1
+
+  darwin-rollback:
+    desc: "macOS 系统回滚"
+    cmds:
+      - task: darwin-rollback-template
+
+  local:
+    desc: "本地部署 macOS 配置"
+    vars:
+      mode: '{{.mode | default "default"}}'
+    cmds:
+      - echo "🚀 正在本地部署 macOS 配置..."
+      - task: darwin-build-template
+        vars: {name: "{{.HOSTNAME}}", mode: "{{.mode}}"}
+      - task: darwin-switch-template
+        vars: {name: "{{.HOSTNAME}}", mode: "{{.mode}}"}

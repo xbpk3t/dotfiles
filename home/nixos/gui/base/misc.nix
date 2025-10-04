@@ -20,10 +20,6 @@
     # FIXME 暂时禁用
     # xfce.thunar
 
-    # Terminal emulators
-    alacritty
-    foot
-
     # System utilities
     pavucontrol
 

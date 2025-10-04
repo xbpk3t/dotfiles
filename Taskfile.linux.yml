@@ -1,0 +1,89 @@
+version: '3'
+
+# Linux 专用任务
+
+vars:
+  HOSTNAME:
+    sh: hostname | tr '[:upper:]' '[:lower:]'
+
+tasks:
+  # ==================== NixOS 模板任务 ====================
+
+  nixos-switch-template:
+    desc: "NixOS 切换模板任务"
+    vars:
+      name: '{{.name}}'
+      mode: '{{.mode | default "default"}}'
+    cmds:
+      - echo "nixos-switch '{{.name}}' in '{{.mode}}' mode..."
+      - echo "$(printf '=%.0s' {1..50})"
+      - |
+        if [[ "{{.mode}}" == "debug" ]]; then
+          nom build "./nix#nixosConfigurations.{{.name}}.config.system.build.toplevel" --show-trace --verbose
+          nixos-rebuild switch --sudo --flake "./nix#{{.name}}" --show-trace --verbose
+        else
+          nixos-rebuild switch --sudo --flake "./nix#{{.name}}"
+        fi
+
+  # ==================== Linux 系统任务 ====================
+
+  shell:
+    desc: "进入开发环境 shell"
+    cmds:
+      - echo "🐚 正在进入开发环境..."
+      - nix shell nixpkgs#git nixpkgs#neovim nixpkgs#colmena
+
+  trace-access:
+    desc: "跟踪文件访问"
+    vars:
+      app: '{{.app}}'
+      args: '{{.args | default ""}}'
+    cmds:
+      - strace -f -t -e trace=file {{.app}} {{.args}} | complete | grep -v -E "(/nix/store|/newroot|/proc)" | grep -o '"(/.*)"' | sort | uniq
+
+  penvof:
+    desc: "查看进程环境变量"
+    vars:
+      pid: '{{.pid}}'
+    cmds:
+      - sudo cat "/proc/{{.pid}}/environ" | tr '\0' '\n'
+
+  list-inactive:
+    desc: "列出非活跃系统服务"
+    cmds:
+      - systemctl list-units -all --state=inactive
+
+  list-failed:
+    desc: "列出失败的系统服务"
+    cmds:
+      - systemctl list-units -all --state=failed
+
+  list-systemd:
+    desc: "列出 systemd 相关服务"
+    cmds:
+      - systemctl list-units systemd-*
+
+  # ==================== Nixpkgs Review 任务 ====================
+
+  pkg-review:
+    desc: "运行 nixpkgs-review 对 PR"
+    vars:
+      pr: '{{.pr}}'
+    cmds:
+      - echo "📦 正在运行 nixpkgs-review for PR #{{.pr}}..."
+      - gh workflow run review.yml --repo ryan4yin/nixpkgs-review-gha -f x86_64-darwin=no -f post-result=true -f pr={{.pr}}
+
+  pkg-test:
+    desc: "运行包测试对 PR"
+    vars:
+      pr: '{{.pr}}'
+      pname: '{{.pname}}'
+    cmds:
+      - echo "🧪 正在运行包测试 for PR #{{.pr}}: {{.pname}}..."
+      - gh workflow run review.yml --repo ryan4yin/nixpkgs-review-gha -f x86_64-darwin=no -f post-result=true -f pr={{.pr}} -f extra-args="-p {{.pname}}.passthru.tests"
+
+  pkg-summary:
+    desc: "查看 nixpkgs-review 工作流摘要"
+    cmds:
+      - echo "📋 正在查看 nixpkgs-review 工作流摘要..."
+      - gh workflow view review.yml --repo ryan4yin/nixpkgs-review-gha
