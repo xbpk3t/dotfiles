@@ -267,10 +267,87 @@
         "$schema" = "https://starship.rs/config-schema.json";
 
         # 最极简的配置
-        #  format = "$all$character";
-        #  right_format = "$cmd_duration$env_var";
-        format = "$character";
-        right_format = "$all";
+        #        format = "$all$character";
+        format = lib.concatStrings [
+          # "$username"
+          "$hostname"
+          "$shlvl"
+          "$directory"
+          "$character"
+        ];
+
+        #        right_format = "$cmd_duration$env_var";
+
+        right_format = lib.concatStrings [
+          "$status"
+          "$cmd_duration"
+          "$sudo"
+          "$package"
+          "$c"
+          "$cmake"
+          "$cobol"
+          "$daml"
+          "$dart"
+          "$deno"
+          "$dotnet"
+          "$elixir"
+          "$elm"
+          "$erlang"
+          "$fennel"
+          "$golang"
+          "$guix_shell"
+          "$haskell"
+          "$haxe"
+          "$helm"
+          "$java"
+          "$julia"
+          "$kotlin"
+          "$gradle"
+          "$lua"
+          "$nim"
+          "$nodejs"
+          "$ocaml"
+          "$opa"
+          "$perl"
+          "$php"
+          "$pulumi"
+          "$purescript"
+          "$python"
+          "$raku"
+          "$rlang"
+          "$red"
+          "$ruby"
+          "$rust"
+          "$scala"
+          "$swift"
+          "$terraform"
+          "$vlang"
+          "$vagrant"
+          "$zig"
+          "$buf"
+          "$nix_shell"
+          "$conda"
+          "$meson"
+          "$spack"
+          "$memory_usage"
+          "$aws"
+          "$gcloud"
+          "$openstack"
+          "$azure"
+          "$env_var"
+          "$crystal"
+          "$git_branch"
+          "$git_commit"
+          "$git_state"
+          "$git_metrics"
+          "$git_status"
+          "$kubernetes"
+          "$time"
+          "$battery"
+        ];
+
+        # format = "$character";
+        # right_format = "$all";
 
         # Inserts a blank line between shell prompts
         add_newline = true;
