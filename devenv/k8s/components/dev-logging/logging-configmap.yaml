@@ -1,0 +1,90 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dev-logging-config
+  labels:
+    component: logging
+    environment: dev
+    app.kubernetes.io/part-of: pag
+data:
+  logback-spring.xml: |
+    <?xml version="1.0" encoding="UTF-8"?>
+    <configuration>
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            </encoder>
+        </appender>
+
+        <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>/var/log/application.log</file>
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <fileNamePattern>/var/log/application.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+                <maxFileSize>100MB</maxFileSize>
+                <maxHistory>30</maxHistory>
+                <totalSizeCap>1GB</totalSizeCap>
+            </rollingPolicy>
+            <encoder>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            </encoder>
+        </appender>
+
+        <appender name="JSON" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <jsonGeneratorDecorator class="net.logstash.logback.decorate.PrettyPrintingJsonGeneratorDecorator"/>
+            </encoder>
+        </appender>
+
+        <logger name="com.example" level="DEBUG"/>
+        <logger name="org.springframework" level="INFO"/>
+        <logger name="org.hibernate" level="WARN"/>
+
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="FILE"/>
+        </root>
+    </configuration>
+
+  log4j2.xml: |
+    <?xml version="1.0" encoding="UTF-8"?>
+    <Configuration status="WARN">
+        <Appenders>
+            <Console name="Console" target="SYSTEM_OUT">
+                <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+            </Console>
+
+            <RollingFile name="RollingFile" fileName="/var/log/application.log"
+                         filePattern="/var/log/application-%d{yyyy-MM-dd}-%i.log">
+                <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+                <Policies>
+                    <TimeBasedTriggeringPolicy/>
+                    <SizeBasedTriggeringPolicy size="100 MB"/>
+                </Policies>
+                <DefaultRolloverStrategy max="10"/>
+            </RollingFile>
+
+            <File name="JSONFile" fileName="/var/log/application.json">
+                <JSONLayout complete="false" compact="true" eventEol="true"/>
+            </File>
+        </Appenders>
+
+        <Loggers>
+            <Root level="info">
+                <AppenderRef ref="Console"/>
+                <AppenderRef ref="RollingFile"/>
+                <AppenderRef ref="JSONFile"/>
+            </Root>
+        </Loggers>
+    </Configuration>
+
+  logging.properties: |
+    # Development logging configuration
+    handlers=java.util.logging.ConsoleHandler
+    java.util.logging.ConsoleHandler.level=ALL
+    java.util.logging.ConsoleHandler.formatter=java.util.logging.SimpleFormatter
+    java.util.logging.SimpleFormatter.format=%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS %4$s %2$s %5$s%6$s%n
+
+    # Application specific loggers
+    com.example.level=FINE
+    org.springframework.level=INFO
+    org.hibernate.level=WARNING

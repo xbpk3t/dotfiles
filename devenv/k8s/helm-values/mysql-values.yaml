@@ -1,0 +1,176 @@
+# MySQL values for PAG development environment
+
+# 全局配置
+global:
+  # MySQL 用户名前缀
+  mysql:
+    auth:
+      existingSecret: ""
+      existingSecretPasswordKey: ""
+
+# 认证配置
+auth:
+  # 根密码
+  rootPassword: "rootpassword"
+  # 创建自定义数据库
+  database: "pag_dev"
+  # 创建自定义用户
+  username: "pag_user"
+  # 自定义用户密码
+  password: "pag_password"
+  # 是否允许远程 root 登录
+  rootUser: "root"
+
+# 主架构
+architecture: standalone
+
+# 镜像配置
+image:
+  registry: docker.io
+  repository: bitnami/mysql
+  tag: 8.0.36-debian-11-r0
+  pullPolicy: IfNotPresent
+  debug: false
+
+# 服务配置
+service:
+  type: LoadBalancer
+  ports:
+    mysql: 3306
+  nodePorts:
+    mysql: ""
+
+# 持久化配置
+primary:
+  persistence:
+    enabled: true
+    storageClass: "standard"
+    accessModes:
+      - ReadWriteOnce
+    size: 10Gi
+    existingClaim: ""
+
+  # 资源限制
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+
+  # 扩展配置
+  configuration: |-
+    [mysqld]
+    default_authentication_plugin=mysql_native_password
+    character-set-server=utf8mb4
+    collation-server=utf8mb4_unicode_ci
+    max_connections=200
+    innodb_buffer_pool_size=512M
+    innodb_log_file_size=128M
+    slow_query_log=1
+    slow_query_log_file=/var/lib/mysql/mysql-slow.log
+    long_query_time=2
+
+  # 健康检查
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+    successThreshold: 1
+
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 1
+    failureThreshold: 3
+    successThreshold: 1
+
+  # 启动命令
+  command: ["/bin/bash", "-c"]
+  args:
+    - |
+      # 初始化脚本
+      mkdir -p /docker-entrypoint-initdb.d
+      cat > /docker-entrypoint-initdb.d/init.sql << 'EOF'
+      -- 创建 Nightingale 所需的数据库和表结构
+      CREATE DATABASE IF NOT EXISTS n9e_v6 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+      CREATE DATABASE IF NOT EXISTS categraf CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+      -- 创建监控相关的用户和权限
+      CREATE USER IF NOT EXISTS 'monitoring'@'%' IDENTIFIED BY 'monitoring_password';
+      GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, ALTER ON *.* TO 'monitoring'@'%';
+      GRANT ALL PRIVILEGES ON *.* TO 'monitoring'@'%' WITH GRANT OPTION;
+
+      -- 创建只读用户
+      CREATE USER IF NOT EXISTS 'readonly'@'%' IDENTIFIED BY 'readonly_password';
+      GRANT SELECT ON *.* TO 'readonly'@'%';
+
+      FLUSH PRIVILEGES;
+      EOF
+
+      exec /entrypoint.sh /run.sh
+
+# 初始化数据库 (如果需要)
+initdbScripts: {}
+initdbScriptsConfigMap: ""
+
+# 额外的配置文件
+initdbScriptsSecret: {}
+configuration: ""
+myCnf: ""
+
+# 网络策略
+networkPolicy:
+  enabled: false
+
+# Pod 安全上下文
+securityContext:
+  enabled: true
+  fsGroup: 1001
+  runAsUser: 1001
+
+# 容器安全上下文
+containerSecurityContext:
+  enabled: true
+  runAsUser: 1001
+  runAsNonRoot: true
+
+# Pod 标签
+podLabels: {}
+
+# Pod 注解
+podAnnotations: {}
+
+# 节点选择器
+nodeSelector: {}
+
+# 容忍度
+tolerations: []
+
+# 亲和性
+affinity: {}
+
+# 更新策略
+updateStrategy:
+  type: RollingUpdate
+
+# 额外的卷
+extraVolumes: []
+
+# 额外的卷挂载
+extraVolumeMounts: []
+
+# 额外的环境变量
+extraEnvVars: []
+extraEnvVarsCM: ""
+extraEnvVarsSecret: ""
+
+# 诊断模式
+diagnosticMode:
+  enabled: false
+  command: ["/bin/bash", "-c", "--"]
+  args: ["while true; do sleep 30; done;"]

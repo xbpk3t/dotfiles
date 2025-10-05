@@ -4,16 +4,18 @@
     autoStart = true;
     settings = {
       faviconService = "google"; # twenty | google | none
-      font.size = 11;
+      font = {
+        normal = "JetBrainsMono Nerd Font";
+        size = 12;
+      };
 
       popToRootOnClose = true;
+
       rootSearch = {
         searchFiles = false;
       };
 
-      theme = {
-        name = "rosepine-dawn";
-      };
+      theme.name = "vicinae-dark";
 
       window = {
         csd = true;

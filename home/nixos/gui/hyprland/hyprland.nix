@@ -6,7 +6,8 @@
   # files = "thunar";
 
   files = "yazi";
-  browser = "chromium";
+  #  browser = "chromium";
+  browser = "firefox";
   terminal = "foot";
   menu = "vicinae";
   menuZ = "anyrun";

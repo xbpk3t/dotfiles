@@ -1,0 +1,63 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - mysql-service.yaml
+  - mysql-config.yaml
+
+# 标签
+commonLabels:
+  app.kubernetes.io/component: database
+  app.kubernetes.io/name: mysql
+
+# 配置映射生成器
+configMapGenerator:
+  - name: mysql-config
+    files:
+      - my.cnf=mysql-config/my.cnf
+      - init.sql=mysql-config/init.sql
+    options:
+      labels:
+        app.kubernetes.io/component: mysql
+        app.kubernetes.io/name: mysql-config
+
+# 密钥生成器
+secretGenerator:
+  - name: mysql-credentials
+    literals:
+      - root-password=rootpassword
+      - user-password=pag_password
+      - monitoring-password=monitoring_password
+      - readonly-password=readonly_password
+    options:
+      labels:
+        app.kubernetes.io/component: mysql
+        app.kubernetes.io/name: mysql-credentials
+
+# 变换
+patches:
+  - patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-credentials
+              key: root-password
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-credentials
+              key: user-password
+    target:
+      kind: StatefulSet
+      labelSelector: "app.kubernetes.io/name=mysql"
+
+# 图像策略
+images:
+  - name: mysql
+    newName: mysql/mysql-server
+    newTag: "8.0"

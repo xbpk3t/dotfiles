@@ -1,0 +1,185 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: pag-alert-rules
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: pag
+    app.kubernetes.io/component: monitoring
+spec:
+  groups:
+    - name: pag.alerts
+      interval: 30s
+      rules:
+        # MySQL 告警规则
+        - alert: MySQLDown
+          expr: up{job="mysql"} == 0
+          for: 2m
+          labels:
+            severity: critical
+            component: database
+          annotations:
+            summary: "MySQL instance is down"
+            description: "MySQL instance {{ $labels.instance }} has been down for more than 2 minutes"
+
+        - alert: MySQLSlowQueries
+          expr: rate(mysql_global_status_slow_queries[5m]) > 1
+          for: 5m
+          labels:
+            severity: warning
+            component: database
+          annotations:
+            summary: "MySQL slow queries detected"
+            description: "MySQL instance {{ $labels.instance }} has {{ $value }} slow queries per second"
+
+        - alert: MySQLConnections
+          expr: mysql_global_status_threads_connected / mysql_global_variables_max_connections * 100 > 80
+          for: 5m
+          labels:
+            severity: warning
+            component: database
+          annotations:
+            summary: "MySQL high connections usage"
+            description: "MySQL connections usage is {{ $value }}% on instance {{ $labels.instance }}"
+
+        # Nightingale 告警规则
+        - alert: NightingaleDown
+          expr: up{job="nightingale"} == 0
+          for: 2m
+          labels:
+            severity: critical
+            component: alerting
+          annotations:
+            summary: "Nightingale service is down"
+            description: "Nightingale service {{ $labels.instance }} has been down for more than 2 minutes"
+
+        - alert: NightingaleHighMemory
+          expr: process_resident_memory_bytes{job="nightingale"} / 1024 / 1024 / 1024 > 512
+          for: 5m
+          labels:
+            severity: warning
+            component: alerting
+          annotations:
+            summary: "Nightingale high memory usage"
+            description: "Nightingale memory usage is {{ $value }}GB on instance {{ $labels.instance }}"
+
+        # Categraf 告警规则
+        - alert: CategrafDown
+          expr: up{job="categraf"} == 0
+          for: 2m
+          labels:
+            severity: critical
+            component: metrics
+          annotations:
+            summary: "Categraf agent is down"
+            description: "Categraf agent {{ $labels.instance }} has been down for more than 2 minutes"
+
+        - alert: CategrafHighCPU
+          expr: rate(process_cpu_seconds_total{job="categraf"}[5m]) * 100 > 80
+          for: 5m
+          labels:
+            severity: warning
+            component: metrics
+          annotations:
+            summary: "Categraf high CPU usage"
+            description: "Categraf CPU usage is {{ $value }}% on instance {{ $labels.instance }}"
+
+        # 系统级告警规则
+        - alert: HighMemoryUsage
+          expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+          for: 5m
+          labels:
+            severity: warning
+            component: system
+          annotations:
+            summary: "High memory usage on node {{ $labels.nodename }}"
+            description: "Memory usage is {{ $value }}% on node {{ $labels.nodename }}"
+
+        - alert: HighDiskUsage
+          expr: (1 - (node_filesystem_avail_bytes{fstype!~"tmpfs|rootfs"} / node_filesystem_size_bytes{fstype!~"tmpfs|rootfs"})) * 100 > 85
+          for: 5m
+          labels:
+            severity: warning
+            component: system
+          annotations:
+            summary: "High disk usage on {{ $labels.instance }}"
+            description: "Disk usage is {{ $value }}% on mount point {{ $labels.mountpoint }}"
+
+        - alert: NodeDown
+          expr: up{job="node-exporter"} == 0
+          for: 2m
+          labels:
+            severity: critical
+            component: system
+          annotations:
+            summary: "Node {{ $labels.nodename }} is down"
+            description: "Node {{ $labels.nodename }} has been unreachable for more than 2 minutes"
+
+        # 应用级告警规则
+        - alert: PodCrashLooping
+          expr: rate(kube_pod_container_status_restarts_total[5m]) * 60 * 5 > 0
+          for: 5m
+          labels:
+            severity: warning
+            component: kubernetes
+          annotations:
+            summary: "Pod {{ $labels.pod }} is crash looping"
+            description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} has restarted {{ $value }} times in the last 5 minutes"
+
+        - alert: PodNotReady
+          expr: kube_pod_status_phase{phase="Running"} == 0
+          for: 5m
+          labels:
+            severity: warning
+            component: kubernetes
+          annotations:
+            summary: "Pod {{ $labels.pod }} is not ready"
+            description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is not in Running phase"
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: pag-recording-rules
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: pag
+    app.kubernetes.io/component: monitoring
+spec:
+  groups:
+    - name: pag.recording
+      interval: 30s
+      rules:
+        # MySQL 录制规则
+        - record: mysql:queries_per_second:rate5m
+          expr: rate(mysql_global_status_queries[5m])
+
+        - record: mysql:connections_usage_percent
+          expr: mysql_global_status_threads_connected / mysql_global_variables_max_connections * 100
+
+        - record: mysql:slow_queries_per_second:rate5m
+          expr: rate(mysql_global_status_slow_queries[5m])
+
+        # 系统录制规则
+        - record: node:memory_usage_percent
+          expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100
+
+        - record: node:disk_usage_percent
+          expr: (1 - (node_filesystem_avail_bytes{fstype!~"tmpfs|rootfs"} / node_filesystem_size_bytes{fstype!~"tmpfs|rootfs"})) * 100
+
+        - record: node:cpu_usage_percent
+          expr: 100 - (avg by (instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)
+
+        # 应用录制规则
+        - record: pod:memory_usage_bytes
+          expr: container_memory_usage_bytes{container!="", container!="POD"}
+
+        - record: pod:cpu_usage_cores
+          expr: rate(container_cpu_usage_seconds_total{container!="", container!="POD"}[5m])
+
+        # PAG 相关录制规则
+        - record: pag:services_availability
+          expr: up{job=~"mysql|nightingale|categraf"}
+
+        - record: pag:response_time_seconds
+          expr: http_request_duration_seconds_sum{job=~"mysql|nightingale|categraf"} / http_request_duration_seconds_count{job=~"mysql|nightingale|categraf"}
