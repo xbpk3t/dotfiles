@@ -1,8 +1,8 @@
 _: {
   programs.direnv = {
-    enable = false;
+    enable = true;
     # 启用 nix-direnv 集成以提高性能
-    nix-direnv.enable = false;
+    nix-direnv.enable = true;
 
     enableZshIntegration = true;
 

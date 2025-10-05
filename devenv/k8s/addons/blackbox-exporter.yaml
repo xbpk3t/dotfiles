@@ -1,0 +1,384 @@
+---
+# Blackbox Exporter 部署配置
+# 用于外部服务监控和探针检测
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: blackbox-exporter
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: blackbox-exporter
+    app.kubernetes.io/component: monitoring
+    app.kubernetes.io/part-of: pag
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: blackbox-exporter
+  labels:
+    app.kubernetes.io/name: blackbox-exporter
+    app.kubernetes.io/component: monitoring
+    app.kubernetes.io/part-of: pag
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "services", "endpoints"]
+    verbs: ["get", "list", "watch"]
+  - nonResourceURLs: ["/metrics"]
+    verbs: ["get"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: blackbox-exporter
+  labels:
+    app.kubernetes.io/name: blackbox-exporter
+    app.kubernetes.io/component: monitoring
+    app.kubernetes.io/part-of: pag
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: blackbox-exporter
+subjects:
+  - kind: ServiceAccount
+    name: blackbox-exporter
+    namespace: monitoring
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: blackbox-exporter
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: blackbox-exporter
+    app.kubernetes.io/component: monitoring
+    app.kubernetes.io/part-of: pag
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9115"
+    prometheus.io/path: "/metrics"
+spec:
+  ports:
+    - name: http
+      port: 9115
+      targetPort: 9115
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: blackbox-exporter
+    app.kubernetes.io/component: monitoring
+  type: ClusterIP
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: blackbox-exporter
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: blackbox-exporter
+    app.kubernetes.io/component: monitoring
+    app.kubernetes.io/part-of: pag
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: blackbox-exporter
+      app.kubernetes.io/component: monitoring
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: blackbox-exporter
+        app.kubernetes.io/component: monitoring
+        app.kubernetes.io/part-of: pag
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9115"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: blackbox-exporter
+      containers:
+        - name: blackbox-exporter
+          image: "prom/blackbox-exporter:latest"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 9115
+              protocol: TCP
+          args:
+            - "--config.file=/etc/blackbox_exporter/config.yml"
+            - "--web.listen-address=:9115"
+            - "--timeout=15s"
+            - "--history.limit=100"
+          env:
+            - name: TZ
+              value: "UTC"
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+          livenessProbe:
+            httpGet:
+              path: /metrics
+              port: 9115
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: 9115
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 3
+          volumeMounts:
+            - name: blackbox-config
+              mountPath: /etc/blackbox_exporter
+              readOnly: true
+      volumes:
+        - name: blackbox-config
+          configMap:
+            name: blackbox-config
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: blackbox-config
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: blackbox-exporter
+    app.kubernetes.io/component: monitoring
+    app.kubernetes.io/part-of: pag
+data:
+  config.yml: |
+    # Blackbox Exporter Configuration for Development
+
+    modules:
+      # HTTP 探针配置
+      http_2xx:
+        prober: http
+        timeout: 5s
+        http:
+          valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+          valid_status_codes: [200, 201, 202, 204]
+          method: GET
+          no_follow_redirects: false
+          fail_if_ssl: false
+          fail_if_not_ssl: false
+          tls_config:
+            insecure_skip_verify: true
+          preferred_ip_protocol: "ip4"
+
+      # HTTPS 探针配置
+      https_2xx:
+        prober: http
+        timeout: 10s
+        http:
+          valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+          valid_status_codes: [200, 201, 202, 204]
+          method: GET
+          no_follow_redirects: false
+          fail_if_ssl: false
+          fail_if_not_ssl: true
+          tls_config:
+            insecure_skip_verify: false
+          preferred_ip_protocol: "ip4"
+
+      # HTTP POST 探针
+      http_post_2xx:
+        prober: http
+        timeout: 5s
+        http:
+          valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+          valid_status_codes: [200, 201, 202, 204]
+          method: POST
+          headers:
+            Content-Type: application/json
+          body: '{"test": "probe"}'
+          tls_config:
+            insecure_skip_verify: true
+          preferred_ip_protocol: "ip4"
+
+      # TCP 探针配置
+      tcp_connect:
+        prober: tcp
+        timeout: 5s
+        tcp:
+          preferred_ip_protocol: "ip4"
+
+      # ICMP 探针配置
+      icmp:
+        prober: icmp
+        timeout: 5s
+        icmp:
+          preferred_ip_protocol: "ip4"
+
+      # DNS 探针配置
+      dns_tcp:
+        prober: dns
+        timeout: 5s
+        dns:
+          query_name: "kubernetes.default.svc.cluster.local"
+          query_type: "A"
+          valid_rcodes:
+            - NOERROR
+          preferred_ip_protocol: "ip4"
+
+      # 自定义 HTTP 探针 - 健康检查
+      health_check:
+        prober: http
+        timeout: 10s
+        http:
+          valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+          valid_status_codes: [200]
+          method: GET
+          no_follow_redirects: false
+          fail_if_ssl: false
+          fail_if_not_ssl: false
+          tls_config:
+            insecure_skip_verify: true
+          preferred_ip_protocol: "ip4"
+          fail_if_body_not_matches_regexp:
+            - ".*healthy.*"
+            - ".*OK.*"
+            - ".*success.*"
+
+      # 自定义 HTTP 探针 - API 检查
+      api_check:
+        prober: http
+        timeout: 10s
+        http:
+          valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+          valid_status_codes: [200]
+          method: GET
+          headers:
+            Accept: application/json
+            User-Agent: blackbox-exporter/0.21.0
+          no_follow_redirects: false
+          fail_if_ssl: false
+          fail_if_not_ssl: false
+          tls_config:
+            insecure_skip_verify: true
+          preferred_ip_protocol: "ip4"
+          fail_if_body_not_matches_regexp:
+            - '"status":\s*"ok"'
+            - '"healthy":\s*true'
+
+      # MySQL 连接探针
+      mysql_connect:
+        prober: tcp
+        timeout: 5s
+        tcp:
+          query_response:
+            - expect: ".*\x00\x00\x01\x0a"
+            - send: "\x20\x00\x00\x01\x85\xa6\x03\x00\x00\x00\x00\x01\x08\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+            - expect: "\x00\x00\x00\x02\x00\x00\x00\x02"
+
+      # Redis 连接探针
+      redis_connect:
+        prober: tcp
+        timeout: 5s
+        tcp:
+          query_response:
+            - send: "PING\r\n"
+            - expect: "PONG\r\n"
+
+      # Prometheus 服务探针
+      prometheus_http:
+        prober: http
+        timeout: 10s
+        http:
+          valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+          valid_status_codes: [200]
+          method: GET
+          no_follow_redirects: false
+          fail_if_ssl: false
+          fail_if_not_ssl: false
+          tls_config:
+            insecure_skip_verify: true
+          preferred_ip_protocol: "ip4"
+          fail_if_body_not_matches_regexp:
+            - "prometheus"
+            - "metrics"
+
+      # Grafana 服务探针
+      grafana_http:
+        prober: http
+        timeout: 10s
+        http:
+          valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+          valid_status_codes: [200]
+          method: GET
+          no_follow_redirects: false
+          fail_if_ssl: false
+          fail_if_not_ssl: false
+          tls_config:
+            insecure_skip_verify: true
+          preferred_ip_protocol: "ip4"
+          fail_if_body_not_matches_regexp:
+            - "grafana"
+            - "dashboard"
+
+      # Nightingale 服务探针
+      nightingale_http:
+        prober: http
+        timeout: 10s
+        http:
+          valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+          valid_status_codes: [200]
+          method: GET
+          path: "/api/n9e/health"
+          no_follow_redirects: false
+          fail_if_ssl: false
+          fail_if_not_ssl: false
+          tls_config:
+            insecure_skip_verify: true
+          preferred_ip_protocol: "ip4"
+          fail_if_body_not_matches_regexp:
+            - ".*healthy.*"
+
+      # 开发环境内部服务探针
+      dev_services:
+        prober: http
+        timeout: 15s
+        http:
+          valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+          valid_status_codes: [200, 201, 202, 204, 301, 302, 304]
+          method: GET
+          no_follow_redirects: false
+          fail_if_ssl: false
+          fail_if_not_ssl: false
+          tls_config:
+            insecure_skip_verify: true
+          preferred_ip_protocol: "ip4"
+          fail_if_body_not_matches_regexp:
+            - ".*OK.*"
+            - ".*success.*"
+            - ".*healthy.*"
+
+      # 外部服务探针 (模拟)
+      external_apis:
+        prober: http
+        timeout: 30s
+        http:
+          valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+          valid_status_codes: [200, 201, 202, 204]
+          method: GET
+          headers:
+            User-Agent: "Mozilla/5.0 (compatible; PAG-Monitor/1.0)"
+          no_follow_redirects: false
+          fail_if_ssl: false
+          fail_if_not_ssl: false
+          tls_config:
+            insecure_skip_verify: true
+          preferred_ip_protocol: "ip4"
+          fail_if_body_not_matches_regexp:
+            - ".*success.*"

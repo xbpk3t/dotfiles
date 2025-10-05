@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./monitoring
+  - ./database
+  - ./ingress
+
+# 共享的命名空间
+namespace: monitoring
+
+# 共享的标签和注解
+commonLabels:
+  app.kubernetes.io/part-of: pag
+  app.kubernetes.io/managed-by: kustomize
+  environment: base
+
+commonAnnotations:
+  description: "PAG Development Environment Base Configuration"
+  maintained-by: "devops-team"

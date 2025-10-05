@@ -1,4 +1,4 @@
-{pkgs, lib, ...}: {
+{pkgs, ...}: {
   programs = {
     bash = {
       enable = true;
@@ -95,7 +95,6 @@
         "auto_pushd" # 自动 pushd
       ];
     };
-
   };
 
   # 添加用户可用的 shell 到 /etc/shells

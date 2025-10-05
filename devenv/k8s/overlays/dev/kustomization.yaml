@@ -1,0 +1,145 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base
+
+# 命名空间覆盖
+namespace: monitoring
+
+# 开发环境特定标签
+commonLabels:
+  environment: development
+  app.kubernetes.io/environment: dev
+  app.kubernetes.io/version: dev
+
+# 开发环境特定注解
+commonAnnotations:
+  environment: development
+  description: "PAG Development Environment"
+  maintained-by: "development-team"
+
+# 配置映射生成器 - 开发环境配置
+configMapGenerator:
+  - name: dev-config
+    literals:
+      - ENVIRONMENT=development
+      - LOG_LEVEL=debug
+      - DEBUG=true
+      - ENABLE_METRICS=true
+      - ENABLE_TRACING=true
+    options:
+      labels:
+        app.kubernetes.io/environment: dev
+        app.kubernetes.io/component: config
+
+# 密钥生成器 - 开发环境密钥
+secretGenerator:
+  - name: dev-secrets
+    literals:
+      - database-password=dev_password_123
+      - api-key=dev_api_key_123456
+      - webhook-secret=dev_webhook_secret
+    options:
+      labels:
+        app.kubernetes.io/environment: dev
+        app.kubernetes.io/component: secrets
+
+# 变换 - 开发环境特定配置
+patches:
+  # 调整资源限制 (开发环境使用较少资源)
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/cpu
+        value: "100m"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/memory
+        value: "128Mi"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/cpu
+        value: "500m"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: "512Mi"
+    target:
+      kind: Deployment
+      labelSelector: "app.kubernetes.io/component=monitoring"
+
+  # 添加开发环境环境变量
+  - patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: ENVIRONMENT
+          value: "development"
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: LOG_LEVEL
+          value: "debug"
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: DEBUG_MODE
+          value: "true"
+    target:
+      kind: Deployment
+      labelSelector: "app.kubernetes.io/part-of=pag"
+
+  # 调整数据库持久化大小 (开发环境使用较小的存储)
+  - patch: |-
+      - op: replace
+        path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
+        value: "5Gi"
+    target:
+      kind: StatefulSet
+      labelSelector: "app.kubernetes.io/name=mysql"
+
+  # 添加开发环境特定的标签和注解
+  - patch: |-
+      - op: add
+        path: /metadata/labels/environment
+        value: "development"
+      - op: add
+        path: /metadata/annotations/created-by
+        value: "kustomize-dev-overlay"
+    target:
+      kind: Service
+      labelSelector: "app.kubernetes.io/part-of=pag"
+
+# 图像策略 - 开发环境使用特定版本
+images:
+  - name: grafana/grafana
+    newTag: "10.4.0"
+  - name: prom/prometheus
+    newTag: "v2.45.0"
+  - name: mysql/mysql-server
+    newTag: "8.0.36"
+  - name: prom/mysqld-exporter
+    newTag: "v0.14.0"
+
+# 策略生成器 - 开发环境策略
+patchesStrategicMerge:
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: "*"
+    spec:
+      replicas: 1
+      strategy:
+        type: Recreate
+
+  - |-
+    apiVersion: apps/v1
+    kind: StatefulSet
+    metadata:
+      name: "*"
+    spec:
+      replicas: 1
+      updateStrategy:
+        type: RollingUpdate
+
+# 额外的开发环境配置
+components:
+  - ../../components/dev-logging
+  - ../../components/dev-monitoring
