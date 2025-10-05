@@ -20,6 +20,8 @@
     colmena # NixOS 远程部署工具
 
     nvd # https://mynixos.com/nixpkgs/package/nvd
+
+    # nix-update # https://github.com/Mic92/nix-update 只适用于nix pkg的维护者，用于自动化更新包版本和哈希
   ];
 
   programs.nix-index = {

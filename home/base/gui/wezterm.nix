@@ -1,47 +1,31 @@
-{...}: {
+{config, ...}: {
   # https://mynixos.com/home-manager/options/programs.wezterm
   programs.wezterm = {
     enable = true;
-
     enableZshIntegration = true;
-    # enableZshIntegration = true;
-
-    colorSchemes = {};
 
     extraConfig = ''
-      local wezterm = require('wezterm')
+      local wezterm = require("wezterm")
+      local config = wezterm.config_builder()
 
-      return {
-        -- 基础配置
-        color_scheme = 'Catppuccin Mocha',
-        font_size = 13,
+      -- 设置 Lua 模块搜索路径指向配置目录
+      package.path = package.path .. ";${config.xdg.configHome}/wezterm/?.lua"
 
-        -- 字体配置
-        font = wezterm.font_with_fallback({
-          'JetBrains Mono',
-          'LXGW WenKai Screen',
-          'Noto Color Emoji'
-        }),
+      -- 加载各个模块
+      require("appearance")(wezterm, config)
+      require("keybings")(wezterm, config)
+      require("status")(wezterm, config)
+      require("tabs")(wezterm, config)
 
-        -- 标签栏
-        enable_tab_bar = true,
-        hide_tab_bar_if_only_one_tab = true,
-
-        -- 滚动历史
-        scrollback_lines = 5000,
-
-        -- 基础快捷键
-        keys = {
-          -- 字体大小
-          { key = '+', mods = 'CTRL', action = wezterm.action.IncreaseFontSize },
-          { key = '-', mods = 'CTRL', action = wezterm.action.DecreaseFontSize },
-          { key = '0', mods = 'CTRL', action = wezterm.action.ResetFontSize },
-
-          -- 复制粘贴
-          { key = 'c', mods = 'CTRL|SHIFT', action = wezterm.action.CopyTo('Clipboard') },
-          { key = 'v', mods = 'CTRL|SHIFT', action = wezterm.action.PasteFrom('Clipboard') },
-        },
-      }
+      return config
     '';
+  };
+
+  # 将 Lua 模块文件部署到配置目录
+  xdg.configFile = {
+    "wezterm/appearance.lua".source = ./wezterm/appearance.lua;
+    "wezterm/keybings.lua".source = ./wezterm/keybings.lua;
+    "wezterm/status.lua".source = ./wezterm/status.lua;
+    "wezterm/tabs.lua".source = ./wezterm/tabs.lua;
   };
 }
