@@ -11,7 +11,7 @@
     "${myvars.username}" = {
       home = lib.mkDefault "/Users/${myvars.username}";
       description = lib.mkDefault myvars.username;
-      shell = lib.mkDefault "/etc/profiles/per-user/${myvars.username}/bin/bash";
+      shell = lib.mkDefault "/etc/profiles/per-user/${myvars.username}/bin/zsh";
     };
 
     # Note: Additional users should be created manually on macOS or via host-specific configuration
@@ -22,7 +22,7 @@
 
   # Shell configuration - only bash and zsh (no fish as not used)
   environment.shells = lib.mkDefault [
-    #  "/etc/profiles/per-user/${myvars.username}/bin/zsh"
+    "/etc/profiles/per-user/${myvars.username}/bin/zsh"
     #  "/run/current-system/sw/bin/zsh"
     #  "/bin/zsh"
     #  "/usr/bin/zsh"

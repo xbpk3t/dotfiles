@@ -12,7 +12,7 @@
             name = "fhs";
             targetPkgs = pkgs: (base.targetPkgs pkgs) ++ [pkgs.pkg-config];
             profile = "export FHS=1";
-            runScript = "bash";
+            runScript = "zsh";
             extraOutputsToInstall = ["dev"];
           }
         )

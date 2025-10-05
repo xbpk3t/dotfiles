@@ -4,7 +4,6 @@
     enable = true;
 
     # Shell integrations
-    enableBashIntegration = true;
     enableZshIntegration = true;
 
     # Use the latest fzf package

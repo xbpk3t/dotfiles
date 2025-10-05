@@ -1,7 +1,7 @@
 {pkgs, ...}: {
   programs.yazi = {
     enable = true;
-    enableBashIntegration = true;
+    enableZshIntegration = true;
     # enableZshIntegration = true;
     # enableFishIntegration = true;
 
