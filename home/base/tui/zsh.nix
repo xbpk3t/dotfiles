@@ -40,7 +40,6 @@
       # 自动纠错
       autocd = true;
 
-
       history = {
         size = 10000;
         save = 10000;
@@ -379,5 +378,4 @@
     #      enableAutoUpdates = false;
     #    };
   };
-
 }

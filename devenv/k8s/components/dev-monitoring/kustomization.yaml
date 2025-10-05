@@ -1,0 +1,67 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+# 开发环境监控配置组件
+
+# 配置映射生成器 - 监控配置
+configMapGenerator:
+  - name: dev-monitoring-config
+    files:
+      - prometheus.yml=conf/prometheus.yml
+      - alertmanager.yml=conf/alertmanager.yml
+    options:
+      labels:
+        component: monitoring
+        environment: dev
+
+# 变换 - 应用监控配置
+patches:
+  - patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: ENABLE_METRICS
+          value: "true"
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: METRICS_PORT
+          value: "8080"
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: METRICS_PATH
+          value: "/metrics"
+    target:
+      kind: Deployment
+      labelSelector: "app.kubernetes.io/component in (monitoring, alerting, metrics)"
+
+  - patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/ports/-
+        value:
+          name: metrics
+          containerPort: 8080
+          protocol: TCP
+    target:
+      kind: Deployment
+      labelSelector: "app.kubernetes.io/component in (monitoring, alerting, metrics)"
+
+  - patch: |-
+      - op: add
+        path: /metadata/annotations/prometheus.io/scrape
+        value: "true"
+      - op: add
+        path: /metadata/annotations/prometheus.io/port
+        value: "8080"
+      - op: add
+        path: /metadata/annotations/prometheus.io/path
+        value: "/metrics"
+    target:
+      kind: Service
+      labelSelector: "app.kubernetes.io/component in (monitoring, alerting, metrics)"
+
+# 资源
+resources:
+  - dev-monitoring-configmap.yaml
+  - dev-servicemonitor.yaml

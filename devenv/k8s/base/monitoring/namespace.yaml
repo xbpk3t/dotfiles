@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+  labels:
+    name: monitoring
+    app.kubernetes.io/part-of: pag
+    app.kubernetes.io/component: monitoring
+    environment: development
+  annotations:
+    description: "Monitoring namespace for PAG development environment"
