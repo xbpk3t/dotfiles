@@ -1,4 +1,8 @@
-{myvars, ...}: {
+{
+  myvars,
+  pkgs,
+  ...
+}: {
   # Don't allow mutation of users outside the config.
   users.mutableUsers = false;
 
@@ -20,6 +24,7 @@
     inherit (myvars) initialHashedPassword;
     home = "/home/${myvars.username}";
     isNormalUser = true;
+    shell = pkgs.zsh; # 显式设置用户 shell 为 zsh
     extraGroups = [
       myvars.username
       "users"
@@ -35,6 +40,7 @@
   # root's ssh key are mainly used for remote deployment
   users.users.root = {
     inherit (myvars) initialHashedPassword;
+    shell = pkgs.zsh; # 设置 root shell 为 zsh
     openssh.authorizedKeys.keys = myvars.mainSshAuthorizedKeys ++ myvars.secondaryAuthorizedKeys;
   };
 }

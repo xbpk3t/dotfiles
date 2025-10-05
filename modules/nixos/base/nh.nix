@@ -14,11 +14,9 @@
   # to install chrome, you need to enable unfree packages
   nixpkgs.config.allowUnfree = lib.mkForce true;
 
-  # do garbage collection weekly to keep disk usage low
+  # 使用 nh 来管理垃圾回收，禁用内置的 nix.gc
   nix.gc = {
-    automatic = lib.mkDefault true;
-    dates = lib.mkDefault "weekly";
-    options = lib.mkDefault "--delete-older-than 7d";
+    automatic = lib.mkDefault false; # 禁用内置 GC，使用 nh 代替
   };
 
   # Manual optimise storage: nix-store --optimise

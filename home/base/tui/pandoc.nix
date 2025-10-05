@@ -55,7 +55,7 @@ _: {
   };
 
   # 添加常用的 pandoc 别名
-  programs.bash.shellAliases = {
+  programs.zsh.shellAliases = {
     #    # Markdown 转 HTML
     #    md2html = "pandoc -f markdown -t html5 -o";
     #    # Markdown 转 PDF

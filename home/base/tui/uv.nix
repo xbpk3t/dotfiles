@@ -20,7 +20,7 @@ _: {
   #  };
 
   # 添加有用的 UV 别名
-  programs.bash.shellAliases = {
+  programs.zsh.shellAliases = {
     #    # 快速安装包
     #    uvi = "uv add";
     #    # 移除包
