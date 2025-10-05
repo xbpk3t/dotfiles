@@ -10,7 +10,7 @@
   browser = "firefox";
   terminal = "foot";
   menu = "vicinae";
-  menuZ = "anyrun";
+  menuZ = "rofi";
 in {
   # 所有配置已经直接整合到 settings 中，不再需要 xdg.configFile 引用
 
@@ -70,7 +70,7 @@ in {
         "$mod, Return, exec, ${terminal}"
         "$mod, d, exec, ${menu}"
         # [[Feature request] A way to close the prompt with a command? · Issue #103 · anyrun-org/anyrun](https://github.com/anyrun-org/anyrun/issues/103)
-        "$mod, z, exec, pgrep ${menuZ} && pkill ${menuZ} || ${menuZ}"
+        "$mod, z, exec, pgrep ${menuZ} && pkill ${menuZ} || ${menuZ} -show combi" # FIXME [2025-10-05] 不知道rofi怎么配置 default-mode 只能在这里显示声明
 
         # 硬件控制 - 使用 WirePlumber 进行音频控制
         # 参考: https://wiki.archlinux.org/title/WirePlumber
