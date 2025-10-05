@@ -28,7 +28,7 @@
   };
 
   # 添加有用的 jq 别名到 shell
-  programs.bash.shellAliases = {
+  programs.zsh.shellAliases = {
     # 格式化 JSON
     #    jqp = "jq '.'";
     #    # 紧凑输出

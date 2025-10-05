@@ -3,7 +3,7 @@
   programs.wezterm = {
     enable = true;
 
-    enableBashIntegration = true;
+    enableZshIntegration = true;
     # enableZshIntegration = true;
 
     colorSchemes = {};

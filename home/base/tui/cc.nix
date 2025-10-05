@@ -38,7 +38,7 @@
 
   programs = {
     # Shell 配置 - 添加 Claude Code 相关的 shell 功能
-    bash.initExtra = ''
+    zsh.initExtra = ''
 
     '';
 

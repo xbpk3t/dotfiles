@@ -7,13 +7,7 @@
 }: {
   boot.loader.timeout = lib.mkForce 10; # wait for x seconds to select the boot entry
 
-  # add user's shell into /etc/shells
-  environment.shells = with pkgs; [
-    bashInteractive
-    nushell
-  ];
-  # set user's default shell system-wide
-  users.defaultUserShell = pkgs.bashInteractive;
+  # Shell 配置已移至 modules/nixos/base/shell.nix
 
   # fix for `sudo xxx` in kitty/wezterm/foot and other modern terminal emulators
   security.sudo.keepTerminfo = true;

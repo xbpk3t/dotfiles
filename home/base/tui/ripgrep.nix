@@ -22,7 +22,7 @@ _: {
   };
 
   # 添加 ripgrep 别名到 shell
-  programs.bash.shellAliases = {
+  programs.zsh.shellAliases = {
     #    # 搜索时包含隐藏文件
     #    rgh = "rg --hidden";
     #    # 只搜索文件名
