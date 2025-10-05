@@ -950,19 +950,22 @@
       ];
     };
 
+    # [yaziPlugins - MyNixOS](https://mynixos.com/nixpkgs/packages/yaziPlugins)
     plugins = {
       inherit (pkgs.yaziPlugins) lazygit;
       inherit (pkgs.yaziPlugins) full-border;
       inherit (pkgs.yaziPlugins) git;
       inherit (pkgs.yaziPlugins) smart-enter;
+      # used to preview archive
+      inherit (pkgs.yaziPlugins) ouch;
     };
 
     initLua = ''
       require("full-border"):setup()
-         require("git"):setup()
-         require("smart-enter"):setup {
-           open_multi = true,
-         }
+      require("git"):setup()
+      require("smart-enter"):setup {
+       open_multi = true,
+      }
     '';
   };
 }
