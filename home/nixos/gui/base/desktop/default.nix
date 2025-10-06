@@ -1,11 +1,6 @@
-{
-  pkgs,
-  mylib,
-  ...
-}: {
+{pkgs, ...}: {
   imports = [
     ./nvidia.nix
-
 
     ./anyrun.nix
     ./rofi.nix
