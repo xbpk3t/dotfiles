@@ -3,12 +3,17 @@
   myvars,
   pkgs,
   ...
-}:
-let
+}: let
   # 平台相关配置
   platform = {
-    userGroup = if pkgs.stdenv.isDarwin then "staff" else "users";
-    homePath = if pkgs.stdenv.isDarwin then "/Users" else "/home";
+    userGroup =
+      if pkgs.stdenv.isDarwin
+      then "staff"
+      else "users";
+    homePath =
+      if pkgs.stdenv.isDarwin
+      then "/Users"
+      else "/home";
   };
 
   # 统一的 sk 基础路径
