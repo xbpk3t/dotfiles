@@ -1,5 +1,5 @@
 # Darwin security configuration
-{pkgs, ...}: {
+{...}: {
   security = {
     # PAM configuration
     pam = {
@@ -54,7 +54,6 @@
     # Note: pinentryPackage is not available on nix-darwin
     # Use pinentryFlavor instead or configure manually
   };
-
 
   # Note: System defaults are managed in system.nix to avoid duplication
 

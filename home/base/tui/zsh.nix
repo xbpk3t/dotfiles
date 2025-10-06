@@ -24,15 +24,6 @@
         # 用来抑制 macOS 终端中显示的 "The default interactive shell is now zsh"
         BASH_SILENCE_DEPRECATION_WARNING = "1";
       });
-
-    # PATH 设置（使用 Home Manager 的正确方式）
-    sessionPath = [
-      "$HOME/.orbstack/bin"
-      "$HOME/go/bin"
-      "$BUN_INSTALL/bin"
-      "$PNPM_HOME/bin"
-      "$HOME/.local/bin" # rofi shells
-    ];
   };
 
   programs = {
@@ -130,12 +121,28 @@
         # 清理临时文件或执行其他清理操作
         # 目前保持空白以最大化性能
       '';
+
+      # PATH 设置（使用 Home Manager 的正确方式）
+      # PLAN [2025-10-06] home.sessionPath -> programs.zsh.sessionVariables 现在zsh有bug，只能这么来处理
+      #  [bug: home.sessionPath is broken with ZSH · Issue #2991 · nix-community/home-manager](https://github.com/nix-community/home-manager/issues/2991)
+      sessionVariables = {
+        PATH = lib.concatStringsSep ":" [
+          "$HOME/.orbstack/bin"
+          "$HOME/go/bin"
+          "$BUN_INSTALL/bin"
+          "$PNPM_HOME/bin"
+          "$HOME/.local/bin" # rofi shells
+
+          "$PATH" # 注意放到最后，且不要删除
+        ];
+        #        PATH = "$HOME/.orbstack/bin:$HOME/go/bin:$BUN_INSTALL/bin:$PNPM_HOME/bin:$HOME/.local/bin:$PATH";
+      };
     };
 
     # A cat(1) clone with syntax highlighting and Git integration
     bat = {
       enable = true;
-       # FIXME conflict with other config
+      # FIXME conflict with other config
       #      config = {
       #        theme = "TwoDark";
       #        style = "numbers,changes,header";
