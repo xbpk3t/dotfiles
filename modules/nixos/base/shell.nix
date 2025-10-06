@@ -101,7 +101,6 @@
   environment.shells = with pkgs; [
     bashInteractive
     zsh
-    nushell
   ];
 
   # 设置系统默认用户 shell
