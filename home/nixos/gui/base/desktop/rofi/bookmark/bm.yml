@@ -7,6 +7,8 @@
 - alias: youtube
   url: 'https://www.youtube.com/'
 
+- alias: nix
+  url: 'https://mynixos.com/flakes'
 
 
 
@@ -122,8 +124,7 @@
   url: 'https://zread.ai/'
 - alias: bitiful
   url: 'https://send.bitiful.com/'
-- alias: nix
-  url: 'https://mynixos.com/flakes'
+
 - alias: folo
   url: 'https://app.follow.is/'
 - alias: youtube-music
