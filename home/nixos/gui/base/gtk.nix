@@ -7,13 +7,13 @@
   # try setting them with home.pointerCursor and gtk.theme,
   # which enable a bunch of compatibility options that should make the themes load in all situations.
 
-  home.pointerCursor = {
-    gtk.enable = true;
-    x11.enable = true;
-    package = pkgs.bibata-cursors;
-    name = "Bibata-Modern-Ice";
-    size = 24;
-  };
+#  home.pointerCursor = {
+#    gtk.enable = true;
+#    x11.enable = true;
+#    package = pkgs.bibata-cursors;
+#    name = "Bibata-Modern-Ice";
+#    size = 24;
+#  };
 
   # set dpi for 4k monitor
   xresources.properties = {
@@ -29,13 +29,6 @@
   #   3. ~/.config/gtk-4.0/settings.ini
   gtk = {
     enable = true;
-
-    font = {
-      name = "Noto Sans";
-      package = pkgs.noto-fonts;
-      size = 11;
-    };
-
     gtk2.configLocation = "${config.xdg.configHome}/gtk-2.0/gtkrc";
   };
 }
