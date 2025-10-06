@@ -21,6 +21,11 @@
     };
   };
 
+  # 禁用指定工具的stylix配置
+  stylix.targets = {
+    rofi.enable = false;
+  };
+
   # Basic packages and configurations can be added here
   # For example:
   # home.packages = [ pkgs.hello ];

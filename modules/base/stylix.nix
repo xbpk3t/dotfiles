@@ -15,14 +15,6 @@
       followSystem = true;
     };
 
-    # Target-specific configurations
-    # Enable theming for supported applications
-    # Note: Using autoEnable instead of specific targets for compatibility
-    # stylix.targets = {
-    #   # Specific targets may not be available in current stylix version
-    #   # Let autoEnable handle the configuration automatically
-    # };
-
     # 使用base00作为背景色（Gruvbox的深背景）
     image = config.lib.stylix.pixel "base00";
 
@@ -32,15 +24,6 @@
     # Using Gruvbox Dark Hard - a popular terminal-friendly theme
     base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-hard.yaml";
 
-    #  hyprland
-    #  hyprlock
-    #  wezterm
-    #  rofi
-    #  zellij
-    #  yazi
-    #  starship
-    #  fzf
-    #  fcitx5
     targets = {
       qt = {
         enable = true;
