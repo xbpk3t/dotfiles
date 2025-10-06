@@ -29,7 +29,7 @@
       # 自定义 API 端点，用于连接到第三方模型服务
       ANTHROPIC_BASE_URL = "https://open.bigmodel.cn/api/anthropic";
       # API 认证令牌 - 使用 sops 管理，通过 cat 命令读取文件内容
-      ANTHROPIC_AUTH_TOKEN = "$(cat /etc/claude/zai/token)";
+      ANTHROPIC_AUTH_TOKEN = "$(cat /etc/sk/claude/zai/token)";
     };
     shellAliases = {
       cc = "claude --dangerously-skip-permissions";
@@ -38,7 +38,7 @@
 
   programs = {
     # Shell 配置 - 添加 Claude Code 相关的 shell 功能
-    zsh.initExtra = ''
+    zsh.initContent = ''
 
     '';
 
@@ -143,7 +143,7 @@
           command = "npx";
           args = ["-y" "task-master-ai"];
           env = {
-            ANTHROPIC_API_KEY = "$(cat /etc/claude/zai/token)";
+            ANTHROPIC_API_KEY = "$(cat /etc/sk/claude/zai/token)";
           };
         };
 
@@ -167,7 +167,7 @@
           command = "npx";
           args = ["-y" "@github/github-mcp-server"];
           env = {
-            GITHUB_PERSONAL_ACCESS_TOKEN = "$(cat /etc/claude/github-token)";
+            GITHUB_PERSONAL_ACCESS_TOKEN = "$(cat /etc/sk/claude/github-token)";
           };
         };
 
@@ -191,7 +191,7 @@
           command = "npx";
           args = ["-y" "@firecrawl/firecrawl-mcp-server"];
           env = {
-            FIRECRAWL_API_KEY = "$(cat /etc/claude/firecrawl-token)";
+            FIRECRAWL_API_KEY = "$(cat /etc/sk/claude/firecrawl-token)";
           };
         };
 
@@ -389,7 +389,7 @@
           command = "npx";
           args = ["-y" "@evalstate/hf-mcp-server"];
           env = {
-            HF_TOKEN = "$(cat /etc/claude/huggingface-token)";
+            HF_TOKEN = "$(cat /etc/sk/claude/huggingface-token)";
           };
         };
 
@@ -449,7 +449,7 @@
           command = "npx";
           args = ["-y" "@postmanlabs/postman-mcp-server"];
           env = {
-            POSTMAN_API_KEY = "$(cat /etc/claude/postman-api-key)";
+            POSTMAN_API_KEY = "$(cat /etc/sk/claude/postman-api-key)";
           };
         };
 
@@ -479,7 +479,7 @@
           command = "npx";
           args = ["-y" "@figma/dev-mode-mcp-server"];
           env = {
-            FIGMA_API_KEY = "$(cat /etc/claude/figma-api-key)";
+            FIGMA_API_KEY = "$(cat /etc/sk/claude/figma-api-key)";
           };
         };
 
@@ -514,7 +514,7 @@
           command = "npx";
           args = ["-y" "@zapier/zapier-mcp"];
           env = {
-            ZAPIER_API_KEY = "$(cat /etc/claude/zapier-api-key)";
+            ZAPIER_API_KEY = "$(cat /etc/sk/claude/zapier-api-key)";
           };
         };
       };

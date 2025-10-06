@@ -17,6 +17,7 @@ in
       nixos-modules
       ++ [
         nixos-generators.nixosModules.all-formats
+        inputs.stylix.nixosModules.stylix
       ]
       ++ (lib.optionals ((lib.lists.length home-modules) > 0) [
         home-manager.nixosModules.home-manager

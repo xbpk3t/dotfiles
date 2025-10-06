@@ -41,6 +41,9 @@
 
     # Add vicinae for application launcher
     vicinae = inputs.vicinae;
+
+    # Add sops-nix for secret management
+    sops-nix = inputs.sops-nix;
   };
 
   # This is the args for all the haumea modules in this folder.

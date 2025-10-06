@@ -44,7 +44,7 @@
         hostname = "ssh.github.com";
         user = "git";
         port = 443;
-        identityFile = "/etc/ssh/github/private_key";
+        identityFile = "/etc/sk/ssh/github/private_key";
         identitiesOnly = true;
       };
     };

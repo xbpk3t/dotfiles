@@ -222,6 +222,11 @@ tasks:
   #- git grep -n -p <str> # 从当前branch中查找指定字符串，相比于 'git grep -n <str>' 会显示匹配行以及上下几行的内容
   #- git grep -n -p <str> <commit号/tag号> # 从指定commit中查找指定字符串
   #- git rev-list --all | xargs git grep <str> # 从所有历史commit中查找指定字符串
+
+
+  # for commit in $(git rev-list --all); do
+  #  git grep <str> $commit -- "*.nix" && echo "Found in commit $commit"
+  #done
   search:
     desc: 从所有历史commit中查找指定字符串
     cmd: git rev-list --all | xargs git grep {{.str}}

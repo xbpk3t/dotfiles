@@ -14,8 +14,8 @@
           acl = "private";
         };
         secrets = {
-          access_key_id = "/etc/rclone/r2/access_key_id";
-          secret_access_key = "/etc/rclone/r2/secret_access_key";
+          access_key_id = "/etc/sk/rclone/r2/access_key_id";
+          secret_access_key = "/etc/sk/rclone/r2/secret_access_key";
         };
       };
     };
