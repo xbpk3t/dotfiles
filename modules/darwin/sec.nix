@@ -55,13 +55,6 @@
     # Use pinentryFlavor instead or configure manually
   };
 
-  # Security-related packages
-  environment.systemPackages = with pkgs; [
-    gnupg
-    sops
-    age
-    openssh
-  ];
 
   # Note: System defaults are managed in system.nix to avoid duplication
 

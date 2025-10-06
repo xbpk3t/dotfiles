@@ -3,7 +3,14 @@
   mylib,
   ...
 }: {
-  imports = mylib.scanPaths ./.;
+  imports = [
+    ./nvidia.nix
+
+
+    ./anyrun.nix
+    ./rofi.nix
+    ./vicinae.nix
+  ];
 
   # wayland related
   home.sessionVariables = {

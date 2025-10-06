@@ -31,6 +31,7 @@
       "$HOME/go/bin"
       "$BUN_INSTALL/bin"
       "$PNPM_HOME/bin"
+      "$HOME/.local/bin" # rofi shells
     ];
   };
 
@@ -134,11 +135,13 @@
     # A cat(1) clone with syntax highlighting and Git integration
     bat = {
       enable = true;
-      #      config = { # FIXME conflict with other config
+       # FIXME conflict with other config
+      #      config = {
       #        theme = "TwoDark";
       #        style = "numbers,changes,header";
       #      };
     };
+
     eza = {
       enable = true;
       enableZshIntegration = true;

@@ -1,12 +1,23 @@
 {
   config,
   myvars,
+  pkgs,
   ...
-}: {
+}:
+let
+  # 平台相关配置
+  platform = {
+    userGroup = if pkgs.stdenv.isDarwin then "staff" else "users";
+    homePath = if pkgs.stdenv.isDarwin then "/Users" else "/home";
+  };
+
+  # 统一的 sk 基础路径
+  skBasePath = "/etc/sk";
+in {
   # Enable sops
   sops = {
     defaultSopsFile = ./secrets.yaml;
-    age.keyFile = "/Users/${myvars.username}/.config/sops/age/keys.txt";
+    age.keyFile = "${platform.homePath}/${myvars.username}/.config/sops/age/keys.txt";
     age.sshKeyPaths = []; # Disable SSH key import
     gnupg.home = null; # Disable GPG key import
 
@@ -15,64 +26,64 @@
       # Rclone R2 secrets
       "rclone/r2/access_key_id" = {
         owner = myvars.username;
-        group = "staff";
+        group = platform.userGroup;
         mode = "0400";
       };
       "rclone/r2/secret_access_key" = {
         owner = myvars.username;
-        group = "staff";
+        group = platform.userGroup;
         mode = "0400";
       };
 
       # SSH secrets
       "ssh/github/private_key" = {
         owner = myvars.username;
-        group = "staff";
+        group = platform.userGroup;
         mode = "0400";
       };
 
       # zAI API secrets
       "claude/zai/token" = {
         owner = myvars.username;
-        group = "staff";
+        group = platform.userGroup;
         mode = "0400";
       };
     };
   };
 
-  # Place secrets in /etc/ for easy access
+  # Place secrets in /etc/sk/ for unified management
   environment.etc = {
-    "rclone/r2/access_key_id" = {
+    "sk/rclone/r2/access_key_id" = {
       source = config.sops.secrets."rclone/r2/access_key_id".path;
     };
-    "rclone/r2/secret_access_key" = {
+    "sk/rclone/r2/secret_access_key" = {
       source = config.sops.secrets."rclone/r2/secret_access_key".path;
     };
-    "ssh/github/private_key" = {
+    "sk/ssh/github/private_key" = {
       source = config.sops.secrets."ssh/github/private_key".path;
     };
-    "claude/zai/token" = {
+    "sk/claude/zai/token" = {
       source = config.sops.secrets."claude/zai/token".path;
     };
   };
 
   # Set proper permissions for the secrets
   system.activationScripts.postActivation.text = ''
-    if [ -f /etc/rclone/r2/access_key_id ]; then
-      chown ${myvars.username}:staff /etc/rclone/r2/access_key_id
-      chmod 600 /etc/rclone/r2/access_key_id
+    if [ -f ${skBasePath}/rclone/r2/access_key_id ]; then
+      chown ${myvars.username}:${platform.userGroup} ${skBasePath}/rclone/r2/access_key_id
+      chmod 600 ${skBasePath}/rclone/r2/access_key_id
     fi
-    if [ -f /etc/rclone/r2/secret_access_key ]; then
-      chown ${myvars.username}:staff /etc/rclone/r2/secret_access_key
-      chmod 600 /etc/rclone/r2/secret_access_key
+    if [ -f ${skBasePath}/rclone/r2/secret_access_key ]; then
+      chown ${myvars.username}:${platform.userGroup} ${skBasePath}/rclone/r2/secret_access_key
+      chmod 600 ${skBasePath}/rclone/r2/secret_access_key
     fi
-    if [ -f /etc/ssh/github/private_key ]; then
-      chown ${myvars.username}:staff /etc/ssh/github/private_key
-      chmod 600 /etc/ssh/github/private_key
+    if [ -f ${skBasePath}/ssh/github/private_key ]; then
+      chown ${myvars.username}:${platform.userGroup} ${skBasePath}/ssh/github/private_key
+      chmod 600 ${skBasePath}/ssh/github/private_key
     fi
-    if [ -f /etc/claude/zai/token ]; then
-      chown ${myvars.username}:staff /etc/claude/zai/token
-      chmod 600 /etc/claude/zai/token
+    if [ -f ${skBasePath}/claude/zai/token ]; then
+      chown ${myvars.username}:${platform.userGroup} ${skBasePath}/claude/zai/token
+      chmod 600 ${skBasePath}/claude/zai/token
     fi
   '';
 }
