@@ -2,7 +2,8 @@
   programs.btop = {
     enable = true;
     package = pkgs.btop.override {
-      rocmSupport = true;
+      # 注意 rocm 只支持 x86_64-linux
+      rocmSupport = pkgs.stdenv.isLinux;
       cudaSupport = true;
     };
     settings = {

@@ -47,6 +47,13 @@
         identityFile = "/etc/sk/ssh/github/private_key";
         identitiesOnly = true;
       };
+
+      "vps" = {
+        hostname = "47.79.17.202";
+        user = "root";
+        port = 22;
+        identityFile = "/etc/sk/ssh/vps/private_key";
+      };
     };
   };
 }

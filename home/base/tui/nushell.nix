@@ -1,4 +1,6 @@
 {pkgs, ...}: {
+  # https://mynixos.com/home-manager/options/programs.nushell
+
   programs = {
     nushell = {
       enable = true;

@@ -6,6 +6,8 @@
     ../../modules/darwin
   ];
 
+  # PLAN [2025-10-08] 目前 username 仍然用的是全局的。应该是不同host可以设置各自的username，才是合理的方案
+
   # Host-specific overrides for system defaults
   # These will override the defaults set in modules/darwin/system.nix
   system.defaults = {

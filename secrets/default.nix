@@ -47,6 +47,12 @@ in {
         mode = "0400";
       };
 
+      "ssh/vps/private_key" = {
+        owner = myvars.username;
+        group = platform.userGroup;
+        mode = "0400";
+      };
+
       # zAI API secrets
       "claude/zai/token" = {
         owner = myvars.username;
@@ -67,6 +73,9 @@ in {
     "sk/ssh/github/private_key" = {
       source = config.sops.secrets."ssh/github/private_key".path;
     };
+    "sk/ssh/vps/private_key" = {
+      source = config.sops.secrets."ssh/vps/private_key".path;
+    };
     "sk/claude/zai/token" = {
       source = config.sops.secrets."claude/zai/token".path;
     };
@@ -85,6 +94,10 @@ in {
     if [ -f ${skBasePath}/ssh/github/private_key ]; then
       chown ${myvars.username}:${platform.userGroup} ${skBasePath}/ssh/github/private_key
       chmod 600 ${skBasePath}/ssh/github/private_key
+    fi
+    if [ -f ${skBasePath}/ssh/vps/private_key ]; then
+      chown ${myvars.username}:${platform.userGroup} ${skBasePath}/ssh/vps/private_key
+      chmod 600 ${skBasePath}/ssh/vps/private_key
     fi
     if [ -f ${skBasePath}/claude/zai/token ]; then
       chown ${myvars.username}:${platform.userGroup} ${skBasePath}/claude/zai/token
