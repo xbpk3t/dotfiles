@@ -7,9 +7,10 @@
         # Host configuration
         "hosts/${name}/default.nix"
         # Base modules
+        "modules/base"
         "modules/nixos/base"
         # Desktop modules
-        "modules/nixos/desktop.nix"
+        "modules/nixos/desktop"
       ])
       ++ [
         # Boot configuration
