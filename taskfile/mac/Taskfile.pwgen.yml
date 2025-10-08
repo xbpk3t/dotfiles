@@ -1,0 +1,16 @@
+---
+version: 3
+
+tasks:
+  default:
+    desc: "为指定网站生成密码"
+    vars:
+      WEBSITE: "{{.CLI_ARGS}}"
+    env:
+      PWGEN_SECRET_KEY: "{{ eXl6dw== | b64dec}}"
+    cmds:
+      - "go run pwgen/cmd/root.go {{.WEBSITE}}"
+  preconditions:
+    - sh: command -v pwgen
+      msg: pwgen not found
+
