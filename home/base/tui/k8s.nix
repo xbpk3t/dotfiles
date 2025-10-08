@@ -121,6 +121,4 @@
       enableAlias = true;
     };
   };
-
-  catppuccin.k9s.transparent = true;
 }
