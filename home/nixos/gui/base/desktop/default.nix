@@ -2,9 +2,11 @@
   imports = [
     ./nvidia.nix
 
-    ./anyrun.nix
-    ./rofi.nix
-    ./vicinae.nix
+    #    ./anyrun.nix
+    #    ./rofi.nix
+    #    ./vicinae.nix
+    #    ./walker.nix
+    #    ./fuzzel.nix
   ];
 
   # wayland related

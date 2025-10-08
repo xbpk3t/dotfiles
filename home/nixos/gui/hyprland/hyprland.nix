@@ -1,16 +1,13 @@
 {pkgs, ...}: let
   package = pkgs.hyprland;
 
-  # 变量定义 - keyd 映射后物理 Alt 键变成了 Super
-  mod = "SUPER"; # keyd 映射：物理Alt → Super，所以用 SUPER
-  # files = "thunar";
-
-  files = "yazi";
-  #  browser = "chromium";
+  mod = "SUPER";
   browser = "firefox";
-  terminal = "foot";
-  menu = "vicinae";
-  menuZ = "rofi";
+  terminal = "wezterm";
+  IDE = "goland";
+  IDEClass = "jetbrains-goland";
+  launcher = "vicinae";
+  zzz = "rofi";
 in {
   # 所有配置已经直接整合到 settings 中，不再需要 xdg.configFile 引用
 
@@ -24,29 +21,20 @@ in {
     settings = {
       # 变量定义 - 直接在 Hyprland 中使用
       "$mod" = mod;
-      "$files" = files;
       "$browser" = browser;
+      "$terminal" = terminal;
+      "$IDE" = IDE;
+      "$launcher" = launcher;
 
       # === 启动应用程序 (exec.conf) ===
-      # ============================================================================
-
-      # 修复 anyrun 的链接问题
-      # 参考: https://github.com/anyrun-org/anyrun/issues/153
       exec-once = [
-        "ln -s \"$XDG_RUNTIME_DIR/hypr\" /tmp/hypr"
-
         # Fcitx5 输入法配置
         "cp ~/.config/fcitx5/profile-bak ~/.config/fcitx5/profile" # 恢复由 nixos 管理的 fcitx5 profile
         "fcitx5 -d --replace" # 启动 fcitx5 守护进程
 
-        # 终端和应用启动
-        "wezterm" # 默认启动的终端
-        "${browser}" # 浏览器
-        "goland" # IDE
-
         # 工作区切换
-        "sleep 3; hyprctl dispatch workspace 1"
-        "sleep 3; hyprctl dispatch workspace 4"
+        #        "sleep 3; hyprctl dispatch workspace 1"
+        #        "sleep 3; hyprctl dispatch workspace 4"
       ];
 
       # 系统相关键绑定
@@ -66,11 +54,17 @@ in {
         # 关闭当前窗口
         "$mod, q, killactive"
 
-        # 终端启动器（注意：keyd映射后物理Alt键现在作为Super使用）
-        "$mod, Return, exec, ${terminal}"
-        "$mod, d, exec, ${menu}"
         # [[Feature request] A way to close the prompt with a command? · Issue #103 · anyrun-org/anyrun](https://github.com/anyrun-org/anyrun/issues/103)
-        "$mod, z, exec, pgrep ${menuZ} && pkill ${menuZ} || ${menuZ} -show combi" # FIXME [2025-10-05] 不知道rofi怎么配置 default-mode 只能在这里显示声明
+        "$mod, d, exec, ${launcher}" # FIXME [2025-10-05] 不知道rofi怎么配置 default-mode 只能在这里显示声明
+
+        # [[Feature request] A way to close the prompt with a command? · Issue #103 · anyrun-org/anyrun](https://github.com/anyrun-org/anyrun/issues/103)
+        "$mod, z, exec, pgrep ${zzz} && pkill ${zzz} || ${zzz} -show combi" # FIXME [2025-10-05] 不知道rofi怎么配置 default-mode 只能在这里显示声明
+
+        "$mod SHIFT, s, exec, cliphist list | fuzzel --dmenu --with-nth 2 | cliphist decode | wl-copy"
+
+        "$mod, 1, exec, if [ $(hyprctl clients -j | jq 'map(select(.workspace.id == 1)) | length') -eq 0 ]; then ${terminal}; fi; hyprctl dispatch workspace 1"
+        "$mod, 2, exec, if [ $(hyprctl clients -j | jq 'map(select(.workspace.id == 2)) | length') -eq 0 ]; then ${browser}; fi; hyprctl dispatch workspace 2"
+        "$mod, 3, exec, if [ $(hyprctl clients -j | jq 'map(select(.workspace.id == 3)) | length') -eq 0 ]; then ${IDE}; fi; hyprctl dispatch workspace 3"
 
         # 硬件控制 - 使用 WirePlumber 进行音频控制
         # 参考: https://wiki.archlinux.org/title/WirePlumber
@@ -83,13 +77,10 @@ in {
         ", XF86AudioPlay, exec, playerctl play-pause"
         ", XF86AudioNext, exec, playerctl next"
         ", XF86AudioPrev, exec, playerctl previous"
-        ", XF86Search, exec, ${menu}"
+        ", XF86Search, exec, ${launcher}"
 
         # === 工作区快捷切换 ===
         # 切换工作区（如果该工作区没有目标应用，则启动它）
-        "$mod, 1, exec, if [ $(hyprctl clients -j | jq 'map(select(.workspace.id == 1)) | length') -eq 0 ]; then wezterm; fi; hyprctl dispatch workspace 1"
-        "$mod, 2, exec, if [ $(hyprctl clients -j | jq 'map(select(.workspace.id == 2)) | length') -eq 0 ]; then firefox; fi; hyprctl dispatch workspace 2"
-        "$mod, 3, exec, if [ $(hyprctl clients -j | jq 'map(select(.workspace.id == 3)) | length') -eq 0 ]; then goland; fi; hyprctl dispatch workspace 3"
 
         # === 工作区管理 ===
         # 使用功能键切换工作区
@@ -312,7 +303,8 @@ in {
           # 滚动速度设置 - 调整这个值来改变上下滑动速度
           # 大于 1.0 加速滚动，小于 1.0 减速滚动
           # 大家普遍设置为0.2，但是我的touchpad比较小所以设置为0.4
-          scroll_factor = 0.4;
+          # [2025-10-07] 0.4有点太快了
+          scroll_factor = 0.3;
 
           # 关键设置：启用点击行为模式，这样可以用手指数量而不是位置来区分点击
           clickfinger_behavior = true;
@@ -345,14 +337,9 @@ in {
       # 工作区分配规则
       # ============================================================================
       windowrulev2 = [
-        # 终端 - alacritty在工作区1
-        "workspace 1, class:^(wezterm)$"
-
-        # 浏览器
-        "workspace 2, class:^(chromium-browser)$"
-
-        # IDE - Goland可能的类名
-        "workspace 3, class:^(goland)$"
+        "workspace 1, class:^(${terminal})$"
+        "workspace 2, class:^(${browser})$"
+        "workspace 3, class:^(${IDEClass})$"
 
         # 浮动窗口
         "float, class:^(pulsemixer)$"
@@ -362,7 +349,6 @@ in {
         "float, title:^(File Transfer*)$"
         "float, title:^(Save File)$"
         "float, class:^(blueman-manager)$"
-        "float, class:^(thunderbird)$, title:^(.*Reminder)"
 
         # Fcitx5 输入法 - 启用此选项可以使 fcitx5 工作，但 fcitx5-configtool 将不工作！
         "pseudo, class:^(fcitx)$"

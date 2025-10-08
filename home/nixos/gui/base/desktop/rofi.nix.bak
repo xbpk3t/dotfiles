@@ -1,7 +1,7 @@
 {pkgs, ...}: {
   # Deploy shell scripts to bin directory - organized by features
   home.file.".local/bin/rofi-snippets".source = ./rofi/snippets/snippets.sh;
-  home.file.".local/bin/rofi-bookmark".source = ./rofi/bookmark/bookmark.nu;
+  home.file.".local/bin/rofi-bookmark".source = ./rofi/bookmark/bookmark.sh;
 
   # Make nushell scripts executable
   home.file.".local/bin/rofi-bookmark".executable = true;
@@ -15,6 +15,7 @@
 
   # Deploy rofi themes to XDG data directory
   xdg.dataFile."rofi/themes".source = ./rofi/themes;
+  xdg.dataFile."rofi/bookmark/icon".source = ./rofi/bookmark/icon;
 
   # Main rofi configuration
   programs.rofi = {
@@ -88,7 +89,7 @@
     };
 
     # Use custom spotlight theme (macOS Spotlight-like)
-    theme = "spotlight";
+    #    theme = "spotlight";
   };
 
   # Install rofi and related packages

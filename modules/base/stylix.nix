@@ -39,17 +39,18 @@
         name = "JetBrainsMono Nerd Font Mono";
       };
 
-      # UI文本
+      # UI文本 - 使用支持中文的字体
       sansSerif = {
-        # 无衬线，适合 UI 元素
-        package = pkgs.inter-nerdfont;
-        name = "Inter";
+        package = pkgs.noto-fonts-cjk-sans;
+        # Noto Sans CJK 作为 fallback
+        name = "Noto Sans CJK SC";
       };
 
-      # 正式文本（比如浏览器文本）
+      # 正式文本（比如浏览器文本）- 使用支持中文的字体
       serif = {
-        package = pkgs.source-serif-pro;
-        name = "Source Serif 4";
+        package = pkgs.noto-fonts-cjk-serif;
+        # Noto Serif CJK 作为 fallback
+        name = "Noto Serif CJK SC";
       };
 
       # Emoji font - using noto-fonts-color-emoji for better compatibility
@@ -72,16 +73,6 @@
       size = 24;
     };
   };
-
-  # Override specific settings if needed
-  # For example, make some applications have transparent backgrounds
-  #  stylix.targets.neovim = {
-  #    transparentBackground = {
-  #      main = true;
-  #      signColumn = true;
-  #      numberLine = true;
-  #    };
-  #  };
 
   # PLAN  [2025-10-06] 需要根据实际需求调整配色，当前为Gruvbox 默认值，所以注释掉
   # Custom color overrides (optional)
