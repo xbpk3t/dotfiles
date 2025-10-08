@@ -13,4 +13,3 @@ tasks:
   preconditions:
     - sh: command -v pwgen
       msg: pwgen not found
-

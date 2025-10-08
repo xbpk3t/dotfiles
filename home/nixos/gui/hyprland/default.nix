@@ -28,6 +28,7 @@ in {
     };
   };
 
+  # 注意这里的手动import
   config = lib.mkIf cfg.enable (
     lib.mkMerge [
       {

@@ -60,19 +60,19 @@
       };
     };
 
-# FIXME [2025-10-08] darwin 不支持该属性。之后要做不同OS的判断
+    # FIXME [2025-10-08] darwin 不支持该属性。之后要做不同OS的判断
 
-#    targets = {
-#      qt = {
-#        enable = true;
-#        platform = "qtct";
-#      };
-#    };
-#    cursor = {
-#      package = pkgs.bibata-cursors;
-#      name = "Bibata-Modern-Ice";
-#      size = 24;
-#    };
+    #    targets = {
+    #      qt = {
+    #        enable = true;
+    #        platform = "qtct";
+    #      };
+    #    };
+    #    cursor = {
+    #      package = pkgs.bibata-cursors;
+    #      name = "Bibata-Modern-Ice";
+    #      size = 24;
+    #    };
   };
 
   # PLAN  [2025-10-06] 需要根据实际需求调整配色，当前为Gruvbox 默认值，所以注释掉

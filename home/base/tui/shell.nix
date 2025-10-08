@@ -1,6 +1,7 @@
 {
   lib,
   pkgs,
+  config,
   ...
 }: {
   home = {
@@ -12,14 +13,25 @@
     # 环境变量
     sessionVariables =
       {
+        # 通用配置
         EDITOR = "nvim";
-        BROWSER = "google-chrome";
+        BROWSER = "chromium-browser";
+
+        # Locale
         LANG = "en_US.UTF-8";
         LC_CTYPE = "en_US.UTF-8";
         LC_COLLATE = "C"; # Avoids locale lookup errors
+
+        # zzz
         BUN_INSTALL = "$HOME/.bun";
         PNPM_HOME = "$HOME/.local/share/pnpm";
       }
+      // (lib.optionalAttrs pkgs.stdenv.isLinux {
+        WINEPREFIX = config.xdg.dataHome + "/wine";
+        LESSHISTFILE = config.xdg.cacheHome + "/less/history";
+        LESSKEY = config.xdg.configHome + "/less/lesskey";
+        DELTA_PAGER = "less -R";
+      })
       // (lib.optionalAttrs pkgs.stdenv.isDarwin {
         # 用来抑制 macOS 终端中显示的 "The default interactive shell is now zsh"
         BASH_SILENCE_DEPRECATION_WARNING = "1";

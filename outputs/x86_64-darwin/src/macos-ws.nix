@@ -2,7 +2,6 @@
   inputs,
   mylib,
   myvars,
-  lib,
   ...
 } @ args: let
   name = "macos-ws";
@@ -67,5 +66,10 @@
     ];
   };
 in {
-  darwinConfigurations.${name} = mylib.macosSystem (args // modules // {genSpecialArgs = genSpecialArgs; system = "x86_64-darwin";});
+  darwinConfigurations.${name} = mylib.macosSystem (args
+    // modules
+    // {
+      genSpecialArgs = genSpecialArgs;
+      system = "x86_64-darwin";
+    });
 }

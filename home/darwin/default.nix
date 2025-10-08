@@ -1,4 +1,8 @@
-{myvars, lib, ...}: {
+{
+  myvars,
+  lib,
+  ...
+}: {
   # This module provides the base home-manager configuration
   # that will be imported by the system configuration
 
