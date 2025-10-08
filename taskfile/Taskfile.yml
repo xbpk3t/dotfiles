@@ -41,6 +41,7 @@ includes:
   me: taskfile/mac/Taskfile.me.yml
   alfred: taskfile/mac/Taskfile.alfred.yml
   pnpm: taskfile/mac/Taskfile.pnpm.yml
+  bm: taskfile/mac/Taskfile.bm.yml
 
   sec: taskfile/works/Taskfile.sec.yml
 
