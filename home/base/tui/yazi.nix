@@ -140,6 +140,7 @@
         ];
 
         # 图片预览
+        # PLAN [2025-10-09] 之后还是处理成yazi内嵌图片preview。用imv不支持上下键切换图片
         preview_image = [
           {
             run = ''imv "$1"'';

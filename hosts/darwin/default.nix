@@ -52,4 +52,13 @@
 
   # Any other host-specific configurations can be added here
   # They will override or extend the module configurations
+
+  # 开启ssh，并开启指定ssh host
+  modules.ssh = {
+    enable = true;
+    hosts = {
+      github.enable = true;
+      vps.enable = true;
+    };
+  };
 }
