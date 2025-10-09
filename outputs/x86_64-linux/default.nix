@@ -1,46 +1,38 @@
-{mylib, ...} @ args: let
-  name = "nixos-ws";
+{
+  lib,
+  inputs,
+  ...
+} @ args: let
+  inherit (inputs) haumea;
 
-  modules = {
-    nixos-modules =
-      (map mylib.relativeToRoot [
-        # Host configuration
-        "hosts/${name}/default.nix"
-        # Base modules
-        "modules/base"
-        "modules/nixos/base"
-        # Desktop modules
-        "modules/nixos/desktop"
-      ])
-      ++ [
-        # Boot configuration
-        ({...}: {
-          # Use systemd-boot instead of GRUB for UEFI systems
-          boot.loader = {
-            efi.canTouchEfiVariables = true;
-            efi.efiSysMountPoint = "/boot";
-            systemd-boot.enable = true;
-            timeout = 10;
-          };
-          # Allow unfree packages for nvidia drivers
-          nixpkgs.config.allowUnfree = true;
-        })
-        # Enable Wayland
-        ({...}: {
-          modules.desktop.wayland.enable = true;
-        })
-      ];
-    home-modules = map mylib.relativeToRoot [
-      # Home manager configuration
-      "home/nixos/default.nix"
-      # Host-specific home configuration
-      "hosts/${name}/home.nix"
-    ];
+  # Contains all the flake outputs of this system architecture.
+  # Filter out reserved names that haumea cannot handle
+  filteredInputs = builtins.removeAttrs args ["self" "super" "root"];
+  data = haumea.lib.load {
+    src = ./src;
+    inputs = filteredInputs;
   };
-in {
-  # NixOS Configurations
-  nixosConfigurations.${name} = mylib.nixosSystem (modules // args);
+  # nix file names is redundant, so we remove it.
+  dataWithoutPaths = builtins.attrValues data;
 
-  # Tests
-  evalTests = {};
-}
+  # Merge all the machine's data into a single attribute set.
+  outputs = {
+    nixosConfigurations = lib.attrsets.mergeAttrsList (
+      map (it: it.nixosConfigurations or {}) dataWithoutPaths
+    );
+  };
+in
+  outputs
+  // {
+    inherit data; # for debugging purposes
+
+    # TODO: Add tests when needed
+    # evalTests = haumea.lib.loadEvalTests {
+    #   src = ./tests;
+    #   inputs = args // {
+    #     inherit outputs;
+    #   };
+    # };
+
+    evalTests = {};
+  }
