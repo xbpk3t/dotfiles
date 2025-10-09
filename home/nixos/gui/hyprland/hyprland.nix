@@ -3,7 +3,7 @@
 
   mod = "SUPER";
   browser = "firefox";
-  terminal = "wezterm";
+  terminal = "alacritty";
   IDE = "goland";
   IDEClass = "jetbrains-goland";
   launcher = "vicinae";
