@@ -34,7 +34,11 @@ in
           home-manager.backupFileExtension = "home-manager.backup";
 
           home-manager.extraSpecialArgs = specialArgs;
-          home-manager.users."${myvars.username}".imports = home-modules;
+          home-manager.users."${myvars.username}".imports =
+            home-modules
+            ++ [
+              inputs.nixvim.homeModules.nixvim
+            ];
         }
       ]);
   }

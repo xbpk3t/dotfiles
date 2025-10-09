@@ -2,8 +2,11 @@
   inputs,
   mylib,
   myvars,
+  lib,
   ...
 } @ args: let
+  macosSystemArgs = args // {inherit lib;};
+
   name = "macos-ws";
 
   genSpecialArgs = system: let
@@ -45,6 +48,7 @@
     darwin-modules =
       (map mylib.relativeToRoot [
         "secrets/default.nix"
+        "modules/base"
         "modules/darwin"
       ])
       ++ [
@@ -61,12 +65,12 @@
         }
       ];
     home-modules = map mylib.relativeToRoot [
-      "home/darwin"
       "home/base"
+      "home/darwin"
     ];
   };
 in {
-  darwinConfigurations.${name} = mylib.macosSystem (args
+  darwinConfigurations.${name} = mylib.macosSystem (macosSystemArgs
     // modules
     // {
       genSpecialArgs = genSpecialArgs;
