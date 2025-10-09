@@ -28,6 +28,11 @@ in {
 
     # Define secrets
     secrets = {
+      "pwgen/sk" = {
+        owner = myvars.username;
+        group = platform.userGroup;
+        mode = "0400";
+      };
       # Rclone R2 secrets
       "rclone/r2/access_key_id" = {
         owner = myvars.username;
@@ -64,6 +69,9 @@ in {
 
   # Place secrets in /etc/sk/ for unified management
   environment.etc = {
+    "sk/pwgen/sk" = {
+      source = config.sops.secrets."pwgen/sk".path;
+    };
     "sk/rclone/r2/access_key_id" = {
       source = config.sops.secrets."rclone/r2/access_key_id".path;
     };
@@ -83,6 +91,11 @@ in {
 
   # Set proper permissions for the secrets
   system.activationScripts.postActivation.text = ''
+    if [ -f ${skBasePath}/pwgen/sk ]; then
+      chown ${myvars.username}:${platform.userGroup} ${skBasePath}/pwgen/sk
+      chmod 600 ${skBasePath}/pwgen/sk
+    fi
+
     if [ -f ${skBasePath}/rclone/r2/access_key_id ]; then
       chown ${myvars.username}:${platform.userGroup} ${skBasePath}/rclone/r2/access_key_id
       chmod 600 ${skBasePath}/rclone/r2/access_key_id
