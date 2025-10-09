@@ -24,7 +24,7 @@ in
         {
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
-          home-manager.backupFileExtension = "home-manager.backup";
+          home-manager.backupFileExtension = "hm.bk";
 
           home-manager.extraSpecialArgs = specialArgs;
           home-manager.users."${myvars.username}".imports =
@@ -32,7 +32,7 @@ in
             ++ [
               inputs.catppuccin.homeModules.catppuccin
               inputs.nixvim.homeModules.nixvim
-              inputs.vicinae.homeModules.default
+              inputs.vicinae.homeManagerModules.default
             ];
         }
       ]);
