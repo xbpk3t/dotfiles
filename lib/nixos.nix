@@ -32,7 +32,7 @@ in
             ++ [
               inputs.catppuccin.homeModules.catppuccin
               inputs.nixvim.homeModules.nixvim
-              inputs.vicinae.homeManagerModules.default
+              inputs.vicinae.homeModules.default
             ];
         }
       ]);

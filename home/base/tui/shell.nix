@@ -16,6 +16,7 @@
         # 通用配置
         EDITOR = "nvim";
         BROWSER = "chromium-browser";
+        PWGEN_SECRET_KEY = "$(cat /etc/sk/pwgen/sk)";
 
         # Locale
         LANG = "en_US.UTF-8";
