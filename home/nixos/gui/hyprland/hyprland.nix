@@ -2,7 +2,7 @@
   package = pkgs.hyprland;
 
   mod = "SUPER";
-  browser = "firefox";
+  browser = "chromium-browser";
   terminal = "alacritty";
   IDE = "goland";
   IDEClass = "jetbrains-goland";

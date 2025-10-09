@@ -11,7 +11,6 @@
         decorations = "full";
         startup_mode = "Windowed";
         dynamic_title = true;
-        gtk_theme_variant = "None"; # pick the system's default
         option_as_alt = "Both";
       };
       cursor = {

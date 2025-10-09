@@ -4,11 +4,48 @@
   # and these arguments are used in the functions like `mylib.nixosSystem`, etc.
   inputs,
   mylib,
+  myvars,
+  lib,
   ...
-}: let
+} @ args: let
+  nixosSystemArgs = args // {inherit lib;};
+
   name = "nixos-ws";
 
-  # Load host variables to determine profile  # Fallback to vm if not specified
+  genSpecialArgs = system: let
+    pkgs = import inputs.nixpkgs {
+      inherit system;
+      config.allowUnfree = true;
+      config.nvidia.acceptLicense = true;
+    };
+  in {
+    inherit
+      mylib
+      myvars
+      pkgs
+      ;
+
+    # use unstable branch for some packages to get the latest updates
+    pkgs-unstable = import inputs.nixpkgs-unstable or inputs.nixpkgs {
+      inherit system;
+      config.allowUnfree = true;
+    };
+
+    # Add anyrun for anyrun configuration modules
+    anyrun = inputs.anyrun;
+
+    # Add catppuccin for theme configuration
+    catppuccin = inputs.catppuccin;
+
+    # Add nixvim for neovim configuration
+    nixvim = inputs.nixvim;
+
+    # Add vicinae for application launcher
+    vicinae = inputs.vicinae;
+
+    # Add sops-nix for secret management
+    sops-nix = inputs.sops-nix;
+  };
 
   modules = {
     nixos-modules =
@@ -35,5 +72,10 @@
     ];
   };
 in {
-  nixosConfigurations.${name} = mylib.nixosSystem (modules // args);
+  nixosConfigurations.${name} = mylib.nixosSystem (nixosSystemArgs
+    // modules
+    // {
+      genSpecialArgs = genSpecialArgs;
+      system = "x86_64-linux";
+    });
 }

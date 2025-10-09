@@ -2,6 +2,8 @@
 version: '3'
 
 includes:
+
+  # devops
   git: taskfile/devops/Taskfile.git.yml
   linters: taskfile/devops/Taskfile.linters.yml
   ansible: taskfile/devops/Taskfile.ansible.yml
@@ -11,10 +13,11 @@ includes:
   rclone: taskfile/devops/Taskfile.rclone.yml
   tf: taskfile/devops/Taskfile.tf.yml
 
+  # go
   gz: taskfile/go/Taskfile.gz.yml
   go: taskfile/go/Taskfile.go.yml
 
-
+  # k8s
   k3d: taskfile/k8s/Taskfile.k3d.yml
   docker: taskfile/k8s/Taskfile.docker.yml
   mk: taskfile/k8s/Taskfile.minikube.yml
@@ -22,7 +25,7 @@ includes:
   helm: taskfile/k8s/Taskfile.helm.yml
   k8s: taskfile/k8s/Taskfile.k8s.yml
 
-
+  # kernel
   linux: taskfile/kernel/Taskfile.linux.yml
   monitor: taskfile/kernel/Taskfile.monitor.yml
   pkg: taskfile/kernel/Taskfile.pkg.yml
@@ -31,7 +34,7 @@ includes:
   ssh: taskfile/kernel/Taskfile.ssh.yml
   tcpdump: taskfile/kernel/Taskfile.tcpdump.yml
 
-
+  # mac
   mac: taskfile/mac/Taskfile.mac.yml
   mac-cleanup: taskfile/mac/Taskfile.mac-cleanup.yml
   brew: taskfile/mac/Taskfile.brew.yml
@@ -42,6 +45,7 @@ includes:
   alfred: taskfile/mac/Taskfile.alfred.yml
   pnpm: taskfile/mac/Taskfile.pnpm.yml
   bm: taskfile/mac/Taskfile.bm.yml
+  pwgen: taskfile/mac/Taskfile.pwgen.yml
 
   sec: taskfile/works/Taskfile.sec.yml
 
