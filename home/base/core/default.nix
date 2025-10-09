@@ -1,5 +1,3 @@
-{...}: {
-  imports = [
-    ./theme.nix
-  ];
+{mylib, ...}: {
+  imports = mylib.scanPaths ./.;
 }
