@@ -1,12 +1,21 @@
 {
-  pkgs,
+  config,
   lib,
+  pkgs,
   ...
-}: {
-  programs.kitty = {
-    enable = lib.mkDefault true;
-    package = pkgs.kitty;
-    settings = {
+}:
+with lib; let
+  cfg = config.custom.gui.kitty;
+in {
+  options.custom.gui.kitty = {
+    enable = mkEnableOption "kitty terminal";
+  };
+
+  config = mkIf cfg.enable {
+    programs.kitty = {
+      enable = true;
+      package = pkgs.kitty;
+      settings = {
       font_size = 12;
       wheel_scroll_min_lines = 1;
       window_padding_width = 4;
@@ -75,5 +84,6 @@
       map ctrl+shift+down    decrease_font_size
       map ctrl+shift+backspace restore_font_size
     '';
+    };
   };
 }
