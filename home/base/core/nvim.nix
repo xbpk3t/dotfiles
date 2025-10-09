@@ -29,11 +29,11 @@
       treesitter.enable = true;
 
       # 推荐：LSP支持
-      lsp.enable = true;
+      lsp.enable = false;
       lsp.servers = {
-        nil_ls.enable = true; # Nix
-        pyright.enable = true; # Python
-        ts_ls.enable = true; # TypeScript
+#        nil_ls.enable = true; # Nix
+#        pyright.enable = true; # Python
+#        ts_ls.enable = true; # TypeScript
       };
 
       # 推荐：自动补全

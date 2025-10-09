@@ -5,4 +5,12 @@
   # 启用 Hyprland 作为主要的 Wayland 合成器
   modules.desktop.hyprland.enable = true;
   # modules.desktop.niri.enable = true;
+
+  modules.ssh = {
+    enable = true;
+    hosts = {
+      github.enable = true;
+      vps.enable = true;
+    };
+  };
 }
