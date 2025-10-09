@@ -1,4 +1,4 @@
-{myvars, ...}:
+{myvars, lib, ...}:
 #############################################################
 #
 #  nixos-ws - NixOS Workstation
@@ -41,6 +41,19 @@ in {
 
   # 启用 sing-box 代理服务
   services.sing-box.enable = true;
+
+  # Boot configuration - Enable systemd-boot and disable GRUB
+  boot.loader = {
+    efi.canTouchEfiVariables = true;
+    efi.efiSysMountPoint = "/boot";
+    systemd-boot.enable = true;
+    timeout = 10;
+    # Explicitly disable GRUB to avoid conflicts
+    grub.enable = false;
+  };
+
+  # Allow unfree packages for nvidia drivers
+  nixpkgs.config.allowUnfree = true;
 
   # Set system state version
   system.stateVersion = "24.11";

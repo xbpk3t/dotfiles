@@ -138,6 +138,28 @@
             for = "unix";
           }
         ];
+
+        # 图片预览
+        preview_image = [
+          {
+            run = ''imv "$1"'';
+            desc = "Preview Image";
+            for = "unix";
+            orphan = true; # 非阻塞模式
+          }
+          {
+            run = ''qlmanage -p "$1"'';
+            desc = "Preview Image";
+            for = "macos";
+            orphan = true;
+          }
+          {
+            run = ''start "" "%1"'';
+            desc = "Preview Image";
+            for = "windows";
+            orphan = true;
+          }
+        ];
       };
       open = {
         rules = [
@@ -149,9 +171,13 @@
             mime = "text/*";
             use = ["edit" "reveal"];
           }
+#          {
+#            mime = "image/*";
+#            use = ["open" "reveal"];
+#          }
           {
             mime = "image/*";
-            use = ["open" "reveal"];
+            use = ["preview_image" "open" "reveal"];
           }
           {
             mime = "{audio,video}/*";
@@ -525,10 +551,16 @@
           run = "forward";
           desc = "Go forward to the next directory";
         }
+#  {
+#    on = "<Space>";
+#    run = ["toggle" "arrow 1"];
+#    desc = "Toggle the current selection state";
+#  }
+
         {
           on = "<Space>";
-          run = ["toggle" "arrow 1"];
-          desc = "Toggle the current selection state";
+          run = "open --rule=preview_image";
+          desc = "Preview image in full screen";
         }
         {
           on = "<C-a>";
