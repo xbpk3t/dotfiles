@@ -29,7 +29,7 @@
       # 自定义 API 端点，用于连接到第三方模型服务
       ANTHROPIC_BASE_URL = "https://open.bigmodel.cn/api/anthropic";
       # API 认证令牌 - 使用 sops 管理，通过 cat 命令读取文件内容
-      ANTHROPIC_AUTH_TOKEN = "$(cat /etc/sk/claude/zai/token)";
+      ANTHROPIC_AUTH_TOKEN = builtins.readFile /etc/sk/claude/zai/token;
     };
     shellAliases = {
       cc = "claude --dangerously-skip-permissions";
@@ -143,7 +143,7 @@
           command = "npx";
           args = ["-y" "task-master-ai"];
           env = {
-            ANTHROPIC_API_KEY = "$(cat /etc/sk/claude/zai/token)";
+            ANTHROPIC_API_KEY = builtins.readFile /etc/sk/claude/zai/token;
           };
         };
 
@@ -167,7 +167,7 @@
           command = "npx";
           args = ["-y" "@github/github-mcp-server"];
           env = {
-            GITHUB_PERSONAL_ACCESS_TOKEN = "$(cat /etc/sk/claude/github-token)";
+            GITHUB_PERSONAL_ACCESS_TOKEN = builtins.readFile /etc/sk/claude/github-token;
           };
         };
 
@@ -191,7 +191,7 @@
           command = "npx";
           args = ["-y" "@firecrawl/firecrawl-mcp-server"];
           env = {
-            FIRECRAWL_API_KEY = "$(cat /etc/sk/claude/firecrawl-token)";
+            FIRECRAWL_API_KEY = builtins.readFile /etc/sk/claude/firecrawl-token;
           };
         };
 
@@ -206,7 +206,7 @@
         #   command = "npx";
         #   args = ["-y" "@notionhq/notion-mcp-server"];
         #   env = {
-        #     NOTION_TOKEN = "$(cat /etc/claude/notion-token)";
+        #     NOTION_TOKEN = "builtins.readFile /etc/claude/notion-token
         #   };
         # };
 
@@ -223,10 +223,10 @@
         #   command = "npx";
         #   args = ["-y" "@azure/azure-mcp"];
         #   env = {
-        #     AZURE_SUBSCRIPTION_ID = "$(cat /etc/claude/azure-subscription-id)";
-        #     AZURE_TENANT_ID = "$(cat /etc/claude/azure-tenant-id)";
-        #     AZURE_CLIENT_ID = "$(cat /etc/claude/azure-client-id)";
-        #     AZURE_CLIENT_SECRET = "$(cat /etc/claude/azure-client-secret)";
+        #     AZURE_SUBSCRIPTION_ID = "builtins.readFile /etc/claude/azure-subscription-id
+        #     AZURE_TENANT_ID = "builtins.readFile /etc/claude/azure-tenant-id
+        #     AZURE_CLIENT_ID = "builtins.readFile /etc/claude/azure-client-id
+        #     AZURE_CLIENT_SECRET = "builtins.readFile /etc/claude/azure-client-secret
         #   };
         # };
 
@@ -236,7 +236,7 @@
         #   command = "npx";
         #   args = ["-y" "@stripe/agent-toolkit"];
         #   env = {
-        #     STRIPE_API_KEY = "$(cat /etc/claude/stripe-api-key)";
+        #     STRIPE_API_KEY = "builtins.readFile /etc/claude/stripe-api-key
         #   };
         # };
 
@@ -260,7 +260,7 @@
         #   command = "npx";
         #   args = ["-y" "@microsoft/azure-devops-mcp"];
         #   env = {
-        #     AZURE_DEVOPS_TOKEN = "$(cat /etc/claude/azure-devops-token)";
+        #     AZURE_DEVOPS_TOKEN = "builtins.readFile /etc/claude/azure-devops-token
         #   };
         # };
 
@@ -277,7 +277,7 @@
         #   command = "npx";
         #   args = ["-y" "@mongodb/mongodb-mcp-server"];
         #   env = {
-        #     MONGODB_URI = "$(cat /etc/claude/mongodb-uri)";
+        #     MONGODB_URI = "builtins.readFile /etc/claude/mongodb-uri
         #   };
         # };
 
@@ -287,8 +287,8 @@
         #   command = "npx";
         #   args = ["-y" "@elastic/mcp-server-elasticsearch"];
         #   env = {
-        #     ELASTICSEARCH_URL = "$(cat /etc/claude/elasticsearch-url)";
-        #     ELASTICSEARCH_API_KEY = "$(cat /etc/claude/elasticsearch-api-key)";
+        #     ELASTICSEARCH_URL = "builtins.readFile /etc/claude/elasticsearch-url
+        #     ELASTICSEARCH_API_KEY = "builtins.readFile /etc/claude/elasticsearch-api-key
         #   };
         # };
 
@@ -298,7 +298,7 @@
         #   command = "npx";
         #   args = ["-y" "@neondatabase/mcp-server-neon"];
         #   env = {
-        #     NEON_API_KEY = "$(cat /etc/claude/neon-api-key)";
+        #     NEON_API_KEY = "builtins.readFile /etc/claude/neon-api-key
         #   };
         # };
 
@@ -308,7 +308,7 @@
         #   command = "npx";
         #   args = ["-y" "@chroma-core/chroma-mcp"];
         #   env = {
-        #     CHROMA_URL = "$(cat /etc/claude/chroma-url)";
+        #     CHROMA_URL = "builtins.readFile /etc/claude/chroma-url
         #   };
         # };
 
@@ -318,7 +318,7 @@
         #   command = "npx";
         #   args = ["-y" "@getsentry/sentry-mcp"];
         #   env = {
-        #     SENTRY_AUTH_TOKEN = "$(cat /etc/claude/sentry-token)";
+        #     SENTRY_AUTH_TOKEN = "builtins.readFile /etc/claude/sentry-token
         #   };
         # };
 
@@ -328,7 +328,7 @@
         #   command = "npx";
         #   args = ["-y" "@mondaycom/mcp"];
         #   env = {
-        #     MONDAY_API_KEY = "$(cat /etc/claude/monday-api-key)";
+        #     MONDAY_API_KEY = "builtins.readFile /etc/claude/monday-api-key
         #   };
         # };
 
@@ -338,7 +338,7 @@
         #   command = "npx";
         #   args = ["-y" "@azure-ai-foundry/mcp-foundry";
         #   env = {
-        #     AZURE_AI_FOUNDRY_KEY = "$(cat /etc/claude/azure-ai-foundry-key)";
+        #     AZURE_AI_FOUNDRY_KEY = "builtins.readFile /etc/claude/azure-ai-foundry-key
         #   };
         # };
 
@@ -355,8 +355,8 @@
         #   command = "npx";
         #   args = ["-y" "@dynatrace-oss/dynatrace-mcp";
         #   env = {
-        #     DYNATRACE_API_TOKEN = "$(cat /etc/claude/dynatrace-api-token)";
-        #     DYNATRACE_BASE_URL = "$(cat /etc/claude/dynatrace-base-url)";
+        #     DYNATRACE_API_TOKEN = "builtins.readFile /etc/claude/dynatrace-api-token
+        #     DYNATRACE_BASE_URL = "builtins.readFile /etc/claude/dynatrace-base-url
         #   };
         # };
 
@@ -366,7 +366,7 @@
         #   command = "npx";
         #   args = ["-y" "@pydantic/logfire-mcp";
         #   env = {
-        #     LOGFIRE_API_KEY = "$(cat /etc/claude/logfire-api-key)";
+        #     LOGFIRE_API_KEY = "builtins.readFile /etc/claude/logfire-api-key
         #   };
         # };
 
@@ -376,10 +376,10 @@
         #   command = "npx";
         #   args = ["-y" "@azure/aks-mcp";
         #   env = {
-        #     AZURE_SUBSCRIPTION_ID = "$(cat /etc/claude/azure-subscription-id)";
-        #     AZURE_TENANT_ID = "$(cat /etc/claude/azure-tenant-id)";
-        #     AZURE_CLIENT_ID = "$(cat /etc/claude/azure-client-id)";
-        #     AZURE_CLIENT_SECRET = "$(cat /etc/claude/azure-client-secret)";
+        #     AZURE_SUBSCRIPTION_ID = "builtins.readFile /etc/claude/azure-subscription-id
+        #     AZURE_TENANT_ID = "builtins.readFile /etc/claude/azure-tenant-id
+        #     AZURE_CLIENT_ID = "builtins.readFile /etc/claude/azure-client-id
+        #     AZURE_CLIENT_SECRET = "builtins.readFile /etc/claude/azure-client-secret
         #   };
         # };
 
@@ -389,7 +389,7 @@
           command = "npx";
           args = ["-y" "@evalstate/hf-mcp-server"];
           env = {
-            HF_TOKEN = "$(cat /etc/sk/claude/huggingface-token)";
+            HF_TOKEN = builtins.readFile /etc/sk/claude/huggingface-token;
           };
         };
 
@@ -399,7 +399,7 @@
         #   command = "npx";
         #   args = ["-y" "@webflow/mcp-server";
         #   env = {
-        #     WEBFLOW_API_TOKEN = "$(cat /etc/claude/webflow-token)";
+        #     WEBFLOW_API_TOKEN = "builtins.readFile /etc/claude/webflow-token
         #   };
         # };
 
@@ -409,7 +409,7 @@
         #   command = "npx";
         #   args = ["-y" "@microsoft/fabric-rti-mcp";
         #   env = {
-        #     FABRIC_API_KEY = "$(cat /etc/claude/fabric-api-key)";
+        #     FABRIC_API_KEY = "builtins.readFile /etc/claude/fabric-api-key
         #   };
         # };
 
@@ -419,7 +419,7 @@
         #   command = "npx";
         #   args = ["-y" "@box-community/mcp-server-box";
         #   env = {
-        #     BOX_DEVELOPER_TOKEN = "$(cat /etc/claude/box-developer-token)";
+        #     BOX_DEVELOPER_TOKEN = "builtins.readFile /etc/claude/box-developer-token
         #   };
         # };
 
@@ -429,7 +429,7 @@
         #   command = "npx";
         #   args = ["-y" "@codacy/codacy-mcp-server";
         #   env = {
-        #     CODACY_API_TOKEN = "$(cat /etc/claude/codacy-api-token)";
+        #     CODACY_API_TOKEN = "builtins.readFile /etc/claude/codacy-api-token
         #   };
         # };
 
@@ -439,7 +439,7 @@
         #   command = "npx";
         #   args = ["-y" "@microsoft/clarity-mcp-server";
         #   env = {
-        #     CLARITY_API_KEY = "$(cat /etc/claude/clarity-api-key)";
+        #     CLARITY_API_KEY = "builtins.readFile /etc/claude/clarity-api-key
         #   };
         # };
 
@@ -449,7 +449,7 @@
           command = "npx";
           args = ["-y" "@postmanlabs/postman-mcp-server"];
           env = {
-            POSTMAN_API_KEY = "$(cat /etc/sk/claude/postman-api-key)";
+            POSTMAN_API_KEY = builtins.readFile /etc/sk/claude/postman-api-key;
           };
         };
 
@@ -459,7 +459,7 @@
         #   command = "npx";
         #   args = ["-y" "@launchdarkly/mcp-server";
         #   env = {
-        #     LAUNCHDARKLY_API_KEY = "$(cat /etc/claude/launchdarkly-api-key)";
+        #     LAUNCHDARKLY_API_KEY = "builtins.readFile /etc/claude/launchdarkly-api-key
         #   };
         # };
 
@@ -469,7 +469,7 @@
         #   command = "npx";
         #   args = ["-y" "@atlassian/atlassian-mcp-server";
         #   env = {
-        #     ATLASSIAN_API_TOKEN = "$(cat /etc/claude/atlassian-api-token)";
+        #     ATLASSIAN_API_TOKEN = "builtins.readFile /etc/claude/atlassian-api-token
         #   };
         # };
 
@@ -479,7 +479,7 @@
           command = "npx";
           args = ["-y" "@figma/dev-mode-mcp-server"];
           env = {
-            FIGMA_API_KEY = "$(cat /etc/sk/claude/figma-api-key)";
+            FIGMA_API_KEY = builtins.readFile /etc/sk/claude/figma-api-key;
           };
         };
 
@@ -489,9 +489,9 @@
         #   command = "npx";
         #   args = ["-y" "@jfrog/jfrog-mcp-server";
         #   env = {
-        #     JFROG_URL = "$(cat /etc/claude/jfrog-url)";
-        #     JFROG_USERNAME = "$(cat /etc/claude/jfrog-username)";
-        #     JFROG_PASSWORD = "$(cat /etc/claude/jfrog-password)";
+        #     JFROG_URL = "builtins.readFile /etc/claude/jfrog-url
+        #     JFROG_USERNAME = "builtins.readFile /etc/claude/jfrog-username
+        #     JFROG_PASSWORD = "builtins.readFile /etc/claude/jfrog-password
         #   };
         # };
 
@@ -501,10 +501,10 @@
         #   command = "npx";
         #   args = ["-y" "@microsoft/devbox-mcp-server";
         #   env = {
-        #     AZURE_SUBSCRIPTION_ID = "$(cat /etc/claude/azure-subscription-id)";
-        #     AZURE_TENANT_ID = "$(cat /etc/claude/azure-tenant-id)";
-        #     AZURE_CLIENT_ID = "$(cat /etc/claude/azure-client-id)";
-        #     AZURE_CLIENT_SECRET = "$(cat /etc/claude/azure-client-secret)";
+        #     AZURE_SUBSCRIPTION_ID = "builtins.readFile /etc/claude/azure-subscription-id
+        #     AZURE_TENANT_ID = "builtins.readFile /etc/claude/azure-tenant-id
+        #     AZURE_CLIENT_ID = "builtins.readFile /etc/claude/azure-client-id
+        #     AZURE_CLIENT_SECRET = "builtins.readFile /etc/claude/azure-client-secret
         #   };
         # };
 
@@ -514,7 +514,7 @@
           command = "npx";
           args = ["-y" "@zapier/zapier-mcp"];
           env = {
-            ZAPIER_API_KEY = "$(cat /etc/sk/claude/zapier-api-key)";
+            ZAPIER_API_KEY = builtins.readFile /etc/sk/claude/zapier-api-key;
           };
         };
       };
