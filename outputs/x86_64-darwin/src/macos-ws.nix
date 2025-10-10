@@ -47,6 +47,8 @@
   modules = {
     darwin-modules =
       (map mylib.relativeToRoot [
+        # Host-specific configuration
+        "hosts/${name}/default.nix"
         "secrets/default.nix"
         "modules/base"
         "modules/darwin"
@@ -65,6 +67,8 @@
         }
       ];
     home-modules = map mylib.relativeToRoot [
+      # Host-specific home configuration
+      "hosts/${name}/home.nix"
       "home/base"
       "home/darwin"
     ];

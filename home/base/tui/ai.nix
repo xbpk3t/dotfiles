@@ -1,5 +1,4 @@
 {pkgs, ...}: {
-
   # FIXME https://github.com/numtide/nix-ai-tools
   home.packages = with pkgs; [
     # tokei # count lines of code, alternative to cloc

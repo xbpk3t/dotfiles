@@ -11,7 +11,6 @@
     # [2025-10-09] 内存这种热数据应用lz4这种高吞吐（CPU开小弟）、低压缩比的压缩算法
     algorithm = "lz4";
 
-
     # Priority of the zram swap devices.
     # It should be a number higher than the priority of your disk-based swap devices
     # (so that the system will fill the zram swap devices before falling back to disk swap).
