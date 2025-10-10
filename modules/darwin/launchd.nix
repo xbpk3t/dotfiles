@@ -61,7 +61,7 @@
       serviceConfig = {
         Label = "local.user.system.cleanup";
         ProgramArguments = [
-          "${pkgs.bash}/bin/zsh"
+          "${pkgs.zsh}/bin/zsh"
           "-c"
           ''
             # 系统清理脚本

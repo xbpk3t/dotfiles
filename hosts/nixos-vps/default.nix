@@ -58,9 +58,6 @@ in {
     fallbackDns = nameservers;
   };
 
-  # 启用 sing-box 代理服务
-  services.sing-box.enable = true;
-
   # Set system state version
   system.stateVersion = "24.11";
 }

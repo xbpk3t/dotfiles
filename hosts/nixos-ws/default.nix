@@ -39,9 +39,6 @@ in {
     fallbackDns = nameservers;
   };
 
-  # 启用 sing-box 代理服务
-  services.sing-box.enable = true;
-
   # Boot configuration - Enable systemd-boot and disable GRUB
   boot.loader = {
     efi.canTouchEfiVariables = true;
