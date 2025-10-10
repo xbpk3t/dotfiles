@@ -172,10 +172,10 @@
             mime = "text/*";
             use = ["edit" "reveal"];
           }
-#          {
-#            mime = "image/*";
-#            use = ["open" "reveal"];
-#          }
+          #          {
+          #            mime = "image/*";
+          #            use = ["open" "reveal"];
+          #          }
           {
             mime = "image/*";
             use = ["preview_image" "open" "reveal"];
@@ -552,11 +552,11 @@
           run = "forward";
           desc = "Go forward to the next directory";
         }
-#  {
-#    on = "<Space>";
-#    run = ["toggle" "arrow 1"];
-#    desc = "Toggle the current selection state";
-#  }
+        #  {
+        #    on = "<Space>";
+        #    run = ["toggle" "arrow 1"];
+        #    desc = "Toggle the current selection state";
+        #  }
 
         {
           on = "<Space>";

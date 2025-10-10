@@ -58,125 +58,123 @@
       ];
     };
 
-
-
-#    firefox = {
-#      enable = false;
-#      package = pkgs.firefox;
-#
-#      # Language packs
-#      languagePacks = ["zh-CN" "en-US"];
-#
-#      # Firefox profiles configuration
-#      profiles = {
-#        default = {
-#          id = 0;
-#          name = "default";
-#          isDefault = true;
-#
-#          settings = {
-#            # Wayland support
-#            "widget.wayland-client.enabled" = true;
-#
-#            # Font rendering optimization
-#            "gfx.font_rendering.cleartype_params.cambria" = "1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
-#            "gfx.font_rendering.cleartype_params.consolas" = "1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
-#            "gfx.font_rendering.cleartype_params.ebrima" = "1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
-#            "gfx.font_rendering.cleartype_params.georgia" = "1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
-#            "gfx.font_rendering.cleartype_params.latin" = "1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
-#            "gfx.font_rendering.cleartype_params.malgun_gothic" = "1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
-#            "gfx.font_rendering.cleartype_params.microsoft_jhenghei" = "1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
-#            "gfx.font_rendering.cleartype_params.microsoft_yahei" = "1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
-#            "gfx.font_rendering.cleartype_params.segoe_ui" = "1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
-#            "gfx.font_rendering.cleartype_params.tahoma" = "1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
-#            "gfx.font_rendering.cleartype_params.times_new_roman" = "1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
-#            "gfx.font_rendering.cleartype_params.trebuchet_ms" = "1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
-#            "gfx.font_rendering.cleartype_params.verdana" = "1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
-#            "gfx.font_rendering.cleartype_params.vertical_stems" = "1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
-#
-#            # Hardware acceleration
-#            "layers.acceleration.force-enabled" = true;
-#            "media.ffmpeg.vaapi.enabled" = true;
-#            "media.gpu-process-kill-and-launch" = true;
-#
-#            # Privacy and security
-#            "privacy.trackingprotection.enabled" = true;
-#            "privacy.trackingprotection.socialtracking.enabled" = true;
-#            "privacy.donottrackheader.enabled" = true;
-#
-#            # Performance
-#            "browser.startup.preXulSkeletonUI" = false;
-#            "browser.cache.disk.capacity" = 1048576; # 1GB cache
-#            "image.mem.decode_bytes_at_a_time" = 32768;
-#
-#            # UI improvements
-#            "browser.toolbars.bookmarks.visibility" = "never";
-#            "browser.tabs.warnOnClose" = false;
-#            "browser.contentblocking.category" = "strict";
-#
-#            # Disable telemetry
-#            "datareporting.healthreport.uploadEnabled" = false;
-#            "toolkit.telemetry.enabled" = false;
-#            "toolkit.telemetry.archive.enabled" = false;
-#
-#            # PDF viewer
-#            "pdfjs.disabled" = false;
-#            "pdfjs.enabledCache.state" = true;
-#          };
-#        };
-#      };
-#
-#      # Enterprise policies
-#      policies = {
-#        DisableTelemetry = true;
-#        DisableFirefoxStudies = true;
-#        DisablePocket = true;
-#        DisableScreenshots = false;
-#        DisableFormHistory = false;
-#        DontCheckDefaultBrowser = true;
-#        DisplayBookmarksToolbar = "never";
-#        DisplayMenuBar = "default-off";
-#        EnableTrackingProtection = {
-#          Value = true;
-#          Locked = false;
-#          Cryptomining = true;
-#          Fingerprinting = true;
-#          EmailTracking = true;
-#        };
-#        EncryptedMediaExtensions = {
-#          Enabled = true;
-#          Locked = false;
-#        };
-#        FirefoxHome = {
-#          Search = true;
-#          TopSites = false;
-#          SponsoredTopSites = false;
-#          Highlights = false;
-#          Pocket = false;
-#          SponsoredPocket = false;
-#          Snippets = false;
-#          Locked = false;
-#        };
-#        PasswordManagerEnabled = true;
-#        NoDefaultBookmarks = false;
-#        OfferToSaveLogins = true;
-#        SanitizeOnShutdown = {
-#          Cache = false;
-#          Cookies = false;
-#          Downloads = false;
-#          FormData = false;
-#          History = false;
-#          Sessions = false;
-#          SiteSettings = false;
-#          OfflineApps = false;
-#          LockPreferences = false;
-#        };
-#      };
-#
-#      # Native messaging hosts (for password managers etc.)
-#      nativeMessagingHosts = with pkgs; [
-#        firefox
-#      ];
-#    };
+    #    firefox = {
+    #      enable = false;
+    #      package = pkgs.firefox;
+    #
+    #      # Language packs
+    #      languagePacks = ["zh-CN" "en-US"];
+    #
+    #      # Firefox profiles configuration
+    #      profiles = {
+    #        default = {
+    #          id = 0;
+    #          name = "default";
+    #          isDefault = true;
+    #
+    #          settings = {
+    #            # Wayland support
+    #            "widget.wayland-client.enabled" = true;
+    #
+    #            # Font rendering optimization
+    #            "gfx.font_rendering.cleartype_params.cambria" = "1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
+    #            "gfx.font_rendering.cleartype_params.consolas" = "1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
+    #            "gfx.font_rendering.cleartype_params.ebrima" = "1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
+    #            "gfx.font_rendering.cleartype_params.georgia" = "1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
+    #            "gfx.font_rendering.cleartype_params.latin" = "1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
+    #            "gfx.font_rendering.cleartype_params.malgun_gothic" = "1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
+    #            "gfx.font_rendering.cleartype_params.microsoft_jhenghei" = "1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
+    #            "gfx.font_rendering.cleartype_params.microsoft_yahei" = "1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
+    #            "gfx.font_rendering.cleartype_params.segoe_ui" = "1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
+    #            "gfx.font_rendering.cleartype_params.tahoma" = "1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
+    #            "gfx.font_rendering.cleartype_params.times_new_roman" = "1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
+    #            "gfx.font_rendering.cleartype_params.trebuchet_ms" = "1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
+    #            "gfx.font_rendering.cleartype_params.verdana" = "1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
+    #            "gfx.font_rendering.cleartype_params.vertical_stems" = "1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0";
+    #
+    #            # Hardware acceleration
+    #            "layers.acceleration.force-enabled" = true;
+    #            "media.ffmpeg.vaapi.enabled" = true;
+    #            "media.gpu-process-kill-and-launch" = true;
+    #
+    #            # Privacy and security
+    #            "privacy.trackingprotection.enabled" = true;
+    #            "privacy.trackingprotection.socialtracking.enabled" = true;
+    #            "privacy.donottrackheader.enabled" = true;
+    #
+    #            # Performance
+    #            "browser.startup.preXulSkeletonUI" = false;
+    #            "browser.cache.disk.capacity" = 1048576; # 1GB cache
+    #            "image.mem.decode_bytes_at_a_time" = 32768;
+    #
+    #            # UI improvements
+    #            "browser.toolbars.bookmarks.visibility" = "never";
+    #            "browser.tabs.warnOnClose" = false;
+    #            "browser.contentblocking.category" = "strict";
+    #
+    #            # Disable telemetry
+    #            "datareporting.healthreport.uploadEnabled" = false;
+    #            "toolkit.telemetry.enabled" = false;
+    #            "toolkit.telemetry.archive.enabled" = false;
+    #
+    #            # PDF viewer
+    #            "pdfjs.disabled" = false;
+    #            "pdfjs.enabledCache.state" = true;
+    #          };
+    #        };
+    #      };
+    #
+    #      # Enterprise policies
+    #      policies = {
+    #        DisableTelemetry = true;
+    #        DisableFirefoxStudies = true;
+    #        DisablePocket = true;
+    #        DisableScreenshots = false;
+    #        DisableFormHistory = false;
+    #        DontCheckDefaultBrowser = true;
+    #        DisplayBookmarksToolbar = "never";
+    #        DisplayMenuBar = "default-off";
+    #        EnableTrackingProtection = {
+    #          Value = true;
+    #          Locked = false;
+    #          Cryptomining = true;
+    #          Fingerprinting = true;
+    #          EmailTracking = true;
+    #        };
+    #        EncryptedMediaExtensions = {
+    #          Enabled = true;
+    #          Locked = false;
+    #        };
+    #        FirefoxHome = {
+    #          Search = true;
+    #          TopSites = false;
+    #          SponsoredTopSites = false;
+    #          Highlights = false;
+    #          Pocket = false;
+    #          SponsoredPocket = false;
+    #          Snippets = false;
+    #          Locked = false;
+    #        };
+    #        PasswordManagerEnabled = true;
+    #        NoDefaultBookmarks = false;
+    #        OfferToSaveLogins = true;
+    #        SanitizeOnShutdown = {
+    #          Cache = false;
+    #          Cookies = false;
+    #          Downloads = false;
+    #          FormData = false;
+    #          History = false;
+    #          Sessions = false;
+    #          SiteSettings = false;
+    #          OfflineApps = false;
+    #          LockPreferences = false;
+    #        };
+    #      };
+    #
+    #      # Native messaging hosts (for password managers etc.)
+    #      nativeMessagingHosts = with pkgs; [
+    #        firefox
+    #      ];
+    #    };
   };
 }
