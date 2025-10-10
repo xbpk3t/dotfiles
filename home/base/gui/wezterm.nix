@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }:
 with lib; let
@@ -21,12 +20,12 @@ in {
       enable = true;
       enableZshIntegration = true;
 
-    # Stylix 将通过 extraConfig 应用用户的自定义配置
-    extraConfig = ''
-      -- 加载自定义模块
-      require("keybings")(wezterm, config)
-      require("status")(wezterm, config)
-    '';
+      # Stylix 将通过 extraConfig 应用用户的自定义配置
+      extraConfig = ''
+        -- 加载自定义模块
+        require("keybings")(wezterm, config)
+        require("status")(wezterm, config)
+      '';
     };
 
     # 将 Lua 模块文件部署到配置目录，让 Stylix 可以引用

@@ -1,11 +1,6 @@
 # Darwin host configuration
 # This file contains host-specific configurations that should not be shared between different machines
 {myvars, ...}: {
-  # Import Darwin-specific modules (which includes base modules)
-  imports = [
-    ../../modules/darwin
-  ];
-
   # PLAN [2025-10-08] 目前 username 仍然用的是全局的。应该是不同host可以设置各自的username，才是合理的方案
 
   # Host-specific overrides for system defaults
@@ -52,13 +47,4 @@
 
   # Any other host-specific configurations can be added here
   # They will override or extend the module configurations
-
-  # 开启ssh，并开启指定ssh host
-  modules.ssh = {
-    enable = true;
-    hosts = {
-      github.enable = true;
-      vps.enable = true;
-    };
-  };
 }

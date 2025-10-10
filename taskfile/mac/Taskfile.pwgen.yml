@@ -7,7 +7,7 @@ tasks:
     vars:
       WEBSITE: "{{.CLI_ARGS}}"
     cmds:
-      - "go run pwgen/cmd/root.go {{.WEBSITE}}"
-  preconditions:
-    - sh: 'command -v pwgen'
-      msg: pwgen not found
+      - "pwgen {{.WEBSITE}}"
+    preconditions:
+      - sh: 'command -v pwgen'
+        msg: pwgen not found
