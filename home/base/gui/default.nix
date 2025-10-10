@@ -1,7 +1,3 @@
-{...}: {
-  imports = [
-    ./kitty.nix
-    ./wezterm.nix
-    ./alacritty.nix
-  ];
+{mylib, ...}: {
+  imports = mylib.scanPaths ./.;
 }

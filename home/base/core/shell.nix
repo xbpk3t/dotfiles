@@ -16,7 +16,7 @@
         # 通用配置
         EDITOR = "nvim";
         BROWSER = "chromium-browser";
-        PWGEN_SECRET_KEY = builtins.readFile /etc/sk/pwgen/sk;
+        PWGEN_SECRET_KEY = "$(cat /etc/sk/pwgen/sk)";
 
         # Locale
         LANG = "en_US.UTF-8";
@@ -140,7 +140,7 @@
       #  [bug: home.sessionPath is broken with ZSH · Issue #2991 · nix-community/home-manager](https://github.com/nix-community/home-manager/issues/2991)
       sessionVariables = {
         PATH = lib.concatStringsSep ":" [
-          "$HOME/.orbstack/bin"
+#          "$HOME/.orbstack/bin"
           "$HOME/go/bin"
           "$BUN_INSTALL/bin"
           "$PNPM_HOME/bin"

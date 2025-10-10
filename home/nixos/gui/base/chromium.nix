@@ -1,7 +1,5 @@
 {pkgs, ...}: {
-  programs = {
-    # source code: https://github.com/nix-community/home-manager/blob/master/modules/programs/chromium.nix
-    chromium = {
+  programs.chromium = {
       enable = true;
       package = pkgs.chromium;
 
@@ -176,5 +174,4 @@
     #        firefox
     #      ];
     #    };
-  };
 }
