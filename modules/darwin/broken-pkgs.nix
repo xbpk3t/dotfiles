@@ -18,6 +18,7 @@ let
     "gdb"
     "ncdu"
     "racket-minimal"
+    "cloudflare-wrangler"
   ];
 in {
   nixpkgs.overlays = [

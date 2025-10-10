@@ -29,7 +29,7 @@
       # 自定义 API 端点，用于连接到第三方模型服务
       ANTHROPIC_BASE_URL = "https://open.bigmodel.cn/api/anthropic";
       # API 认证令牌 - 使用 sops 管理，通过 cat 命令读取文件内容
-      ANTHROPIC_AUTH_TOKEN = builtins.readFile /etc/sk/claude/zai/token;
+      ANTHROPIC_AUTH_TOKEN = "$(cat /etc/sk/claude/zai/token)";
     };
     shellAliases = {
       cc = "claude --dangerously-skip-permissions";
@@ -89,116 +89,116 @@
       package = pkgs.claude-code;
 
       mcpServers = {
-        filesystem = {
-          type = "stdio";
-          command = "pnpm";
-          args = ["dlx" "@modelcontextprotocol/server-filesystem"];
-        };
-        sequential-thinking = {
-          type = "stdio";
-          command = "pnpm";
-          args = ["dlx" "@modelcontextprotocol/server-sequential-thinking"];
-        };
-        memory = {
-          type = "stdio";
-          command = "pnpm";
-          args = ["dlx" "@modelcontextprotocol/server-memory"];
-        };
-
-        nixos-mcp = {
-          type = "stdio";
-          command = "uvx";
-          args = ["mcp-nixos"];
-        };
-
-        octocode = {
-          type = "stdio";
-          command = "pnpm";
-          args = ["dlx" "octocode-mcp@latest"];
-        };
-
-        ddg = {
-          type = "stdio";
-          command = "pnpm";
-          args = ["dlx" "duckduckgo-mcp-server"];
-        };
-
-        deepwiki = {
-          type = "http";
-          url = "https://mcp.deepwiki.com/mcp";
-        };
-
-        context7 = {
-          type = "http";
-          url = "https://mcp.context7.com/mcp";
-        };
-
-        github = {
-          type = "http";
-          url = "https://api.githubcopilot.com/mcp/";
-        };
-
-        claude-task-master = {
-          type = "stdio";
-          command = "npx";
-          args = ["-y" "task-master-ai"];
-          env = {
-            ANTHROPIC_API_KEY = builtins.readFile /etc/sk/claude/zai/token;
-          };
-        };
-
-        # [johnhuang316/code-index-mcp](https://github.com/johnhuang316/code-index-mcp) 用于提高编写代码的效率和检索效率
-        code-index = {
-          type = "stdio";
-          command = "uvx";
-          args = ["code-index-mcp"];
-        };
-
-        # Microsoft Markitdown - Convert various file formats to Markdown (Useful for document processing)
-        markitdown = {
-          type = "stdio";
-          command = "npx";
-          args = ["-y" "@microsoft/markitdown-mcp"];
-        };
-
-        # GitHub Official MCP Server (Essential for GitHub integration)
-        github-mcp = {
-          type = "stdio";
-          command = "npx";
-          args = ["-y" "@github/github-mcp-server"];
-          env = {
-            GITHUB_PERSONAL_ACCESS_TOKEN = builtins.readFile /etc/sk/claude/github-token;
-          };
-        };
-
-        # Microsoft Playwright - Automate web browsers (Useful for testing and web automation)
-        playwright = {
-          type = "stdio";
-          command = "npx";
-          args = ["-y" "@microsoft/playwright-mcp"];
-        };
-
-        # Serena - Semantic code retrieval & editing (Useful for code analysis)
-        serena = {
-          type = "stdio";
-          command = "npx";
-          args = ["-y" "serena-mcp"];
-        };
-
-        # Firecrawl - Extract web data (Useful for web scraping and content extraction)
-        firecrawl = {
-          type = "stdio";
-          command = "npx";
-          args = ["-y" "@firecrawl/firecrawl-mcp-server"];
-          env = {
-            FIRECRAWL_API_KEY = builtins.readFile /etc/sk/claude/firecrawl-token;
-          };
-        };
-
-        jetbrains = {
-          type = "sse";
-          url = "http://localhost:64342/sse";
-        };
+#        filesystem = {
+#          type = "stdio";
+#          command = "pnpm";
+#          args = ["dlx" "@modelcontextprotocol/server-filesystem"];
+#        };
+#        sequential-thinking = {
+#          type = "stdio";
+#          command = "pnpm";
+#          args = ["dlx" "@modelcontextprotocol/server-sequential-thinking"];
+#        };
+#        memory = {
+#          type = "stdio";
+#          command = "pnpm";
+#          args = ["dlx" "@modelcontextprotocol/server-memory"];
+#        };
+#
+#        nixos-mcp = {
+#          type = "stdio";
+#          command = "uvx";
+#          args = ["mcp-nixos"];
+#        };
+#
+#        octocode = {
+#          type = "stdio";
+#          command = "pnpm";
+#          args = ["dlx" "octocode-mcp@latest"];
+#        };
+#
+#        ddg = {
+#          type = "stdio";
+#          command = "pnpm";
+#          args = ["dlx" "duckduckgo-mcp-server"];
+#        };
+#
+#        deepwiki = {
+#          type = "http";
+#          url = "https://mcp.deepwiki.com/mcp";
+#        };
+#
+#        context7 = {
+#          type = "http";
+#          url = "https://mcp.context7.com/mcp";
+#        };
+#
+#        github = {
+#          type = "http";
+#          url = "https://api.githubcopilot.com/mcp/";
+#        };
+#
+#        claude-task-master = {
+#          type = "stdio";
+#          command = "npx";
+#          args = ["-y" "task-master-ai"];
+#          env = {
+#            ANTHROPIC_API_KEY = builtins.readFile /etc/sk/claude/zai/token;
+#          };
+#        };
+#
+#        # [johnhuang316/code-index-mcp](https://github.com/johnhuang316/code-index-mcp) 用于提高编写代码的效率和检索效率
+#        code-index = {
+#          type = "stdio";
+#          command = "uvx";
+#          args = ["code-index-mcp"];
+#        };
+#
+#        # Microsoft Markitdown - Convert various file formats to Markdown (Useful for document processing)
+#        markitdown = {
+#          type = "stdio";
+#          command = "npx";
+#          args = ["-y" "@microsoft/markitdown-mcp"];
+#        };
+#
+#        # GitHub Official MCP Server (Essential for GitHub integration)
+#        github-mcp = {
+#          type = "stdio";
+#          command = "npx";
+#          args = ["-y" "@github/github-mcp-server"];
+#          env = {
+#            GITHUB_PERSONAL_ACCESS_TOKEN = builtins.readFile /etc/sk/claude/github-token;
+#          };
+#        };
+#
+#        # Microsoft Playwright - Automate web browsers (Useful for testing and web automation)
+#        playwright = {
+#          type = "stdio";
+#          command = "npx";
+#          args = ["-y" "@microsoft/playwright-mcp"];
+#        };
+#
+#        # Serena - Semantic code retrieval & editing (Useful for code analysis)
+#        serena = {
+#          type = "stdio";
+#          command = "npx";
+#          args = ["-y" "serena-mcp"];
+#        };
+#
+#        # Firecrawl - Extract web data (Useful for web scraping and content extraction)
+#        firecrawl = {
+#          type = "stdio";
+#          command = "npx";
+#          args = ["-y" "@firecrawl/firecrawl-mcp-server"];
+#          env = {
+#            FIRECRAWL_API_KEY = builtins.readFile /etc/sk/claude/firecrawl-token;
+#          };
+#        };
+#
+#        jetbrains = {
+#          type = "sse";
+#          url = "http://localhost:64342/sse";
+#        };
 
         # Notion Official MCP Server (Useful if you use Notion)
         # notion = {
@@ -241,11 +241,11 @@
         # };
 
         # Terraform - Infrastructure as Code (Useful for DevOps)
-        terraform = {
-          type = "stdio";
-          command = "npx";
-          args = ["-y" "@hashicorp/terraform-mcp-server"];
-        };
+#        terraform = {
+#          type = "stdio";
+#          command = "npx";
+#          args = ["-y" "@hashicorp/terraform-mcp-server"];
+#        };
 
         # Microsoft Learn - Official documentation (Useful for Microsoft tech docs)
         # microsoft-learn = {
@@ -384,14 +384,14 @@
         # };
 
         # Hugging Face - Models and datasets (Very useful for AI/ML work)
-        huggingface = {
-          type = "stdio";
-          command = "npx";
-          args = ["-y" "@evalstate/hf-mcp-server"];
-          env = {
-            HF_TOKEN = builtins.readFile /etc/sk/claude/huggingface-token;
-          };
-        };
+#        huggingface = {
+#          type = "stdio";
+#          command = "npx";
+#          args = ["-y" "@evalstate/hf-mcp-server"];
+#          env = {
+#            HF_TOKEN = builtins.readFile /etc/sk/claude/huggingface-token;
+#          };
+#        };
 
         # Webflow - Web design platform (Only if you use Webflow)
         # webflow = {
@@ -444,14 +444,14 @@
         # };
 
         # Postman - API development (Useful for API testing and development)
-        postman = {
-          type = "stdio";
-          command = "npx";
-          args = ["-y" "@postmanlabs/postman-mcp-server"];
-          env = {
-            POSTMAN_API_KEY = builtins.readFile /etc/sk/claude/postman-api-key;
-          };
-        };
+#        postman = {
+#          type = "stdio";
+#          command = "npx";
+#          args = ["-y" "@postmanlabs/postman-mcp-server"];
+#          env = {
+#            POSTMAN_API_KEY = builtins.readFile /etc/sk/claude/postman-api-key;
+#          };
+#        };
 
         # LaunchDarkly - Feature flags (Feature flag management)
         # launchdarkly = {
@@ -474,14 +474,14 @@
         # };
 
         # Figma Dev Mode - Design context (Very useful for design-development workflow)
-        figma = {
-          type = "stdio";
-          command = "npx";
-          args = ["-y" "@figma/dev-mode-mcp-server"];
-          env = {
-            FIGMA_API_KEY = builtins.readFile /etc/sk/claude/figma-api-key;
-          };
-        };
+#        figma = {
+#          type = "stdio";
+#          command = "npx";
+#          args = ["-y" "@figma/dev-mode-mcp-server"];
+#          env = {
+#            FIGMA_API_KEY = builtins.readFile /etc/sk/claude/figma-api-key;
+#          };
+#        };
 
         # JFrog - DevOps platform (Artifact management)
         # jfrog = {
@@ -509,14 +509,14 @@
         # };
 
         # Zapier - Automation platform (Very useful for workflow automation)
-        zapier = {
-          type = "stdio";
-          command = "npx";
-          args = ["-y" "@zapier/zapier-mcp"];
-          env = {
-            ZAPIER_API_KEY = builtins.readFile /etc/sk/claude/zapier-api-key;
-          };
-        };
+#        zapier = {
+#          type = "stdio";
+#          command = "npx";
+#          args = ["-y" "@zapier/zapier-mcp"];
+#          env = {
+#            ZAPIER_API_KEY = builtins.readFile /etc/sk/claude/zapier-api-key;
+#          };
+#        };
       };
 
       # 编辑器和行为设置
