@@ -1,0 +1,46 @@
+---
+version: '3'
+
+# rsync
+#rsync 比 scp 更加高级，适合备份和同步大量文件，支持断点续传、增量同步、文件过滤，在本地也可以使用 rsync 进行文件备份。
+#
+#基本语法与 scp 相似：
+#
+#rsync [选项] 源路径 目标路径
+#基本用法如下：
+#
+## 同步目录（不保留属性）
+#rsync /source/ /destination/
+#
+## 保留文件属性（推荐）
+#rsync -a /source/ /destination/
+#
+## 详细输出 + 保留属性
+#rsync -av /source/ /destination/
+#
+## 显示进度
+#rsync -av --progress /source/ /destination/
+#若为远程服务器，可以指定端口和密钥：
+#
+## 指定端口
+#rsync -av -e "ssh -p 2222" /local/ username@hostname:/remote/
+#
+## 指定私钥
+#rsync -av -e "ssh -i ~/.ssh/mykey.pem" /local/ username@hostname:/remote/
+#若想要增量同步，可使用 --delete 删除备份目录中多余的文件：
+#
+## 远程同步文件并删除多余文件
+#rsync -av --delete --progress /local username@hostname:/remote/
+#排除特定文件，使用 --exclude 或 --exclude-fram：
+#
+## 排除临时文件和缓存
+#rsync -av --exclude='*.tmp' --exclude='cache/' /source/ /backup/
+#
+## 使用排除文件
+#rsync -av --exclude-from='exclude-list.txt' /source/ /backup/
+#断点续传，使用 --partial 参数：
+#
+#rsync -avP --partial large-video.mp4 username@hostname:/videos/
+
+tasks:
+  
