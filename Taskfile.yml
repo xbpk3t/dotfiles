@@ -67,13 +67,16 @@ tasks:
 
 
 
-  # === 核心构建任务 ===
+  # sudo env http_proxy=http://127.0.0.1:7890 https_proxy=http://127.0.0.1:7890 nixos-rebuild switch
+  #--flake .#intel
   build:
     desc: "构建系统配置（不切换）"
     cmds:
       - echo "正在为 {{.HOSTNAME}} ({{.SYSTEM}}) 构建 {{.OS}} 配置..."
       - nix build ./nix#{{.BUILD_TARGET}} --extra-experimental-features 'nix-command flakes'
       - echo "构建完成！"
+
+
 
   build-switch:
     desc: "构建并切换到新配置"
@@ -268,3 +271,8 @@ tasks:
 #      - task: disk-usage
 #      - echo "Recent system generations:"
 #      - nix profile history --profile "{{.SYSTEM_PROFILE}}" | head -10 || echo "  Could not read system profile history"
+
+
+
+# ssh -t luck@192.168.92.194 "sudo nix-store --delete $(readlink -f /nix/store/zc9s68h7rmbkm23ara98mjzwa2p1jdcl-source) --ignore-liveness"
+# 遇到一个 nix/store cache问题，导致

@@ -42,5 +42,9 @@ version: '3'
 #
 #rsync -avP --partial large-video.mp4 username@hostname:/videos/
 
+
+# rsync -avz --delete --progress -e "ssh -o StrictHostKeyChecking=no" /Users/lhgtqb7bll/Desktop/nix-config/ luck@192.168.71.7:~/Desktop/nix-config/
+
 tasks:
-  
+  default:
+    cmd: rsync -avz --delete --progress -e
