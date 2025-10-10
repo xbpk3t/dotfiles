@@ -1,6 +1,9 @@
 ---
 version: '3'
 
+
+# sshpass -p '<pass>' ssh -t -o StrictHostKeyChecking=no luck@192.168.71.7 'cd /home/luck/nix-config && echo "<pass>" | sudo -S nixos-rebuild switch --flake .#nixos-ws 2>&1 | tail -100'
+
 env:
   SSH_KEY_TYPE: ed25519
   SSH_KEY_DIR: ~/.ssh

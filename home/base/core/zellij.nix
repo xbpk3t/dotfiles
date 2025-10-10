@@ -1,6 +1,4 @@
 _: {
-
-
   programs.zellij = {
     enable = true;
 
@@ -37,20 +35,20 @@ _: {
     # 需要安装以下插件：
     # room
     # 没有 keybinds 这个key
-#    keybinds = {
-#      normal = {
-#        bind = [
-#          {
-#            key = "Ctrl+f";
-#            command = "zellij plugin -- zellij:forgot";
-#          }
-#          {
-#            key = "Ctrl+o";
-#            command = "zellij plugin -- zellij:filepicker";
-#          }
-#        ];
-#      };
-#    };
+    #    keybinds = {
+    #      normal = {
+    #        bind = [
+    #          {
+    #            key = "Ctrl+f";
+    #            command = "zellij plugin -- zellij:forgot";
+    #          }
+    #          {
+    #            key = "Ctrl+o";
+    #            command = "zellij plugin -- zellij:filepicker";
+    #          }
+    #        ];
+    #      };
+    #    };
 
     layouts = {
       default = {

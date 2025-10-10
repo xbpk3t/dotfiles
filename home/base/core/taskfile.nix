@@ -8,7 +8,6 @@
   home.file."taskfile".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Desktop/${myvars.name}/taskfile";
   home.file."taskfile".recursive = true;
 
-
   home.file."Taskfile.yml".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Desktop/${myvars.name}/taskfile/Taskfile.yml";
 
   home.packages = with pkgs; [
