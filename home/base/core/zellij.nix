@@ -1,4 +1,6 @@
 _: {
+
+
   programs.zellij = {
     enable = true;
 
@@ -30,6 +32,26 @@ _: {
       theme = "default";
     };
 
+    # PLAN [2025-10-10] 补充 zellij 插件
+    # [zellij-org/awesome-zellij: A list of awesome resources for zellij](https://github.com/zellij-org/awesome-zellij)
+    # 需要安装以下插件：
+    # room
+    # 没有 keybinds 这个key
+#    keybinds = {
+#      normal = {
+#        bind = [
+#          {
+#            key = "Ctrl+f";
+#            command = "zellij plugin -- zellij:forgot";
+#          }
+#          {
+#            key = "Ctrl+o";
+#            command = "zellij plugin -- zellij:filepicker";
+#          }
+#        ];
+#      };
+#    };
+
     layouts = {
       default = {
         layout = {
@@ -55,6 +77,15 @@ _: {
                       borderless = true;
                       plugin = {
                         location = "zellij:status-bar";
+                      };
+                    };
+                  }
+                  {
+                    pane = {
+                      size = 1;
+                      borderless = true;
+                      plugin = {
+                        location = "zellij:filepicker";
                       };
                     };
                   }

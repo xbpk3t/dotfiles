@@ -1,4 +1,6 @@
 {lib}: {
+  name = "nix-config";
+
   username = "lhgtqb7bll";
   userfullname = "lucas";
   mail = "yyzw@live.com";
