@@ -9,7 +9,4 @@ secrets/age.key
 *.age.key
 secrets/secrets_temp.yaml
 
-RNC
-sing-box
-sing-box-yg
-v2ray-agent
+./.hammerspoon/tasks_data.json

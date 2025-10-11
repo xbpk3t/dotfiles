@@ -140,7 +140,7 @@
       #  [bug: home.sessionPath is broken with ZSH · Issue #2991 · nix-community/home-manager](https://github.com/nix-community/home-manager/issues/2991)
       sessionVariables = {
         PATH = lib.concatStringsSep ":" [
-#          "$HOME/.orbstack/bin"
+          #          "$HOME/.orbstack/bin"
           "$HOME/go/bin"
           "$BUN_INSTALL/bin"
           "$PNPM_HOME/bin"
