@@ -10,14 +10,14 @@ _: {
 
       "tencent-lemon"
 
-#      "orbstack"
-#      "reqable"
+      #      "orbstack"
+      #      "reqable"
 
-#      "wechat"
-#      "wireshark-app"
+      #      "wechat"
+      #      "wireshark-app"
     ];
     # 开启这个配置，以及autoUpdate。完全由nix管理brew
-     greedyCasks = true;
+    greedyCasks = true;
 
     onActivation = {
       cleanup = "zap"; # 只安装nix配置的pkg，除此之外全部移除

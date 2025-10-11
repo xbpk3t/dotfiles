@@ -1,6 +1,9 @@
-{ config, pkgs, lib, ... }:
-
-let
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}: let
   cfg = config.modules.networking.singbox;
 in {
   options.modules.networking.singbox = {
@@ -17,8 +20,8 @@ in {
     # FIXME 替换为直接从 sub-store la qu
     systemd.services.sing-box = {
       description = "Sing-box Proxy Service";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "network.target" ];
+      wantedBy = ["multi-user.target"];
+      after = ["network.target"];
       serviceConfig = {
         ExecStart = "${pkgs.sing-box}/bin/sing-box run -c /etc/sing-box/config.json";
         Restart = "always";

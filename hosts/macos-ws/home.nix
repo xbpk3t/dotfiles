@@ -7,10 +7,5 @@
         vps.enable = true;
       };
     };
-
-    networking = {
-      singbox.enable = true;
-    };
   };
-
 }

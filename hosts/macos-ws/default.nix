@@ -47,4 +47,11 @@
 
   # Any other host-specific configurations can be added here
   # They will override or extend the module configurations
+
+  # 系统级配置启用
+  modules = {
+    networking = {
+      singbox.enable = true;
+    };
+  };
 }
