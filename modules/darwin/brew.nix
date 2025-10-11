@@ -10,6 +10,8 @@ _: {
 
       "tencent-lemon"
 
+      "kitty"
+
       #      "orbstack"
       #      "reqable"
 

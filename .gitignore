@@ -9,4 +9,4 @@ secrets/age.key
 *.age.key
 secrets/secrets_temp.yaml
 
-./.hammerspoon/tasks_data.json
+/.hammerspoon/tasks_data.json

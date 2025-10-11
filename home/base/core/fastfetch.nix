@@ -4,7 +4,8 @@
 
     settings = {
       logo = {
-        type = "none"; # 禁用 logo
+        # 禁用 logo有点丑，所以换成默认配置
+        type = "auto";
       };
 
       display = {
