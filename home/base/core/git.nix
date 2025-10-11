@@ -54,12 +54,14 @@
       #     helper = "!/usr/local/bin/gh auth git-credential";
       #   };
       # };
-      http = {
-        proxy = "http://127.0.0.1:7890";
-      };
-      https = {
-        proxy = "http://127.0.0.1:7890";
-      };
+
+      # [2025-10-11] 配置singbox之后，默认使用TUN模式，不需要配置proxy
+      #  http = {
+      #    proxy = "http://127.0.0.1:7890";
+      #  };
+      #  https = {
+      #    proxy = "http://127.0.0.1:7890";
+      #  };
       pull = {
         rebase = true;
       };

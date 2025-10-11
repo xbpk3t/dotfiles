@@ -78,15 +78,17 @@ _: {
                       };
                     };
                   }
-                  {
-                    pane = {
-                      size = 1;
-                      borderless = true;
-                      plugin = {
-                        location = "zellij:filepicker";
-                      };
-                    };
-                  }
+
+# filepicker 插件有问题，所以注释掉
+#                  {
+#                    pane = {
+#                      size = 1;
+#                      borderless = true;
+#                      plugin = {
+#                        location = "zellij:filepicker";
+#                      };
+#                    };
+#                  }
                 ];
               };
             }
