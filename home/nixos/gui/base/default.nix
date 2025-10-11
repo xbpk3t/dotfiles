@@ -1,4 +1,8 @@
-{mylib, pkgs, ...}: {
+{
+  mylib,
+  pkgs,
+  ...
+}: {
   imports = mylib.scanPaths ./.;
 
   home.packages = with pkgs; [
@@ -30,8 +34,6 @@
     # my custom hardened packages
   ];
 
-
   # FIXME 配置 rustdesk-server
   # https://mynixos.com/nixpkgs/options/services.rustdesk-server
-
 }

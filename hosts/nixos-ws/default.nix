@@ -55,21 +55,11 @@ in {
   # Set system state version
   system.stateVersion = "24.11";
 
+  # NetBird VPN client (enabled by default in module)
+  # All configuration is handled in modules/nixos/base/networking/netbird.nix
+  # To disable: modules.networking.netbird.client.enable = false;
 
-  modules.networking.netbird = {
-    enable = true;
-    clients = {
-      # 其他配置项均使用默认值
-      nixos-ws = {
-        enable = true;
-        openFirewall = true;
-      };
-    };
-  };
-
-  # Enable sing-box proxy service
-  modules.networking.singbox = {
-    enable = true;
-    # configPath defaults to /home/luck/config.json
-  };
+  # Sing-box proxy service
+  # Configuration file must be at /etc/sing-box/config.json
+  modules.networking.singbox.enable = true;
 }
