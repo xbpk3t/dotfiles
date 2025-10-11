@@ -46,8 +46,10 @@ includes:
   pnpm: taskfile/mac/Taskfile.pnpm.yml
   bm: taskfile/mac/Taskfile.bm.yml
   pwgen: taskfile/mac/Taskfile.pwgen.yml
+  sb: taskfile/mac/Taskfile.singbox.yml
 
   sec: taskfile/works/Taskfile.sec.yml
+
 
 
 tasks:

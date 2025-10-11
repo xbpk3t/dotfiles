@@ -1,4 +1,4 @@
-{mylib, ...}: {
+{mylib, pkgs, ...}: {
   imports = mylib.scanPaths ./.;
 
   home.packages = with pkgs; [
@@ -24,9 +24,14 @@
     # imv
 
     # remote desktop(rdp connect)
-    # FIXME 换成 rustdesk + frp + tailscale
+
     # remmina
     # freerdp # required by remmina
     # my custom hardened packages
   ];
+
+
+  # FIXME 配置 rustdesk-server
+  # https://mynixos.com/nixpkgs/options/services.rustdesk-server
+
 }

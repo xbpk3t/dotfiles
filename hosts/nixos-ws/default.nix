@@ -54,4 +54,22 @@ in {
 
   # Set system state version
   system.stateVersion = "24.11";
+
+
+  modules.networking.netbird = {
+    enable = true;
+    clients = {
+      # 其他配置项均使用默认值
+      nixos-ws = {
+        enable = true;
+        openFirewall = true;
+      };
+    };
+  };
+
+  # Enable sing-box proxy service
+  modules.networking.singbox = {
+    enable = true;
+    # configPath defaults to /home/luck/config.json
+  };
 }
