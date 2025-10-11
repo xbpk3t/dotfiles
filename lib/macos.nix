@@ -9,7 +9,7 @@
   specialArgs ? (genSpecialArgs system),
   ...
 }: let
-  inherit (inputs) nixpkgs-darwin home-manager darwin;
+  inherit (inputs) home-manager darwin;
 in
   darwin.lib.darwinSystem {
     inherit system specialArgs;
@@ -18,11 +18,9 @@ in
       ++ [
         (
           {...}: {
-            nixpkgs.pkgs = import nixpkgs-darwin {
-              inherit system; # refer the `system` parameter form outer scope recursively
-              # To use chrome, we need to allow the installation of non-free software
-              config.allowUnfree = true;
-            };
+            # Darwin 系统使用 nixpkgs-darwin，配置 allowBroken = true
+            nixpkgs.config.allowUnfree = true;
+            nixpkgs.config.allowBroken = true; # 允许安装 broken 包（如 zig）
           }
         )
       ]
@@ -38,6 +36,7 @@ in
             home-modules
             ++ [
               inputs.nixvim.homeModules.nixvim
+              inputs.nvf.homeManagerModules.default
             ];
         }
       ]);

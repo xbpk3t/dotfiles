@@ -551,9 +551,7 @@
         "flake-utils": "flake-utils",
         "haumea": "haumea_2",
         "nix-kube-generators": "nix-kube-generators",
-        "nixpkgs": [
-          "nixpkgs-darwin"
-        ],
+        "nixpkgs": "nixpkgs",
         "poetry2nix": "poetry2nix"
       },
       "locked": {
@@ -608,6 +606,22 @@
     },
     "nixpkgs": {
       "locked": {
+        "lastModified": 1760038930,
+        "narHash": "sha256-Oncbh0UmHjSlxO7ErQDM3KM0A5/Znfofj2BSzlHLeVw=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "0b4defa2584313f3b781240b29d61f6f9f7e0df3",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs-darwin": {
+      "locked": {
         "lastModified": 1758763312,
         "narHash": "sha256-puBMviZhYlqOdUUgEmMVJpXqC/ToEqSvkyZ30qQ09xM=",
         "owner": "nixos",
@@ -622,13 +636,29 @@
         "type": "github"
       }
     },
-    "nixpkgs-darwin": {
+    "nixpkgs_2": {
       "locked": {
         "lastModified": 1758763312,
         "narHash": "sha256-puBMviZhYlqOdUUgEmMVJpXqC/ToEqSvkyZ30qQ09xM=",
         "owner": "nixos",
         "repo": "nixpkgs",
         "rev": "e57b3b16ad8758fd681511a078f35c416a8cc939",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixpkgs-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_3": {
+      "locked": {
+        "lastModified": 1760103332,
+        "narHash": "sha256-BMsGVfKl4Q80Pr9T1AkCRljO1bpwCmY8rTBVj8XGuhA=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "870493f9a8cb0b074ae5b411b2f232015db19a65",
         "type": "github"
       },
       "original": {
@@ -714,9 +744,7 @@
         "flake-compat": "flake-compat",
         "flake-parts": "flake-parts_3",
         "mnw": "mnw",
-        "nixpkgs": [
-          "nixpkgs-darwin"
-        ],
+        "nixpkgs": "nixpkgs_3",
         "systems": "systems_7"
       },
       "locked": {
@@ -769,7 +797,7 @@
         "nix-homebrew": "nix-homebrew",
         "nixhelm": "nixhelm",
         "nixos-generators": "nixos-generators",
-        "nixpkgs": "nixpkgs",
+        "nixpkgs": "nixpkgs_2",
         "nixpkgs-darwin": "nixpkgs-darwin",
         "nixvim": "nixvim",
         "nvf": "nvf",
