@@ -18,6 +18,12 @@ in
       ++ [
         nixos-generators.nixosModules.all-formats
         inputs.stylix.nixosModules.stylix
+        (
+          {...}: {
+            # NixOS 系统使用 nixpkgs，配置 allowBroken = true
+            nixpkgs.config.allowBroken = true; # 允许安装 broken 包（如 zig）
+          }
+        )
       ]
       ++ (lib.optionals ((lib.lists.length home-modules) > 0) [
         home-manager.nixosModules.home-manager
@@ -32,7 +38,8 @@ in
             ++ [
               inputs.catppuccin.homeModules.catppuccin
               inputs.nixvim.homeModules.nixvim
-              inputs.vicinae.homeManagerModules.default
+              inputs.nvf.homeManagerModules.default
+              # inputs.vicinae.homeManagerModules.default
             ];
         }
       ]);

@@ -57,16 +57,11 @@
       inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
 
-    # nvf for neovim configuration
-    nvf = {
-      url = "github:notashelf/nvf";
-      inputs.nixpkgs.follows = "nixpkgs-darwin";
-    };
+    nvf.url = "github:notashelf/nvf";
 
     # nixhelm for helm charts management
     nixhelm = {
       url = "github:nix-community/nixhelm";
-      inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
 
     # anyrun - a wayland launcher

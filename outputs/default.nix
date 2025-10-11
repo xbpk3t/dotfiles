@@ -12,9 +12,12 @@
   genSpecialArgs = system: let
     pkgs = import inputs.nixpkgs {
       inherit system;
+      # to install chrome, you need to enable unfree packages
       config.allowUnfree = true;
       # 接受 NVIDIA 驱动license，否则无法build
       config.nvidia.acceptLicense = true;
+      # 允许安装 broken 包（如 zig）
+      config.allowBroken = true;
     };
   in {
     inherit
@@ -28,6 +31,7 @@
       inherit system; # refer the `system` parameter form outer scope recursively
       # To use chrome, we need to allow the installation of non-free software
       config.allowUnfree = true;
+      config.allowBroken = true;
     };
 
     # Add anyrun for anyrun configuration modules
@@ -44,6 +48,9 @@
 
     # Add sops-nix for secret management
     sops-nix = inputs.sops-nix;
+
+    # Add nvf for neovim configuration
+    nvf = inputs.nvf;
   };
 
   # This is the args for all the haumea modules in this folder.
