@@ -100,7 +100,6 @@ in {
     # CLIENT CONFIGURATION
     #---------------------------------------------------------------------------
     (mkIf cfg.client.enable {
-
       # 默认启用所有NixOS机器的netbird client
       # Use native NixOS netbird service with "default" key
       # This creates: netbird-default.service
