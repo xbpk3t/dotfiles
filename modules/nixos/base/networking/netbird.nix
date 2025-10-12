@@ -100,20 +100,35 @@ in {
     # CLIENT CONFIGURATION
     #---------------------------------------------------------------------------
     (mkIf cfg.client.enable {
+
+      # 默认启用所有NixOS机器的netbird client
       # Use native NixOS netbird service with "default" key
       # This creates: netbird-default.service
       # Socket at: /var/run/netbird-default/sock
+      # Note: There is no "enable" option - the client is enabled by configuring it
       services.netbird.clients.default = {
-        autoStart = cfg.client.autoStart;
-        port = cfg.client.port;
-        interface = cfg.client.interface;
-        openFirewall = cfg.client.openFirewall;
-        hardened = cfg.client.hardened;
-        logLevel = cfg.client.logLevel;
+        autoStart = true;
+        port = 51820;
+        interface = "wt0";
+        openFirewall = true;
+        hardened = false;
+        logLevel = "info";
+
+        # Additional configuration to disable NetBird's SSH server and firewall
+        # This allows the system's SSH service to work directly over NetBird
+        # DisableFirewall is needed because NetBird's ACL rules are blocking SSH
+        config = {
+          ServerSSHAllowed = false;
+          DisableFirewall = true;
+        };
       };
 
-      # Add netbird CLI to system packages
-      environment.systemPackages = [pkgs.netbird];
+      # Add netbird CLI and nftables to system packages
+      # nftables is required for NetBird's firewall manager
+      environment.systemPackages = [
+        pkgs.netbird
+        pkgs.nftables
+      ];
 
       # Create symlink for CLI compatibility
       # The CLI expects /var/run/netbird/sock but service creates /var/run/netbird-default/sock
