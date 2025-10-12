@@ -1,8 +1,7 @@
 ---
-version: '3'
+version: "3"
 
 includes:
-
   # devops
   git: taskfile/devops/Taskfile.git.yml
   linters: taskfile/devops/Taskfile.linters.yml
@@ -47,10 +46,9 @@ includes:
   bm: taskfile/mac/Taskfile.bm.yml
   pwgen: taskfile/mac/Taskfile.pwgen.yml
   sb: taskfile/mac/Taskfile.singbox.yml
+  z: taskfile/mac/Taskfile.z.yml
 
   sec: taskfile/works/Taskfile.sec.yml
-
-
 
 tasks:
   default:

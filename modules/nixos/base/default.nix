@@ -1,4 +1,8 @@
-{mylib, ...}: {
+{
+  mylib,
+  lib,
+  ...
+}: {
   imports = mylib.scanPaths ./.;
 
   # 使用 nh 来管理垃圾回收，禁用内置的 nix.gc
