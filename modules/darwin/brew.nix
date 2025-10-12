@@ -11,6 +11,7 @@ _: {
       "tencent-lemon"
 
       "kitty"
+      # "rustdesk"
 
       #      "orbstack"
       #      "reqable"

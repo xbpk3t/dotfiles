@@ -21,13 +21,17 @@
     # package = pkgs-unstable.pipewire;
     alsa.enable = true;
     alsa.support32Bit = true;
+    # 兼容 PulseAudio 客户端
     pulse.enable = true;
     # If you want to use JACK applications, uncomment this
+    # 可选，音频增强
     jack.enable = true;
+    # PipeWire 的 session manager
     wireplumber.enable = true;
   };
   # rtkit is optional but recommended
   security.rtkit.enable = true;
+
   # Disable pulseaudio, it conflicts with pipewire too.
   services.pulseaudio.enable = false;
 
