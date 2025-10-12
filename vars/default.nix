@@ -1,5 +1,5 @@
 {lib}: {
-  name = "nix-config";
+  name = "dotfiles";
 
   username = "lhgtqb7bll";
   userfullname = "lucas";

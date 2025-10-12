@@ -1,0 +1,28 @@
+[
+  "material-icon-theme"
+  "nix"
+  "rst"
+
+  "basher"
+  "biome"
+  "cargotoml"
+  "catppuccin"
+  "catppuccin-icons"
+  "git-firefly"
+  "marksman"
+  "snippets"
+  "toml"
+  "typos"
+  "zig"
+
+  "astro"
+  "docker-compose"
+  "git-firefly"
+  "html"
+  "nix"
+  "nu"
+  "toml"
+  "wakatime"
+  "vue"
+  "terraform"
+]

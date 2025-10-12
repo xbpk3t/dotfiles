@@ -1,0 +1,20 @@
+---
+version: "3"
+
+vars:
+  RG_CLI: rg
+  TAGS:
+    - TODO
+    - FIXME
+    - PLAN
+    - MAYBE
+
+tasks:
+  default:
+    desc: Scan for selected tag in current directory using ripgrep
+    interactive: true
+    dir: "{{.USER_WORKING_DIR}}"
+    vars:
+      SELECTED:
+        sh: gum choose {{.TAGS | join " "}}
+    cmd: "{{.RG_CLI}} -e {{.SELECTED}} --column ."
