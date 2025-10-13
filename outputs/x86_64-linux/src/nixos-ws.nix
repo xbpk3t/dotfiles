@@ -46,6 +46,14 @@
 
     # Add sops-nix for secret management
     sops-nix = inputs.sops-nix;
+
+    # Add DankMaterialShell packages
+    # DMS requires dmsCli and dgop from its own inputs
+    dmsPkgs = {
+      dankMaterialShell = inputs.dankMaterialShell.packages.${system}.default;
+      dmsCli = inputs.dankMaterialShell.inputs.dms-cli.packages.${system}.default;
+      dgop = inputs.dankMaterialShell.inputs.dgop.packages.${system}.dgop;
+    };
   };
 
   modules = {
@@ -73,7 +81,12 @@
         "home/base"
         "home/nixos"
       ])
-      ++ [inputs.noctalia.homeModules.default];
+      ++ [
+        inputs.noctalia.homeModules.default
+        inputs.dankMaterialShell.homeModules.dankMaterialShell.default
+        inputs.dankMaterialShell.homeModules.dankMaterialShell.niri
+        inputs.niri.homeModules.niri
+      ];
   };
 in {
   nixosConfigurations.${name} = mylib.nixosSystem (nixosSystemArgs
