@@ -20,6 +20,7 @@
     };
   in {
     inherit
+      inputs
       mylib
       myvars
       pkgs
@@ -60,16 +61,19 @@
       ])
       ++ [
         inputs.sops-nix.nixosModules.sops
+        inputs.noctalia.nixosModules.default
         {
           modules.desktop.wayland.enable = true;
         }
       ];
-    home-modules = map mylib.relativeToRoot [
-      # Host-specific home configuration
-      "hosts/${name}/home.nix"
-      "home/base"
-      "home/nixos"
-    ];
+    home-modules =
+      (map mylib.relativeToRoot [
+        # Host-specific home configuration
+        "hosts/${name}/home.nix"
+        "home/base"
+        "home/nixos"
+      ])
+      ++ [inputs.noctalia.homeModules.default];
   };
 in {
   nixosConfigurations.${name} = mylib.nixosSystem (nixosSystemArgs
