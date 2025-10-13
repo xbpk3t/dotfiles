@@ -39,6 +39,12 @@ in {
     fallbackDns = nameservers;
   };
 
+  services.noctalia-shell = {
+    enable = true;
+    # 注意需要target，否则需要手动启动
+    target = "hyprland-session.target";
+  };
+
   # Boot configuration - Enable systemd-boot and disable GRUB
   boot.loader = {
     efi.canTouchEfiVariables = true;

@@ -4,6 +4,10 @@
   # Disable power-profiles-daemon to avoid conflicts with TLP
   services.power-profiles-daemon.enable = false;
 
+  # noctalia的battery会报错 No battery detected
+  # 通过 upower 解决该问题
+  services.upower.enable = true;
+
   # Enable TLP for advanced power management
   services.tlp = {
     enable = true;
