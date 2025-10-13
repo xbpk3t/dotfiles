@@ -227,7 +227,7 @@
           key = "Date & Time";
           keyColor = "blue";
           format = "{1}-{3}-{11} {12} {14}:{17}:{20}";
-          formatLocale = "zh_CN.UTF-8";
+          formatLocale = "en_US.UTF-8";
         }
         {
           type = "wifi";
