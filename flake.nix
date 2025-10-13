@@ -10,6 +10,7 @@
       "https://nix-community.cachix.org"
       "https://loneros.cachix.org"
       "https://vicinae.cachix.org"
+      "https://niri.cachix.org"
     ];
 
     trusted-public-keys = [
@@ -19,6 +20,7 @@
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       "loneros.cachix.org-1:hhp1SqKJSLdBLSRLCLvPfh/CtGV+FJOde3NKbnZrIrY="
       "vicinae.cachix.org-1:1kDrfienkGHPYbkpNj1mWTr7Fm1+zcenzgTizIcI3oc="
+      "niri.cachix.org-1:Wv0OmO7PsuocRKzfDoJ3mulSl7Z6oezYhGhR+3W2964="
     ];
 
     # 防止关键包被垃圾回收清理
@@ -110,6 +112,18 @@
       url = "github:noctalia-dev/noctalia-shell";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.quickshell.follows = "quickshell"; # Use same quickshell version
+    };
+
+    # DankMaterialShell - Desktop shell for wayland compositors
+    dankMaterialShell = {
+      url = "github:AvengeMedia/DankMaterialShell";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # niri-flake - Required for DMS niri integration
+    niri = {
+      url = "github:sodiboo/niri-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
