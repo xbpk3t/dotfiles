@@ -39,10 +39,15 @@ in {
     fallbackDns = nameservers;
   };
 
-  services.noctalia-shell = {
-    enable = true;
-    # 注意需要target，否则需要手动启动
-    target = "hyprland-session.target";
+  # Desktop Shell 配置
+  # 使用 modules.desktop.shell 模块来管理 shell 服务
+  # 注意：NixOS 和 home-manager 的配置需要保持一致
+  modules.desktop.shell = {
+    # Noctalia - 设置为 false 以禁用
+    noctalia.enable = false;
+
+    # DMS - 设置为 true 以启用
+    dms.enable = true;
   };
 
   # Boot configuration - Enable systemd-boot and disable GRUB

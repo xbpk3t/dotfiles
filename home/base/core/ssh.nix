@@ -32,6 +32,7 @@ in {
     home.packages = with pkgs; [
       sshs
       termscp
+      sshpass
     ];
 
     programs.ssh = {
