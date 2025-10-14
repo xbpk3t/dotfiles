@@ -94,16 +94,23 @@
     #      };
     #    };
 
-    keyd = {
-      enable = true;
-      keyboards.default.settings = {
-        main = {
-          # overloads the capslock key to function as both escape (when tapped) and control (when held)
-
-          #          capslock = "overload(control, esc)";
-          #          esc = "capslock";
-        };
-      };
-    };
+    #    keyd = {
+    #      enable = true;
+    #      keyboards.mac.settings = {
+    #        main = {
+    #          control = "layer(meta)";
+    #          meta = "layer(control)";
+    #          rightcontrol = "layer(meta)";
+    #        };
+    #        meta = {
+    #          left = "control-left";
+    #          right = "control-right";
+    #          space = "control-space";
+    #        };
+    #      };
+    #      keyboards.mac.ids = [
+    #        "*"
+    #      ];
+    #    };
   };
 }
