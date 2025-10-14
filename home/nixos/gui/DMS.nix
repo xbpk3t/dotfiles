@@ -4,43 +4,39 @@
   ...
 }:
 with lib; let
-  cfg = config.modules.desktop.shell.dms;
+  cfg = config.modules.desktop.shell.DMS;
 in {
-  # DankMaterialShell 配置模块
-  # 使用 cfg 模式实现条件开关
-  options.modules.desktop.shell.dms = {
-    enable = mkEnableOption "DankMaterialShell";
+  options.modules.desktop.shell.DMS = {
+    enable = mkEnableOption "DMS service";
   };
 
   config = mkIf cfg.enable {
-    # DankMaterialShell 配置
-    # 基于 noctalia 的配置偏好进行调整
     programs.dankMaterialShell = {
       enable = true;
 
       # 启用 systemd 自动启动
       enableSystemd = true;
 
-      # 启用各种功能模块（基于 noctalia 配置的功能需求）
-      # 系统监控（对应 noctalia 的 SystemMonitor widget）
+      # 启用各种功能模块
+      # 系统监控
       enableSystemMonitoring = true;
 
-      # 剪贴板历史（对应 noctalia 的 enableClipboardHistory）
+      # 剪贴板历史
       enableClipboard = true;
 
       # VPN 支持
       enableVPN = true;
 
-      # 亮度控制（对应 noctalia 的 Brightness widget）
+      # 亮度控制
       enableBrightnessControl = true;
 
-      # 夜间模式（对应 noctalia 的 NightLight）
+      # 夜间模式
       enableNightMode = true;
 
-      # 动态主题（对应 noctalia 的 matugen 配置）
+      # 动态主题
       enableDynamicTheming = true;
 
-      # 音频可视化（对应 noctalia 的 cava 配置）
+      # 音频可视化
       enableAudioWavelength = true;
 
       # 日历事件支持

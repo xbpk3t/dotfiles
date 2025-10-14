@@ -1,6 +1,5 @@
 {pkgs, ...}: {
   # XDG Portal 配置
-  # 基于 hyprland 的 xdg.nix 配置进行调整
   xdg.portal = {
     enable = true;
 
