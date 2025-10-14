@@ -1,4 +1,13 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  inputs,
+  ...
+}: let
+  # Import AI tools from nix-ai-tools flake
+  ai-tools = inputs.nix-ai-tools.packages.${pkgs.system};
+in {
+  # https://github.com/numtide/nix-ai-tools
+
   # FIXME 怎么在codex、cc 之间复用这些commands和agents?
   #  # 自动发现 cc 目录中的命令文件
   #  subagentsDir = ./cc/subagents;
@@ -23,6 +32,13 @@
   #    )
   #    (builtins.readDir commandsDir);
 
+  # Install AI coding tools from nix-ai-tools
+  home.packages = with ai-tools; [
+    claude-code-router # Route Claude Code to other LLM providers
+    codex # OpenAI Codex CLI - coding agent
+    qwen-code # Qwen3-Coder models CLI
+  ];
+
   # Claude CLI 环境变量配置
   home = {
     sessionVariables = {
@@ -33,6 +49,7 @@
     };
     shellAliases = {
       cc = "claude --dangerously-skip-permissions";
+      ccr = "claude-code-router"; # Alias for claude-code-router
     };
   };
 
@@ -89,71 +106,71 @@
       package = pkgs.claude-code;
 
       mcpServers = {
-        #        filesystem = {
-        #          type = "stdio";
-        #          command = "pnpm";
-        #          args = ["dlx" "@modelcontextprotocol/server-filesystem"];
-        #        };
-        #        sequential-thinking = {
-        #          type = "stdio";
-        #          command = "pnpm";
-        #          args = ["dlx" "@modelcontextprotocol/server-sequential-thinking"];
-        #        };
-        #        memory = {
-        #          type = "stdio";
-        #          command = "pnpm";
-        #          args = ["dlx" "@modelcontextprotocol/server-memory"];
-        #        };
-        #
-        #        nixos-mcp = {
-        #          type = "stdio";
-        #          command = "uvx";
-        #          args = ["mcp-nixos"];
-        #        };
-        #
-        #        octocode = {
-        #          type = "stdio";
-        #          command = "pnpm";
-        #          args = ["dlx" "octocode-mcp@latest"];
-        #        };
-        #
-        #        ddg = {
-        #          type = "stdio";
-        #          command = "pnpm";
-        #          args = ["dlx" "duckduckgo-mcp-server"];
-        #        };
-        #
-        #        deepwiki = {
-        #          type = "http";
-        #          url = "https://mcp.deepwiki.com/mcp";
-        #        };
-        #
-        #        context7 = {
-        #          type = "http";
-        #          url = "https://mcp.context7.com/mcp";
-        #        };
-        #
-        #        github = {
-        #          type = "http";
-        #          url = "https://api.githubcopilot.com/mcp/";
-        #        };
-        #
-        #        claude-task-master = {
-        #          type = "stdio";
-        #          command = "npx";
-        #          args = ["-y" "task-master-ai"];
-        #          env = {
-        #            ANTHROPIC_API_KEY = builtins.readFile /etc/sk/claude/zai/token;
-        #          };
-        #        };
-        #
-        #        # [johnhuang316/code-index-mcp](https://github.com/johnhuang316/code-index-mcp) 用于提高编写代码的效率和检索效率
-        #        code-index = {
-        #          type = "stdio";
-        #          command = "uvx";
-        #          args = ["code-index-mcp"];
-        #        };
-        #
+        filesystem = {
+          type = "stdio";
+          command = "pnpm";
+          args = ["dlx" "@modelcontextprotocol/server-filesystem"];
+        };
+        sequential-thinking = {
+          type = "stdio";
+          command = "pnpm";
+          args = ["dlx" "@modelcontextprotocol/server-sequential-thinking"];
+        };
+        memory = {
+          type = "stdio";
+          command = "pnpm";
+          args = ["dlx" "@modelcontextprotocol/server-memory"];
+        };
+
+        nixos-mcp = {
+          type = "stdio";
+          command = "uvx";
+          args = ["mcp-nixos"];
+        };
+
+        octocode = {
+          type = "stdio";
+          command = "pnpm";
+          args = ["dlx" "octocode-mcp@latest"];
+        };
+
+        ddg = {
+          type = "stdio";
+          command = "pnpm";
+          args = ["dlx" "duckduckgo-mcp-server"];
+        };
+
+        deepwiki = {
+          type = "http";
+          url = "https://mcp.deepwiki.com/mcp";
+        };
+
+        context7 = {
+          type = "http";
+          url = "https://mcp.context7.com/mcp";
+        };
+
+        github = {
+          type = "http";
+          url = "https://api.githubcopilot.com/mcp/";
+        };
+
+        claude-task-master = {
+          type = "stdio";
+          command = "npx";
+          args = ["-y" "task-master-ai"];
+          env = {
+            ANTHROPIC_API_KEY = "$(cat /etc/sk/claude/zai/token)";
+          };
+        };
+
+        # [johnhuang316/code-index-mcp](https://github.com/johnhuang316/code-index-mcp) 用于提高编写代码的效率和检索效率
+        code-index = {
+          type = "stdio";
+          command = "uvx";
+          args = ["code-index-mcp"];
+        };
+
         #        # Microsoft Markitdown - Convert various file formats to Markdown (Useful for document processing)
         #        markitdown = {
         #          type = "stdio";
@@ -162,15 +179,15 @@
         #        };
         #
         #        # GitHub Official MCP Server (Essential for GitHub integration)
-        #        github-mcp = {
-        #          type = "stdio";
-        #          command = "npx";
-        #          args = ["-y" "@github/github-mcp-server"];
-        #          env = {
-        #            GITHUB_PERSONAL_ACCESS_TOKEN = builtins.readFile /etc/sk/claude/github-token;
-        #          };
-        #        };
-        #
+        github-mcp = {
+          type = "stdio";
+          command = "npx";
+          args = ["-y" "@github/github-mcp-server"];
+          env = {
+            GITHUB_PERSONAL_ACCESS_TOKEN = "$(cat /etc/sk/claude/github-token)";
+          };
+        };
+
         #        # Microsoft Playwright - Automate web browsers (Useful for testing and web automation)
         #        playwright = {
         #          type = "stdio";
@@ -343,11 +360,11 @@
         # };
 
         # Imagesorcery - Local image processing (Useful for image manipulation)
-        imagesorcery = {
-          type = "stdio";
-          command = "npx";
-          args = ["-y" "@sunriseapps/imagesorcery-mcp"];
-        };
+        #        imagesorcery = {
+        #          type = "stdio";
+        #          command = "npx";
+        #          args = ["-y" "@sunriseapps/imagesorcery-mcp"];
+        #        };
 
         # Dynatrace - Observability platform (Enterprise monitoring)
         # dynatrace = {

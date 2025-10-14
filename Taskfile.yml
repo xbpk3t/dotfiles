@@ -159,7 +159,7 @@ tasks:
     desc: 清理 system generations，注意不会立即删除软件包本身
     cmds:
       - echo "🧹 Cleaning old system generations (older than {{.CLEANUP_DAYS}} days)..."
-      - sudo nix profile wipe-history --profile "{{.SYSTEM_PROFILE}}" --older-than "{{.CLEANUP_DAYS}}d"
+      - sudo nix profile wipe-history --profile "{{.SYSTEM_PROFILE}}" --older-than "{{.CLEANUP_DAYS}}d" --extra-experimental-features 'nix-command flakes'
       - echo "✅ System generations cleaned"
 
   clean-home:
@@ -169,7 +169,7 @@ tasks:
     desc: 清理 home-manager generations，同样不会立即删除软件包本身
     cmds:
       - echo "🧹 Cleaning home-manager generations..."
-      - nix profile wipe-history --profile ~/.local/state/nix/profiles/home-manager --older-than "{{.CLEANUP_DAYS}}d" 2>/dev/null || echo "No home-manager profile found"
+      - nix profile wipe-history --profile ~/.local/state/nix/profiles/home-manager --older-than "{{.CLEANUP_DAYS}}d" -extra-experimental-features 'nix-command flakes' 2>/dev/null || echo "No home-manager profile found"
 
   gc:
     internal: true

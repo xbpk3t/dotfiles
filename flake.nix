@@ -123,6 +123,15 @@
       url = "github:sodiboo/niri-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    xremap-flake.url = "github:xremap/nix-flake";
+
+    # https://github.com/numtide/flake-utils
+    utils.url = "github:numtide/flake-utils";
+    nixos-hardware.url = "github:nixos/nixos-hardware";
+
+    # https://github.com/numtide/nix-ai-tools
+    nix-ai-tools.url = "github:numtide/nix-ai-tools";
   };
 
   outputs = inputs: import ./outputs inputs;
