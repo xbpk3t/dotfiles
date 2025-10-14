@@ -6,8 +6,8 @@
   modules.desktop.niri.enable = true;
 
   modules.desktop.shell = {
-    noctalia.enable = true;
-    DMS.enable = false;
+    noctalia.enable = false;
+    dms.enable = true;
   };
 
   modules.ssh = {

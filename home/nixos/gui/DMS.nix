@@ -1,12 +1,13 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }:
 with lib; let
-  cfg = config.modules.desktop.shell.DMS;
+  cfg = config.modules.desktop.shell.dms;
 in {
-  options.modules.desktop.shell.DMS = {
+  options.modules.desktop.shell.dms = {
     enable = mkEnableOption "DMS service";
   };
 
@@ -231,5 +232,8 @@ in {
         animationSpeed = 0;
       };
     };
+
+    # [DMS fails to start and reports: the error module "QtMultimedia" is not installed · Issue #420 · AvengeMedia/DankMaterialShell](https://github.com/AvengeMedia/DankMaterialShell/issues/420)
+    home.packages = [pkgs.kdePackages.qtmultimedia];
   };
 }
