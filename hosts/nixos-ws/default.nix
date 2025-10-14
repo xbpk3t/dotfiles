@@ -64,7 +64,7 @@ in {
   modules.networking.singbox.enable = true;
 
   modules.desktop.shell = {
-    noctalia.enable = true;
-    DMS.enable = false;
+    noctalia.enable = false;
+    dms.enable = true;
   };
 }
