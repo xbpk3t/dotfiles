@@ -1,10 +1,19 @@
-{config, ...}: let
+{
+  config,
+  pkgs,
+  ...
+}: let
   # 基于 hyprland 配置的变量定义
   mod = "Mod"; # niri 使用 "Mod" 代表 Super 键
   browser = "chromium-browser";
   terminal = "alacritty";
   IDE = "goland";
 in {
+  # 安装 xwayland-satellite 以支持 X11 应用（如 GoLand）
+  home.packages = with pkgs; [
+    xwayland-satellite
+  ];
+
   # Niri compositor 配置
   # 基于 hyprland 配置进行迁移
   programs.niri = {
@@ -137,6 +146,9 @@ in {
 
         # Polkit 认证代理
         {command = ["/usr/lib/mate-polkit/polkit-mate-authentication-agent-1"];}
+
+        # 启动 xwayland-satellite 以支持 X11 应用（如 GoLand）
+        {command = ["xwayland-satellite"];}
       ];
 
       # 快捷键绑定（基于 hyprland 的 bind 配置）
@@ -157,6 +169,9 @@ in {
         # 系统操作
         # 关闭当前窗口（对应 hyprland 的 $mod, q, killactive）
         "${mod}+Q".action = close-window;
+
+        # 应用启动器 - 使用 fuzzel
+        "${mod}+Space".action = spawn "fuzzel";
 
         # 终端和应用启动（对应 hyprland 的应用启动绑定）
         "${mod}+Return".action = spawn terminal;
@@ -200,10 +215,10 @@ in {
         # 注意：Mod+M 被 DMS 用于进程列表，这里使用 Mod+Shift+M
         "${mod}+Shift+M".action = maximize-column;
 
-        # 截图功能（对应 hyprland 的截图绑定）
-        # niri 使用不同的截图工具
-        "Print".action = spawn "sh" "-c" "grim -o $(niri msg -j outputs | jq -r '.[] | select(.focused) | .name') ~/Pictures/Screenshots/$(date +%Y%m%d_%H%M%S).png";
-        "${mod}+Print".action = spawn "sh" "-c" "grim -g \"$(slurp)\" ~/Pictures/Screenshots/$(date +%Y%m%d_%H%M%S).png";
+        # 指定区域截图
+        # 注意没有 -c 和 -p，也没有使用 flameshot full 来直接截取全屏，以确保灵活性
+        # 之前使用wayland内置的 grim + slurp，以及hyprland和niri内置截图工具，都不如flameshot好用
+        "Print".action = spawn "sh" "-c" "flameshot gui";
 
         # 锁屏（对应 hyprland 的 swaylock）
         # 注意：Super+Alt+L 被 DMS 用于锁屏，这里使用 Ctrl+Alt+L 作为备用

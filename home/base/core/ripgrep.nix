@@ -15,7 +15,9 @@ _: {
       # 颜色输出
       "--color=always"
       # 最大列宽（避免过长行）
-      "--max-columns=200"
+      "--max-columns=300"
+      # 用来 conjunction with --max-columns, 即使超出也preview前面的部分
+      "--max-columns-preview"
       # 最大文件大小（避免二进制文件）
       "--max-filesize=10M"
     ];
