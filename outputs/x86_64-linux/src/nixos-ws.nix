@@ -70,6 +70,7 @@
       ++ [
         inputs.sops-nix.nixosModules.sops
         inputs.noctalia.nixosModules.default
+        inputs.xremap-flake.nixosModules.default
         {
           modules.desktop.wayland.enable = true;
         }
