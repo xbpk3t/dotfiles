@@ -2,10 +2,16 @@
   config,
   lib,
   modulesPath,
+  inputs,
   ...
 }: {
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
+    # Lenovo XiaoXinAir-14IIL 2020 is similar to IdeaPad series with Intel 10th gen
+    # Using common laptop optimizations since there's no specific profile
+    inputs.nixos-hardware.nixosModules.common-pc-laptop
+    inputs.nixos-hardware.nixosModules.common-pc-laptop-ssd
+    inputs.nixos-hardware.nixosModules.common-cpu-intel
   ];
 
   boot.initrd.availableKernelModules = ["xhci_pci" "nvme" "usbhid" "usb_storage" "sd_mod" "sdhci_pci" "rtsx_pci_sdmmc"];
