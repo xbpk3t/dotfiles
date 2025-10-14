@@ -17,6 +17,7 @@
         EDITOR = "nvim";
         BROWSER = "chromium-browser";
         PWGEN_SECRET_KEY = "$(cat /etc/sk/pwgen/sk)";
+        GITHUB_TOKEN = "$(gh auth token)";
 
         # Locale
         LANG = "en_US.UTF-8";
