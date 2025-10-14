@@ -24,7 +24,7 @@ in {
 
       target = mkOption {
         type = types.str;
-        default = "hyprland-session.target";
+        default = "graphical-session.target";
         description = "Systemd target for noctalia shell service";
       };
     };
