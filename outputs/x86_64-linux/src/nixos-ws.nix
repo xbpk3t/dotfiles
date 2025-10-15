@@ -84,6 +84,7 @@
       ])
       ++ [
         inputs.noctalia.homeModules.default
+        # https://github.com/AvengeMedia/DankMaterialShell/issues/182#issuecomment-3321695029 因为不再 DMS+niri，所以使用default
         inputs.dankMaterialShell.homeModules.dankMaterialShell.default
         inputs.dankMaterialShell.homeModules.dankMaterialShell.niri
         inputs.niri.homeModules.niri

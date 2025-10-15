@@ -18,6 +18,8 @@ in {
   programs.niri = {
     enable = true;
 
+    # PLAN [2025-10-15] 之后还是把niri配置改为kdl文件（直接 builtin.readFile 引入即可）
+    # https://github.com/cap153/config/blob/main/niri/.config/niri/config.kdl
     settings = {
       # 输入设备配置
       input = {

@@ -22,6 +22,8 @@
   environment.systemPackages = with pkgs; [
     gnumake
     wl-clipboard
+    # for hyprland cursor
+    adwaita-icon-theme
   ];
 
   services = {
