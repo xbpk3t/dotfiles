@@ -6,8 +6,7 @@
   terminal = "alacritty";
   IDE = "goland";
   IDEClass = "jetbrains-goland";
-  #  launcher = "vicinae";
-  #  zzz = "rofi";
+  launcher = "fuzzel";
 in {
   # 所有配置已经直接整合到 settings 中，不再需要 xdg.configFile 引用
 
@@ -24,7 +23,7 @@ in {
       "$browser" = browser;
       "$terminal" = terminal;
       "$IDE" = IDE;
-      #      "$launcher" = launcher;
+      "$launcher" = launcher;
 
       # === 启动应用程序 (exec.conf) ===
       exec-once = [
@@ -64,7 +63,7 @@ in {
         "$mod, q, killactive"
 
         # [[Feature request] A way to close the prompt with a command? · Issue #103 · anyrun-org/anyrun](https://github.com/anyrun-org/anyrun/issues/103)
-        #        "$mod, d, exec, ${launcher}" # FIXME [2025-10-05] 不知道rofi怎么配置 default-mode 只能在这里显示声明
+        "$mod, d, exec, ${launcher}" # FIXME [2025-10-05] 不知道rofi怎么配置 default-mode 只能在这里显示声明
         #
         #        # [[Feature request] A way to close the prompt with a command? · Issue #103 · anyrun-org/anyrun](https://github.com/anyrun-org/anyrun/issues/103)
         #        "$mod, z, exec, pgrep ${zzz} && pkill ${zzz} || ${zzz} -show combi" # FIXME [2025-10-05] 不知道rofi怎么配置 default-mode 只能在这里显示声明
@@ -86,7 +85,7 @@ in {
         ", XF86AudioPlay, exec, playerctl play-pause"
         ", XF86AudioNext, exec, playerctl next"
         ", XF86AudioPrev, exec, playerctl previous"
-        #        ", XF86Search, exec, ${launcher}"
+        ", XF86Search, exec, ${launcher}"
 
         # === 工作区快捷切换 ===
         # 切换工作区（如果该工作区没有目标应用，则启动它）

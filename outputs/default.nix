@@ -51,6 +51,9 @@
 
     # Add nvf for neovim configuration
     nvf = inputs.nvf;
+
+    # Add NUR for community packages
+    nur = inputs.nur;
   };
 
   # This is the args for all the haumea modules in this folder.
