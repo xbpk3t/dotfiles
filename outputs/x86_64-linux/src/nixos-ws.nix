@@ -17,6 +17,9 @@
       inherit system;
       config.allowUnfree = true;
       config.nvidia.acceptLicense = true;
+      overlays = [
+        inputs.nur.overlays.default
+      ];
     };
   in {
     inherit
@@ -46,6 +49,9 @@
 
     # Add sops-nix for secret management
     sops-nix = inputs.sops-nix;
+
+    # Add NUR for community packages
+    nur = inputs.nur;
 
     # Add DankMaterialShell packages
     # DMS requires dmsCli and dgop from its own inputs
@@ -88,6 +94,7 @@
         inputs.dankMaterialShell.homeModules.dankMaterialShell.default
         inputs.dankMaterialShell.homeModules.dankMaterialShell.niri
         inputs.niri.homeModules.niri
+        inputs.nur.modules.homeManager.default
       ];
   };
 in {
