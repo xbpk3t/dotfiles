@@ -2,6 +2,13 @@
 version: 3
 
 vars:
+  OPEN_CMD:
+    sh: |
+      if [ "$(uname)" = "Darwin" ]; then
+        echo "open"
+      else
+        echo "xdg-open"
+      fi
   BOOKMARKS:
     - alias: yuanbao
       url: 'https://yuanbao.tencent.com/chat/naQivTmsDa?chatMode=temp'
@@ -154,9 +161,17 @@ tasks:
         # Let user select a bookmark alias
         selected_alias=$(echo -e "$bookmark_list" | gum filter --placeholder "Select bookmark...")
 
-        # Output the URL for the selected alias
+        # Handle the selected bookmark based on --no flag
         if [ -n "$selected_alias" ]; then
-          echo "${bookmark_urls[$selected_alias]}"
+          # Check if --no flag is present in CLI args
+          if echo "{{.CLI_ARGS}}" | grep -q '\--no'; then
+            # Just echo the URL
+            echo "${bookmark_urls[$selected_alias]}"
+          else
+            # Open in browser (default behavior)
+            {{.OPEN_CMD}} "${bookmark_urls[$selected_alias]}"
+            echo "Opening ${bookmark_urls[$selected_alias]} in browser..."
+          fi
         else
           echo "No bookmark selected"
           exit 1
