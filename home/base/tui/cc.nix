@@ -2,10 +2,7 @@
   pkgs,
   inputs,
   ...
-}: let
-  # Import AI tools from nix-ai-tools flake
-  ai-tools = inputs.nix-ai-tools.packages.${pkgs.system};
-in {
+}: {
   # https://github.com/numtide/nix-ai-tools
 
   # FIXME 怎么在codex、cc 之间复用这些commands和agents?
@@ -33,7 +30,7 @@ in {
   #    (builtins.readDir commandsDir);
 
   # Install AI coding tools from nix-ai-tools
-  home.packages = with ai-tools; [
+  home.packages = with inputs.nix-ai-tools.packages.${pkgs.system}; [
     claude-code-router # Route Claude Code to other LLM providers
     codex # OpenAI Codex CLI - coding agent
     qwen-code # Qwen3-Coder models CLI

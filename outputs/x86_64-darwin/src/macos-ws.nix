@@ -17,6 +17,7 @@
     };
   in {
     inherit
+      inputs
       mylib
       myvars
       pkgs

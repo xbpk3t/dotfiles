@@ -11,6 +11,7 @@
       "https://loneros.cachix.org"
       "https://vicinae.cachix.org"
       "https://niri.cachix.org"
+      "https://numtide.cachix.org"
     ];
 
     trusted-public-keys = [
@@ -21,6 +22,7 @@
       "loneros.cachix.org-1:hhp1SqKJSLdBLSRLCLvPfh/CtGV+FJOde3NKbnZrIrY="
       "vicinae.cachix.org-1:1kDrfienkGHPYbkpNj1mWTr7Fm1+zcenzgTizIcI3oc="
       "niri.cachix.org-1:Wv0OmO7PsuocRKzfDoJ3mulSl7Z6oezYhGhR+3W2964="
+      "numtide.cachix.org-1:2ps1kLBUWjxIneOy1Ik6cQjb41X0iXVXeHigGmycPPE="
     ];
 
     # 防止关键包被垃圾回收清理
@@ -134,6 +136,12 @@
 
     # https://github.com/numtide/nix-ai-tools
     nix-ai-tools.url = "github:numtide/nix-ai-tools";
+
+    # https://github.com/nix-community/NUR
+    nur = {
+      url = "github:nix-community/NUR";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs: import ./outputs inputs;
