@@ -24,7 +24,8 @@ in {
 
       target = mkOption {
         type = types.str;
-        default = "graphical-session.target";
+        #        default = "graphical-session.target";
+        default = "hyprland-session.target";
         description = "Systemd target for noctalia shell service";
       };
     };
@@ -34,7 +35,8 @@ in {
 
       target = mkOption {
         type = types.str;
-        default = "graphical-session.target";
+        #        default = "graphical-session.target";
+        default = "hyprland-session.target";
         description = "Systemd target for DMS service";
       };
     };

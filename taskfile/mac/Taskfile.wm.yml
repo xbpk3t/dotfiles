@@ -1,0 +1,6 @@
+---
+version: '3'
+
+tasks:
+  # show hyprland's log
+  # hyprctl rollinglog

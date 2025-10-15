@@ -32,15 +32,13 @@ tasks:
     cmd: "{{.PC_CLI}} run --all-files"  # 检查所有文件（非暂存区）
     dir: '{{.USER_WORKING_DIR}}'
     interactive: true
-    defer:
-      - task: update
 
 
   update:
     desc: 更新远程仓库版本
     cmd: '{{.PC_CLI}} autoupdate'
     dir: '{{.USER_WORKING_DIR}}'
-    internal: true
+#    internal: true
 
 
   # 新增维护任务

@@ -9,5 +9,5 @@ tasks:
     cmds:
       - "pwgen {{.WEBSITE}}"
     preconditions:
-      - sh: 'command -v pwgen'
-        msg: pwgen not found
+      - sh: command -v pwgen
+        msg: pwgen not found ()
