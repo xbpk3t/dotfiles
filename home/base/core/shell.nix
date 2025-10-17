@@ -23,10 +23,6 @@
         LANG = "en_US.UTF-8";
         LC_CTYPE = "en_US.UTF-8";
         LC_COLLATE = "C"; # Avoids locale lookup errors
-
-        # zzz
-        BUN_INSTALL = "$HOME/.bun";
-        PNPM_HOME = "$HOME/.local/share/pnpm";
       }
       // (lib.optionalAttrs pkgs.stdenv.isLinux {
         WINEPREFIX = config.xdg.dataHome + "/wine";
@@ -143,8 +139,8 @@
         PATH = lib.concatStringsSep ":" [
           #          "$HOME/.orbstack/bin"
           "$HOME/go/bin"
-          "$BUN_INSTALL/bin"
-          "$PNPM_HOME/bin"
+          "$HOME/.bun/bin"
+          "$HOME/.local/share/pnpm/bin"
           "$HOME/.local/bin" # rofi shells
 
           "$PATH" # 注意放到最后，且不要删除
@@ -156,11 +152,6 @@
     # A cat(1) clone with syntax highlighting and Git integration
     bat = {
       enable = true;
-      # FIXME conflict with other config
-      #      config = {
-      #        theme = "TwoDark";
-      #        style = "numbers,changes,header";
-      #      };
     };
 
     eza = {
