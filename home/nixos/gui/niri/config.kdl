@@ -1,0 +1,278 @@
+// Niri compositor 配置文件
+// 基于 hyprland 配置进行迁移
+// 参考: https://github.com/cap153/config/blob/main/niri/.config/niri/config.kdl
+
+// ============================================================================
+// 输入设备配置
+// ============================================================================
+
+input {
+    keyboard {
+        xkb {
+            layout "us"
+        }
+    }
+
+    // 触摸板配置
+    touchpad {
+        // 自然滚动
+        natural-scroll
+
+        // 轻触点击
+        tap
+
+        // 拖拽锁定 (disable-while-typing)
+        dwt
+
+        // 滚动速度
+        scroll-factor 0.2
+
+        // 点击方式
+        click-method "clickfinger"
+
+        // 加速配置
+        accel-speed 0.0
+        accel-profile "flat"
+    }
+
+    // 鼠标配置
+    mouse {
+        accel-speed 0.0
+        accel-profile "flat"
+    }
+
+    // 焦点跟随鼠标
+    focus-follows-mouse
+}
+
+// ============================================================================
+// 输出配置
+// ============================================================================
+
+// 默认输出配置
+// niri 会自动检测显示器
+
+// ============================================================================
+// 布局配置
+// ============================================================================
+
+layout {
+    // 焦点环配置 - 禁用焦点环
+    focus-ring {
+        off
+    }
+
+    // 边框配置 - 禁用边框
+    border {
+        off
+    }
+
+    // 间距配置 - 设置为 0 使窗口完全贴合屏幕边框
+    gaps 0
+
+    // 居中布局
+    center-focused-column "never"
+
+    // 预设列宽
+    preset-column-widths {
+        proportion 0.33333
+        proportion 0.5
+        proportion 0.66667
+    }
+
+    // 默认列宽 - 设置为 1.0 使新窗口默认全宽度
+    default-column-width {
+        proportion 1.0
+    }
+
+    // 预设窗口高度
+    preset-window-heights {
+        proportion 0.33333
+        proportion 0.5
+        proportion 0.66667
+    }
+}
+
+// ============================================================================
+// 窗口规则
+// ============================================================================
+
+// 默认所有窗口全屏打开
+window-rule {
+    // 匹配所有窗口
+    default-column-width { proportion 1.0; }
+    open-maximized true
+}
+
+// 工作区分配规则
+window-rule {
+    match app-id="^alacritty$"
+    open-on-workspace "1"
+    open-maximized true
+}
+
+window-rule {
+    match app-id="^firefox$"
+    open-on-workspace "2"
+    open-maximized true
+}
+
+window-rule {
+    match app-id="^goland$"
+    open-on-workspace "3"
+    open-maximized true
+}
+
+// ============================================================================
+// 启动应用程序
+// ============================================================================
+
+// Stylix 壁纸 - 使用 swaybg 显示 stylix 配置的背景图片
+// 注意: 这个会在 niri.nix 中通过 Nix 变量替换
+spawn-at-startup "swaybg" "-i" "@STYLIX_IMAGE@" "-m" "fill"
+
+// Fcitx5 输入法配置
+spawn-at-startup "fcitx5" "-d" "--replace"
+
+// Polkit 认证代理
+spawn-at-startup "/usr/lib/mate-polkit/polkit-mate-authentication-agent-1"
+
+// 启动 xwayland-satellite 以支持 X11 应用（如 GoLand）
+spawn-at-startup "xwayland-satellite"
+
+// ============================================================================
+// 快捷键绑定
+// ============================================================================
+
+// 注意：DMS 会通过 niri.enableKeybinds 自动添加以下快捷键，请勿在此重复定义：
+// - Mod+Space: 应用启动器 (spotlight toggle)
+// - Mod+N: 通知中心 (notifications toggle)
+// - Mod+Comma: 设置 (settings toggle)
+// - Mod+P: 记事本 (notepad toggle)
+// - Super+Alt+L: 锁屏 (lock screen)
+// - Mod+X: 电源菜单 (powermenu toggle)
+// - Mod+M: 进程列表 (processlist toggle) - 仅当 enableSystemMonitoring = true
+// - Mod+V: 剪贴板管理器 (clipboard toggle) - 仅当 enableClipboard = true
+// - XF86AudioRaiseVolume/LowerVolume/Mute/MicMute: 音频控制
+// - XF86MonBrightnessUp/Down: 亮度控制 - 仅当 enableBrightnessControl = true
+// - Mod+Alt+N: 夜间模式 (night mode toggle) - 仅当 enableNightMode = true
+
+binds {
+    // ========================================================================
+    // 系统操作
+    // ========================================================================
+
+    // 关闭当前窗口
+    Mod+Q { close-window; }
+
+    // ========================================================================
+    // 终端和应用启动
+    // ========================================================================
+
+    Mod+Return { spawn "alacritty"; }
+    Mod+B { spawn "firefox"; }
+    Mod+I { spawn "goland"; }
+    // 双击super -> launcher
+    Mod+D { spawn "vicinae"; }
+
+    // ========================================================================
+    // 工作区管理
+    // ========================================================================
+
+    Mod+1 { focus-workspace 1; }
+    Mod+2 { focus-workspace 2; }
+    Mod+3 { focus-workspace 3; }
+
+    // 移动窗口到工作区
+    Mod+Shift+F1 { move-column-to-workspace 1; }
+    Mod+Shift+F2 { move-column-to-workspace 2; }
+    Mod+Shift+F3 { move-column-to-workspace 3; }
+
+    // ========================================================================
+    // 窗口焦点切换
+    // ========================================================================
+
+    Mod+Left { focus-column-left; }
+    Mod+Right { focus-column-right; }
+    Mod+Up { focus-window-up; }
+    Mod+Down { focus-window-down; }
+
+    // ========================================================================
+    // 移动窗口
+    // ========================================================================
+
+    Mod+Shift+Left { move-column-left; }
+    Mod+Shift+Right { move-column-right; }
+    Mod+Shift+Up { move-window-up; }
+    Mod+Shift+Down { move-window-down; }
+
+    // ========================================================================
+    // 调整窗口大小
+    // ========================================================================
+
+    Mod+Ctrl+Left { set-column-width "-10%"; }
+    Mod+Ctrl+Right { set-column-width "+10%"; }
+    Mod+Ctrl+Up { set-window-height "-10%"; }
+    Mod+Ctrl+Down { set-window-height "+10%"; }
+
+    // ========================================================================
+    // 全屏和最大化
+    // ========================================================================
+
+    // 全屏切换
+    Mod+F { fullscreen-window; }
+
+    // 最大化切换（niri 特有）
+    // 注意：Mod+M 被 DMS 用于进程列表，这里使用 Mod+Shift+M
+    Mod+Shift+M { maximize-column; }
+
+    // ========================================================================
+    // 截图和锁屏
+    // ========================================================================
+
+    // 指定区域截图
+    // 注意没有 -c 和 -p，也没有使用 flameshot full 来直接截取全屏，以确保灵活性
+    // 之前使用wayland内置的 grim + slurp，以及hyprland和niri内置截图工具，都不如flameshot好用
+    Print { spawn "sh" "-c" "flameshot gui"; }
+
+    // 锁屏
+    // 注意：Super+Alt+L 被 DMS 用于锁屏，这里使用 Ctrl+Alt+L 作为备用
+    Ctrl+Alt+L { spawn "swaylock"; }
+
+    // ========================================================================
+    // 其他工具
+    // ========================================================================
+
+    // 电源菜单
+    // 注意：Mod+X 被 DMS 用于电源菜单，这里使用 Mod+Shift+X 作为备用
+    Mod+Shift+X { spawn "wlogout"; }
+
+    // 网络管理器
+    // 注意：Mod+N 被 DMS 用于通知中心，这里使用 Mod+Shift+N
+    Mod+Shift+N { spawn "nm-connection-editor"; }
+
+    // Fcitx5 重启
+    Mod+E { spawn "bash" "-c" "pkill fcitx5 -9; sleep 1; fcitx5 -d --replace; sleep 1; fcitx5-remote -r"; }
+
+    // ========================================================================
+    // 工作区滚动切换
+    // ========================================================================
+
+    Mod+WheelScrollDown { focus-workspace-down; }
+    Mod+WheelScrollUp { focus-workspace-up; }
+
+    // ========================================================================
+    // 消费或弹出窗口（niri 特有功能）
+    // ========================================================================
+
+    // 注意：Mod+Comma 被 DMS 用于设置，这里使用 Mod+Period 和 Mod+Shift+Period
+    Mod+Period { consume-window-into-column; }
+    Mod+Shift+Period { expel-window-from-column; }
+
+    // ========================================================================
+    // 切换窗口方向（niri 特有）
+    // ========================================================================
+
+    Mod+R { switch-preset-column-width; }
+    Mod+Shift+R { reset-window-height; }
+}
