@@ -4,9 +4,9 @@
   lib,
   ...
 }: let
-  cfg = config.custom.software.zed;
+  cfg = config.custom.gui.zed;
 in {
-  options.custom.software.zed = {
+  options.custom.gui.zed = {
     enable = lib.mkEnableOption "Enable kitty";
   };
 

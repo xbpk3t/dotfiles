@@ -24,8 +24,9 @@ in {
       services = {
         xserver = {
           enable = false; # disable xorg server
-          displayManager.gdm.enable = false; # explicitly disable GDM (updated syntax)
         };
+        # Explicitly disable GDM (using new syntax)
+        displayManager.gdm.enable = false;
         # https://wiki.archlinux.org/title/Greetd
         greetd = {
           enable = true;
