@@ -1,0 +1,43 @@
+---
+version: '3'
+
+vars:
+  EXTENSION_NAME: my-tools
+  BUILD_DIR: dist
+  VICINAE_EXTENSIONS_DIR: ~/.config/vicinae/extensions
+
+tasks:
+  install:
+    desc: "Install dependencies"
+    cmds:
+      - pnpm install
+
+  dev:
+    desc: "Run extension in development mode"
+    cmds:
+      - pnpm dev
+
+  build:
+    desc: "Build the extension"
+    cmds:
+      - pnpm build
+
+  deploy:
+    desc: "Build and deploy extension to vicinae extensions directory"
+    cmds:
+      - task: build
+      - mkdir -p {{.VICINAE_EXTENSIONS_DIR}}/{{.EXTENSION_NAME}}
+      - cp -r {{.BUILD_DIR}}/* {{.VICINAE_EXTENSIONS_DIR}}/{{.EXTENSION_NAME}}/
+      - echo "Extension deployed to {{.VICINAE_EXTENSIONS_DIR}}/{{.EXTENSION_NAME}}"
+
+  clean:
+    desc: "Clean build artifacts"
+    cmds:
+      - rm -rf {{.BUILD_DIR}}
+      - rm -rf node_modules
+
+  sync:
+    desc: "Sync code to remote machine"
+    cmds:
+      - rsync -avz --delete --progress -e "ssh -o StrictHostKeyChecking=no" /Users/lhgtqb7bll/Desktop/dotfiles/ luck@100.71.227.230:~/Desktop/dotfiles
+      - echo "Code synced to remote machine"
