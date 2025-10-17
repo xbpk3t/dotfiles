@@ -2,6 +2,7 @@
   myvars,
   lib,
   mylib,
+  pkgs,
   ...
 }: {
   imports = [../base] ++ mylib.scanPaths ./.;
@@ -10,6 +11,9 @@
   home = {
     username = myvars.username;
     homeDirectory = "/Users/${myvars.username}";
+    packages = with pkgs; [
+      alacritty
+    ];
     stateVersion = lib.mkDefault "24.11";
   };
 

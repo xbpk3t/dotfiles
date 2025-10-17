@@ -6,23 +6,23 @@
     substituters = [
       "https://cache.nixos.org"
       "https://cache.garnix.io"
-      "https://hyprland.cachix.org"
       "https://nix-community.cachix.org"
       "https://loneros.cachix.org"
       "https://vicinae.cachix.org"
       "https://niri.cachix.org"
       "https://numtide.cachix.org"
+      "https://watersucks.cachix.org"
     ];
 
     trusted-public-keys = [
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-      "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
       "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       "loneros.cachix.org-1:hhp1SqKJSLdBLSRLCLvPfh/CtGV+FJOde3NKbnZrIrY="
       "vicinae.cachix.org-1:1kDrfienkGHPYbkpNj1mWTr7Fm1+zcenzgTizIcI3oc="
       "niri.cachix.org-1:Wv0OmO7PsuocRKzfDoJ3mulSl7Z6oezYhGhR+3W2964="
       "numtide.cachix.org-1:2ps1kLBUWjxIneOy1Ik6cQjb41X0iXVXeHigGmycPPE="
+      "watersucks.cachix.org-1:6gadPC5R8iLWQ3EUtfu3GFrVY7X6I4Fwz/ihW25Jbv8="
     ];
 
     # 防止关键包被垃圾回收清理
@@ -140,6 +140,27 @@
     # https://github.com/nix-community/NUR
     nur = {
       url = "github:nix-community/NUR";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # nixos-cli - Modern NixOS management CLI
+    # https://github.com/nix-community/nixos-cli
+    nixos-cli = {
+      url = "github:water-sucks/nixos";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # mac-app-util - Fix .app programs installed by Nix on Mac
+    # https://github.com/hraban/mac-app-util
+    mac-app-util = {
+      url = "github:hraban/mac-app-util";
+      inputs.nixpkgs.follows = "nixpkgs-darwin";
+    };
+
+    # colmena - NixOS deployment tool
+    # https://github.com/zhaofengli/colmena
+    colmena = {
+      url = "github:zhaofengli/colmena";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };

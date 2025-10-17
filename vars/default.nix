@@ -1,7 +1,7 @@
 {lib}: {
   name = "dotfiles";
 
-  username = "luck";
+  username = "lhgtqb7bll";
   userfullname = "lucas";
   mail = "yyzw@live.com";
 
