@@ -42,6 +42,11 @@
 
       # USB autosuspend: enable to power down idle USB devices
       USB_AUTOSUSPEND = 1;
+      # USB 设备自动休眠延迟时间 (秒)
+      # 鼠标自动休眠时间配置
+      # 设置为 10 分钟 (600 秒)
+      # 如果不设置，默认5s就自动挂起，很影响使用
+      USB_AUTOSUSPEND_DELAY = 600;
 
       # Your existing USB denylist for specific quirks
       USB_DENYLIST = "2357:0601 0bda:5411";
