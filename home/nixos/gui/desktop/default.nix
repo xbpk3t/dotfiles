@@ -2,11 +2,11 @@
   imports = [
     ./nvidia.nix
     # 启用 fuzzel 作为应用启动器（DMS 的 QtMultimedia 问题无法修复）
-    ./fuzzel.nix
+    #    ./fuzzel.nix
 
     #    ./anyrun.nix
     #    ./rofi.nix
-    #    ./vicinae.nix
+    ./vicinae.nix
     #    ./walker.nix
   ];
 

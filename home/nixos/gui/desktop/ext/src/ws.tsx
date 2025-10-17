@@ -1,0 +1,111 @@
+import React, { useState } from 'react';
+import { Action, ActionPanel, List, Icon } from '@vicinae/api';
+
+interface Bookmark {
+  alias: string;
+  url: string;
+}
+
+interface WsProps {
+  arguments: {
+    query?: string;
+  };
+}
+
+// Bookmarks data from taskfile.bm.yml
+const BOOKMARKS: Bookmark[] = [
+  { alias: 'yuanbao', url: 'https://yuanbao.tencent.com/chat/naQivTmsDa?chatMode=temp' },
+  { alias: 'youtube', url: 'https://www.youtube.com/' },
+  { alias: 'nix', url: 'https://mynixos.com/flakes' },
+  { alias: 'ping', url: 'https://ping.pe/' },
+  { alias: 'json-to-go', url: 'https://mholt.github.io/json-to-go/' },
+  { alias: 'annas-archive', url: 'https://zh.annas-archive.org/' },
+  { alias: 'zaobao', url: 'https://www.zaobao.com/' },
+  { alias: 'docs', url: 'https://docs.lucc.dev/' },
+  { alias: 'cws', url: 'https://cws-database.com/explore?limit=25&offset=0' },
+  { alias: 'moemail', url: 'https://moemail.app/moe' },
+  { alias: 'ossinsight.io', url: 'https://ossinsight.io/collections/' },
+  { alias: 'sojson', url: 'https://www.sojson.com/jshtml.html' },
+  { alias: 'yaml-to-go', url: 'https://zhwt.github.io/yaml-to-go/' },
+  { alias: 'modelscope', url: 'https://modelscope.cn/my/accountsettings' },
+  { alias: 'web-check', url: 'https://web-check.xyz/' },
+  { alias: 'globalping', url: 'https://globalping.io/' },
+  { alias: 'myip', url: 'https://ipcheck.ing/' },
+  { alias: 'abtest', url: 'https://abtest.design/' },
+  { alias: 'pitchhub', url: 'https://pitchhub.36kr.com/investevent' },
+  { alias: 'whoismaking', url: 'https://whoismaking.money/zh' },
+  { alias: 'scmp', url: 'https://www.scmp.com/' },
+  { alias: 'spotify', url: 'https://open.spotify.com/' },
+  { alias: 'astexplorer', url: 'https://astexplorer.net/' },
+  { alias: 'joinquant', url: 'https://www.joinquant.com/' },
+  { alias: 'kubespec', url: 'https://kubespec.dev/' },
+  { alias: 'linux.do', url: 'https://linux.do/' },
+  { alias: 'pocketcasts', url: 'https://play.pocketcasts.com/new-releases' },
+  { alias: 'markdownpreview', url: 'https://markdownlivepreview.dev/' },
+  { alias: 'reddit-hotlist', url: 'https://www.reddit-list.com/en' },
+  { alias: 'qwertylearner', url: 'https://qwertylearner.ai/article-gallery' },
+  { alias: 'daziya', url: 'https://daziya.com/game' },
+  { alias: 'dnsdumpster', url: 'https://dnsdumpster.com/' },
+  { alias: 'diffchecker', url: 'https://www.diffchecker.com/' },
+  { alias: 'deepwiki', url: 'https://deepwiki.com/' },
+  { alias: 'grok', url: 'https://grok.com/chat' },
+  { alias: 'speedtest', url: 'https://speed.cloudflare.com/' },
+  { alias: 'regex101', url: 'https://regex101.com/' },
+  { alias: 'coder-kung-fu', url: 'https://github.com/yanfeizhang/coder-kung-fu' },
+  { alias: 'digvps', url: 'https://digvps.com/' },
+  { alias: 'dbengines', url: 'https://db-engines.com/en/ranking' },
+  { alias: 'tableconvert', url: 'https://tableconvert.com/' },
+  { alias: 'becode', url: 'https://becode.be-a.dev/console' },
+  { alias: '91wink', url: 'https://91wink.com/' },
+  { alias: 'apifox', url: 'https://app.apifox.com/' },
+  { alias: 'namebeta', url: 'https://namebeta.com/' },
+  { alias: 'aliyun', url: 'https://account.aliyun.com/' },
+  { alias: 'gitlab', url: 'https://gitlab.com/hhacking' },
+  { alias: 'pollyoyo', url: 'https://app.pollyoyo.com/dashboard' },
+  { alias: 'chatgpt', url: 'https://chatgpt.com/' },
+  { alias: 'fastsend', url: 'https://fastsend.ing/zh' },
+  { alias: 'fofa', url: 'https://fofa.info/' },
+  { alias: 'pm', url: 'https://www.woshipm.com/' },
+  { alias: 'zp', url: 'https://open.bigmodel.cn/finance-center/finance/overview' },
+  { alias: 'onlinetools.com', url: 'https://onlinetools.com/' },
+  { alias: 'godbolt', url: 'https://godbolt.org/' },
+  { alias: 'zread', url: 'https://zread.ai/' },
+  { alias: 'bitiful', url: 'https://send.bitiful.com/' },
+  { alias: 'folo', url: 'https://app.follow.is/' },
+  { alias: 'youtube-music', url: 'https://music.youtube.com/' },
+  { alias: 'cloudconvert', url: 'https://cloudconvert.com/' },
+  { alias: 'heimao', url: 'https://tousu.sina.com.cn/' },
+  { alias: 'tldr', url: 'https://wangchujiang.com/reference/' },
+  { alias: 'cf', url: 'https://dash.cloudflare.com/' },
+  { alias: 'flomo', url: 'https://v.flomoapp.com/mine' },
+  { alias: 'osb', url: 'https://opensource.builders/' },
+  { alias: 'investing', url: 'https://cn.investing.com/news' },
+  { alias: 'json-to-nix', url: 'https://json-to-nix.pages.dev/' },
+  { alias: 'netbird', url: 'https://app.netbird.io/peers' },
+  { alias: '88code', url: 'https://www.88code.org/user-dashboard' },
+];
+
+export default function Command(props: WsProps) {
+  return (
+    <List searchBarPlaceholder="Search bookmarks...">
+      {BOOKMARKS.map((bookmark) => (
+        <List.Item
+          key={bookmark.alias}
+          title={bookmark.alias}
+          subtitle={bookmark.url}
+          icon={Icon.Link}
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser title="Open in Browser" url={bookmark.url} />
+              <Action.CopyToClipboard
+                title="Copy URL"
+                content={bookmark.url}
+                shortcut={{ modifiers: ['cmd'], key: 'c' }}
+              />
+            </ActionPanel>
+          }
+        />
+      ))}
+    </List>
+  );
+}
