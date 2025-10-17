@@ -62,8 +62,4 @@ in {
   # Sing-box proxy service
   # Configuration file must be at /etc/sing-box/config.json
   modules.networking.singbox.enable = true;
-
-  modules.desktop.shell = {
-    noctalia.enable = false;
-  };
 }
