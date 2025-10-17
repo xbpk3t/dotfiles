@@ -52,14 +52,6 @@
 
     # Add NUR for community packages
     nur = inputs.nur;
-
-    # Add DankMaterialShell packages
-    # DMS requires dmsCli and dgop from its own inputs
-    dmsPkgs = {
-      dankMaterialShell = inputs.dankMaterialShell.packages.${system}.default;
-      dmsCli = inputs.dankMaterialShell.inputs.dms-cli.packages.${system}.default;
-      dgop = inputs.dankMaterialShell.inputs.dgop.packages.${system}.dgop;
-    };
   };
 
   modules = {
@@ -75,7 +67,6 @@
       ])
       ++ [
         inputs.sops-nix.nixosModules.sops
-        inputs.noctalia.nixosModules.default
         inputs.xremap-flake.nixosModules.default
         {
           modules.desktop.wayland.enable = true;
@@ -89,13 +80,8 @@
         "home/nixos"
       ])
       ++ [
-        inputs.noctalia.homeModules.default
-        # https://github.com/AvengeMedia/DankMaterialShell/issues/182#issuecomment-3321695029 因为不再 DMS+niri，所以使用default
-        inputs.dankMaterialShell.homeModules.dankMaterialShell.default
-        inputs.dankMaterialShell.homeModules.dankMaterialShell.niri
         inputs.niri.homeModules.niri
         inputs.nur.modules.homeManager.default
-
         inputs.vicinae.homeManagerModules.default
       ];
   };

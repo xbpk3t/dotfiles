@@ -110,12 +110,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    noctalia = {
-      url = "github:noctalia-dev/noctalia-shell";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.quickshell.follows = "quickshell"; # Use same quickshell version
-    };
-
     xremap-flake.url = "github:xremap/nix-flake";
 
     # https://github.com/numtide/flake-utils
