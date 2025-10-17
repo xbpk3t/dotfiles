@@ -39,5 +39,7 @@
     sops
     age
     openssh
+
+    croc # https://github.com/schollz/croc
   ];
 }

@@ -95,6 +95,8 @@
         inputs.dankMaterialShell.homeModules.dankMaterialShell.niri
         inputs.niri.homeModules.niri
         inputs.nur.modules.homeManager.default
+
+        inputs.vicinae.homeManagerModules.default
       ];
   };
 in {

@@ -32,6 +32,7 @@ includes:
   shell: taskfile/kernel/Taskfile.shell.yml
   ssh: taskfile/kernel/Taskfile.ssh.yml
   tcpdump: taskfile/kernel/Taskfile.tcpdump.yml
+  sys: taskfile/kernel/Taskfile.systemd.yml
 
   # mac
   mac: taskfile/mac/Taskfile.mac.yml
@@ -44,7 +45,7 @@ includes:
   alfred: taskfile/mac/Taskfile.alfred.yml
   pnpm: taskfile/mac/Taskfile.pnpm.yml
   bm: taskfile/mac/Taskfile.bm.yml
-  pwgen: taskfile/mac/Taskfile.pwgen.yml
+  wf: taskfile/mac/Taskfile.workflow.yml
   sb: taskfile/mac/Taskfile.singbox.yml
   z: taskfile/mac/Taskfile.z.yml
 

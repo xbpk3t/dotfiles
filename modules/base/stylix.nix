@@ -1,7 +1,6 @@
 {
   pkgs,
   lib,
-  config,
   ...
 }: {
   stylix = {
@@ -16,9 +15,16 @@
     };
 
     # 使用base00作为背景色（Gruvbox的深背景）
-    image = config.lib.stylix.pixel "base00";
+    #    image = config.lib.stylix.pixel "base00";
+    image = pkgs.fetchurl {
+      url = "https://cdn.lucc.dev/wallpapers/a1.png";
+      hash = "sha256-NJy3pGK/I0bgmjT2Irxak3AX+8n4rHcFd2eNzC6RQtg=";
+    };
 
+    # 暗色主题
     polarity = "dark";
+
+    # PLAN [2025-10-17] [catppuccin/nix: ❄️ Soothing pastel theme for Nix](https://github.com/catppuccin/nix) 研究一下，能否直接把 catppuccin 作为theme方案集成到stylix里。现在stylix好像不存在类似catppuccin这种整套配色方案。
 
     # Color scheme configuration
     # Using Gruvbox Dark Hard - a popular terminal-friendly theme

@@ -115,6 +115,6 @@ _: {
 
   # only works in bash/zsh, not nushell
   home.shellAliases = {
-    "jj" = "zellij";
+    "zz" = "zellij";
   };
 }
