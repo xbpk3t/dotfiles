@@ -65,6 +65,5 @@ in {
 
   modules.desktop.shell = {
     noctalia.enable = false;
-    dms.enable = false;
   };
 }
