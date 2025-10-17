@@ -1,0 +1,260 @@
+---
+version: '3'
+
+
+# systemd-cgtop
+#显示控制组（cgroup）的资源使用情况（类似 top）。
+#示例：systemd-cgtop
+#systemd-cgls
+#列出控制组的层级结构。
+#示例：systemd-cgls
+#systemd-run
+#临时运行一个命令作为 systemd 单元。
+#示例：systemd-run --unit=mycommand sleep 60
+#systemd-escape
+#将字符串转换为适合 systemd 单元名称的格式。
+#示例：systemd-escape "my service"（输出：my\x20service）
+#systemd-notify
+#通知 systemd 服务状态（通常在脚本中使用）。
+#示例：systemd-notify --ready
+#systemd-resolve
+#管理 DNS 解析（在较老版本中使用，部分功能已移至 resolvectl）。
+#示例：systemd-resolve --status
+#resolvectl
+#管理 DNS 解析（替代 systemd-resolve）。
+#
+#resolvectl status
+#显示 DNS 解析状态。
+#resolvectl set-dns <IP>
+#设置 DNS 服务器。
+#示例：resolvectl set-dns 8.8.8.8
+#
+#
+#systemd-inhibit
+#临时禁止系统进入某些状态（如休眠、关机）。
+#示例：systemd-inhibit --what=shutdown sleep 3600
+#systemd-nspawn
+#运行轻量级容器。
+#示例：systemd-nspawn -D /path/to/container
+#systemd-tmpfiles
+#管理临时文件和目录。
+#
+#systemd-tmpfiles --create
+#创建配置文件中定义的临时文件。
+#systemd-tmpfiles --clean
+#清理过期临时文件。
+#
+#
+#systemd-delta
+#显示系统单元文件与默认配置的差异。
+#示例：systemd-delta
+#systemd-path
+#显示 systemd 使用的路径。
+#示例：systemd-path
+#systemd-ask-password
+#提示用户输入密码（用于脚本或服务）。
+#示例：systemd-ask-password "Enter password:"
+#systemd-socket-activate
+#测试 socket 激活的单元。
+#示例：systemd-socket-activate -l 8080
+
+
+
+#  单元类型：systemd 管理多种单元，包括 .service（服务）、.target（运行目标）、.socket（套接字）、.timer（定时器）、.mount（挂载点）、.slice（资源控制组）等。上述命令中 <unit> 可以替换为具体的单元名称，如 nginx.service 或 multi-user.target。
+
+#  配置文件：单元文件通常位于 /etc/systemd/system/（用户自定义）或 /usr/lib/systemd/system/（系统默认）。
+
+#  日志持久化：journalctl 的日志默认存储在内存中，若需持久化，需配置 /etc/systemd/journald.conf 中的 Storage=persistent。
+
+
+tasks:
+# 服务管理组
+  service:*:
+    vars:
+      ACTION: '{{index .MATCH 0}}'
+      UNIT: '{{index .MATCH 1 | default ""}}'
+    requires:
+      vars:
+        - name: ACTION
+          enum:
+            - start
+            - stop
+            - restart
+            - reload
+            - reload-or-restart
+            - enable
+            - disable
+            - mask
+            - unmask
+            - daemon-reload
+            - reset-failed
+    cmds:
+      - echo "Starting {{.ACTION}}"
+      - systemctl {{.ACTION}} {{.UNIT}}
+
+# 状态查询组
+  status:*:
+    vars:
+      ACTION: '{{index .MATCH 0}}'
+      UNIT: '{{index .MATCH 1 | default ""}}'
+    requires:
+      vars:
+        - name: ACTION
+          enum:
+            - status
+            - active
+            - enabled
+            - failed
+            - list
+            - list-all
+            - list-services
+            - list-failed
+            - list-files
+            - list-dependencies
+            - get-default
+    cmds:
+      - echo "Starting {{.ACTION}}"
+      - systemctl {{.ACTION}} {{.UNIT}}
+
+# 系统管理组
+  system:*:
+    vars:
+      ACTION: '{{index .MATCH 0}}'
+      TARGET: '{{index .MATCH 1 | default ""}}'
+    requires:
+      vars:
+        - name: ACTION
+          enum:
+            - reboot
+            - poweroff
+            - halt
+            - suspend
+            - hibernate
+            - hybrid-sleep
+            - rescue
+            - emergency
+            - default
+            - isolate
+            - set-default
+    cmds:
+      - echo "Starting {{.ACTION}}"
+      - systemctl {{.ACTION}} {{.TARGET}}
+
+# 日志管理组
+  journal:*:
+    vars:
+      ACTION: '{{index .MATCH 0}}'
+      PARAM: '{{index .MATCH 1 | default ""}}'
+    requires:
+      vars:
+        - name: ACTION
+          enum:
+            - logs
+            - logs-follow
+            - logs-boot
+            - logs-boot-previous
+            - list-boots
+            - logs-kernel
+            - logs-error
+            - logs-warning
+            - logs-since
+            - logs-until
+            - disk-usage
+            - vacuum-time
+            - vacuum-size
+    cmds:
+      - echo "Starting {{.ACTION}}"
+      - journalctl {{.ACTION}} {{.PARAM}}
+
+# 性能分析组
+  analyze:*:
+    vars:
+      ACTION: '{{index .MATCH 0}}'
+      UNIT: '{{index .MATCH 1 | default ""}}'
+    requires:
+      vars:
+        - name: ACTION
+          enum:
+            - analyze
+            - blame
+            - critical-chain
+            - plot
+            - dot
+            - verify
+            - unit-files
+            - security
+    cmds:
+      - echo "Starting {{.ACTION}}"
+      - systemd-analyze {{.ACTION}} {{.UNIT}}
+
+# 用户会话组
+  login:*:
+    vars:
+      ACTION: '{{index .MATCH 0}}'
+      PARAM: '{{index .MATCH 1 | default ""}}'
+    requires:
+      vars:
+        - name: ACTION
+          enum:
+            - list-sessions
+            - session-status
+            - terminate-session
+            - list-users
+            - kill-user
+            - user-status
+            - lock-session
+            - unlock-session
+    cmds:
+      - echo "Starting {{.ACTION}}"
+      - loginctl {{.ACTION}} {{.PARAM}}
+
+# 主机名管理组
+  hostname:*:
+    vars:
+      ACTION: '{{index .MATCH 0}}'
+      VALUE: '{{index .MATCH 1 | default ""}}'
+    requires:
+      vars:
+        - name: ACTION
+          enum:
+            - status
+            - set-hostname
+    cmds:
+      - echo "Starting {{.ACTION}}"
+      - hostnamectl {{.ACTION}} {{.VALUE}}
+
+# 本地化管理组
+  locale:*:
+    vars:
+      ACTION: '{{index .MATCH 0}}'
+      VALUE: '{{index .MATCH 1 | default ""}}'
+    requires:
+      vars:
+        - name: ACTION
+          enum:
+            - status
+            - set-locale
+            - set-keymap
+            - list-locales
+            - list-keymaps
+    cmds:
+      - echo "Starting {{.ACTION}}"
+      - localectl {{.ACTION}} {{.VALUE}}
+
+# 时间管理组
+  time:*:
+    vars:
+      ACTION: '{{index .MATCH 0}}'
+      VALUE: '{{index .MATCH 1 | default ""}}'
+    requires:
+      vars:
+        - name: ACTION
+          enum:
+            - status
+            - set-time
+            - set-timezone
+            - set-ntp
+            - list-timezones
+    cmds:
+      - echo "Starting {{.ACTION}}"
+      - timedatectl {{.ACTION}} {{.VALUE}}

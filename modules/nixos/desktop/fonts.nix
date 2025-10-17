@@ -1,6 +1,13 @@
 # https://mynixos.com/nixpkgs/options/fonts.fontconfig
 # 注意：本文件仅作为stylix的补充配置
 {...}: {
+  # 修复 Chromium/Electron 应用字体模糊问题
+  # 启用 stem darkening 以改善小字体在深色背景下的渲染
+  # 参考: https://blog.aktsbot.in/no-more-blurry-fonts.html
+  environment.sessionVariables = {
+    FREETYPE_PROPERTIES = "cff:no-stem-darkening=0 autofitter:no-stem-darkening=0";
+  };
+
   # all fonts are linked to /nix/var/nix/profiles/system/sw/share/X11/fonts
   fonts = {
     # use fonts specified by user rather than default ones

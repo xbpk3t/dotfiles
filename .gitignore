@@ -11,3 +11,5 @@ secrets/age.key
 secrets/secrets_temp.yaml
 
 /.hammerspoon/tasks_data.json
+/hyprpaper_switcher_ext
+/j-vicinae-extensions

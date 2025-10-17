@@ -18,6 +18,7 @@ in {
   # https://mynixos.com/nixpkgs/options/services.netbird
   #############################################################################
 
+  # https://github.com/nukdokplex/ncaa/blob/master/nixos-modules/netbird-client.nix
   options.modules.networking.netbird = {
     #---------------------------------------------------------------------------
     # CLIENT OPTIONS (enabled by default)

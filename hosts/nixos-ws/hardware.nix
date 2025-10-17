@@ -12,6 +12,10 @@
     inputs.nixos-hardware.nixosModules.common-pc-laptop
     inputs.nixos-hardware.nixosModules.common-pc-laptop-ssd
     inputs.nixos-hardware.nixosModules.common-cpu-intel
+    # NOTE: lenovo-ideapad-14imh9 模块包含一个 workaround-reset-xhci-driver 服务
+    # 该服务检查 Chicony 摄像头，但本机使用的是 Syntek 摄像头，导致服务失败
+    # 因此暂时禁用该模块，只使用通用的 laptop 优化
+    # inputs.nixos-hardware.nixosModules.lenovo-ideapad-14imh9
   ];
 
   boot.initrd.availableKernelModules = ["xhci_pci" "nvme" "usbhid" "usb_storage" "sd_mod" "sdhci_pci" "rtsx_pci_sdmmc"];

@@ -49,8 +49,8 @@ in {
     grub.enable = false;
   };
 
-  # Allow unfree packages for nvidia drivers
-  nixpkgs.config.allowUnfree = true;
+  # NOTE: nixpkgs.config.allowUnfree is already set in genSpecialArgs (outputs/default.nix)
+  # Do NOT set it here when using specialArgs.pkgs as it will be ignored and cause warnings
 
   # Set system state version
   system.stateVersion = "24.11";
@@ -65,6 +65,6 @@ in {
 
   modules.desktop.shell = {
     noctalia.enable = false;
-    dms.enable = true;
+    dms.enable = false;
   };
 }

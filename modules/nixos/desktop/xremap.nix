@@ -18,6 +18,9 @@ in {
   #  users.groups.uinput.members = [ myvars.username ];
   #  users.groups.input.members = [ myvars.username ];
 
+  # FIXME
+  # [Wayland/X11 support? · Issue #420 · rbreaves/kinto](https://github.com/rbreaves/kinto/issues/420) kinto是mac-like keyboard layout的最佳方案，kinto基于xkeysnail实现，而xkeysnail目前也已兼容wayland。但是 “but it can’t dynamically change the keymap based on the app or app type until someone fixes the app detection.”
+
   config = mkIf cfg.enable {
     environment.systemPackages = [pkgs.xremap];
 
