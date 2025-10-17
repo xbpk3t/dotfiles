@@ -116,18 +116,6 @@
       inputs.quickshell.follows = "quickshell"; # Use same quickshell version
     };
 
-    # DankMaterialShell - Desktop shell for wayland compositors
-    dankMaterialShell = {
-      url = "github:AvengeMedia/DankMaterialShell";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    # niri-flake - Required for DMS niri integration
-    niri = {
-      url = "github:sodiboo/niri-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     xremap-flake.url = "github:xremap/nix-flake";
 
     # https://github.com/numtide/flake-utils
