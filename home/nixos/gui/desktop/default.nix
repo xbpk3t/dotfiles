@@ -1,7 +1,6 @@
 {pkgs, ...}: {
   imports = [
     ./nvidia.nix
-    # 启用 fuzzel 作为应用启动器（DMS 的 QtMultimedia 问题无法修复）
     #    ./fuzzel.nix
 
     #    ./anyrun.nix
