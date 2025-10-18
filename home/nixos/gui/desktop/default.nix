@@ -1,12 +1,8 @@
 {pkgs, ...}: {
   imports = [
     ./nvidia.nix
-    #    ./fuzzel.nix
-
-    #    ./anyrun.nix
-    #    ./rofi.nix
+    ./swayidle.nix
     ./vicinae.nix
-    #    ./walker.nix
   ];
 
   # wayland related
@@ -36,7 +32,4 @@
     alsa-utils # provides amixer/alsamixer/...
     networkmanagerapplet # provide GUI app: nm-connection-editor
   ];
-
-  # Swaylock configuration - screen locker
-  programs.swaylock.enable = true;
 }

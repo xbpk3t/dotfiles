@@ -52,7 +52,7 @@
     settings = {
       # Display settings
       show-failed-attempts = true;
-      show-keyboard-layout = true;
+      show-keyboard-layout = false;
       indicator-caps-lock = true;
       
       # Appearance - using stylix colors
