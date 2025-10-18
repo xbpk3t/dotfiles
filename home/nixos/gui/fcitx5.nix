@@ -8,7 +8,7 @@
     ".config/fcitx5/config".text = ''
       # 全局配置
       [Hotkey]
-      # 切换输入法快捷键：Ctrl+Space
+      # 切换输入法快捷键：Ctrl+Space（中文/英文）
       TriggerKeys=Control+space
       # 枚举快捷键
       EnumerateWithTriggerKeys=True
@@ -76,6 +76,17 @@
       # 候选词数量
       PageSize=7
     '';
+
+    ".config/fcitx5/conf/classicui.conf".text = ''
+      [UI]
+      Theme=mellow-vermilion
+      # 字体
+      Font=Noto Sans CJK SC 12
+      # 可选：水平候选列表
+      VerticalCandidateList=False
+      # ... 其他 UI 设置
+    '';
+
   };
 
   # 输入法系统配置
@@ -88,6 +99,12 @@
       fcitx5-chinese-addons
       # 配置工具
       fcitx5-configtool
+
+      # https://github.com/sanweiya/fcitx5-mellow-themes
+      fcitx5-mellow-themes
+
+      # https://github.com/catppuccin/fcitx5
+      catppuccin-fcitx5
     ];
   };
 
