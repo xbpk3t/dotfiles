@@ -16,10 +16,6 @@
     # Media
     # vlc
 
-    # File managers
-    # FIXME 暂时禁用
-    # xfce.thunar
-
     # 只有linux
     # pavucontrol
 
