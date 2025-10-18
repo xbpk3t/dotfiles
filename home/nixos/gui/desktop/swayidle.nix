@@ -73,11 +73,11 @@
       # Additional optimizations:
       # - Grace period: Allow a short time to enter password without re-locking immediately
       # 宽限期，避免立即重锁
-      grace = 5;  # 5 seconds grace period after wake to enter password
+      grace = 5; # 5 seconds grace period after wake to enter password
 
       # - Fade-in effect for smoother appearance (minimal overhead)
       # 平滑淡入效果，提升用户体验，几乎无开销
-      fade-in = 0.5;  # Fade in over 0.5 seconds
+      fade-in = 0.5; # Fade in over 0.5 seconds
 
       # - Disable screenshot capture for security (prevents grabbing lock screen)
       # 增强安全，防止截屏锁屏
