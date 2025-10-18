@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{pkgs, config, ...}: {
   home.packages = with pkgs; [
     gotools # goimports
     gum
@@ -26,7 +26,7 @@
     # Go 环境变量设置 (更新为新语法)
     env = {
       # GOPATH 设置
-      GOPATH = "go"; # 相对于 home 目录，即 ~/go
+      GOPATH = "${config.home.homeDirectory}/go";
 
       # GOPROXY 设置
       GOPRIVATE = "*.corp.example.com,rsc.io/private"; # 私有模块设置
@@ -34,6 +34,8 @@
       # Go 代理设置（中国镜像）
       GOPROXY = "https://goproxy.cn,direct";
       GOSUMDB = "sum.golang.google.cn";
+
+      GOMODCACHE = "${config.home.homeDirectory}/go/pkg/mod";
 
       # Go 模块设置
       GO111MODULE = "on";
