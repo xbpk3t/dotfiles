@@ -16,6 +16,6 @@
     # ncdu
 
     # rename
-    rnr # https://github.com/ismaelgv/rnr # FIXME 添加rnr的taskfile
+    rnr # https://github.com/ismaelgv/rnr
   ];
 }
