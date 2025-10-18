@@ -22,7 +22,6 @@
   };
 
   home.packages = with pkgs; [
-    swaybg # the wallpaper
     wl-clipboard # copying and pasting
     hyprpicker # color picker
     brightnessctl

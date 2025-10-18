@@ -76,4 +76,9 @@
       size = 24;
     };
   };
+
+  environment.systemPackages = with pkgs; [
+    # stylix image as wallpaper, swaybg is required to achieve the effect
+    swaybg
+  ];
 }
