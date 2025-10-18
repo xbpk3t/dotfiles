@@ -44,7 +44,7 @@
         ];
       in {
         "application/json" = browser;
-        "application/pdf" = browser; # TODO: pdf viewer
+        "application/pdf" = browser;
 
         "text/html" = browser;
         "text/xml" = browser;
