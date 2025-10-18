@@ -148,6 +148,8 @@ vars:
       url: https://app.netbird.io/peers
     - alias: 88code
       url: https://www.88code.org/user-dashboard
+    - alias: ping0
+      url: https://ping0.cc/
 
 
 tasks:

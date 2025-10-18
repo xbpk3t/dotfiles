@@ -111,7 +111,6 @@ in {
             action = "<cmd>Telescope projects<cr>";
             desc = "Switch between projects";
           }
-          # TODO 注释快速跳转
           {
             key = "<leader>ft";
             mode = ["n"];
@@ -321,7 +320,6 @@ in {
           # 2. Monokai Pro 主题（类似 IDEA 的 Monokai）
           monokai-pro-nvim
 
-          # 3. TODO 注释高亮和搜索
           todo-comments-nvim
 
           # 4. Spectre：批量查找和替换（支持正则表达式）
@@ -355,7 +353,6 @@ in {
             vim.cmd([[colorscheme monokai-pro]])
           '';
 
-          # TODO 注释配置
           todo-comments = ''
             require("todo-comments").setup({
               signs = true,

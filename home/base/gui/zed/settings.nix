@@ -1,7 +1,8 @@
 {
-  # [2025-10-12] 目前zed相较goland的一些缺失功能
+  # [2025-10-12] MAYBE 目前zed相较goland的一些缺失功能
   # - [git side-by-side viewer] https://github.com/zed-industries/zed/discussions/26770
-  # - [TODO highlight] https://github.com/zed-industries/zed/issues/11895 https://github.com/zed-industries/zed/pull/9082
+  # - [highlight] https://github.com/zed-industries/zed/issues/11895
+  # https://github.com/zed-industries/zed/pull/9082
   # - [通过CMD+`切换项目] 怎么通过 CMD+` 快捷键，直接在多个project之间切换？我在配置 use_system_window_tabs 之前，本身通过 CMD+` 这种mac本身提供的窗口切换来切换项目是可行的，但是在添加该配置之后，因为本身没有多窗口了，所以怎么需要配置哪个快捷键来保证类似操作？
   # - [类似CMD+E切换最近修改文件]
 

@@ -119,6 +119,12 @@
     # https://github.com/numtide/nix-ai-tools
     nix-ai-tools.url = "github:numtide/nix-ai-tools";
 
+    # niri-flake
+    niri = {
+      url = "github:sodiboo/niri-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # https://github.com/nix-community/NUR
     nur = {
       url = "github:nix-community/NUR";
