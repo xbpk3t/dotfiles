@@ -47,11 +47,6 @@ in {
   # Shared swap configuration
   swapDevices = [];
 
-  # Shared system state version
-  # Note: This should be host-specific and is kept here as an example
-  # In practice, system.stateVersion should be set in host-specific configuration
-  # system.stateVersion = "24.05";
-
   # 确保 systemd-resolved 正确启用
   services.resolved = {
     enable = true;

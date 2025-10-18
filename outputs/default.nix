@@ -117,11 +117,6 @@ in {
   # Eval Tests for all systems.
   evalTests = lib.lists.all (it: it.evalTests == {}) allSystemValues;
 
-  # TODO: Add proper checks when needed
-  # checks = forAllSystems (system: {
-  #   # eval-tests per system
-  #   eval-tests = allSystems.${system}.evalTests == { };
-  # });
   checks = {};
 
   # Development Shells
@@ -152,4 +147,46 @@ in {
 
   # Format the nix code in this flake
   formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixfmt);
+
+  # Colmena deployment configuration
+  # https://colmena.cli.rs/unstable/introduction.html
+  # 使用方法: colmena apply
+  # 注意: 需要先配置 SSH 密钥认证到目标机器的 root 用户
+  colmena = {
+    meta = {
+      nixpkgs = import nixpkgs {
+        system = "x86_64-linux";
+        config.allowUnfree = true;
+      };
+      specialArgs = genSpecialArgs "x86_64-linux";
+    };
+
+    # NixOS workstation - 远程部署目标
+    nixos-ws = {
+      deployment = {
+        targetHost = "192.168.234.194";
+        targetUser = "luck";
+        # 使用 SSH 密钥认证（需要配置 SSH 密钥）
+        # buildOnTarget = true; # 在目标机器上构建，避免跨架构问题
+      };
+
+      # 直接导入 nixos-ws 的配置模块
+      # 这样 colmena 会使用与 nixosConfigurations.nixos-ws 相同的配置
+      imports =
+        (map mylib.relativeToRoot [
+          "hosts/nixos-ws/default.nix"
+          "secrets/default.nix"
+          "modules/base"
+          "modules/nixos/base"
+          "modules/nixos/desktop"
+        ])
+        ++ [
+          inputs.sops-nix.nixosModules.sops
+          inputs.xremap-flake.nixosModules.default
+          {
+            modules.desktop.wayland.enable = true;
+          }
+        ];
+    };
+  };
 }
