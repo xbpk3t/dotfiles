@@ -25,6 +25,15 @@ in {
       xwayland-satellite
     ];
 
+    # Wayland 环境变量
+    # 确保应用正确使用 Wayland 和 compositor 的缩放设置
+    home.sessionVariables = {
+      # 禁用 GDK 的 DPI 缩放，让 compositor 处理
+      GDK_DPI_SCALE = "1.0";
+      # 确保 Qt 应用使用 Wayland
+      QT_QPA_PLATFORM = "wayland";
+    };
+
     # FIXME [2025-10-17] [Gesture bindings · Issue #372 · YaLTeR/niri](https://github.com/YaLTeR/niri/issues/372) 等niri支持自定义gestures之后，修改配置
 
     # Niri compositor 配置
