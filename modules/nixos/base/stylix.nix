@@ -24,8 +24,6 @@
     # 暗色主题
     polarity = "dark";
 
-    # PLAN [2025-10-17] [catppuccin/nix: ❄️ Soothing pastel theme for Nix](https://github.com/catppuccin/nix) 研究一下，能否直接把 catppuccin 作为theme方案集成到stylix里。现在stylix好像不存在类似catppuccin这种整套配色方案。
-
     # Color scheme configuration
     # Using Gruvbox Dark Hard - a popular terminal-friendly theme
     base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-hard.yaml";
@@ -66,40 +64,16 @@
       };
     };
 
-    # FIXME [2025-10-08] darwin 不支持该属性。之后要做不同OS的判断
-
-    #    targets = {
-    #      qt = {
-    #        enable = true;
-    #        platform = "qtct";
-    #      };
-    #    };
-    #    cursor = {
-    #      package = pkgs.bibata-cursors;
-    #      name = "Bibata-Modern-Ice";
-    #      size = 24;
-    #    };
+    targets = {
+      qt = {
+        enable = true;
+        platform = "qtct";
+      };
+    };
+    cursor = {
+      package = pkgs.bibata-cursors;
+      name = "Bibata-Modern-Ice";
+      size = 24;
+    };
   };
-
-  # PLAN  [2025-10-06] 需要根据实际需求调整配色，当前为Gruvbox 默认值，所以注释掉
-  # Custom color overrides (optional)
-  # Uncomment and modify if you want to override specific colors
-  #  stylix.override = {
-  #    base00 = "#1d2021"; # background
-  #    base01 = "#3c3836"; # lighter background
-  #    base02 = "#504945"; # selection background
-  #    base03 = "#665c54"; # comments
-  #    base04 = "#bdae93"; # dark foreground
-  #    base05 = "#d5c4a1"; # foreground
-  #    base06 = "#ebdbb2"; # light foreground
-  #    base07 = "#fbf1c7"; # light background
-  #    base08 = "#fb4934"; # red
-  #    base09 = "#fe8019"; # orange
-  #    base0A = "#fabd2f"; # yellow
-  #    base0B = "#b8bb26"; # green
-  #    base0C = "#8ec07c"; # cyan
-  #    base0D = "#83a598"; # blue
-  #    base0E = "#d3869b"; # purple
-  #    base0F = "#d65d0e"; # brown
-  #  };
 }

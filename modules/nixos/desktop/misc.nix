@@ -48,15 +48,5 @@
   programs = {
     # dconf is a low-level configuration system.
     dconf.enable = true;
-
-    # thunar file manager(part of xfce) related options
-    # FIXME 暂时禁用，如果有问题再说
-    #    thunar = {
-    #      enable = true;
-    #      plugins = with pkgs.xfce; [
-    #        thunar-archive-plugin
-    #        thunar-volman
-    #      ];
-    #    };
   };
 }

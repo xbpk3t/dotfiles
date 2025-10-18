@@ -128,3 +128,36 @@ tasks:
   # - echo -e "$(cmd)" # Use `echo -e`+double quotes to avoid special character issues (ensure special characters are not lost)
   # - echo -n # Echo without newline, use echo -n to prevent strings from being wrapped
   # - sed -n '1w <output-file>' <input-file> # Write the first line of input-file to output-file
+
+
+
+  rename:
+    desc: Rename files (and optionally directories recursively) by replacing a pattern with a new string (task rename [--recursive] <old> <new>, task rename-undo)
+    cmds:
+      - |
+        if [ "{{.RECURSIVE}}" = "true" ]; then
+          rnr regex -f -r -D -x "{{.PATTERN}}" "{{.REPLACEMENT}}" ./
+        else
+          rnr regex -f "{{.PATTERN}}" "{{.REPLACEMENT}}" ./*
+        fi
+    vars:
+      PATTERN:
+        sh: echo "{{.CLI_ARGS | default 'file renamed'}}" | awk '{print $1}'
+      REPLACEMENT:
+        sh: echo "{{.CLI_ARGS | default 'file renamed'}}" | awk '{print $2}'
+      RECURSIVE:
+        sh: echo "{{.CLI_ARGS}}" | grep -w -- "--recursive" > /dev/null && echo "true" || echo "false"
+    silent: true
+
+    # 回滚操作
+    rename-undo:
+      desc: Undo a previous rename operation using the latest dump file
+      cmds:
+        - |
+          DUMP_FILE=$(ls -t rnr-*.json | head -n 1)
+          if [ -z "$DUMP_FILE" ]; then
+            echo "No dump file found for undo operation."
+            exit 1
+          fi
+          rnr from-file -f -u "$DUMP_FILE"
+      silent: true

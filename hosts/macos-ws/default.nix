@@ -1,8 +1,6 @@
 # Darwin host configuration
 # This file contains host-specific configurations that should not be shared between different machines
 {myvars, ...}: {
-  # PLAN [2025-10-08] 目前 username 仍然用的是全局的。应该是不同host可以设置各自的username，才是合理的方案
-
   # Host-specific overrides for system defaults
   # These will override the defaults set in modules/darwin/system.nix
   system.defaults = {
@@ -49,9 +47,5 @@
   # They will override or extend the module configurations
 
   # 系统级配置启用
-  modules = {
-    networking = {
-      singbox.enable = true;
-    };
-  };
+  modules.networking.singbox.enable = true;
 }
