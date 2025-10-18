@@ -84,12 +84,97 @@ in {
     # Install sing-box package
     environment.systemPackages = [pkgs.sing-box];
 
+    # Systemd service to download sing-box configuration from subscription URL
+    # 独立的配置下载服务，与 sing-box 主服务解耦
+    systemd.services.sing-box-update-config = {
+      description = "Update Sing-box Configuration from Subscription URL";
+
+      # 使用 systemd 内置的重试机制，比自己写 shell 脚本更优雅
+      serviceConfig = {
+        Type = "oneshot";
+        User = "root";
+
+        # 重试配置：失败后自动重试，使用指数退避
+        Restart = "on-failure";
+        RestartSec = "30s"; # 初始重试间隔 30 秒
+        RestartMaxDelaySec = "5min"; # 最大重试间隔 5 分钟
+        StartLimitBurst = 5; # 最多重试 5 次
+        StartLimitIntervalSec = "1h"; # 1 小时内最多重试 5 次
+      };
+
+      script = ''
+        set -euo pipefail
+
+        # Read subscription URL from secret
+        SUBSCRIPTION_URL=$(cat /etc/sk/singbox/subscription_url)
+
+        # Create config directory if it doesn't exist
+        mkdir -p /etc/sing-box
+
+        # 临时文件，下载成功后再替换正式配置
+        TEMP_CONFIG="/etc/sing-box/config.json.tmp"
+        CONFIG_FILE="/etc/sing-box/config.json"
+
+        echo "Downloading sing-box configuration from subscription URL..."
+
+        # Download configuration with retry and timeout
+        # -f: fail silently on HTTP errors
+        # -S: show error even with -s
+        # -L: follow redirects
+        # --retry 3: retry 3 times on transient errors
+        # --retry-delay 5: wait 5 seconds between retries
+        # --retry-max-time 60: max 60 seconds for all retries
+        # --connect-timeout 30: connection timeout 30 seconds
+        # --max-time 120: max total time 120 seconds
+        ${pkgs.curl}/bin/curl -fsSL \
+          --retry 3 \
+          --retry-delay 5 \
+          --retry-max-time 60 \
+          --connect-timeout 30 \
+          --max-time 120 \
+          "$SUBSCRIPTION_URL" \
+          -o "$TEMP_CONFIG"
+
+        # Verify the downloaded file is valid JSON
+        if ! ${pkgs.jq}/bin/jq empty "$TEMP_CONFIG" 2>/dev/null; then
+          echo "Error: Downloaded configuration is not valid JSON"
+          rm -f "$TEMP_CONFIG"
+          exit 1
+        fi
+
+        # 原子性替换配置文件
+        mv -f "$TEMP_CONFIG" "$CONFIG_FILE"
+        chmod 600 "$CONFIG_FILE"
+
+        echo "Sing-box configuration updated successfully"
+      '';
+    };
+
+    # Systemd timer to update sing-box configuration every 12 hours
+    systemd.timers.sing-box-update-config = {
+      description = "Timer for Sing-box Configuration Update";
+      wantedBy = ["timers.target"];
+
+      timerConfig = {
+        # 系统启动后 5 分钟首次运行
+        OnBootSec = "5min";
+        # 之后每 12 小时运行一次
+        OnUnitActiveSec = "12h";
+        # 如果错过了运行时间，立即运行
+        Persistent = true;
+        # 添加随机延迟 0-30 分钟，避免所有机器同时请求
+        RandomizedDelaySec = "30min";
+      };
+    };
+
     # Create systemd system service for sing-box (requires root for TUN interface)
-    # FIXME 替换为直接从 sub-store 的URL拉取
     systemd.services.sing-box = {
       description = "Sing-box Proxy Service";
       wantedBy = ["multi-user.target"];
-      after = ["network.target"];
+      # 确保配置文件存在后再启动
+      after = ["network.target" "sing-box-update-config.service"];
+      # 首次启动前必须先下载配置
+      requires = ["sing-box-update-config.service"];
 
       serviceConfig = {
         Type = "simple";

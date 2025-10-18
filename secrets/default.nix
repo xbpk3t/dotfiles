@@ -64,6 +64,13 @@ in {
         group = platform.userGroup;
         mode = "0400";
       };
+
+      # Sing-box subscription URL
+      "singbox/subscription_url" = {
+        owner = "root";
+        group = "root";
+        mode = "0400";
+      };
     };
   };
 
@@ -86,6 +93,9 @@ in {
     };
     "sk/claude/zai/token" = {
       source = config.sops.secrets."claude/zai/token".path;
+    };
+    "sk/singbox/subscription_url" = {
+      source = config.sops.secrets."singbox/subscription_url".path;
     };
   };
 
@@ -115,6 +125,10 @@ in {
     if [ -f ${skBasePath}/claude/zai/token ]; then
       chown ${myvars.username}:${platform.userGroup} ${skBasePath}/claude/zai/token
       chmod 600 ${skBasePath}/claude/zai/token
+    fi
+    if [ -f ${skBasePath}/singbox/subscription_url ]; then
+      chown root:root ${skBasePath}/singbox/subscription_url
+      chmod 400 ${skBasePath}/singbox/subscription_url
     fi
   '';
 }
