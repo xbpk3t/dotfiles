@@ -1,5 +1,7 @@
 {pkgs, config, ...}: {
   home.packages = with pkgs; [
+    go
+
     gotools # goimports
     gum
     gofumpt
@@ -23,8 +25,14 @@
   programs.go = {
     enable = true;
 
+    package = pkgs.go;
+
     # Go 环境变量设置 (更新为新语法)
     env = {
+      # GOROOT 设置 - 确保与 go 版本一致
+      # 否则会出现 go env GOROOT 和 go version 显示 golang version 不一致的情况
+      GOROOT = "${pkgs.go}/share/go";
+
       # GOPATH 设置
       GOPATH = "${config.home.homeDirectory}/go";
 
