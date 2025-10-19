@@ -19,6 +19,9 @@
         PWGEN_SECRET_KEY = "$(cat /etc/sk/pwgen/sk)";
         GITHUB_TOKEN = "$(gh auth token)";
 
+        MOBILE = "$(cat /etc/sk/me/mobile)";
+        PASS = "$(cat /etc/sk/me/pass)";
+
         # Locale
         LANG = "en_US.UTF-8";
         LC_CTYPE = "en_US.UTF-8";

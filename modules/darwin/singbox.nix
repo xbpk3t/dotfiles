@@ -24,7 +24,7 @@ in {
         set -euo pipefail
 
         # Read subscription URL from secret
-        SUBSCRIPTION_URL=$(cat /etc/sk/singbox/subscription_url)
+        SUBSCRIPTION_URL=$(cat /etc/sk/singbox/url)
 
         # Create config directory if it doesn't exist
         mkdir -p /Users/${myvars.username}/.config/sing-box
