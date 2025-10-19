@@ -54,6 +54,26 @@ in {
   # [sing-box 裸核运行指南+批量机场节点导入配置模板教程（适用 windows/OpenWRT） - 开发调优 - LINUX DO](https://linux.do/t/topic/770312)
   # [](https://raw.githubusercontent.com/Keywos/rule/main/rename.js)
 
+  # [2025-10-19]
+  # https://linux.do/t/topic/231929 每个节点名字前有机场名，有分流
+  # https://linux.do/t/topic/128839/6
+  # https://linux.do/t/topic/785811
+  # https://linux.do/t/topic/938696
+
+  # 想法很好很天真，云端测速，多端的singbox直接吃现成的（默认latency排序，singbox默认读取第一个node）
+  #
+  #但是之前忽略了一点，目前sub-store是跑在HK节点的。而我所有需要跑singbox进程的端的网络环境就比较复杂了。
+  #
+  #所以这里这个问题的最优解是什么？
+  #
+  #是直接本地singbox测速转换节点？但是singbox cli 本身不支持这个操作，所以怎么实现呢？
+  #
+  #还是说有更好的方案？
+
+  # MAYBE [2025-10-19] 把这个 sbshell 迁移到nix里
+  # [官方singbox一键辅助脚本实现自动订阅+配置文件 - 开发调优 - LINUX DO](https://linux.do/t/topic/294209)
+  # [qljsyph/sbshell: 官方 sing-box 内核的辅助脚本--客户端&服务端](https://github.com/qljsyph/sbshell)
+
   # [beck-8/subs-check: 订阅转换、测速、测活、流媒体检测、重命名、导出为任意格式的工具](https://github.com/beck-8/subs-check)
 
   #     experimental.cache_file = {
@@ -106,7 +126,7 @@ in {
         set -euo pipefail
 
         # Read subscription URL from secret
-        SUBSCRIPTION_URL=$(cat /etc/sk/singbox/subscription_url)
+        SUBSCRIPTION_URL=$(cat /etc/sk/singbox/url)
 
         # Create config directory if it doesn't exist
         mkdir -p /etc/sing-box

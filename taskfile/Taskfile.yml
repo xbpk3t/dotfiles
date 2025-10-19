@@ -48,6 +48,7 @@ includes:
   wf: taskfile/mac/Taskfile.workflow.yml
   sb: taskfile/mac/Taskfile.singbox.yml
   z: taskfile/mac/Taskfile.z.yml
+  ss: taskfile/mac/Taskfile.snippets.yml
 
   sec: taskfile/works/Taskfile.sec.yml
 

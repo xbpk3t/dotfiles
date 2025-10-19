@@ -29,6 +29,6 @@
     wf-recorder # screen recording
     # audio
     alsa-utils # provides amixer/alsamixer/...
-    networkmanagerapplet # provide GUI app: nm-connection-editor
+    # networkmanagerapplet # provide GUI app: nm-connection-editor
   ];
 }

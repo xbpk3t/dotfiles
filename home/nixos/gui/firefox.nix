@@ -1,63 +1,9 @@
 {pkgs, ...}: {
-  #  programs.chromium = {
-  #    enable = true;
-  #    package = pkgs.chromium;
-  #
-  #    # https://wiki.archlinux.org/title/Chromium#Native_Wayland_support
-  #    commandLineArgs = [
-  #      "--ozone-platform-hint=auto"
-  #      "--ozone-platform=wayland"
-  #      # make it use GTK_IM_MODULE if it runs with Gtk4, so fcitx5 can work with it.
-  #      # (only supported by chromium/chrome at this time, not electron)
-  #      "--gtk-version=4"
-  #      # make it use text-input-v1, which works for kwin 5.27 and weston
-  #      "--enable-wayland-ime"
-  #
-  #      # Chrome 字体渲染优化 - 解决 Wayland 下字体发虚问题
-  #      "--enable-font-antialiasing=1"
-  #      "--disable-skia-runtime-opts" # 禁用 Skia 运行时优化，改善字体渲染
-  #      "--enable-features=FontPrefs,WebUIDarkMode,UseOzonePlatform"
-  #      "--disable-gpu-process-crash-limit" # 防止 GPU 进程崩溃导致的字体问题
-  #
-  #      # 字体渲染质量优化
-  #      "--force-device-scale-factor=1" # 强制设备缩放因子，避免字体模糊
-  #      "--disable-lcd-text" # 在某些情况下可以改善字体渲染
-  #      "--enable-native-gpu-memory-buffers" # 改善 GPU 内存缓冲，提升渲染质量
-  #
-  #      # 启用硬件加速 - vulkan api (可选)
-  #      # "--enable-features=Vulkan"
-  #    ];
-  #
-  #    # Extensions (using extension IDs from Chrome Web Store)
-  #    extensions = [
-  #      # AdGuard AdBlocker
-  #      {id = "bgnkhhnnamicmpeenaelnjfhikgbkllg";}
-  #
-  #      # Easy Scraper
-  #      {id = "cljbfnedccphacfneigoegkiieckjndh";}
-  #
-  #      # Immersive Translate
-  #      {id = "bpoadfkcbjbfhfodiogcnhhhpibjhbnh";}
-  #
-  #      # OneTab
-  #      {id = "chphlpgkkbolifaimnlloiipkdnihall";}
-  #
-  #      # Recent Tabs
-  #      {id = "ocllfmhjhfmogablefmibmjcodggknml";}
-  #
-  #      # Wappalyzer
-  #      {id = "gppongmhjkpfnbhagpmjfkannfbllamg";}
-  #
-  #      # Authenticator
-  #      {id = "bhghoamapcdpbohphigoooaddinpkbai";}
-  #      # Vimium (vim-like navigation)
-  #      #      {id = "dbepggeogbaibhgnhhndojpepiihcmeb";}
-  #    ];
-  #  };
-
   home = {
-    sessionVariables.MOZ_USE_XINPUT2 = "1"; # Improves trackpad scrolling in FF
-    sessionVariables.MOZ_ENABLE_WAYLAND = "1"; # Sometimes FF launches under XWayland otherwise
+    # Improves trackpad scrolling in FF
+    sessionVariables.MOZ_USE_XINPUT2 = "1";
+    # Sometimes FF launches under XWayland otherwise
+    sessionVariables.MOZ_ENABLE_WAYLAND = "1";
   };
 
   programs.firefox = {
@@ -153,6 +99,13 @@
 
           # 启用 WebRender 以改善图形性能: WebRender 是 Firefox 的现代渲染引擎，能更好地利用 GPU，尤其在 Wayland 上。你的配置有 layers.acceleration，但启用 WebRender 可以进一步优化滚动和动画。
           "gfx.webrender.all" = true;
+
+          # 禁用 Firefox Sync
+          # 完全禁用 Sync 功能，包括：
+          # - 移除 Firefox 帐户登录入口（设置中不再显示 Sync 选项）。
+          # - 停止所有同步相关的网络请求和后台进程。
+          # - 消除所有 Sync 相关的开销（网络流量、CPU、内存、电池等）。
+          "identity.fxaccounts.enabled" = false;
         };
       };
     };
@@ -167,6 +120,9 @@
       DontCheckDefaultBrowser = true;
       DisplayBookmarksToolbar = "never";
       DisplayMenuBar = "default-off";
+
+      # 禁用 firefox 账号（类似上面 profiles/settings 里的禁用配置），但作用范围更广（可能影响其他帐户相关功能）。
+      DisableFirefoxAccounts = true;
 
       # 启用自动更新扩展
       ExtensionsUpdate = true;

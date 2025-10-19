@@ -136,7 +136,7 @@
       '';
 
       # PATH 设置（使用 Home Manager 的正确方式）
-      # PLAN [2025-10-06] home.sessionPath -> programs.zsh.sessionVariables 现在zsh有bug，只能这么来处理
+      # MAYBE [2025-10-06] home.sessionPath -> programs.zsh.sessionVariables 现在zsh有bug，只能这么来处理
       #  [bug: home.sessionPath is broken with ZSH · Issue #2991 · nix-community/home-manager](https://github.com/nix-community/home-manager/issues/2991)
       sessionVariables = {
         PATH = lib.concatStringsSep ":" [
