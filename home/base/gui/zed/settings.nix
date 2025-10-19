@@ -6,9 +6,6 @@
   # - [通过CMD+`切换项目] 怎么通过 CMD+` 快捷键，直接在多个project之间切换？我在配置 use_system_window_tabs 之前，本身通过 CMD+` 这种mac本身提供的窗口切换来切换项目是可行的，但是在添加该配置之后，因为本身没有多窗口了，所以怎么需要配置哪个快捷键来保证类似操作？
   # - [类似CMD+E切换最近修改文件]
 
-  # FIXME [2025-10-12] https://zed.dev/blog/claude-code-via-acp 配置zed的AI相关
-  # https://linux.do/t/topic/929471/4
-
   # 可供参考的zed配置
   # https://github.com/linkfrg/dotfiles/blob/main/modules/home-manager/software/zed/settings.nix
   # https://github.com/pabloagn/rhodium/blob/main/home/apps/ides/zed/default.nix
@@ -164,8 +161,19 @@
     };
   };
   "restore_on_startup" = "last_session";
-  "disable_ai" = true;
+  # AI Configuration - Enable Claude Code via ACP
+  # Reference: https://zed.dev/blog/claude-code-via-acp
+  "disable_ai" = false;
   "cursor_shape" = "bar";
+
+  # Agent Configuration - Claude Code via ACP
+  # Make sure you have the latest version of Zed
+  # Find available agents in the Plus menu in the Agent Panel
+  "agent" = {
+    "provider" = "claude-code";
+    # Claude Code will run as an independent process via ACP
+    # Zed provides the UI for following edits, reviewing changes, and managing tasks
+  };
   "gutter" = {
     "line_numbers" = true;
     "runnables" = true;
@@ -184,9 +192,12 @@
     "hunk_style" = "staged_hollow";
   };
 
+  # AI Features Configuration
   features = {
-    copilot = false;
-    inline_completion_provider = "none";
+    # Enable AI features for Claude Code integration
+    copilot = false; # Keep GitHub Copilot disabled, using Claude Code instead
+    # Enable inline completion via AI
+    inline_completion_provider = "supermaven"; # or "none" if you prefer manual AI invocation
   };
   hour_format = "hour24";
 }
