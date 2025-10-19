@@ -24,10 +24,10 @@
       }
 
       # Lock screen after another 5 minutes (total 10 min inactivity)
-#      {
-#        timeout = 600;
-#        command = "${pkgs.swaylock}/bin/swaylock -f";
-#      }
+      #      {
+      #        timeout = 600;
+      #        command = "${pkgs.swaylock}/bin/swaylock -f";
+      #      }
 
       # Suspend system after another 15 minutes (total 20 min inactivity)
       # 注意这里只配置了STR(Sleep) (也就是systemctl suspend)，没有配置STD(Hibernate)和 hyprid-sleep
@@ -41,10 +41,10 @@
     events = [
       # Lock screen before sleep (when manually suspending or via timeout)
       # 我不需要swaylock，所以不配置 before-sleep 事件
-#      {
-#        event = "before-sleep";
-#        command = "${pkgs.swaylock}/bin/swaylock -f";
-#      }
+      #      {
+      #        event = "before-sleep";
+      #        command = "${pkgs.swaylock}/bin/swaylock -f";
+      #      }
 
       # Optional: Lock screen on explicit lock signal (e.g., from keybind)
       # This ensures consistency if you have a manual lock shortcut
@@ -56,37 +56,38 @@
     ];
   };
 
-# Swaylock configuration
-# 我不需要swaylock，所以全部注释掉
-#  programs.swaylock = {
-#    enable = true;
-#
-#    settings = {
-#      # Display settings
-#      show-failed-attempts = true;
-#      show-keyboard-layout = false;
-#      indicator-caps-lock = true;
-#
-#      # Appearance - using stylix colors
-#      # These will be automatically themed by stylix
-#      daemonize = true;
-#
-#      # Disable the default background
-#      # Stylix will handle the background color
-#      ignore-empty-password = true;
-#
-#      # Additional optimizations:
-#      # - Grace period: Allow a short time to enter password without re-locking immediately
-#      # 宽限期，避免立即重锁
-#      grace = 5; # 5 seconds grace period after wake to enter password
-#
-#      # - Fade-in effect for smoother appearance (minimal overhead)
-#      # 平滑淡入效果，提升用户体验，几乎无开销
-#      fade-in = 0.5; # Fade in over 0.5 seconds
-#
-#      # - Disable screenshot capture for security (prevents grabbing lock screen)
-#      # 增强安全，防止截屏锁屏
-#      screenshots = false;
-#    };
-#  };
+  # Swaylock configuration
+  # 我不需要swaylock，所以全部注释掉
+  # 因为我现在的机器不支持指纹解锁，且因为使用 initialHashedPassword 导致每次解锁都很慢，体验很差
+  #  programs.swaylock = {
+  #    enable = true;
+  #
+  #    settings = {
+  #      # Display settings
+  #      show-failed-attempts = true;
+  #      show-keyboard-layout = false;
+  #      indicator-caps-lock = true;
+  #
+  #      # Appearance - using stylix colors
+  #      # These will be automatically themed by stylix
+  #      daemonize = true;
+  #
+  #      # Disable the default background
+  #      # Stylix will handle the background color
+  #      ignore-empty-password = true;
+  #
+  #      # Additional optimizations:
+  #      # - Grace period: Allow a short time to enter password without re-locking immediately
+  #      # 宽限期，避免立即重锁
+  #      grace = 5; # 5 seconds grace period after wake to enter password
+  #
+  #      # - Fade-in effect for smoother appearance (minimal overhead)
+  #      # 平滑淡入效果，提升用户体验，几乎无开销
+  #      fade-in = 0.5; # Fade in over 0.5 seconds
+  #
+  #      # - Disable screenshot capture for security (prevents grabbing lock screen)
+  #      # 增强安全，防止截屏锁屏
+  #      screenshots = false;
+  #    };
+  #  };
 }

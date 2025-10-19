@@ -86,7 +86,6 @@
       VerticalCandidateList=False
       # ... 其他 UI 设置
     '';
-
   };
 
   # 输入法系统配置
