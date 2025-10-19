@@ -140,27 +140,15 @@
         ];
 
         # 图片预览
-        # PLAN [2025-10-09] 之后还是处理成yazi内嵌图片preview。用imv不支持上下键切换图片
-        preview_image = [
-          {
-            run = ''imv "$1"'';
-            desc = "Preview Image";
-            for = "unix";
-            orphan = true; # 非阻塞模式
-          }
-          {
-            run = ''qlmanage -p "$1"'';
-            desc = "Preview Image";
-            for = "macos";
-            orphan = true;
-          }
-          {
-            run = ''start "" "%1"'';
-            desc = "Preview Image";
-            for = "windows";
-            orphan = true;
-          }
-        ];
+        # Use yazi's built-in image preview instead of external viewers
+        # This allows arrow key navigation between images
+        # Yazi automatically selects the appropriate preview method based on terminal capabilities
+        # Supported protocols: Kitty, iTerm2, WezTerm, Sixel, etc.
+        # For more info: https://yazi-rs.github.io/docs/image-preview/
+        #
+        # Note: Removed imv external viewer as it doesn't support arrow key navigation
+        # Yazi's built-in preview works with j/k or arrow keys to navigate between images
+        preview_image = [];
       };
       open = {
         rules = [
@@ -1001,4 +989,8 @@
       }
     '';
   };
+
+  # alacritty support for yazi
+  # https://yazi-rs.github.io/docs/image-preview/
+  home.packages = with pkgs; [ueberzugpp];
 }
