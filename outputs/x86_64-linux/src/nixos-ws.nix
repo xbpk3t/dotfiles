@@ -68,6 +68,7 @@
       ++ [
         inputs.sops-nix.nixosModules.sops
         inputs.xremap-flake.nixosModules.default
+        inputs.nixos-cli.nixosModules.nixos-cli
         {
           modules.desktop.wayland.enable = true;
         }

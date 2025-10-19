@@ -59,7 +59,6 @@ in {
 
         echo "Sing-box configuration updated successfully"
       '';
-      mode = "0755";
     };
 
     # Launchd daemon to update sing-box configuration every 12 hours

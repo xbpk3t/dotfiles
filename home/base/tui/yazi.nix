@@ -992,5 +992,7 @@
 
   # alacritty support for yazi
   # https://yazi-rs.github.io/docs/image-preview/
+  # 用imv不支持上下键切换图片，所以处理成yazi内嵌图片preview
+  # 而 alacritty 没有内置images render，所以需要ueberzugpp
   home.packages = with pkgs; [ueberzugpp];
 }

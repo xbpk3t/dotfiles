@@ -70,10 +70,11 @@
         platform = "qtct";
       };
     };
+    # 使用默认 cursor，但是改小size
     cursor = {
-      package = pkgs.bibata-cursors;
-      name = "Bibata-Modern-Ice";
-      size = 24;
+      #      package = pkgs.bibata-cursors;
+      #      name = "Bibata-Modern-Ice";
+      size = 12;
     };
   };
 
