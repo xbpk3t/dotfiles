@@ -9,8 +9,10 @@
   home = {
     username = myvars.username;
     homeDirectory = "/Users/${myvars.username}";
+    # mac-app-util 配置项
     packages = with pkgs; [
       alacritty
+      zed
     ];
   };
 

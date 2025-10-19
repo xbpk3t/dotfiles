@@ -11,8 +11,11 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
+    home.packages = with pkgs; [zed];
+
     programs.zed-editor = {
       enable = true;
+      package = pkgs.zed;
 
       extraPackages = with pkgs; [
         nixd # https://mynixos.com/nixpkgs/package/nixd zed的nix LSP需要nixd

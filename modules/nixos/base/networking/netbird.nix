@@ -141,24 +141,5 @@ in {
         "d /var/run/netbird-default 0755 netbird-default netbird-default -"
       ];
     })
-
-    #---------------------------------------------------------------------------
-    # SERVER CONFIGURATION
-    #---------------------------------------------------------------------------
-    (mkIf cfg.server.enable {
-      # TODO: Implement NetBird server configuration
-      # This would include:
-      # - services.netbird.server.management
-      # - services.netbird.server.signal
-      # - services.netbird.server.relay (coturn)
-      # - Nginx reverse proxy configuration
-
-      assertions = [
-        {
-          assertion = cfg.server.domain != "";
-          message = "modules.networking.netbird.server.domain must be set when server is enabled";
-        }
-      ];
-    })
   ];
 }
