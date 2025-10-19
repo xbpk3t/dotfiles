@@ -28,6 +28,17 @@ in {
 
     # Define secrets
     secrets = {
+      "me/mobile" = {
+        owner = myvars.username;
+        group = platform.userGroup;
+        mode = "0400";
+      };
+      "me/pass" = {
+        owner = myvars.username;
+        group = platform.userGroup;
+        mode = "0400";
+      };
+
       "pwgen/sk" = {
         owner = myvars.username;
         group = platform.userGroup;
@@ -66,7 +77,7 @@ in {
       };
 
       # Sing-box subscription URL
-      "singbox/subscription_url" = {
+      "singbox/url" = {
         owner = "root";
         group = "root";
         mode = "0400";
@@ -76,6 +87,12 @@ in {
 
   # Place secrets in /etc/sk/ for unified management
   environment.etc = {
+    "sk/me/mobile" = {
+      source = config.sops.secrets."me/mobile".path;
+    };
+    "sk/me/pass" = {
+      source = config.sops.secrets."me/pass".path;
+    };
     "sk/pwgen/sk" = {
       source = config.sops.secrets."pwgen/sk".path;
     };
@@ -94,13 +111,24 @@ in {
     "sk/claude/zai/token" = {
       source = config.sops.secrets."claude/zai/token".path;
     };
-    "sk/singbox/subscription_url" = {
-      source = config.sops.secrets."singbox/subscription_url".path;
+    "sk/singbox/url" = {
+      source = config.sops.secrets."singbox/url".path;
     };
   };
 
   # Set proper permissions for the secrets
   system.activationScripts.postActivation.text = ''
+
+    if [ -f ${skBasePath}/me/mobile ]; then
+      chown ${myvars.username}:${platform.userGroup} ${skBasePath}/me/mobile
+      chmod 600 ${skBasePath}/me/mobile
+    fi
+
+    if [ -f ${skBasePath}/me/pass ]; then
+      chown ${myvars.username}:${platform.userGroup} ${skBasePath}/me/pass
+      chmod 600 ${skBasePath}/me/pass
+    fi
+
     if [ -f ${skBasePath}/pwgen/sk ]; then
       chown ${myvars.username}:${platform.userGroup} ${skBasePath}/pwgen/sk
       chmod 600 ${skBasePath}/pwgen/sk
@@ -126,9 +154,9 @@ in {
       chown ${myvars.username}:${platform.userGroup} ${skBasePath}/claude/zai/token
       chmod 600 ${skBasePath}/claude/zai/token
     fi
-    if [ -f ${skBasePath}/singbox/subscription_url ]; then
-      chown root:root ${skBasePath}/singbox/subscription_url
-      chmod 400 ${skBasePath}/singbox/subscription_url
+    if [ -f ${skBasePath}/singbox/url ]; then
+      chown root:root ${skBasePath}/singbox/url
+      chmod 400 ${skBasePath}/singbox/url
     fi
   '';
 }
