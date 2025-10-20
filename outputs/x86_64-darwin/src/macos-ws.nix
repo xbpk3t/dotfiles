@@ -29,12 +29,6 @@
       config.allowUnfree = true;
     };
 
-    # Add anyrun for anyrun configuration modules
-    anyrun = inputs.anyrun;
-
-    # Add catppuccin for theme configuration
-    catppuccin = inputs.catppuccin;
-
     # Add nixvim for neovim configuration
     nixvim = inputs.nixvim;
 

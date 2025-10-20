@@ -34,12 +34,6 @@
       config.allowBroken = true;
     };
 
-    # Add anyrun for anyrun configuration modules
-    anyrun = inputs.anyrun;
-
-    # Add catppuccin for theme configuration
-    catppuccin = inputs.catppuccin;
-
     # Add nixvim for neovim configuration
     nixvim = inputs.nixvim;
 
@@ -182,7 +176,6 @@ in {
         ])
         ++ [
           inputs.sops-nix.nixosModules.sops
-          inputs.xremap-flake.nixosModules.default
           {
             modules.desktop.wayland.enable = true;
           }

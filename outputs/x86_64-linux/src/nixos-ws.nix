@@ -38,9 +38,6 @@
     # Add anyrun for anyrun configuration modules
     anyrun = inputs.anyrun;
 
-    # Add catppuccin for theme configuration
-    catppuccin = inputs.catppuccin;
-
     # Add nixvim for neovim configuration
     nixvim = inputs.nixvim;
 
@@ -67,7 +64,6 @@
       ])
       ++ [
         inputs.sops-nix.nixosModules.sops
-        inputs.xremap-flake.nixosModules.default
         inputs.nixos-cli.nixosModules.nixos-cli
         {
           modules.desktop.wayland.enable = true;
