@@ -68,21 +68,9 @@
       url = "github:nix-community/nixhelm";
     };
 
-    # anyrun - a wayland launcher
-    anyrun = {
-      url = "github:anyrun-org/anyrun/v25.9.0";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     # vicinae - a wayland launcher (alternative to anyrun)
     vicinae = {
       url = "github:vicinaehq/vicinae";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    # catppuccin theme
-    catppuccin = {
-      url = "github:catppuccin/nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -97,20 +85,11 @@
       inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
 
-    nix-flatpak.url = "github:gmodena/nix-flatpak?ref=latest";
-
     # haumea for module loading
     haumea = {
       url = "github:nix-community/haumea/v0.2.2";
       inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
-
-    quickshell = {
-      url = "github:outfoxxed/quickshell";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    xremap-flake.url = "github:xremap/nix-flake";
 
     # https://github.com/numtide/flake-utils
     utils.url = "github:numtide/flake-utils";
