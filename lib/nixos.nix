@@ -35,7 +35,6 @@ in
           home-manager.users."${myvars.username}".imports =
             home-modules
             ++ [
-              inputs.catppuccin.homeModules.catppuccin
               inputs.nixvim.homeModules.nixvim
               inputs.nvf.homeManagerModules.default
               # inputs.vicinae.homeManagerModules.default
