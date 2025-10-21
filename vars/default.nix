@@ -1,5 +1,7 @@
 {lib}: {
-  name = "dotfiles";
+  # Project directory name (relative to Desktop)
+  # This is used to construct the full project path
+  projectDir = "Desktop/dotfiles";
 
   username = "luck";
   userfullname = "lucas";

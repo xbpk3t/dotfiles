@@ -8,10 +8,14 @@
 }: {
   imports = mylib.scanPaths ./.;
 
+  # MAYBE https://github.com/triton/triton/blob/master/pkgs/all-pkgs/s/systemd/default.nix 这个配置太牛逼了，之后学着搞下
+
   # Additional Nix management tools
   environment.systemPackages = with pkgs; [
+    # Install nixos-cli package
+    inputs.nixos-cli.packages.${pkgs.system}.default
+
     nix-output-monitor # Build progress visualization
-    nvd # Nix version diff tool
 
     deadnix # https://github.com/astro/deadnix
     statix # https://github.com/oppiliappan/statix
@@ -21,7 +25,6 @@
     #
     # it provides the command `nom` works just like `nix
     # with more details log output
-    nix-output-monitor
     hydra-check # check hydra(nix's build farm) for the build status of a package
     nix-index # A small utility to index nix store paths
     nix-init # generate nix derivation from url
@@ -32,7 +35,7 @@
 
     colmena # NixOS 远程部署工具
 
-    nvd # https://mynixos.com/nixpkgs/package/nvd
+    nvd # https://mynixos.com/nixpkgs/package/nvd Nix version diff tool
 
     # nix-update # https://github.com/Mic92/nix-update 只适用于nix pkg的维护者，用于自动化更新包版本和哈希
   ];
@@ -47,8 +50,17 @@
       min-free = 128000000;
       max-free = 1000000000;
       trusted-users = ["@wheel"];
+      # https://github.com/NixOS/nix/issues/11728
+      download-buffer-size = 524288000;
     };
-    extraOptions = "experimental-features = nix-command flakes";
+    extraOptions = ''
+      experimental-features = nix-command flakes
+      # GitHub API rate limit fix
+      # To avoid API rate limits, set GITHUB_TOKEN environment variable
+      # The token will be read from gh CLI if available
+      # Usage: export GITHUB_TOKEN=$(gh auth token)
+      # Or add to your shell profile for persistence
+    '';
 
     gc = {
       # 使用 nh 来管理垃圾回收，禁用内置的 nix.gc
@@ -79,37 +91,45 @@
       enable = true;
       extraArgs = "--keep-since 7d --keep 5";
     };
-    flake = "/home/${myvars.username}/nix-config";
+    flake = "/home/${myvars.username}/${myvars.projectDir}";
   };
 
   # nixos-cli - Modern NixOS management CLI
   # https://github.com/nix-community/nixos-cli
   # https://nix-community.github.io/nixos-cli/installation.html
+  # Note: nixos-cli is installed as a package (see environment.systemPackages above)
+  # It provides commands like: nixos build, nixos switch, nixos test, etc.
+  # Configuration is done via environment variables and config files
   services.nixos-cli = {
     enable = true;
     config = {
-      # Optional: Add shell aliases for convenience
-      # These can be added to shell.nix or user's shell configuration
-      # nixos build    - Build the system configuration
-      # nixos switch   - Build and activate the system configuration
-      # nixos test     - Build and test the system configuration (no bootloader)
-      # nixos boot     - Build and set as boot default (activate on next boot)
-      # nixos rollback - Rollback to the previous generation
-      # nixos list     - List all generations
-      # nixos clean    - Clean old generations
+      use_nvd = true;
+      ignore_dirty_tree = true;
+
+      # Shell aliases for convenience
       aliases = {
-        genlist = ["generation" "list"];
-        switch = ["generation" "switch"];
+        # Generation management
+        sw = ["generation" "switch"];
+        ls = ["generation" "list"];
+        gendiff = ["generation" "diff"];
         rollback = ["generation" "rollback"];
         gendel = ["generation" "delete"];
         gendelall = ["generation" "delete" "--all"];
+
+        # Apply/build operations
         build = ["apply" "--no-activate" "--no-boot" "--output" "result"];
         test = ["apply" "--no-boot" "-y"];
+        boot = ["apply" "--no-activate" "-y"];
+        dry = ["apply" "--dry"];
+        vm = ["apply" "--vm"];
+
+        # Information and query
+        opt = ["option"];
+        opts = ["option" "--non-interactive"];
+        man = ["manual"];
       };
 
       apply = {
-        use_nvd = true;
-        use_nom = true;
         imply_impure_with_tag = true;
         use_git_commit_msg = true;
         ignore_dirty_tree = true;
@@ -121,14 +141,18 @@
     Defaults env_keep += "NO_COLOR"
   '';
 
-  # Install nixos-cli package
-  environment.systemPackages = [
-    inputs.nixos-cli.packages.${pkgs.system}.default
-  ];
-
   # Configure nixos-cli
   # Set the flake path for nixos-cli to use
-  environment.sessionVariables = {
-    FLAKE = "/home/${myvars.username}/Desktop/dotfiles";
+  environment.sessionVariables = let
+    projectPath = "/home/${myvars.username}/${myvars.projectDir}";
+  in {
+    FLAKE = projectPath;
+    NIXOS_CONFIG = projectPath;
+
+    # FIXME 看看怎么处理
+    # GitHub API rate limit fix
+    # Commented out because it causes GitHub API 401 errors
+    # See: https://discourse.nixos.org/t/nix-commands-fail-github-requests-401-without-sudo/30038
+    # NIX_CONFIG = "access-tokens = github.com=$GITHUB_TOKEN";
   };
 }
