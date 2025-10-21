@@ -88,5 +88,7 @@ in {
       source = "${config.programs.niri.package}/bin/niri-session";
       executable = true;
     };
+
+    home.file.".config/sunset/sunsetr.toml".source = config.lib.file.mkOutOfStoreSymlink "./sunsetr.toml";
   };
 }
