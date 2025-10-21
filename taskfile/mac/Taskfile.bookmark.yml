@@ -199,5 +199,5 @@ tasks:
 
   json:
     desc: "Output all bookmarks as JSON"
-    cmds: 'yq eval '.vars.BOOKMARKS' "{{.TASKFILE}}" -o json'
+    cmd: yq eval '.vars.BOOKMARKS' "{{.TASKFILE}}" -o json
     silent: true
