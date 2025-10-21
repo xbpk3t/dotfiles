@@ -72,3 +72,14 @@ tasks:
 
   # [hanshuaikang/Nping: 🏎 Nping mean NB Ping, A Ping Tool in Rust with Real-Time Data and Visualizations](https://github.com/hanshuaikang/Nping) 多地址并发 Ping 工具。基于 Rust 开发使用 ICMP 协议的 Ping 工具, 支持多地址并发 Ping, 可视化图表展示, 数据实时更新等特性。Rust 的多地址并发 Ping 工具。这是一个用 Rust 开发的可视化 Ping 工具，支持同时对多个目标地址并发 Ping 操作。它提供了分区折线图和表格视图等可视化展示，支持实时动态展示延迟、丢包率等性能指标，同时兼容 IPv4 和 IPv6 网络环境。
   nping:
+
+
+  wifi:
+    cmds:
+      - sudo nmcli dev # 查看网络设备
+      - sudo nmcli r wifi on # 开启wifi
+      - sudo nmcli dev wifi # 扫描wifi
+      - sudo nmcli dev wifi connect wifi-name password pwd # 连接wifi
+    preconditions:
+      - sh: command -v nmcli
+        msg: nmcli not found
