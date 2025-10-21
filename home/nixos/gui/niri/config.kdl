@@ -105,30 +105,15 @@ layout {
 // 窗口规则
 // ============================================================================
 
-// 默认所有窗口全屏打开
+// 默认所有窗口全屏打开（类似 Super+F 效果）
+// 并且自动聚焦新打开的窗口（例如从终端点击 URL 打开浏览器时）
 window-rule {
     // 匹配所有窗口
     default-column-width { proportion 1.0; }
-    open-maximized true
-}
-
-// 工作区分配规则
-window-rule {
-    match app-id="^alacritty$"
-    open-on-workspace "1"
-    open-maximized true
-}
-
-window-rule {
-    match app-id="^firefox$"
-    open-on-workspace "2"
-    open-maximized true
-}
-
-window-rule {
-    match app-id="^goland$"
-    open-on-workspace "3"
-    open-maximized true
+    open-fullscreen true
+    open-focused true
+    // 保证只有一个focus window
+    match is-focused=true
 }
 
 // ============================================================================
@@ -147,6 +132,9 @@ spawn-at-startup "/usr/lib/mate-polkit/polkit-mate-authentication-agent-1"
 
 // 启动 xwayland-satellite 以支持 X11 应用（如 GoLand）
 spawn-at-startup "xwayland-satellite"
+
+// nisiusd
+spawn-at-startup "niriusd"
 
 // ============================================================================
 // 快捷键绑定
@@ -181,21 +169,24 @@ binds {
     Mod+B { spawn "firefox"; }
     Mod+I { spawn "goland"; }
     // 双击super -> launcher
-    Mod+D { spawn "vicinae"; }
+    Mod+D { spawn-sh "vicinae toggle"; }
 
     // ========================================================================
-    // 工作区管理
+    // 应用切换 - 类似 macOS Alfred 的 App 切换
     // ========================================================================
+    // 注意：niri 不直接支持按 app-id 聚焦窗口的命令
+    // 这里使用 spawn 命令配合 niri msg 来实现
+    // 如果应用未运行，则启动；如果已运行，则聚焦
 
-    Mod+1 { focus-workspace 1; }
-    Mod+2 { focus-workspace 2; }
-    Mod+3 { focus-workspace 3; }
+    // Super+1: 切换到 Alacritty
+    // Use -a for app-id matching. Common app-ids: Alacritty, firefox, jetbrains-goland
+    Mod+1 { spawn-sh "nirius focus-or-spawn -a 'Alacritty' alacritty"; }
 
-    // 移动窗口到工作区
-    Mod+Shift+F1 { move-column-to-workspace 1; }
-    Mod+Shift+F2 { move-column-to-workspace 2; }
-    Mod+Shift+F3 { move-column-to-workspace 3; }
+    // Super+2: 切换到 Firefox
+    Mod+2 { spawn-sh "nirius focus-or-spawn -a 'firefox' firefox"; }
 
+    // Super+3: 切换到 GoLand
+    Mod+3 { spawn-sh "nirius focus-or-spawn -a 'jetbrains-goland' goland"; }
     // ========================================================================
     // 窗口焦点切换
     // ========================================================================
@@ -257,17 +248,11 @@ binds {
 
     // 网络管理器
     // 注意：Mod+N 被 DMS 用于通知中心，这里使用 Mod+Shift+N
-    Mod+Shift+N { spawn "nm-connection-editor"; }
+    // [2025-10-19] 用不到，注释掉
+    // Mod+Shift+N { spawn "nm-connection-editor"; }
 
     // Fcitx5 重启
     Mod+E { spawn "bash" "-c" "pkill fcitx5 -9; sleep 1; fcitx5 -d --replace; sleep 1; fcitx5-remote -r"; }
-
-    // ========================================================================
-    // 工作区滚动切换
-    // ========================================================================
-
-    Mod+WheelScrollDown { focus-workspace-down; }
-    Mod+WheelScrollUp { focus-workspace-up; }
 
     // ========================================================================
     // 消费或弹出窗口（niri 特有功能）
@@ -283,4 +268,15 @@ binds {
 
     Mod+R { switch-preset-column-width; }
     Mod+Shift+R { reset-window-height; }
+}
+
+// stylix的cursor无法处理niri的curosr，所以必须要在niri里处理cursor配置
+cursor {
+    // xcursor-theme "default"
+    // xcursor-theme "macOS-BigSur-White"
+    xcursor-theme "Bibata-Modern-Classic"
+    xcursor-size 16
+
+    // hide-when-typing
+    // hide-after-inactive-ms 1000
 }
