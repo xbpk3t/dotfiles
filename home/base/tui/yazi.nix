@@ -408,6 +408,8 @@
       };
     };
 
+    #I don't get that.. normally it's a add file (touch) or A for add folder (or mkdir) r for RENAME (R for rename the file extension) y for yank (vim wording for copy) x for cut (like windoof Ctrl + x) v for visual mode (select more files or folders for copy or delete) d for delete trash and D for perma delete. I think it's quite intuitive and way faster than typing the command.
+    #我不明白……通常情况下，它是添加文件（touch）或 A 添加文件夹（或 mkdir），r 重命名（R 重命名文件扩展名），y 复制（vim 中复制的写法），x 剪切（类似 windows 的 Ctrl + x），v 可视模式（选择更多文件或文件夹进行复制或删除），d 删除垃圾文件，D 永久删除。我觉得这很直观，而且比直接输入命令快得多。
     keymap = {
       keymap = [
         {

@@ -1,8 +1,30 @@
-_: {
+{pkgs, ...}: {
+  # https://github.com/nix-community/nix-direnv
+  # https://mynixos.com/home-manager/options/programs.direnv
+  # https://mynixos.com/nixpkgs/options/programs.direnv
+
+  # https://blog.therainisme.com/nixos
+
+  home.packages = with pkgs; [
+    direnv
+    nix-direnv
+
+    devbox # [devbox - MyNixOS](https://mynixos.com/nixpkgs/package/devbox)
+  ];
+
   programs.direnv = {
     enable = true;
+    silent = false;
+    #    loadInNixShell = true;
+
+    package = pkgs.direnv;
     # 启用 nix-direnv 集成以提高性能
-    nix-direnv.enable = true;
+    nix-direnv = {
+      enable = true;
+      package = pkgs.nix-direnv;
+    };
+
+    #    direnvrcExtra = "";
 
     enableZshIntegration = true;
 

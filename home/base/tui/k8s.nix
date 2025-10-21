@@ -58,6 +58,8 @@
     # **使用 IPVS 模式的前提：** 如果计划或正在使用 `kube-proxy` 的 `ipvs` 模式，那么 `ipvsadm` 是必需的，因为 `kube-proxy` 需要用它来配置内核中的 IPVS 规则。同时，`ipvs` 模式本身通常也需要依赖 `ipset` 来实现某些功能。
     # **结论：** 如果你使用 `kube-proxy` 的默认 `iptables` 模式，`ipvsadm` 不是必需的。但如果你计划使用或正在使用性能更优的 `ipvs` 模式，那么 `ipvsadm` 是**必须安装**的。即使现在不用 IPVS 模式，预先安装它为将来可能的模式切换或性能优化做准备也是明智的，因此通常是**可选，但推荐安装**。
 
+    helm-dashboard # https://github.com/komodorio/helm-dashboard/
+
     #    # Kubernetes 相关工具
     #    kubectl
     #    kubernetes-helm
