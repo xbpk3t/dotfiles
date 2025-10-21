@@ -51,7 +51,5 @@
     imagemagick
     exiftool
     graphviz
-
-    devbox # [devbox - MyNixOS](https://mynixos.com/nixpkgs/package/devbox)
   ];
 }
