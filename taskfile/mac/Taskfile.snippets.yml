@@ -384,8 +384,6 @@ tasks:
 
   json:
     desc: "Output all snippets as JSON"
-    cmds:
-      - |
-        # Output snippets in JSON format for programmatic use
-        yq eval '.vars.ss' "{{.TASKFILE}}" -o json
+    # Output snippets in JSON format for programmatic use
+    cmd: yq eval '.vars.ss' "{{.TASKFILE}}" -o json
     silent: true
