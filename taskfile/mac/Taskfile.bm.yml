@@ -151,6 +151,12 @@ vars:
     - alias: ping0
       url: https://ping0.cc/
 
+    - alias: getiot
+      url: https://getiot.tech/
+
+    - alias: toolify
+      url: https://www.toolify.ai/
+
 
 tasks:
   default:
