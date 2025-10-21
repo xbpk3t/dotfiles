@@ -24,17 +24,20 @@ export default function Command(props: PwgenProps) {
     try {
       const website = props.arguments.website || '';
 
-      // Try to read secret key from /etc/sk/pwgen file
-      let secretKey = '';
-      try {
-        secretKey = execSync('cat /etc/sk/pwgen 2>/dev/null || echo ""', { encoding: 'utf-8' }).trim();
-      } catch (e) {
-        // Fallback to environment variable
-        secretKey = process.env.PWGEN_SECRET || '';
+      // Try to read secret key from environment variable (set by shell.nix)
+      let secretKey = process.env.PWGEN_SECRET || '';
+
+      // Fallback: try to read from /etc/sk/pwgen/sk file
+      if (!secretKey) {
+        try {
+          secretKey = execSync('cat /etc/sk/pwgen/sk 2>/dev/null || echo ""', { encoding: 'utf-8' }).trim();
+        } catch (e) {
+          // Ignore error, secretKey remains empty
+        }
       }
 
       if (!secretKey) {
-        setError('Secret key not found. Please set PWGEN_SECRET environment variable or ensure /etc/sk/pwgen exists');
+        setError('Secret key not found. Please set PWGEN_SECRET environment variable or ensure /etc/sk/pwgen/sk exists');
         setIsLoading(false);
         return;
       }

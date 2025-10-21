@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/vicinaehq/vicinae/refs/heads/main/extra/schemas/extension.json",
-  "name": "my-tools",
+  "name": "xts",
   "title": "My Tools",
   "description": "Tools for pwgen, gh, ws, ss",
   "categories": ["Developer Tools", "Productivity"],
@@ -41,7 +41,7 @@
       ]
     },
     {
-      "name": "ws",
+      "name": "ww",
       "title": "Bookmarks",
       "subtitle": "Quick access to bookmarks",
       "description": "Search and open bookmarks",

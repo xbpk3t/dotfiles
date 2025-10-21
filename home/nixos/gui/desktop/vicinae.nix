@@ -30,8 +30,8 @@
   };
 
   # 部署 vicinae 扩展源代码
-  # 扩展源代码放在 ~/.local/share/vicinae-ext-src/my-tools
-  home.file.".local/share/vicinae-ext-src/my-tools" = {
+  # 扩展源代码放在 ~/.local/share/vicinae-ext-src/ext
+  home.file.".local/share/vicinae-ext-src/ext" = {
     source = ./ext;
     recursive = true;
   };
@@ -44,7 +44,7 @@
     EXT_DST="$HOME/.local/share/vicinae/extensions/my-tools"
 
     if [ -d "$EXT_SRC" ]; then
-      echo "Building vicinae extension my-tools..."
+      echo "Building vicinae exts..."
       cd "$EXT_SRC"
 
       # 安装依赖（如果需要）
@@ -62,7 +62,7 @@
         # 复制 package.json 和 assets
         cp package.json "$EXT_DST/" || true
         [ -d "assets" ] && cp -r assets "$EXT_DST/" || true
-        echo "Vicinae extension my-tools installed to $EXT_DST"
+        echo "Vicinae exts installed to $EXT_DST"
       fi
     fi
   '';
