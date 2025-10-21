@@ -53,6 +53,7 @@
     };
 
     # Keep nix-homebrew for compatibility
+    # https://github.com/zhaofengli/nix-homebrew
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
 
     # nixvim for neovim configuration
@@ -62,11 +63,6 @@
     };
 
     nvf.url = "github:notashelf/nvf";
-
-    # nixhelm for helm charts management
-    nixhelm = {
-      url = "github:nix-community/nixhelm";
-    };
 
     # vicinae - a wayland launcher (alternative to anyrun)
     vicinae = {

@@ -44,7 +44,7 @@ includes:
   me: taskfile/mac/Taskfile.me.yml
   alfred: taskfile/mac/Taskfile.alfred.yml
   pnpm: taskfile/mac/Taskfile.pnpm.yml
-  bm: taskfile/mac/Taskfile.bm.yml
+  ww: taskfile/mac/Taskfile.bookmark.yml
   wf: taskfile/mac/Taskfile.workflow.yml
   sb: taskfile/mac/Taskfile.singbox.yml
   z: taskfile/mac/Taskfile.z.yml
