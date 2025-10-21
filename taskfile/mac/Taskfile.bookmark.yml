@@ -196,3 +196,8 @@ tasks:
         msg: gum not found, pls install
     interactive: true
     silent: true
+
+  json:
+    desc: "Output all bookmarks as JSON"
+    cmds: 'yq eval '.vars.BOOKMARKS' "{{.TASKFILE}}" -o json'
+    silent: true
