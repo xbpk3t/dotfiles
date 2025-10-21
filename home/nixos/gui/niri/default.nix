@@ -23,6 +23,11 @@ in {
     # 安装 xwayland-satellite 以支持 X11 应用（如 GoLand）
     home.packages = with pkgs; [
       xwayland-satellite
+
+      # https://github.com/psi4j/sunsetr
+      sunsetr
+
+      (callPackage ./nirius.nix {})
     ];
 
     # Wayland 环境变量
@@ -34,7 +39,7 @@ in {
       QT_QPA_PLATFORM = "wayland";
     };
 
-    # FIXME [2025-10-17] [Gesture bindings · Issue #372 · YaLTeR/niri](https://github.com/YaLTeR/niri/issues/372) 等niri支持自定义gestures之后，修改配置
+    # MAYBE [2025-10-17] [Gesture bindings · Issue #372 · YaLTeR/niri](https://github.com/YaLTeR/niri/issues/372) 等niri支持自定义gestures之后，修改配置
 
     # Niri compositor 配置
     # 使用 KDL 配置文件
