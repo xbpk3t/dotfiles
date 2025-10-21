@@ -200,4 +200,28 @@
     inline_completion_provider = "supermaven"; # or "none" if you prefer manual AI invocation
   };
   hour_format = "hour24";
+
+  # https://linux.do/t/topic/929471
+  language_models = {
+    "openai_compatible" = {
+      "glm-open" = {
+        "api_url" = "https=//open.bigmodel.cn/api/paas/v4/";
+        "available_models" = [
+          {
+            "name" = "glm-4.6";
+            "display_name" = null;
+            "max_tokens" = 128000;
+            "max_output_tokens" = 80000;
+            "max_completion_tokens" = 200000;
+            "capabilities" = {
+              "tools" = true;
+              "images" = false;
+              "parallel_tool_calls" = true;
+              "prompt_cache_key" = true;
+            };
+          }
+        ];
+      };
+    };
+  };
 }

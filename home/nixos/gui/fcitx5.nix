@@ -1,6 +1,28 @@
 {pkgs, ...}: {
   # Fcitx5 简化智能拼音输入法配置
   # 只保留核心功能：简体中文 + 英文 + 智能拼音
+  # [fcitx5 settings](https://gist.github.com/ktpss95112/8c0b79a8f82058b89633a4fd1d3e9fa4)
+
+  #  # 测试 fcitx5 是否运行
+  #  fcitx5-remote
+  #
+  #  # 输出应该是：
+  #  # 1 (中文模式) 或 2 (英文模式)
+  #
+  #  # 切换到中文模式
+  #  fcitx5-remote -o
+  #
+  #  # 切换到英文模式
+  #  fcitx5-remote -c
+
+  #  # Fcitx5 日志
+  #  journalctl --user -u fcitx5 -f
+  #
+  #  # 或查看系统日志
+  #  tail -f ~/.local/share/fcitx5/crash.log
+  #
+  #  # 以调试模式启动 fcitx5
+  #  fcitx5 -d --replace --verbose=debug
 
   # Fcitx5 配置文件 - 使用 home.file 直接写入
   home.file = {

@@ -71,15 +71,26 @@
       };
     };
     # 使用默认 cursor，但是改小size
-    cursor = {
-      #      package = pkgs.bibata-cursors;
-      #      name = "Bibata-Modern-Ice";
-      size = 12;
-    };
+    #    cursor = {
+    ##      package = pkgs.bibata-cursors;
+    ##      name = "Bibata-Modern-Classic";
+    ##      size = 14;
+    #
+    #      #      package = pkgs.apple-cursor;
+    #      #      name = "macOS-BigSur-White";
+    #      #      size = 14;
+    #    };
   };
 
   environment.systemPackages = with pkgs; [
     # stylix image as wallpaper, swaybg is required to achieve the effect
     swaybg
+
+    # https://mynixos.com/nixpkgs/package/bibata-cursors
+    bibata-cursors
+
+    # https://github.com/ful1e5/apple_cursor
+    # https://mynixos.com/nixpkgs/package/apple-cursor
+    apple-cursor
   ];
 }
