@@ -11,16 +11,22 @@
     ];
 
     # 环境变量
+    # Note: Dynamic variables (those using command substitution) are set in zsh initContent
     sessionVariables =
       {
         # 通用配置
         EDITOR = "nvim";
         BROWSER = "chromium-browser";
-        PWGEN_SECRET_KEY = "$(cat /etc/sk/pwgen/sk)";
+        PWGEN_SECRET = "$(cat /etc/sk/pwgen/sk)";
         GITHUB_TOKEN = "$(gh auth token)";
 
         MOBILE = "$(cat /etc/sk/me/mobile)";
         PASS = "$(cat /etc/sk/me/pass)";
+
+        # GitHub API rate limit fix
+        # Commented out because it causes GitHub API 401 errors
+        # See: https://discourse.nixos.org/t/nix-commands-fail-github-requests-401-without-sudo/30038
+        NIX_CONFIG = "access-tokens = github.com=$(gh auth token)";
 
         # Locale
         LANG = "en_US.UTF-8";
