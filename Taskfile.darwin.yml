@@ -1,71 +1,52 @@
+---
+# 本项目Taskfile.yml默认作为NixOS的task
+# darwin task需要includes进去
+
 version: '3'
 
-# macOS 专用任务
-
 vars:
-  HOSTNAME:
-    sh: scutil --get ComputerName | tr ' ' '-' | tr '[:upper:]' '[:lower:]'
+  REBUILD_CMD: darwin-rebuild
+  ZZZ: nix profile history --profile /nix/var/nix/profiles/system
+  ROLLBACK: sudo darwin-rebuild switch --rollback
+  REPL_WITH_FLAKE: "bash -lc 'cd nix && nix repl -f flake:nixpkgs'"
+
 
 tasks:
-  # ==================== macOS 模板任务 ====================
 
-  darwin-build-template:
-    desc: "macOS 构建模板任务"
-    vars:
-      name: '{{.name}}'
-      mode: '{{.mode | default "default"}}'
+  # sudo env http_proxy=http://127.0.0.1:7890 https_proxy=http://127.0.0.1:7890 nixos-rebuild switch
+  #--flake .#intel
+  build:
+    desc: "构建系统配置（不切换）"
     cmds:
-      - echo "darwin-build '{{.name}}' in '{{.mode}}' mode..."
-      - echo "$(printf '=%.0s' {1..50})"
-      - |
-        TARGET="./nix#darwinConfigurations.{{.name}}.system"
-        if [[ "{{.mode}}" == "debug" ]]; then
-          nom build $TARGET --extra-experimental-features "nix-command flakes" --show-trace --verbose
-        else
-          nix build $TARGET --extra-experimental-features "nix-command flakes"
-        fi
+      - echo "正在为 {{.HOSTNAME}} ({{.SYSTEM}}) 构建 {{.OS}} 配置..."
+      - nix build ./nix#{{.BUILD_TARGET}} --extra-experimental-features 'nix-command flakes'
+      - echo "构建完成！"
 
-  darwin-switch-template:
-    desc: "macOS 切换模板任务"
-    vars:
-      name: '{{.name}}'
-      mode: '{{.mode | default "default"}}'
+
+  build-switch:
+    desc: "构建并切换到新配置"
     cmds:
-      - echo "darwin-switch '{{.name}}' in '{{.mode}}' mode..."
-      - echo "$(printf '=%.0s' {1..50})"
-      - |
-        if [[ "{{.mode}}" == "debug" ]]; then
-          sudo -E ./result/sw/bin/darwin-rebuild switch --flake "./nix#{{.name}}" --show-trace --verbose
-        else
-          sudo -E ./result/sw/bin/darwin-rebuild switch --flake "./nix#{{.name}}"
-        fi
+      - echo "正在构建并切换 {{.OS}} 配置..."
+      #      - sudo {{.REBUILD_CMD}} switch --flake .#{{.HOSTNAME}}
+      - sudo {{.REBUILD_CMD}} switch --flake .#macos-ws --show-trace # FIXME
+      - echo "切换到新配置完成！"
 
-  darwin-rollback-template:
-    desc: "macOS 回滚模板任务"
+
+  darwin:
+    desc: "构建并切换到 nix-darwin 配置"
     cmds:
-      - ./result/sw/bin/darwin-rebuild --rollback
+      - echo "🚀 正在为 {{.HOSTNAME}} ({{.SYSTEM}}) 构建 nix-darwin 配置..."
+      - nix build ./nix#{{.BUILD_TARGET}} --extra-experimental-features 'nix-command flakes'
+      - echo "🔄 正在切换到新配置..."
+      - sudo {{.REBUILD_CMD}} switch --flake ./nix#{{.HOSTNAME}}
+      - echo "✅ nix-darwin 配置应用成功！"
 
-  # ==================== macOS 实用任务 ====================
 
-  darwin-set-proxy:
-    desc: "设置系统代理"
+  # FIXME 其实可以直接使用 嵌套task，直接复用build就可以了，后面直接添加参数 --show-trace
+  darwin-debug:
+    desc: "使用详细输出构建并切换（用于调试）"
     cmds:
-      - echo "🌐 正在设置系统代理..."
-      - sudo python3 scripts/darwin_set_proxy.py
-      - sleep 1
-
-  darwin-rollback:
-    desc: "macOS 系统回滚"
-    cmds:
-      - task: darwin-rollback-template
-
-  local:
-    desc: "本地部署 macOS 配置"
-    vars:
-      mode: '{{.mode | default "default"}}'
-    cmds:
-      - echo "🚀 正在本地部署 macOS 配置..."
-      - task: darwin-build-template
-        vars: {name: "{{.HOSTNAME}}", mode: "{{.mode}}"}
-      - task: darwin-switch-template
-        vars: {name: "{{.HOSTNAME}}", mode: "{{.mode}}"}
+      - echo "🐛 正在使用调试输出构建 {{.OS}} 配置..."
+      - nix build ./nix#{{.BUILD_TARGET}} --show-trace --verbose --extra-experimental-features 'nix-command flakes'
+      - echo "🔄 正在使用调试输出切换..."
+      - sudo {{.REBUILD_CMD}} switch --flake ./nix#{{.HOSTNAME}} --show-trace --verbose
