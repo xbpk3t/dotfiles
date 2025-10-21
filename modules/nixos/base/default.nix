@@ -148,11 +148,5 @@
   in {
     FLAKE = projectPath;
     NIXOS_CONFIG = projectPath;
-
-    # FIXME 看看怎么处理
-    # GitHub API rate limit fix
-    # Commented out because it causes GitHub API 401 errors
-    # See: https://discourse.nixos.org/t/nix-commands-fail-github-requests-401-without-sudo/30038
-    # NIX_CONFIG = "access-tokens = github.com=$GITHUB_TOKEN";
   };
 }
