@@ -6,6 +6,9 @@
     sessionVariables.MOZ_ENABLE_WAYLAND = "1";
   };
 
+
+  # policy: https://mozilla.github.io/policy-templates/
+  # settings: about:config
   programs.firefox = {
     enable = true;
     package = pkgs.firefox;
@@ -57,6 +60,8 @@
           # Wayland support
           # [2025-10-15] firefox已经默认支持wayland，不再需要该参数
           # "widget.wayland-client.enabled" = true;
+          # 优化 Wayland 高 DPI 渲染
+          "widget.wayland.high-dpi-rendering" = true;
 
           # Hardware acceleration
           "layers.acceleration.force-enabled" = true;
@@ -70,12 +75,20 @@
           "privacy.trackingprotection.socialtracking.enabled" = true;
           "privacy.donottrackheader.enabled" = true;
 
+          "privacy.clearOnShutdown.cookies" = false; # 关闭浏览器时清除 Cookie
+          # 清除浏览历史
+          "privacy.clearOnShutdown.history" = true;
+          # 阻止所有第三方 Cookie
+          "network.cookie.cookieBehavior" = 2;
+
+
           # Performance
           "browser.startup.preXulSkeletonUI" = false;
           "browser.cache.disk.capacity" = 1048576; # 1GB cache
           # 调整缓存大小以平衡性能和磁盘使用
           "browser.cache.memory.enable" = true;
-          "browser.cache.memory.capacity" = 524288;
+          # 1GB memory cache
+          "browser.cache.memory.capacity" = 1048576;
 
           "image.mem.decode_bytes_at_a_time" = 32768;
 
@@ -86,7 +99,8 @@
 
           # 自动把所有UI以及网页内容都缩放到90%，比较适配我的14寸laptop
           # hyprland和niri对该配置的处理不同，hyprland下90%的布局、字号正好，但是niri下就太小了，所以恢复为默认
-          "layout.css.devPixelsPerPx" = 1;
+          # [2025-10-22] 调整为1.1，否则网页文本内容略小，看不清楚
+          "layout.css.devPixelsPerPx" = 1.1;
 
           # Disable telemetry
           "datareporting.healthreport.uploadEnabled" = false;
@@ -99,6 +113,8 @@
 
           # 启用 WebRender 以改善图形性能: WebRender 是 Firefox 的现代渲染引擎，能更好地利用 GPU，尤其在 Wayland 上。你的配置有 layers.acceleration，但启用 WebRender 可以进一步优化滚动和动画。
           "gfx.webrender.all" = true;
+           # 进一步优化 Wayland 下的渲染
+          "gfx.webrender.compositor" = true;
 
           # 禁用 Firefox Sync
           # 完全禁用 Sync 功能，包括：
@@ -106,6 +122,11 @@
           # - 停止所有同步相关的网络请求和后台进程。
           # - 消除所有 Sync 相关的开销（网络流量、CPU、内存、电池等）。
           "identity.fxaccounts.enabled" = false;
+
+
+          "font.minimum-size.x-western" = 14;
+          "font.name.sans-serif.zh-CN" = "Noto Sans CJK SC"; # 中文无衬线字体
+            "font.name.serif.zh-CN" = "Noto Serif CJK SC"; # 中文衬线字体
         };
       };
     };
@@ -116,7 +137,7 @@
       DisableFirefoxStudies = true;
       DisablePocket = true;
       DisableScreenshots = false;
-      DisableFormHistory = false;
+
       DontCheckDefaultBrowser = true;
       DisplayBookmarksToolbar = "never";
       DisplayMenuBar = "default-off";
@@ -148,9 +169,21 @@
         Snippets = false;
         Locked = false;
       };
-      PasswordManagerEnabled = true;
+
+      # 禁用密码保存提示（避免Firefox 每次询问是否保存密码的提示）
+      # 禁用密码管理功能，阻止 Firefox 保存任何密码
+      PasswordManagerEnabled = false;
+      # 禁用每次登录时弹出的保存密码提示
+      OfferToSaveLogins = false;
+
+
+      DisableFormHistory = true; # 禁用表单历史记录
+      AutofillAddressEnabled = false; # 禁用地址自动填充
+      AutofillCreditCardEnabled = false; # 禁用信用卡自动填充
+
+
       NoDefaultBookmarks = false;
-      OfferToSaveLogins = true;
+
       SanitizeOnShutdown = {
         Cache = false;
         Cookies = false;
