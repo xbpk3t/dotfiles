@@ -6,7 +6,6 @@
     sessionVariables.MOZ_ENABLE_WAYLAND = "1";
   };
 
-
   # policy: https://mozilla.github.io/policy-templates/
   # settings: about:config
   programs.firefox = {
@@ -37,7 +36,7 @@
 
             addons.onetab
             addons.wappalyzer
-            addons.ublock-origin
+            # addons.ublock-origin
           ];
         };
 
@@ -79,8 +78,14 @@
           # 清除浏览历史
           "privacy.clearOnShutdown.history" = true;
           # 阻止所有第三方 Cookie
-          "network.cookie.cookieBehavior" = 2;
+          # [2025-10-24] 可能会导致某些网站加载失败（尤其是需要第三方 Cookie 的页面）。尝试将值改为 1（仅阻止第三方跟踪 Cookie）
+          "network.cookie.cookieBehavior" = 1;
 
+          "network.http.max-connections" = 48; # 默认 24，增加到 48
+          "network.http.max-persistent-connections-per-server" = 12; # 默认 6
+
+          # 启用 HTTP/3 以提高网络性能，尤其在高延迟网络下
+          "network.http.http3.enabled" = true;
 
           # Performance
           "browser.startup.preXulSkeletonUI" = false;
@@ -88,14 +93,33 @@
           # 调整缓存大小以平衡性能和磁盘使用
           "browser.cache.memory.enable" = true;
           # 1GB memory cache
-          "browser.cache.memory.capacity" = 1048576;
+          # [2025-10-24] 设置为
+          # Firefox 根据系统内存自动计算最大内存缓存大小。对于你的 16GB 内存机器，Firefox 会自动分配约 32MB ~ 64MB，既够用又不浪费。
+          # 检测系统总物理内存
+          #根据内置阶梯表设置上限：
+          # > 4GB RAM → 最大 32MB 内存缓存（默认）
+          #> 8GB RAM → 约 48MB
+          #> 16GB+ → 约 32~64MB（动态调整）
+          # 实时动态调整：
+          #
+          #内存充足时，缓存可接近上限。
+          #内存紧张时（比如你开了 30 个 tab），自动缩减甚至清空缓存，优先保证标签页不崩溃。
+          #
+          #这正是你想要的：在多标签页时，后台 tab 不挂，内存不炸。
+          "browser.cache.memory.capacity" = -1;
 
           "image.mem.decode_bytes_at_a_time" = 32768;
 
           # UI improvements
           "browser.toolbars.bookmarks.visibility" = "never";
           "browser.tabs.warnOnClose" = false;
+          # 减小标签页宽度，方便在小屏幕上显示更多标签
+          "browser.tabs.tabMinWidth" = 50; # 默认 76
           "browser.contentblocking.category" = "strict";
+
+          # Firefox 默认会在内存压力下挂起后台标签页
+          "browser.tabs.unloadOnLowMemory" = false; # 禁用低内存时卸载标签页
+          "browser.tabs.min-inactive-duration-before-unload" = 600000; # 10 分钟
 
           # 自动把所有UI以及网页内容都缩放到90%，比较适配我的14寸laptop
           # hyprland和niri对该配置的处理不同，hyprland下90%的布局、字号正好，但是niri下就太小了，所以恢复为默认
@@ -113,7 +137,7 @@
 
           # 启用 WebRender 以改善图形性能: WebRender 是 Firefox 的现代渲染引擎，能更好地利用 GPU，尤其在 Wayland 上。你的配置有 layers.acceleration，但启用 WebRender 可以进一步优化滚动和动画。
           "gfx.webrender.all" = true;
-           # 进一步优化 Wayland 下的渲染
+          # 进一步优化 Wayland 下的渲染
           "gfx.webrender.compositor" = true;
 
           # 禁用 Firefox Sync
@@ -123,10 +147,9 @@
           # - 消除所有 Sync 相关的开销（网络流量、CPU、内存、电池等）。
           "identity.fxaccounts.enabled" = false;
 
-
           "font.minimum-size.x-western" = 14;
           "font.name.sans-serif.zh-CN" = "Noto Sans CJK SC"; # 中文无衬线字体
-            "font.name.serif.zh-CN" = "Noto Serif CJK SC"; # 中文衬线字体
+          "font.name.serif.zh-CN" = "Noto Serif CJK SC"; # 中文衬线字体
         };
       };
     };
@@ -176,11 +199,9 @@
       # 禁用每次登录时弹出的保存密码提示
       OfferToSaveLogins = false;
 
-
       DisableFormHistory = true; # 禁用表单历史记录
       AutofillAddressEnabled = false; # 禁用地址自动填充
       AutofillCreditCardEnabled = false; # 禁用信用卡自动填充
-
 
       NoDefaultBookmarks = false;
 
