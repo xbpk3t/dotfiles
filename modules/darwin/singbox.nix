@@ -14,7 +14,11 @@ in {
 
   config = mkIf cfg.enable {
     # Install sing-box package for user
-    environment.systemPackages = [pkgs.sing-box pkgs.curl pkgs.jq];
+    environment.systemPackages = [
+      pkgs.sing-box
+      pkgs.curl
+      pkgs.jq
+    ];
 
     # Create a script to download sing-box configuration with retry logic
     # 独立的配置下载脚本，与 sing-box 主服务解耦
@@ -63,7 +67,7 @@ in {
 
     # Launchd daemon to update sing-box configuration every 12 hours
     # 定时更新配置，与主服务解耦
-    launchd.daemons.sing-box-update-config = {
+    launchd.daemons.singbox-update-config = {
       serviceConfig = {
         Label = "local.singbox.update-config";
         ProgramArguments = ["/etc/sing-box/update-config.sh"];
