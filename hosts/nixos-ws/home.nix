@@ -3,6 +3,8 @@
     nvidia.enable = true;
 
     niri.enable = true;
+
+    zed.enable = false;
   };
 
   modules.ssh = {
