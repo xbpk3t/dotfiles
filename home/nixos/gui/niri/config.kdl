@@ -222,7 +222,8 @@ binds {
 //    Mod+B { spawn "firefox"; }
 //    Mod+I { spawn "goland"; }
 // 双击super ->
-    Mod+D { spawn-sh "rofi --mode combi"; }
+//    Mod+D { spawn-sh "rofi -show combi"; }
+    Mod+D { spawn-sh "raffi"; }
 
 // ========================================================================
 // 应用切换 - 类似 macOS Alfred 的 App 切换
