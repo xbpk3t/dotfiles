@@ -124,7 +124,7 @@
           # 自动把所有UI以及网页内容都缩放到90%，比较适配我的14寸laptop
           # hyprland和niri对该配置的处理不同，hyprland下90%的布局、字号正好，但是niri下就太小了，所以恢复为默认
           # [2025-10-22] 调整为1.1，否则网页文本内容略小，看不清楚
-          "layout.css.devPixelsPerPx" = 1.1;
+          "layout.css.devPixelsPerPx" = 1;
 
           # Disable telemetry
           "datareporting.healthreport.uploadEnabled" = false;

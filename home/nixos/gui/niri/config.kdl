@@ -6,6 +6,11 @@
 // 输入设备配置
 // ============================================================================
 
+
+environment {
+    ELECTRON_OZONE_PLATFORM_HINT "auto"
+}
+
 input {
     keyboard {
         xkb {
@@ -30,22 +35,22 @@ input {
 
     // 滚动速度
         // [2025-10-24] 修改为0.6，现在这个trackpad太小，导致scroll很费劲
-        scroll-factor 0.5
+        scroll-factor 0.6
 
     // 点击方式
         click-method "clickfinger"
 
     // 加速配置
-        // [2025-10-24] 以加速trackpad的cursor的移动速度，怎么配置？比如说我之前相从屏幕的左下滑到右上需要4次，现在我想要2次就滑过去
-        accel-speed 0.2
-        accel-profile "adaptive"
+        // 不设置加速，否则会有很“窜”，很飘的感觉
+        accel-speed 0
+        // accel-profile "adaptive"
     }
 
 // 鼠标配置
-    mouse {
-        accel-speed 1.0
-        accel-profile "adaptive"
-    }
+//    mouse {
+//        accel-speed 1.0
+//        accel-profile "adaptive"
+//    }
 
 // 焦点跟随鼠标 - 注释掉以避免焦点冲突问题
     // focus-follows-mouse
@@ -159,6 +164,9 @@ window-rule {
 // GoLand 绑定到 workspace 3 - 新增窗口规则，将 GoLand 应用绑定到 workspace 3
 window-rule {
     match app-id="jetbrains-goland"
+    // 针对浮动子窗口（menu、搜索栏）
+    // match "is-floating" true
+    open-focused true
     open-on-workspace "3"
 }
 
@@ -244,7 +252,8 @@ binds {
     Mod+3 { focus-workspace "3"; }
 
     // 用来切换workspace (支持循环切换)
-    Mod+Tab { spawn-sh "niri msg -j workspace next";}
+    // FIXME [2025-10-24] dan
+    Mod+Tab { focus-workspace-down; }
 
 
 // 移动窗口到工作区 - 修改快捷键仅支持三个工作区，使用命名工作区引用
@@ -299,8 +308,12 @@ binds {
 // 之前使用wayland内置的 grim + slurp，以及hyprland和niri内置截图工具，都不如flameshot好用
     Print { spawn "sh" "-c" "flameshot gui"; }
 
-    F2 { spawn-sh "pactl set-sink-volume @DEFAULT_SINK@ -10%";}
-    F3 { spawn-sh "pactl set-sink-volume @DEFAULT_SINK@ +10%";}
+    F2 {
+        spawn-sh "pactl set-sink-volume @DEFAULT_SINK@ -10% && notify-send -t 800 -a Volume Volume \"$(wpctl get-volume @DEFAULT_AUDIO_SINK@)\""
+    }
+    F3 {
+        spawn-sh "pactl set-sink-volume @DEFAULT_SINK@ +10% && notify-send -t 800 -a Volume Volume \"$(wpctl get-volume @DEFAULT_AUDIO_SINK@)\""
+    }
 
 // 锁屏
 // 注意：Super+Alt+L 被 DMS 用于锁屏，这里使用 Ctrl+Alt+L 作为备用
