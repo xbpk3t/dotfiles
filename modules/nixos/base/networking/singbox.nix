@@ -106,7 +106,7 @@ in {
 
     # Systemd service to download sing-box configuration from subscription URL
     # 独立的配置下载服务，与 sing-box 主服务解耦
-    systemd.services.sing-box-update-config = {
+    systemd.services.singbox-update-config = {
       description = "Update Sing-box Configuration from Subscription URL";
 
       # 使用 systemd 内置的重试机制，比自己写 shell 脚本更优雅
@@ -171,7 +171,7 @@ in {
     };
 
     # Systemd timer to update sing-box configuration every 12 hours
-    systemd.timers.sing-box-update-config = {
+    systemd.timers.singbox-update-config = {
       description = "Timer for Sing-box Configuration Update";
       wantedBy = ["timers.target"];
 
@@ -188,13 +188,14 @@ in {
     };
 
     # Create systemd system service for sing-box (requires root for TUN interface)
-    systemd.services.sing-box = {
+    systemd.services.singbox = {
       description = "Sing-box Proxy Service";
       wantedBy = ["multi-user.target"];
       # 确保配置文件存在后再启动
-      after = ["network.target" "sing-box-update-config.service"];
+      #      after = ["network.target" "singbox-update-config.service"];
+      after = ["network.target"];
       # 首次启动前必须先下载配置
-      requires = ["sing-box-update-config.service"];
+      requires = ["singbox-update-config.service"];
 
       serviceConfig = {
         Type = "simple";
