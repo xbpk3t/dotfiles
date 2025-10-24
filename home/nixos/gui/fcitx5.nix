@@ -132,8 +132,8 @@
   # 环境变量
   home.sessionVariables = {
     # 输入法相关环境变量
-    GTK_IM_MODULE = "fcitx";
-    QT_IM_MODULE = "fcitx";
+    # GTK_IM_MODULE = "fcitx";
+    # QT_IM_MODULE = "fcitx";
     XMODIFIERS = "@im=fcitx";
     INPUT_METHOD = "fcitx";
     SDL_IM_MODULE = "fcitx";
