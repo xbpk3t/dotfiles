@@ -9,7 +9,7 @@ shutdown_duration = 0.5  # Duration of smooth shutdown in seconds (0.1-60 | 0 = 
 adaptive_interval = 1    # Adaptive interval base for smooth transitions (1-1000)ms
 
 #[Time-based config]
-night_temp = 3300        # Color temperature during night (1000-20000) Kelvin
+night_temp = 4500        # Color temperature during night (1000-20000) Kelvin
 day_temp = 6500          # Color temperature during day (1000-20000) Kelvin
 night_gamma = 90         # Gamma percentage for night (10-100%)
 day_gamma = 100          # Gamma percentage for day (10-100%)
