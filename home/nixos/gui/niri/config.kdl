@@ -11,38 +11,44 @@ input {
         xkb {
             layout "us"
         }
+
+        // 确保焦点行为更加可预测，避免鼠标影响焦点
+        // [2025-10-24] 之前是true,所以切换workspce之后，会失焦，需要重新定位cursor,才能输入内容
+        // focus-wrap-around "never"
     }
 
-    // 触摸板配置
+        // 触摸板配置
     touchpad {
-        // 自然滚动
+    // 自然滚动
         natural-scroll
 
-        // 轻触点击
+    // 轻触点击
         tap
 
-        // 拖拽锁定 (disable-while-typing)
+    // 拖拽锁定 (disable-while-typing)
         dwt
 
-        // 滚动速度
-        scroll-factor 0.2
+    // 滚动速度
+        // [2025-10-24] 修改为0.6，现在这个trackpad太小，导致scroll很费劲
+        scroll-factor 0.5
 
-        // 点击方式
+    // 点击方式
         click-method "clickfinger"
 
-        // 加速配置
-        accel-speed 0.0
-        accel-profile "flat"
+    // 加速配置
+        // [2025-10-24] 以加速trackpad的cursor的移动速度，怎么配置？比如说我之前相从屏幕的左下滑到右上需要4次，现在我想要2次就滑过去
+        accel-speed 0.2
+        accel-profile "adaptive"
     }
 
-    // 鼠标配置
+// 鼠标配置
     mouse {
-        accel-speed 0.0
-        accel-profile "flat"
+        accel-speed 1.0
+        accel-profile "adaptive"
     }
 
-    // 焦点跟随鼠标
-    focus-follows-mouse
+// 焦点跟随鼠标 - 注释掉以避免焦点冲突问题
+    // focus-follows-mouse
 }
 
 // ============================================================================
@@ -61,39 +67,49 @@ output "eDP-1" {
 }
 
 // ============================================================================
+// 动画配置 - 新增以禁用所有动画，实现干脆利落的切换
+animations {
+    off
+}
+
+// ============================================================================
 // 布局配置
 // ============================================================================
 
 layout {
-    // 焦点环配置 - 禁用焦点环
+// 焦点环配置 - 启用焦点环以提供视觉反馈，便于识别当前焦点窗口
     focus-ring {
-        off
+        width 1
+        active-color "rgb(0, 120, 212)"
+        inactive-color "rgb(128, 128, 128)"
     }
 
-    // 边框配置 - 禁用边框
+// 边框配置 - 启用边框以区分窗口边界，提高可读性
     border {
-        off
+        width 1
+        active-color "rgb(0, 120, 212)"
+        inactive-color "rgb(128, 128, 128)"
     }
 
-    // 间距配置 - 设置为 0 使窗口完全贴合屏幕边框
-    gaps 0
+// 间距配置 - 设置小间距以避免窗口完全贴合，提高视觉舒适度
+    gaps 3
 
-    // 居中布局
+// 居中布局
     center-focused-column "never"
 
-    // 预设列宽
+// 预设列宽
     preset-column-widths {
         proportion 0.33333
         proportion 0.5
         proportion 0.66667
     }
 
-    // 默认列宽 - 设置为 1.0 使新窗口默认全宽度
+// 默认列宽 - 设置为 0.6 以便默认平铺多个窗口，而不是全宽度
     default-column-width {
-        proportion 1.0
+        proportion 0.6
     }
 
-    // 预设窗口高度
+// 预设窗口高度
     preset-window-heights {
         proportion 0.33333
         proportion 0.5
@@ -102,18 +118,48 @@ layout {
 }
 
 // ============================================================================
+// 命名工作区配置 - 使用 named workspaces，按需求分别用于 Alacritty (1), Firefox (2), GoLand (3)
+workspace "1" { }
+
+workspace "2" { }
+
+workspace "3" { }
+
+// ============================================================================
 // 窗口规则
 // ============================================================================
 
-// 默认所有窗口全屏打开（类似 Super+F 效果）
-// 并且自动聚焦新打开的窗口（例如从终端点击 URL 打开浏览器时）
+// 默认窗口规则 - 移除全屏默认以符合tiling布局，避免所有窗口强制全屏
 window-rule {
-    // 匹配所有窗口
-    default-column-width { proportion 1.0; }
-    open-fullscreen true
+// 匹配所有窗口
+    default-column-width { proportion 0.5; }
     open-focused true
-    // 保证只有一个focus window
+// 保证只有一个focus window
     match is-focused=true
+}
+
+// 浮动窗口规则 - 为弹出式窗口或不适合平铺的应用设置浮动模式（示例：Firefox PiP，使用 app-id 和 title 匹配）
+window-rule {
+    match app-id="firefox" title="Picture-in-Picture"
+    open-floating true
+}
+
+// Alacritty 绑定到 workspace 1 - 新增窗口规则，将 Alacritty 应用绑定到 workspace 1
+window-rule {
+    match app-id="Alacritty"
+    open-on-workspace "1"
+}
+
+// Firefox 绑定到 workspace 2 - 新增窗口规则，将 Firefox 应用绑定到 workspace 2
+window-rule {
+    match app-id="firefox"
+    open-on-workspace "2"
+}
+
+// GoLand 绑定到 workspace 3 - 新增窗口规则，将 GoLand 应用绑定到 workspace 3
+window-rule {
+    match app-id="jetbrains-goland"
+    open-on-workspace "3"
 }
 
 // ============================================================================
@@ -157,117 +203,136 @@ spawn-at-startup "sunsetr"
 // - Mod+Alt+N: 夜间模式 (night mode toggle) - 仅当 enableNightMode = true
 
 binds {
-    // ========================================================================
-    // 系统操作
-    // ========================================================================
+// ========================================================================
+// 系统操作
+// ========================================================================
 
-    // 关闭当前窗口
+// 关闭当前窗口
     Mod+Q { close-window; }
 
-    // ========================================================================
-    // 终端和应用启动
-    // ========================================================================
+// ========================================================================
+// 终端和应用启动
+// ========================================================================
 
-    Mod+Return { spawn "alacritty"; }
-    Mod+B { spawn "firefox"; }
-    Mod+I { spawn "goland"; }
-    // 双击super -> launcher
+//    Mod+Return { spawn "alacritty"; }
+//    Mod+B { spawn "firefox"; }
+//    Mod+I { spawn "goland"; }
+// 双击super ->
     Mod+D { spawn-sh "vicinae toggle"; }
 
-    // ========================================================================
-    // 应用切换 - 类似 macOS Alfred 的 App 切换
-    // ========================================================================
-    // 注意：niri 不直接支持按 app-id 聚焦窗口的命令
-    // 这里使用 spawn 命令配合 niri msg 来实现
-    // 如果应用未运行，则启动；如果已运行，则聚焦
+// ========================================================================
+// 应用切换 - 类似 macOS Alfred 的 App 切换
+// ========================================================================
+// 注意：niri 不直接支持按 app-id 聚焦窗口的命令
+// 这里使用 spawn 命令配合 niri msg 来实现
+// 如果应用未运行，则启动；如果已运行，则聚焦
 
-    // Super+1: 切换到 Alacritty
-    // Use -a for app-id matching. Common app-ids: Alacritty, firefox, jetbrains-goland
-    Mod+1 { spawn-sh "nirius focus-or-spawn -a 'Alacritty' alacritty"; }
+// Super+1: 切换到 Alacritty
+// Use -a for app-id matching. Common app-ids: Alacritty, firefox, jetbrains-goland
+//    Mod+1 { spawn-sh "nirius focus-or-spawn -a 'Alacritty' alacritty"; }
+//
+//    // Super+2: 切换到 Firefox
+//    Mod+2 { spawn-sh "nirius focus-or-spawn -a 'firefox' firefox"; }
+//
+//    // Super+3: 切换到 GoLand
+//    Mod+3 { spawn-sh "nirius focus-or-spawn -a 'jetbrains-goland' goland"; }
 
-    // Super+2: 切换到 Firefox
-    Mod+2 { spawn-sh "nirius focus-or-spawn -a 'firefox' firefox"; }
+// ========================================================================
+// 工作区切换 - 修改快捷键仅支持三个工作区，使用命名工作区引用
+    Mod+1 { focus-workspace "1"; }
+    Mod+2 { focus-workspace "2"; }
+    Mod+3 { focus-workspace "3"; }
 
-    // Super+3: 切换到 GoLand
-    Mod+3 { spawn-sh "nirius focus-or-spawn -a 'jetbrains-goland' goland"; }
-    // ========================================================================
-    // 窗口焦点切换
-    // ========================================================================
+    // 用来切换workspace (支持循环切换)
+    Mod+Tab { spawn-sh "niri msg -j workspace next";}
+
+
+// 移动窗口到工作区 - 修改快捷键仅支持三个工作区，使用命名工作区引用
+    Mod+Ctrl+1 { move-window-to-workspace "1"; }
+    Mod+Ctrl+2 { move-window-to-workspace "2"; }
+    Mod+Ctrl+3 { move-window-to-workspace "3"; }
+
+// ========================================================================
+// 窗口焦点切换
+// ========================================================================
 
     Mod+Left { focus-column-left; }
     Mod+Right { focus-column-right; }
     Mod+Up { focus-window-up; }
     Mod+Down { focus-window-down; }
 
-    // ========================================================================
-    // 移动窗口
-    // ========================================================================
+// ========================================================================
+// 移动窗口
+// ========================================================================
 
     Mod+Shift+Left { move-column-left; }
     Mod+Shift+Right { move-column-right; }
     Mod+Shift+Up { move-window-up; }
     Mod+Shift+Down { move-window-down; }
 
-    // ========================================================================
-    // 调整窗口大小
-    // ========================================================================
+// ========================================================================
+// 调整窗口大小
+// ========================================================================
 
     Mod+Ctrl+Left { set-column-width "-10%"; }
     Mod+Ctrl+Right { set-column-width "+10%"; }
     Mod+Ctrl+Up { set-window-height "-10%"; }
     Mod+Ctrl+Down { set-window-height "+10%"; }
 
-    // ========================================================================
-    // 全屏和最大化
-    // ========================================================================
+// ========================================================================
+// 全屏和最大化
+// ========================================================================
 
-    // 全屏切换
+// 全屏切换
     Mod+F { fullscreen-window; }
 
-    // 最大化切换（niri 特有）
-    // 注意：Mod+M 被 DMS 用于进程列表，这里使用 Mod+Shift+M
+// 最大化切换（niri 特有）
+// 注意：Mod+M 被 DMS 用于进程列表，这里使用 Mod+Shift+M
     Mod+Shift+M { maximize-column; }
 
-    // ========================================================================
-    // 截图和锁屏
-    // ========================================================================
+// ========================================================================
+// 截图和锁屏
+// ========================================================================
 
-    // 指定区域截图
-    // 注意没有 -c 和 -p，也没有使用 flameshot full 来直接截取全屏，以确保灵活性
-    // 之前使用wayland内置的 grim + slurp，以及hyprland和niri内置截图工具，都不如flameshot好用
+// 指定区域截图
+// 注意没有 -c 和 -p，也没有使用 flameshot full 来直接截取全屏，以确保灵活性
+// 之前使用wayland内置的 grim + slurp，以及hyprland和niri内置截图工具，都不如flameshot好用
     Print { spawn "sh" "-c" "flameshot gui"; }
 
-    // 锁屏
-    // 注意：Super+Alt+L 被 DMS 用于锁屏，这里使用 Ctrl+Alt+L 作为备用
+    F2 { spawn-sh "pactl set-sink-volume @DEFAULT_SINK@ -10%";}
+    F3 { spawn-sh "pactl set-sink-volume @DEFAULT_SINK@ +10%";}
+
+// 锁屏
+// 注意：Super+Alt+L 被 DMS 用于锁屏，这里使用 Ctrl+Alt+L 作为备用
     Ctrl+Alt+L { spawn "swaylock"; }
 
-    // ========================================================================
-    // 其他工具
-    // ========================================================================
+// ========================================================================
+// 其他工具
+// ========================================================================
 
-    // 电源菜单
-    // 注意：Mod+X 被 DMS 用于电源菜单，这里使用 Mod+Shift+X 作为备用
+// 电源菜单
+// 注意：Mod+X 被 DMS 用于电源菜单，这里使用 Mod+Shift+X 作为备用
     Mod+Shift+X { spawn "wlogout"; }
 
-    // 网络管理器
-    // 注意：Mod+N 被 DMS 用于通知中心，这里使用 Mod+Shift+N
-    // [2025-10-19] 用不到，注释掉
-    // Mod+Shift+N { spawn "nm-connection-editor"; }
+// 网络管理器
+// 注意：Mod+N 被 DMS 用于通知中心，这里使用 Mod+Shift+N
+// [2025-10-19] 用不到，注释掉
+// Mod+Shift+N { spawn "nm-connection-editor"; }
 
-    // Fcitx5 重启
+// Fcitx5 重启
     Mod+E { spawn "bash" "-c" "pkill fcitx5 -9; sleep 1; fcitx5 -d --replace; sleep 1; fcitx5-remote -r"; }
 
-    // ========================================================================
-    // 消费或弹出窗口（niri 特有功能）
-    // ========================================================================
+// ========================================================================
+// 消费或弹出窗口（niri 特有功能）
+// ========================================================================
 
-    // 注意：Mod+Comma 被 DMS 用于设置，这里使用 Mod+Period 和 Mod+Shift+Period
+// 注意：Mod+Comma 被 DMS 用于设置，这里使用 Mod+Period 和 Mod+Shift+Period
     Mod+Period { consume-window-into-column; }
     Mod+Shift+Period { expel-window-from-column; }
 
-    // ========================================================================
-    // 切换窗口方向（niri 特有）
-    // ========================================================================
+// ========================================================================
+// 切换窗口方向（niri 特有）
+// ========================================================================
 
     Mod+R { switch-preset-column-width; }
     Mod+Shift+R { reset-window-height; }
@@ -275,11 +340,11 @@ binds {
 
 // stylix的cursor无法处理niri的curosr，所以必须要在niri里处理cursor配置
 cursor {
-    // xcursor-theme "default"
-    // xcursor-theme "macOS-BigSur-White"
+//    xcursor-theme "default"
+// xcursor-theme "macOS-BigSur-White"
     xcursor-theme "Bibata-Modern-Classic"
-    xcursor-size 16
+    xcursor-size 12
 
-    // hide-when-typing
-    // hide-after-inactive-ms 1000
+// hide-when-typing
+// hide-after-inactive-ms 1000
 }
