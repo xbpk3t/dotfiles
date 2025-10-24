@@ -11,3 +11,5 @@ secrets/age.key
 secrets/secrets_temp.yaml
 
 /home/nixos/gui/desktop/ext/node_modules/
+/zzz/
+/manifests/
