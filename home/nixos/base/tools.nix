@@ -19,10 +19,16 @@
   # notify-send
   services.mako = {
     enable = true;
-    #      defaultTimeout = 2000;
     #      backgroundColor = "#1e1e2e";
     #      textColor = "#cdd6f4";
     #      borderColor = "#89b4fa";
     #      borderRadius = 8;
+
+    settings = {
+      anchor = "top-right";
+      default-timeout = 3000;
+      ignore-timeout = 1;
+      #              "mode=${mode}".invisible = 1;
+    };
   };
 }

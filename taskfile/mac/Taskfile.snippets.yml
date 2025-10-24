@@ -387,3 +387,4 @@ tasks:
     # Output snippets in JSON format for programmatic use
     cmd: yq eval '.vars.ss' "{{.TASKFILE}}" -o json
     silent: true
+    interactive: true

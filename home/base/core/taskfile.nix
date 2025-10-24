@@ -5,8 +5,10 @@
   ...
 }: {
   # 使用 mkOutOfStoreSymlink 创建指向 taskfile 目录和 Taskfile.yml 文件的符号链接
-  home.file."taskfile".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/${myvars.projectDir}/taskfile";
-  home.file."taskfile".recursive = true;
+  home.file."taskfile" = {
+    source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/${myvars.projectDir}/taskfile";
+    recursive = true;
+  };
 
   home.file."Taskfile.yml".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/${myvars.projectDir}/taskfile/Taskfile.yml";
 
