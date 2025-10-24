@@ -4,9 +4,9 @@
   lib,
   ...
 }: let
-  cfg = config.custom.gui.zed;
+  cfg = config.modules.desktop.zed;
 in {
-  options.custom.gui.zed = {
+  options.modules.desktop.zed = {
     enable = lib.mkEnableOption "Enable kitty";
   };
 
@@ -15,7 +15,7 @@ in {
 
     programs.zed-editor = {
       enable = true;
-      package = pkgs.zed;
+      #      package = pkgs.zed-editor;
 
       extraPackages = with pkgs; [
         nixd # https://mynixos.com/nixpkgs/package/nixd zed的nix LSP需要nixd
@@ -25,7 +25,7 @@ in {
       ];
 
       extensions = import ./extensions.nix;
-      themes = import ./themes.nix;
+      #      themes = import ./themes.nix;
       userSettings = import ./settings.nix;
       userKeymaps = import ./keymaps.nix;
       userTasks = import ./tasks.nix;
