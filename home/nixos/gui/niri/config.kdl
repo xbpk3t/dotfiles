@@ -7,10 +7,6 @@
 // ============================================================================
 
 
-environment {
-    ELECTRON_OZONE_PLATFORM_HINT "auto"
-}
-
 input {
     keyboard {
         xkb {
@@ -226,7 +222,7 @@ binds {
 //    Mod+B { spawn "firefox"; }
 //    Mod+I { spawn "goland"; }
 // 双击super ->
-    Mod+D { spawn-sh "vicinae toggle"; }
+    Mod+D { spawn-sh "rofi --mode combi"; }
 
 // ========================================================================
 // 应用切换 - 类似 macOS Alfred 的 App 切换

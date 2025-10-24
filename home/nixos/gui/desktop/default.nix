@@ -2,7 +2,7 @@
   imports = [
     ./nvidia.nix
     ./swayidle.nix
-    ./vicinae.nix
+    ./rofi.nix
   ];
 
   # wayland related
