@@ -78,6 +78,10 @@
       };
     };
 
+    diff-so-fancy = {
+      enable = true;
+    };
+
     aliases = {
       br = "branch --sort=-committerdate";
       co = "checkout";

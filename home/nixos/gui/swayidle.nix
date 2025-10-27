@@ -59,35 +59,35 @@
   # Swaylock configuration
   # 我不需要swaylock，所以全部注释掉
   # 因为我现在的机器不支持指纹解锁，且因为使用 initialHashedPassword 导致每次解锁都很慢，体验很差
-  #  programs.swaylock = {
-  #    enable = true;
-  #
-  #    settings = {
-  #      # Display settings
-  #      show-failed-attempts = true;
-  #      show-keyboard-layout = false;
-  #      indicator-caps-lock = true;
-  #
-  #      # Appearance - using stylix colors
-  #      # These will be automatically themed by stylix
-  #      daemonize = true;
-  #
-  #      # Disable the default background
-  #      # Stylix will handle the background color
-  #      ignore-empty-password = true;
-  #
-  #      # Additional optimizations:
-  #      # - Grace period: Allow a short time to enter password without re-locking immediately
-  #      # 宽限期，避免立即重锁
-  #      grace = 5; # 5 seconds grace period after wake to enter password
-  #
-  #      # - Fade-in effect for smoother appearance (minimal overhead)
-  #      # 平滑淡入效果，提升用户体验，几乎无开销
-  #      fade-in = 0.5; # Fade in over 0.5 seconds
-  #
-  #      # - Disable screenshot capture for security (prevents grabbing lock screen)
-  #      # 增强安全，防止截屏锁屏
-  #      screenshots = false;
-  #    };
-  #  };
+  programs.swaylock = {
+    enable = true;
+
+    settings = {
+      # Display settings
+      show-failed-attempts = true;
+      show-keyboard-layout = false;
+      indicator-caps-lock = true;
+
+      # Appearance - using stylix colors
+      # These will be automatically themed by stylix
+      daemonize = true;
+
+      # Disable the default background
+      # Stylix will handle the background color
+      ignore-empty-password = true;
+
+      # Additional optimizations:
+      # - Grace period: Allow a short time to enter password without re-locking immediately
+      # 宽限期，避免立即重锁
+      grace = 5; # 5 seconds grace period after wake to enter password
+
+      # - Fade-in effect for smoother appearance (minimal overhead)
+      # 平滑淡入效果，提升用户体验，几乎无开销
+      fade-in = 0.5; # Fade in over 0.5 seconds
+
+      # - Disable screenshot capture for security (prevents grabbing lock screen)
+      # 增强安全，防止截屏锁屏
+      screenshots = false;
+    };
+  };
 }

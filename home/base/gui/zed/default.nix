@@ -7,7 +7,7 @@
   cfg = config.modules.desktop.zed;
 in {
   options.modules.desktop.zed = {
-    enable = lib.mkEnableOption "Enable kitty";
+    enable = lib.mkEnableOption "Enable zed";
   };
 
   config = lib.mkIf cfg.enable {
@@ -27,7 +27,7 @@ in {
       extensions = import ./extensions.nix;
       #      themes = import ./themes.nix;
       userSettings = import ./settings.nix;
-      userKeymaps = import ./keymaps.nix;
+      # userKeymaps = import ./keymaps.nix;
       userTasks = import ./tasks.nix;
     };
   };

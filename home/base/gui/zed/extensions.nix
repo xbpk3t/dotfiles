@@ -22,7 +22,7 @@
   "nix"
   "nu"
   "toml"
-  "wakatime"
+  # "wakatime"
   "vue"
-  "terraform"
+  # "terraform"
 ]
