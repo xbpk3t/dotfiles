@@ -13,12 +13,14 @@
   name = "nixos-ws";
 
   genSpecialArgs = system: let
+    customPkgsOverlay = import (mylib.relativeToRoot "pkgs/overlay.nix");
     pkgs = import inputs.nixpkgs {
       inherit system;
       config.allowUnfree = true;
       config.nvidia.acceptLicense = true;
       overlays = [
         inputs.nur.overlays.default
+        customPkgsOverlay
       ];
     };
   in {
@@ -33,6 +35,9 @@
     pkgs-unstable = import inputs.nixpkgs-unstable or inputs.nixpkgs {
       inherit system;
       config.allowUnfree = true;
+      overlays = [
+        customPkgsOverlay
+      ];
     };
 
     # Add anyrun for anyrun configuration modules
