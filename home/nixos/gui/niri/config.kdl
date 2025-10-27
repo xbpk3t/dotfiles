@@ -222,7 +222,8 @@ window-rule {
     match app-id="firefox"
     open-on-workspace "firefox"
 
-    open-maximized true
+    // open-maximized true
+    open-fullscreen true
 }
 
 // GoLand 绑定到 workspace 3 - 新增窗口规则，将 GoLand 应用绑定到 workspace 3

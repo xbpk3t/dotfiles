@@ -38,9 +38,9 @@
 
       # UI文本 - 使用支持中文的字体
       sansSerif = {
-        package = pkgs.noto-fonts-cjk-sans;
-        # Noto Sans CJK 作为 fallback
-        name = "Noto Sans CJK SC";
+        # 苹果苹方作为默认 UI 字体
+        package = pkgs.apple-pingfang;
+        name = "PingFang SC";
       };
 
       # 正式文本（比如浏览器文本）- 使用支持中文的字体

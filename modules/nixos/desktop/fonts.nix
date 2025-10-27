@@ -34,6 +34,7 @@
       noto-fonts-emoji
 
       # Chinese fonts for CJK support
+      apple-pingfang # 苹果苹方
       noto-fonts-cjk-sans # 思源黑体
       noto-fonts-cjk-serif # 思源宋体
       source-han-sans # Adobe 思源黑体
@@ -63,6 +64,10 @@
         # SansSerif 也简写做 Sans, Sans 在法语中就是「without」或者「无」的意思
         sansSerif = [
           # 西文: 无衬线字体（指笔画末端没有修饰(衬线)的字体，通常用于屏幕显示）
+          "PingFang SC"
+          "PingFang TC"
+          "PingFang HK"
+
           "Source Sans 3"
           # 中文: 黑体
           "LXGW WenKai Screen" # 霞鹜文楷 屏幕阅读版
