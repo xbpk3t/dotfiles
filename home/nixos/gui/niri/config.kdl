@@ -308,7 +308,7 @@ binds {
 //    Mod+D { spawn-sh "rofi -show combi"; }
     Mod+D { spawn-sh "raffi"; }
     Mod+Shift+D { spawn-sh "fuzzel"; }
-    Shift+Alt+S { spawn-sh "fuzzel-clipboard"; }
+    Mod+Shift+C { spawn-sh "cliphist list | fuzzel --dmenu | cliphist decode | wl-copy"; }
 
 // ========================================================================
 // 应用切换 - 类似 macOS Alfred 的 App 切换

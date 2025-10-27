@@ -1,0 +1,576 @@
+---
+
+
+pwgen:
+  description: pwgen
+  icon: pwgen
+  ifenvset: PWGEN_SECRET
+  binary: raffi-pwgen
+
+snippet:
+  description: "ss"
+  icon: "text-snippet"
+  binary: raffi-snippet
+
+
+gh:
+  description: gh
+  icon: github
+  binary: raffi-gh
+
+
+
+yuanbao:
+  description: yuanbao
+  icon: yuanbao
+  binary: xdg-open
+  args:
+    - "https://yuanbao.tencent.com/chat/naQivTmsDa?chatMode=temp"
+
+youtube:
+  description: youtube
+  icon: youtube
+  binary: xdg-open
+  args:
+    - "https://www.youtube.com/"
+
+nix:
+  description: nix
+  icon: nix
+  binary: xdg-open
+  args:
+    - "https://mynixos.com/flakes"
+
+nixx:
+  description: nixx
+  icon: nix
+  binary: raffi-bookmark
+  args:
+    - "--search-url"
+    - "https://mynixos.com/search?q={{query}}"
+
+youtube-search:
+  description: youtube-search
+  icon: youtube
+  binary: raffi-bookmark
+  args:
+    - "--search-url"
+    - "https://www.youtube.com/results?search_query={{query}}"
+
+google-translate:
+  description: vn
+  icon: google
+  binary: raffi-bookmark
+  args:
+    - "--search-url"
+    - "https://translate.google.com/?sl=auto&tl=zh-CN&text={{query}}"
+
+
+bz:
+  description: bz
+  icon: bz
+  binary: raffi-bookmark
+  args:
+    - "--search-url"
+    - "https://search.bilibili.com/all?keyword={{query}}"
+
+
+#
+zashboard:
+  description: zashboard
+  icon: zashboard
+  binary: xdg-open
+  args:
+    - https://board.zash.run.place/
+
+gmail:
+  description: gmail
+  icon: gmail
+  binary: xdg-open
+  args:
+    - https://mail.google.com/mail/
+
+ping:
+  description: ping
+  icon: ping
+  binary: xdg-open
+  args:
+    - "https://ping.pe/"
+
+json-to-go:
+  description: json-to-go
+  icon: json-to-go
+  binary: xdg-open
+  args:
+    - "https://mholt.github.io/json-to-go/"
+
+annas-archive:
+  description: annas-archive
+  icon: annas-archive
+  binary: xdg-open
+  args:
+    - "https://zh.annas-archive.org/"
+
+zaobao:
+  description: zaobao
+  icon: zaobao
+  binary: xdg-open
+  args:
+    - "https://www.zaobao.com/"
+
+docs:
+  description: docs
+  icon: docs
+  binary: xdg-open
+  args:
+    - "https://docs.lucc.dev/"
+
+cws:
+  description: cws
+  icon: cws
+  binary: xdg-open
+  args:
+    - "https://cws-database.com/explore?limit=25&offset=0"
+
+moemail:
+  description: moemail
+  icon: moemail
+  binary: xdg-open
+  args:
+    - "https://moemail.app/moe"
+
+ossinsight.io:
+  description: ossinsight.io
+  icon: ossinsight
+  binary: xdg-open
+  args:
+    - "https://ossinsight.io/collections/"
+
+sojson:
+  description: sojson
+  icon: sojson
+  binary: xdg-open
+  args:
+    - "https://www.sojson.com/jshtml.html"
+
+yaml-to-go:
+  description: yaml-to-go
+  icon: yaml-to-go
+  binary: xdg-open
+  args:
+    - "https://zhwt.github.io/yaml-to-go/"
+
+modelscope:
+  description: modelscope
+  icon: modelscope
+  binary: xdg-open
+  args:
+    - "https://modelscope.cn/my/accountsettings"
+
+web-check:
+  description: web-check
+  icon: web-check
+  binary: xdg-open
+  args:
+    - "https://web-check.xyz/"
+
+globalping:
+  description: globalping
+  icon: globalping
+  binary: xdg-open
+  args:
+    - "https://globalping.io/"
+
+myip:
+  description: myip
+  icon: myip
+  binary: xdg-open
+  args:
+    - "https://ipcheck.ing/"
+
+abtest:
+  description: abtest
+  icon: abtest
+  binary: xdg-open
+  args:
+    - "https://abtest.design/"
+
+pitchhub:
+  description: pitchhub
+  icon: pitchhub
+  binary: xdg-open
+  args:
+    - "https://pitchhub.36kr.com/investevent"
+
+whoismaking:
+  description: whoismaking
+  icon: whoismaking
+  binary: xdg-open
+  args:
+    - "https://whoismaking.money/zh"
+
+scmp:
+  description: scmp
+  icon: scmp
+  binary: xdg-open
+  args:
+    - "https://www.scmp.com/"
+
+spotify:
+  description: spotify
+  icon: spotify
+  binary: xdg-open
+  args:
+    - "https://open.spotify.com/"
+
+astexplorer:
+  description: astexplorer
+  icon: astexplorer
+  binary: xdg-open
+  args:
+    - "https://astexplorer.net/"
+
+joinquant:
+  description: joinquant
+  icon: joinquant
+  binary: xdg-open
+  args:
+    - "https://www.joinquant.com/"
+
+kubespec:
+  description: kubespec
+  icon: kubespec
+  binary: xdg-open
+  args:
+    - "https://kubespec.dev/"
+
+linux.do:
+  description: linux.do
+  icon: linux-do
+  binary: xdg-open
+  args:
+    - "https://linux.do/"
+
+pocketcasts:
+  description: pocketcasts
+  icon: pocketcasts
+  binary: xdg-open
+  args:
+    - "https://play.pocketcasts.com/new-releases"
+
+markdownpreview:
+  description: markdownpreview
+  icon: markdownpreview
+  binary: xdg-open
+  args:
+    - "https://markdownlivepreview.dev/"
+
+reddit-hotlist:
+  description: reddit-hotlist
+  icon: reddit-hotlist
+  binary: xdg-open
+  args:
+    - "https://www.reddit-list.com/en"
+
+qwertylearner:
+  description: qwertylearner
+  icon: qwertylearner
+  binary: xdg-open
+  args:
+    - "https://qwertylearner.ai/article-gallery"
+
+daziya:
+  description: daziya
+  binary: xdg-open
+  args:
+    - "https://daziya.com/game"
+
+dnsdumpster:
+  description: dnsdumpster
+  icon: dnsdumpster
+  binary: xdg-open
+  args:
+    - "https://dnsdumpster.com/"
+
+diffchecker:
+  description: diffchecker
+  icon: diffchecker
+  binary: xdg-open
+  args:
+    - "https://www.diffchecker.com/"
+
+deepwiki:
+  description: deepwiki
+  icon: deepwiki
+  binary: xdg-open
+  args:
+    - "https://deepwiki.com/"
+
+grok:
+  description: grok
+  icon: grok
+  binary: xdg-open
+  args:
+    - "https://grok.com/chat"
+
+speedtest:
+  description: speedtest
+  icon: speedtest
+  binary: xdg-open
+  args:
+    - "https://speed.cloudflare.com/"
+
+regex101:
+  description: regex101
+  icon: regex101
+  binary: xdg-open
+  args:
+    - "https://regex101.com/"
+
+coder-kung-fu:
+  description: coder-kung-fu
+  icon: coder-kung-fu
+  binary: xdg-open
+  args:
+    - "https://github.com/yanfeizhang/coder-kung-fu"
+
+digvps:
+  description: digvps
+  icon: digvps
+  binary: xdg-open
+  args:
+    - "https://digvps.com/"
+
+dbengines:
+  description: dbengines
+  icon: dbengines
+  binary: xdg-open
+  args:
+    - "https://db-engines.com/en/ranking"
+
+tableconvert:
+  description: tableconvert
+  icon: tableconvert
+  binary: xdg-open
+  args:
+    - "https://tableconvert.com/"
+
+becode:
+  description: becode
+  icon: becode
+  binary: xdg-open
+  args:
+    - "https://becode.be-a.dev/console"
+
+91wink:
+  description: 91wink
+  icon: 91wink
+  binary: xdg-open
+  args:
+    - "https://91wink.com/"
+
+apifox:
+  description: apifox
+  icon: apifox
+  binary: xdg-open
+  args:
+    - "https://app.apifox.com/"
+
+namebeta:
+  description: namebeta
+  icon: namebeta
+  binary: xdg-open
+  args:
+    - "https://namebeta.com/"
+
+aliyun:
+  description: aliyun
+  icon: aliyun
+  binary: xdg-open
+  args:
+    - "https://account.aliyun.com/"
+
+gitlab:
+  description: gitlab
+  icon: gitlab
+  binary: xdg-open
+  args:
+    - "https://gitlab.com/hhacking"
+
+pollyoyo:
+  description: pollyoyo
+  icon: pollyoyo
+  binary: xdg-open
+  args:
+    - "https://app.pollyoyo.com/dashboard"
+
+chatgpt:
+  description: chatgpt
+  icon: chatgpt
+  binary: xdg-open
+  args:
+    - "https://chatgpt.com/"
+
+fastsend:
+  description: fastsend
+  icon: fastsend
+  binary: xdg-open
+  args:
+    - "https://fastsend.ing/zh"
+
+fofa:
+  description: fofa
+  icon: fofa
+  binary: xdg-open
+  args:
+    - "https://fofa.info/"
+
+pm:
+  description: pm
+  icon: pm
+  binary: xdg-open
+  args:
+    - "https://www.woshipm.com/"
+
+zp:
+  description: zp
+  binary: xdg-open
+  args:
+    - "https://open.bigmodel.cn/finance-center/finance/overview"
+
+onlinetools.com:
+  description: onlinetools.com
+  icon: onlinetools.com
+  binary: xdg-open
+  args:
+    - "https://onlinetools.com/"
+
+godbolt:
+  description: godbolt
+  icon: godbolt
+  binary: xdg-open
+  args:
+    - "https://godbolt.org/"
+
+zread:
+  description: zread
+  icon: zread
+  binary: xdg-open
+  args:
+    - "https://zread.ai/"
+
+bitiful:
+  description: bitiful
+  icon: bitiful
+  binary: xdg-open
+  args:
+    - "https://send.bitiful.com/"
+
+folo:
+  description: folo
+  icon: folo
+  binary: xdg-open
+  args:
+    - "https://app.follow.is/"
+
+youtube-music:
+  description: youtube-music
+  icon: youtube-music
+  binary: xdg-open
+  args:
+    - "https://music.youtube.com/"
+
+cloudconvert:
+  description: cloudconvert
+  icon: cloudconvert
+  binary: xdg-open
+  args:
+    - "https://cloudconvert.com/"
+
+heimao:
+  description: heimao
+  icon: heimao
+  binary: xdg-open
+  args:
+    - "https://tousu.sina.com.cn/"
+
+tldr:
+  description: tldr
+  icon: tldr
+  binary: xdg-open
+  args:
+    - "https://wangchujiang.com/reference/"
+
+cf:
+  description: cf
+  icon: cf
+  binary: xdg-open
+  args:
+    - "https://dash.cloudflare.com/"
+
+flomo:
+  description: flomo
+  icon: flomo
+  binary: xdg-open
+  args:
+    - "https://v.flomoapp.com/mine"
+
+osb:
+  description: osb
+  icon: osb
+  binary: xdg-open
+  args:
+    - "https://opensource.builders/"
+
+investing:
+  description: investing
+  icon: investing
+  binary: xdg-open
+  args:
+    - "https://cn.investing.com/news"
+
+json-to-nix:
+  description: json-to-nix
+  binary: xdg-open
+  args:
+    - "https://json-to-nix.pages.dev/"
+
+netbird:
+  description: netbird
+  binary: xdg-open
+  args:
+    - "https://app.netbird.io/peers"
+
+88code:
+  description: 88code
+  binary: xdg-open
+  args:
+    - "https://www.88code.org/user-dashboard"
+
+ping0:
+  description: ping0
+  binary: xdg-open
+  args:
+    - "https://ping0.cc/"
+
+getiot:
+  description: getiot
+  binary: xdg-open
+  args:
+    - "https://getiot.tech/"
+
+toolify:
+  description: toolify
+  binary: xdg-open
+  args:
+    - "https://www.toolify.ai/"
+
+gg:
+  description: gg
+  icon: google
+  binary: raffi-bookmark
+  args:
+    - "--search-url"
+    - "https://www.google.com/search?q={{query}}"
+    - "--prompt"
+    - "google: "
