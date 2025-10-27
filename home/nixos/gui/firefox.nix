@@ -215,6 +215,9 @@
 
       NoDefaultBookmarks = false;
 
+      # 默认禁用自动翻译
+      TranslateEnabled = false;
+
       SanitizeOnShutdown = {
         Cache = false;
         Cookies = false;
@@ -228,8 +231,6 @@
       };
 
       Preferences = {
-        # ------------------- Vertical Tabs -------------------
-
         # ------------------- Tab 预览 -------------------
         # 不预览tab的缩略图和tip
         "browser.tabs.hoverPreview.enabled" = {

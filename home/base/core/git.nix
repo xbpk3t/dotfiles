@@ -19,8 +19,6 @@
 
   programs.git = {
     enable = true;
-    userName = "xbpk3t";
-    userEmail = myvars.mail;
     lfs.enable = true;
 
     # 全局忽略文件配置
@@ -34,7 +32,14 @@
       ".idea"
     ];
 
-    extraConfig = {
+    settings = {
+      alias = {
+      };
+      user = {
+        name = "xbpk3t";
+        email = myvars.mail;
+      };
+
       core = {
         autocrlf = "input";
         filemode = false;
@@ -43,8 +48,7 @@
       init = {
         defaultBranch = "main";
       };
-      alias = {
-      };
+
       # 凭证配置由 programs.gh 自动管理，无需手动配置
       # credential = {
       #   "https://github.com" = {
@@ -80,6 +84,7 @@
 
     diff-so-fancy = {
       enable = true;
+      #      enableGitIntegration = true;
     };
 
     aliases = {
