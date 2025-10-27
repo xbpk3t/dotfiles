@@ -79,7 +79,7 @@
 
           "privacy.clearOnShutdown.cookies" = false; # 关闭浏览器时清除 Cookie
           # 清除浏览历史
-          "privacy.clearOnShutdown.history" = true;
+          "privacy.clearOnShutdown.history" = false;
           # 阻止所有第三方 Cookie
           # [2025-10-24] 可能会导致某些网站加载失败（尤其是需要第三方 Cookie 的页面）。尝试将值改为 1（仅阻止第三方跟踪 Cookie）
           "network.cookie.cookieBehavior" = 1;
@@ -127,25 +127,6 @@
           "browser.tabs.unloadOnLowMemory" = false; # 禁用低内存时卸载标签页
           "browser.tabs.min-inactive-duration-before-unload" = 600000; # 10 分钟
 
-          # 不预览tab的缩略图和tip
-          "browser.tabs.hoverPreview.enabled" = false;
-          "browser.tabs.hoverPreview.showThumbnails" = false;
-
-          # fullscreen下不要默认autohide search bar, 否则trigger到上面时整个layout都会修改，就很突兀
-          "browser.fullscreen.autohide" = false;
-
-          "layout.css.devPixelsPerPx" = -1;
-          # 搭配缩放Layout使用，保证整体缩放，而非只缩放text
-          # 模拟 "Zoom Text Only"（设为 false = 只文本模式）
-          # "browser.zoom.full" = false;
-          # 其他相关：禁用 APZ（异步平移/缩放）以增强文本模式兼容
-          #          "apz.allow_zooming" = false;
-          # 禁用站点特定缩放记忆（全局统一）
-          #          "browser.zoom.siteSpecific" = false;
-          # 禁止修改缩放参数（保证防止Ctrl+ +/- 以及 Ctrl+触控板之类误操作）
-          #          "zoom.minPercent" = 30;
-          #          "zoom.maxPercent" = 500;
-
           # Disable telemetry
           "datareporting.healthreport.uploadEnabled" = false;
           "toolkit.telemetry.enabled" = false;
@@ -172,11 +153,15 @@
           # 中文最小size
           "font.default.zh-CN" = "sans-serif";
           "font.minimum-size.zh-CN" = 14;
-          "font.name.sans-serif.zh-CN" = ".PingFang SC"; # 中文无衬线字体
-          "font.name.serif.zh-CN" = ".PingFang SC"; # 中文衬线字体
+          "font.name.sans-serif.zh-CN" = "PingFang SC"; # 中文无衬线字体
+          "font.name.serif.zh-CN" = "PingFang SC"; # 中文衬线字体
 
           "font.size.monospace.zh-CN" = 14;
           "font.size.variable.zh-CN" = 14;
+
+          # Vertical Tabs
+          "sidebar.verticalTabs" = true;
+          "sidebar.verticalTabs.dragToPinPromo.dismissed" = true;
         };
       };
     };
@@ -240,6 +225,67 @@
         SiteSettings = false;
         OfflineApps = false;
         LockPreferences = false;
+      };
+
+      Preferences = {
+        # ------------------- Vertical Tabs -------------------
+
+        # ------------------- Tab 预览 -------------------
+        # 不预览tab的缩略图和tip
+        "browser.tabs.hoverPreview.enabled" = {
+          Value = false;
+          Status = "locked";
+        };
+        "browser.tabs.hoverPreview.showThumbnails" = {
+          Value = false;
+          Status = "locked";
+        };
+
+        # ------------------- 全屏行为 -------------------
+        # fullscreen下不要默认autohide search bar, 否则trigger到上面时整个layout都会修改，就很突兀
+        "browser.fullscreen.autohide" = {
+          Value = false;
+          Status = "locked";
+        };
+
+        # ------------------- UI 缩放 -------------------
+        # -1 相当于 1,也就是使用默认缩放
+        # 1.0略小，1.2略大，1.1刚刚好
+        "layout.css.devPixelsPerPx" = {
+          Value = "1.1";
+          Status = "locked";
+        };
+        # 搭配缩放Layout使用，保证整体缩放，而非只缩放text
+        # 模拟 "Zoom Text Only"（设为 false = 只文本模式）
+        "browser.zoom.full" = {
+          Value = false;
+          Status = "locked";
+        };
+        # 其他相关：禁用 APZ（异步平移/缩放）以增强文本模式兼容
+        # "apz.allow_zooming" = false;
+        # 禁用站点特定缩放记忆（全局统一）
+        # "browser.zoom.siteSpecific" = false;
+
+        # 这两个值不支持锁定，放到这相当于没设置
+        # 禁止修改缩放参数（保证防止Ctrl+ +/- 以及 Ctrl+触控板之类误操作）
+        #        "zoom.minPercent" = {
+        #          Value = 110;
+        #          Status = "locked";
+        #        };
+        #        "zoom.maxPercent" = {
+        #          Value = 110;
+        #          Status = "locked";
+        #        };
+
+        # Ctrl+Tab 用来toggle切换
+        "browser.ctrlTab.recentlyUsedOrder" = {
+          Value = true;
+          Status = "locked";
+        };
+        "browser.ctrlTab.previews" = {
+          Value = false;
+          Status = "locked";
+        };
       };
     };
   };
