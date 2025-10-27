@@ -131,7 +131,10 @@
           "browser.tabs.hoverPreview.enabled" = false;
           "browser.tabs.hoverPreview.showThumbnails" = false;
 
-          # "layout.css.devPixelsPerPx" = 1.2;
+          # fullscreen下不要默认autohide search bar, 否则trigger到上面时整个layout都会修改，就很突兀
+          "browser.fullscreen.autohide" = false;
+
+          "layout.css.devPixelsPerPx" = -1;
           # 搭配缩放Layout使用，保证整体缩放，而非只缩放text
           # 模拟 "Zoom Text Only"（设为 false = 只文本模式）
           # "browser.zoom.full" = false;
@@ -169,8 +172,8 @@
           # 中文最小size
           "font.default.zh-CN" = "sans-serif";
           "font.minimum-size.zh-CN" = 14;
-          "font.name.sans-serif.zh-CN" = "Noto Sans CJK SC"; # 中文无衬线字体
-          "font.name.serif.zh-CN" = "Noto Serif CJK SC"; # 中文衬线字体
+          "font.name.sans-serif.zh-CN" = ".PingFang SC"; # 中文无衬线字体
+          "font.name.serif.zh-CN" = ".PingFang SC"; # 中文衬线字体
 
           "font.size.monospace.zh-CN" = 14;
           "font.size.variable.zh-CN" = 14;
