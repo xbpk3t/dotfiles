@@ -5,6 +5,8 @@
     niri.enable = true;
 
     zed.enable = false;
+
+    kitty.enable = false;
   };
 
   modules.ssh = {
