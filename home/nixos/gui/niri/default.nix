@@ -5,15 +5,6 @@
   ...
 }: let
   cfg = config.modules.desktop.niri;
-
-  # 读取 KDL 配置文件并替换 stylix 图片路径
-  configKdl = builtins.readFile ./config.kdl;
-  # 替换 @STYLIX_IMAGE@ 占位符为实际的 stylix 图片路径
-  finalConfigKdl =
-    builtins.replaceStrings
-    ["@STYLIX_IMAGE@"]
-    ["${config.stylix.image}"]
-    configKdl;
 in {
   options.modules.desktop.niri = {
     enable = lib.mkEnableOption "niri compositor";
@@ -27,7 +18,10 @@ in {
       # https://github.com/psi4j/sunsetr
       sunsetr
 
-      (callPackage ./nirius.nix {})
+      # https://github.com/atx/wtype
+      wtype
+
+      nirius
     ];
 
     # Wayland 环境变量
@@ -48,7 +42,7 @@ in {
 
       # 使用 KDL 配置文件
       # 参考: https://github.com/cap153/config/blob/main/niri/.config/niri/config.kdl
-      config = finalConfigKdl;
+      config = builtins.readFile ./config.kdl;
     };
 
     # XDG Portal 配置
