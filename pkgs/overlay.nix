@@ -1,5 +1,4 @@
-final: prev:
-let
+_final: prev: let
   customPkgs = import ./default.nix prev;
 in
-customPkgs
+  customPkgs
