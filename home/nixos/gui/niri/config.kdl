@@ -35,11 +35,14 @@ input {
 
     // 点击方式
         click-method "clickfinger"
+        scroll-method "two-finger"
 
     // 加速配置
         // 不设置加速，否则会有很“窜”，很飘的感觉
         accel-speed 0
         // accel-profile "adaptive"
+
+
     }
 
 // 鼠标配置
@@ -65,6 +68,20 @@ input {
 // 如果 UI 过大可以尝试 1.25
 output "eDP-1" {
     scale 1
+    // Transform allows to rotate the output counter-clockwise, valid values are:
+// normal, 90, 180, 270, flipped, flipped-90, flipped-180 and flipped-270.
+    transform "normal"
+
+// Position of the output in the global coordinate space.
+// This affects directional monitor actions like "focus-monitor-left", and cursor movement.
+// The cursor can only move between directly adjacent outputs.
+// Output scale and rotation has to be taken into account for positioning:
+// outputs are sized in logical, or scaled, pixels.
+// For example, a 3840×2160 output with scale 2.0 will have a logical size of 1920×1080,
+// so to put another output directly adjacent to it on the right, set its x to 1920.
+// If the position is unset or results in an overlap, the output is instead placed
+// automatically.
+//position x=1280 y=0
 }
 
 // ============================================================================
@@ -87,13 +104,58 @@ layout {
 
 // 边框配置 - 启用边框以区分窗口边界，提高可读性
     border {
-        width 1
+    // The settings are the same as for the focus ring.
+    // If you enable the border, you probably want to disable the focus ring.
+        off
+
+        width 0.5
         active-color "rgb(0, 120, 212)"
         inactive-color "rgb(128, 128, 128)"
     }
 
+
+// You can enable drop shadows for windows.
+    shadow {
+    // Uncomment the next line to enable shadows.
+    // on
+
+    // By default, the shadow draws only around its window, and not behind it.
+    // Uncomment this setting to make the shadow draw behind its window.
+    //
+    // Note that niri has no way of knowing about the CSD window corner
+    // radius. It has to assume that windows have square corners, leading to
+    // shadow artifacts inside the CSD rounded corners. This setting fixes
+    // those artifacts.
+    //
+    // However, instead you may want to set prefer-no-csd and/or
+    // geometry-corner-radius. Then, niri will know the corner radius and
+    // draw the shadow correctly, without having to draw it behind the
+    // window. These will also remove client-side shadows if the window
+    // draws any.
+    //
+    // draw-behind-window true
+
+    // You can change how shadows look. The values below are in logical
+    // pixels and match the CSS box-shadow properties.
+
+    // Softness controls the shadow blur radius.
+        softness 30
+
+    // Spread expands the shadow.
+        spread 5
+
+    // Offset moves the shadow relative to the window.
+        offset x=0 y=5
+
+    // You can also change the shadow color and opacity.
+        color "#0007"
+    }
+
+
 // 间距配置 - 设置小间距以避免窗口完全贴合，提高视觉舒适度
     gaps 3
+
+    background-color "transparent"
 
 // 居中布局
     center-focused-column "never"
@@ -120,11 +182,11 @@ layout {
 
 // ============================================================================
 // 命名工作区配置 - 使用 named workspaces，按需求分别用于 Alacritty (1), Firefox (2), GoLand (3)
-workspace "1" { }
+workspace "terminal"
 
-workspace "2" { }
+workspace "firefox"
 
-workspace "3" { }
+workspace "IDE"
 
 // ============================================================================
 // 窗口规则
@@ -134,6 +196,7 @@ workspace "3" { }
 window-rule {
 // 匹配所有窗口
     default-column-width { proportion 0.5; }
+
     open-focused true
 // 保证只有一个focus window
     match is-focused=true
@@ -148,13 +211,18 @@ window-rule {
 // Alacritty 绑定到 workspace 1 - 新增窗口规则，将 Alacritty 应用绑定到 workspace 1
 window-rule {
     match app-id="Alacritty"
-    open-on-workspace "1"
+    open-on-workspace "terminal"
+
+    // open-maximized true
+    open-fullscreen true
 }
 
 // Firefox 绑定到 workspace 2 - 新增窗口规则，将 Firefox 应用绑定到 workspace 2
 window-rule {
     match app-id="firefox"
-    open-on-workspace "2"
+    open-on-workspace "firefox"
+
+    open-maximized true
 }
 
 // GoLand 绑定到 workspace 3 - 新增窗口规则，将 GoLand 应用绑定到 workspace 3
@@ -163,7 +231,10 @@ window-rule {
     // 针对浮动子窗口（menu、搜索栏）
     // match "is-floating" true
     open-focused true
-    open-on-workspace "3"
+    open-on-workspace "IDE"
+
+// open-maximized true
+    open-fullscreen true
 }
 
 // ============================================================================
@@ -172,7 +243,7 @@ window-rule {
 
 // Stylix 壁纸 - 使用 swaybg 显示 stylix 配置的背景图片
 // 注意: 这个会在 niri.nix 中通过 Nix 变量替换
-spawn-at-startup "swaybg" "-i" "@STYLIX_IMAGE@" "-m" "fill"
+// spawn-at-startup "swaybg" "-i" "@STYLIX_IMAGE@" "-m" "fill"
 
 // Fcitx5 输入法配置
 spawn-at-startup "fcitx5" "-d" "--replace"
@@ -211,6 +282,18 @@ binds {
 // 系统操作
 // ========================================================================
 
+
+// Mod-Shift-/, which is usually the same as Mod-?,
+// shows a list of important hotkeys.
+    Mod+Shift+Slash { show-hotkey-overlay; }
+
+// Open/close the Overview: a zoomed-out view of workspaces and windows.
+// You can also move the mouse into the top-left hot corner,
+// or do a four-finger swipe up on a touchpad.
+    // 预览window
+    // Mod+O repeat=false { toggle-overview; }
+
+
 // 关闭当前窗口
     Mod+Q { close-window; }
 
@@ -224,6 +307,8 @@ binds {
 // 双击super ->
 //    Mod+D { spawn-sh "rofi -show combi"; }
     Mod+D { spawn-sh "raffi"; }
+    Mod+Shift+D { spawn-sh "fuzzel"; }
+    Shift+Alt+S { spawn-sh "fuzzel-clipboard"; }
 
 // ========================================================================
 // 应用切换 - 类似 macOS Alfred 的 App 切换
@@ -244,9 +329,9 @@ binds {
 
 // ========================================================================
 // 工作区切换 - 修改快捷键仅支持三个工作区，使用命名工作区引用
-    Mod+1 { focus-workspace "1"; }
-    Mod+2 { focus-workspace "2"; }
-    Mod+3 { focus-workspace "3"; }
+    Mod+1 { focus-workspace "terminal"; }
+    Mod+2 { focus-workspace "firefox"; }
+    Mod+3 { focus-workspace "IDE"; }
 
     // 用来切换workspace (支持循环切换)
     // FIXME [2025-10-24] dan
@@ -254,9 +339,9 @@ binds {
 
 
 // 移动窗口到工作区 - 修改快捷键仅支持三个工作区，使用命名工作区引用
-    Mod+Ctrl+1 { move-window-to-workspace "1"; }
-    Mod+Ctrl+2 { move-window-to-workspace "2"; }
-    Mod+Ctrl+3 { move-window-to-workspace "3"; }
+    Mod+Ctrl+1 { move-window-to-workspace "terminal"; }
+    Mod+Ctrl+2 { move-window-to-workspace "firefox"; }
+    Mod+Ctrl+3 { move-window-to-workspace "IDE"; }
 
 // ========================================================================
 // 窗口焦点切换
@@ -303,7 +388,8 @@ binds {
 // 指定区域截图
 // 注意没有 -c 和 -p，也没有使用 flameshot full 来直接截取全屏，以确保灵活性
 // 之前使用wayland内置的 grim + slurp，以及hyprland和niri内置截图工具，都不如flameshot好用
-    Print { spawn "sh" "-c" "flameshot gui"; }
+    Mod+Print { spawn "sh" "-c" "flameshot gui"; }
+    Print { spawn "sh" "-c" "flameshot full"; }
 
     F2 {
         spawn-sh "pactl set-sink-volume @DEFAULT_SINK@ -10% && notify-send -t 800 -a Volume Volume \"$(wpctl get-volume @DEFAULT_AUDIO_SINK@)\""
@@ -357,4 +443,13 @@ cursor {
 
 // hide-when-typing
 // hide-after-inactive-ms 1000
+}
+
+
+// Disable the hot corners.
+gestures {
+    // Top-left preview action
+    hot-corners {
+        off
+    }
 }
