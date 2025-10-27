@@ -13,7 +13,10 @@
     package = pkgs.firefox;
 
     # Language packs
-    languagePacks = ["zh-CN" "en-US"];
+    languagePacks = [
+      "zh-CN"
+      "en-US"
+    ];
 
     # Firefox profiles configuration
     profiles = {
@@ -87,6 +90,9 @@
           # 启用 HTTP/3 以提高网络性能，尤其在高延迟网络下
           "network.http.http3.enabled" = true;
 
+          # Auto-detect proxy settings for this network
+          "network.proxy.type" = 4;
+
           # Performance
           "browser.startup.preXulSkeletonUI" = false;
           "browser.cache.disk.capacity" = 1048576; # 1GB cache
@@ -121,10 +127,21 @@
           "browser.tabs.unloadOnLowMemory" = false; # 禁用低内存时卸载标签页
           "browser.tabs.min-inactive-duration-before-unload" = 600000; # 10 分钟
 
-          # 自动把所有UI以及网页内容都缩放到90%，比较适配我的14寸laptop
-          # hyprland和niri对该配置的处理不同，hyprland下90%的布局、字号正好，但是niri下就太小了，所以恢复为默认
-          # [2025-10-22] 调整为1.1，否则网页文本内容略小，看不清楚
-          "layout.css.devPixelsPerPx" = 1;
+          # 不预览tab的缩略图和tip
+          "browser.tabs.hoverPreview.enabled" = false;
+          "browser.tabs.hoverPreview.showThumbnails" = false;
+
+          "layout.css.devPixelsPerPx" = 1.2;
+          # 搭配缩放Layout使用，保证整体缩放，而非只缩放text
+          # 模拟 "Zoom Text Only"（设为 false = 只文本模式）
+          "browser.zoom.full" = false;
+          # 其他相关：禁用 APZ（异步平移/缩放）以增强文本模式兼容
+          #          "apz.allow_zooming" = false;
+          # 禁用站点特定缩放记忆（全局统一）
+          #          "browser.zoom.siteSpecific" = false;
+          # 禁止修改缩放参数（保证防止Ctrl+ +/- 以及 Ctrl+触控板之类误操作）
+          #          "zoom.minPercent" = 30;
+          #          "zoom.maxPercent" = 500;
 
           # Disable telemetry
           "datareporting.healthreport.uploadEnabled" = false;
@@ -147,9 +164,16 @@
           # - 消除所有 Sync 相关的开销（网络流量、CPU、内存、电池等）。
           "identity.fxaccounts.enabled" = false;
 
+          # 英文最小size
           "font.minimum-size.x-western" = 14;
+          # 中文最小size
+          "font.default.zh-CN" = "sans-serif";
+          "font.minimum-size.zh-CN" = 14;
           "font.name.sans-serif.zh-CN" = "Noto Sans CJK SC"; # 中文无衬线字体
           "font.name.serif.zh-CN" = "Noto Serif CJK SC"; # 中文衬线字体
+
+          "font.size.monospace.zh-CN" = 14;
+          "font.size.variable.zh-CN" = 14;
         };
       };
     };
@@ -159,7 +183,6 @@
       DisableTelemetry = true;
       DisableFirefoxStudies = true;
       DisablePocket = true;
-      DisableScreenshots = false;
 
       DontCheckDefaultBrowser = true;
       DisplayBookmarksToolbar = "never";
@@ -169,7 +192,6 @@
       DisableFirefoxAccounts = true;
 
       # 启用自动更新扩展
-      ExtensionsUpdate = true;
 
       EnableTrackingProtection = {
         Value = true;
