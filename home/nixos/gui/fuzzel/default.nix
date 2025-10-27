@@ -67,7 +67,7 @@
   home.activation.linkRaffiScripts = config.lib.dag.entryAfter ["writeBoundary"] ''
     mkdir -p $HOME/.local/bin
 
-    ln -sf ${config.home.homeDirectory}/${myvars.projectDir}/home/nixosF/gui/fuzzel/raffi-bookmark.nu $HOME/.local/bin/raffi-bookmark
+    ln -sf ${config.home.homeDirectory}/${myvars.projectDir}/home/nixos/gui/fuzzel/raffi-bookmark.nu $HOME/.local/bin/raffi-bookmark
     chmod +x $HOME/.local/bin/raffi-bookmark
 
     ln -sf ${config.home.homeDirectory}/${myvars.projectDir}/home/nixos/gui/fuzzel/raffi-pwgen.nu $HOME/.local/bin/raffi-pwgen
