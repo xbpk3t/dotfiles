@@ -182,11 +182,12 @@ layout {
 
 // ============================================================================
 // 命名工作区配置 - 使用 named workspaces，按需求分别用于 Alacritty (1), Firefox (2), GoLand (3)
+// 注意命名 workspace 会按照配置文件中的声明顺序初始出现。所以这里的声明顺序就是实际上workspace布局的上下顺序
 workspace "terminal"
-
+workspace "IDE"
 workspace "firefox"
 
-workspace "IDE"
+
 
 // ============================================================================
 // 窗口规则
@@ -331,18 +332,23 @@ binds {
 // ========================================================================
 // 工作区切换 - 修改快捷键仅支持三个工作区，使用命名工作区引用
     Mod+1 { focus-workspace "terminal"; }
-    Mod+2 { focus-workspace "firefox"; }
-    Mod+3 { focus-workspace "IDE"; }
+    Mod+2 { focus-workspace "IDE"; }
+    Mod+3 { focus-workspace "firefox"; }
+
 
     // 用来切换workspace (支持循环切换)
     // FIXME [2025-10-24] dan
     Mod+Tab { focus-workspace-down; }
 
+    // 调整workspace上下位置
+    Mod+Alt+Up { move-workspace-up; }
+    Mod+Alt+Down { move-workspace-down; }
 
 // 移动窗口到工作区 - 修改快捷键仅支持三个工作区，使用命名工作区引用
     Mod+Ctrl+1 { move-window-to-workspace "terminal"; }
-    Mod+Ctrl+2 { move-window-to-workspace "firefox"; }
-    Mod+Ctrl+3 { move-window-to-workspace "IDE"; }
+    Mod+Ctrl+2 { move-window-to-workspace "IDE"; }
+    Mod+Ctrl+3 { move-window-to-workspace "firefox"; }
+
 
 // ========================================================================
 // 窗口焦点切换
