@@ -16,8 +16,9 @@
   # 默认使用JB的键位
   "base_keymap" = "JetBrains";
 
-  "ui_font_size" = 16;
-  "buffer_font_size" = 13;
+  # 直接使用stylix的theme
+  # "ui_font_size" = 16;
+  # "buffer_font_size" = 13;
   "tab_size" = 2;
   "preferred_line_length" = 120;
   # 换行，按照editor编辑区的可用width自动调整
@@ -30,12 +31,12 @@
     "metrics" = false;
   };
 
-  "theme" = {
-    "mode" = "dark";
-    "light" = "One Light";
-    # Monokai for zed
-    "dark" = "Zedokai";
-  };
+  # "theme" = {
+  # "mode" = "dark";
+  # "light" = "One Light";
+  # Monokai for zed
+  # "dark" = "Zedokai";
+  # };
 
   # zed的scrollbar太粗了，所以禁用
   "scrollbar" = {
@@ -197,7 +198,8 @@
     # Enable AI features for Claude Code integration
     copilot = false; # Keep GitHub Copilot disabled, using Claude Code instead
     # Enable inline completion via AI
-    inline_completion_provider = "supermaven"; # or "none" if you prefer manual AI invocation
+    # 默认
+    # inline_completion_provider = "supermaven"; # or "none" if you prefer manual AI invocation
   };
   hour_format = "hour24";
 

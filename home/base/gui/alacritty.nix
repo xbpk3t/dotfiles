@@ -18,31 +18,31 @@
       };
 
       # 键盘快捷键配置
-      keyboard.bindings = [
-        # 使用 Super+C 复制选中文本到剪贴板
-        {
-          key = "C";
-          mods = "Super";
-          action = "Copy";
-        }
-        # 使用 Super+V 从剪贴板粘贴
-        {
-          key = "V";
-          mods = "Super";
-          action = "Paste";
-        }
-        # 禁用原 Ctrl+Shift+C/V（可选）
-        {
-          key = "C";
-          mods = "Control|Shift";
-          action = "None";
-        }
-        {
-          key = "V";
-          mods = "Control|Shift";
-          action = "None";
-        }
-      ];
+      # keyboard.bindings = [
+      #   # 使用 Super+C 复制选中文本到剪贴板
+      #   {
+      #     key = "C";
+      #     mods = "Super";
+      #     action = "Copy";
+      #   }
+      #   # 使用 Super+V 从剪贴板粘贴
+      #   {
+      #     key = "V";
+      #     mods = "Super";
+      #     action = "Paste";
+      #   }
+      #   # 禁用原 Ctrl+Shift+C/V（可选）
+      #   {
+      #     key = "C";
+      #     mods = "Control|Shift";
+      #     action = "None";
+      #   }
+      #   {
+      #     key = "V";
+      #     mods = "Control|Shift";
+      #     action = "None";
+      #   }
+      # ];
 
       # 复制时自动保存到系统剪贴板
       selection.save_to_clipboard = true;

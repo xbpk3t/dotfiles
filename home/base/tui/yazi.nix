@@ -8,7 +8,7 @@
     shellWrapperName = "yy";
 
     settings = {
-      manager = {
+      mgr = {
         ratio = [1 4 3];
         sort_by = "alphabetical";
         sort_sensitive = false;

@@ -5,9 +5,9 @@
   ...
 }:
 with lib; let
-  cfg = config.custom.gui.kitty;
+  cfg = config.modules.desktop.kitty;
 in {
-  options.custom.gui.kitty = {
+  options.modules.desktop.kitty = {
     enable = mkEnableOption "kitty terminal";
   };
 
