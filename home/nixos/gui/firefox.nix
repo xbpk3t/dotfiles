@@ -131,10 +131,10 @@
           "browser.tabs.hoverPreview.enabled" = false;
           "browser.tabs.hoverPreview.showThumbnails" = false;
 
-          "layout.css.devPixelsPerPx" = 1.2;
+          # "layout.css.devPixelsPerPx" = 1.2;
           # 搭配缩放Layout使用，保证整体缩放，而非只缩放text
           # 模拟 "Zoom Text Only"（设为 false = 只文本模式）
-          "browser.zoom.full" = false;
+          # "browser.zoom.full" = false;
           # 其他相关：禁用 APZ（异步平移/缩放）以增强文本模式兼容
           #          "apz.allow_zooming" = false;
           # 禁用站点特定缩放记忆（全局统一）
