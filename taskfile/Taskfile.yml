@@ -46,7 +46,6 @@ includes:
   pnpm: taskfile/mac/Taskfile.pnpm.yml
   ww: taskfile/mac/Taskfile.bookmark.yml
   wf: taskfile/mac/Taskfile.workflow.yml
-  sb: taskfile/mac/Taskfile.singbox.yml
   z: taskfile/mac/Taskfile.z.yml
   ss: taskfile/mac/Taskfile.snippets.yml
 
