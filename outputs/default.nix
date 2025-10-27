@@ -6,6 +6,7 @@
   inherit (inputs.nixpkgs) lib;
   mylib = import ../lib {inherit lib;};
   myvars = import ../vars {inherit lib;};
+  customPkgsOverlay = import ../pkgs/overlay.nix;
 
   # Add my custom lib, vars, nixpkgs instance, and all the inputs to specialArgs,
   # so that I can use them in all my nixos/home-manager/darwin modules.
@@ -18,6 +19,9 @@
       config.nvidia.acceptLicense = true;
       # 允许安装 broken 包（如 zig）
       config.allowBroken = true;
+      overlays = [
+        customPkgsOverlay
+      ];
     };
   in {
     inherit
@@ -32,6 +36,9 @@
       # To use chrome, we need to allow the installation of non-free software
       config.allowUnfree = true;
       config.allowBroken = true;
+      overlays = [
+        customPkgsOverlay
+      ];
     };
 
     # Add nixvim for neovim configuration
