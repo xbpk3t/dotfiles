@@ -10,10 +10,14 @@
   name = "macos-ws";
 
   genSpecialArgs = system: let
+    customPkgsOverlay = import (mylib.relativeToRoot "pkgs/overlay.nix");
     pkgs = import inputs.nixpkgs {
       inherit system;
       config.allowUnfree = true;
       config.nvidia.acceptLicense = true;
+      overlays = [
+        customPkgsOverlay
+      ];
     };
   in {
     inherit
@@ -27,6 +31,9 @@
     pkgs-unstable = import inputs.nixpkgs-unstable or inputs.nixpkgs {
       inherit system;
       config.allowUnfree = true;
+      overlays = [
+        customPkgsOverlay
+      ];
     };
 
     # Add nixvim for neovim configuration
