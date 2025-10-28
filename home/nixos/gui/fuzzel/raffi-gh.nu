@@ -34,7 +34,8 @@ let repo_lines = (
 let search_entry = "Search GitHub for typed query ↗"
 let menu_input = if $repo_lines == '' { $search_entry } else { $repo_lines + "\n" + $search_entry }
 
-let selected_repo = prompt-fuzzel "GitHub Repos: " --lines 20 --input $menu_input
+# let selected_repo = prompt-fuzzel "GitHub Repos: " --lines 20 --input $menu_input
+let selected_repo = prompt-fuzzel "" --lines 20 --input $menu_input
 
 if $selected_repo == '' {
   exit 1
