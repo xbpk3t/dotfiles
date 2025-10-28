@@ -79,6 +79,9 @@
     ln -sf ${myvars.projectRoot}/home/nixos/gui/fuzzel/raffi-gh.nu $HOME/.local/bin/raffi-gh
     chmod +x $HOME/.local/bin/raffi-gh
 
+    ln -sf ${myvars.projectRoot}/home/nixos/gui/fuzzel/raffi-cc.nu $HOME/.local/bin/raffi-cc
+    chmod +x $HOME/.local/bin/raffi-cc
+
     ln -sf ${myvars.projectRoot}/home/nixos/gui/fuzzel/raffi-common.nu $HOME/.local/bin/raffi-common.nu
     # No chmod +x needed here
   '';
