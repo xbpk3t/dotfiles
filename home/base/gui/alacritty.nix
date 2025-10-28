@@ -2,7 +2,18 @@
   programs.alacritty = {
     enable = true;
     package = pkgs.alacritty;
+
     settings = {
+      terminal = {
+        shell = {
+          program = "${pkgs.zsh}/bin/zsh";
+          args = [
+            "-c"
+            "${pkgs.zellij}/bin/zellij"
+          ];
+        };
+      };
+
       window = {
         padding = {
           x = 4;
