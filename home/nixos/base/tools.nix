@@ -28,6 +28,9 @@
       anchor = "top-right";
       default-timeout = 3000;
       ignore-timeout = 1;
+      # keep notifications visible even for fullscreen windows
+      # 保证在fullscreen模式下，也能看到弹窗
+      layer = "overlay";
       #              "mode=${mode}".invisible = 1;
     };
   };
