@@ -2,158 +2,193 @@
 // Reference: https://zellij.dev/documentation/configuration
 // Plugins: zjstatus, zellij-forgot, room
 // https://github.com/zellij-org/awesome-zellij
-
 // ===== Basic Settings =====
 on_force_close "quit"
 simplified_ui false
 default_shell "zsh"
 default_mode "normal"
 show_startup_tips false
-
 // ===== Mouse Support =====
 mouse_mode true
 advanced_mouse_actions true
-
 // ===== Copy and Paste =====
-copy_command "pbcopy"  // macOS clipboard
-copy_clipboard "primary"
-
+copy_command "pbcopy"
+// macOS clipboardcopy_clipboard "primary"
 // ===== UI Settings =====
-
 // https://zellij.dev/documentation/options.html?highlight=pane_frames#pane_frames
 pane_frames true
-
 // ===== Scroll Buffer =====
 scroll_buffer_size 10000
-
 // ===== Theme =====
 theme "default"
-
-default_layout "compact"
-
-
+// 注意：default_layout "compact" 已经 被删除，否则会覆盖 layout { … }。Zellij 只认一个 layout 块。
+// default_layout "compact"
 // ===== Plugins to Load in Background =====
 // These plugins run in the background and don't require a pane
-load_plugins {
-    // zjframes - Toggle pane frames based on conditions
-    // https://github.com/dj95/zjstatus
-    "https://github.com/dj95/zjstatus/releases/latest/download/zjframes.wasm" {
-        hide_frame_for_single_pane       "true"
-        hide_frame_except_for_search     "true"
-        hide_frame_except_for_scroll     "true"
-        hide_frame_except_for_fullscreen "true"
-    }
-}
-
+//load_plugins {
+//    // zjframes - Toggle pane frames based on conditions
+//    // https://github.com/dj95/zjstatus
+//    "https://github.com/dj95/zjstatus/releases/latest/download/zjframes.wasm" {
+//        hide_frame_for_single_pane       "true"
+//        hide_frame_except_for_search     "true"
+//        hide_frame_except_for_scroll     "true"
+//        hide_frame_except_for_fullscreen "true"
+//    }
+//}
 // ===== Keybindings =====
 keybinds {
-    normal {
-        // 快速展示和访问键绑定
-        // Bind Ctrl+f to open zellij-forgot (keybinding helper)
-        bind "Ctrl f" {
-            LaunchOrFocusPlugin "https://github.com/karimould/zellij-forgot/releases/latest/download/zellij_forgot.wasm" {
-                floating true
-            }
-        }
-
-        // 快速搜索和切换标签页
-        // https://github.com/rvcas/room
-        // Bind Ctrl+p to open room (tab search and switcher)
-        bind "Ctrl p" {
-            LaunchOrFocusPlugin "https://github.com/rvcas/room/releases/latest/download/room.wasm" {
-                floating true
-            }
-        }
-    }
-
+    //    normal {
+    //        // 快速展示和访问键绑定
+    //        // Bind Ctrl+f to open zellij-forgot (keybinding helper)
+    //        bind "Ctrl f" {
+    //            LaunchOrFocusPlugin "https://github.com/karimould/zellij-forgot/releases/latest/download/zellij_forgot.wasm" {
+    //                floating true
+    //            }
+    //        }
+    //
+    //        // 快速搜索和切换标签页
+    //        // https://github.com/rvcas/room
+    //        // Bind Ctrl+p to open room (tab search and switcher)
+    //        bind "Ctrl p" {
+    //            LaunchOrFocusPlugin "https://github.com/rvcas/room/releases/latest/download/room.wasm" {
+    //                floating true
+    //            }
+    //        }
+    //    }
     // Keep other default keybindings
     shared_except "locked" {
-        bind "Ctrl g" { SwitchToMode "locked"; }
-        bind "Ctrl q" { Quit; }
-        bind "Alt n" { NewPane; }
-        bind "Alt h" "Alt Left" { MoveFocusOrTab "Left"; }
-        bind "Alt l" "Alt Right" { MoveFocusOrTab "Right"; }
-        bind "Alt j" "Alt Down" { MoveFocus "Down"; }
-        bind "Alt k" "Alt Up" { MoveFocus "Up"; }
-        bind "Alt =" "Alt +" { Resize "Increase"; }
-        bind "Alt -" { Resize "Decrease"; }
-        bind "Alt [" { PreviousSwapLayout; }
-        bind "Alt ]" { NextSwapLayout; }
+        bind "Ctrl g" {
+            SwitchToMode "locked"
+        }
+        bind "Ctrl q" {
+            Quit
+        }
+        bind "Alt n" {
+            NewPane
+        }
+        bind "Alt h" "Alt Left" {
+            MoveFocusOrTab "Left"
+        }
+        bind "Alt l" "Alt Right" {
+            MoveFocusOrTab "Right"
+        }
+        bind "Alt j" "Alt Down" {
+            MoveFocus "Down"
+        }
+        bind "Alt k" "Alt Up" {
+            MoveFocus "Up"
+        }
+        bind "Alt =" "Alt +" {
+            Resize "Increase"
+        }
+        bind "Alt -" {
+            Resize "Decrease"
+        }
+        bind "Alt [" {
+            PreviousSwapLayout
+        }
+        bind "Alt ]" {
+            NextSwapLayout
+        }
     }
 }
-
 // ===== Default Layout =====
 // This layout includes zjstatus as the status bar
 layout {
+    // 每次新建标签页（包括启动时）都会使用
     default_tab_template {
-        children
-
-        // 可配置的主题化状态栏插件
-        // zjstatus - Configurable status bar
-        // https://github.com/dj95/zjstatus
-        pane size=1 borderless=true {
-            plugin location="https://github.com/dj95/zjstatus/releases/latest/download/zjstatus.wasm" {
-                // Format configuration
-                format_left   "{mode} #[fg=#89B4FA,bold]{session}"
-                format_center "{tabs}"
-                format_right  "{command_git_branch} {datetime}"
-                format_space  ""
-
-                // Border configuration
-                border_enabled  "false"
-                border_char     "─"
-                border_format   "#[fg=#6C7086]{char}"
-                border_position "top"
-
-                // Frame hiding
-                hide_frame_for_single_pane "true"
-
-                // Mode indicators
-                mode_normal        "#[bg=#89B4FA,fg=#1E1E2E,bold] NORMAL "
-                mode_locked        "#[bg=#F38BA8,fg=#1E1E2E,bold] LOCKED "
-                mode_resize        "#[bg=#FAB387,fg=#1E1E2E,bold] RESIZE "
-                mode_pane          "#[bg=#A6E3A1,fg=#1E1E2E,bold] PANE "
-                mode_tab           "#[bg=#F9E2AF,fg=#1E1E2E,bold] TAB "
-                mode_scroll        "#[bg=#CBA6F7,fg=#1E1E2E,bold] SCROLL "
-                mode_enter_search  "#[bg=#94E2D5,fg=#1E1E2E,bold] SEARCH "
-                mode_search        "#[bg=#94E2D5,fg=#1E1E2E,bold] SEARCH "
-                mode_rename_tab    "#[bg=#F5C2E7,fg=#1E1E2E,bold] RENAME "
-                mode_rename_pane   "#[bg=#F5C2E7,fg=#1E1E2E,bold] RENAME "
-                mode_session       "#[bg=#74C7EC,fg=#1E1E2E,bold] SESSION "
-                mode_move          "#[bg=#F2CDCD,fg=#1E1E2E,bold] MOVE "
-                mode_prompt        "#[bg=#B4BEFE,fg=#1E1E2E,bold] PROMPT "
-                mode_tmux          "#[bg=#FFC387,fg=#1E1E2E,bold] TMUX "
-
-                // Tab styling
-                tab_normal              "#[fg=#6C7086] {index} {name} {floating_indicator}"
-                tab_normal_fullscreen   "#[fg=#6C7086] {index} {name} [] {floating_indicator}"
-                tab_normal_sync         "#[fg=#6C7086] {index} {name} <> {floating_indicator}"
-
-                tab_active              "#[fg=#9399B2,bold,italic] {index} {name} {floating_indicator}"
-                tab_active_fullscreen   "#[fg=#9399B2,bold,italic] {index} {name} [] {floating_indicator}"
-                tab_active_sync         "#[fg=#9399B2,bold,italic] {index} {name} <> {floating_indicator}"
-
-                tab_separator           "#[fg=#6C7086] | "
-                tab_floating_indicator  "󰉈 "
-                tab_sync_indicator      " "
-                tab_fullscreen_indicator "󰊓 "
-
-                // Git branch command
-                command_git_branch_command     "git rev-parse --abbrev-ref HEAD"
-                command_git_branch_format      "#[fg=#89B4FA] {stdout} "
-                command_git_branch_interval    "10"
-                command_git_branch_rendermode  "static"
-
-                // Datetime
-                datetime        "#[fg=#6C7086,bold] {format} "
-                datetime_format "%Y-%m-%d %H:%M"
-                datetime_timezone "Asia/Shanghai"
+        // 2. 主体区域：先垂直分割（状态栏在底部），再水平分割两个 pane
+        // 把 状态栏 与 工作区 垂直排列
+        //        children split_direction="vertical" {
+        //             左边大 pane（70% 宽度）
+        //            pane split_direction="horizontal" ratio=0.7 {
+        //                command "zsh"
+        //            }
+        //             右边小 pane（30% 宽度）
+        //            pane {
+        //                command "zsh"
+        //            }
+        //        }
+        children split_direction="vertical" {
+            // workspace: horizontal split 70/30
+            //            child split_direction="horizontal" ratio=0.7 {
+            //                pane {
+            //                    command "zsh"
+            //                 }
+            //                pane {
+            //                    command "zsh"
+            //                 }
+            //            }
+            // 主工作区（单 pane）
+            pane {
+                command "zsh"
+            }
+            // 可配置的主题化状态栏插件
+            // zjstatus - Configurable status bar
+            // https://github.com/dj95/zjstatus
+            pane size=1 borderless=true {
+                plugin location="https://github.com/dj95/zjstatus/releases/latest/download/zjstatus.wasm" {
+                    // Format configuration
+                    format_left "{mode} #[fg=#89B4FA,bold]{session}"
+                    format_center "{tabs}"
+                    format_right "{command_git_branch} {datetime}"
+                    format_space ""
+                    // Border configuration
+                    border_enabled "false"
+                    border_char "─"
+                    border_format "#[fg=#6C7086]{char}"
+                    border_position "top"
+                    // Frame hiding
+                    hide_frame_for_single_pane "true"
+                    // Mode indicators
+                    mode_normal "#[bg=#89B4FA,fg=#1E1E2E,bold] NORMAL "
+                    mode_locked "#[bg=#F38BA8,fg=#1E1E2E,bold] LOCKED "
+                    mode_resize "#[bg=#FAB387,fg=#1E1E2E,bold] RESIZE "
+                    mode_pane "#[bg=#A6E3A1,fg=#1E1E2E,bold] PANE "
+                    mode_tab "#[bg=#F9E2AF,fg=#1E1E2E,bold] TAB "
+                    mode_scroll "#[bg=#CBA6F7,fg=#1E1E2E,bold] SCROLL "
+                    mode_enter_search "#[bg=#94E2D5,fg=#1E1E2E,bold] SEARCH "
+                    mode_search "#[bg=#94E2D5,fg=#1E1E2E,bold] SEARCH "
+                    mode_rename_tab "#[bg=#F5C2E7,fg=#1E1E2E,bold] RENAME "
+                    mode_rename_pane "#[bg=#F5C2E7,fg=#1E1E2E,bold] RENAME "
+                    mode_session "#[bg=#74C7EC,fg=#1E1E2E,bold] SESSION "
+                    mode_move "#[bg=#F2CDCD,fg=#1E1E2E,bold] MOVE "
+                    mode_prompt "#[bg=#B4BEFE,fg=#1E1E2E,bold] PROMPT "
+                    mode_tmux "#[bg=#FFC387,fg=#1E1E2E,bold] TMUX "
+                    // Tab styling
+                    tab_layout "horizontal"
+                    tab_separator " | "
+                    tab_normal "{index}:{name}"
+                    tab_active "#[bold,fg=#9399B2]{index}:{name}"
+                    // tab_normal              "#[fg=#6C7086] {index} {name} {floating_indicator}"
+                    // tab_normal_fullscreen   "#[fg=#6C7086] {index} {name} [] {floating_indicator}"
+                    // tab_normal_sync         "#[fg=#6C7086] {index} {name} <> {floating_indicator}"
+                    // tab_active              "#[fg=#9399B2,bold,italic] {index} {name} {floating_indicator}"
+                    // tab_active_fullscreen   "#[fg=#9399B2,bold,italic] {index} {name} [] {floating_indicator}"
+                    // tab_active_sync         "#[fg=#9399B2,bold,italic] {index} {name} <> {floating_indicator}"
+                    tab_separator "#[fg=#6C7086] | "
+                    tab_floating_indicator "󰉈 "
+                    tab_sync_indicator " "
+                    tab_fullscreen_indicator "󰊓 "
+                    // Git branch command
+                    command_git_branch_command "git rev-parse --abbrev-ref HEAD"
+                    command_git_branch_format "#[fg=#89B4FA] {stdout} "
+                    command_git_branch_interval "10"
+                    command_git_branch_rendermode "static"
+                    // Datetime
+                    datetime "#[fg=#6C7086,bold] {format} "
+                    datetime_format "%Y-%m-%d %H:%M"
+                    datetime_timezone "Asia/Shanghai"
+                }
             }
         }
     }
-
-    // Default tab
-    tab name="Shell" focus=true {
-        pane command="zsh"
-    }
+ // Default tab
+    // 这个 pane 不会被渲染，因为：
+//
+//default_tab_template 已经定义了完整布局
+//tab { ... } 里的 pane 只在 没有 default_tab_template 时生效
+//    tab name="Shell" focus=true {
+//        pane command="zsh"
+//    }
 }

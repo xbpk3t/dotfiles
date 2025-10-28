@@ -1,51 +1,38 @@
 // Niri compositor 配置文件
 // 基于 hyprland 配置进行迁移
 // 参考: https://github.com/cap153/config/blob/main/niri/.config/niri/config.kdl
-
 // ============================================================================
 // 输入设备配置
 // ============================================================================
-
-
 input {
     keyboard {
         xkb {
             layout "us"
         }
-
-        // 确保焦点行为更加可预测，避免鼠标影响焦点
+ // 确保焦点行为更加可预测，避免鼠标影响焦点
         // [2025-10-24] 之前是true,所以切换workspce之后，会失焦，需要重新定位cursor,才能输入内容
         // focus-wrap-around "never"
     }
-
-        // 触摸板配置
+    // 触摸板配置
     touchpad {
-    // 自然滚动
+        // 自然滚动
         natural-scroll
-
-    // 轻触点击
+        // 轻触点击
         tap
-
-    // 拖拽锁定 (disable-while-typing)
+        // 拖拽锁定 (disable-while-typing)
         dwt
-
-    // 滚动速度
+        // 滚动速度
         // [2025-10-24] 修改为0.6，现在这个trackpad太小，导致scroll很费劲
         scroll-factor 0.6
-
-    // 点击方式
+        // 点击方式
         click-method "clickfinger"
         scroll-method "two-finger"
-
-    // 加速配置
+        // 加速配置
         // 不设置加速，否则会有很“窜”，很飘的感觉
         accel-speed 0
-        // accel-profile "adaptive"
-
-
+ // accel-profile "adaptive"
     }
-
-// 鼠标配置
+ // 鼠标配置
 //    mouse {
 //        accel-speed 1.0
 //        accel-profile "adaptive"
@@ -54,11 +41,9 @@ input {
 // 焦点跟随鼠标 - 注释掉以避免焦点冲突问题
     // focus-follows-mouse
 }
-
 // ============================================================================
 // 输出配置
 // ============================================================================
-
 // 内置笔记本显示器配置
 // 在 Wayland 下，缩放应该完全由 compositor 的 output scale 控制
 // 已移除 gtk.nix 中的 Xft.dpi 设置以避免双重缩放冲突
@@ -69,10 +54,9 @@ input {
 output "eDP-1" {
     scale 1
     // Transform allows to rotate the output counter-clockwise, valid values are:
-// normal, 90, 180, 270, flipped, flipped-90, flipped-180 and flipped-270.
+    // normal, 90, 180, 270, flipped, flipped-90, flipped-180 and flipped-270.
     transform "normal"
-
-// Position of the output in the global coordinate space.
+ // Position of the output in the global coordinate space.
 // This affects directional monitor actions like "focus-monitor-left", and cursor movement.
 // The cursor can only move between directly adjacent outputs.
 // Output scale and rotation has to be taken into account for positioning:
@@ -83,189 +67,152 @@ output "eDP-1" {
 // automatically.
 //position x=1280 y=0
 }
-
 // ============================================================================
 // 动画配置 - 新增以禁用所有动画，实现干脆利落的切换
 animations {
     off
 }
-
 // ============================================================================
 // 布局配置
 // ============================================================================
-
 layout {
-// 焦点环配置 - 启用焦点环以提供视觉反馈，便于识别当前焦点窗口
+    // 焦点环配置 - 启用焦点环以提供视觉反馈，便于识别当前焦点窗口
     focus-ring {
         width 1
         active-color "rgb(0, 120, 212)"
         inactive-color "rgb(128, 128, 128)"
     }
-
-// 边框配置 - 启用边框以区分窗口边界，提高可读性
+    // 边框配置 - 启用边框以区分窗口边界，提高可读性
     border {
-    // The settings are the same as for the focus ring.
-    // If you enable the border, you probably want to disable the focus ring.
+        // The settings are the same as for the focus ring.
+        // If you enable the border, you probably want to disable the focus ring.
         off
-
         width 0.5
         active-color "rgb(0, 120, 212)"
         inactive-color "rgb(128, 128, 128)"
     }
-
-
-// You can enable drop shadows for windows.
+    // You can enable drop shadows for windows.
     shadow {
-    // Uncomment the next line to enable shadows.
-    // on
-
-    // By default, the shadow draws only around its window, and not behind it.
-    // Uncomment this setting to make the shadow draw behind its window.
-    //
-    // Note that niri has no way of knowing about the CSD window corner
-    // radius. It has to assume that windows have square corners, leading to
-    // shadow artifacts inside the CSD rounded corners. This setting fixes
-    // those artifacts.
-    //
-    // However, instead you may want to set prefer-no-csd and/or
-    // geometry-corner-radius. Then, niri will know the corner radius and
-    // draw the shadow correctly, without having to draw it behind the
-    // window. These will also remove client-side shadows if the window
-    // draws any.
-    //
-    // draw-behind-window true
-
-    // You can change how shadows look. The values below are in logical
-    // pixels and match the CSS box-shadow properties.
-
-    // Softness controls the shadow blur radius.
+        // Uncomment the next line to enable shadows.
+        // on
+        // By default, the shadow draws only around its window, and not behind it.
+        // Uncomment this setting to make the shadow draw behind its window.
+        //
+        // Note that niri has no way of knowing about the CSD window corner
+        // radius. It has to assume that windows have square corners, leading to
+        // shadow artifacts inside the CSD rounded corners. This setting fixes
+        // those artifacts.
+        //
+        // However, instead you may want to set prefer-no-csd and/or
+        // geometry-corner-radius. Then, niri will know the corner radius and
+        // draw the shadow correctly, without having to draw it behind the
+        // window. These will also remove client-side shadows if the window
+        // draws any.
+        //
+        // draw-behind-window true
+        // You can change how shadows look. The values below are in logical
+        // pixels and match the CSS box-shadow properties.
+        // Softness controls the shadow blur radius.
         softness 30
-
-    // Spread expands the shadow.
+        // Spread expands the shadow.
         spread 5
-
-    // Offset moves the shadow relative to the window.
+        // Offset moves the shadow relative to the window.
         offset x=0 y=5
-
-    // You can also change the shadow color and opacity.
+        // You can also change the shadow color and opacity.
         color "#0007"
     }
-
-
-// 间距配置 - 设置小间距以避免窗口完全贴合，提高视觉舒适度
+    // 间距配置 - 设置小间距以避免窗口完全贴合，提高视觉舒适度
     gaps 3
-
     background-color "transparent"
-
-// 居中布局
+    // 居中布局
     center-focused-column "never"
-
-// 预设列宽
+    // 预设列宽
     preset-column-widths {
         proportion 0.33333
         proportion 0.5
         proportion 0.66667
     }
-
-// 默认列宽 - 设置为 0.6 以便默认平铺多个窗口，而不是全宽度
+    // 默认列宽 - 设置为 0.6 以便默认平铺多个窗口，而不是全宽度
     default-column-width {
         proportion 0.6
     }
-
-// 预设窗口高度
+    // 预设窗口高度
     preset-window-heights {
         proportion 0.33333
         proportion 0.5
         proportion 0.66667
     }
 }
-
 // ============================================================================
 // 命名工作区配置 - 使用 named workspaces，按需求分别用于 Alacritty (1), Firefox (2), GoLand (3)
 // 注意命名 workspace 会按照配置文件中的声明顺序初始出现。所以这里的声明顺序就是实际上workspace布局的上下顺序
 workspace "terminal"
 workspace "IDE"
 workspace "firefox"
-
-
-
 // ============================================================================
 // 窗口规则
 // ============================================================================
-
 // 默认窗口规则 - 移除全屏默认以符合tiling布局，避免所有窗口强制全屏
 window-rule {
-// 匹配所有窗口
-    default-column-width { proportion 0.5; }
-
+    // 匹配所有窗口
+    default-column-width {
+        proportion 0.5
+    }
     open-focused true
-// 保证只有一个focus window
+    // 保证只有一个focus window
     match is-focused=true
 }
-
 // 浮动窗口规则 - 为弹出式窗口或不适合平铺的应用设置浮动模式（示例：Firefox PiP，使用 app-id 和 title 匹配）
 window-rule {
     match app-id="firefox" title="Picture-in-Picture"
     open-floating true
 }
-
 // Alacritty 绑定到 workspace 1 - 新增窗口规则，将 Alacritty 应用绑定到 workspace 1
 window-rule {
     match app-id="Alacritty"
+    exclude is-floating=true
     open-on-workspace "terminal"
-
     // open-maximized true
     open-fullscreen true
 }
-
 // Firefox 绑定到 workspace 2 - 新增窗口规则，将 Firefox 应用绑定到 workspace 2
 window-rule {
     match app-id="firefox"
+    exclude is-floating=true
     open-on-workspace "firefox"
-
     // open-maximized true
     open-fullscreen true
 }
-
 // GoLand 绑定到 workspace 3 - 新增窗口规则，将 GoLand 应用绑定到 workspace 3
 window-rule {
     match app-id="jetbrains-goland"
+    exclude is-floating=true
     // 针对浮动子窗口（menu、搜索栏）
     // match "is-floating" true
     open-focused true
     open-on-workspace "IDE"
-
-// open-maximized true
+    // open-maximized true
     open-fullscreen true
 }
-
 // ============================================================================
 // 启动应用程序
 // ============================================================================
-
 // Stylix 壁纸 - 使用 swaybg 显示 stylix 配置的背景图片
 // 注意: 这个会在 niri.nix 中通过 Nix 变量替换
 // spawn-at-startup "swaybg" "-i" "@STYLIX_IMAGE@" "-m" "fill"
-
 // Fcitx5 输入法配置
 spawn-at-startup "fcitx5" "-d" "--replace"
-
 // Polkit 认证代理
 spawn-at-startup "/usr/lib/mate-polkit/polkit-mate-authentication-agent-1"
-
 // 启动 xwayland-satellite 以支持 X11 应用（如 GoLand）
 spawn-at-startup "xwayland-satellite"
-
 // nisiusd
 spawn-at-startup "niriusd"
-
 // sunsetr
 spawn-at-startup "sunsetr"
-
 // ============================================================================
 // 快捷键绑定
 // ============================================================================
-
 // 注意：DMS 会通过 niri.enableKeybinds 自动添加以下快捷键，请勿在此重复定义：
 // - Mod+Space: 应用启动器 (spotlight toggle)
 // - Mod+N: 通知中心 (notifications toggle)
@@ -278,181 +225,214 @@ spawn-at-startup "sunsetr"
 // - XF86AudioRaiseVolume/LowerVolume/Mute/MicMute: 音频控制
 // - XF86MonBrightnessUp/Down: 亮度控制 - 仅当 enableBrightnessControl = true
 // - Mod+Alt+N: 夜间模式 (night mode toggle) - 仅当 enableNightMode = true
-
 binds {
-// ========================================================================
-// 系统操作
-// ========================================================================
-
-
-// Mod-Shift-/, which is usually the same as Mod-?,
-// shows a list of important hotkeys.
-    Mod+Shift+Slash { show-hotkey-overlay; }
-
-// Open/close the Overview: a zoomed-out view of workspaces and windows.
-// You can also move the mouse into the top-left hot corner,
-// or do a four-finger swipe up on a touchpad.
+    // ========================================================================
+    // 系统操作
+    // ========================================================================
+    // Mod-Shift-/, which is usually the same as Mod-?,
+    // shows a list of important hotkeys.
+    Mod+Shift+Slash {
+        show-hotkey-overlay
+    }
+    // Open/close the Overview: a zoomed-out view of workspaces and windows.
+    // You can also move the mouse into the top-left hot corner,
+    // or do a four-finger swipe up on a touchpad.
     // 预览window
     // Mod+O repeat=false { toggle-overview; }
-
-
-// 关闭当前窗口
-    Mod+Q { close-window; }
-
-// ========================================================================
-// 终端和应用启动
-// ========================================================================
-
-//    Mod+Return { spawn "alacritty"; }
-//    Mod+B { spawn "firefox"; }
-//    Mod+I { spawn "goland"; }
-// 双击super ->
-//    Mod+D { spawn-sh "rofi -show combi"; }
-    Mod+D { spawn-sh "raffi"; }
-    Mod+Shift+D { spawn-sh "fuzzel"; }
-    Mod+Shift+C { spawn-sh "cliphist list | fuzzel --dmenu | cliphist decode | wl-copy"; }
-
-// ========================================================================
-// 应用切换 - 类似 macOS Alfred 的 App 切换
-// ========================================================================
-// 注意：niri 不直接支持按 app-id 聚焦窗口的命令
-// 这里使用 spawn 命令配合 niri msg 来实现
-// 如果应用未运行，则启动；如果已运行，则聚焦
-
-// Super+1: 切换到 Alacritty
-// Use -a for app-id matching. Common app-ids: Alacritty, firefox, jetbrains-goland
-//    Mod+1 { spawn-sh "nirius focus-or-spawn -a 'Alacritty' alacritty"; }
-//
-//    // Super+2: 切换到 Firefox
-//    Mod+2 { spawn-sh "nirius focus-or-spawn -a 'firefox' firefox"; }
-//
-//    // Super+3: 切换到 GoLand
-//    Mod+3 { spawn-sh "nirius focus-or-spawn -a 'jetbrains-goland' goland"; }
-
-// ========================================================================
-// 工作区切换 - 修改快捷键仅支持三个工作区，使用命名工作区引用
-    Mod+1 { focus-workspace "terminal"; }
-    Mod+2 { focus-workspace "IDE"; }
-    Mod+3 { focus-workspace "firefox"; }
-
-
+    // 关闭当前窗口
+    Mod+Q {
+        close-window
+    }
+    // ========================================================================
+    // 终端和应用启动
+    // ========================================================================
+    //    Mod+Return { spawn "alacritty"; }
+    //    Mod+B { spawn "firefox"; }
+    //    Mod+I { spawn "goland"; }
+    // 双击super ->
+    //    Mod+D { spawn-sh "rofi -show combi"; }
+    Mod+D {
+        spawn-sh "raffi"
+    }
+    Mod+Shift+D {
+        spawn-sh "fuzzel"
+    }
+    Mod+Shift+C {
+        spawn-sh "cliphist list | fuzzel --dmenu | cliphist decode | wl-copy"
+    }
+    // ========================================================================
+    // 应用切换 - 类似 macOS Alfred 的 App 切换
+    // ========================================================================
+    // 注意：niri 不直接支持按 app-id 聚焦窗口的命令
+    // 这里使用 spawn 命令配合 niri msg 来实现
+    // 如果应用未运行，则启动；如果已运行，则聚焦
+    // Super+1: 切换到 Alacritty
+    // Use -a for app-id matching. Common app-ids: Alacritty, firefox, jetbrains-goland
+    //    Mod+1 { spawn-sh "nirius focus-or-spawn -a 'Alacritty' alacritty"; }
+    //
+    //    // Super+2: 切换到 Firefox
+    //    Mod+2 { spawn-sh "nirius focus-or-spawn -a 'firefox' firefox"; }
+    //
+    //    // Super+3: 切换到 GoLand
+    //    Mod+3 { spawn-sh "nirius focus-or-spawn -a 'jetbrains-goland' goland"; }
+    // ========================================================================
+    // 工作区切换 - 修改快捷键仅支持三个工作区，使用命名工作区引用
+    Mod+1 {
+        focus-workspace "terminal"
+    }
+    Mod+2 {
+        focus-workspace "IDE"
+    }
+    Mod+3 {
+        focus-workspace "firefox"
+    }
     // 用来切换workspace (支持循环切换)
     // FIXME [2025-10-24] dan
-    Mod+Tab { focus-workspace-down; }
-
+    Mod+Tab {
+        focus-workspace-down
+    }
     // 调整workspace上下位置
-    Mod+Alt+Up { move-workspace-up; }
-    Mod+Alt+Down { move-workspace-down; }
-
-// 移动窗口到工作区 - 修改快捷键仅支持三个工作区，使用命名工作区引用
-    Mod+Ctrl+1 { move-window-to-workspace "terminal"; }
-    Mod+Ctrl+2 { move-window-to-workspace "IDE"; }
-    Mod+Ctrl+3 { move-window-to-workspace "firefox"; }
-
-
-// ========================================================================
-// 窗口焦点切换
-// ========================================================================
-
-    Mod+Left { focus-column-left; }
-    Mod+Right { focus-column-right; }
-    Mod+Up { focus-window-up; }
-    Mod+Down { focus-window-down; }
-
-// ========================================================================
-// 移动窗口
-// ========================================================================
-
-    Mod+Shift+Left { move-column-left; }
-    Mod+Shift+Right { move-column-right; }
-    Mod+Shift+Up { move-window-up; }
-    Mod+Shift+Down { move-window-down; }
-
-// ========================================================================
-// 调整窗口大小
-// ========================================================================
-
-    Mod+Ctrl+Left { set-column-width "-10%"; }
-    Mod+Ctrl+Right { set-column-width "+10%"; }
-    Mod+Ctrl+Up { set-window-height "-10%"; }
-    Mod+Ctrl+Down { set-window-height "+10%"; }
-
-// ========================================================================
-// 全屏和最大化
-// ========================================================================
-
-// 全屏切换
-    Mod+F { fullscreen-window; }
-
-// 最大化切换（niri 特有）
-// 注意：Mod+M 被 DMS 用于进程列表，这里使用 Mod+Shift+M
-    Mod+Shift+M { maximize-column; }
-
-// ========================================================================
-// 截图和锁屏
-// ========================================================================
-
-// 指定区域截图
-// 注意没有 -c 和 -p，也没有使用 flameshot full 来直接截取全屏，以确保灵活性
-// 之前使用wayland内置的 grim + slurp，以及hyprland和niri内置截图工具，都不如flameshot好用
-    Mod+Print { spawn "sh" "-c" "flameshot gui"; }
-    Print { spawn "sh" "-c" "flameshot full"; }
-
+    Mod+Alt+Up {
+        move-workspace-up
+    }
+    Mod+Alt+Down {
+        move-workspace-down
+    }
+    // 移动窗口到工作区 - 修改快捷键仅支持三个工作区，使用命名工作区引用
+    Mod+Ctrl+1 {
+        move-window-to-workspace "terminal"
+    }
+    Mod+Ctrl+2 {
+        move-window-to-workspace "IDE"
+    }
+    Mod+Ctrl+3 {
+        move-window-to-workspace "firefox"
+    }
+    // ========================================================================
+    // 窗口焦点切换
+    // ========================================================================
+    Mod+Left {
+        focus-column-left
+    }
+    Mod+Right {
+        focus-column-right
+    }
+    Mod+Up {
+        focus-window-up
+    }
+    Mod+Down {
+        focus-window-down
+    }
+    // ========================================================================
+    // 移动窗口
+    // ========================================================================
+    Mod+Shift+Left {
+        move-column-left
+    }
+    Mod+Shift+Right {
+        move-column-right
+    }
+    Mod+Shift+Up {
+        move-window-up
+    }
+    Mod+Shift+Down {
+        move-window-down
+    }
+    // ========================================================================
+    // 调整窗口大小
+    // ========================================================================
+    Mod+Ctrl+Left {
+        set-column-width "-10%"
+    }
+    Mod+Ctrl+Right {
+        set-column-width "+10%"
+    }
+    Mod+Ctrl+Up {
+        set-window-height "-10%"
+    }
+    Mod+Ctrl+Down {
+        set-window-height "+10%"
+    }
+    // ========================================================================
+    // 全屏和最大化
+    // ========================================================================
+    // 全屏切换
+    Mod+F {
+        fullscreen-window
+    }
+    // 最大化切换（niri 特有）
+    // 注意：Mod+M 被 DMS 用于进程列表，这里使用 Mod+Shift+M
+    Mod+Shift+M {
+        maximize-column
+    }
+    // ========================================================================
+    // 截图和锁屏
+    // ========================================================================
+    // 指定区域截图
+    // 注意没有 -c 和 -p，也没有使用 flameshot full 来直接截取全屏，以确保灵活性
+    // 之前使用wayland内置的 grim + slurp，以及hyprland和niri内置截图工具，都不如flameshot好用
+    Mod+Print {
+        spawn "sh" "-c" "flameshot gui"
+    }
+    Print {
+        spawn "sh" "-c" "flameshot full"
+    }
     F2 {
         spawn-sh "pactl set-sink-volume @DEFAULT_SINK@ -10% && notify-send -t 800 -a Volume Volume \"$(wpctl get-volume @DEFAULT_AUDIO_SINK@)\""
     }
     F3 {
         spawn-sh "pactl set-sink-volume @DEFAULT_SINK@ +10% && notify-send -t 800 -a Volume Volume \"$(wpctl get-volume @DEFAULT_AUDIO_SINK@)\""
     }
-
-// 锁屏
-// 注意：Super+Alt+L 被 DMS 用于锁屏，这里使用 Ctrl+Alt+L 作为备用
-    Ctrl+Alt+L { spawn "swaylock"; }
-
-// ========================================================================
-// 其他工具
-// ========================================================================
-
-// 电源菜单
-// 注意：Mod+X 被 DMS 用于电源菜单，这里使用 Mod+Shift+X 作为备用
-    Mod+Shift+X { spawn "wlogout"; }
-
-// 网络管理器
-// 注意：Mod+N 被 DMS 用于通知中心，这里使用 Mod+Shift+N
-// [2025-10-19] 用不到，注释掉
-// Mod+Shift+N { spawn "nm-connection-editor"; }
-
-// Fcitx5 重启
-    Mod+E { spawn "bash" "-c" "pkill fcitx5 -9; sleep 1; fcitx5 -d --replace; sleep 1; fcitx5-remote -r"; }
-
-// ========================================================================
-// 消费或弹出窗口（niri 特有功能）
-// ========================================================================
-
-// 注意：Mod+Comma 被 DMS 用于设置，这里使用 Mod+Period 和 Mod+Shift+Period
-    Mod+Period { consume-window-into-column; }
-    Mod+Shift+Period { expel-window-from-column; }
-
-// ========================================================================
-// 切换窗口方向（niri 特有）
-// ========================================================================
-
-    Mod+R { switch-preset-column-width; }
-    Mod+Shift+R { reset-window-height; }
+    // 锁屏
+    // 注意：Super+Alt+L 被 DMS 用于锁屏，这里使用 Ctrl+Alt+L 作为备用
+    Ctrl+Alt+L {
+        spawn "swaylock"
+    }
+    // ========================================================================
+    // 其他工具
+    // ========================================================================
+    // 电源菜单
+    // 注意：Mod+X 被 DMS 用于电源菜单，这里使用 Mod+Shift+X 作为备用
+    Mod+Shift+X {
+        spawn "wlogout"
+    }
+    // 网络管理器
+    // 注意：Mod+N 被 DMS 用于通知中心，这里使用 Mod+Shift+N
+    // [2025-10-19] 用不到，注释掉
+    // Mod+Shift+N { spawn "nm-connection-editor"; }
+    // Fcitx5 重启
+    Mod+E {
+        spawn "bash" "-c" "pkill fcitx5 -9; sleep 1; fcitx5 -d --replace; sleep 1; fcitx5-remote -r"
+    }
+    // ========================================================================
+    // 消费或弹出窗口（niri 特有功能）
+    // ========================================================================
+    // 注意：Mod+Comma 被 DMS 用于设置，这里使用 Mod+Period 和 Mod+Shift+Period
+    Mod+Period {
+        consume-window-into-column
+    }
+    Mod+Shift+Period {
+        expel-window-from-column
+    }
+    // ========================================================================
+    // 切换窗口方向（niri 特有）
+    // ========================================================================
+    Mod+R {
+        switch-preset-column-width
+    }
+    Mod+Shift+R {
+        reset-window-height
+    }
 }
-
 // stylix的cursor无法处理niri的curosr，所以必须要在niri里处理cursor配置
 cursor {
-//    xcursor-theme "default"
-// xcursor-theme "macOS-BigSur-White"
+    //    xcursor-theme "default"
+    // xcursor-theme "macOS-BigSur-White"
     xcursor-theme "Bibata-Modern-Classic"
     xcursor-size 12
-
-// hide-when-typing
+ // hide-when-typing
 // hide-after-inactive-ms 1000
 }
-
-
 // Disable the hot corners.
 gestures {
     // Top-left preview action
