@@ -37,51 +37,51 @@
   #    Comment=Open bookmarks from YAML file
   #  '';
 
-  #    home.file."taskfile".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/${myvars.projectDir}/taskfile";
+  #    home.file."taskfile".source = config.lib.file.mkOutOfStoreSymlink "${myvars.projectRoot}/taskfile";
 
   #  home.file.".local/bin/raffi-bookmark" = {
-  #    source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/${myvars.projectDir}/home/nixos/gui/fuzzel/raffi-bookmark.nu";
+  #    source = config.lib.file.mkOutOfStoreSymlink "${myvars.projectRoot}/home/nixos/gui/fuzzel/raffi-bookmark.nu";
   #    executable = true;
   #  };
   #
   #  home.file.".local/bin/raffi-pwgen" = {
-  #    source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/${myvars.projectDir}/home/nixos/gui/fuzzel/raffi-pwgen.nu";
+  #    source = config.lib.file.mkOutOfStoreSymlink "${myvars.projectRoot}/home/nixos/gui/fuzzel/raffi-pwgen.nu";
   #    executable = true;
   #  };
   #
   #  home.file.".local/bin/raffi-snippet" = {
-  #    source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/${myvars.projectDir}/home/nixos/gui/fuzzel/raffi-snippet.nu";
+  #    source = config.lib.file.mkOutOfStoreSymlink "${myvars.projectRoot}/home/nixos/gui/fuzzel/raffi-snippet.nu";
   #    executable = true;
   #  };
   #
   #  home.file.".local/bin/raffi-gh" = {
-  #    source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/${myvars.projectDir}/home/nixos/gui/fuzzel/raffi-gh.nu";
+  #    source = config.lib.file.mkOutOfStoreSymlink "${myvars.projectRoot}/home/nixos/gui/fuzzel/raffi-gh.nu";
   #    executable = true;
   #  };
   #
   #  home.file.".local/bin/raffi-common.nu" = {
-  #    source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/${myvars.projectDir}/home/nixos/gui/fuzzel/raffi-common.nu";
+  #    source = config.lib.file.mkOutOfStoreSymlink "${myvars.projectRoot}/home/nixos/gui/fuzzel/raffi-common.nu";
   #    executable = false;
   #  };
 
   home.activation.linkRaffiScripts = config.lib.dag.entryAfter ["writeBoundary"] ''
     mkdir -p $HOME/.local/bin
 
-    ln -sf ${config.home.homeDirectory}/${myvars.projectDir}/home/nixos/gui/fuzzel/raffi-bookmark.nu $HOME/.local/bin/raffi-bookmark
+    ln -sf ${myvars.projectRoot}/home/nixos/gui/fuzzel/raffi-bookmark.nu $HOME/.local/bin/raffi-bookmark
     chmod +x $HOME/.local/bin/raffi-bookmark
 
-    ln -sf ${config.home.homeDirectory}/${myvars.projectDir}/home/nixos/gui/fuzzel/raffi-pwgen.nu $HOME/.local/bin/raffi-pwgen
+    ln -sf ${myvars.projectRoot}/home/nixos/gui/fuzzel/raffi-pwgen.nu $HOME/.local/bin/raffi-pwgen
     chmod +x $HOME/.local/bin/raffi-pwgen
 
-    ln -sf ${config.home.homeDirectory}/${myvars.projectDir}/home/nixos/gui/fuzzel/raffi-snippet.nu $HOME/.local/bin/raffi-snippet
+    ln -sf ${myvars.projectRoot}/home/nixos/gui/fuzzel/raffi-snippet.nu $HOME/.local/bin/raffi-snippet
     chmod +x $HOME/.local/bin/raffi-snippet
 
-    ln -sf ${config.home.homeDirectory}/${myvars.projectDir}/home/nixos/gui/fuzzel/raffi-gh.nu $HOME/.local/bin/raffi-gh
+    ln -sf ${myvars.projectRoot}/home/nixos/gui/fuzzel/raffi-gh.nu $HOME/.local/bin/raffi-gh
     chmod +x $HOME/.local/bin/raffi-gh
 
-    ln -sf ${config.home.homeDirectory}/${myvars.projectDir}/home/nixos/gui/fuzzel/raffi-common.nu $HOME/.local/bin/raffi-common.nu
+    ln -sf ${myvars.projectRoot}/home/nixos/gui/fuzzel/raffi-common.nu $HOME/.local/bin/raffi-common.nu
     # No chmod +x needed here
   '';
 
-  xdg.configFile."raffi/raffi.yaml".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/${myvars.projectDir}/home/nixos/gui/fuzzel/raffi.yml";
+  xdg.configFile."raffi/raffi.yaml".source = config.lib.file.mkOutOfStoreSymlink "${myvars.projectRoot}/home/nixos/gui/fuzzel/raffi.yml";
 }
