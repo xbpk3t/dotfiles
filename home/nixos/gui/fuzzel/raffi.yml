@@ -18,7 +18,10 @@ gh:
   icon: github
   binary: raffi-gh
 
-
+cc:
+  description: cc
+  icon: timer
+  binary: raffi-cc
 
 yuanbao:
   description: yuanbao
