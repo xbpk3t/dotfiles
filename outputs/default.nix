@@ -44,9 +44,6 @@
     # Add nixvim for neovim configuration
     nixvim = inputs.nixvim;
 
-    # Add vicinae for application launcher
-    vicinae = inputs.vicinae;
-
     # Add sops-nix for secret management
     sops-nix = inputs.sops-nix;
 
