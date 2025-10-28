@@ -13,6 +13,10 @@
     yamllint
     markdownlint-cli
 
+    # https://mynixos.com/nixpkgs/package/kdlfmt
+    # kdlfmt 的 pre-commit 仍然需要bin才能使用
+    kdlfmt
+
     urlscan
     lychee
 

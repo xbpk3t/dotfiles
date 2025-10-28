@@ -221,3 +221,9 @@ repos:
       # - id: alejandra-nix
       # Requires Alejandra to be previously installed in the system
       - id: alejandra-system
+
+
+  - repo: https://github.com/hougesen/kdlfmt
+    rev: v0.1.4
+    hooks:
+      - id: kdlfmt-format
