@@ -8,7 +8,6 @@
       "https://cache.garnix.io"
       "https://nix-community.cachix.org"
       "https://loneros.cachix.org"
-      "https://vicinae.cachix.org"
       "https://niri.cachix.org"
       "https://numtide.cachix.org"
       "https://watersucks.cachix.org"
@@ -19,7 +18,6 @@
       "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       "loneros.cachix.org-1:hhp1SqKJSLdBLSRLCLvPfh/CtGV+FJOde3NKbnZrIrY="
-      "vicinae.cachix.org-1:1kDrfienkGHPYbkpNj1mWTr7Fm1+zcenzgTizIcI3oc="
       "niri.cachix.org-1:Wv0OmO7PsuocRKzfDoJ3mulSl7Z6oezYhGhR+3W2964="
       "numtide.cachix.org-1:2ps1kLBUWjxIneOy1Ik6cQjb41X0iXVXeHigGmycPPE="
       "watersucks.cachix.org-1:6gadPC5R8iLWQ3EUtfu3GFrVY7X6I4Fwz/ihW25Jbv8="
@@ -63,12 +61,6 @@
     };
 
     nvf.url = "github:notashelf/nvf";
-
-    # vicinae - a wayland launcher (alternative to anyrun)
-    vicinae = {
-      url = "github:vicinaehq/vicinae";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
 
     sops-nix = {
       url = "github:Mic92/sops-nix";

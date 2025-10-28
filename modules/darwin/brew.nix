@@ -5,10 +5,10 @@ _: {
       "alfred"
       "hammerspoon"
 
-      "goland"
-      "google-chrome"
+      # "goland"
+      # "google-chrome"
 
-      "tencent-lemon"
+      # "tencent-lemon"
 
       # "rustdesk"
 
