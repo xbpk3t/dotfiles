@@ -91,7 +91,7 @@
       enable = true;
       extraArgs = "--keep-since 7d --keep 5";
     };
-    flake = "/home/${myvars.username}/${myvars.projectDir}";
+    flake = myvars.projectRoot;
   };
 
   # nixos-cli - Modern NixOS management CLI
@@ -144,7 +144,7 @@
   # Configure nixos-cli
   # Set the flake path for nixos-cli to use
   environment.sessionVariables = let
-    projectPath = "/home/${myvars.username}/${myvars.projectDir}";
+    projectPath = myvars.projectRoot;
   in {
     FLAKE = projectPath;
     NIXOS_CONFIG = projectPath;

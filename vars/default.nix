@@ -1,9 +1,11 @@
-{lib}: {
-  # Project directory name (relative to Desktop)
-  # This is used to construct the full project path
-  projectDir = "Desktop/dotfiles";
-
+{lib}: let
   username = "luck";
+  projectRoot = "/home/${username}/Desktop/dotfiles";
+in {
+  inherit username projectRoot;
+  # TODO: remove once all modules use projectRoot directly
+  projectDir = projectRoot;
+
   userfullname = "lucas";
   mail = "yyzw@live.com";
 
