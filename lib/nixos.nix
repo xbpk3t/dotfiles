@@ -37,7 +37,6 @@ in
             ++ [
               inputs.nixvim.homeModules.nixvim
               inputs.nvf.homeManagerModules.default
-              # inputs.vicinae.homeManagerModules.default
             ];
         }
       ]);
