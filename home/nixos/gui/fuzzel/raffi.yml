@@ -18,6 +18,17 @@ gh:
   icon: github
   binary: raffi-gh
 
+
+gh-search:
+  description: gh-search
+  icon: github-search
+  binary: raffi-bookmark
+  args:
+    - "--search-url"
+    - "https://www.github.com/search?q={{query}}&type=repositories"
+
+
+
 cc:
   description: cc
   icon: timer
