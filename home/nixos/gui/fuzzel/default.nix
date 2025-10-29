@@ -3,7 +3,10 @@
   config,
   myvars,
   ...
-}: {
+}: 
+let
+  fuzzelPath = "${myvars.projectRoot}/home/nixos/gui/fuzzel";
+in {
   home.packages = with pkgs; [
     raffi
     cliphist
@@ -25,66 +28,33 @@
     };
   };
 
-  #  home.file.".local/bin/fuzzel-bookmark".source = ./fuzzel/bm/bm.sh;
-  #  home.file.".local/bin/fuzzel-bookmark".executable = true;
-  #  xdg.dataFile."applications/fuzzel-bookmark.desktop".text = ''
-  #    [Desktop Entry]
-  #    Name=Bookmark
-  #    Exec=fuzzel-bookmark
-  #    Type=Application
-  #    Icon=bookmark
-  #    Categories=Utility;
-  #    Comment=Open bookmarks from YAML file
-  #  '';
-
-  #    home.file."taskfile".source = config.lib.file.mkOutOfStoreSymlink "${myvars.projectRoot}/taskfile";
-
-  #  home.file.".local/bin/raffi-bookmark" = {
-  #    source = config.lib.file.mkOutOfStoreSymlink "${myvars.projectRoot}/home/nixos/gui/fuzzel/raffi-bookmark.nu";
-  #    executable = true;
-  #  };
-  #
-  #  home.file.".local/bin/raffi-pwgen" = {
-  #    source = config.lib.file.mkOutOfStoreSymlink "${myvars.projectRoot}/home/nixos/gui/fuzzel/raffi-pwgen.nu";
-  #    executable = true;
-  #  };
-  #
-  #  home.file.".local/bin/raffi-snippet" = {
-  #    source = config.lib.file.mkOutOfStoreSymlink "${myvars.projectRoot}/home/nixos/gui/fuzzel/raffi-snippet.nu";
-  #    executable = true;
-  #  };
-  #
-  #  home.file.".local/bin/raffi-gh" = {
-  #    source = config.lib.file.mkOutOfStoreSymlink "${myvars.projectRoot}/home/nixos/gui/fuzzel/raffi-gh.nu";
-  #    executable = true;
-  #  };
-  #
-  #  home.file.".local/bin/raffi-common.nu" = {
-  #    source = config.lib.file.mkOutOfStoreSymlink "${myvars.projectRoot}/home/nixos/gui/fuzzel/raffi-common.nu";
-  #    executable = false;
-  #  };
-
   home.activation.linkRaffiScripts = config.lib.dag.entryAfter ["writeBoundary"] ''
     mkdir -p $HOME/.local/bin
 
-    ln -sf ${myvars.projectRoot}/home/nixos/gui/fuzzel/raffi-bookmark.nu $HOME/.local/bin/raffi-bookmark
+    ln -sf ${fuzzelPath}/raffi-bookmark.nu $HOME/.local/bin/raffi-bookmark
     chmod +x $HOME/.local/bin/raffi-bookmark
 
-    ln -sf ${myvars.projectRoot}/home/nixos/gui/fuzzel/raffi-pwgen.nu $HOME/.local/bin/raffi-pwgen
+    ln -sf ${fuzzelPath}/raffi-pwgen.nu $HOME/.local/bin/raffi-pwgen
     chmod +x $HOME/.local/bin/raffi-pwgen
 
-    ln -sf ${myvars.projectRoot}/home/nixos/gui/fuzzel/raffi-snippet.nu $HOME/.local/bin/raffi-snippet
+    ln -sf ${fuzzelPath}/raffi-snippet.nu $HOME/.local/bin/raffi-snippet
     chmod +x $HOME/.local/bin/raffi-snippet
 
-    ln -sf ${myvars.projectRoot}/home/nixos/gui/fuzzel/raffi-gh.nu $HOME/.local/bin/raffi-gh
+    ln -sf ${fuzzelPath}/raffi-gh.nu $HOME/.local/bin/raffi-gh
     chmod +x $HOME/.local/bin/raffi-gh
 
-    ln -sf ${myvars.projectRoot}/home/nixos/gui/fuzzel/raffi-cc.nu $HOME/.local/bin/raffi-cc
+    ln -sf ${fuzzelPath}/raffi-cc.nu $HOME/.local/bin/raffi-cc
     chmod +x $HOME/.local/bin/raffi-cc
 
-    ln -sf ${myvars.projectRoot}/home/nixos/gui/fuzzel/raffi-common.nu $HOME/.local/bin/raffi-common.nu
+    ln -sf ${fuzzelPath}/raffi-common.nu $HOME/.local/bin/raffi-common.nu
     # No chmod +x needed here
+
+    ln -sf ${fuzzelPath}/fuzzel-clipboard.nu $HOME/.local/bin/fuzzel-clipboard
+    chmod +x $HOME/.local/bin/fuzzel-clipboard
+
+    ln -sf ${fuzzelPath}/fuzzel-text-actions.nu $HOME/.local/bin/fuzzel-text-actions
+    chmod +x $HOME/.local/bin/fuzzel-text-actions
   '';
 
-  xdg.configFile."raffi/raffi.yaml".source = config.lib.file.mkOutOfStoreSymlink "${myvars.projectRoot}/home/nixos/gui/fuzzel/raffi.yml";
+  xdg.configFile."raffi/raffi.yaml".source = config.lib.file.mkOutOfStoreSymlink "${fuzzelPath}/raffi.yml";
 }
