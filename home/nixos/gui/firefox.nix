@@ -241,6 +241,10 @@
           Value = false;
           Status = "locked";
         };
+        "browser.ctrlTab.sortByRecentlyUsed" = {
+          Value = true;
+          Status = "locked";
+        };
 
         # ------------------- 全屏行为 -------------------
         # fullscreen下不要默认autohide search bar, 否则trigger到上面时整个layout都会修改，就很突兀
