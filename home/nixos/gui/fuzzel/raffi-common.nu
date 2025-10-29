@@ -12,19 +12,56 @@ export def copy-to-clipboard [text] {
   false
 }
 
-export def type-into-focused [text] {
-  if (not (which ydotool | is-empty)) {
-    let ok = (try { ^ydotool type --unicode $text; true } catch { false })
+def wtype-paste-from-clipboard [text] {
+  if (not (copy-to-clipboard $text)) {
+    return false
+  }
+
+  sleep 50ms
+
+  let combos = [
+    { hold: 'ctrl', key: 'v' }
+    { hold: 'shift', key: 'Insert' }
+  ]
+
+  for combo in $combos {
+    let args = [
+      '-M' $combo.hold
+      '-k' $combo.key
+      '-m' $combo.hold
+    ]
+
+    let ok = (try { ^wtype ...$args; true } catch { false })
     if $ok { return true }
   }
 
+  false
+}
+
+export def type-into-focused [text] {
+  let text_to_type = ($text | default '' | into string)
+
+  if $text_to_type == '' {
+    return true
+  }
+
   if (not (which wtype | is-empty)) {
-    let ok = (try { ^wtype --unicode $text; true } catch { false })
+    if (wtype-paste-from-clipboard $text_to_type) {
+      return true
+    }
+
+    # Fallback to direct typing if clipboard paste is not available.
+    let ok = (try { $text_to_type | ^wtype -; true } catch { false })
+    if $ok { return true }
+  }
+
+  if (not (which ydotool | is-empty)) {
+    let ok = (try { ^ydotool type --unicode $text_to_type; true } catch { false })
     if $ok { return true }
   }
 
   if (not (which xdotool | is-empty)) {
-    let ok = (try { ^xdotool type --delay 0 --clearmodifiers $text; true } catch { false })
+    let ok = (try { ^xdotool type --delay 0 --clearmodifiers $text_to_type; true } catch { false })
     if $ok { return true }
   }
 
