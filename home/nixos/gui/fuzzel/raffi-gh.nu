@@ -151,7 +151,7 @@ def handle-repo [repo] {
   } else {
     let has_doc = $repo.doc != ''
     let actions = repo-actions $has_doc
-    let selection = prompt-fuzzel $"Action for ($repo.display): " --lines 10 --input ($actions | str join "\n") --no-sort
+    let selection = prompt-fuzzel $"Action for ($repo.display): " --lines 10 --input ($actions | str join "\n") 
 
     if $selection == '' {
       true
@@ -173,7 +173,7 @@ def main [] {
 
   let menu_input = ($repo_lines | str join "\n")
 
-  let selected_value = prompt-fuzzel "" --lines 20 --input $menu_input --no-sort
+  let selected_value = prompt-fuzzel "" --lines 20 --input $menu_input 
 
   if $selected_value == '' {
     exit 1
