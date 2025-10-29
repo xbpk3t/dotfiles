@@ -7,137 +7,198 @@ use ./raffi-common.nu [
   prompt-fuzzel
 ]
 
-let repos_json = (
+def fetch-repo-json [] {
   try {
     ^dgh --output raw err> /dev/null
   } catch {
     ''
   }
-)
-
-if $repos_json == '' {
-  exit 1
 }
 
-let repo_lines = (
-  try {
-    $repos_json
-    | ^jq -r '
-      .[] |
-      (.URL | split("/") | .[3] + "/" + .[4])
-    '
-  } catch {
+def icon-path [icon_dir icon_file] {
+  if $icon_file == '' {
     ''
-  }
-)
-
-let search_entry = "Search GitHub for typed query ↗"
-let menu_input = if $repo_lines == '' { $search_entry } else { $repo_lines + "\n" + $search_entry }
-
-# let selected_repo = prompt-fuzzel "GitHub Repos: " --lines 20 --input $menu_input
-let selected_repo = prompt-fuzzel "" --lines 20 --input $menu_input
-
-if $selected_repo == '' {
-  exit 1
-}
-
-let repo_info_raw = (
-  try {
-    $repos_json
-    | ^jq -r --arg full_name $selected_repo '
-      .[] |
-      (.URL | split("/") | .[3] + "/" + .[4]) as $repo_full_name |
-      select($repo_full_name == $full_name) |
-      {url: .URL, doc: (.Doc // ""), des: (.Des // ""), tag: .Tag}
-    '
-  } catch {
-    ''
-  }
-) | str trim
-
-if $repo_info_raw == '' or $repo_info_raw == 'null' {
-  if $selected_repo == $search_entry {
-    let query = prompt-fuzzel "GitHub Search: " --lines 0 --input "\n"
-
-    if $query == '' {
-      exit 1
+  } else {
+    let candidate = ([$icon_dir $icon_file] | path join)
+    if (($candidate | path exists) == true) {
+      $candidate
+    } else {
+      ''
     }
+  }
+}
 
-    let encoded_query = ($query | url encode)
-    let search_url = (["https://github.com/search?q=" $encoded_query "&type=repositories"] | str join)
-    open-url $search_url --message (["Searching GitHub for " $query] | str join)
-    exit 0
+def build-repo-entries [raw icon_dir] {
+  if $raw == '' {
+    []
+  } else {
+    let jq_program = '
+      def norm_doc:
+        (if . == null then "" else (. | tostring) end | gsub("^[[:space:]]+|[[:space:]]+$"; ""));
+      def has_qs:
+        ((.qs // []) | length > 0) or any(.topics[]?; ((.qs // []) | length > 0));
+      .[] |
+        (.URL // "") as $url |
+        ($url | split("/")) as $parts |
+        select(($parts | length) > 4) |
+        ($parts[3] // "") as $owner |
+        ($parts[4] // "") as $name |
+        select($owner != "" and $name != "") |
+        ($owner + "/" + $name) as $display |
+        (.Doc | norm_doc) as $doc_raw |
+        ($doc_raw != "" and $doc_raw != "null") as $has_doc |
+        has_qs as $has_qs |
+        (if $has_doc and $has_qs then "ab.svg"
+         elif $has_doc then "a.svg"
+         elif $has_qs then "b.svg"
+         else "check.svg" end) as $icon |
+        [$display, $url, (if $has_doc then $doc_raw else "" end), $icon] | @tsv
+    ';
+
+    $raw
+    | ^jq -r $jq_program
+    | lines
+    | where {|line| ($line | str trim) != '' }
+    | each {|line|
+        let parts = ($line | split row "\t")
+        let display = ($parts | get 0? | default '')
+        let url = ($parts | get 1? | default '')
+
+        if $display == '' or $url == '' {
+          null
+        } else {
+          let doc = ($parts | get 2? | default '')
+          let icon_file = ($parts | get 3? | default '')
+
+          {
+            display: $display
+            url: $url
+            doc: $doc
+            icon_path: (icon-path $icon_dir $icon_file)
+          }
+        }
+      }
+    | where {|entry| $entry != null }
+  }
+}
+
+def format-menu-entry [display_text icon_path] {
+  let icon_suffix = if $icon_path == '' {
+    ''
+  } else {
+    (char nul) + "icon" + (char us) + $icon_path
   }
 
-  let owner_repo = (
-    $selected_repo
-    | str trim
+  $display_text + $icon_suffix
+}
+
+def repo-actions [has_doc] {
+  if $has_doc {
+    ["Open Repository" "Open Docs (docs.lucc.dev)" "Open Documentation" "Copy URL"]
+  } else {
+    ["Open Repository" "Open Docs (docs.lucc.dev)" "Copy URL"]
+  }
+}
+
+def open-docs [full_name] {
+  let repo_name = (
+    $full_name
+    | split row "/"
+    | get 1?
+    | default ''
   )
 
-  if ($owner_repo | str contains "/") {
-    open-url $"https://github.com/($owner_repo)" --message (["Opening " $owner_repo] | str join)
-    exit 0
+  if $repo_name == '' {
+    return
   }
 
-  exit 1
+  let docs_url = $"https://docs.lucc.dev/($repo_name)"
+  open-url $docs_url --message (["Opening docs for " $full_name] | str join)
 }
 
-let repo_info = (
-  try {
-    $repo_info_raw | from json
-  } catch {
-    {}
+def run-action [action repo] {
+  match $action {
+    "Open Repository" => {
+      open-url $repo.url --message (["Opening " $repo.display] | str join)
+      true
+    }
+    "Open Docs (docs.lucc.dev)" => {
+      open-docs $repo.display
+      true
+    }
+    "Open Documentation" => {
+      if $repo.doc != '' {
+        open-url $repo.doc --message (["Opening documentation for " $repo.display] | str join)
+      }
+      true
+    }
+    "Copy URL" => {
+      if (not (copy-to-clipboard $repo.url)) {
+        print --stderr "gh: failed to copy URL to clipboard"
+        false
+      } else {
+        notify "GitHub" (["URL copied for " $repo.display] | str join)
+        true
+      }
+    }
+    _ => false
   }
-)
-
-let repo_url = ($repo_info.url? | default '')
-let repo_doc = ($repo_info.doc? | default '')
-let repo_full_name = $selected_repo
-
-if $repo_url == '' {
-  exit 1
 }
 
-let actions = if $repo_doc != '' and $repo_doc != 'null' {
-  ["Open Repository" "Open Docs (docs.lucc.dev)" "Open Documentation" "Copy URL"]
-} else {
-  ["Open Repository" "Open Docs (docs.lucc.dev)" "Copy URL"]
-}
+def handle-repo [repo] {
+  if $repo.url == '' {
+    false
+  } else {
+    let has_doc = $repo.doc != ''
+    let actions = repo-actions $has_doc
+    let selection = prompt-fuzzel $"Action for ($repo.display): " --lines 10 --input ($actions | str join "\n") --no-sort
 
-let action = prompt-fuzzel $"Action for ($repo_full_name): " --lines 10 --input ($actions | str join "\n")
-
-match $action {
-  "Open Repository" => {
-    open-url $repo_url --message (["Opening " $repo_full_name] | str join)
+    if $selection == '' {
+      true
+    } else {
+      run-action $selection $repo
+    }
   }
-  "Open Docs (docs.lucc.dev)" => {
-    let repo_name = (
-      $repo_full_name
-      | split row "/"
-      | get 1?
-      | default ''
-    )
+}
 
-    if $repo_name == '' {
+def main [] {
+  let icon_dir = ([$env.HOME ".local" "share" "icons" "gh"] | path join)
+  let repos_raw = fetch-repo-json
+  let repo_entries = build-repo-entries $repos_raw $icon_dir
+
+  let repo_lines = (
+    $repo_entries
+    | each {|entry| format-menu-entry $entry.display $entry.icon_path }
+  )
+
+  let menu_input = ($repo_lines | str join "\n")
+
+  let selected_value = prompt-fuzzel "" --lines 20 --input $menu_input --no-sort
+
+  if $selected_value == '' {
+    exit 1
+  }
+
+  let repo = (
+    $repo_entries
+    | where display == $selected_value
+    | get 0?
+  )
+
+  if $repo == null {
+    if ($selected_value | str contains "/") {
+      open-url $"https://github.com/($selected_value)" --message (["Opening " $selected_value] | str join)
       exit 0
     }
 
-    let docs_url = $"https://docs.lucc.dev/($repo_name)"
-    open-url $docs_url --message (["Opening docs for " $repo_full_name] | str join)
+    exit 1
   }
-  "Open Documentation" => {
-    if $repo_doc != '' and $repo_doc != 'null' {
-      open-url $repo_doc --message (["Opening documentation for " $repo_full_name] | str join)
-    }
-  }
-  "Copy URL" => {
-    if (not (copy-to-clipboard $repo_url)) {
-      print --stderr "gh: failed to copy URL to clipboard"
-    } else {
-      notify "GitHub" (["URL copied for " $repo_full_name] | str join)
-    }
-  }
-  _ => {
+
+  if (handle-repo $repo) {
     exit 0
+  } else {
+    exit 1
   }
 }
+
+main
