@@ -262,7 +262,12 @@ binds {
         // spawn-sh "cliphist list | fuzzel --dmenu | cliphist decode | wl-copy"
         // spawn-sh "cliphist list | awk '{\$1=\"\"; print \$0}' | fuzzel --dmenu | cliphist decode | wl-copy"
         // 用 -v empty= 传一个空变量，就不用在 awk 里出现双引号了（从而不需要 \"）
-        spawn-sh "cliphist list | awk -v empty= '{ $1=empty; print }' | fuzzel --dmenu | cliphist decode | wl-copy"
+        // spawn-sh "cliphist list | awk -v empty= '{ $1=empty; print }' | fuzzel --dmenu | cliphist decode | wl-copy"
+        spawn-sh "fuzzel-clipboard"
+    }
+    // Text actions on selected text
+    Mod+Slash {
+        spawn-sh "fuzzel-text-actions"
     }
     // ========================================================================
     // 应用切换 - 类似 macOS Alfred 的 App 切换
