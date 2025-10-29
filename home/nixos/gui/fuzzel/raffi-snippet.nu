@@ -13,7 +13,7 @@ def bail [message] {
   exit 1
 }
 
-def load-snippets [] {
+export def load-snippets [] {
   try {
     ^task -g ss:json err> /dev/null
   } catch {
@@ -21,12 +21,23 @@ def load-snippets [] {
   }
 }
 
-def list-snippet-names [snippets_json] {
+export def list-snippet-names [snippets_json] {
   try {
     $snippets_json
     | ^jq -r '.[].sub[] | .name'
   } catch {
     ''
+  }
+}
+
+export def snippet-names [] {
+  let snippets_json = load-snippets
+  if $snippets_json == '' {
+    []
+  } else {
+    list-snippet-names $snippets_json
+    | lines
+    | where {|name| ($name | str trim) != '' }
   }
 }
 
