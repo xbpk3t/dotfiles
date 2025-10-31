@@ -1,14 +1,13 @@
-# NVF (Neovim from Flake) 配置文件
-# NVF 是一个基于 Nix 的模块化 Neovim 配置框架
 {
   lib,
   config,
+  pkgs,
   ...
 }:
 with lib; let
-  cfg = config.custom.tui.nvf;
+  cfg = config.modules.tui.nvf;
 in {
-  options.custom.tui.nvf = {
+  options.modules.tui.nvf = {
     enable = lib.mkEnableOption "Enable NVF (for Vim)";
   };
 
@@ -25,6 +24,11 @@ in {
         # 启用 Node.js 支持（某些插件需要）
         withNodeJs = true;
 
+        # 启用剪贴板支持（系统剪贴板集成）
+        clipboard = {
+          enable = true;
+        };
+
         # 基础编辑器选项
         options = {
           # Tab 宽度为 2 个空格
@@ -32,7 +36,13 @@ in {
           # 自动缩进宽度为 2 个空格
           shiftwidth = 2;
           # 禁用自动换行
-          wrap = false;
+          wrap = true;
+
+          # 自动保存配置
+          # 启用自动写入（当缓冲区失去焦点时自动保存）
+          autowrite = true;
+          # 在失去焦点前自动写入（与 autowrite 配合使用）
+          autowriteall = true;
         };
 
         # 自定义快捷键映射
@@ -73,11 +83,12 @@ in {
             desc = "File browser toggle";
           }
           # 类似 CMD+E：打开最近编辑的文件列表
+          # 使用超级键 (mod 键) + e，对应 Win+E 或 Cmd+E
           {
-            key = "<leader>fr";
+            key = "<D-e>"; # 相当于 CMD+E 或 Win+E
             mode = ["n"];
             action = "<cmd>Telescope oldfiles<cr>";
-            desc = "Recent files (like CMD+E in IDEA)";
+            desc = "Recent files (mod+E)";
           }
           # 插入模式下的方向键映射（Ctrl + hjkl）
           {
@@ -139,7 +150,7 @@ in {
 
         # 启用拼写检查
         spellcheck = {
-          enable = true;
+          enable = false;
         };
 
         # LSP（语言服务器协议）配置
@@ -171,7 +182,7 @@ in {
           # 启用 Treesitter 语法高亮
           enableTreesitter = true;
           # 启用额外的诊断信息
-          enableExtraDiagnostics = true;
+          enableExtraDiagnostics = false;
 
           # 各语言的 LSP 支持
           nix.enable = true; # Nix 语言
@@ -181,6 +192,7 @@ in {
           markdown.enable = true; # Markdown
           ts.enable = true; # TypeScript/JavaScript
           html.enable = true; # HTML
+          yaml.enable = true; # YAML
         };
 
         # 视觉增强配置
@@ -207,9 +219,15 @@ in {
         # 代码片段支持
         snippets.luasnip.enable = true;
 
-        # 顶部标签栏（显示打开的缓冲区）
+        # 顶部标签栏（显示打开的缓冲区）- 已禁用
         tabline = {
-          nvimBufferline.enable = true;
+          nvimBufferline.enable = false;
+          # nvimBufferline.settings = {
+          #   options = {
+          #     # Remove any top border/separators that might be causing the line
+          #     separator_style = "thin"; # Options: "thin", "thick", "shadow", or { "left", "right" } for custom
+          #   };
+          # };
         };
 
         # Treesitter 上下文显示（显示当前函数/类名）
@@ -304,9 +322,9 @@ in {
           fastaction.enable = true;
         };
 
-        # 会话管理（已禁用）
+        # 会话管理（已启用）
         session = {
-          nvim-session-manager.enable = false;
+          nvim-session-manager.enable = true;
         };
 
         # 注释插件
@@ -317,9 +335,10 @@ in {
         # 自定义插件列表
         # 使用 vim.startPlugins 添加 nvf 未内置的插件
         startPlugins = with pkgs.vimPlugins; [
-          # 2. Monokai Pro 主题（类似 IDEA 的 Monokai）
-          monokai-pro-nvim
+          # 2. Tokyo Night 主题 - 替换 Monokai Pro
+          tokyonight-nvim
 
+          # https://github.com/folke/todo-comments.nvim
           todo-comments-nvim
 
           # 4. Spectre：批量查找和替换（支持正则表达式）
@@ -342,85 +361,40 @@ in {
         # Lua 配置代码
         # 用于配置上面添加的插件
         luaConfigRC = {
-          # Monokai Pro 主题配置
-          monokai-theme = ''
-            require("monokai-pro").setup({
-              transparent_background = false,
-              terminal_colors = true,
-              devicons = true,
-              filter = "pro", -- classic | octagon | pro | machine | ristretto | spectrum
-            })
-            vim.cmd([[colorscheme monokai-pro]])
-          '';
+          # 设置行号 - 绝对行号，禁用相对行号
+          lineNumbers = builtins.readFile ./lineNumbers.lua;
 
-          todo-comments = ''
-            require("todo-comments").setup({
-              signs = true,
-              keywords = {
-                FIX = { icon = " ", color = "error", alt = { "FIXME", "BUG", "FIXIT", "ISSUE" } },
-                TODO = { icon = " ", color = "info" },
-                HACK = { icon = " ", color = "warning" },
-                WARN = { icon = " ", color = "warning", alt = { "WARNING", "XXX" } },
-                PERF = { icon = " ", alt = { "OPTIM", "PERFORMANCE", "OPTIMIZE" } },
-                NOTE = { icon = " ", color = "hint", alt = { "INFO" } },
-              },
-            })
-          '';
+          # 设置系统剪贴板 - 让默认复制粘贴使用系统剪贴板
+          clipboard = builtins.readFile ./clipboard.lua;
+
+          # Neo-tree auto-refresh configuration
+          neotree-config = builtins.readFile ./neotree-config.lua;
+
+          # Tokyo Night 主题配置
+          #        monokai-theme = builtins.readFile ./monokai-theme.lua;
+
+          # Tokyo Night 主题配置
+          "tokyonight-theme" = builtins.readFile ./tokyonight-theme.lua;
+
+          "todo-comments" = builtins.readFile ./todo-comments.lua;
 
           # Spectre 批量查找替换配置
-          spectre = ''
-            require('spectre').setup({
-              replace_engine = {
-                ['sed'] = {
-                  cmd = "sed",
-                  args = nil,
-                },
-              },
-              default = {
-                find = {
-                  cmd = "rg",
-                  options = {"ignore-case"}
-                },
-                replace = {
-                  cmd = "sed"
-                }
-              },
-            })
-          '';
+          spectre = builtins.readFile ./spectre.lua;
 
           # DAP 调试配置
-          dap-config = ''
-            local dap = require('dap')
-            -- 设置断点快捷键
-            vim.keymap.set('n', '<F5>', function() dap.continue() end, { desc = "Debug: Continue" })
-            vim.keymap.set('n', '<F10>', function() dap.step_over() end, { desc = "Debug: Step Over" })
-            vim.keymap.set('n', '<F11>', function() dap.step_into() end, { desc = "Debug: Step Into" })
-            vim.keymap.set('n', '<F12>', function() dap.step_out() end, { desc = "Debug: Step Out" })
-            vim.keymap.set('n', '<leader>b', function() dap.toggle_breakpoint() end, { desc = "Debug: Toggle Breakpoint" })
-          '';
+          "dap-config" = builtins.readFile ./dap-config.lua;
 
           # DAP UI 配置
-          dap-ui = ''
-            require("dapui").setup()
-            local dap, dapui = require("dap"), require("dapui")
-            dap.listeners.after.event_initialized["dapui_config"] = function()
-              dapui.open()
-            end
-            dap.listeners.before.event_terminated["dapui_config"] = function()
-              dapui.close()
-            end
-            dap.listeners.before.event_exited["dapui_config"] = function()
-              dapui.close()
-            end
-            vim.keymap.set('n', '<leader>du', function() require("dapui").toggle() end, { desc = "Debug: Toggle UI" })
-          '';
+          "dap-ui" = builtins.readFile ./dap-ui.lua;
+
+          # URL 链接处理配置 - 实现类似 Ctrl+Click 的功能
+          "url-open" = builtins.readFile ./url-open.lua;
+
+          # 退出 Neovim 完全退出配置
+          "quit-all" = builtins.readFile ./quit-all.lua;
 
           # 数据库 UI 配置
-          dadbod-ui = ''
-            vim.g.db_ui_use_nerd_fonts = 1
-            vim.g.db_ui_show_database_icon = 1
-            vim.keymap.set('n', '<leader>D', '<cmd>DBUIToggle<cr>', { desc = "Toggle Database UI" })
-          '';
+          "dadbod-ui" = builtins.readFile ./dadbod-ui.lua;
         };
       };
     };
