@@ -62,6 +62,12 @@
       0=Tab
       [Hotkey/TogglePreedit]
       0=Control+Alt+P
+      # 禁用 Ctrl+Shift+F 切换繁简体
+      [Hotkey/FullWidth]
+      0=Shift+space
+      # 禁用所有可能导致繁简切换的快捷键
+      [Hotkey/SimplifiedTraditionalSwitch]
+      # 删除或注释掉任何繁简切换快捷键
       [Behavior]
       # 共享输入状态：No (每个应用独立状态)
       ShareInputState=No
@@ -85,8 +91,8 @@
       CustomXkbOption=
       # 强制启用的插件
       EnabledAddons=
-      # 强制禁用的插件
-      DisabledAddons=
+      # 强制禁用的插件 - 禁用可能影响繁简体的插件
+      DisabledAddons=chttrans, traditionalchinese
       # 默认预加载输入法
       PreloadInputMethod=True
       # 枚举输入法后退
@@ -95,7 +101,7 @@
       EnumerateGroupBackwardKeys=
     '';
 
-    # Fcitx5 输入法配置文件
+    # Fcitx5 输入法配置文件 - 更严格地限制输入法选项
     ".config/fcitx5/profile".text = ''
       [Groups/0]
       # 组名称
@@ -116,7 +122,7 @@
       0=Default
     '';
 
-    # 拼音输入法配置
+    # 拼音输入法配置 - 强制简体
     ".config/fcitx5/conf/pinyin.conf".text = ''
       # 拼音引擎配置
       [Behavior]
@@ -130,8 +136,10 @@
       FuzzyPinyinEnabled=True
       # 模糊音配置 (z=zh, c=ch, s=sh, n=l, l=n)
       FuzzyPinyinPairs=z:zh;c:ch;s:sh;n:l;l:n
-      # 仅启用简体字符集
+      # 仅启用简体字符集 - 关键设置
       CharsetType=Simplified
+      # 禁用繁简转换相关功能
+      TraditionalChineseFallbackEnabled=False
       # 启用简拼
       IncompletePinyinEnabled=True
       # 显示完整拼音
@@ -140,6 +148,15 @@
       AdjustOrderByFrequency=True
       # 候选词数量
       PageSize=10
+      # 确保首选项为简体中文
+      PreferSimplifiedChinese=True
+    '';
+
+    # 禁用繁简转换插件配置
+    ".config/fcitx5/conf/chttrans.conf".text = ''
+      [General]
+      # 禁用繁简转换功能
+      Enabled=False
     '';
 
     # UI 配置
@@ -228,8 +245,11 @@
     fcitx5.addons = with pkgs; [
       # 智能拼音输入引擎 (核心)
       fcitx5-chinese-addons
+
       # 配置工具
-      fcitx5-configtool
+      # [2025-10-31] 不需要GUI来做fcitx5配置
+      # fcitx5-configtool
+
       # 基于中文维基百科的拼音词典
       fcitx5-pinyin-zhwiki
       # https://github.com/sanweiya/fcitx5-mellow-themes
