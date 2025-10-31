@@ -67,6 +67,7 @@
 
           # Hardware acceleration
           "layers.acceleration.force-enabled" = true;
+
           "media.ffmpeg.vaapi.enabled" = true;
           "media.gpu-process-kill-and-launch" = true;
           # 优化硬件视频解码以降低 CPU 使用。添加 media.ffmpeg.hwaccel.enabled 可以进一步支持硬件解码，尤其在视频密集页面上。
@@ -113,6 +114,7 @@
           #
           #这正是你想要的：在多标签页时，后台 tab 不挂，内存不炸。
           "browser.cache.memory.capacity" = -1;
+          "browser.cache.memory.max_entry_size" = 52428; # 50MB 单页
 
           "image.mem.decode_bytes_at_a_time" = 32768;
 
@@ -124,8 +126,15 @@
           "browser.contentblocking.category" = "strict";
 
           # Firefox 默认会在内存压力下挂起后台标签页
-          "browser.tabs.unloadOnLowMemory" = false; # 禁用低内存时卸载标签页
-          "browser.tabs.min-inactive-duration-before-unload" = 600000; # 10 分钟
+          # [2025-10-30] 修改为允许tab suspend，并修改为30s就suspend
+          # 禁用低内存时卸载标签页
+          "browser.tabs.unloadOnLowMemory" = true;
+          "browser.tabs.min-inactive-duration-before-unload" = 30000;
+
+          # 限制内容进程数量（减少进程开销）
+          # 默认 8，改为 4
+          "dom.ipc.processCount" = 4;
+          "dom.ipc.processCount.webLargeMemory" = 4;
 
           # Disable telemetry
           "datareporting.healthreport.uploadEnabled" = false;
@@ -137,6 +146,7 @@
           "pdfjs.enabledCache.state" = true;
 
           # 启用 WebRender 以改善图形性能: WebRender 是 Firefox 的现代渲染引擎，能更好地利用 GPU，尤其在 Wayland 上。你的配置有 layers.acceleration，但启用 WebRender 可以进一步优化滚动和动画。
+          # [2025-10-30] 禁用强制开启，让ff自己判断
           "gfx.webrender.all" = true;
           # 进一步优化 Wayland 下的渲染
           "gfx.webrender.compositor" = true;

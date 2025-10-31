@@ -1,4 +1,7 @@
 _: {
+  # https://mynixos.com/nixpkgs/options/programs.chromium
+  # https://mynixos.com/home-manager/options/programs.chromium
+
   #  programs.chromium = {
   #    enable = true;
   #    package = pkgs.chromium;

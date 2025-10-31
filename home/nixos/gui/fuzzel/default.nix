@@ -3,8 +3,7 @@
   config,
   myvars,
   ...
-}: 
-let
+}: let
   fuzzelPath = "${myvars.projectRoot}/home/nixos/gui/fuzzel";
 in {
   home.packages = with pkgs; [
