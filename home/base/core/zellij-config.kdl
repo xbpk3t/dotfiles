@@ -16,7 +16,8 @@ copy_command "pbcopy"
 // macOS clipboardcopy_clipboard "primary"
 // ===== UI Settings =====
 // https://zellij.dev/documentation/options.html?highlight=pane_frames#pane_frames
-pane_frames true
+// 移除pane边框（避免复制时会复制到border，并且也能提供更大的workspace width）
+pane_frames false
 // ===== Scroll Buffer =====
 scroll_buffer_size 10000
 // ===== Theme =====
