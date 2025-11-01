@@ -1,18 +1,23 @@
 {
   pkgs,
   lib,
+  inputs,
   ...
 }: {
+  imports = [
+    inputs.stylix.homeModules.stylix
+  ];
+
   stylix = {
     enable = lib.mkDefault true;
 
     autoEnable = lib.mkDefault true;
 
     # Home Manager integration settings
-    homeManagerIntegration = {
-      autoImport = true;
-      followSystem = true;
-    };
+    #    homeManagerIntegration = {
+    #      autoImport = true;
+    #      followSystem = true;
+    #    };
 
     # 使用base00作为背景色（Gruvbox的深背景）
     #    image = config.lib.stylix.pixel "base00";
@@ -25,8 +30,13 @@
     polarity = "dark";
 
     # Color scheme configuration
-    # Using Gruvbox Dark Hard - a popular terminal-friendly theme
+    # https://nix-community.github.io/stylix/configuration.html#handmade-schemes
+    # https://github.com/tinted-theming/schemes
+    # 注意这里不接受 base24 的theme
+    # Switch to Catppuccin Mocha for a dark, pastel-friendly palette
     base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-hard.yaml";
+    # base16Scheme = "${pkgs.base16-schemes}/share/themes/catppuccin-latte.yaml";
+    # base16Scheme = "${pkgs.base16-schemes}/share/themes/catppuccin-mocha.yaml";
 
     # Font configuration
     fonts = {
@@ -75,6 +85,12 @@
         enable = true;
         platform = "qtct";
       };
+
+      rofi.enable = false;
+      zed.enable = false;
+      helix.enable = false;
+      # 配置 Firefox profile names 以避免 stylix warning
+      firefox.profileNames = ["default"];
     };
     # 使用默认 cursor，但是改小size
     #    cursor = {
@@ -88,7 +104,7 @@
     #    };
   };
 
-  environment.systemPackages = with pkgs; [
+  home.packages = with pkgs; [
     # stylix image as wallpaper, swaybg is required to achieve the effect
     # swaybg
 
