@@ -31,7 +31,6 @@
 
       # Emoji fonts
       noto-fonts-color-emoji
-      noto-fonts-emoji
 
       # Chinese fonts for CJK support
       apple-pingfang # 苹果苹方

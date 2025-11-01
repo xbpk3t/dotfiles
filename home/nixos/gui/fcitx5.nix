@@ -244,7 +244,7 @@
     fcitx5.waylandFrontend = true;
     fcitx5.addons = with pkgs; [
       # 智能拼音输入引擎 (核心)
-      fcitx5-chinese-addons
+      qt6Packages.fcitx5-chinese-addons
 
       # 配置工具
       # [2025-10-31] 不需要GUI来做fcitx5配置

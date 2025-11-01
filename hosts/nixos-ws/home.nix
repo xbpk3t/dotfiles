@@ -19,6 +19,5 @@
 
   modules.tui = {
     nvf.enable = true;
-    nixvim.enable = false;
   };
 }
