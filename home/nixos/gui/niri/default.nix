@@ -13,6 +13,8 @@ in {
   config = lib.mkIf cfg.enable {
     # 安装 xwayland-satellite 以支持 X11 应用（如 GoLand）
     home.packages = with pkgs; [
+      niri
+
       xwayland-satellite
 
       # https://github.com/psi4j/sunsetr
@@ -39,6 +41,7 @@ in {
     # 使用 KDL 配置文件
     programs.niri = {
       enable = true;
+      package = pkgs.niri;
 
       # 使用 KDL 配置文件
       # 参考: https://github.com/cap153/config/blob/main/niri/.config/niri/config.kdl
