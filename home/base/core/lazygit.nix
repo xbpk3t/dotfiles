@@ -1,6 +1,7 @@
 {pkgs, ...}: {
   home.packages = with pkgs; [
     lazygit
+    delta # 新增 delta 以支持 side-by-side diff
   ];
 
   # https://mynixos.com/nixpkgs/options/programs.lazygit
@@ -11,14 +12,18 @@
       git = {
         paging = {
           colorArg = "always";
-          pager = "diff-so-fancy";
+
+          # side-by-side viewer
+          # --paging=never 是必需的，确保 delta 不自行分页（lazygit 会处理）
+          # 注意这里使用 catppuccin theme，因为 stylix 生成的不太好看
+          pager = "delta -s --paging=never --line-numbers --dark";
         };
         disableForcePushing = true;
       };
       gui = {
         language = "en";
         mouseEvents = false;
-        sidePanelWidth = 0.3;
+        sidePanelWidth = 0.2;
         mainPanelSplitMode = "flexible"; # one of "horizontal" | "flexible" | "vertical"
         showFileTree = false; # ` to toggle
         nerdFontsVersion = "3";
