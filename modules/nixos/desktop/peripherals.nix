@@ -16,6 +16,8 @@
   # It support for PulseAudio-, JACK-, ALSA- and GStreamer-based applications.
   # PipeWire has a great bluetooth support, it can be a good alternative to PulseAudio.
   #     https://nixos.wiki/wiki/PipeWire
+
+  # PLAN [2025-10-31] 是否可以通过配置来提升音质？
   services.pipewire = {
     enable = true;
     # package = pkgs-unstable.pipewire;
