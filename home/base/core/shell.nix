@@ -10,6 +10,11 @@
       trash-cli # https://github.com/andreafrancia/trash-cli
     ];
 
+    # PLAN fzf-tab
+    # https://github.com/0xtter/nixos-configuration/blob/main/home-manager/thomas.nix
+    # https://www.youtube.com/watch?v=eKkFbvanlP8
+    # https://github.com/Aloxaf/fzf-tab
+
     # 环境变量
     # Note: Dynamic variables (those using command substitution) are set in zsh initContent
     sessionVariables =
@@ -167,6 +172,7 @@
       enable = true;
     };
 
+    # Better ls and lsd
     eza = {
       enable = true;
       enableZshIntegration = true;
@@ -297,94 +303,6 @@
           #          Ubuntu = "󰕈 ";
           #        };
         };
-
-        buf = {
-          symbol = " ";
-        };
-        c = {
-          symbol = " ";
-        };
-        directory = {
-          read_only = " 󰌾";
-        };
-        docker_context = {
-          symbol = " ";
-        };
-        fossil_branch = {
-          symbol = " ";
-        };
-        git_branch = {
-          symbol = " ";
-        };
-        golang = {
-          symbol = " ";
-        };
-        hg_branch = {
-          symbol = " ";
-        };
-        hostname = {
-          ssh_symbol = " ";
-        };
-        lua = {
-          symbol = " ";
-        };
-        memory_usage = {
-          symbol = "󰍛 ";
-        };
-        meson = {
-          symbol = "󰔷 ";
-        };
-        nim = {
-          symbol = "󰆥 ";
-        };
-        nix_shell = {
-          symbol = " ";
-        };
-        nodejs = {
-          symbol = " ";
-        };
-        ocaml = {
-          symbol = " ";
-        };
-        package = {
-          symbol = "󰏗 ";
-        };
-        python = {
-          symbol = " ";
-        };
-        rust = {
-          symbol = " ";
-        };
-        swift = {
-          symbol = " ";
-        };
-        zig = {
-          symbol = " ";
-        };
-
-        #      rust = {
-        #        format = "[$symbol($version )]($style)";
-        #      };
-        #
-        #      nodejs = {
-        #        format = "[$symbol($version )]($style)";
-        #      };
-        #
-        #      lua = {
-        #        format = "[$symbol($version )]($style)";
-        #      };
-        #
-        #      golang = {
-        #        format = "[$symbol($version )]($style)";
-        #      };
-        #
-        #      c = {
-        #        format = "[$symbol($version(-$name) )]($style)";
-        #      };
-        #
-        #      ruby = {
-        #        format = "[$symbol($version )]($style)";
-        #      };
       };
     };
 
@@ -392,13 +310,13 @@
       enable = true;
     };
 
-    #    zoxide = {
-    #      enable = true;
-    #      enableZshIntegration = true;
-    #      options = [
-    #        "--cmd cd"
-    #      ];
-    #    };
+    zoxide = {
+      enable = true;
+      enableZshIntegration = true;
+      options = [
+        "--cmd cd"
+      ];
+    };
 
     # 快速 tldr 客户端
     #    tealdeer = {
