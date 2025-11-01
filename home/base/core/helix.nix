@@ -107,7 +107,6 @@
   programs.helix = {
     enable = true;
     settings = {
-      theme = "onedark";
       editor = {
         color-modes = true;
         bufferline = "multiple";
