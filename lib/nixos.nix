@@ -34,7 +34,6 @@ in
           home-manager.users."${myvars.username}".imports =
             home-modules
             ++ [
-              inputs.nixvim.homeModules.nixvim
               inputs.nvf.homeManagerModules.default
             ];
         }
