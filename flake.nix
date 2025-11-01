@@ -54,12 +54,6 @@
     # https://github.com/zhaofengli/nix-homebrew
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
 
-    # nixvim for neovim configuration
-    nixvim = {
-      url = "github:nix-community/nixvim";
-      inputs.nixpkgs.follows = "nixpkgs-darwin";
-    };
-
     nvf.url = "github:notashelf/nvf";
 
     sops-nix = {

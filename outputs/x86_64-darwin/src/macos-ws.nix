@@ -36,9 +36,6 @@
       ];
     };
 
-    # Add nixvim for neovim configuration
-    nixvim = inputs.nixvim;
-
     # Add sops-nix for secret management
     sops-nix = inputs.sops-nix;
   };
