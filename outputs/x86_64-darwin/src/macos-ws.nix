@@ -35,33 +35,16 @@
         customPkgsOverlay
       ];
     };
-
-    # Add sops-nix for secret management
-    sops-nix = inputs.sops-nix;
   };
 
   modules = {
-    darwin-modules =
-      (map mylib.relativeToRoot [
-        # Host-specific configuration
-        "hosts/${name}/default.nix"
-        "secrets/default.nix"
-        "modules/base"
-        "modules/darwin"
-      ])
-      ++ [
-        inputs.stylix.darwinModules.stylix
-        inputs.nix-homebrew.darwinModules.nix-homebrew
-        inputs.sops-nix.darwinModules.sops
-        {
-          nix-homebrew = {
-            enable = true;
-            enableRosetta = false;
-            user = myvars.username;
-            autoMigrate = true;
-          };
-        }
-      ];
+    darwin-modules = map mylib.relativeToRoot [
+      # Host-specific configuration
+      "hosts/${name}/default.nix"
+      "secrets/default.nix"
+      "modules/base"
+      "modules/darwin"
+    ];
     home-modules = map mylib.relativeToRoot [
       # Host-specific home configuration
       "hosts/${name}/home.nix"

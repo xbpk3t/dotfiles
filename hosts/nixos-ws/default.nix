@@ -49,8 +49,13 @@ in {
     grub.enable = false;
   };
 
+  # 启用 nixos-container 容器支持
+  boot.enableContainers = true;
+
   # NOTE: nixpkgs.config.allowUnfree is already set in genSpecialArgs (outputs/default.nix)
   # Do NOT set it here when using specialArgs.pkgs as it will be ignored and cause warnings
+
+  modules.desktop.wayland.enable = true;
 
   # Set system state version
   system.stateVersion = "24.11";

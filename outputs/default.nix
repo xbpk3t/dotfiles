@@ -40,15 +40,6 @@
         customPkgsOverlay
       ];
     };
-
-    # Add sops-nix for secret management
-    sops-nix = inputs.sops-nix;
-
-    # Add nvf for neovim configuration
-    nvf = inputs.nvf;
-
-    # Add NUR for community packages
-    nur = inputs.nur;
   };
 
   # This is the args for all the haumea modules in this folder.
@@ -167,20 +158,13 @@ in {
 
       # 直接导入 nixos-ws 的配置模块
       # 这样 colmena 会使用与 nixosConfigurations.nixos-ws 相同的配置
-      imports =
-        (map mylib.relativeToRoot [
-          "hosts/nixos-ws/default.nix"
-          "secrets/default.nix"
-          "modules/base"
-          "modules/nixos/base"
-          "modules/nixos/desktop"
-        ])
-        ++ [
-          inputs.sops-nix.nixosModules.sops
-          {
-            modules.desktop.wayland.enable = true;
-          }
-        ];
+      imports = mylib.relativeToRoot [
+        "hosts/nixos-ws/default.nix"
+        "secrets/default.nix"
+        "modules/base"
+        "modules/nixos/base"
+        "modules/nixos/desktop"
+      ];
     };
   };
 }
