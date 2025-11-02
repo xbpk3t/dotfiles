@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  inputs,
   ...
 }: let
   cfg = config.modules.desktop.niri;
@@ -9,6 +10,10 @@ in {
   options.modules.desktop.niri = {
     enable = lib.mkEnableOption "niri compositor";
   };
+
+  imports = [
+    inputs.niri.homeModules.niri
+  ];
 
   config = lib.mkIf cfg.enable {
     # 安装 xwayland-satellite 以支持 X11 应用（如 GoLand）

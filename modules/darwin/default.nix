@@ -4,7 +4,7 @@
   mylib,
   ...
 }: {
-  imports = [../base] ++ (mylib.scanPaths ./.);
+  imports = [../base] ++ mylib.scanPaths ./.;
 
   # Enable nix-darwin's management of the Nix installation for Determinate compatibility
   nix.enable = true;

@@ -6,7 +6,7 @@
   pkgs,
   ...
 }: {
-  imports = mylib.scanPaths ./.;
+  imports = [inputs.nixos-cli.nixosModules.nixos-cli] ++ mylib.scanPaths ./.;
 
   # MAYBE https://github.com/triton/triton/blob/master/pkgs/all-pkgs/s/systemd/default.nix 这个配置太牛逼了，之后学着搞下
 

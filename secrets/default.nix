@@ -2,6 +2,7 @@
   config,
   myvars,
   pkgs,
+  inputs,
   ...
 }: let
   # 平台相关配置
@@ -19,6 +20,11 @@
   # 统一的 sk 基础路径
   skBasePath = "/etc/sk";
 in {
+  imports = [
+    inputs.sops-nix.nixosModules.sops
+    # inputs.sops-nix.darwinModules.sops
+  ];
+
   # Enable sops
   sops = {
     defaultSopsFile = ./secrets.yaml;
