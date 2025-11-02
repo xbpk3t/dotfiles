@@ -1,4 +1,19 @@
-_: {
+{
+  inputs,
+  myvars,
+  ...
+}: {
+  imports = [
+    inputs.nix-homebrew.darwinModules.nix-homebrew
+  ];
+
+  nix-homebrew = {
+    enable = true;
+    enableRosetta = false;
+    user = myvars.username;
+    autoMigrate = true;
+  };
+
   homebrew = {
     enable = true;
     casks = [

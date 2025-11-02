@@ -1,10 +1,18 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  inputs,
+  ...
+}: {
   home = {
     # Improves trackpad scrolling in FF
     sessionVariables.MOZ_USE_XINPUT2 = "1";
     # Sometimes FF launches under XWayland otherwise
     sessionVariables.MOZ_ENABLE_WAYLAND = "1";
   };
+
+  imports = [
+    inputs.nur.modules.homeManager.default
+  ];
 
   # policy: https://mozilla.github.io/policy-templates/
   # settings: about:config

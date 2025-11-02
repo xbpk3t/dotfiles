@@ -39,43 +39,24 @@
         customPkgsOverlay
       ];
     };
-
-    # Add sops-nix for secret management
-    sops-nix = inputs.sops-nix;
-
-    # Add NUR for community packages
-    nur = inputs.nur;
   };
 
   modules = {
-    nixos-modules =
-      (map mylib.relativeToRoot [
-        # Host-specific configuration
-        "hosts/${name}/default.nix"
-        # common
-        "secrets/default.nix"
-        "modules/base"
-        "modules/nixos/base"
-        "modules/nixos/desktop"
-      ])
-      ++ [
-        inputs.sops-nix.nixosModules.sops
-        inputs.nixos-cli.nixosModules.nixos-cli
-        {
-          modules.desktop.wayland.enable = true;
-        }
-      ];
-    home-modules =
-      (map mylib.relativeToRoot [
-        # Host-specific home configuration
-        "hosts/${name}/home.nix"
-        "home/base"
-        "home/nixos"
-      ])
-      ++ [
-        inputs.niri.homeModules.niri
-        inputs.nur.modules.homeManager.default
-      ];
+    nixos-modules = map mylib.relativeToRoot [
+      # Host-specific configuration
+      "hosts/${name}/default.nix"
+      # common
+      "secrets/default.nix"
+      "modules/base"
+      "modules/nixos/base"
+      "modules/nixos/desktop"
+    ];
+    home-modules = map mylib.relativeToRoot [
+      # Host-specific home configuration
+      "hosts/${name}/home.nix"
+      "home/base"
+      "home/nixos"
+    ];
   };
 in {
   nixosConfigurations.${name} = mylib.nixosSystem (nixosSystemArgs
