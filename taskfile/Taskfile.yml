@@ -48,6 +48,7 @@ includes:
   wf: taskfile/mac/Taskfile.workflow.yml
   z: taskfile/mac/Taskfile.z.yml
   ss: taskfile/mac/Taskfile.snippets.yml
+  ruler: taskfile/mac/Taskfile.ruler.yml
 
   sec: taskfile/works/Taskfile.sec.yml
 

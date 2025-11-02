@@ -1,0 +1,41 @@
+version: '3'
+
+vars:
+  RULER_BIN: ruler
+  DEFAULT_AGENTS: codex,cursor,claude,copilot
+  MCP_PORT: 8080
+
+tasks:
+  setup:
+    desc: Initialize and apply rules for a new setup (global or project)
+    cmds:
+      - '{{.RULER_BIN}} init --global'
+      - task: apply
+    preconditions:
+      - test ! -d ~/.ruler  # Skip if already initialized globally
+
+  apply:
+    desc: Apply and sync rules to agents with validation
+    cmds:
+      - '{{.RULER_BIN}} apply --agents {{.DEFAULT_AGENTS}} --global'
+      - '{{.RULER_BIN}} sync --global'
+    silent: false
+
+  mcp:
+    desc: Start MCP server with health check
+    cmds:
+      - '{{.RULER_BIN}} mcp start --port {{.MCP_PORT}}'
+      - '{{.RULER_BIN}} mcp status'
+    preconditions:
+
+  stop:
+    desc: Stop MCP and revert changes
+    cmds:
+      - '{{.RULER_BIN}} mcp stop'
+      - '{{.RULER_BIN}} revert --global'
+    ignore_error: true
+
+  clean:
+    desc: Full cleanup including revert and validation
+    deps: [stop]
+    cmds:
