@@ -4,7 +4,7 @@ merge_strategy = "merge"
 
 [agents.claude]
 enabled = true
-output_path = "CLAUDE.md"
+output_path = ".claude/CLAUDE.md"
 
 [agents.claude.mcp]
 enabled = true
@@ -13,7 +13,7 @@ output_path = ".mcp.json"
 
 [agents.codex]
 enabled = true
-output_path = "AGENTS.md"
+output_path = ".codex/prompts/AGENTS.md"
 output_path_config = ".codex/config.toml"
 
 [agents.codex.mcp]
@@ -68,7 +68,7 @@ command = "npx"
 args = ["-y", "task-master-ai"]
 
 ["mcp_servers.claude-task-master".env]
-ANTHROPIC_API_KEY = "$(cat /etc/sk/claude/zai/token)"
+ANTHROPIC_API_KEY = "$(pass-env claude/zai/token)"
 
 ["mcp_servers.code-index"]
 type = "stdio"

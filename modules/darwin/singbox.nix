@@ -7,6 +7,19 @@
 }:
 with lib; let
   cfg = config.modules.networking.singbox;
+  passLib = mylib.pass;
+  userHome = passLib.inferHomeDir {
+    inherit pkgs;
+    user = myvars.username;
+  };
+  passHelpers = passLib.mkPassHelpers {
+    inherit pkgs;
+    homeDir = userHome;
+    user = myvars.username;
+    scriptName = "pass-env";
+  };
+  passValue = passHelpers.valueAsUser;
+  passPaths = myvars.passSecrets;
 in {
   options.modules.networking.singbox = {
     enable = mkEnableOption "sing-box service";
@@ -28,7 +41,12 @@ in {
         set -euo pipefail
 
         # Read subscription URL from secret
-        SUBSCRIPTION_URL=$(cat /etc/sk/singbox/url)
+        SUBSCRIPTION_URL=${passValue passPaths.singbox.url}
+
+        if [ -z "$SUBSCRIPTION_URL" ]; then
+          echo "Error: pass entry singbox/url is empty"
+          exit 1
+        fi
 
         # Create config directory if it doesn't exist
         mkdir -p /Users/${myvars.username}/.config/sing-box

@@ -1,8 +1,19 @@
 {
+  config,
   pkgs,
   inputs,
+  mylib,
+  myvars,
   ...
-}: {
+}: let
+  passHelpers = mylib.pass.mkPassHelpers {
+    inherit pkgs;
+    homeDir = config.home.homeDirectory;
+    scriptName = "pass-env";
+  };
+  passValue = passHelpers.value;
+  passPaths = myvars.passSecrets;
+in {
   # https://github.com/numtide/nix-ai-tools
 
   home.packages =
@@ -23,7 +34,7 @@
       # 自定义 API 端点，用于连接到第三方模型服务
       ANTHROPIC_BASE_URL = "https://open.bigmodel.cn/api/anthropic";
       # API 认证令牌 - 使用 sops 管理，通过 cat 命令读取文件内容
-      ANTHROPIC_AUTH_TOKEN = "$(cat /etc/sk/claude/zai/token)";
+      ANTHROPIC_AUTH_TOKEN = passValue passPaths.claude.zai.token;
 
       # https://github.com/openai/codex/issues/848
       CODEX_UNSAFE_ALLOW_NO_SANDBOX = 1;
@@ -44,10 +55,11 @@
       settings = {
         approval_policy = "on-request";
         sandbox_mode = "danger-full-access";
-        profile = "full_access";
+        # full_access not found
+        # profile = "full_access";
 
         file_opener = "cursor";
-        tools = {web_search = true;};
+        tools = {web_search_request = true;};
       };
       custom-instructions = ''
       '';

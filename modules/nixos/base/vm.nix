@@ -28,6 +28,12 @@
       enable = true;
       # Create a `docker` alias for podman, to use it as a drop-in replacement
       dockerCompat = true;
+
+      #      rootless = {
+      #        enable = true;
+      #        setSocketVariable = true; # expose DOCKER_HOST/PODMAN_SOCKET for the user session
+      #      };
+
       # Required for containers under podman-compose to be able to talk to each other.
       defaultNetwork.settings.dns_enabled = true;
       # Periodically prune Podman resources
@@ -40,6 +46,17 @@
 
     oci-containers = {
       backend = "podman";
+      containers = {
+        nginx = {
+          image = "nginx:latest";
+          ports = ["80:80"];
+          autoStart = true;
+        };
+        redis = {
+          image = "redis:alpine";
+          autoStart = true;
+        };
+      };
     };
 
     # Usage: https://wiki.nixos.org/wiki/Waydroid

@@ -1,4 +1,18 @@
-{pkgs, ...}: {
+{
+  config,
+  pkgs,
+  mylib,
+  myvars,
+  ...
+}: let
+  passHelpers = mylib.pass.mkPassHelpers {
+    inherit pkgs;
+    homeDir = config.home.homeDirectory;
+    scriptName = "pass-env";
+  };
+  passValue = passHelpers.value;
+  passPaths = myvars.passSecrets;
+in {
   programs.rclone = {
     enable = true;
     package = pkgs.rclone; # 可选：覆盖默认包
@@ -14,8 +28,8 @@
           acl = "private";
         };
         secrets = {
-          access_key_id = "/etc/sk/rclone/r2/access_key_id";
-          secret_access_key = "/etc/sk/rclone/r2/secret_access_key";
+          access_key_id = passValue passPaths.rclone.r2.access_key_id;
+          secret_access_key = passValue passPaths.rclone.r2.secret_access_key;
         };
       };
     };

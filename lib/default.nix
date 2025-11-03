@@ -3,6 +3,7 @@
   macosSystem = import ./macos.nix;
   nixosSystem = import ./nixos.nix;
   attrs = import ./attrs.nix {inherit lib;};
+  pass = import ./pass.nix {inherit lib;};
 
   # use path relative to the root of the project
   relativeToRoot = lib.path.append ../.;
@@ -25,6 +26,7 @@ in {
     macosSystem
     nixosSystem
     attrs
+    pass
     scanPaths
     relativeToRoot
     ;
