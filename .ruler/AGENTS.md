@@ -1,4 +1,3 @@
-
 # Personal Preferences
 
 ## Language & Communication

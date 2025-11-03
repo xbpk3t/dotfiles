@@ -1,0 +1,15 @@
+default_agents = ["codex", "claude", "qwen"]  # 只针对 codex/cc
+
+[mcp]
+enabled = true
+merge_strategy = "merge"  # 追加规则（如果有子目录）
+
+[output.codex]
+prompts_path = ".codex/prompts/AGENTS.md"  # 项目级输出（避免全局冲突）
+config_path = ".codex/config.toml"        # 但别覆盖 Nix 的 settings
+merge_mcp = true
+
+[output.claude]
+prompts_path = ".claude/prompts/AGENTS.md"
+config_path = ".claude/settings.json"
+merge_mcp = true

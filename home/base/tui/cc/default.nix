@@ -4,7 +4,6 @@
   ...
 }: {
   # https://github.com/numtide/nix-ai-tools
-
   home.packages =
     (with inputs.nix-ai-tools.packages.${pkgs.system}; [
       claude-code-router
@@ -14,9 +13,6 @@
       spec-kit
     ])
     ++ [pkgs.ruler];
-
-  home.file.".ruler/ruler.toml".text = builtins.readFile ./ruler.toml;
-  home.file.".ruler/AGENTS.md".text = builtins.readFile ./AGENTS.md;
 
   home = {
     sessionVariables = {
@@ -41,14 +37,7 @@
       package = inputs.nix-ai-tools.packages.${pkgs.system}.codex;
 
       # https://github.com/openai/codex/blob/main/docs/config.md
-      settings = {
-        approval_policy = "on-request";
-        sandbox_mode = "danger-full-access";
-        profile = "full_access";
-
-        file_opener = "cursor";
-        tools = {web_search = true;};
-      };
+      settings = import ./codex.nix;
       custom-instructions = ''
       '';
     };
@@ -56,8 +45,6 @@
     claude-code = {
       enable = true;
       package = inputs.nix-ai-tools.packages.${pkgs.system}.claude-code;
-      # MCP servers are defined in .ruler/ruler.toml and distributed via Ruler.
-
       settings = {
         theme = "dark";
         outputStyle = "Explanatory";
@@ -75,7 +62,7 @@
         #    confirmOnExit = false;
         #    showLineNumbers = true;
         #  };
-
+        mcpServers = import ./cc.nix;
         permissions = {
           additionalDirectories = [
             "~/Desktop"
