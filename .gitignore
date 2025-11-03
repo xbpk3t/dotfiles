@@ -10,10 +10,10 @@ secrets/age.key
 *.age.key
 secrets/secrets_temp.yaml
 
-/home/nixos/gui/desktop/ext/node_modules/
-zzz/
 manifests/
 .cache/
+
 .codex/
-.mcp.json
-.ruler/mcp.json
+.claude/
+.qwen/
+/.claude/
