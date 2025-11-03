@@ -296,7 +296,6 @@ binds {
         focus-workspace "firefox"
     }
     // 用来切换workspace (支持循环切换)
-    // FIXME [2025-10-24] dan
     Mod+Tab {
         focus-workspace-down
     }
@@ -387,10 +386,10 @@ binds {
         spawn "sh" "-c" "flameshot full"
     }
     F2 {
-        spawn-sh "pactl set-sink-volume @DEFAULT_SINK@ -10% && notify-send -t 800 -a Volume Volume \"$(wpctl get-volume @DEFAULT_AUDIO_SINK@)\""
+        spawn-sh "pactl set-sink-volume @DEFAULT_SINK@ -10% && notify-send -t 800 -a Volume \"$(wpctl get-volume @DEFAULT_AUDIO_SINK@)\""
     }
     F3 {
-        spawn-sh "pactl set-sink-volume @DEFAULT_SINK@ +10% && notify-send -t 800 -a Volume Volume \"$(wpctl get-volume @DEFAULT_AUDIO_SINK@)\""
+        spawn-sh "pactl set-sink-volume @DEFAULT_SINK@ +10% && notify-send -t 800 -a Volume \"$(wpctl get-volume @DEFAULT_AUDIO_SINK@)\""
     }
     // 锁屏
     // 注意：Super+Alt+L 被 DMS 用于锁屏，这里使用 Ctrl+Alt+L 作为备用
