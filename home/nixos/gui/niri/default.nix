@@ -42,6 +42,58 @@ in {
 
     # MAYBE [2025-10-17] [Gesture bindings · Issue #372 · YaLTeR/niri](https://github.com/YaLTeR/niri/issues/372) 等niri支持自定义gestures之后，修改配置
 
+    # https://mynixos.com/home-manager/options/services.mako
+    # notify-send
+    #　Mako is a lightweight notification daemon specifically designed for Wayland compositors. It doesn't require a full desktop environment (like GNOME or KDE) to function. Instead, it can run in minimal setups as long as you have:
+    #
+    #A Wayland compositor (e.g., Sway, Hyprland, or River) installed and running.
+    #D-Bus support (for handling notifications).
+    #Basic dependencies like Wayland libraries, Pango, Cairo, and optionally GDK-Pixbuf for icons.
+    #
+    #In a minimal distro (such as a base Arch Linux or Alpine install without a DE), you can use Mako by installing these prerequisites and configuring it via tools like Home Manager in Nix. It won't work in a purely text-based (CLI-only) environment, since it's graphical and relies on Wayland for rendering notifications.
+    services.mako = {
+      enable = true;
+      #      backgroundColor = "#1e1e2e";
+      #      textColor = "#cdd6f4";
+      #      borderColor = "#89b4fa";
+      #      borderRadius = 8;
+
+      settings = {
+        #      anchor = "top-right";
+
+        "actionable=true" = {
+          anchor = "top-left";
+        };
+        actions = true;
+        anchor = "top-right";
+        icons = true;
+        ignore-timeout = false;
+        markup = true;
+
+        default-timeout = 3000;
+        #      ignore-timeout = 1;
+
+        # keep notifications visible even for fullscreen windows
+        # 保证在fullscreen模式下，也能看到弹窗
+        layer = "overlay";
+        #              "mode=${mode}".invisible = 1;
+        "app-name=Countdown" = {
+          width = 60;
+          height = 24;
+          margin = 4;
+          padding = 4;
+          border-size = 0;
+          markup = true;
+          icons = false;
+          default-timeout = 0;
+          ignore-timeout = true;
+          format = "<span font='Sans 10' weight='bold'>%s</span>";
+          text-alignment = "center";
+          font = "Sans 8";
+        };
+      };
+    };
+
     # Niri compositor 配置
     # 使用 KDL 配置文件
     programs.niri = {
