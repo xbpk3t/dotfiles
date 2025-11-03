@@ -84,17 +84,83 @@ def send-notification [
   }
 }
 
-def play-alert [] {
-  if (which paplay | is-empty) {
+def wait-notification-dismissed [notification_id: string] {
+  if $notification_id == '' {
     return
+  }
+
+  if (which makoctl | is-empty) {
+    return
+  }
+
+  loop {
+    let current = (
+      try { ^makoctl list } catch { '' }
+    )
+
+    if (not ($current | str contains $"Notification ($notification_id):")) {
+      break
+    }
+
+    sleep 250ms
+  }
+}
+
+def start-alert-loop [notification_id: string] {
+  if $notification_id == '' {
+    return ''
+  }
+
+  if (which paplay | is-empty) {
+    return ''
+  }
+
+  if (which systemd-run | is-empty) {
+    return ''
+  }
+
+  if (which systemctl | is-empty) {
+    return ''
   }
 
   let sound_path = "/run/current-system/sw/share/sounds/freedesktop/stereo/alarm-clock-elapsed.oga"
   if (not ($sound_path | path exists)) {
+    return ''
+  }
+
+  let unit = $"cc-alert-($notification_id)"
+
+  try { ^systemctl --user stop $unit } catch { null }
+
+  let script = $"trap '' INT TERM; while true; do paplay \"($sound_path)\"; done"
+
+  try {
+    ^systemd-run
+      --user
+      $"--unit=$unit"
+      "--property=CollectMode=inactive-or-failed"
+      "--collect"
+      "--quiet"
+      "sh"
+      "-c"
+      $script
+  } catch {
+    return ''
+  }
+
+  $unit
+}
+
+def stop-alert-loop [unit: string] {
+  if $unit == '' {
     return
   }
 
-  try { ^paplay $sound_path } catch { null }
+  if (which systemctl | is-empty) {
+    return
+  }
+
+  try { ^systemctl --user stop $unit } catch { null }
 }
 
 def main [...raw_input] {
@@ -131,6 +197,15 @@ def main [...raw_input] {
   }
 
   let final_message = "Time is up"
-  send-notification $final_message --replace-id $notification_id --urgency critical --require-close true
-  play-alert
+  let final_id = send-notification $final_message --replace-id $notification_id --urgency critical --require-close true
+
+  let alert_unit = start-alert-loop $final_id
+
+  try {
+    wait-notification-dismissed $final_id
+  } catch {
+    null
+  }
+
+  stop-alert-loop $alert_unit
 }

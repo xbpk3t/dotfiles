@@ -1,10 +1,11 @@
 {
-  # [2025-10-12] MAYBE 目前zed相较goland的一些缺失功能
+  # [2025-10-12] 目前zed相较goland的一些缺失功能
   # - [git side-by-side viewer] https://github.com/zed-industries/zed/discussions/26770
   # - [highlight] https://github.com/zed-industries/zed/issues/11895
   # https://github.com/zed-industries/zed/pull/9082
   # - [通过CMD+`切换项目] 怎么通过 CMD+` 快捷键，直接在多个project之间切换？我在配置 use_system_window_tabs 之前，本身通过 CMD+` 这种mac本身提供的窗口切换来切换项目是可行的，但是在添加该配置之后，因为本身没有多窗口了，所以怎么需要配置哪个快捷键来保证类似操作？
   # - [类似CMD+E切换最近修改文件]
+  # - [内存开销并不低] LSP没有lazy load机制，默认LSP很多都是node实现的，单个进程都在80MB，开10个就是800MB内存开销
 
   # 可供参考的zed配置
   # https://github.com/linkfrg/dotfiles/blob/main/modules/home-manager/software/zed/settings.nix
