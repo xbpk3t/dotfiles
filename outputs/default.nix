@@ -25,6 +25,7 @@
     };
   in {
     inherit
+      inputs
       mylib
       myvars
       pkgs
@@ -164,6 +165,27 @@ in {
         "modules/base"
         "modules/nixos/base"
         "modules/nixos/desktop"
+      ];
+    };
+
+    nixos-vps = let
+      target =
+        myvars.networking.colmenaTargets.nixos-vps
+        or {
+          targetHost = "127.0.0.1";
+          targetUser = "root";
+        };
+    in {
+      deployment = {
+        inherit (target) targetHost targetUser;
+        targetPort = target.targetPort or null;
+      };
+
+      imports = map mylib.relativeToRoot [
+        "hosts/nixos-vps/default.nix"
+        "modules/base"
+        "modules/nixos/base"
+        "modules/nixos/vps"
       ];
     };
   };

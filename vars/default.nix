@@ -32,9 +32,11 @@ in {
   # 2. Or just use hardware security keys like Yubikey/CanoKey.
   mainSshAuthorizedKeys = [
     # The main ssh keys for daily usage
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIKlN+Q/GxvwxDX/OAjJHaNFEznEN4Tw4E4TwqQu/eD6 ryan@idols-ai"
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJwoI5MAogEa726jwwHL5EgM1X/i2A5d2pgV7i7t8fzB ryan@shoukei"
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDc1PNTXzzvd93E+e9LXvnEzqgUI5gMTEF/IitvzgmL+ ryan@frieren"
+    #    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIKlN+Q/GxvwxDX/OAjJHaNFEznEN4Tw4E4TwqQu/eD6 ryan@idols-ai"
+    #    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJwoI5MAogEa726jwwHL5EgM1X/i2A5d2pgV7i7t8fzB ryan@shoukei"
+    #    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDc1PNTXzzvd93E+e9LXvnEzqgUI5gMTEF/IitvzgmL+ ryan@frieren"
+
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDth3yFJZ2p5tID2W2AHI3s6t6B8oU3nSVBIJANNxyIG nixos-vps"
   ];
   secondaryAuthorizedKeys = [
     # the backup ssh keys for disaster recovery

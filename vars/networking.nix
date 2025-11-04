@@ -15,6 +15,15 @@
   ];
   prefixLength = 24;
 
+  colmenaTargets = {
+    nixos-vps = {
+      targetHost = "10.254.0.2";
+      targetUser = "root";
+      # Override when deploying to a remote VPS.
+      targetPort = null;
+    };
+  };
+
   # hostsAddr = {
   # ============================================
   # Homelab's Physical Machines (KubeVirt Nodes)

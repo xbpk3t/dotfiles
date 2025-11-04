@@ -17,3 +17,8 @@ manifests/
 .claude/
 .qwen/
 /.claude/
+.direnv/
+specs/
+
+result
+result-*
