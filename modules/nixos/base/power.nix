@@ -52,7 +52,8 @@
       USB_DENYLIST = "2357:0601 0bda:5411";
 
       # Disable Bluetooth on startup if not needed
-      DEVICES_TO_DISABLE_ON_STARTUP = "bluetooth";
+      # [2025-11-04] 开启该配置，会自动禁用蓝牙设备（比如说　我的蓝牙耳机显示为connected，但是每次都需要手动连接）
+      # DEVICES_TO_DISABLE_ON_STARTUP = "bluetooth";
 
       # Runtime power management for PCIe devices: on for savings
       RUNTIME_PM_ON_AC = "on";
