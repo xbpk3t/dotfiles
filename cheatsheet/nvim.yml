@@ -1,0 +1,337 @@
+---
+
+
+
+- type: 高频操作
+  cmds:
+    - cmd: d
+      des: 复制操作
+    - cmd: z
+      des: 粘贴操作
+
+    # q = :qa
+    # Q = :qa! -> force quit
+    - cmd: <leader>q/Q
+      des: 退出当前项目
+
+
+    - des:
+    - des: 单文件查找
+
+    - des: 项目级别批量替换
+    - des: 单文件替换
+
+    - des: 切换最近修改文件
+
+#    1. 项目级别批量查找: <leader>lg (Telescope live_grep)
+#    2. 单文件查找: <leader>ff (Telescope find_files)
+#    3. 项目级别批量替换: <leader>sr (Spectre)
+#    4. 单文件替换: :%s/old_text/new_text/g 或 :s/old_text/new_text/g 命令
+#    5. 切换最近修改文件: <leader>fr (Telescope oldfiles)
+
+
+
+- type: 插入模式
+  cmds:
+    - cmd: jk
+      des: 从插入模式快速退出到普通模式
+    - cmd: Ctrl + h
+      des: 在插入模式下向左移动光标
+    - cmd: Ctrl + j
+      des: 在插入模式下向下移动光标
+    - cmd: Ctrl + k
+      des: 在插入模式下向上移动光标
+    - cmd: Ctrl + l
+      des: 在插入模式下向右移动光标
+
+
+
+
+
+- type: 文件和搜索操作
+  cmds:
+    - cmd: <leader>ff
+      des: 使用 Telescope 按文件名搜索文件
+    - cmd: <leader>lg
+      des: 使用 Telescope 在文件内容中实时搜索
+    - cmd: <leader>fr
+      des: 打开最近编辑的文件列表
+    - cmd: <leader>fp
+      des: 切换项目
+    - cmd: <leader>fe
+      des: 切换文件浏览器(Neo-tree)
+    - cmd: <leader>ft
+      des: 查找 TODO 注释
+    - cmd: <leader>nh
+      des: 清除搜索高亮
+
+
+
+- type: Debug
+  cmds:
+    - cmd: F5
+      des: 调试 - 继续执行
+    - cmd: F10
+      des: 调试 - 单步跳过
+    - cmd: F11
+      des: 调试 - 单步进入
+    - cmd: F12
+      des: 调试 - 单步跳出
+    - cmd: <leader>b
+      des: 调试 - 切换断点
+    - cmd: <leader>du
+      des: 调试 - 切换 UI
+
+- type: 数据库功能
+  cmds:
+    - cmd: <leader>D
+      des: 切换数据库 UI
+
+- type: 搜索和替换
+  cmds:
+    - cmd: <leader>sr
+      des: 打开 Spectre 进行批量查找和替换
+
+- type: LSP
+  cmds:
+    - cmd: K
+      des: 显示光标下的帮助文档
+    - cmd: gd
+      des: 跳转到定义
+    - cmd: gD
+      des: 跳转到声明
+    - cmd: gi
+      des: 跳转到实现
+    - cmd: go
+      des: 跳转到类型定义
+    - cmd: gr
+      des: 查找引用
+    - cmd: <leader>ca
+      des: 代码操作
+    - cmd: <leader>rn
+      des: 重命名
+    - cmd: '[d'
+      des: 上一个诊断
+    - cmd: ']d'
+      des: 下一个诊断
+    - cmd: <leader>qf
+      des: 显示问题列表
+    - cmd: <leader>cl
+      des: 切换代码操作灯泡
+
+- type: Git 集成 (GitSigns)
+  cmds:
+    - cmd: <leader>g
+      des: Git 操作前缀
+    - cmd: <leader>h
+      des: Git 操作前缀
+    - cmd: 'h + hjkl'
+      des: 跳转到上/下/左/右一个 Git 变更
+    - cmd: ']c'
+      des: 下一个 Git 变更
+    - cmd: '[c'
+      des: 上一个 Git 变更
+    - cmd: <leader>hs
+      des: stage 当前行
+    - cmd: <leader>hu
+      des: undo stage 当前行
+    - cmd: <leader>hb
+      des: 查看当前缓冲区的 Git blame
+    - cmd: <leader>hS
+      des: stage 所有文件
+    - cmd: <leader>hu
+      des: reset HEAD
+
+- type: Git 差异查看 (Diffview)
+  cmds:
+    - cmd: ':DiffviewOpen'
+      des: 打开当前分支与目标分支的差异视图
+    - cmd: ':DiffviewClose'
+      des: 关闭差异视图
+    - cmd: ':DiffviewRefresh'
+      des: 刷新差异视图
+
+- type: 文件树浏览器 (Neo-tree)
+  cmds:
+    - cmd: <leader>fe
+      des: 切换文件浏览器
+    - cmd: '<space>'
+      des: 展开/折叠目录
+    - cmd: a
+      des: 添加文件/目录
+    - cmd: d
+      des: 删除文件/目录
+    - cmd: r
+      des: 重命名文件/目录
+    - cmd: c
+      des: 复制节点
+    - cmd: m
+      des: 移动节点
+    - cmd: o
+      des: 打开文件或目录
+    - cmd: 'h/l'
+      des: 在目录/文件间导航
+    - cmd: '?'
+      des: 显示帮助
+
+- type: 缓冲区管理 (nvim-bufferline)
+  cmds:
+    - cmd: <leader>1-9
+      des: 跳转到第 1-9 个标签页
+    - cmd: <leader>0
+      des: 跳转到最后一个标签页
+    - cmd: '<C-h>'
+      des: 切换到左边的缓冲区
+    - cmd: '<C-l>'
+      des: 切换到右边的缓冲区
+    - cmd: <leader>bd
+      des: 关闭当前缓冲区
+    - cmd: <leader>bD
+      des: 关闭其他缓冲区
+
+- type: 代码导航和上下文 (Navbuddy)
+  cmds:
+    - cmd: <leader>nb
+      des: 打开 Navbuddy 面包屑导航
+    - cmd: <leader>nd
+      des: 打开当前文件结构
+
+- type: 快速跳转 (Hop)
+  cmds:
+    - cmd: <leader>hp
+      des: Hop 模式跳转到任意位置
+    - cmd: <leader>hw
+      des: Hop 单词跳转
+    - cmd: <leader>hl
+      des: Hop 行跳转
+
+- type: 快速跳转 (Leap)
+  cmds:
+    - cmd: <leader>lp
+      des: Leap 模式跳转到任意位置
+    - cmd: <leader>lw
+      des: Leap 单词跳转
+    - cmd: <leader>ll
+      des: Leap 行跳转
+
+- type: 注释操作 (Comment.nvim)
+  cmds:
+    - cmd: gcc
+      des: 切换当前行注释
+    - cmd: gcb
+      des: 切换当前行块注释
+    - cmd: gc
+      des: 视觉模式 - 切换选择的行注释
+    - cmd: gbc
+      des: 视觉模式 - 切换选择的块注释
+
+- type: 围绕操作 (Surround)
+  cmds:
+    - cmd: ys
+      des: "添加环绕 (例如: ysiw\" - 为单词加双引号)"
+    - cmd: cs
+      des: "修改环绕 (例如: cs\"' - 把单引号改为双引号)"
+    - cmd: ds
+      des: "删除环绕 (例如: ds\" - 删除双引号)"
+
+- type: 代码片段 (LuaSnip)
+  cmds:
+    - cmd: '<Tab>'
+      des: 展开或跳转到下一个占位符
+    - cmd: '<C-j>'
+      des: 跳转到下一个占位符
+    - cmd: '<C-k>'
+      des: 跳转到上一个占位符
+
+- type: 终端操作
+  cmds:
+    - cmd: <leader>tt
+      des: 打开/关闭终端
+    - cmd: <leader>tf
+      des: 打开文件浏览器中的终端
+    - cmd: <leader>tp
+      des: 打开项目终端
+
+- type: 会话管理 (Project.nvim)
+  cmds:
+    - cmd: <leader>fp
+      des: 打开项目管理器
+    - cmd: ':ProjectRoot'
+      des: 跳转到项目根目录
+    - cmd: ':ProjectNew'
+      des: 创建新项目
+
+- type: 启动页面 (Dashboard)
+  cmds:
+    - cmd: <leader>dd
+      des: 打开启动页面
+
+- type: 错误和诊断 (Trouble)
+  cmds:
+    - cmd: <leader>xx
+      des: 切换 Trouble (诊断列表)
+    - cmd: <leader>xw
+      des: 切换工作区诊断
+    - cmd: <leader>xd
+      des: 切换文档诊断
+    - cmd: <leader>xl
+      des: 切换位置列表
+    - cmd: <leader>xq
+      des: 切换快速修复列表
+
+- type: 代码高亮和语法 (Treesitter)
+  cmds:
+    - cmd: <leader>ts
+      des: Treesitter 命令菜单
+    - cmd: <leader>tu
+      des: 切换 Treesitter UI
+    - cmd: <leader>tc
+      des: 切换 Treesitter 上下文高亮
+
+- type: 颜色选择 (Colorizer)
+  cmds:
+    - cmd: <leader>col
+      des: 切换颜色高亮显示
+
+- type: 智能列标记 (SmartColumn)
+  cmds:
+    - cmd: <leader>sc
+      des: 切换智能列标记
+
+- type: 图标选择 (IconPicker)
+  cmds:
+    - cmd: <leader>ic
+      des: 打开图标选择器
+    - cmd: '<C-i>'
+      des: 在插入模式下选择图标
+
+- type: 代码格式化
+  cmds:
+    - cmd: <leader>lf
+      des: 格式化当前缓冲区
+    - cmd: <leader>lpf
+      des: 格式化当前项目
+
+- type: 空白字符管理 (IndentBlankline)
+  cmds:
+    - cmd: <leader>ui
+      des: 切换缩进参考线
+    - cmd: <leader>us
+      des: 切换空白字符显示
+
+- type: 光标高亮 (Cursorline)
+  cmds:
+    - cmd: <leader>ul
+      des: 切换当前行高亮
+    - cmd: <leader>uc
+      des: 切换当前列高亮
+
+- type: 历史撤销高亮 (HighlightUndo)
+  cmds:
+    - cmd: <leader>uh
+      des: 切换撤销历史高亮
+
+- type: 通知管理 (Nvim-Notify)
+  cmds:
+    - cmd: <leader>un
+      des: 切换通知历史

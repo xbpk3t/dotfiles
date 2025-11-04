@@ -1,0 +1,106 @@
+---
+
+
+- type: 高频操作
+  cmds:
+    - cmd: CMD + E
+      des: 用来 toggle切换最近编辑文件，体验极佳！！！（把“切换仅更改的文件”快捷键勾掉）
+
+
+- type: webpage操作
+  cmds:
+    - cmd: CMD + +/-
+      des: 放大/缩小页面
+    - cmd: CMD + 0
+      des: 重置页面缩放比例
+
+    - divider: true
+    - cmd: CMD + R
+      des: 深度刷新
+    - cmd: CMD + Shift + R
+      des: 强制重新加载（清除缓存）
+
+    - divider: true
+    - cmd: 空格键
+      des: 向下滚动网页
+    - cmd: Shift + 空格键
+      des: 向上滚动整屏
+    - cmd: CMD + ↑
+      des: 滚动到页面顶部
+    - cmd: CMD + ↓
+      des: 滚动到页面底部
+
+    - divider: true
+    - cmd: Fn + ←
+      des: 滚动到顶部（= Home键）
+    - cmd: Fn + →
+      des: 滚动到底部（= End键）
+    - cmd: Fn + ↑
+      des: 向上翻页（= Page Up）
+    - cmd: Fn + ↓
+      des: 向下翻页（= Page Down）
+    - cmd: Fn + CMD + F
+      des: 全屏切换
+
+    - divider: true
+    - cmd: CMD + d
+      des: 保存到书签
+
+- type: 标签页和窗口快捷键
+  cmds:
+    - cmd: CMD + T
+      des: 新建标签页
+    - cmd: CMD + Shift + T
+      des: 重新打开最近关闭的标签页（支持连续恢复多次关闭） # 相当于 `CMD + Option + ←/→`
+
+    - divider: true
+    - cmd: CMD + N
+      des: 新建窗口
+    - cmd: CMD + Shift + N
+      des: 新建隐身窗口（隐私浏览）
+
+    - divider: true
+    - cmd: CMD + Shift + [/]
+      des: 切换tab # 相当于 `CMD + Option + ←/→`
+    - cmd: CMD + W
+      des: 关闭当前标签页
+
+- type: 地址栏快捷键
+  cmds:
+    - cmd: CMD + L
+      des: 聚焦到地址栏（可直接编辑网址或搜索）
+    - cmd: CMD + Option + F
+      des: 在页面内查找文本（激活搜索框）
+    - cmd: CMD + Enter
+      des: 在新标签页执行搜索/打开网址（保持当前页面活动状态） # "同样，搜索后不跳转到新标签页。在有大量搜索的场景下，效率很高，少了跳转和重复键入搜索词条的过程。"
+
+- type: 链接操作
+  cmds:
+    - cmd: CMD + 点击URL
+      des: 后台新标签页打开 # "在新 tab 打开该 url，不需要再右键操作了，操作效率更高"
+    - cmd: CMD + Shift + 点URL
+      des: 在【新tab】打开该 url，并切换到【新tab】
+    - cmd: Shift + 点击URL
+      des: 新窗口打开并立即聚焦
+    - cmd: 鼠标中键点击链接
+      des: 等同于 `CMD + 点击`（后台打开）
+
+- type: chrome toolbar操作
+  cmds:
+    - cmd: CMD + Option + B
+      des: 打开书签管理器
+    - cmd: CMD + Shift + J
+      des: 打开下载内容
+    - cmd: CMD + Y
+      des: 打开历史记录
+
+- type: 高效操作组合键
+  cmds:
+    - cmd: CMD + Option + I
+      des: 打开开发者工具
+    - cmd: CMD + ,
+      des: 打开设置页面
+    - cmd: CMD + H
+      des: 隐藏Chrome窗口
+    - cmd: CMD + Q
+      des: 完全退出Chrome

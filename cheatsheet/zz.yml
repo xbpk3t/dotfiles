@@ -1,0 +1,126 @@
+---
+
+# zz -> tab -> pane 各自都是一对多关系
+
+
+
+- type: 高频操作
+  cmds:
+    - cmd: 进入vim模式（ctrl + shift + space） -> v -> y # 进入vim模式，visual模式，执行复制
+      des: zz里选中文本并复制
+
+
+
+
+
+- type: 基础操作
+  cmds:
+    - cmd: Ctrl + q
+      des: 退出 Zellij
+    - cmd: Alt + n
+      des: 创建新pane
+    - cmd: Ctrl + g
+      des: 进入锁定模式
+
+
+
+
+
+- type: Pane
+  cmds:
+#    - cmd: Alt + h / Alt + Left
+#      des: 将焦点移动到左侧pane或Tab
+#    - cmd: Alt + l / Alt + Right
+#      des: 将焦点移动到右侧pane或Tab
+#    - cmd: Alt + j / Alt + Down
+#      des: 将焦点移动到下方pane
+#    - cmd: Alt + k / Alt + Up
+#      des: 将焦点移动到上方pane
+#    - cmd: Alt + = / Alt + +
+#      des: 增大当前pane
+#    - cmd: Alt + -
+#      des: 缩小当前pane
+#    - cmd: Alt + [
+#      des: 上一个交换布局
+#    - cmd: Alt + ]
+#      des: 下一个交换布局
+#    - cmd: Ctrl + g, %
+#      des: 垂直分割pane（在锁定模式下）
+#    - cmd: Ctrl + g, "
+#      des: 水平分割pane（在锁定模式下）
+    - cmd: Ctrl + p, x # Ctrl+P 进入命令模式，然后 x 关闭当前pane
+      des: 关闭当前pane（在锁定模式下）
+
+    - cmd: Alt + n
+      des: 新增pane
+
+
+
+
+
+- type: Tab
+  cmds:
+#    - cmd: Ctrl + g, c
+#      des: 创建新Tab（在锁定模式下）
+#    - cmd: Ctrl + g, n
+#      des: 切换到下一个Tab（在锁定模式下）
+#    - cmd: Ctrl + g, p
+#      des: 切换到上一个Tab（在锁定模式下）
+#    - cmd: Ctrl + g, Tab
+#      des: 在Tab之间循环切换（在锁定模式下）
+#    - cmd: Ctrl + g, 1-9
+#      des: 切换到第1-9个Tab（在锁定模式下）
+#    - cmd: Ctrl + g, d
+#      des: 关闭当前Tab（在锁定模式下）
+#    - cmd: Ctrl + g, r
+#      des: 重命名当前Tab（在锁定模式下）
+    - cmd: Alt + left/right
+      des: 切换Tab # 不需要 Ctrl + T，或者直接单击相应tab
+
+
+
+
+- type: 模式切换
+  cmds:
+    - cmd: Ctrl + g
+      des: 进入锁定模式
+    - cmd: Ctrl + g, p
+      des: 进入pane模式（在锁定模式下）
+    - cmd: Ctrl + g, t
+      des: 进入Tab模式（在锁定模式下）
+    - cmd: Ctrl + g, s
+      des: 进入搜索模式（在锁定模式下）
+    - cmd: Ctrl + g, m
+      des: 进入移动pane模式（在锁定模式下）
+
+
+- type: 滚动和搜索
+  cmds:
+    - cmd: Ctrl + g, PageUp
+      des: 向上滚动一页（在锁定模式下）
+    - cmd: Ctrl + g, PageDown
+      des: 向下滚动一页（在锁定模式下）
+    - cmd: Ctrl + g, Ctrl + u
+      des: 向上滚动半页（在锁定模式下）
+    - cmd: Ctrl + g, Ctrl + d
+      des: 向下滚动半页（在锁定模式下）
+    - cmd: Ctrl + g, Home
+      des: 滚动到顶部（在锁定模式下）
+    - cmd: Ctrl + g, End
+      des: 滚动到底部（在锁定模式下）
+
+
+- type: 其他操作
+  cmds:
+    - cmd: Ctrl + g, z
+      des: 最大化/还原当前pane（在锁定模式下）
+    - cmd: Ctrl + g, f
+      des: 进入/退出全屏模式（在锁定模式下）
+    - cmd: Ctrl + g, ?
+      des: 显示帮助（在锁定模式下）
+    - cmd: Ctrl + g, k
+      des: 显示键盘快捷键（在锁定模式下）
+    - cmd: 鼠标滚轮
+      des: 滚动内容
+    - cmd: Shift + 鼠标点击
+      des: 在新pane中打开链接

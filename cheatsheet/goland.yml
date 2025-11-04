@@ -1,0 +1,88 @@
+---
+
+- type: 高频操作
+  cmds:
+    - cmd: CMD + E
+      des: 用来 toggle切换最近编辑文件，体验极佳！！！ # （把"切换仅更改的文件"快捷键勾掉）
+
+- type: Toolbar
+  cmds:
+    - cmd: Ctrl + Option + 上下方位键
+      des: 调整活动工具窗口大小（比如"终端窗口"）
+    - cmd: CMD + esc
+      des: 隐藏当前活动栏 # （默认是 fn+esc，改键）
+
+- type: git
+  cmds:
+    - cmd: CMD + K
+      des: git 提交栏
+    - cmd: CMD + shift + K
+      des: git 推送
+
+- type: scratch
+  cmds:
+    - cmd: CMD + Ctrl + N
+      des: 创建新scratch文件
+    - cmd: CMD + Ctrl + T
+      des: 查看当前scratch列表 # （添加快捷键） # 比之前用 vscode 作为临时编辑器强 1w 倍，支持跨项目使用、调试、语法高亮、文件历史记录等正常项目文件里的所有功能
+
+- type: Run
+  cmds:
+    - cmd: Ctrl + R
+      des: run
+    - cmd: Ctrl + D
+      des: debug
+
+- type: 单文件
+  cmds:
+    - cmd: CMD+F
+      des: 单文件查找
+    - cmd: CMD+R
+      des: 单文件替换
+    - cmd: CMD+x
+      des: 删除当前行
+    - cmd: CMD+d
+      des: 复制当前行
+    - cmd: Fn + 上/下
+      des: 页面顶部/底部
+    - cmd: CMD + 左/右
+      des: 行首/行尾
+    - cmd: CMD + L
+      des: 跳转行号
+    - cmd: CMD + -/+
+      des: 收起/展开代码块
+    - cmd: CMD + shift+r
+      des: 全局替换
+    - cmd: CMD + fn + 左/右
+      des: 文件头/文件尾
+    - cmd: CMD + Option + L
+      des: 当前页面 Reformat Code
+    - cmd: CMD + fn + F12
+      des: 按文件结构导航 (used to search and track functions directly)
+
+- type: 字符串操作
+  cmds:
+    - cmd: CMD + Shift + U
+      des: uppercase
+
+- type: golang 相关快捷键
+  cmds:
+    - cmd: Option + enter
+      des: 选择"生成构造函数"
+    - cmd: Option+Enter
+      des: 选择"生成 getter/setter" # 生成 struct 中某个成员的 getter/setter
+    - cmd: shift+f6
+      des: 批量修改变量名 # 鼠标点击到某个变量后
+
+- type: goland 快捷操作 struct
+  cmds:
+    - cmd: 直接粘贴json
+      des: 把 json 直接复制到 goland 即可 # json直接转换成结构体
+    - cmd: ctrl+T+引入类型
+      des: 即可把结构体的内嵌结构体，转移到外部
+    - cmd: Option+enter+Change field name style in tags
+      des: 即可修改命名风格，为小驼峰
+    - cmd: Option+enter+Update key value in tags
+      des: 给所有 tag 添加omitempty等标签
+    - cmd: Option+enter+Add key to tags
+      des: 给所有 tag 添加 key
