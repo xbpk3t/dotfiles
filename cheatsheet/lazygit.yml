@@ -1,0 +1,223 @@
+---
+- type: 基础操作
+  cmds:
+    - cmd: Space
+      des: 在当前项上切换选择/取消选择
+    - cmd: Enter
+      des: 打开当前项的菜单或确认选择
+    - cmd: Escape
+      des: 取消操作或返回上一级
+    - cmd: Ctrl + c
+      des: 退出 Lazygit
+    - cmd: q
+      des: 退出 Lazygit
+    - cmd: Ctrl + l
+      des: 刷新界面
+    - cmd: Tab
+      des: 在面板之间切换
+    - cmd: Ctrl + h/j/k/l
+      des: 在面板之间导航
+
+- type: 导航快捷键
+  cmds:
+    - cmd: Arrow Up / k
+      des: 向上移动光标
+    - cmd: Arrow Down / j
+      des: 同时向下移动光标
+    - cmd: Home / g
+      des: 跳转到列表顶部
+    - cmd: End / G
+      des: 跳转到列表底部
+    - cmd: Page Up / Ctrl + u
+      des: 向上翻页
+    - cmd: Page Down / Ctrl + d
+      des: 向下翻页
+
+- type: 提交操作
+  cmds:
+    - cmd: c
+      des: 创建新提交
+    - cmd: C
+      des: 使用编辑器创建提交
+    - cmd: w
+      des: 提交前压缩
+    - cmd: f
+      des: 提交修复
+    - cmd: A
+      des: 添加所有文件并提交
+    - cmd: S
+      des: 暂存所有更改的文件
+    - cmd: a
+      des: 添加当前文件到暂存区
+    - cmd: D
+      des: 丢弃更改
+    - cmd: d
+      des: 查看差异
+
+- type: 分支操作
+  cmds:
+    - cmd: n
+      des: 新建分支
+    - cmd: b
+      des: 检出分支
+    - cmd: B
+      des: 创建并检出新分支
+    - cmd: r
+      des: 重命名当前分支
+    - cmd: M
+      des: 合并选中的分支到当前分支
+    - cmd: cc
+      des: 检出上一个分支
+    - cmd: '.'
+      des: 切换到最近的分支
+
+- type: 拉取/推送操作
+  cmds:
+    - cmd: P
+      des: 推送到远程
+    - cmd: p
+      des: 从远程拉取
+    - cmd: R
+      des: 强制推送
+    - cmd: U
+      des: 设置上游分支并推送
+    - cmd: F
+      des: 从远程强制拉取
+
+- type: 标签操作
+  cmds:
+    - cmd: N
+      des: 新建标签
+    - cmd: t
+      des: 推送标签
+    - cmd: T
+      des: 删除标签
+
+- type: 暂存区操作
+  cmds:
+    - cmd: s
+      des: 暂存文件
+    - cmd: u
+      des: 取消暂存文件
+    - cmd: Shift + s
+      des: 暂存所有文件
+    - cmd: Shift + u
+      des: 取消暂存所有文件
+    - cmd: x
+      des: 撤销暂存
+    - cmd: X
+      des: 丢弃文件更改
+
+- type: 提交历史操作
+  cmds:
+    - cmd: Enter
+      des: 查看提交详情
+    - cmd: T
+      des: 恢复到此提交
+    - cmd: r
+      des: 交互式变基到此提交
+    - cmd: R
+      des: 常规变基到此提交
+    - cmd: h
+      des: 查看提交历史
+    - cmd: A
+      des: 将更改添加到此提交
+    - cmd: g
+      des: 在 GitHub 上查看提交
+    - cmd: y
+      des: 复制提交哈希
+
+- type: 工作区操作
+  cmds:
+    - cmd: W
+      des: 打开工作区菜单
+    - cmd: w
+      des: 在新终端中打开工作区
+    - cmd: C
+      des: 克隆仓库到新目录
+
+- type: 配置和设置
+  cmds:
+    - cmd: '?'
+      des: 显示帮助菜单
+    - cmd: '`'
+      des: 显示主菜单
+    - cmd: Ctrl + e
+      des: 打开编辑器
+    - cmd: Ctrl + o
+      des: 打开文件管理器
+    - cmd: Ctrl + t
+      des: 打开终端
+    - cmd: z
+      des: 撤销操作
+    - cmd: Z
+      des: 重做操作
+
+- type: 远程操作
+  cmds:
+    - cmd: a
+      des: 添加远程
+    - cmd: r
+      des: 重命名远程
+    - cmd: d
+      des: 删除远程
+    - cmd: m
+      des: 修改远程URL
+    - cmd: F
+      des: 获取远程更改
+
+- type: 子模块操作
+  cmds:
+    - cmd: I
+      des: 初始化子模块
+    - cmd: S
+      des: 同步子模块
+    - cmd: U
+      des: 更新子模块
+    - cmd: g
+      des: 在 GitHub 上查看子模块
+
+- type: 补丁操作
+  cmds:
+    - cmd: p
+      des: 应用补丁
+    - cmd: P
+      des: 将当前补丁应用到工作目录
+    - cmd: o
+      des: 打开补丁选项
+    - cmd: E
+      des: 编辑补丁
+    - cmd: r
+      des: 重置补丁
+    - cmd: d
+      des: 丢弃补丁
+
+- type: 冲突解决
+  cmds:
+    - cmd: a
+      des: 标记为已解决（所有冲突）
+    - cmd: A
+      des: 自动解决冲突
+    - cmd: m
+      des: 手动解决冲突
+    - cmd: c
+      des: 自定义命令解决冲突
+    - cmd: k
+      des: 保留当前更改
+    - cmd: t
+      des: 保留传入更改
+    - cmd: b
+      des: 保持双方更改
+
+- type: 过滤和搜索
+  cmds:
+    - cmd: '/'
+      des: 搜索
+    - cmd: Esc
+      des: 清除过滤器
+    - cmd: Ctrl + F
+      des: 切换文件过滤器
+    - cmd: Ctrl + B
+      des: 切换分支过滤器
+    - cmd: Ctrl + R
+      des: 切换远程分支过滤器
