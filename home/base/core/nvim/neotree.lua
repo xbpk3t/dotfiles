@@ -1,4 +1,4 @@
--- Auto-refresh Neo-tree when files are created/removed
+-- Auto-refresh Neo-tree when files are created/removed.
 vim.api.nvim_create_autocmd({ "BufEnter", "DirChanged" }, {
   callback = function()
     local manager_ok, manager = pcall(require, "neo-tree.sources.manager")
@@ -18,8 +18,13 @@ vim.api.nvim_create_autocmd({ "BufEnter", "DirChanged" }, {
   end,
 })
 
--- Additional Neo-tree configuration
-require("neo-tree").setup({
+-- Additional Neo-tree configuration.
+local neotree_ok, neotree = pcall(require, "neo-tree")
+if not neotree_ok then
+  return
+end
+
+neotree.setup({
   filesystem = {
     filtered_items = {
       hide_dotfiles = false,
