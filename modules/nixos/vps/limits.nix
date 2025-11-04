@@ -1,7 +1,22 @@
 # NixOS system limits configuration
 # Based on Linux-Optimizer project configurations for Ubuntu/Debian/CentOS/Fedora
 # Contains system limits configuration that can be shared between multiple hosts
-_: {
+{
+  config,
+  lib,
+  ...
+}: let
+  hostName = config.networking.hostName or null;
+  flakeRef =
+    if hostName == null
+    then null
+    else "/etc/nixos#${hostName}";
+in {
+  assertions = lib.optional (hostName == null) {
+    assertion = false;
+    message = "modules/nixos/vps/limits.nix expects networking.hostName to be defined.";
+  };
+
   # System limits optimization (ulimit settings)
   # Based on Linux-Optimizer /etc/profile configurations
   security.pam.loginLimits = [
@@ -104,4 +119,14 @@ _: {
       value = "unlimited";
     }
   ];
+
+  system.autoUpgrade = lib.mkIf (flakeRef != null) {
+    enable = lib.mkDefault true;
+    flake = lib.mkDefault flakeRef;
+    flags = lib.mkDefault ["--show-trace"];
+    dates = lib.mkDefault "weekly";
+    allowReboot = lib.mkDefault false;
+  };
+
+  services.timesyncd.enable = lib.mkDefault true;
 }

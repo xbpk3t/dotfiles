@@ -1,8 +1,8 @@
 # NixOS networking configuration
-_: {
+{lib, ...}: {
   # Network optimization - Complete Linux server optimization parameters
   # Based on Linux-Optimizer project configurations for Ubuntu/Debian/CentOS/Fedora
-  boot.kernel.sysctl = {
+  boot.kernel.sysctl = lib.mapAttrs (_: value: lib.mkDefault value) {
     # File system settings
     # Set the maximum number of open file descriptors
     "fs.file-max" = 67108864;
