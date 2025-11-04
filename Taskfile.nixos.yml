@@ -119,6 +119,12 @@ tasks:
       - echo "🐚 正在进入开发环境..."
       - nix shell nixpkgs#git nixpkgs#neovim nixpkgs#colmena
 
+  colmena-apply-vps:
+    desc: "使用 Colmena 部署 nixos-vps 容器"
+    cmds:
+      - echo "🚀 正在通过 Colmena 部署 nixos-vps..."
+      - colmena apply -t nixos-vps
+
 
 #  用途：跟踪某个应用程序的文件访问行为。
 #  分析：
