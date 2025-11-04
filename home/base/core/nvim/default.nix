@@ -52,8 +52,10 @@ in {
           # 启用绝对行号，关闭相对行号
           number = true;
           relativenumber = false;
-          # 禁用自动换行
-          wrap = false;
+          # 启用自动换行并在单词边界断行，保持缩进
+          wrap = true;
+          linebreak = true;
+          breakindent = true;
         };
 
         # 自定义快捷键映射
@@ -71,6 +73,25 @@ in {
             mode = ["n"];
             action = ":nohl<CR>";
             desc = "Clear search highlights";
+          }
+          # 自动保存开关
+          {
+            key = "<leader>ua";
+            mode = ["n"];
+            action = "<cmd>AutoSaveToggle<cr>";
+            desc = "Toggle global auto-save";
+          }
+          {
+            key = "<leader>ba";
+            mode = ["n"];
+            action = "<cmd>AutoSaveBufferToggle<cr>";
+            desc = "Toggle auto-save for buffer";
+          }
+          {
+            key = "<leader>sa";
+            mode = ["n"];
+            action = "<cmd>AutoSaveAutocmdToggle<cr>";
+            desc = "Toggle auto-save write autocmds";
           }
           # 使用 Telescope 按文件名搜索文件
           {
@@ -346,20 +367,40 @@ in {
             nvim-dap
             nvim-dap-ui
             lazygit-nvim
+
+            # https://github.com/ThePrimeagen/harpoon
+            # https://mynixos.com/nixpkgs/package/vimPlugins.harpoon
             harpoon
+            # https://mynixos.com/nixpkgs/package/vimPlugins.kulala-nvim
+            kulala-nvim
+            # https://mynixos.com/nixpkgs/package/vimPlugins.hurl-nvim
+            # https://mynixos.com/nixpkgs/package/hurl
+            hurl-nvim
             telescope-fzf-native-nvim
+            # https://github.com/someone-stole-my-name/yaml-companion.nvim
             yaml-companion-nvim
             vim-dadbod
             vim-dadbod-ui
             vim-dadbod-completion
             plenary-nvim
+            nui-nvim
             nvim-web-devicons
+            nvim-surround
+            flash-nvim
+            nvim-scrollview
+            fzf-lua
+            avante-nvim
+            zen-mode-nvim
+            lualine-nvim
           ])
           ++ [scratchNvim];
 
         # Lua 配置代码
         # 用于配置上面添加的插件
         luaConfigRC = {
+          auto-save = builtins.readFile ./auto-save.lua;
+          kulala = builtins.readFile ./kulala.lua;
+          hurl = builtins.readFile ./hurl.lua;
           monokai-theme = builtins.readFile ./theme.lua;
           telescope_extensions = builtins.readFile ./telescope-fzf.lua;
           todo-comments = builtins.readFile ./todo-comments.lua;
@@ -373,6 +414,13 @@ in {
           neotree = builtins.readFile ./neotree.lua;
           yaml_companion = builtins.readFile ./yaml-companion.lua;
           lineNumbers = builtins.readFile ./lineNumbers.lua;
+          nvim_surround = builtins.readFile ./nvim-surround.lua;
+          flash = builtins.readFile ./flash.lua;
+          scrollview = builtins.readFile ./scrollview.lua;
+          fzf_lua = builtins.readFile ./fzf-lua.lua;
+          avante = builtins.readFile ./avante.lua;
+          zen_mode = builtins.readFile ./zen-mode.lua;
+          lualine = builtins.readFile ./lualine.lua;
         };
       };
     };
