@@ -310,11 +310,18 @@
       enable = true;
     };
 
+    # zoxide会记录哪些command的path? 只要你用 cd、z、zi、pushd、popd 等改变目录的命令，zoxide 都会自动记录 —— 不需要你手动 zoxide add
+    # zoxide的rank怎么计算? 可以理解为LRU机制（访问频率、最近访问时间。除此之外还有 path深度）
+
+    # zoxide query --list | head -10
+    # zi # 内置了fzf
+
     zoxide = {
       enable = true;
       enableZshIntegration = true;
       options = [
-        "--cmd cd"
+        # zoxide 默认就是用 z 作为 alias，添加参数则使用cd作为alias
+        # "--cmd cd"
       ];
     };
 
