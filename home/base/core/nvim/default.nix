@@ -6,6 +6,21 @@
 }:
 with lib; let
   cfg = config.modules.tui.nvf;
+  scratchNvim = pkgs.vimUtils.buildVimPlugin {
+    pname = "scratch.nvim";
+    version = "2025-11-04";
+    src = pkgs.fetchFromGitHub {
+      owner = "LintaoAmons";
+      repo = "scratch.nvim";
+      rev = "1e78854fd3140411b231d5b6f9b3559b1ba5de77";
+      sha256 = "18f6lwq6lh4qazr688hxr2qpzipdmqng24w4ikwbmgw84ngyhp9b";
+    };
+    dependencies = with pkgs.vimPlugins; [
+      plenary-nvim
+      telescope-nvim
+    ];
+    doCheck = false;
+  };
 in {
   options.modules.tui.nvf = {
     enable = lib.mkEnableOption "Enable NVF (for Vim)";
@@ -34,6 +49,9 @@ in {
           tabstop = 2;
           # 自动缩进宽度为 2 个空格
           shiftwidth = 2;
+          # 启用绝对行号，关闭相对行号
+          number = true;
+          relativenumber = false;
           # 禁用自动换行
           wrap = false;
         };
@@ -184,6 +202,7 @@ in {
           markdown.enable = true; # Markdown
           ts.enable = true; # TypeScript/JavaScript
           html.enable = true; # HTML
+          yaml.enable = true; # YAML
         };
 
         # 视觉增强配置
@@ -318,40 +337,42 @@ in {
         };
 
         # 自定义插件列表
-        # 使用 vim.startPlugins 添加 nvf 未内置的插件
-        startPlugins = with pkgs.vimPlugins; [
-          # 2. Monokai Pro 主题（类似 IDEA 的 Monokai）
-          monokai-pro-nvim
-
-          todo-comments-nvim
-
-          # 4. Spectre：批量查找和替换（支持正则表达式）
-          nvim-spectre
-
-          # 5. DAP (Debug Adapter Protocol) - 调试支持
-          nvim-dap
-          nvim-dap-ui
-
-          # 6. 数据库支持 - vim-dadbod
-          vim-dadbod
-          vim-dadbod-ui
-          vim-dadbod-completion
-
-          # 依赖插件
-          plenary-nvim # 很多插件的依赖
-          nvim-web-devicons # 图标支持
-        ];
+        # https://mynixos.com/nixpkgs/packages/vimPlugins
+        startPlugins =
+          (with pkgs.vimPlugins; [
+            monokai-pro-nvim
+            todo-comments-nvim
+            nvim-spectre
+            nvim-dap
+            nvim-dap-ui
+            lazygit-nvim
+            harpoon
+            telescope-fzf-native-nvim
+            yaml-companion-nvim
+            vim-dadbod
+            vim-dadbod-ui
+            vim-dadbod-completion
+            plenary-nvim
+            nvim-web-devicons
+          ])
+          ++ [scratchNvim];
 
         # Lua 配置代码
         # 用于配置上面添加的插件
         luaConfigRC = {
           monokai-theme = builtins.readFile ./theme.lua;
-          todo-comments = builtins.readFile ./todo.lua;
+          telescope_extensions = builtins.readFile ./telescope-fzf.lua;
+          todo-comments = builtins.readFile ./todo-comments.lua;
           spectre = builtins.readFile ./spectre.lua;
-          dap-config = builtins.readFile ./dap.lua;
+          dap-config = builtins.readFile ./dap-config.lua;
           dap-ui = builtins.readFile ./dap-ui.lua;
           dadbod-ui = builtins.readFile ./dadbod-ui.lua;
+          lazygit = builtins.readFile ./lazygit.lua;
+          harpoon = builtins.readFile ./harpoon.lua;
+          scratch = builtins.readFile ./scratch.lua;
           neotree = builtins.readFile ./neotree.lua;
+          yaml_companion = builtins.readFile ./yaml-companion.lua;
+          lineNumbers = builtins.readFile ./lineNumbers.lua;
         };
       };
     };
