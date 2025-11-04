@@ -8,7 +8,8 @@ scratch.setup({
   window_cmd = "rightbelow vsplit",
   use_telescope = true,
   file_picker = "telescope",
-  filetypes = { "lua", "nix", "yaml", "markdown", "sh" },
+  -- Extend this list to add new scratch buffers for extra languages
+  filetypes = { "lua", "nix", "yaml", "yml", "markdown", "md", "sh", "go" },
 })
 
 vim.keymap.set("n", "<leader>sn", "<cmd>Scratch<cr>", { desc = "Scratch: New file" })

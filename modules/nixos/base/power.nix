@@ -71,7 +71,15 @@
 
   # Enable Powertop for automatic power tuning and analysis
   # This complements TLP by applying additional optimizations
-  powerManagement.powertop.enable = true;
+  # https://mynixos.com/nixpkgs/options/powerManagement
+  powerManagement = {
+    enable = true;
+    # https://mynixos.com/nixpkgs/option/powerManagement.cpuFreqGovernor
+    cpuFreqGovernor = "ondemand";
+    powertop = {
+      enable = true;
+    };
+  };
 
   # Kernel parameters for AMD CPUs: enable active mode for better power management
   # This assumes an AMD CPU; remove if using Intel

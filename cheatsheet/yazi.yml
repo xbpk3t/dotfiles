@@ -1,0 +1,210 @@
+---
+- type: 基础操作
+  cmds:
+    - cmd: q
+      des: 退出
+    - cmd: Q
+      des: 退出且不输出cwd文件
+    - cmd: <C-c>
+      des: 关闭当前标签页，或退出（如果是最后一个）
+    - cmd: <C-z>
+      des: 暂停进程
+    - cmd: <Esc>
+      des: 退出可视模式、清除选择或取消搜索
+
+- type: 光标移动
+  cmds:
+    - cmd: k / <Up>
+      des: 向上移动光标
+    - cmd: j / <Down>
+      des: 向下移动光标
+    - cmd: <C-u>
+      des: 向上移动半页
+    - cmd: <C-d>
+      des: 向下移动半页
+    - cmd: <C-b>
+      des: 向上移动一页
+    - cmd: <C-f>
+      des: 向下移动一页
+    - cmd: <PageUp>
+      des: 向上移动一页
+    - cmd: <PageDown>
+      des: 向下移动一页
+    - cmd: gg
+      des: 移动光标到顶部
+    - cmd: G
+      des: 移动光标到底部
+
+- type: 目录导航
+  cmds:
+    - cmd: h / <Left>
+      des: 返回父目录
+    - cmd: l / <Right>
+      des: 进入子目录
+    - cmd: H
+      des: 返回上一个目录
+    - cmd: L
+      des: 前进到下一个目录
+    - cmd: g + i
+      des: 打开lazygit插件
+
+- type: 选择和可视模式
+  cmds:
+    - cmd: <Space>
+      des: 预览图片全屏
+    - cmd: <C-a>
+      des: 选择所有文件
+    - cmd: <C-r>
+      des: 反转选择
+    - cmd: v
+      des: 进入可视模式（选择模式）
+    - cmd: V
+      des: 进入可视模式（取消模式）
+
+- type: 复制粘贴
+  cmds:
+    - cmd: y
+      des: 复制选中的文件
+    - cmd: x
+      des: 剪切选中的文件
+    - cmd: p
+      des: 粘贴已复制的文件
+    - cmd: P
+      des: 粘贴已复制的文件（覆盖已存在文件）
+    - cmd: Y / X
+      des: 取消复制状态
+
+- type: 文件操作
+  cmds:
+    - cmd: d
+      des: 删除选中的文件到回收站
+    - cmd: D
+      des: 永久删除选中的文件
+    - cmd: a
+      des: 创建文件（以/结尾创建目录）
+    - cmd: r
+      des: 重命名选中的文件
+    - cmd: o
+      des: 打开选中的文件
+    - cmd: O
+      des: 交互式打开选中的文件
+    - cmd: <Enter>
+      des: 打开选中的文件
+    - cmd: <S-Enter>
+      des: 交互式打开选中的文件
+
+- type: 链接操作
+  cmds:
+    - cmd: "'-'"
+      des: 创建复制文件的符号链接（绝对路径）
+    - cmd: "'_'"
+      des: 创建复制文件的符号链接（相对路径）
+    - cmd: "<C-->"
+      des: 创建复制文件的硬链接
+
+- type: 搜索和过滤
+  cmds:
+    - cmd: s
+      des: 通过fd按名称搜索文件
+    - cmd: S
+      des: 通过ripgrep按内容搜索文件
+    - cmd: f
+      des: 过滤文件
+    - cmd: /
+      des: 查找下一个文件
+    - cmd: "?"
+      des: 查找上一个文件
+    - cmd: n
+      des: 转到下一个查找结果
+    - cmd: N
+      des: 转到上一个查找结果
+
+- type: 快速跳转
+  cmds:
+    - cmd: z
+      des: 通过zoxide跳转目录
+    - cmd: Z
+      des: 通过fzf跳转文件/目录
+    - cmd: g + h
+      des: 跳转到家目录
+    - cmd: g + c
+      des: 跳转到~/.config
+    - cmd: g + d
+      des: 跳转到~/Downloads
+    - cmd: g + <Space>
+      des: 交互式跳转
+
+# - type: 排序和行模式
+#   cmds:
+#     - cmd: , + m
+#       des: 按修改时间排序，行模式为修改时间
+#     - cmd: , + M
+#       des: 按修改时间反向排序，行模式为修改时间
+#     - cmd: , + b
+#       des: 按创建时间排序，行模式为创建时间
+#     - cmd: , + B
+#       des: 按创建时间反向排序，行模式为创建时间
+#     - cmd: , + e
+#       des: 按扩展名排序
+#     - cmd: , + E
+#       des: 按扩展名反向排序
+#     - cmd: , + a
+#       des: 按字母排序
+#     - cmd: , + A
+#       des: 按字母反向排序
+#     - cmd: , + n
+#       des: 按自然排序
+#     - cmd: , + N
+#       des: 按自然反向排序
+#     - cmd: , + s
+#       des: 按大小排序，行模式为大小
+#     - cmd: , + S
+#       des: 按大小反向排序，行模式为大小
+#     - cmd: , + r
+#       des: 随机排序
+#
+- type: 标签页操作
+  cmds:
+    - cmd: t
+      des: 创建包含当前目录的新标签页
+    - cmd: 1-9
+      des: 切换到第1-9个标签页
+    - cmd: "["
+      des: 切换到上一个标签页
+    - cmd: "]"
+      des: 切换到下一个标签页
+    - cmd: "{"
+      des: 将当前标签页与上一个标签页交换
+    - cmd: "}"
+      des: 将当前标签页与下一个标签页交换
+
+# - type: 显示和状态
+#   cmds:
+#     - cmd: .
+#       des: 切换隐藏文件的可见性
+#     - cmd: ;
+#       des: 运行shell命令
+#     - cmd: :
+#       des: 运行shell命令（阻塞直到完成）
+#     - cmd: w
+#       des: 显示任务管理器
+#     - cmd: ~ / <F1>
+#       des: 打开帮助
+#
+# - type: 文件复制操作
+#   cmds:
+#     - cmd: c + c
+#       des: 复制文件路径
+#     - cmd: c + d
+#       des: 复制目录路径
+#     - cmd: c + f
+#       des: 复制文件名
+#     - cmd: c + n
+#       des: 复制不含扩展名的文件名
+#
+# - type: 插件功能
+#   cmds:
+#     - cmd: l
+#       des: 使用smart-enter插件（进入子目录或打开文件）
+#     - cmd: <Tab>
+#       des: Spot高亮悬停的文件
