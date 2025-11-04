@@ -29,6 +29,11 @@
 #    4. 单文件替换: :%s/old_text/new_text/g 或 :s/old_text/new_text/g 命令
 #    5. 切换最近修改文件: <leader>fr (Telescope oldfiles)
 
+      # 全文复制当前文本内容　普通模式下　:%y+ (比 ggVGy+ 好用)
+
+# 回撤操作 u (undo)
+      # 撤销　回撤操作　Ctrl + r (redo)
+
 
 
 - type: 插入模式

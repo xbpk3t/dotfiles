@@ -26,6 +26,13 @@
       "en-US"
     ];
 
+    # https://mynixos.com/nixpkgs/options/programs.firefox.nativeMessagingHosts
+    # similar with surfkingkeys, vimium in chrome, but better
+    #
+    # nativeMessagingHosts = [
+    #   pkgs.tridactyl-native
+    # ];
+
     # Firefox profiles configuration
     profiles = {
       default = {

@@ -4,6 +4,17 @@ if not ok then
 end
 
 telescope.setup({
+  defaults = {
+    file_ignore_patterns = {
+      "%.git/",
+      "%.idea/",
+      "%.vscode/",
+      "node_modules/",
+      "dist/",
+      "build/",
+      "target/",
+    },
+  },
   extensions = {
     fzf = {
       fuzzy = true,

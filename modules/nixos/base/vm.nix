@@ -22,6 +22,8 @@
 
   boot.kernelModules = ["vfio-pci"];
 
+  # https://mynixos.com/nixpkgs/options/virtualisation.docker
+  # https://mynixos.com/nixpkgs/options/virtualisation.podman
   virtualisation = {
     docker.enable = false;
     podman = {

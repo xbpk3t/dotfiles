@@ -1,4 +1,9 @@
-{
+{pkgs, ...}: {
+  home.packages = with pkgs; [
+    # https://mynixos.com/nixpkgs/package/lshw
+    lshw
+  ];
+
   programs.fastfetch = {
     enable = true;
 
