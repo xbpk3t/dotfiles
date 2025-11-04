@@ -7,6 +7,13 @@ if monokai_ok then
     terminal_colors = true,
     devicons = true,
     filter = "pro", -- classic | octagon | pro | machine | ristretto | spectrum
+    override = function(c)
+      return {
+        ["@field.yaml"] = { fg = c.base.red },
+        ["@property.yaml"] = { fg = c.base.red },
+        ["@attribute.yaml"] = { fg = c.base.red },
+      }
+    end,
   })
   vim.cmd([[colorscheme monokai-pro]])
 end
