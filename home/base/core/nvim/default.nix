@@ -345,85 +345,13 @@ in {
         # Lua 配置代码
         # 用于配置上面添加的插件
         luaConfigRC = {
-          # Monokai Pro 主题配置
-          monokai-theme = ''
-            require("monokai-pro").setup({
-              transparent_background = false,
-              terminal_colors = true,
-              devicons = true,
-              filter = "pro", -- classic | octagon | pro | machine | ristretto | spectrum
-            })
-            vim.cmd([[colorscheme monokai-pro]])
-          '';
-
-          todo-comments = ''
-            require("todo-comments").setup({
-              signs = true,
-              keywords = {
-                FIX = { icon = " ", color = "error", alt = { "FIXME", "BUG", "FIXIT", "ISSUE" } },
-                TODO = { icon = " ", color = "info" },
-                HACK = { icon = " ", color = "warning" },
-                WARN = { icon = " ", color = "warning", alt = { "WARNING", "XXX" } },
-                PERF = { icon = " ", alt = { "OPTIM", "PERFORMANCE", "OPTIMIZE" } },
-                NOTE = { icon = " ", color = "hint", alt = { "INFO" } },
-              },
-            })
-          '';
-
-          # Spectre 批量查找替换配置
-          spectre = ''
-            require('spectre').setup({
-              replace_engine = {
-                ['sed'] = {
-                  cmd = "sed",
-                  args = nil,
-                },
-              },
-              default = {
-                find = {
-                  cmd = "rg",
-                  options = {"ignore-case"}
-                },
-                replace = {
-                  cmd = "sed"
-                }
-              },
-            })
-          '';
-
-          # DAP 调试配置
-          dap-config = ''
-            local dap = require('dap')
-            -- 设置断点快捷键
-            vim.keymap.set('n', '<F5>', function() dap.continue() end, { desc = "Debug: Continue" })
-            vim.keymap.set('n', '<F10>', function() dap.step_over() end, { desc = "Debug: Step Over" })
-            vim.keymap.set('n', '<F11>', function() dap.step_into() end, { desc = "Debug: Step Into" })
-            vim.keymap.set('n', '<F12>', function() dap.step_out() end, { desc = "Debug: Step Out" })
-            vim.keymap.set('n', '<leader>b', function() dap.toggle_breakpoint() end, { desc = "Debug: Toggle Breakpoint" })
-          '';
-
-          # DAP UI 配置
-          dap-ui = ''
-            require("dapui").setup()
-            local dap, dapui = require("dap"), require("dapui")
-            dap.listeners.after.event_initialized["dapui_config"] = function()
-              dapui.open()
-            end
-            dap.listeners.before.event_terminated["dapui_config"] = function()
-              dapui.close()
-            end
-            dap.listeners.before.event_exited["dapui_config"] = function()
-              dapui.close()
-            end
-            vim.keymap.set('n', '<leader>du', function() require("dapui").toggle() end, { desc = "Debug: Toggle UI" })
-          '';
-
-          # 数据库 UI 配置
-          dadbod-ui = ''
-            vim.g.db_ui_use_nerd_fonts = 1
-            vim.g.db_ui_show_database_icon = 1
-            vim.keymap.set('n', '<leader>D', '<cmd>DBUIToggle<cr>', { desc = "Toggle Database UI" })
-          '';
+          monokai-theme = builtins.readFile ./theme.lua;
+          todo-comments = builtins.readFile ./todo.lua;
+          spectre = builtins.readFile ./spectre.lua;
+          dap-config = builtins.readFile ./dap.lua;
+          dap-ui = builtins.readFile ./dap-ui.lua;
+          dadbod-ui = builtins.readFile ./dadbod-ui.lua;
+          neotree = builtins.readFile ./neotree.lua;
         };
       };
     };
