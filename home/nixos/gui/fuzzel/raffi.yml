@@ -85,7 +85,6 @@ google-translate:
   icon: google
   binary: xdg-open
   args:
-    - "--search-url"
     - https://translate.google.com/?sl=auto&tl=zh-CN
 
 
