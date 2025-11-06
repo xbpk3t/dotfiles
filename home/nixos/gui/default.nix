@@ -13,6 +13,8 @@
     # enable native Wayland support for most Electron apps
     "ELECTRON_OZONE_PLATFORM_HINT" = "auto";
     # misc
+
+    # 用来适配IDEA
     "_JAVA_AWT_WM_NONREPARENTING" = "1";
     "QT_WAYLAND_DISABLE_WINDOWDECORATION" = "1";
     "QT_QPA_PLATFORM" = "wayland";

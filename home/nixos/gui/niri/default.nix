@@ -20,7 +20,7 @@ in {
     home.packages = with pkgs; [
       niri
 
-      xwayland-satellite
+      # xwayland-satellite
 
       # https://github.com/psi4j/sunsetr
       sunsetr
@@ -28,7 +28,7 @@ in {
       # https://github.com/atx/wtype
       wtype
 
-      nirius
+      # nirius
     ];
 
     # Wayland 环境变量

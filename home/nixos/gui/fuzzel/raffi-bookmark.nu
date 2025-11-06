@@ -9,6 +9,7 @@ def main [
   --url: string = ''
   --search-url: string = ''
   --prompt: string = 'Search: '
+  --query: string = ''
 ] {
   if $url == '' and $search_url == '' {
     print --stderr "raffi-bookmark: --url or --search-url is required"
@@ -16,16 +17,24 @@ def main [
   }
 
   if $search_url != '' {
-    let query = prompt-fuzzel $prompt --lines 0 --input "\n"
+    let provided_query = ($query | str trim)
 
-    if $query == '' {
-      if $url != '' {
-        open-url $url
+    let resolved_query = if $provided_query != '' {
+      $provided_query
+    } else {
+      let result = prompt-fuzzel $prompt --lines 0 --input "\n"
+
+      if $result == '' {
+        if $url != '' {
+          open-url $url
+        }
+        exit 0
       }
-      exit 0
+
+      $result
     }
 
-    let encoded = ($query | url encode)
+    let encoded = ($resolved_query | url encode)
     let target = ($search_url | str replace --all '{{query}}' $encoded)
     open-url $target
     exit 0
