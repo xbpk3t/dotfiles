@@ -7,6 +7,9 @@
     # Docker
     hadolint
 
+    # https://mynixos.com/nixpkgs/package/compose2nix
+    compose2nix
+
     # Kubernetes 工具
     minikube
 

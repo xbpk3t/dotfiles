@@ -30,10 +30,15 @@
 ## Development Workflow
 
 - Check for flake.nix before suggesting installations
+- Notice that I'm using [haumea](https://github.com/nix-community/haumea) as nix configuration framework. It will auto import all nix below folder using `scanPaths` in `default.nix`. The loading order of the dotfiles is `flake.nix` -> `outputs` -> `hosts` -> `modules`/`home`.
 - Prefer `nix develop` shells over global installations
 - Test commands before committing
 - Use `direnv` integration when available (auto-load devShell)
 - Feel free to use `gh` for GitHub operations
+
+
+
+
 
 ## Code Style
 

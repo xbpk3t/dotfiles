@@ -25,6 +25,18 @@ const default_actions = [
     output: "none"
     replace_placeholder: true
   }
+    {
+      name: "Nix Search"
+      command: [
+        "raffi-bookmark"
+        "--search-url"
+        "https://mynixos.com/search?q={{query}}"
+        "--query"
+        "%s"
+      ]
+      output: "none"
+      replace_placeholder: true
+    }
   {
     name: "Generate Password"
     command: [
