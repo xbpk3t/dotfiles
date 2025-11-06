@@ -147,8 +147,8 @@ layout {
 // 命名工作区配置 - 使用 named workspaces，按需求分别用于 Alacritty (1), Firefox (2), GoLand (3)
 // 注意命名 workspace 会按照配置文件中的声明顺序初始出现。所以这里的声明顺序就是实际上workspace布局的上下顺序
 // workspace "terminal"
-// workspace "IDE"
-// workspace "firefox"
+workspace "IDE"
+workspace "firefox"
 // ============================================================================
 // 窗口规则
 // ============================================================================
@@ -175,25 +175,33 @@ window-rule {
 //     // open-maximized true
 //     open-fullscreen true
 // }
-// // Firefox 绑定到 workspace 2 - 新增窗口规则，将 Firefox 应用绑定到 workspace 2
-// window-rule {
-//     match app-id="firefox"
-//     exclude is-floating=true
-//     open-on-workspace "firefox"
-//     // open-maximized true
-//     open-fullscreen true
-// }
-// // GoLand 绑定到 workspace 3 - 新增窗口规则，将 GoLand 应用绑定到 workspace 3
+// Firefox 绑定到 workspace 2 - 新增窗口规则，将 Firefox 应用绑定到 workspace 2
+window-rule {
+    match app-id="firefox"
+    exclude is-floating=true
+    open-on-workspace "firefox"
+    // open-maximized true
+    open-fullscreen true
+}
+// GoLand 绑定到 workspace 3 - 新增窗口规则，将 GoLand 应用绑定到 workspace 3
 // window-rule {
 //     match app-id="jetbrains-goland"
+//     exclude title="^(Settings|Search Everywhere|Open File|Project Structure|Find in Files)"
 //     exclude is-floating=true
-//     // 针对浮动子窗口（menu、搜索栏）
-//     // match "is-floating" true
+//     // 主窗口保持全屏；排除常见浮动对话框，避免与浮动规则冲突
 //     open-focused true
 //     open-on-workspace "IDE"
-//     // open-maximized true
 //     open-fullscreen true
 // }
+// 让常见 JetBrains 弹窗浮动（例：Settings、Search Everywhere、Open File 等）
+//window-rule {
+//    match app-id="^jetbrains-.*"
+//    match title="^(Settings|Search Everywhere|Open File|Project Structure|Find in Files)"
+//    open-floating true
+//    // 可选：把新浮动窗居中
+//    // https://github.com/YaLTeR/niri/wiki/Configuration:-Window-Rules#default-floating-position
+//    default-floating-position x=0 y=0 relative-to="top"
+//}
 // ============================================================================
 // 启动应用程序
 // ============================================================================
@@ -207,7 +215,7 @@ spawn-at-startup "/usr/lib/mate-polkit/polkit-mate-authentication-agent-1"
 // 启动 xwayland-satellite 以支持 X11 应用（如 GoLand）
 // spawn-at-startup "xwayland-satellite"
 // nisiusd
-spawn-at-startup "niriusd"
+// spawn-at-startup "niriusd"
 // sunsetr
 spawn-at-startup "sunsetr"
 // ============================================================================
@@ -266,7 +274,8 @@ binds {
         spawn-sh "fuzzel-clipboard"
     }
     // Text actions on selected text
-    Mod+Slash {
+    // Use Mod+\ instead of Mod+/ (Slash)
+    Mod+Backslash {
         spawn-sh "fuzzel-text-actions"
     }
     // ========================================================================
@@ -289,12 +298,12 @@ binds {
     // Mod+1 {
     //     focus-workspace "terminal"
     // }
-    // Mod+2 {
-    //     focus-workspace "IDE"
-    // }
-    // Mod+3 {
-    //     focus-workspace "firefox"
-    // }
+    Mod+1 {
+        focus-workspace "IDE"
+    }
+    Mod+2 {
+        focus-workspace "firefox"
+    }
     // 用来切换workspace (支持循环切换)
     Mod+Tab {
         focus-window-previous
@@ -310,12 +319,12 @@ binds {
     // Mod+Ctrl+1 {
     //     move-window-to-workspace "terminal"
     // }
-    // Mod+Ctrl+2 {
-    //     move-window-to-workspace "IDE"
-    // }
-    // Mod+Ctrl+3 {
-    //     move-window-to-workspace "firefox"
-    // }
+    Mod+Ctrl+1 {
+        move-window-to-workspace "IDE"
+    }
+    Mod+Ctrl+2 {
+        move-window-to-workspace "firefox"
+    }
     // ========================================================================
     // 窗口焦点切换
     // ========================================================================
