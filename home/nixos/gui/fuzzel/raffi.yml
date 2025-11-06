@@ -20,7 +20,7 @@ gh:
 
 
 gh-search:
-  description: gh-search
+  description: ghs
   icon: github-search
   binary: raffi-bookmark
   args:
@@ -42,7 +42,7 @@ yuanbao:
     - "https://yuanbao.tencent.com/chat/naQivTmsDa?chatMode=temp"
 
 youtube:
-  description: youtube
+  description: you
   icon: youtube
   binary: xdg-open
   args:
@@ -55,8 +55,8 @@ nix:
   args:
     - "https://mynixos.com/flakes"
 
-nixx:
-  description: nixx
+nix-search:
+  description: nixs
   icon: nix
   binary: raffi-bookmark
   args:
@@ -64,20 +64,30 @@ nixx:
     - "https://mynixos.com/search?q={{query}}"
 
 youtube-search:
-  description: youtube-search
+  description: yous
   icon: youtube
   binary: raffi-bookmark
   args:
     - "--search-url"
     - "https://www.youtube.com/results?search_query={{query}}"
 
-google-translate:
-  description: vn
+google-translate-search:
+  description: vns
   icon: google
   binary: raffi-bookmark
   args:
     - "--search-url"
     - "https://translate.google.com/?sl=auto&tl=zh-CN&text={{query}}"
+
+
+google-translate:
+  description: vn
+  icon: google
+  binary: xdg-open
+  args:
+    - "--search-url"
+    - https://translate.google.com/?sl=auto&tl=zh-CN
+
 
 
 bz:
@@ -488,7 +498,7 @@ folo:
     - "https://app.follow.is/"
 
 youtube-music:
-  description: youtube-music
+  description: youm
   icon: youtube-music
   binary: xdg-open
   args:

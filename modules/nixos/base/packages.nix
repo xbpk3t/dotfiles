@@ -36,6 +36,18 @@
     dmidecode # a tool that reads information about your system's hardware from the BIOS according to the SMBIOS/DMI standard
     parted
 
+    # https://mynixos.com/nixpkgs/package/procs
+    procs
+
+    # https://mynixos.com/nixpkgs/package/ipcalc
+    ipcalc
+
+    # https://mynixos.com/nixpkgs/package/dogdns
+    dogdns
+
+    # https://mynixos.com/nixpkgs/package/termshark
+    termshark
+
     # https://github.com/ifd3f/caligula
     # Better dd (used to make UFEI Boot)
     caligula

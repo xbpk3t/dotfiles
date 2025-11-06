@@ -15,33 +15,36 @@ const default_actions = [
   }
   {
     name: "Google Search"
-    command: ["xdg-open", "https://www.google.com/search?q=%s"]
+    command: [
+      "raffi-bookmark"
+      "--search-url"
+      "https://www.google.com/search?q={{query}}"
+      "--query"
+      "%s"
+    ]
     output: "none"
     replace_placeholder: true
   }
   {
-    name: "Convert to Lowercase"
-    command: ["tr", "[:upper:]", "[:lower:]"]
-    output: "clipboard"
-  }
-  {
-    name: "Convert to Uppercase"
-    command: ["tr", "[:lower:]", "[:upper:]"]
-    output: "clipboard"
-  }
-  {
-    name: "Copy to Clipboard"
-    command: ["wl-copy"]
-    output: "none"
-  }
-  {
     name: "Generate Password"
-    command: ["pwgen", "-c", "-n", "-1", "-s", "16"]
-    output: "clipboard"
+    command: [
+      "raffi-pwgen"
+      "--skip-type"
+      "--website"
+      "%s"
+    ]
+    output: "none"
+    replace_placeholder: true
   }
   {
     name: "GitHub Search"
-    command: ["xdg-open", "https://github.com/search?q=%s"]
+    command: [
+      "raffi-bookmark"
+      "--search-url"
+      "https://github.com/search?q={{query}}"
+      "--query"
+      "%s"
+    ]
     output: "none"
     replace_placeholder: true
   }
@@ -87,10 +90,10 @@ def execute-action [action, text] {
         let processed_command = ($command | each {|part|
           if $part == "%s" { $text } else { $part }
         })
-        run-external ...$processed_command
+        run-external ...$processed_command | complete
       } else {
         # Pipe text to command but don't capture output
-        echo $text | run-external ...$command
+        echo $text | run-external ...$command | complete
       }
     }
   }
@@ -99,6 +102,12 @@ def execute-action [action, text] {
 def main [] {
   # Get currently selected text from primary clipboard
   let selected_text = (run-external "wl-paste" "--primary" | complete).stdout | str trim
+
+  let debug_mode = ($env.RAFFI_TEXT_ACTIONS_DEBUG? | default '')
+
+  if $debug_mode != '' {
+    print --stderr $"[text-actions] selected text: ($selected_text)"
+  }
 
   if ($selected_text == "") {
     notify "Text Actions" "No selected text found"
@@ -121,6 +130,11 @@ def main [] {
 
   # Show fuzzel menu with action for the selected text
   let selected_action_name = prompt-fuzzel $"Action for: ($text_preview)" --lines 10 --input $action_input
+
+  if $debug_mode != '' {
+    print --stderr $"[text-actions] chosen action: ($selected_action_name)"
+  }
+
   if $selected_action_name == '' {
     exit 1
   }
@@ -134,15 +148,24 @@ def main [] {
 
   if $selected_action == null {
     notify "Text Actions" $"Unknown action selected: ($selected_action_name)"
+    if $debug_mode != '' {
+      print --stderr "[text-actions] selected action not found"
+    }
     exit 1
   }
 
   # Execute the selected action
   try {
+    if $debug_mode != '' {
+      print --stderr $"[text-actions] executing: ($selected_action.name)"
+    }
     execute-action $selected_action $selected_text
     notify "Text Actions" $"Executed: ($selected_action_name)"
     exit 0
   } catch {
+    if $debug_mode != '' {
+      print --stderr "[text-actions] execution failed"
+    }
     notify "Text Actions" $"Failed to execute action: ($selected_action_name)"
     exit 1
   }
