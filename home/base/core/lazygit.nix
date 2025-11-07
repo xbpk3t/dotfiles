@@ -10,14 +10,16 @@
     package = pkgs.lazygit;
     settings = {
       git = {
-        paging = {
-          colorArg = "always";
+        pagers = [
+          {
+            colorArg = "always";
 
-          # side-by-side viewer
-          # --paging=never 是必需的，确保 delta 不自行分页（lazygit 会处理）
-          # 注意这里使用 catppuccin theme，因为 stylix 生成的不太好看
-          pager = "delta -s --paging=never --line-numbers --dark";
-        };
+            # side-by-side viewer
+            # --paging=never 是必需的，确保 delta 不自行分页（lazygit 会处理）
+            # 注意这里使用 catppuccin theme，因为 stylix 生成的不太好看
+            pager = "delta -s --paging=never --line-numbers --dark";
+          }
+        ];
         disableForcePushing = true;
       };
       gui = {

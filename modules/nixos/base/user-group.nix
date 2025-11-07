@@ -30,6 +30,7 @@
       "users"
       "wheel"
       "networkmanager" # for nmtui / nm-connection-editor
+      "docker"
       "podman"
       "wireshark"
       "adbusers" # android debugging
