@@ -1,0 +1,8 @@
+# Namaka configuration for dotfiles project
+
+[check]
+cmd = ["nix", "eval", ".#checks"]
+
+# Define the test directories
+[[test]]
+path = "tests"

@@ -21,6 +21,18 @@
     statix # https://github.com/oppiliappan/statix
     alejandra # https://github.com/kamadorueda/alejandra
 
+    # https://mynixos.com/nixpkgs/package/namaka
+    # https://github.com/nix-community/namaka
+    namaka
+
+    # https://mynixos.com/nixpkgs/package/nixtract
+    nixtract
+
+    # https://mynixos.com/nixpkgs/package/nix-unit
+    # https://github.com/nix-community/nix-unit
+    #
+    nix-unit
+
     # nix related
     #
     # it provides the command `nom` works just like `nix

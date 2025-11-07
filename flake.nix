@@ -73,6 +73,15 @@
       inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
 
+    # namaka for snapshot testing
+    namaka = {
+      url = "github:nix-community/namaka/v0.2.1";
+      inputs = {
+        haumea.follows = "haumea";
+        nixpkgs.follows = "nixpkgs";
+      };
+    };
+
     # https://github.com/numtide/flake-utils
     utils.url = "github:numtide/flake-utils";
     nixos-hardware.url = "github:nixos/nixos-hardware";
