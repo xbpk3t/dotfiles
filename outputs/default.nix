@@ -77,6 +77,10 @@
 
   # Helper function to generate a set of attributes for each system
   forAllSystems = func: (nixpkgs.lib.genAttrs allSystemNames func);
+
+  # Default system used for running Namaka snapshot tests.
+  namakaTestSystem = "x86_64-linux";
+  namakaTestSpecialArgs = genSpecialArgs namakaTestSystem;
 in {
   # Add attribute sets into outputs, for debugging
   debugAttrs = {
@@ -104,7 +108,15 @@ in {
   # Eval Tests for all systems.
   evalTests = lib.lists.all (it: it.evalTests == {}) allSystemValues;
 
-  checks = {};
+  # Namaka snapshot tests evaluate the fixtures under ./tests via haumea.
+  checks = inputs.namaka.lib.load {
+    src = ../tests;
+    inputs = {
+      inherit lib;
+      inherit (inputs) haumea;
+      pkgs = namakaTestSpecialArgs.pkgs;
+    };
+  };
 
   # Development Shells
   devShells = forAllSystems (
@@ -125,6 +137,8 @@ in {
           typos
           # code formatter
           nodePackages.prettier
+          # namaka for snapshot testing
+          inputs.namaka.packages.${system}.default
         ];
         name = "dots";
         # inherit (self.checks.${system}.pre-commit-check) shellHook;
