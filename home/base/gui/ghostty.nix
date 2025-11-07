@@ -16,6 +16,10 @@ _: {
       confirm-close-surface = false;
       background-opacity = 0.8;
       window-padding-x = 4;
+      clipboard-read = "allow";
+      clipboard-write = "allow";
+      clipboard-paste = "allow";
+      copy-on-select = "clipboard";
 
       # background = "black";
       # window-padding-color = "background";

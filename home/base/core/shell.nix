@@ -101,6 +101,19 @@
         # zsh 支持 alias -s 功能
         alias -s {md,go,json,ts,html,yaml,yml,py,sql}=goland
 
+        # ===== eza wrapper (works even without a TTY stdin) =====
+        unalias ll 2>/dev/null || true
+        ll() {
+          if [[ $# -eq 0 ]]; then
+            command eza -l .
+          else
+            command eza -l "$@"
+          fi
+        }
+        if type compdef &>/dev/null; then
+          compdef _eza ll 2>/dev/null
+        fi
+
         # ===== Locale 设置 =====
         # 使用推荐的最小集合，避免 LC_ALL 覆盖导致的异常
         unset LC_ALL

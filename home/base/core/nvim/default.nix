@@ -121,6 +121,12 @@ in {
             action = "<cmd>Telescope oldfiles<cr>";
             desc = "Recent files (like CMD+E in IDEA)";
           }
+          {
+            key = "<C-`>";
+            mode = ["n"];
+            action = "<cmd>Telescope oldfiles<cr>";
+            desc = "Recent files via Ctrl+`";
+          }
           # 插入模式下的方向键映射（Ctrl + hjkl）
           {
             key = "<C-h>";
@@ -247,12 +253,15 @@ in {
 
         # 自动补全配置
         autocomplete.nvim-cmp.enable = true;
+
         # 代码片段支持
-        snippets.luasnip.enable = true;
+        # [2025-11-07] 很干扰，所以注释掉
+        snippets.luasnip.enable = false;
 
         # 顶部标签栏（显示打开的缓冲区）
+        # [2025-11-07] 不需要
         tabline = {
-          nvimBufferline.enable = true;
+          nvimBufferline.enable = false;
         };
 
         # Treesitter 上下文显示（显示当前函数/类名）
@@ -372,25 +381,29 @@ in {
             # https://mynixos.com/nixpkgs/package/vimPlugins.harpoon
             harpoon
             # https://mynixos.com/nixpkgs/package/vimPlugins.kulala-nvim
-            kulala-nvim
+            # kulala-nvim
             # https://mynixos.com/nixpkgs/package/vimPlugins.hurl-nvim
             # https://mynixos.com/nixpkgs/package/hurl
-            hurl-nvim
+            # hurl-nvim
+
             telescope-fzf-native-nvim
             # https://github.com/someone-stole-my-name/yaml-companion.nvim
-            yaml-companion-nvim
+            # yaml-companion-nvim
             vim-dadbod
             vim-dadbod-ui
             vim-dadbod-completion
+
             plenary-nvim
             nui-nvim
             nvim-web-devicons
             nvim-surround
             flash-nvim
             nvim-scrollview
+            neoscroll-nvim
             fzf-lua
             avante-nvim
-            zen-mode-nvim
+            # https://github.com/folke/zen-mode.nvim
+            # zen-mode-nvim
             lualine-nvim
           ])
           ++ [scratchNvim];
@@ -399,8 +412,8 @@ in {
         # 用于配置上面添加的插件
         luaConfigRC = {
           auto-save = builtins.readFile ./auto-save.lua;
-          kulala = builtins.readFile ./kulala.lua;
-          hurl = builtins.readFile ./hurl.lua;
+          # kulala = builtins.readFile ./kulala.lua;
+          # hurl = builtins.readFile ./hurl.lua;
           monokai-theme = builtins.readFile ./theme.lua;
           telescope_extensions = builtins.readFile ./telescope-fzf.lua;
           todo-comments = builtins.readFile ./todo-comments.lua;
@@ -412,15 +425,16 @@ in {
           harpoon = builtins.readFile ./harpoon.lua;
           scratch = builtins.readFile ./scratch.lua;
           neotree = builtins.readFile ./neotree.lua;
-          yaml_companion = builtins.readFile ./yaml-companion.lua;
-          lineNumbers = builtins.readFile ./lineNumbers.lua;
+          # yaml_companion = builtins.readFile ./yaml-companion.lua;
           nvim_surround = builtins.readFile ./nvim-surround.lua;
           flash = builtins.readFile ./flash.lua;
           scrollview = builtins.readFile ./scrollview.lua;
+          neoscroll = builtins.readFile ./neoscroll.lua;
           fzf_lua = builtins.readFile ./fzf-lua.lua;
           avante = builtins.readFile ./avante.lua;
-          zen_mode = builtins.readFile ./zen-mode.lua;
+          # zen_mode = builtins.readFile ./zen-mode.lua;
           lualine = builtins.readFile ./lualine.lua;
+          treesitter = builtins.readFile ./treesitter.lua;
         };
       };
     };
