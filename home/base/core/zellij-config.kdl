@@ -12,7 +12,8 @@ show_startup_tips false
 mouse_mode true
 advanced_mouse_actions true
 // ===== Copy and Paste =====
-copy_command "pbcopy"
+// https://zellij.dev/documentation/faq.html#copy--paste-isnt-working-how-can-i-fix-this
+copy_command "wl-copy"
 // macOS clipboardcopy_clipboard "primary"
 // ===== UI Settings =====
 // https://zellij.dev/documentation/options.html?highlight=pane_frames#pane_frames

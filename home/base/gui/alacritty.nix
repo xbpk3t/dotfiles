@@ -25,7 +25,10 @@
         option_as_alt = "Both";
       };
       cursor = {
-        style = "Block";
+        style = {
+          shape = "Beam";
+          blinking = "Always";
+        };
       };
 
       # 键盘快捷键配置

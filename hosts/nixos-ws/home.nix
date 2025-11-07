@@ -6,7 +6,7 @@
 
     zed.enable = false;
 
-    kitty.enable = false;
+    kitty.enable = true;
   };
 
   modules.ssh = {

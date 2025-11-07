@@ -25,6 +25,7 @@
 
     typescript #
     nodePackages.ts-node
+    nodePackages.yaml-language-server
 
     # Web 开发
     # tailwindcss
