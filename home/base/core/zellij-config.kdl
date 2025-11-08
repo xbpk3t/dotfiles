@@ -59,9 +59,9 @@ keybinds {
     //    }
     // Keep other default keybindings
     shared_except "locked" {
-        bind "Ctrl g" {
-            SwitchToMode "locked"
-        }
+        // bind "Ctrl g" {
+        //     SwitchToMode "locked"
+        // }
         bind "Ctrl q" {
             Quit
         }

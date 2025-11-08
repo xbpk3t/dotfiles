@@ -1,5 +1,8 @@
 {pkgs, ...}: {
   home.packages = with pkgs; [
+    # https://mynixos.com/nixpkgs/package/devenv
+    devenv
+
     # Python
     python313
 
