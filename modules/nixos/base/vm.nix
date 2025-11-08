@@ -37,6 +37,13 @@
       #        setSocketVariable = true; # expose DOCKER_HOST/PODMAN_SOCKET for the user session
       #      };
 
+      daemon = {
+        settings = {
+          registry-mirrors = [
+          ];
+        };
+      };
+
       # Required for containers under podman-compose to be able to talk to each other.
       # defaultNetwork.settings.dns_enabled = true;
       # Periodically prune Podman resources

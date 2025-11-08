@@ -77,6 +77,13 @@
         ps = "procs";
         find = "fd";
         grep = "ripgrep";
+
+        # TUI tool aliases
+        t = "btop";
+        yz = "yazi";
+        ff = "fastfetch";
+        lg = "lazygit";
+        v = "nvim .";
       };
 
       history = {
@@ -154,12 +161,7 @@
           fi
         }
 
-        # ===== 键盘绑定 (Alt 版本) =====
-        bindkey -s '^[1' 'btop\n'         # Alt+1: btop
-        bindkey -s '^[2' 'yazi\n'         # Alt+2: yazi
-        bindkey -s '^[3' 'fastfetch\n'    # Alt+3: fastfetch
-        bindkey -s '^[4' 'fzf\n'          # Alt+4: fzf
-        bindkey -s '^[5' 'lazygit\n'      # Alt+5: lazygit
+
 
 
 

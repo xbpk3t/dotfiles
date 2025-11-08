@@ -1,4 +1,10 @@
-{pkgs, ...}: {
+{pkgs, ...}: let
+  defaultEditor = "${pkgs.neovim}/bin/nvim";
+  yaziEditWrapper = pkgs.writeShellScriptBin "yazi-open-editor" ''
+    editor="''${EDITOR:-${defaultEditor}}"
+    exec "$editor" "$@"
+  '';
+in {
   programs.yazi = {
     enable = true;
     enableZshIntegration = true;
@@ -38,8 +44,8 @@
       opener = {
         edit = [
           {
-            run = ''${"EDITOR:-vi"} "$@"'';
-            desc = "$EDITOR";
+            run = ''${yaziEditWrapper}/bin/yazi-open-editor "$@"'';
+            desc = "Open with \$EDITOR (fallback nvim)";
             block = true;
             for = "unix";
           }

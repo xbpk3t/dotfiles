@@ -1,5 +1,5 @@
 {pkgs, ...}: {
   home.packages = with pkgs; [
-    jetbrains.goland # https://mynixos.com/nixpkgs/package/jetbrains.goland
+    # jetbrains.goland # https://mynixos.com/nixpkgs/package/jetbrains.goland
   ];
 }
