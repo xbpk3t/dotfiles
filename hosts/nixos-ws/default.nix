@@ -67,5 +67,19 @@ in {
   # Sing-box proxy service
   # Configuration file must be at /etc/sing-box/config.json
   modules.networking.singbox.enable = true;
+
+  # k3s Kubernetes with PAG stack
+  # modules.k3s = {
+  #   enable = true;
+  #   role = "server";
+  #   enablePAGStack = true;
+  #   pagConfig = {
+  #     prometheus.retention = "7d";
+  #     prometheus.storageSize = "5Gi";
+  #     grafana.adminPassword = "admin123";
+  #     grafana.serviceType = "LoadBalancer";
+  #   };
+  # };
+
   #  modules.networking.netbird.enable = false;
 }

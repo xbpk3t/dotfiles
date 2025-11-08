@@ -31,6 +31,10 @@
         };
       };
 
+      # hints
+      # https://alacritty.org/config-alacritty.html#hints
+      # Default Hints shortcut: Ctrl+shift
+
       # 键盘快捷键配置
       # keyboard.bindings = [
       #   # 使用 Super+C 复制选中文本到剪贴板

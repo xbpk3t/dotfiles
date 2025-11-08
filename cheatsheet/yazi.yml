@@ -12,6 +12,15 @@
     - cmd: <Esc>
       des: 退出可视模式、清除选择或取消搜索
 
+
+
+#　yazi 怎么剪切文件到目标path?
+# 直接 x 然后到目标path 之后　p （注意这里可能需要用　t 来在yazi里打开一个新tab，来找到目标path。另外，如果目标path已经有同名文件了，那么需要　P 来force paste）
+
+
+
+
+
 - type: 光标移动
   cmds:
     - cmd: k / <Up>

@@ -1,4 +1,6 @@
 ---
+
+
 - type: 基础操作
   cmds:
     - cmd: Space
@@ -36,6 +38,19 @@
 
    # 移动cursor 到行首、行尾　0, $
    # 移动cursor 到当前page 的首行、尾行　H, L
+
+
+
+      # 直接用 1-5 切换功能区
+      # 最高频操作，都是在　files栏里的，比如说　a 就是 git add -A.
+      # u ->
+      # d ->
+
+
+
+
+
+
 
 - type: 导航快捷键
   cmds:

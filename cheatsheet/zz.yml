@@ -10,6 +10,22 @@
       des: zz里选中文本并复制
 
 
+# zz mode
+# | 模式          | 默认进入方式            | 常用按键                        | 说明                    |
+# | ----------- | ----------------- | --------------------------- | --------------------- |
+# | **Normal**  | 启动后默认模式           | `Ctrl + g`（前缀）              | 正常操作模式。用前缀键后按字母进入其他模式 |
+# | **Locked**  | `Ctrl + g` → `l`  | 无法操作面板（防止误触）                |                       |
+# | **Pane**    | `Ctrl + g` → `p`  | 分屏相关：新建、关闭、切换 Pane          |                       |
+# | **Tab**     | `Ctrl + g` → `t`  | 标签页相关：新建、切换 Tab             |                       |
+# | **Resize**  | `Ctrl + g` → `r`  | 调整 Pane 大小                  |                       |
+# | **Scroll**  | `Ctrl + g` → `s`  | 查看滚动缓冲区（可以用 `g` / `G`）      |                       |
+# | **Move**    | `Ctrl + g` → `m`  | 移动 Pane 位置                  |                       |
+# | **Search**  | `/`（在 scroll 模式下） | 搜索输出内容                      |                       |
+# | **Session** | `Ctrl + g` → `o`  | 管理 session（attach、detach 等） |                       |
+#
+
+# 在 alacritty 里使用zellij，如果我想回到terminal的最上、最下。这个是由其中哪个控制的？
+      # controlled by zellij. ctrl+g, s (scroll mode), g (top), G (bottom)
 
 
 
