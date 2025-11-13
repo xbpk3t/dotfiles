@@ -70,23 +70,22 @@ youtube-search:
   args:
     - "--search-url"
     - "https://www.youtube.com/results?search_query={{query}}"
+#
+# translate-search:
+#   description: vns
+#   icon: google
+#   binary: raffi-bookmark
+#   args:
+#     - "--search-url"
+#     - "https://translate.google.com/?sl=auto&tl=zh-CN&text={{query}}"
+#
 
-google-translate-search:
-  description: vns
-  icon: google
-  binary: raffi-bookmark
-  args:
-    - "--search-url"
-    - "https://translate.google.com/?sl=auto&tl=zh-CN&text={{query}}"
-
-
-google-translate:
+translate:
   description: vn
   icon: google
   binary: xdg-open
   args:
-    - https://translate.google.com/?sl=auto&tl=zh-CN
-
+    - https://app.immersivetranslate.com/text#zh-CN/en
 
 
 bz:
@@ -597,3 +596,11 @@ gg:
     - "https://www.google.com/search?q={{query}}"
     - "--prompt"
     - "google: "
+
+
+
+ap-news:
+  description: APNews
+  binary: xdg-open
+  args:
+    - https://apnews.com/world-news

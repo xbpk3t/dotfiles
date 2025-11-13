@@ -7,7 +7,11 @@
   home = {
     packages = with pkgs; [
       zsh-completions
-      trash-cli # https://github.com/andreafrancia/trash-cli
+
+      # https://github.com/andreafrancia/trash-cli
+      # trash-list
+      # trash-empty
+      trash-cli
     ];
 
     # PLAN fzf-tab
