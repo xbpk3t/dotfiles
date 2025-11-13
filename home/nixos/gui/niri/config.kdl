@@ -212,8 +212,8 @@ window-rule {
 spawn-at-startup "fcitx5" "-d" "--replace"
 // Polkit 认证代理
 spawn-at-startup "/usr/lib/mate-polkit/polkit-mate-authentication-agent-1"
-// 启动 xwayland-satellite 以支持 X11 应用（如 GoLand）
-spawn-at-startup "xwayland-satellite"
+// xwayland-satellite 现由 systemd 用户服务管理，避免重复拉起
+// spawn-at-startup "xwayland-satellite"
 // nisiusd
 // spawn-at-startup "niriusd"
 // sunsetr
