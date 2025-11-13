@@ -464,6 +464,26 @@
         "type": "github"
       }
     },
+    "mcp-servers-nix": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1762909285,
+        "narHash": "sha256-Gti/uayz99SGuiXrXkckd+o+3f6IkdXKoCdSB3+md3w=",
+        "owner": "natsukium",
+        "repo": "mcp-servers-nix",
+        "rev": "abad9db6b218faa90dc5b46a7443b8653238fa59",
+        "type": "github"
+      },
+      "original": {
+        "owner": "natsukium",
+        "repo": "mcp-servers-nix",
+        "type": "github"
+      }
+    },
     "mnw": {
       "locked": {
         "lastModified": 1758834834,
@@ -901,6 +921,7 @@
         "haumea": "haumea",
         "home-manager": "home-manager",
         "mac-app-util": "mac-app-util",
+        "mcp-servers-nix": "mcp-servers-nix",
         "namaka": "namaka",
         "niri": "niri",
         "nix-ai-tools": "nix-ai-tools",
