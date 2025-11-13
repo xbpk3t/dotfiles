@@ -89,6 +89,12 @@
     # https://github.com/numtide/nix-ai-tools
     nix-ai-tools.url = "github:numtide/nix-ai-tools";
 
+    # https://github.com/natsukium/mcp-servers-nix
+    mcp-servers-nix = {
+      url = "github:natsukium/mcp-servers-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # niri-flake
     niri = {
       url = "github:sodiboo/niri-flake";
