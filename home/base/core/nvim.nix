@@ -21,98 +21,6 @@ with lib; let
     ];
     doCheck = false;
   };
-  autoSaveLua = ''
-    -- 自动保存：在内容变更或离开插入模式时写入文件，避免无名缓冲区等
-    local group = vim.api.nvim_create_augroup("AutoSaveOnChange", { clear = true })
-
-    local function should_save(buf)
-      if vim.api.nvim_buf_get_option(buf, "buftype") ~= "" then
-        return false
-      end
-      if not vim.api.nvim_buf_get_option(buf, "modifiable") then
-        return false
-      end
-      if vim.api.nvim_buf_get_name(buf) == "" then
-        return false
-      end
-      if vim.api.nvim_buf_get_option(buf, "readonly") then
-        return false
-      end
-      return true
-    end
-
-    local function is_globally_enabled()
-      if vim.g.auto_save_enabled == nil then
-        vim.g.auto_save_enabled = true
-      end
-      return vim.g.auto_save_enabled
-    end
-
-    local function is_buffer_enabled(buf)
-      local value = vim.b[buf].auto_save_enabled
-      if value == nil then
-        return true
-      end
-      return value
-    end
-
-    local function respects_autocmds()
-      if vim.g.auto_save_respect_autocmds == nil then
-        vim.g.auto_save_respect_autocmds = false
-      end
-      return vim.g.auto_save_respect_autocmds
-    end
-
-    local function notify_state(scope, enabled)
-      local ok, notify = pcall(require, "notify")
-      local message = string.format("Auto-save %s %s", scope, enabled and "enabled" or "paused")
-      if ok then
-        notify(message, vim.log.levels.INFO, { title = "AutoSave" })
-      else
-        vim.schedule(function()
-          vim.notify(message, vim.log.levels.INFO)
-        end)
-      end
-    end
-
-    vim.api.nvim_create_user_command("AutoSaveToggle", function()
-      local enabled = not is_globally_enabled()
-      vim.g.auto_save_enabled = enabled
-      notify_state("globally", enabled)
-    end, { desc = "Toggle global auto-save" })
-
-    vim.api.nvim_create_user_command("AutoSaveBufferToggle", function()
-      local buf = vim.api.nvim_get_current_buf()
-      local enabled = not is_buffer_enabled(buf)
-      vim.b.auto_save_enabled = enabled
-      notify_state("for buffer", enabled)
-    end, { desc = "Toggle auto-save for current buffer" })
-
-    vim.api.nvim_create_user_command("AutoSaveAutocmdToggle", function()
-      local enabled = not respects_autocmds()
-      vim.g.auto_save_respect_autocmds = enabled
-      notify_state("write autocmds on auto-save", enabled)
-    end, { desc = "Toggle running BufWrite autocommands during auto-save" })
-
-    vim.api.nvim_create_autocmd({ "TextChanged", "TextChangedI", "InsertLeave", "FocusLost" }, {
-      group = group,
-      callback = function(args)
-        local buf = args.buf
-        if not should_save(buf) or not vim.bo[buf].modified then
-          return
-        end
-        if not (is_globally_enabled() and is_buffer_enabled(buf)) then
-          return
-        end
-        if vim.g.auto_save_respect_autocmds then
-          vim.api.nvim_command("silent keepjumps noautocmd write")
-        else
-          vim.api.nvim_command("silent keepjumps write")
-        end
-      end,
-    })
-  '';
-
   deleteCurrentFileLua = ''
     local function delete_current_file()
       local buf = vim.api.nvim_get_current_buf()
@@ -142,6 +50,155 @@ with lib; let
 
     vim.api.nvim_create_user_command("DeleteCurrentFile", delete_current_file, {
       desc = "删除当前文件并关闭缓冲区",
+    })
+  '';
+
+  telescopeHelpersLua = ''
+    local function require_telescope()
+      local ok, builtin = pcall(require, "telescope.builtin")
+      if not ok then
+        vim.notify("Telescope 尚未就绪", vim.log.levels.ERROR)
+        return nil
+      end
+      return builtin
+    end
+
+    function _G.__nvf_open_oldfiles()
+      local builtin = require_telescope()
+      if not builtin then
+        return
+      end
+      builtin.oldfiles({
+        cwd_only = false,
+        include_current_session = true,
+        only_cwd = false,
+        path_display = { "truncate" },
+      })
+    end
+
+    function _G.__nvf_lsp_document_symbols()
+      local builtin = require_telescope()
+      if not builtin then
+        return
+      end
+      local clients = {}
+      if vim.lsp and vim.lsp.get_clients then
+        clients = vim.lsp.get_clients({ bufnr = 0 }) or {}
+      end
+      if vim.tbl_isempty(clients) then
+        vim.notify("当前缓冲区没有附加 LSP，无法列出符号", vim.log.levels.WARN)
+      end
+      builtin.lsp_document_symbols({
+        symbols = {
+          "Class",
+          "Function",
+          "Method",
+          "Struct",
+          "Interface",
+          "Module",
+          "Field",
+          "Variable",
+        },
+      })
+    end
+  '';
+
+  lspSetupLua = ''
+    local function pick_ts_server()
+      for _, name in ipairs({ "ts_ls", "tsserver" }) do
+        local path = package.searchpath("lspconfig.server_configurations." .. name, package.path)
+        if path then
+          return name
+        end
+      end
+      return "ts_ls"
+    end
+
+    local lsp_bootstrapped = false
+    local function configure_lsp()
+      if lsp_bootstrapped then
+        return
+      end
+      lsp_bootstrapped = true
+
+      if not (vim.lsp and vim.lsp.config and vim.lsp.enable) then
+        vim.schedule(function()
+          vim.notify("vim.lsp.config/vim.lsp.enable API 不可用，已跳过自定义 LSP 启动", vim.log.levels.WARN)
+        end)
+        return
+      end
+
+      local ts_server = pick_ts_server()
+      local servers = {
+        nixd = {
+          settings = {
+            nixd = {
+              formatting = {
+                command = { "nixfmt" },
+              },
+            },
+          },
+        },
+        gopls = {
+          settings = {
+            gopls = {
+              analyses = { unusedparams = true },
+              staticcheck = true,
+            },
+          },
+        },
+        lua_ls = {
+          settings = {
+            Lua = {
+              completion = { callSnippet = "Replace" },
+              diagnostics = { globals = { "vim" } },
+              workspace = { checkThirdParty = false },
+            },
+          },
+        },
+        clangd = {
+          cmd = { "clangd", "--background-index", "--clang-tidy", "--offset-encoding=utf-8" },
+        },
+        pyright = {},
+        html = {},
+        yamlls = {
+          settings = {
+            yaml = {
+              keyOrdering = false,
+            },
+          },
+        },
+        marksman = {},
+      }
+
+      servers[ts_server] = {
+        settings = {
+          javascript = { suggest = { completeFunctionCalls = true } },
+          typescript = { suggest = { completeFunctionCalls = true } },
+        },
+      }
+
+      for name, opts in pairs(servers) do
+        local ok, err = pcall(vim.lsp.config, name, opts)
+        if not ok then
+          vim.notify(string.format("注册 %s LSP 失败: %s", name, err), vim.log.levels.WARN)
+        end
+      end
+
+      local ok_enable, err_enable = pcall(vim.lsp.enable, vim.tbl_keys(servers))
+      if not ok_enable then
+        vim.notify("vim.lsp.enable 调用失败: " .. err_enable, vim.log.levels.ERROR)
+      end
+    end
+
+    vim.api.nvim_create_autocmd("User", {
+      pattern = "LazyDone",
+      once = true,
+      callback = configure_lsp,
+    })
+    vim.api.nvim_create_autocmd("VimEnter", {
+      once = true,
+      callback = configure_lsp,
     })
   '';
 in {
@@ -201,24 +258,12 @@ in {
             action = ":nohl<CR>";
             desc = "Clear search highlights";
           }
-          # 自动保存开关
+          # 自动保存切换（AutoSave.nvim 默认命令 ASToggle）
           {
             key = "<leader>ua";
             mode = ["n"];
-            action = "<cmd>AutoSaveToggle<cr>";
-            desc = "Toggle global auto-save";
-          }
-          {
-            key = "<leader>ba";
-            mode = ["n"];
-            action = "<cmd>AutoSaveBufferToggle<cr>";
-            desc = "Toggle auto-save for buffer";
-          }
-          {
-            key = "<leader>sa";
-            mode = ["n"];
-            action = "<cmd>AutoSaveAutocmdToggle<cr>";
-            desc = "Toggle auto-save write autocmds";
+            action = "<cmd>ASToggle<cr>";
+            desc = "Toggle auto-save";
           }
           # 使用 Telescope 按文件名搜索文件
           {
@@ -234,19 +279,25 @@ in {
             action = "<cmd>Telescope live_grep<cr>";
             desc = "Search files by contents";
           }
-          # 切换文件浏览器（Neo-tree）
+          # 文件浏览器（yazi）
           {
             key = "<leader>fe";
             mode = ["n"];
-            action = "<cmd>Neotree toggle<cr>";
-            desc = "File browser toggle";
+            action = "<cmd>lua YaziProjectRoot()<cr>";
+            desc = "Project explorer (yazi)";
           }
-          # 类似 CMD+E：打开最近编辑的文件列表
+          # 最近文件列表（oldfiles）
           {
             key = "<leader>fr";
             mode = ["n"];
-            action = "<cmd>Telescope oldfiles<cr>";
-            desc = "Recent files (like CMD+E in IDEA)";
+            action = "<cmd>lua __nvf_open_oldfiles()<cr>";
+            desc = "Recent files";
+          }
+          {
+            key = "<C-Tab>";
+            mode = ["n"];
+            action = "<cmd>lua __nvf_open_oldfiles()<cr>";
+            desc = "Recent files via Ctrl+Tab";
           }
           # 删除当前文件（rm + 关闭缓冲区）
           {
@@ -254,12 +305,6 @@ in {
             mode = ["n"];
             action = "<cmd>DeleteCurrentFile<cr>";
             desc = "Delete file from disk";
-          }
-          {
-            key = "<C-Tab>";
-            mode = ["n"];
-            action = "<cmd>Telescope oldfiles<cr>";
-            desc = "Recent files via Ctrl+Tab";
           }
           # 插入模式下的方向键映射（Ctrl + hjkl）
           {
@@ -293,18 +338,12 @@ in {
             action = "<cmd>Telescope projects<cr>";
             desc = "Switch between projects";
           }
+          # telescope: 当前文档结构
           {
-            key = "<leader>ft";
+            key = "<leader>ls";
             mode = ["n"];
-            action = "<cmd>TodoTelescope<cr>";
-            desc = "Find TODO comments";
-          }
-          # 批量查找和替换
-          {
-            key = "<leader>sr";
-            mode = ["n"];
-            action = "<cmd>lua require('spectre').open()<cr>";
-            desc = "Open Spectre for search and replace";
+            action = "<cmd>lua __nvf_lsp_document_symbols()<cr>";
+            desc = "Document symbols";
           }
           # 退出所有窗口并关闭 Neovim
           {
@@ -326,6 +365,31 @@ in {
             mode = ["n"];
             action = "\"_dd";
             desc = "Delete current line without yanking";
+          }
+          # LSP 导航：定义/声明/引用/实现
+          {
+            key = "gd";
+            mode = ["n"];
+            action = "<cmd>lua vim.lsp.buf.definition()<cr>";
+            desc = "Go to definition";
+          }
+          {
+            key = "gD";
+            mode = ["n"];
+            action = "<cmd>lua vim.lsp.buf.declaration()<cr>";
+            desc = "Go to declaration";
+          }
+          {
+            key = "gI";
+            mode = ["n"];
+            action = "<cmd>lua vim.lsp.buf.implementation()<cr>";
+            desc = "Go to implementation";
+          }
+          {
+            key = "gr";
+            mode = ["n"];
+            action = "<cmd>lua vim.lsp.buf.references()<cr>";
+            desc = "List references";
           }
         ];
 
@@ -349,9 +413,6 @@ in {
         lsp = {
           # 启用 LSP 支持
           enable = true;
-          # 只使用新的 vim.lsp.config 流程，关闭 legacy lspconfig
-          # config not exist
-          #"nvim-lspconfig".enable = false;
           # 保存文件时自动格式化
           formatOnSave = true;
           # LSP 图标支持
@@ -371,6 +432,7 @@ in {
         };
 
         # 编程语言支持配置
+        # https://notashelf.github.io/nvf/index.xhtml#ch-languages
         languages = {
           # 启用代码格式化
           enableFormat = true;
@@ -381,13 +443,16 @@ in {
 
           # 各语言的 LSP 支持
           nix.enable = true; # Nix 语言
+          go.enable = true;
+          lua.enable = true;
+
           clang.enable = true; # C/C++
           # zig.enable = true; # Zig（已禁用：zig-hook 标记为损坏）
-          python.enable = true; # Python
-          markdown.enable = true; # Markdown
+          python.enable = true;
+          markdown.enable = true;
           ts.enable = true; # TypeScript/JavaScript
-          html.enable = true; # HTML
-          yaml.enable = true; # YAML
+          html.enable = true;
+          yaml.enable = true;
         };
 
         # 视觉增强配置
@@ -406,8 +471,8 @@ in {
           indent-blankline.enable = true;
         };
 
-        # 自动配对括号、引号等
-        autopairs.nvim-autopairs.enable = true;
+        # 自动配对括号、引号等（交由 lazy.nvim 版本管理）
+        autopairs.nvim-autopairs.enable = false;
 
         # 自动补全配置
         # [2025-11-08] 很干扰，所以设置为false
@@ -424,7 +489,7 @@ in {
         };
 
         # Treesitter 上下文显示（显示当前函数/类名）
-        treesitter.context.enable = true;
+        treesitter.context.enable = false;
 
         # 快捷键绑定辅助工具
         binds = {
@@ -448,10 +513,10 @@ in {
         projects.project-nvim.enable = true;
 
         # 启动页面（Dashboard）
-        dashboard.dashboard-nvim.enable = true;
+        dashboard.dashboard-nvim.enable = false;
 
-        # 文件树浏览器（Neo-tree，支持 Git 状态显示）
-        filetree.neo-tree.enable = true;
+        # 文件树浏览器由 yazi.nvim 接管
+        filetree.neo-tree.enable = false;
 
         # 通知系统
         notify = {
@@ -515,9 +580,9 @@ in {
           fastaction.enable = true;
         };
 
-        # 会话管理（已禁用）
+        # 会话管理
         session = {
-          nvim-session-manager.enable = false;
+          nvim-session-manager.enable = true;
         };
 
         # 注释插件
@@ -525,508 +590,647 @@ in {
           comment-nvim.enable = true;
         };
 
-        extraPlugins =
-          (with pkgs.vimPlugins; {
-            monokaiPro = {
-              package = monokai-pro-nvim;
-              setup = ''
-                local monokai = require("monokai-pro")
-                monokai.setup({
-                  transparent_background = false,
-                  terminal_colors = true,
-                  devicons = true,
-                  filter = "pro",
-                  override = function(c)
-                    local bg = "#2d2a2e"
-                    local fg = "#fcfcfa"
-                    local comment = "#727072"
-                    local pink = "#ff6188"
-                    local yellow = "#ffd866"
-                    local green = "#a9dc76"
-                    local cyan = "#78dce8"
-                    local purple = "#ab9df2"
-                    local sel_bg = "#5b595c"
-                    return {
-                      ["@field.yaml"] = { fg = c.base.red },
-                      ["@property.yaml"] = { fg = c.base.red },
-                      ["@attribute.yaml"] = { fg = c.base.red },
-                      Comment = { fg = comment, italic = true },
-                      ["@comment"] = { fg = comment, italic = true },
-                      LineNr = { fg = "#5f5d60" },
-                      CursorLine = { bg = "#2f2c31" },
-                      CursorLineNr = { fg = "#a39fa8", bold = true },
-                      SignColumn = { bg = bg },
-                      Visual = { bg = sel_bg },
-                      Search = { bg = "#403e41", fg = fg },
-                      NormalFloat = { bg = "#2e2b30", fg = fg },
-                      FloatBorder = { fg = "#58565a", bg = "#2e2b30" },
-                      DiagnosticError = { fg = pink },
-                      DiagnosticWarn = { fg = yellow },
-                      DiagnosticInfo = { fg = cyan },
-                      DiagnosticHint = { fg = purple },
-                      DiagnosticVirtualTextError = { fg = pink, bg = "#35272d" },
-                      DiagnosticVirtualTextWarn = { fg = yellow, bg = "#3a3427" },
-                      DiagnosticVirtualTextInfo = { fg = cyan, bg = "#23343a" },
-                      DiagnosticVirtualTextHint = { fg = purple, bg = "#2f2b3a" },
-                      LspInlayHint = { fg = comment, bg = "#2f2c31", italic = false },
-                      Todo = { fg = bg, bg = yellow, bold = true },
-                      ["@text.todo"] = { fg = bg, bg = yellow, bold = true },
-                      Keyword = { fg = pink, italic = true },
-                      Constant = { fg = purple },
-                      Number = { fg = purple },
-                      String = { fg = green },
-                      Function = { fg = cyan },
-                      Type = { fg = yellow },
-                      Pmenu = { bg = "#2b282d", fg = fg },
-                      PmenuSel = { bg = "#423f44", fg = fg, bold = true },
-                    }
-                  end,
-                })
-                vim.cmd([[colorscheme monokai-pro]])
-                vim.api.nvim_set_hl(0, "Comment", { fg = "#727072", italic = true })
-                vim.api.nvim_set_hl(0, "@comment", { fg = "#727072", italic = true })
-              '';
-            };
+        lazy = {
+          plugins =
+            (with pkgs.vimPlugins; {
+              "monokai-pro.nvim" = {
+                package = monokai-pro-nvim;
+                lazy = false;
+                priority = 1000;
+                after = ''
+                  local monokai = require("monokai-pro")
+                  monokai.setup({
+                    transparent_background = false,
+                    terminal_colors = true,
+                    devicons = true,
+                    filter = "pro",
+                    override = function(c)
+                      local bg = "#2d2a2e"
+                      local fg = "#fcfcfa"
+                      local comment = "#727072"
+                      local pink = "#ff6188"
+                      local yellow = "#ffd866"
+                      local green = "#a9dc76"
+                      local cyan = "#78dce8"
+                      local purple = "#ab9df2"
+                      local sel_bg = "#5b595c"
+                      return {
+                        ["@field.yaml"] = { fg = c.base.red },
+                        ["@property.yaml"] = { fg = c.base.red },
+                        ["@attribute.yaml"] = { fg = c.base.red },
+                        Comment = { fg = comment, italic = true },
+                        ["@comment"] = { fg = comment, italic = true },
+                        LineNr = { fg = "#5f5d60" },
+                        CursorLine = { bg = "#2f2c31" },
+                        CursorLineNr = { fg = "#a39fa8", bold = true },
+                        SignColumn = { bg = bg },
+                        Visual = { bg = sel_bg },
+                        Search = { bg = "#403e41", fg = fg },
+                        NormalFloat = { bg = "#2e2b30", fg = fg },
+                        FloatBorder = { fg = "#58565a", bg = "#2e2b30" },
+                        DiagnosticError = { fg = pink },
+                        DiagnosticWarn = { fg = yellow },
+                        DiagnosticInfo = { fg = cyan },
+                        DiagnosticHint = { fg = purple },
+                        DiagnosticVirtualTextError = { fg = pink, bg = "#35272d" },
+                        DiagnosticVirtualTextWarn = { fg = yellow, bg = "#3a3427" },
+                        DiagnosticVirtualTextInfo = { fg = cyan, bg = "#23343a" },
+                        DiagnosticVirtualTextHint = { fg = purple, bg = "#2f2b3a" },
+                        LspInlayHint = { fg = comment, bg = "#2f2c31", italic = false },
+                        MatchParen = { fg = bg, bg = "#f6a434", bold = true },
+                        Todo = { fg = bg, bg = yellow, bold = true },
+                        ["@text.todo"] = { fg = bg, bg = yellow, bold = true },
+                        Keyword = { fg = pink, italic = true },
+                        Constant = { fg = purple },
+                        Number = { fg = purple },
+                        String = { fg = green },
+                        Function = { fg = cyan },
+                        Type = { fg = yellow },
+                        Pmenu = { bg = "#2b282d", fg = fg },
+                        PmenuSel = { bg = "#423f44", fg = fg, bold = true },
+                      }
+                    end,
+                  })
+                  vim.cmd([[colorscheme monokai-pro]])
+                  vim.api.nvim_set_hl(0, "Comment", { fg = "#727072", italic = true })
+                  vim.api.nvim_set_hl(0, "@comment", { fg = "#727072", italic = true })
+                  vim.api.nvim_set_hl(0, "MatchParen", { fg = "#2d2a2e", bg = "#f6a434", bold = true })
+                '';
+              };
+              #
+              # "todo-comments.nvim" = {
+              #   package = todo-comments-nvim;
+              #   event = [{event = "User"; pattern = "LazyFile";}];
+              #   keys = [
+              #     {
+              #       key = "<leader>ft";
+              #       mode = ["n"];
+              #       action = ":TodoTelescope<CR>";
+              #       desc = "Todos (all tags)";
+              #     }
+              #     {
+              #       key = "<leader>fT";
+              #       mode = ["n"];
+              #       action = ":TodoTelescope keywords=TODO,FIX<CR>";
+              #       desc = "Only TODO/FIX";
+              #     }
+              #   ];
+              #   after = ''
+              #     require("todo-comments").setup({
+              #       signs = true,
+              #       merge_keywords = true,
+              #       colors = {
+              #         error = { "#ff6188" },
+              #         warning = { "#ffd866" },
+              #         info = { "#78dce8" },
+              #         hint = { "#ab9df2" },
+              #         default = { "#a9dc76" },
+              #         test = { "#ffb454" },
+              #       },
+              #       keywords = {
+              #         FIX = { icon = " ", color = "error", alt = { "FIXME", "BUG", "FIXIT", "ISSUE" } },
+              #         TODO = { icon = " ", color = "info", alt = { "TASK", "TODO!" } },
+              #         HACK = { icon = " ", color = "warning" },
+              #         WARN = { icon = " ", color = "warning", alt = { "WARNING", "XXX" } },
+              #         PERF = { icon = " ", color = "warning", alt = { "OPTIM", "PERFORMANCE", "OPTIMIZE" } },
+              #         NOTE = { icon = " ", color = "hint", alt = { "INFO" } },
+              #         TEST = { icon = " ", color = "test", alt = { "TESTING", "QA", "ASSERT" } },
+              #         CHORE = { icon = " ", color = "default", alt = { "CHORE", "CLEANUP" } },
+              #       },
+              #       highlight = {
+              #         before = "",
+              #         keyword = "wide_bg",
+              #         after = "fg",
+              #         pattern = [[.*<(KEYWORDS)\s*(\([^)]*\))?:]],
+              #         exclude = { "diff" },
+              #       },
+              #       search = {
+              #         command = "rg",
+              #         args = {
+              #           "--color=never",
+              #           "--no-heading",
+              #           "--with-filename",
+              #           "--line-number",
+              #           "--column",
+              #           "--hidden",
+              #           "--follow",
+              #           "--no-ignore",
+              #         },
+              #         pattern = [[\b(KEYWORDS)(\([^)]*\))?:]],
+              #       },
+              #     })
+              #     local ok_telescope, telescope = pcall(require, "telescope")
+              #     if ok_telescope then
+              #       pcall(telescope.load_extension, "todo-comments")
+              #     end
+              #   '';
+              # };
 
-            todoComments = {
-              package = todo-comments-nvim;
-              setup = ''
-                require("todo-comments").setup({
-                  signs = true,
-                  merge_keywords = true,
-                  keywords = {
-                    FIX = { icon = "F ", color = "error", alt = { "FIXME", "BUG", "FIXIT", "ISSUE" } },
-                    TODO = { icon = "T ", color = "info" },
-                    HACK = { icon = "H ", color = "warning" },
-                    WARN = { icon = "! ", color = "warning", alt = { "WARNING", "XXX" } },
-                    PERF = { icon = "P ", color = "warning", alt = { "OPTIM", "PERFORMANCE", "OPTIMIZE" } },
-                    NOTE = { icon = "N ", color = "hint", alt = { "INFO" } },
-                  },
-                  highlight = { keyword = "bg" },
-                  search = {
-                    command = "rg",
-                    args = {
-                      "--color=never",
-                      "--no-heading",
-                      "--with-filename",
-                      "--line-number",
-                      "--column",
+              "auto-save.nvim" = {
+                package = auto-save-nvim;
+                lazy = false;
+                after = ''
+                  require("auto-save").setup({})
+                '';
+              };
+
+              "nvim-spectre" = {
+                package = nvim-spectre;
+                cmd = ["Spectre"];
+                keys = [
+                  {
+                    key = "<leader>sr";
+                    mode = ["n"];
+                    action = ":lua require('spectre').open()<CR>";
+                    desc = "Project replace (Spectre)";
+                  }
+                ];
+                after = ''
+                  require("spectre").setup({
+                    replace_engine = {
+                      ["sed"] = {
+                        cmd = "sed",
+                        args = nil,
+                      },
                     },
-                    pattern = [[\b(KEYWORDS)(:|\s)]],
-                  },
-                })
-              '';
-            };
-
-            spectre = {
-              package = nvim-spectre;
-              setup = ''
-                require("spectre").setup({
-                  replace_engine = {
-                    ["sed"] = {
-                      cmd = "sed",
-                      args = nil,
+                    default = {
+                      find = { cmd = "rg", options = { "ignore-case" } },
+                      replace = { cmd = "sed" },
                     },
-                  },
-                  default = {
-                    find = { cmd = "rg", options = { "ignore-case" } },
-                    replace = { cmd = "sed" },
-                  },
-                })
-              '';
-            };
+                  })
+                '';
+              };
 
-            dap = {
-              package = nvim-dap;
-              setup = ''
-                local dap = require("dap")
-                vim.keymap.set("n", "<F5>", dap.continue, { desc = "Debug: Continue" })
-                vim.keymap.set("n", "<F10>", dap.step_over, { desc = "Debug: Step Over" })
-                vim.keymap.set("n", "<F11>", dap.step_into, { desc = "Debug: Step Into" })
-                vim.keymap.set("n", "<F12>", dap.step_out, { desc = "Debug: Step Out" })
-                vim.keymap.set("n", "<leader>b", dap.toggle_breakpoint, { desc = "Debug: Toggle Breakpoint" })
-              '';
-            };
+              "nvim-dap" = {
+                package = nvim-dap;
+                keys = [
+                  {
+                    key = "<F5>";
+                    mode = ["n"];
+                    action = ":lua require('dap').continue()<CR>";
+                    desc = "Debug continue";
+                  }
+                  {
+                    key = "<F10>";
+                    mode = ["n"];
+                    action = ":lua require('dap').step_over()<CR>";
+                    desc = "Debug step over";
+                  }
+                  {
+                    key = "<F11>";
+                    mode = ["n"];
+                    action = ":lua require('dap').step_into()<CR>";
+                    desc = "Debug step into";
+                  }
+                  {
+                    key = "<F12>";
+                    mode = ["n"];
+                    action = ":lua require('dap').step_out()<CR>";
+                    desc = "Debug step out";
+                  }
+                  {
+                    key = "<leader>b";
+                    mode = ["n"];
+                    action = ":lua require('dap').toggle_breakpoint()<CR>";
+                    desc = "Toggle breakpoint";
+                  }
+                ];
+              };
 
-            dapUi = {
-              package = nvim-dap-ui;
-              setup = ''
-                local dap, dapui = require("dap"), require("dapui")
-                dapui.setup()
-                dap.listeners.after.event_initialized["dapui_config"] = function()
-                  dapui.open()
-                end
-                dap.listeners.before.event_terminated["dapui_config"] = function()
-                  dapui.close()
-                end
-                dap.listeners.before.event_exited["dapui_config"] = function()
-                  dapui.close()
-                end
-                vim.keymap.set("n", "<leader>du", dapui.toggle, { desc = "Debug: Toggle UI" })
-              '';
-            };
-
-            harpoon = {
-              package = harpoon;
-              setup = ''
-                local harpoon = require("harpoon")
-                harpoon.setup({})
-                local mark = require("harpoon.mark")
-                local ui = require("harpoon.ui")
-                vim.keymap.set("n", "<leader>ha", mark.add_file, { desc = "Harpoon: Add file" })
-                vim.keymap.set("n", "<leader>hh", ui.toggle_quick_menu, { desc = "Harpoon: Quick menu" })
-                for i = 1, 4 do
-                  vim.keymap.set("n", "<leader>h" .. i, function()
-                    ui.nav_file(i)
-                  end, { desc = string.format("Harpoon: File %d", i) })
-                end
-              '';
-            };
-
-            telescopeFzf = {
-              package = telescope-fzf-native-nvim;
-              setup = ''
-                local telescope = require("telescope")
-                telescope.setup({
-                  defaults = {
-                    file_ignore_patterns = {
-                      "%.git/",
-                      "%.idea/",
-                      "%.vscode/",
-                      "node_modules/",
-                      "dist/",
-                      "build/",
-                      "target/",
-                    },
-                  },
-                  extensions = {
-                    fzf = {
-                      fuzzy = true,
-                      override_generic_sorter = true,
-                      override_file_sorter = true,
-                      case_mode = "smart_case",
-                    },
-                  },
-                })
-                pcall(telescope.load_extension, "fzf")
-              '';
-            };
-
-            dadbod = {
-              package = vim-dadbod;
-            };
-
-            dadbodUi = {
-              package = vim-dadbod-ui;
-              setup = ''
-                vim.g.db_ui_use_nerd_fonts = 1
-                vim.g.db_ui_show_database_icon = 1
-                vim.keymap.set("n", "<leader>D", "<cmd>DBUIToggle<cr>", { desc = "Toggle Database UI" })
-              '';
-            };
-
-            dadbodCompletion = {
-              package = vim-dadbod-completion;
-            };
-
-            plenary = {
-              package = plenary-nvim;
-            };
-
-            nui = {
-              package = nui-nvim;
-            };
-
-            devicons = {
-              package = nvim-web-devicons;
-            };
-
-            nvimSurround = {
-              package = nvim-surround;
-              setup = ''
-                require("nvim-surround").setup({})
-              '';
-            };
-
-            flash = {
-              package = flash-nvim;
-              setup = ''
-                local flash = require("flash")
-                flash.setup({
-                  modes = {
-                    search = { enabled = true },
-                    character = { enabled = true },
-                  },
-                })
-                local keymap = vim.keymap.set
-                keymap({ "n", "x", "o" }, "s", flash.jump, { desc = "Flash: jump to target" })
-                keymap({ "n", "x", "o" }, "S", flash.treesitter, { desc = "Flash: treesitter select" })
-                keymap({ "o" }, "r", flash.remote, { desc = "Flash: remote flash" })
-                keymap({ "o", "x" }, "R", flash.treesitter_search, { desc = "Flash: treesitter search" })
-              '';
-            };
-
-            scrollview = {
-              package = nvim-scrollview;
-              setup = ''
-                require("scrollview").setup({ current_only = true, winblend = 25, base = "right" })
-              '';
-            };
-
-            neoscroll = {
-              package = neoscroll-nvim;
-              setup = ''
-                local neoscroll = require("neoscroll")
-                neoscroll.setup({
-                  hide_cursor = true,
-                  stop_eof = true,
-                  respect_scrolloff = false,
-                  performance_mode = false,
-                  easing_function = "cubic",
-                  duration_multiplier = 1.15,
-                  mappings = { "<C-u>", "<C-d>", "<C-b>", "<C-f>", "<C-y>", "<C-e>", "zt", "zz", "zb" },
-                })
-                local config = require("neoscroll.config")
-                config.set_mappings({
-                  ["<C-u>"] = { "scroll", { "-vim.wo.scroll", "true", "140" } },
-                  ["<C-d>"] = { "scroll", { "vim.wo.scroll", "true", "140" } },
-                  ["<C-b>"] = { "scroll", { "-vim.api.nvim_win_get_height(0)", "true", "260" } },
-                  ["<C-f>"] = { "scroll", { "vim.api.nvim_win_get_height(0)", "true", "260" } },
-                  zt = { "zt", { "150" } },
-                  zz = { "zz", { "150" } },
-                  zb = { "zb", { "150" } },
-                })
-              '';
-            };
-
-            fzfLua = {
-              package = fzf-lua;
-              setup = ''
-                local fzf = require("fzf-lua")
-                fzf.setup({
-                  winopts = { border = "single", preview = { layout = "vertical" } },
-                })
-                local keymap = vim.keymap.set
-                keymap("n", "<leader>fp", fzf.files, { desc = "FZF: project files" })
-                keymap("n", "<leader>fg", fzf.live_grep, { desc = "FZF: live grep" })
-                keymap("n", "<leader>fb", fzf.buffers, { desc = "FZF: buffers" })
-              '';
-            };
-
-            avante = {
-              package = avante-nvim;
-              setup = ''
-                local ok_avante, avante = pcall(require, "avante")
-                if not ok_avante then
-                  return
-                end
-
-                local ok_lib, avante_lib = pcall(require, "avante_lib")
-                if ok_lib and type(avante_lib) == "table" and avante_lib.load then
-                  avante_lib.load()
-                end
-
-                avante.setup({
-                  provider = "claude",
-                  mode = "agentic",
-                  auto_suggestions_provider = "claude",
-                  selector = { provider = "fzf_lua" },
-                  input = { provider = "native", provider_opts = {} },
-                  behaviour = {
-                    enable_auto_suggestions = false,
-                    enable_fastapply = false,
-                  },
-                  suggestion = { debounce = 1500 },
-                  providers = {
-                    claude = {
-                      endpoint = "https://api.anthropic.com",
-                      model = "claude-3.5-sonnet-20241022",
-                      api_key_name = "ANTHROPIC_API_KEY",
-                    },
-                    openai = {
-                      endpoint = "https://api.openai.com/v1/chat/completions",
-                      model = "gpt-4o-mini",
-                      api_key_name = "OPENAI_API_KEY",
-                    },
-                  },
-                })
-              '';
-            };
-
-            lualine = {
-              package = lualine-nvim;
-              setup = ''
-                require("lualine").setup({
-                  options = {
-                    theme = "auto",
-                    section_separators = "",
-                    component_separators = "",
-                  },
-                  extensions = { "quickfix" },
-                })
-              '';
-            };
-
-            toggleterm = {
-              package = toggleterm-nvim;
-              setup = ''
-                local toggleterm = require("toggleterm")
-                toggleterm.setup({
-                  start_in_insert = true,
-                  persist_mode = true,
-                  persist_size = true,
-                  shade_terminals = true,
-                  close_on_exit = false,
-                })
-                local function with_mouse_suppressed(bufnr, fn)
-                  local state = { mouse = vim.o.mouse, mousefocus = vim.o.mousefocus }
-                  vim.b[bufnr].__toggleterm_mouse_state = state
-                  vim.o.mouse = ""
-                  vim.o.mousefocus = false
-                  fn()
-                end
-                local function restore_mouse(bufnr)
-                  local state = vim.b[bufnr].__toggleterm_mouse_state
-                  if not state then
-                    return
+              "nvim-dap-ui" = {
+                package = nvim-dap-ui;
+                keys = [
+                  {
+                    key = "<leader>du";
+                    mode = ["n"];
+                    action = ":lua require('dapui').toggle()<CR>";
+                    desc = "Toggle DAP UI";
+                  }
+                ];
+                after = ''
+                  local dap, dapui = require("dap"), require("dapui")
+                  dapui.setup()
+                  dap.listeners.after.event_initialized["dapui_config"] = function()
+                    dapui.open()
                   end
-                  vim.o.mouse = state.mouse
-                  vim.o.mousefocus = state.mousefocus
-                  vim.b[bufnr].__toggleterm_mouse_state = nil
-                end
-                local Terminal = require("toggleterm.terminal").Terminal
-                local lazygit = Terminal:new({
-                  cmd = "lazygit",
-                  dir = "git_dir",
-                  direction = "float",
-                  hidden = true,
-                  close_on_exit = false,
-                  on_open = function(term)
-                    with_mouse_suppressed(term.bufnr, function()
-                      vim.cmd("startinsert")
-                    end)
-                  end,
-                  on_close = function(term)
-                    restore_mouse(term.bufnr)
-                  end,
-                })
-                vim.keymap.set("n", "<leader>gg", function()
-                  lazygit:toggle()
-                end, { desc = "Toggle Lazygit" })
-                vim.keymap.set("n", "<leader>tt", "<cmd>ToggleTerm direction=vertical<cr>", { desc = "Toggle vertical terminal" })
-                vim.keymap.set("n", "<leader>ti", function()
-                  for _, win in ipairs(vim.api.nvim_list_wins()) do
-                    local buf = vim.api.nvim_win_get_buf(win)
-                    if vim.bo[buf].buftype == "terminal" then
-                      vim.api.nvim_set_current_win(win)
-                      vim.cmd("startinsert")
+                  dap.listeners.before.event_terminated["dapui_config"] = function()
+                    dapui.close()
+                  end
+                  dap.listeners.before.event_exited["dapui_config"] = function()
+                    dapui.close()
+                  end
+                '';
+              };
+
+              "telescope-fzf-native.nvim" = {
+                package = telescope-fzf-native-nvim;
+                lazy = false;
+                after = ''
+                  local telescope = require("telescope")
+                  telescope.setup({
+                    defaults = {
+                      file_ignore_patterns = {
+                        "node_modules/",
+                        "dist/",
+                        "build/",
+                        "target/",
+                      },
+                      vimgrep_arguments = {
+                        "rg",
+                        "--color=never",
+                        "--no-heading",
+                        "--with-filename",
+                        "--line-number",
+                        "--column",
+                        "--hidden",
+                        "--no-ignore",
+                      },
+                      dynamic_preview_title = true,
+                      path_display = { "truncate" },
+                    },
+                    pickers = {
+                      find_files = {
+                        hidden = true,
+                        no_ignore = true,
+                        follow = true,
+                        find_command = {
+                          "rg",
+                          "--files",
+                          "--hidden",
+                          "--no-ignore",
+                          "--follow",
+                          "--color=never",
+                        },
+                      },
+                      oldfiles = {
+                        cwd_only = false,
+                        include_current_session = true,
+                        only_cwd = false,
+                        sort_lastused = true,
+                      },
+                      live_grep = {
+                        additional_args = function()
+                          return { "--hidden", "--no-ignore" }
+                        end,
+                      },
+                      lsp_document_symbols = {
+                        symbol_width = 60,
+                        symbol_type_width = 12,
+                        symbols = {
+                          "Class",
+                          "Function",
+                          "Method",
+                          "Struct",
+                          "Interface",
+                          "Module",
+                          "Field",
+                          "Variable",
+                        },
+                      },
+                    },
+                    extensions = {
+                      fzf = {
+                        fuzzy = true,
+                        override_generic_sorter = true,
+                        override_file_sorter = true,
+                        case_mode = "smart_case",
+                      },
+                    },
+                  })
+                  pcall(telescope.load_extension, "fzf")
+                '';
+              };
+              "vim-dadbod" = {
+                package = vim-dadbod;
+                lazy = true;
+                cmd = ["DB" "DBUI" "DBUIToggle" "DBUIAddConnection"];
+              };
+
+              "vim-dadbod-ui" = {
+                package = vim-dadbod-ui;
+                cmd = ["DBUI" "DBUIToggle"];
+                keys = [
+                  {
+                    key = "<leader>D";
+                    mode = ["n"];
+                    action = ":DBUIToggle<CR>";
+                    desc = "Toggle Database UI";
+                  }
+                ];
+                after = ''
+                  vim.g.db_ui_use_nerd_fonts = 1
+                  vim.g.db_ui_show_database_icon = 1
+                '';
+              };
+
+              "vim-dadbod-completion" = {
+                package = vim-dadbod-completion;
+                lazy = true;
+              };
+
+              "plenary.nvim" = {
+                package = plenary-nvim;
+                lazy = true;
+              };
+
+              "nui.nvim" = {
+                package = nui-nvim;
+                lazy = true;
+              };
+
+              # "nvim-web-devicons" = {
+              #   package = nvim-web-devicons;
+              #   lazy = true;
+              # };
+              #
+              "nvim-surround" = {
+                package = nvim-surround;
+                event = [
+                  {
+                    event = "User";
+                    pattern = "LazyFile";
+                  }
+                ];
+                after = ''
+                  require("nvim-surround").setup({})
+                '';
+              };
+
+              "nvim-scrollview" = {
+                package = nvim-scrollview;
+                event = ["BufWinEnter"];
+              };
+
+              # "neoscroll.nvim" = {
+              #   package = neoscroll-nvim;
+              #   event = ["BufReadPost"];
+              #   after = ''
+              #     local neoscroll = require("neoscroll")
+              #     neoscroll.setup({
+              #       hide_cursor = true,
+              #       stop_eof = true,
+              #       respect_scrolloff = false,
+              #       performance_mode = false,
+              #       easing_function = "cubic",
+              #       duration_multiplier = 1.15,
+              #       mappings = { "<C-u>", "<C-d>", "<C-b>", "<C-f>", "<C-y>", "<C-e>", "zt", "zz", "zb" },
+              #     })
+              #   '';
+              # };
+              #
+              "toggleterm.nvim" = {
+                package = toggleterm-nvim;
+                cmd = ["ToggleTerm"];
+                keys = [
+                  {
+                    key = "<leader>tt";
+                    mode = ["n"];
+                    action = ":ToggleTerm direction=vertical<CR>";
+                    desc = "Vertical terminal";
+                  }
+                  {
+                    key = "<leader>gg";
+                    mode = ["n"];
+                    action = ":lua ToggleTermLazygit()<CR>";
+                    desc = "Toggle Lazygit";
+                  }
+                  {
+                    key = "<leader>ti";
+                    mode = ["n"];
+                    action = ":lua ToggleTermFocus()<CR>";
+                    desc = "Focus terminal";
+                  }
+                ];
+                after = ''
+                  local toggleterm = require("toggleterm")
+                  toggleterm.setup({
+                    start_in_insert = true,
+                    persist_mode = true,
+                    persist_size = true,
+                    shade_terminals = true,
+                    close_on_exit = false,
+                  })
+
+                  local function with_mouse_suppressed(bufnr, fn)
+                    local state = { mouse = vim.o.mouse, mousefocus = vim.o.mousefocus }
+                    vim.b[bufnr].__toggleterm_mouse_state = state
+                    vim.o.mouse = ""
+                    vim.o.mousefocus = false
+                    fn()
+                  end
+
+                  local function restore_mouse(bufnr)
+                    local state = vim.b[bufnr].__toggleterm_mouse_state
+                    if not state then
                       return
                     end
+                    vim.o.mouse = state.mouse
+                    vim.o.mousefocus = state.mousefocus
+                    vim.b[bufnr].__toggleterm_mouse_state = nil
                   end
-                  vim.notify("没有可聚焦的终端窗口", vim.log.levels.INFO)
-                end, { desc = "Focus terminal and start insert" })
-              '';
+
+                  local Terminal = require("toggleterm.terminal").Terminal
+                  local lazygit = Terminal:new({
+                    cmd = "lazygit",
+                    dir = "git_dir",
+                    direction = "float",
+                    hidden = true,
+                    close_on_exit = false,
+                    on_open = function(term)
+                      with_mouse_suppressed(term.bufnr, function()
+                        vim.cmd("startinsert")
+                      end)
+                    end,
+                    on_close = function(term)
+                      restore_mouse(term.bufnr)
+                    end,
+                  })
+
+                  function ToggleTermLazygit()
+                    lazygit:toggle()
+                  end
+
+                  function ToggleTermFocus()
+                    for _, win in ipairs(vim.api.nvim_list_wins()) do
+                      local buf = vim.api.nvim_win_get_buf(win)
+                      if vim.bo[buf].buftype == "terminal" then
+                        vim.api.nvim_set_current_win(win)
+                        vim.cmd("startinsert")
+                        return
+                      end
+                    end
+                    vim.notify("没有可聚焦的终端窗口", vim.log.levels.INFO)
+                  end
+                '';
+              };
+
+              "nvim-autopairs" = {
+                package = nvim-autopairs;
+                event = ["InsertEnter"];
+                after = ''
+                  local autopairs = require("nvim-autopairs")
+                  autopairs.setup({
+                    check_ts = true,
+                    disable_filetype = { "TelescopePrompt" },
+                    enable_check_bracket_line = false,
+                    fast_wrap = {
+                      map = "<M-e>",
+                      chars = { "{", "[", "(", '"', "'" },
+                      pattern = string.gsub([[ [%'"%)%>%]%}%,] ]], "%s+", ""),
+                      end_key = "$",
+                      keys = "qwertyuiopzxcvbnmasdfghjkl",
+                      check_comma = true,
+                      highlight = "PmenuSel",
+                      highlight_grey = "Comment",
+                    },
+                  })
+
+                  local ok_cmp, cmp = pcall(require, "cmp")
+                  if ok_cmp then
+                    local cmp_autopairs = require("nvim-autopairs.completion.cmp")
+                    cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
+                  end
+                '';
+              };
+            })
+            // {
+              "scratch.nvim" = {
+                package = scratchNvim;
+                keys = [
+                  {
+                    key = "<leader>sn";
+                    mode = ["n"];
+                    action = ":Scratch<CR>";
+                    desc = "Scratch: new";
+                  }
+                  {
+                    key = "<leader>so";
+                    mode = ["n"];
+                    action = ":ScratchOpen<CR>";
+                    desc = "Scratch: picker";
+                  }
+                ];
+                after = ''
+                  local ok_scratch, scratch = pcall(require, "scratch")
+                  if not ok_scratch then
+                    return
+                  end
+                  scratch.setup({
+                    scratch_file_dir = vim.fn.stdpath("cache") .. "/scratch.nvim",
+                    window_cmd = "rightbelow vsplit",
+                    use_telescope = true,
+                    file_picker = "telescope",
+                    filetypes = { "lua", "nix", "yaml", "yml", "markdown", "md", "sh", "go" },
+                  })
+                '';
+              };
+
+              "yazi.nvim" = {
+                package = pkgs.vimPlugins."yazi-nvim";
+                cmd = ["Yazi"];
+                keys = [
+                  {
+                    key = "<leader>fe";
+                    mode = ["n"];
+                    action = ":lua YaziProjectRoot()<CR>";
+                    desc = "Explorer (yazi)";
+                  }
+                ];
+                after = ''
+                  require("yazi").setup({
+                    open_for_directories = false,
+                    open_multiple_tabs = false,
+                    floating_window_scaling_factor = 0.92,
+                    change_neovim_cwd_on_close = false,
+                    highlight_hovered_buffers_in_same_directory = true,
+                    future_features = { use_cwd_file = false },
+                  })
+                '';
+              };
             };
-
-            # kulala = {
-            #   package = kulala-nvim;
-            #   setup = ''
-            #     local kulala = require("kulala")
-            #     kulala.setup({ global_keymaps = true, global_keymaps_prefix = "<leader>R" })
-            #     vim.keymap.set("n", "<leader>Rr", kulala.run, { desc = "Kulala: run request" })
-            #     vim.keymap.set("n", "<leader>RA", kulala.run_all, { desc = "Kulala: run all requests" })
-            #     vim.keymap.set("n", "<leader>RO", kulala.open, { desc = "Kulala: open response UI" })
-            #   '';
-            # };
-
-            # hurl = {
-            #   package = hurl-nvim;
-            #   setup = ''
-            #     local hurl = require("hurl")
-            #     hurl.setup({ show_notification = false, mode = "split" })
-            #     local opts = { noremap = true, silent = true }
-            #     vim.keymap.set("n", "<leader>Hr", "<cmd>HurlRunner<cr>", vim.tbl_extend("keep", { desc = "Hurl: run request under cursor" }, opts))
-            #     vim.keymap.set("n", "<leader>HA", "<cmd>HurlRunnerAll<cr>", vim.tbl_extend("keep", { desc = "Hurl: run file" }, opts))
-            #     vim.keymap.set("n", "<leader>HE", "<cmd>HurlSetEnv<cr>", vim.tbl_extend("keep", { desc = "Hurl: choose env file" }, opts))
-            #     vim.keymap.set("n", "<leader>HL", "<cmd>HurlLogs<cr>", vim.tbl_extend("keep", { desc = "Hurl: show logs" }, opts))
-            #   '';
-            # };
-
-            # yamlCompanion = {
-            #   package = yaml-companion-nvim;
-            #   setup = ''
-            #     local yaml_companion = require("yaml-companion")
-            #     local cfg = yaml_companion.setup({
-            #       builtin_matchers = {
-            #         kubernetes = { enabled = true },
-            #         cloud_init = { enabled = true },
-            #       },
-            #     })
-            #     pcall(require("telescope").load_extension, "yaml_schema")
-            #     local server = "yamlls"
-            #     local lsp = vim.lsp
-            #     if type(lsp.config) == "table" then
-            #       lsp.config[server] = vim.tbl_deep_extend("force", lsp.config[server] or {}, cfg)
-            #       if type(lsp.enable) == "function" then
-            #         pcall(lsp.enable, server)
-            #       end
-            #     end
-            #   '';
-            # };
-
-            # zenMode = {
-            #   package = zen-mode-nvim;
-            #   setup = ''
-            #     local zen = require("zen-mode")
-            #     zen.setup({
-            #       window = { width = 0.5, options = { number = false, relativenumber = false } },
-            #       plugins = { options = { number = false, relativenumber = false } },
-            #     })
-            #     vim.keymap.set("n", "<leader>zz", zen.toggle, { desc = "Toggle Zen Mode" })
-            #   '';
-            # };
-          })
-          // {
-            scratch = {
-              package = scratchNvim;
-              setup = ''
-                local ok_scratch, scratch = pcall(require, "scratch")
-                if not ok_scratch then
-                  return
-                end
-                scratch.setup({
-                  scratch_file_dir = vim.fn.stdpath("cache") .. "/scratch.nvim",
-                  window_cmd = "rightbelow vsplit",
-                  use_telescope = true,
-                  file_picker = "telescope",
-                  filetypes = { "lua", "nix", "yaml", "yml", "markdown", "md", "sh", "go" },
-                })
-                vim.keymap.set("n", "<leader>sn", "<cmd>Scratch<cr>", { desc = "Scratch: New file" })
-                vim.keymap.set("n", "<leader>so", "<cmd>ScratchOpen<cr>", { desc = "Scratch: Open picker" })
-              '';
-            };
-          };
+        };
 
         luaConfigRC = {
-          auto-save = autoSaveLua;
           delete-current-file = deleteCurrentFileLua;
-          neotree = ''
-            vim.api.nvim_create_autocmd({ "BufEnter", "DirChanged" }, {
-              callback = function()
-                local manager_ok, manager = pcall(require, "neo-tree.sources.manager")
-                if not manager_ok then
-                  return
+          telescope-helpers = telescopeHelpersLua;
+          deprecations = ''
+            if vim.hl and vim.highlight ~= vim.hl then
+              local priorities = vim.hl.priorities or (vim.highlight and vim.highlight.priorities)
+              vim.highlight = vim.hl
+              vim.highlight.priorities = priorities
+            end
+
+            if vim.lsp and vim.lsp.get_clients then
+              vim.lsp.buf_get_clients = function(bufnrOrOpts)
+                if type(bufnrOrOpts) == "table" then
+                  return vim.lsp.get_clients(bufnrOrOpts)
+                elseif type(bufnrOrOpts) == "number" then
+                  return vim.lsp.get_clients({ bufnr = bufnrOrOpts })
+                else
+                  return vim.lsp.get_clients()
                 end
-                local renderer_ok, renderer = pcall(require, "neo-tree.ui.renderer")
-                if not renderer_ok then
-                  return
+              end
+            end
+
+            do
+              local supports_table_spec = pcall(function()
+                vim.validate({ __validate_probe = { function() end, "f" } })
+              end)
+              if not supports_table_spec then
+                local impl = vim.validate
+                vim.validate = function(spec_or_name, value, validator, optional)
+                  if type(spec_or_name) == "table" and value == nil then
+                    for name, spec in pairs(spec_or_name) do
+                      impl(name, spec[1], spec[2], spec[3])
+                    end
+                    return true
+                  end
+                  return impl(spec_or_name, value, validator, optional)
                 end
-                local state = manager.get_state("filesystem")
-                if state and renderer.window_exists(state) then
-                  manager.refresh("filesystem")
-                end
-              end,
-            })
+              end
+            end
+          '';
+          lsp-setup = lspSetupLua;
+          yazi-project = ''
+            local function project_root()
+              local buf = vim.api.nvim_get_current_buf()
+              local name = vim.api.nvim_buf_get_name(buf)
+              local start = (name ~= "" and vim.fs.dirname(name)) or vim.loop.cwd()
+              local marker = vim.fs.find({
+                ".git",
+                "flake.nix",
+                "package.json",
+                "go.mod",
+                "pyproject.toml",
+              }, { path = start, upward = true })[1]
+              if not marker then
+                return start
+              end
+              if marker:sub(-4) == ".git" then
+                return vim.fs.dirname(marker)
+              end
+              return vim.fs.dirname(marker)
+            end
+
+            function YaziProjectRoot()
+              local root = project_root()
+              local ok, yazi = pcall(require, "yazi")
+              if not ok then
+                vim.notify("yazi.nvim 未安装", vim.log.levels.WARN)
+                return
+              end
+              yazi.yazi({
+                change_neovim_cwd_on_close = false,
+                future_features = { use_cwd_file = false },
+                hooks = {
+                  on_yazi_ready = function(_, config, api)
+                    if root then
+                      api:emit_to_yazi({ "cd", "--str", root })
+                    end
+                  end,
+                },
+              }, root)
+            end
           '';
           treesitter = ''
             local ok_install, install = pcall(require, "nvim-treesitter.install")
