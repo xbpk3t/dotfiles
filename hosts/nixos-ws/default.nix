@@ -22,12 +22,17 @@ in {
   # Hostname configuration - NetworkManager 自动管理
   networking = {
     inherit hostName;
-    # 启用 NetworkManager 自动管理网络接口
-    networkmanager.enable = true;
     useDHCP = false;
 
-    # NetworkManager 使用 systemd-resolved 处理 DNS
-    networkmanager.dns = "systemd-resolved";
+    # 启用 IWD 守护进程，impala/iwctl 才能通过 D-Bus 控制 Wi-Fi
+    wireless.iwd.enable = true;
+
+    # 启用 NetworkManager 自动管理网络接口，并改用 IWD 作为 Wi-Fi backend
+    networkmanager = {
+      enable = true;
+      dns = "systemd-resolved";
+      wifi.backend = "iwd";
+    };
 
     # DNS 配置
     inherit nameservers;
