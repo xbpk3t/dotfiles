@@ -1,4 +1,11 @@
 {pkgs, ...}: {
+  home.packages = with pkgs; [
+    # https://mynixos.com/nixpkgs/package/baidupcs-go
+    # https://github.com/qjfoidnh/BaiduPCS-Go
+    # [2025-11-13] 临时使用后注释掉。还是很好用的。
+    # baidupcs-go
+  ];
+
   programs.rclone = {
     enable = true;
     package = pkgs.rclone; # 可选：覆盖默认包
