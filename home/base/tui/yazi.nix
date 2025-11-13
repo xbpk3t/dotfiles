@@ -981,9 +981,10 @@ in {
 
     # [yaziPlugins - MyNixOS](https://mynixos.com/nixpkgs/packages/yaziPlugins)
     plugins = {
+      # Ensure git.yazi is always present for inline status and blame info
+      git = pkgs.yaziPlugins.git;
       inherit (pkgs.yaziPlugins) lazygit;
       inherit (pkgs.yaziPlugins) full-border;
-      inherit (pkgs.yaziPlugins) git;
       inherit (pkgs.yaziPlugins) smart-enter;
       # used to preview archive
       inherit (pkgs.yaziPlugins) ouch;

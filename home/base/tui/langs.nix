@@ -6,8 +6,12 @@
     # Python
     python313
 
-    # Rust
-    rustup
+    # Rust (pure nixpkgs toolchain)
+    rustc
+    cargo
+    rustfmt
+    clippy
+    rust-analyzer
 
     # 其他语言
     # php
@@ -27,7 +31,8 @@
     tsx
 
     typescript #
-    nodePackages.ts-node
+    # error: 'ts-node' was removed because it is unmaintained, and since NodeJS 22.6.0+, experimental TypeScript support is built-in to NodeJS.
+    # nodePackages.ts-node
     nodePackages.yaml-language-server
 
     # Web 开发
