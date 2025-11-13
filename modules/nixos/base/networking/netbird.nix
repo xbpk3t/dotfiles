@@ -11,7 +11,7 @@ in {
   # NetBird Module - Simplified and Clean
   #
   # This module provides a clean interface for NetBird configuration:
-  # - Client: Enabled by default on all machines
+  # - Client: Available on all machines but disabled by default
   # - Server: Disabled by default, enable explicitly when needed
   #
   # Based on official NixOS options:
@@ -26,7 +26,7 @@ in {
     client = {
       enable = mkOption {
         type = types.bool;
-        default = true;
+        default = false;
         description = "Enable NetBird client (VPN mesh network)";
       };
 
@@ -107,12 +107,12 @@ in {
       # Socket at: /var/run/netbird-default/sock
       # Note: There is no "enable" option - the client is enabled by configuring it
       services.netbird.clients.default = {
-        autoStart = true;
-        port = 51820;
-        interface = "wt0";
-        openFirewall = true;
-        hardened = false;
-        logLevel = "info";
+        autoStart = cfg.client.autoStart;
+        port = cfg.client.port;
+        interface = cfg.client.interface;
+        openFirewall = cfg.client.openFirewall;
+        hardened = cfg.client.hardened;
+        logLevel = cfg.client.logLevel;
 
         # Additional configuration to disable NetBird's SSH server and firewall
         # This allows the system's SSH service to work directly over NetBird
@@ -140,6 +140,21 @@ in {
         # Ensure /var/run/netbird-default is accessible
         "d /var/run/netbird-default 0755 netbird-default netbird-default -"
       ];
+    })
+
+    #---------------------------------------------------------------------------
+    # SERVER CONFIGURATION
+    #---------------------------------------------------------------------------
+    (mkIf cfg.server.enable {
+      services.netbird = {
+        enable = true;
+        package = pkgs.netbird;
+        server = {
+          enable = true;
+          domain = cfg.server.domain;
+          enableNginx = cfg.server.enableNginx;
+        };
+      };
     })
   ];
 }
