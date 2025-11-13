@@ -6,6 +6,8 @@
   ...
 }: let
   cfg = config.modules.desktop.niri;
+  xwaylandDisplay = ":0";
+  waylandSocket = "wayland-1";
 in {
   options.modules.desktop.niri = {
     enable = lib.mkEnableOption "niri compositor";
@@ -20,7 +22,7 @@ in {
     home.packages = with pkgs; [
       niri
 
-      # xwayland-satellite
+      xwayland-satellite
 
       # https://github.com/psi4j/sunsetr
       sunsetr
@@ -38,6 +40,8 @@ in {
       GDK_DPI_SCALE = "1.0";
       # 确保 Qt 应用使用 Wayland
       QT_QPA_PLATFORM = "wayland";
+      # 给 X11 应用一个稳定的 DISPLAY，配合 xwayland-satellite systemd 服务
+      DISPLAY = xwaylandDisplay;
     };
 
     # MAYBE [2025-10-17] [Gesture bindings · Issue #372 · YaLTeR/niri](https://github.com/YaLTeR/niri/issues/372) 等niri支持自定义gestures之后，修改配置
@@ -136,13 +140,38 @@ in {
       ];
     };
 
-    # NOTE: this executable is used by greetd to start a wayland session when system boot up
-    # with such a vendor-no-locking script, we can switch to another wayland compositor without modifying greetd's config in NixOS module
+    # Wrap the upstream niri-session launcher so greetd exports DISPLAY before
+    # systemd --user captures the environment. Anything spawned from the
+    # compositor (terminals, launchers, JetBrains IDEs, etc.) now inherits the
+    # same DISPLAY value without manual exports.
     home.file.".wayland-session" = {
-      source = "${config.programs.niri.package}/bin/niri-session";
       executable = true;
+      text = ''
+        #!${pkgs.bash}/bin/bash
+        export WAYLAND_DISPLAY=${waylandSocket}
+        export DISPLAY=${xwaylandDisplay}
+        exec ${config.programs.niri.package}/bin/niri-session "$@"
+      '';
     };
 
     home.file.".config/sunset/sunsetr.toml".source = config.lib.file.mkOutOfStoreSymlink "./sunsetr.toml";
+
+    systemd.user.services."xwayland-satellite" = {
+      Unit = {
+        Description = "Xwayland bridge for X11 apps under niri";
+        After = ["graphical-session.target"];
+        PartOf = ["graphical-session.target"];
+      };
+      Service = {
+        ExecStart = "${pkgs.xwayland-satellite}/bin/xwayland-satellite";
+        Environment = [
+          "WAYLAND_DISPLAY=${waylandSocket}"
+          "DISPLAY=${xwaylandDisplay}"
+        ];
+        Restart = "on-failure";
+        RestartSec = 2;
+      };
+      Install.WantedBy = ["graphical-session.target"];
+    };
   };
 }
