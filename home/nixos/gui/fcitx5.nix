@@ -1,262 +1,346 @@
 {pkgs, ...}: {
-  # Fcitx5 简化智能拼音输入法配置
-  # 只保留核心功能：简体中文 + 英文 + 智能拼音
+  # 几点心得：
+  # 1、可以看到，最后我把所有之前的配置都注释掉了，因为实际上全都是默认配置，那么为啥要写了？
+  # 2、应该全部都用nix配置，而非之前的conf文件写法（用 home.file直接symlink）。这里需要注意的是并不需要很多人的 0, 1, 2 这种写法（或者 key."0" 这种写法），如果不写这些东西，直接写主key，默认就是0。
+  # 3、与很多其他nix服务不同，修改fcitx5配置，并 nixos apply 之后，需要 fcitx5 -d --replace 让配置重新生效之后，再检查相应配置是否生效。才是完整的使用流程。
+
+
   # [fcitx5 settings](https://gist.github.com/ktpss95112/8c0b79a8f82058b89633a4fd1d3e9fa4)
 
-  #  # 测试 fcitx5 是否运行
-  #  fcitx5-remote
-  #
-  #  # 输出应该是：
-  #  # 1 (中文模式) 或 2 (英文模式)
-  #
-  #  # 切换到中文模式
-  #  fcitx5-remote -o
-  #
-  #  # 切换到英文模式
-  #  fcitx5-remote -c
+  # https://github.com/Ev357/.dotfiles/blob/main/modules/fcitx5/settings.nix 我的配置基本上就是从这个复制过来的
 
-  #  # Fcitx5 日志
-  #  journalctl --user -u fcitx5 -f
-  #
-  #  # 或查看系统日志
-  #  tail -f ~/.local/share/fcitx5/crash.log
-  #
-  #  # 以调试模式启动 fcitx5
-  #  fcitx5 -d --replace --verbose=debug
+  # https://github.com/kyehn/kudzu/blob/main/nixos/modules/fcitx5.nix
+  # https://github.com/Sittymin/nixos_config/blob/main/system/config/locale.nix
+  # https://github.com/chenlijun99/dotfiles/blob/master/src/nixos/users/common/lijun-base/fcitx5.nix 目前找到最全面的 fcitx5 的 nix 配置
+  # https://github.com/ChUrl/flake-nixinator/blob/master/home/modules/fcitx/default.nix
+  # https://github.com/yutkat/dotfiles/tree/main/.config/fcitx5/conf
 
-  # Fcitx5 配置文件 - 使用 home.file 直接写入
-  home.file = {
-    # Fcitx5 主配置文件
-    ".config/fcitx5/config".text = ''
-      # 全局配置
-      [Hotkey]
-      # 切换输入法快捷键：Ctrl+Space（中文/英文）
-      TriggerKeys=Control+space
-      # 枚举快捷键
-      EnumerateWithTriggerKeys=True
-      # 枚举时跳过第一个输入法
-      EnumerateSkipFirst=False
-      [Hotkey/TriggerKeys]
-      0=Zenkaku_Hankaku
-      1=Hangul
-      2=Control+space
-      [Hotkey/AltTriggerKeys]
-      0=Shift_L
-      1=Shift+Shift_R
-      [Hotkey/EnumerateForwardKeys]
-      0=Control+Shift+Shift_R
-      1=Control+Shift+Shift_L
-      [Hotkey/EnumerateGroupForwardKeys]
-      0=Super+space
-      [Hotkey/ActivateKeys]
-      0=Hangul_Hanja
-      [Hotkey/DeactivateKeys]
-      0=Hangul_Romaja
-      [Hotkey/PrevPage]
-      0=Up
-      [Hotkey/NextPage]
-      0=Down
-      [Hotkey/PrevCandidate]
-      0=Shift+Tab
-      [Hotkey/NextCandidate]
-      0=Tab
-      [Hotkey/TogglePreedit]
-      0=Control+Alt+P
-      # 禁用 Ctrl+Shift+F 切换繁简体
-      [Hotkey/FullWidth]
-      0=Shift+space
-      # 禁用所有可能导致繁简切换的快捷键
-      [Hotkey/SimplifiedTraditionalSwitch]
-      # 删除或注释掉任何繁简切换快捷键
-      [Behavior]
-      # 共享输入状态：No (每个应用独立状态)
-      ShareInputState=No
-      # 预编辑模式
-      PreeditEnabledByDefault=True
-      # 显示输入法信息
-      ShowInputMethodInformation=True
-      # 显示输入法信息当切换焦点
-      showInputMethodInformationWhenFocusIn=False
-      # 显示紧凑输入法信息
-      CompactInputMethodInformation=True
-      # 显示第一个输入法信息
-      ShowFirstInputMethodInformation=True
-      # 默认页面大小
-      DefaultPageSize=7
-      # 是否默认激活
-      ActiveByDefault=False
-      # 覆盖 Xkb 选项
-      OverrideXkbOption=False
-      # 自定义 Xkb 选项
-      CustomXkbOption=
-      # 强制启用的插件
-      EnabledAddons=
-      # 强制禁用的插件 - 禁用可能影响繁简体的插件
-      DisabledAddons=chttrans, traditionalchinese
-      # 默认预加载输入法
-      PreloadInputMethod=True
-      # 枚举输入法后退
-      EnumerateBackwardKeys=
-      # 枚举输入法组后退
-      EnumerateGroupBackwardKeys=
-    '';
-
-    # Fcitx5 输入法配置文件 - 更严格地限制输入法选项
-    ".config/fcitx5/profile".text = ''
-      [Groups/0]
-      # 组名称
-      Name=Default
-      # 默认布局
-      Default Layout=us
-      # 默认输入法
-      DefaultIM=pinyin
-      [Groups/0/Items/0]
-      # 英文键盘
-      Name=keyboard-us
-      Layout=
-      [Groups/0/Items/1]
-      # 智能拼音
-      Name=pinyin
-      Layout=
-      [GroupOrder]
-      0=Default
-    '';
-
-    # 拼音输入法配置 - 强制简体
-    ".config/fcitx5/conf/pinyin.conf".text = ''
-      # 拼音引擎配置
-      [Behavior]
-      # 启用云拼音
-      CloudPinyinEnabled=True
-      # 云拼音候选词位置（1表示第1个位置，优化热词显示）
-      CloudPinyinIndex=1
-      # 云拼音后端选择（推荐百度）
-      CloudPinyinBackend=Baidu
-      # 模糊拼音
-      FuzzyPinyinEnabled=True
-      # 模糊音配置 (z=zh, c=ch, s=sh, n=l, l=n)
-      FuzzyPinyinPairs=z:zh;c:ch;s:sh;n:l;l:n
-      # 仅启用简体字符集 - 关键设置
-      CharsetType=Simplified
-      # 禁用繁简转换相关功能
-      TraditionalChineseFallbackEnabled=False
-      # 启用简拼
-      IncompletePinyinEnabled=True
-      # 显示完整拼音
-      ShowCompletePinyin=True
-      # 启用词频调整
-      AdjustOrderByFrequency=True
-      # 候选词数量
-      PageSize=10
-      # 确保首选项为简体中文
-      PreferSimplifiedChinese=True
-    '';
-
-    # 禁用繁简转换插件配置
-    ".config/fcitx5/conf/chttrans.conf".text = ''
-      [General]
-      # 禁用繁简转换功能
-      Enabled=False
-    '';
-
-    # UI 配置
-    #    ".config/fcitx5/conf/classicui.conf".text = ''
-    #      [UI]
-    #      # 主题
-    #      Theme=stylix
-    #      # 字体
-    #      Font=Noto Sans CJK SC 12
-    #      # 菜单字体
-    #      MenuFont=Noto Sans CJK SC 12
-    #      # 托盘字体
-    #      TrayFont=Noto Sans CJK SC Bold 12
-    #      # 垂直候选列表
-    #      Vertical Candidate List=True
-    #      # 使用每屏幕 DPI
-    #      PerScreenDPI=True
-    #      # 使用鼠标滚轮翻页
-    #      WheelForPaging=True
-    #      # 托盘标签轮廓颜色
-    #      TrayOutlineColor=#000000
-    #      # 托盘标签文本颜色
-    #      TrayTextColor=#ffffff
-    #      # 优先使用文本图标
-    #      PreferTextIcon=False
-    #      # 在图标中显示布局名称
-    #      ShowLayoutNameInIcon=True
-    #      # 使用输入法语言显示文本
-    #      UseInputMethodLangaugeToDisplayText=True
-    #    '';
-
-    # 注音输入法配置
-    #    ".config/fcitx5/conf/chewing.conf".text = ''
-    #      # 选词键
-    #      SelectionKey=1234567890
-    #      # 每页候选词数量
-    #      PageSize=10
-    #      # 候选列表布局
-    #      CandidateLayout=Vertical
-    #      # 使用数字键盘作为选词键
-    #      UseKeypadAsSelection=False
-    #      # 正向添加短语
-    #      AddPhraseForward=True
-    #      # 反向选择短语
-    #      ChoiceBackward=True
-    #      # 自动移动光标
-    #      AutoShiftCursor=True
-    #      # 使用空格作为选词键
-    #      SpaceAsSelection=False
-    #      # 键盘布局
-    #      Layout="Default Keyboard"
-    #    '';
-
-    # 全角/半角切换配置
-    ".config/fcitx5/conf/fullwidth.conf".text = ''
-      [Hotkey]
-      0=Shift+space
-    '';
-
-    # 通知配置
-    #    ".config/fcitx5/conf/notification.conf".text = ''
-    #      [HiddenNotifications]
-    #      0=enumerate-group
-    #    '';
-
-    # 标点符号配置
-    ".config/fcitx5/conf/punctuation.conf".text = ''
-      # 在字母或数字后使用半角标点
-      HalfWidthPuncAfterLetterOrNumber=False
-
-
-      # 成对输入标点（如引号）
-      TypePairedPunctuationsTogether=False
-      # 启用标点配置
-      Enabled=True
-      [Hotkey]
-      0=Control+period
-    '';
-  };
-
-  # 输入法系统配置
+  # https://mynixos.com/nixpkgs/options/i18n.inputMethod.fcitx5
   i18n.inputMethod = {
     enable = true;
     type = "fcitx5";
-    fcitx5.waylandFrontend = true;
-    fcitx5.addons = with pkgs; [
-      # 智能拼音输入引擎 (核心)
-      qt6Packages.fcitx5-chinese-addons
 
-      # 配置工具
-      # [2025-10-31] 不需要GUI来做fcitx5配置
-      # fcitx5-configtool
+    fcitx5 = {
+      waylandFrontend = true;
 
-      # 基于中文维基百科的拼音词典
-      fcitx5-pinyin-zhwiki
-      # https://github.com/sanweiya/fcitx5-mellow-themes
-      # fcitx5-mellow-themes
-      # https://github.com/catppuccin/fcitx5
-      # catppuccin-fcitx5
-    ];
+      addons = with pkgs; [
+        # 智能拼音输入引擎 (核心)
+        qt6Packages.fcitx5-chinese-addons
+
+        # 配置工具
+        # [2025-10-31] 不需要GUI来做fcitx5配置
+        # fcitx5-configtool
+
+        # 基于中文维基百科的拼音词典
+        fcitx5-pinyin-zhwiki
+        # https://github.com/sanweiya/fcitx5-mellow-themes
+        # fcitx5-mellow-themes
+        # https://github.com/catppuccin/fcitx5
+        # catppuccin-fcitx5
+      ];
+
+      settings = {
+        # profile 中的输入法组 (.config/fcitx5/profile)
+        inputMethod = {
+          GroupOrder = {
+            "0" = "Default";
+          };
+          "Groups/0" = {
+            # 组名称
+            Name = "Default";
+            # 默认布局
+            "Default Layout" = "us";
+            # 默认输入法
+            DefaultIM = "pinyin";
+          };
+          "Groups/0/Items/0" = {
+            Name = "keyboard-us";
+            Layout = "";
+          };
+          "Groups/0/Items/1" = {
+            Name = "pinyin";
+            Layout = "";
+          };
+        };
+
+        # 主配置 (.config/fcitx5/config)
+        #        globalOptions = {
+        # 热键设置
+        #          Hotkey = {
+        #            # 切换启用/禁用输入法
+        #            TriggerKeys = "Ctrl+Space";
+        #            # 控制枚举输入法组的组合键 (映射 [Hotkey/EnumerateGroupForwardKeys])
+        #            EnumerateGroupForwardKeys = "Super+space";
+        #            # 反复按切换键时进行轮换
+        #            EnumerateWithTriggerKeys = "True";
+        #            # 临时在当前和第一个输入法之间切换
+        #            AltTriggerKeys = "Shift_L";
+        #            # 向前切换输入法
+        #            EnumerateForwardKeys = "Control+Shift+Shift_R";
+        #            # 轮换输入法时跳过第一个输入法
+        #            EnumerateSkipFirst = "False";
+        #            # 激活输入法
+        #            ActivateKeys = "";
+        #            # 取消激活输入法
+        #            DeactivateKeys = "";
+        #            # 默认上一页
+        #            PrevPage = "Up";
+        #            # 默认下一页
+        #            NextPage = "Down";
+        #            # 默认跳转前一个候选词
+        #            # PrevCandidate = "Shift+Tab";
+        #            # 默认跳转下一个候选词
+        #            # NextCandidate = "Tab";
+        #            # 切换是否使用嵌入预编辑
+        #            TogglePreedit = "Control+Alt+P";
+        #          };
+
+        #          # 触发输入法的多套快捷键 (映射 [Hotkey/TriggerKeys])
+        #          "Hotkey/TriggerKeys" = {
+        #            "0" = "Zenkaku_Hankaku";
+        #            "1" = "Hangul";
+        #            "2" = "Control+space";
+        #          };
+        #          # 备用触发键 (映射 [Hotkey/AltTriggerKeys])
+        #          "Hotkey/AltTriggerKeys" = {
+        #            "0" = "Shift_L";
+        #            "1" = "Shift+Shift_R";
+        #          };
+        #          # 控制循环枚举输入法的组合键 (映射 [Hotkey/EnumerateForwardKeys])
+        #          "Hotkey/EnumerateForwardKeys" = {
+        #            "0" = "Control+Shift+Shift_R";
+        #            "1" = "Control+Shift+Shift_L";
+        #          };
+        #          # 控制枚举输入法组的组合键 (映射 [Hotkey/EnumerateGroupForwardKeys])
+        #          "Hotkey/EnumerateGroupForwardKeys" = {
+        #            "0" = "Super+space";
+        #          };
+        #          # 激活输入法的快捷键 (映射 [Hotkey/ActivateKeys])
+        #          "Hotkey/ActivateKeys" = {
+        #            "0" = "Hangul_Hanja";
+        #          };
+        #          # 取消激活输入法的快捷键 (映射 [Hotkey/DeactivateKeys])
+        #          "Hotkey/DeactivateKeys" = {
+        #            "0" = "Hangul_Romaja";
+        #          };
+        #          # 候选页上一页 (映射 [Hotkey/PrevPage])
+        #          "Hotkey/PrevPage" = {
+        #            "0" = "Up";
+        #          };
+        #          # 候选页下一页 (映射 [Hotkey/NextPage])
+        #          "Hotkey/NextPage" = {
+        #            "0" = "Down";
+        #          };
+        #          # 候选项前一个 (映射 [Hotkey/PrevCandidate])
+        #          "Hotkey/PrevCandidate" = {
+        #            "0" = "Shift+Tab";
+        #          };
+        #          # 候选项后一个 (映射 [Hotkey/NextCandidate])
+        #          "Hotkey/NextCandidate" = {
+        #            "0" = "Tab";
+        #          };
+        #          # 快速切换预编辑模式 (映射 [Hotkey/TogglePreedit])
+        #          "Hotkey/TogglePreedit" = {
+        #            "0" = "Control+Alt+P";
+        #          };
+        #          # 保留全角/半角切换快捷键，避免被默认乱改 (映射 [Hotkey/FullWidth])
+        #          "Hotkey/FullWidth" = {
+        #            "0" = "Shift+space";
+        #          };
+
+        #          Behavior = {
+        #            # 默认状态为激活
+        #            ActiveByDefault = "False";
+        #            # 重新聚焦时重置状态
+        #            resetStateWhenFocusIn = "No";
+        #            # 共享输入状态
+        #            ShareInputState = "No";
+        #            # 在程序中显示预编辑文本
+        #            PreeditEnabledByDefault = "True";
+        #            # 切换输入法时显示输入法信息
+        #            ShowInputMethodInformation = "True";
+        #            # 在焦点更改时显示输入法信息
+        #            showInputMethodInformationWhenFocusIn = "False";
+        #            # 显示紧凑的输入法信息
+        #            CompactInputMethodInformation = "True";
+        #            # 显示第一个输入法的信息
+        #            ShowFirstInputMethodInformation = "True";
+        #            # 默认页大小
+        #            DefaultPageSize = "7";
+        #            # 覆盖 Xkb 选项
+        #            OverrideXkbOption = "False";
+        #            # 自定义 Xkb 选项
+        #            CustomXkbOption = "";
+        #            # Force Enabled Addons
+        #            EnabledAddons = "";
+        #            # Force Disabled Addons
+        #            DisabledAddons = "chttrans, traditionalchinese";
+        #            # Preload input method to be used by default
+        #            PreloadInputMethod = "True";
+        #            # 允许在密码框中使用输入法
+        #            AllowInputMethodForPassword = "False";
+        #            # 输入密码时显示预编辑文本
+        #            ShowPreeditForPassword = "False";
+        #            # 保存用户数据的时间间隔（以分钟为单位）
+        #            AutoSavePeriod = "30";
+        #          };
+        #        };
+
+        # 各个插件的 ini 片段
+        addons = {
+          punctuation = {
+            globalSection = {
+              HalfWidthPuncAfterLetterOrNumber = "False";
+              TypePairedPunctuationsTogether = "False";
+              Enabled = "True";
+            };
+            sections.Hotkey."0" = "Control+period";
+          };
+
+          chttrans = {
+            globalSection = {
+              Enabled = "False";
+            };
+            # 很重要，用来移除默认的 Ctrl+Shift+F 这个用来切换简繁中文的快捷键（以避免不小心切换到繁体中文）
+            sections.Hotkey."0" = "";
+          };
+
+          pinyin = {
+            globalSection = {
+              ShuangpinProfile = "Ziranma";
+              ShowShuangpinMode = "True";
+              PageSize = 7;
+              SpellEnabled = "False";
+              SymbolsEnabled = "False";
+              ChaiziEnabled = "True";
+              ExtBEnabled = "True";
+              CloudPinyinEnabled = "True";
+              CloudPinyinIndex = 1;
+              CloudPinyinBackend = "Baidu";
+
+              # 首个candidate会被替换为一个loading的icon，在得到真正结果前用来占位
+              CloudPinyinAnimation = "False";
+              KeepCloudPinyinPlaceHolder = "False";
+
+              FuzzyPinyinEnabled = "True";
+              FuzzyPinyinPairs = "z:zh;c:ch;s:sh;n:l;l:n";
+              CharsetType = "Simplified";
+              TraditionalChineseFallbackEnabled = "False";
+              IncompletePinyinEnabled = "True";
+              ShowCompletePinyin = "True";
+              AdjustOrderByFrequency = "True";
+              PreferSimplifiedChinese = "True";
+
+              PreeditMode = "\"Composing pinyin\"";
+              PreeditCursorPositionAtBeginning = "True";
+              PinyinInPreedit = "False";
+              Prediction = "False";
+              PredictionSize = 10;
+              SwitchInputMethodBehavior = "\"Commit current preedit\"";
+              SecondCandidate = "";
+              ThirdCandidate = "";
+              UseKeypadAsSelection = "False";
+              BackSpaceToUnselect = "True";
+              "Number of sentence" = 2;
+              LongWordLengthLimit = 4;
+              VAsQuickphrase = "False";
+              FirstRun = "False";
+              QuickPhraseKey = "";
+            };
+            sections = {
+              ForgetWord."0" = "Control+7";
+              PrevPage = {
+                "0" = "minus";
+                "1" = "Up";
+                "2" = "KP_Up";
+                "3" = "Page_Up";
+              };
+              NextPage = {
+                "0" = "equal";
+                "1" = "Down";
+                "2" = "KP_Down";
+                "3" = "Next";
+              };
+              PrevCandidate."0" = "Shift+Tab";
+              NextCandidate."0" = "Tab";
+              ChooseCharFromPhrase = {
+                "0" = "bracketleft";
+                "1" = "bracketright";
+              };
+              FilterByStroke."0" = "grave";
+              "QuickPhrase trigger" = {
+                "0" = "www.";
+                "1" = "ftp.";
+                "2" = "http:";
+                "3" = "mail.";
+                "4" = "bbs.";
+                "5" = "forum.";
+                "6" = "https:";
+                "7" = "ftp:";
+                "8" = "telnet:";
+                "9" = "mailto:";
+              };
+              Fuzzy = {
+                VE_UE = "True";
+                NG_GN = "True";
+                Inner = "True";
+                InnerShort = "True";
+                PartialFinal = "True";
+                PartialSp = "False";
+                V_U = "True";
+                AN_ANG = "True";
+                EN_ENG = "True";
+                IAN_IANG = "True";
+                IN_ING = "True";
+                U_OU = "True";
+                UAN_UANG = "True";
+                C_CH = "True";
+                F_H = "True";
+                L_N = "True";
+                S_SH = "True";
+                Z_ZH = "True";
+                Correction = "None";
+              };
+            };
+          };
+
+          # 拼音引擎设置
+          #          pinyin = {
+          #            Behavior = {
+          #              CloudPinyinEnabled = true;
+          #              CloudPinyinIndex = 1;
+          #              CloudPinyinBackend = "Baidu";
+          #              FuzzyPinyinEnabled = true;
+          #              FuzzyPinyinPairs = "z:zh;c:ch;s:sh;n:l;l:n";
+          #              CharsetType = "Simplified";
+          #              TraditionalChineseFallbackEnabled = false;
+          #              IncompletePinyinEnabled = true;
+          #              ShowCompletePinyin = true;
+          #              AdjustOrderByFrequency = true;
+          #              PageSize = 10;
+          #              PreferSimplifiedChinese = true;
+          #            };
+          #          };
+
+          # 繁简插件完全禁用，防止调出快捷键
+          #          chttrans = {
+          #            General = {
+          #              Enabled = false;
+          #            };
+          #          };
+
+          # 标点配置，只有数字/字母后使用半角的逻辑交给 data/punc 统一控制
+          #          punctuation = {
+          #            HalfWidthPuncAfterLetterOrNumber = false;
+          #            TypePairedPunctuationsTogether = false;
+          #            Enabled = true;
+          #            Hotkey = {
+          #              "0" = "Control+period";
+          #            };
+          #          };
+        };
+      };
+    };
   };
 
   # 环境变量
