@@ -110,7 +110,7 @@ in {
 
   # Namaka snapshot tests evaluate the fixtures under ./tests via haumea.
   checks = inputs.namaka.lib.load {
-    src = ../tests;
+    src = self + "/tests/haumea";
     inputs = {
       inherit lib;
       inherit (inputs) haumea;
