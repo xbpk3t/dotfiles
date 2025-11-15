@@ -71,7 +71,14 @@ tasks:
       - echo "================ 历史贡献趋势 ================"
       - git who hist -n 5 | head -n 20
       - echo "✅ Git仓库分析报告完成！"
+
+      # https://github.com/hellodigua/code996
+      - npx code996
     dir: '{{.USER_WORKING_DIR}}'
+
+
+
+
 
   # 查看 tag list
   tag-list:

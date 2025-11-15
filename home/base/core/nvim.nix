@@ -206,6 +206,8 @@ in {
     enable = lib.mkEnableOption "Enable NVF (for Vim)";
   };
 
+  # MAYBE [2025-11-13] 研究一下 Telescope 的 advanced usage 以及相关插件
+  # PLAN 把yazi.nvim 直接做到 toggleterm　里面
   config = mkIf cfg.enable {
     #    programs.neovim = {
     #      enable = true;

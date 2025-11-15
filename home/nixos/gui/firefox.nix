@@ -55,6 +55,11 @@
             addons.onetab
             addons.wappalyzer
             # addons.ublock-origin
+
+            # Use Cookie-Editor other than cookies.txt.
+            # pros 1. CE support import cookie. 2. multiple formats. JSON / Netscape / header string，方便和别的工具互通。
+            # cons 1. 不支持一键导出所有站点所有 cookie
+            # Cookie-Editor
           ];
         };
 

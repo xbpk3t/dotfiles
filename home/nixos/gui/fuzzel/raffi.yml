@@ -604,3 +604,10 @@ ap-news:
   binary: xdg-open
   args:
     - https://apnews.com/world-news
+
+
+DMIT:
+  description: DMIT
+  binary: xdg-open
+  args:
+    - https://www.dmit.io/cart.php
