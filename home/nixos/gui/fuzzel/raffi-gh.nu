@@ -7,6 +7,58 @@ use ./raffi-common.nu [
   prompt-fuzzel
 ]
 
+const DGH_SYNC_INTERVAL = 6hr
+
+def dgh-cache-info [] {
+  let cache_path = "/tmp/dgh.yml"
+
+  if (($cache_path | path exists) == false) {
+    null
+  } else {
+    let listing = (
+      try {
+        ls $cache_path
+      } catch {
+        []
+      }
+    )
+
+    $listing | get 0? | default null
+  }
+}
+
+def dgh-cache-stale [] {
+  let info = dgh-cache-info
+
+  if $info == null {
+    true
+  } else {
+    let last_modified = ($info | get modified? | default null)
+
+    if $last_modified == null {
+      true
+    } else {
+      let now = (date now)
+      let elapsed = ($now - $last_modified)
+      $elapsed >= $DGH_SYNC_INTERVAL
+    }
+  }
+}
+
+def spawn-dgh-sync [] {
+  try {
+    job spawn { ^dgh sync err> /dev/null out> /dev/null }
+  } catch {
+    null
+  }
+}
+
+def ensure-dgh-sync [] {
+  if (dgh-cache-stale) {
+    spawn-dgh-sync
+  }
+}
+
 def fetch-repo-json [] {
   try {
     ^dgh --output raw err> /dev/null
@@ -162,6 +214,8 @@ def handle-repo [repo] {
 }
 
 def main [] {
+  ensure-dgh-sync
+
   let icon_dir = ([$env.HOME ".local" "share" "icons" "gh"] | path join)
   let repos_raw = fetch-repo-json
   let repo_entries = build-repo-entries $repos_raw $icon_dir
