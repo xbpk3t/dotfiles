@@ -166,6 +166,13 @@ tasks:
       - echo "Starting {{.ACTION}}"
       - journalctl {{.ACTION}} {{.PARAM}}
 
+# FIXME 这整个taskfile都需要重新处理
+# sudo journalctl -u singbox -f
+# 这里的 -u 是啥意思？
+# 搭配
+
+
+
 # 性能分析组
   analyze:*:
     vars:

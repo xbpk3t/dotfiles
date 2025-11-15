@@ -1,0 +1,27 @@
+_: {
+  services.clipse = {
+    enable = true;
+    # historySize = 400;
+    imageDisplay.type = "kitty";
+    theme = {
+      DimmedDesc = "#928374";
+      DimmedTitle = "#928374";
+      DividerDot = "#b8bb26";
+      HelpDesc = "#555555";
+      HelpKey = "#b8bb26";
+      NormalDesc = "#444444";
+      NormalTitle = "#989899";
+      PageActiveDot = "#b8bb26";
+      PageInactiveDot = "#555555";
+      PreviewBorder = "#458588";
+      PreviewedText = "#989899";
+      SelectedDesc = "#555555";
+      SelectedDescBorder = "#458588";
+      SelectedTitle = "#458588";
+      StatusMsg = "#cc241d";
+      TitleFore = "#b8bb26";
+      TitleInfo = "#555555";
+      useCustomTheme = true;
+    };
+  };
+}

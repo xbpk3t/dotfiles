@@ -19,6 +19,8 @@ in {
   # https://github.com/yonggekkk/sing-box-yg
   # https://github.com/mack-a/v2ray-agent
 
+  # https://linux.do/t/topic/1146113/5
+
   # [求一份在 macOS 上能用的 sing-box 1.12 的 tun 配置 - 开发调优 - LINUX DO](https://linux.do/t/topic/980110)
   # [sing-box 新手入门教程，使用配置、订阅转换方法攻略 | DUN.IM BLOG](https://blog.dun.im/anonymous/sing-box-dns-proxies-routes-rules-configuration-subscription-conversion-basic-tutorial.html)
   # [sing-box配置詳解 | 客户端服务器端配置 | 自行配置 - YouTube](https://www.youtube.com/watch?v=Mt3T2P9kybM)
@@ -46,6 +48,7 @@ in {
   #  [全自动获取免费机场节点/订阅方法分享【立即实现代理节点自由】 - 开发调优 / 开发调优, Lv1 - LINUX DO](https://linux.do/t/topic/38413)
 
   # 【配置 sub-store】
+  # 为啥选择 sub-store 而非 https://github.com/Toperlock/sing-box-subscribe
   # [搭 Docker版 Sub-Store 带 http-meta 实现 集合订阅 测延迟 排序 筛选 生成新订阅 定时任务上传Gist](https://zelikk.blogspot.com/2025/05/docker-sub-store-http-meta-gist.html)
   # [通过Docker在VPS上架设Sub-Store-整点猫咪](https://surge.tel/22/2953/)
   # [sub-store-org/Sub-Store: Advanced Subscription Manager for QX, Loon, Surge, Stash, Egern and Shadowrocket!](https://github.com/sub-store-org/Sub-Store)
