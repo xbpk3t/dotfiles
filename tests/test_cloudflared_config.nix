@@ -1,7 +1,8 @@
-let
-  pkgs = import <nixpkgs> {};
-  lib = pkgs.lib;
-
+{
+  pkgs ? import <nixpkgs> {},
+  lib ? pkgs.lib,
+  ...
+}: let
   tunnelId = "8a3a09c5-3fa3-4488-ba53-541482b1427e";
   cfg = {
     enable = true;
@@ -60,5 +61,7 @@ let
         }
       ];
   };
-in
-  builtins.toJSON http2Config
+in {
+  format = "json";
+  expr = http2Config;
+}
