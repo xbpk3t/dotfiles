@@ -113,17 +113,17 @@ in {
       description = "Update Sing-box Configuration from Subscription URL";
 
       # 使用 systemd 内置的重试机制，比自己写 shell 脚本更优雅
-      serviceConfig = {
-        Type = "oneshot";
-        User = "root";
+#      serviceConfig = {
+#        Type = "oneshot";
+#        User = "root";
+#
+#        # 重试配置：失败后自动重试，使用指数退避
+#        Restart = "on-failure";
+#      };
 
-        # 重试配置：失败后自动重试，使用指数退避
-        Restart = "on-failure";
-        RestartSec = "30s"; # 初始重试间隔 30 秒
-        RestartMaxDelaySec = "5min"; # 最大重试间隔 5 分钟
-        StartLimitBurst = 5; # 最多重试 5 次
-        StartLimitIntervalSec = "1h"; # 1 小时内最多重试 5 次
-      };
+      # StartLimit* 作用于 [Unit]，在 NixOS 中需要放在 serviceConfig 之外
+      startLimitBurst = 3; # 最多重试 3 次
+      startLimitIntervalSec = 3600; # 1 小时内最多重试 5 次 # 1h -> 3600s
 
       script = ''
         set -euo pipefail
