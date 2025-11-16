@@ -31,13 +31,16 @@
   modules = {
     system = "x86_64-linux";
     inherit lib myvars;
-    nixos-modules = map mylib.relativeToRoot [
-      "hosts/${name}/default.nix"
-      "modules/base"
-      "modules/nixos/base"
-      "modules/nixos/vps"
-    ];
+    nixos-modules =
+      [inputs.sops-nix.nixosModules.sops]
+      ++ map mylib.relativeToRoot [
+        "hosts/${name}/default.nix"
+        "modules/base"
+        "modules/nixos/base"
+        "modules/nixos/vps"
+      ];
     home-modules = map mylib.relativeToRoot [
+      "secrets/default.nix"
       "home/base/core"
       "home/nixos/base"
     ];

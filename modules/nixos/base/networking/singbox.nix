@@ -113,13 +113,13 @@ in {
       description = "Update Sing-box Configuration from Subscription URL";
 
       # 使用 systemd 内置的重试机制，比自己写 shell 脚本更优雅
-#      serviceConfig = {
-#        Type = "oneshot";
-#        User = "root";
-#
-#        # 重试配置：失败后自动重试，使用指数退避
-#        Restart = "on-failure";
-#      };
+      #      serviceConfig = {
+      #        Type = "oneshot";
+      #        User = "root";
+      #
+      #        # 重试配置：失败后自动重试，使用指数退避
+      #        Restart = "on-failure";
+      #      };
 
       # StartLimit* 作用于 [Unit]，在 NixOS 中需要放在 serviceConfig 之外
       startLimitBurst = 3; # 最多重试 3 次
@@ -129,7 +129,7 @@ in {
         set -euo pipefail
 
         # Read subscription URL from secret
-        SUBSCRIPTION_URL=$(cat /etc/sk/singbox/url)
+        SUBSCRIPTION_URL=$(cat ${config.sops.secrets.singboxUrl.path})
 
         # Create config directory if it doesn't exist
         mkdir -p /etc/sing-box

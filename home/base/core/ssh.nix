@@ -59,7 +59,7 @@ in {
             hostname = "ssh.github.com";
             user = "git";
             port = 443;
-            identityFile = "/etc/sk/ssh/github/private_key";
+            identityFile = config.sops.secrets.sshGithubPrivateKey.path;
             identitiesOnly = true;
           };
         }
@@ -68,7 +68,7 @@ in {
             hostname = "47.79.17.202";
             user = "root";
             port = 22;
-            identityFile = "/etc/sk/ssh/vps/private_key";
+            identityFile = config.sops.secrets.sshVpsPrivateKey.path;
           };
         };
     };

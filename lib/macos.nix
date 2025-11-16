@@ -40,6 +40,7 @@ in
               inputs.nvf.homeManagerModules.default
               # mac-app-util home-manager module
               inputs.mac-app-util.homeManagerModules.default
+              inputs.sops-nix.homeManagerModules.sops
             ];
         }
       ]);
