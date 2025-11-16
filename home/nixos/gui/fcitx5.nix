@@ -4,7 +4,6 @@
   # 2、应该全部都用nix配置，而非之前的conf文件写法（用 home.file直接symlink）。这里需要注意的是并不需要很多人的 0, 1, 2 这种写法（或者 key."0" 这种写法），如果不写这些东西，直接写主key，默认就是0。
   # 3、与很多其他nix服务不同，修改fcitx5配置，并 nixos apply 之后，需要 fcitx5 -d --replace 让配置重新生效之后，再检查相应配置是否生效。才是完整的使用流程。
 
-
   # [fcitx5 settings](https://gist.github.com/ktpss95112/8c0b79a8f82058b89633a4fd1d3e9fa4)
 
   # https://github.com/Ev357/.dotfiles/blob/main/modules/fcitx5/settings.nix 我的配置基本上就是从这个复制过来的
