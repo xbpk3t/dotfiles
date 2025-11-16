@@ -43,9 +43,8 @@ in {
         {
           "*" = {
             addKeysToAgent = "yes";
-            controlMaster = "auto";
-            controlPath = "/tmp/%r@%h:%p";
-            controlPersist = "yes";
+            controlMaster = "no";
+            controlPersist = "no";
             hashKnownHosts = true;
             serverAliveInterval = 15;
             serverAliveCountMax = 6;
