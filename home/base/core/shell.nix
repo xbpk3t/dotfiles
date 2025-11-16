@@ -26,11 +26,11 @@
         # 通用配置
         EDITOR = "nvim";
         BROWSER = "chromium-browser";
-        PWGEN_SECRET = "$(cat /etc/sk/pwgen/sk)";
+        PWGEN_SECRET = config.sops.secrets.pwgenSk.path;
         GITHUB_TOKEN = "$(gh auth token)";
 
-        MOBILE = "$(cat /etc/sk/me/mobile)";
-        PASS = "$(cat /etc/sk/me/pass)";
+        MOBILE = config.sops.secrets.meMobile.path;
+        PASS = config.sops.secrets.mePass.path;
 
         # GitHub API rate limit fix
         # Commented out because it causes GitHub API 401 errors
