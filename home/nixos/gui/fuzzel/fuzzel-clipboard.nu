@@ -3,6 +3,7 @@
 use ./raffi-common.nu [
   copy-to-clipboard
   prompt-fuzzel
+  type-into-focused
 ]
 
 use ./raffi-snippet.nu [
@@ -97,7 +98,7 @@ def run-snippet-picker [] {
   $result
 }
 
-def handle-clipboard-selection [selection entries] {
+def handle-clipboard-selection [selection entries skip_type] {
   let entry = (
     $entries
     | where display == $selection
@@ -120,10 +121,20 @@ def handle-clipboard-selection [selection entries] {
     return false
   }
 
+  if (not $skip_type) {
+    sleep 100ms
+    if (not (type-into-focused $decoded)) {
+      print --stderr "clipboard: failed to type decoded content into the focused window"
+      return false
+    }
+  }
+
   true
 }
 
-def main [] {
+def main [
+  --skip-type
+] {
   let entries = fetch-cliphist-entries
   let snippet_name = snippet-label
   let history_lines = ($entries | each {|entry| $entry.display })
@@ -146,7 +157,7 @@ def main [] {
     }
   }
 
-  if (handle-clipboard-selection $selection $entries) {
+  if (handle-clipboard-selection $selection $entries $skip_type) {
     exit 0
   } else {
     exit 1
