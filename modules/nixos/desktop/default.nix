@@ -3,6 +3,7 @@
   config,
   lib,
   myvars,
+  pkgs,
   ...
 }:
 with lib; let
@@ -55,5 +56,19 @@ in {
       # Enable graphical target
       systemd.defaultUnit = "graphical.target";
     })
+    {
+      environment.systemPackages = with pkgs; [
+        deadnix
+        statix
+        alejandra
+        namaka
+        nixtract
+        nix-unit
+        hydra-check
+        nix-init
+        nix-melt
+        nix-tree
+      ];
+    }
   ];
 }
