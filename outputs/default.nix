@@ -195,12 +195,14 @@ in {
         targetPort = target.targetPort or null;
       };
 
-      imports = map mylib.relativeToRoot [
-        "hosts/nixos-vps/default.nix"
-        "modules/base"
-        "modules/nixos/base"
-        "modules/nixos/vps"
-      ];
+      imports =
+        [inputs.disko.nixosModules.disko]
+        ++ map mylib.relativeToRoot [
+          "hosts/nixos-vps/default.nix"
+          "modules/base"
+          "modules/nixos/base"
+          "modules/nixos/vps"
+        ];
     };
   };
 }

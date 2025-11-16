@@ -1,19 +1,15 @@
-{}: rec {
-  #  mainGateway = "192.168.5.1"; # main router
-  #  mainGateway6 = "fe80::5"; # main router's link-local address
-  #  # use suzi as the default gateway
-  #  # it's a subrouter with a transparent proxy
-  #  proxyGateway = "192.168.5.178";
-  #  proxyGateway6 = "fe80::8";
-  #  nameservers = [
-  #    # IPv4
-  #    "119.29.29.29" # DNSPod
-  #    "223.5.5.5" # AliDNS
-  #    # IPv6
-  #    "2400:3200::1" # Alidns
-  #    "2606:4700:4700::1111" # Cloudflare
-  #  ];
-  #  prefixLength = 24;
+_: rec {
+  mainGateway = "192.168.5.1";
+  mainGateway6 = "fe80::5";
+  proxyGateway = "192.168.5.178";
+  proxyGateway6 = "fe80::8";
+  nameservers = [
+    "119.29.29.29"
+    "223.5.5.5"
+    "2400:3200::1"
+    "2606:4700:4700::1111"
+  ];
+  prefixLength = 24;
 
   colmenaTargets = {
     nixos-vps = {
