@@ -38,6 +38,8 @@
       group = "root";
     };
 in {
+  # https://github.com/Guno327/nixcfg/tree/main/secrets sops相关配置参考该repo
+
   # Enable sops
   sops = {
     defaultSopsFile = ./secrets.yaml;
