@@ -221,8 +221,9 @@
               CloudPinyinAnimation = "False";
               KeepCloudPinyinPlaceHolder = "False";
 
-              FuzzyPinyinEnabled = "True";
-              FuzzyPinyinPairs = "z:zh;c:ch;s:sh;n:l;l:n";
+              #              FuzzyPinyinEnabled = "True";
+              #              FuzzyPinyinPairs = "z:zh;c:ch;s:sh;n:l;l:n";
+
               CharsetType = "Simplified";
               TraditionalChineseFallbackEnabled = "False";
               IncompletePinyinEnabled = "True";
@@ -279,27 +280,27 @@
                 "8" = "telnet:";
                 "9" = "mailto:";
               };
-              Fuzzy = {
-                VE_UE = "True";
-                NG_GN = "True";
-                Inner = "True";
-                InnerShort = "True";
-                PartialFinal = "True";
-                PartialSp = "False";
-                V_U = "True";
-                AN_ANG = "True";
-                EN_ENG = "True";
-                IAN_IANG = "True";
-                IN_ING = "True";
-                U_OU = "True";
-                UAN_UANG = "True";
-                C_CH = "True";
-                F_H = "True";
-                L_N = "True";
-                S_SH = "True";
-                Z_ZH = "True";
-                Correction = "None";
-              };
+              #              Fuzzy = {
+              #                VE_UE = "True";
+              #                NG_GN = "True";
+              #                Inner = "True";
+              #                InnerShort = "True";
+              #                PartialFinal = "True";
+              #                PartialSp = "False";
+              #                V_U = "True";
+              #                AN_ANG = "True";
+              #                EN_ENG = "True";
+              #                IAN_IANG = "True";
+              #                IN_ING = "True";
+              #                U_OU = "True";
+              #                UAN_UANG = "True";
+              #                C_CH = "True";
+              #                F_H = "True";
+              #                L_N = "True";
+              #                S_SH = "True";
+              #                Z_ZH = "True";
+              #                Correction = "None";
+              #              };
             };
           };
 
