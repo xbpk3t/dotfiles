@@ -1,4 +1,8 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  config,
+  ...
+}: {
   home.packages = with pkgs; [
     # https://mynixos.com/nixpkgs/package/baidupcs-go
     # https://github.com/qjfoidnh/BaiduPCS-Go
@@ -21,8 +25,8 @@
           acl = "private";
         };
         secrets = {
-          access_key_id = "/etc/sk/rclone/r2/access_key_id";
-          secret_access_key = "/etc/sk/rclone/r2/secret_access_key";
+          access_key_id = config.sops.secrets.rcloneR2AccessKeyId.path;
+          secret_access_key = config.sops.secrets.rcloneR2SecretAccessKey.path;
         };
       };
     };

@@ -1,6 +1,11 @@
 {pkgs, ...}:
 # [Archlinux 笔记本省电设置 - 少数派](https://sspai.com/post/101744)
 {
+  environment.systemPackages = with pkgs; [
+    # https://mynixos.com/nixpkgs/package/powertop
+    powertop
+  ];
+
   # Disable power-profiles-daemon to avoid conflicts with TLP
   services.power-profiles-daemon.enable = false;
 
