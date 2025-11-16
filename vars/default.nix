@@ -37,6 +37,8 @@ in {
     #    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDc1PNTXzzvd93E+e9LXvnEzqgUI5gMTEF/IitvzgmL+ ryan@frieren"
 
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDth3yFJZ2p5tID2W2AHI3s6t6B8oU3nSVBIJANNxyIG nixos-vps"
+
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF7x+rABbX8F5M7o3JhuzC3nifn3/ePgLXp5WaW/8FiE nixos-hk"
   ];
   secondaryAuthorizedKeys = [
     # the backup ssh keys for disaster recovery
