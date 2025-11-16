@@ -7,6 +7,58 @@ use ./raffi-common.nu [
   prompt-fuzzel
 ]
 
+const DGH_SYNC_INTERVAL = 6hr
+
+def dgh-cache-info [] {
+  let cache_path = "/tmp/dgh.yml"
+
+  if (($cache_path | path exists) == false) {
+    null
+  } else {
+    let listing = (
+      try {
+        ls $cache_path
+      } catch {
+        []
+      }
+    )
+
+    $listing | get 0? | default null
+  }
+}
+
+def dgh-cache-stale [] {
+  let info = dgh-cache-info
+
+  if $info == null {
+    true
+  } else {
+    let last_modified = ($info | get modified? | default null)
+
+    if $last_modified == null {
+      true
+    } else {
+      let now = (date now)
+      let elapsed = ($now - $last_modified)
+      $elapsed >= $DGH_SYNC_INTERVAL
+    }
+  }
+}
+
+def spawn-dgh-sync [] {
+  try {
+    job spawn { ^dgh sync err> /dev/null out> /dev/null }
+  } catch {
+    null
+  }
+}
+
+def ensure-dgh-sync [] {
+  if (dgh-cache-stale) {
+    spawn-dgh-sync
+  }
+}
+
 def fetch-repo-json [] {
   try {
     ^dgh --output raw err> /dev/null
@@ -48,11 +100,12 @@ def build-repo-entries [raw icon_dir] {
         (.Doc | norm_doc) as $doc_raw |
         ($doc_raw != "" and $doc_raw != "null") as $has_doc |
         has_qs as $has_qs |
+        (.Type // "") as $type |
         (if $has_doc and $has_qs then "ab.svg"
          elif $has_doc then "a.svg"
          elif $has_qs then "b.svg"
          else "check.svg" end) as $icon |
-        [$display, $url, (if $has_doc then $doc_raw else "" end), $icon] | @tsv
+        [$display, $url, (if $has_doc then $doc_raw else "" end), $icon, $type] | @tsv
     ';
 
     $raw
@@ -69,12 +122,14 @@ def build-repo-entries [raw icon_dir] {
         } else {
           let doc = ($parts | get 2? | default '')
           let icon_file = ($parts | get 3? | default '')
+          let repo_type = ($parts | get 4? | default '')
 
           {
             display: $display
             url: $url
             doc: $doc
             icon_path: (icon-path $icon_dir $icon_file)
+            type: $repo_type
           }
         }
       }
@@ -100,20 +155,15 @@ def repo-actions [has_doc] {
   }
 }
 
-def open-docs [full_name] {
-  let repo_name = (
-    $full_name
-    | split row "/"
-    | get 1?
-    | default ''
-  )
+def open-docs [repo] {
+  let repo_type = ($repo.type? | default '')
 
-  if $repo_name == '' {
+  if $repo_type == '' {
     return
   }
 
-  let docs_url = $"https://docs.lucc.dev/($repo_name)"
-  open-url $docs_url --message (["Opening docs for " $full_name] | str join)
+  let target = $"https://docs.lucc.dev/#/data/gh?type=($repo_type)"
+  open-url $target --message (["Opening docs for " ($repo.display? | default 'repository')] | str join)
 }
 
 def run-action [action repo] {
@@ -123,7 +173,7 @@ def run-action [action repo] {
       true
     }
     "Open Docs (docs.lucc.dev)" => {
-      open-docs $repo.display
+      open-docs $repo
       true
     }
     "Open Documentation" => {
@@ -162,6 +212,8 @@ def handle-repo [repo] {
 }
 
 def main [] {
+  ensure-dgh-sync
+
   let icon_dir = ([$env.HOME ".local" "share" "icons" "gh"] | path join)
   let repos_raw = fetch-repo-json
   let repo_entries = build-repo-entries $repos_raw $icon_dir

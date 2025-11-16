@@ -12,6 +12,12 @@ tasks:
     desc: Show / manipulate link devices
     cmd: ip link show
 
+  tun:
+    cmd: ip link show | grep tun
+
+  ip-route:
+    cmd: ip route show
+
   ip-neigh:
     desc: Show / manipulate neighbour objects
     cmd: ip neigh

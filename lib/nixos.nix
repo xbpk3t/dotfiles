@@ -35,6 +35,7 @@ in
             home-modules
             ++ [
               inputs.nvf.homeManagerModules.default
+              inputs.sops-nix.homeManagerModules.sops
             ];
         }
       ]);

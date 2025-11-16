@@ -103,7 +103,10 @@
     #    kubebuilder
     #    istioctl
     #    clusterctl # for kubernetes cluster-api
-    #    kubevirt # virtctl
+
+    # https://mynixos.com/nixpkgs/package/kubevirt
+    kubevirt # virtctl
+
     #    pkgs-stable.kubernetes-helm
     #    fluxcd
     #    argocd

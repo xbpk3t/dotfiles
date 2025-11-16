@@ -2,6 +2,7 @@
   pkgs,
   inputs,
   lib,
+  config,
   ...
 }: let
   mcpPackages = inputs.mcp-servers-nix.packages.${pkgs.system};
@@ -104,7 +105,7 @@ in {
       # 自定义 API 端点，用于连接到第三方模型服务
       ANTHROPIC_BASE_URL = "https://open.bigmodel.cn/api/anthropic";
       # API 认证令牌 - 使用 sops 管理，通过 cat 命令读取文件内容
-      ANTHROPIC_AUTH_TOKEN = "$(cat /etc/sk/claude/zai/token)";
+      ANTHROPIC_AUTH_TOKEN = config.sops.secrets.claudeZaiToken.path;
 
       # https://github.com/openai/codex/issues/848
       CODEX_UNSAFE_ALLOW_NO_SANDBOX = 1;
