@@ -42,16 +42,19 @@
   };
 
   modules = {
-    nixos-modules = map mylib.relativeToRoot [
-      # Host-specific configuration
-      "hosts/${name}/default.nix"
-      # common
-      "secrets/default.nix"
-      "modules/base"
-      "modules/nixos/base"
-      "modules/nixos/desktop"
-    ];
+    nixos-modules =
+      [inputs.sops-nix.nixosModules.sops]
+      ++ map mylib.relativeToRoot [
+        # Host-specific configuration
+        "hosts/${name}/default.nix"
+        # common
+        "secrets/default.nix"
+        "modules/base"
+        "modules/nixos/base"
+        "modules/nixos/desktop"
+      ];
     home-modules = map mylib.relativeToRoot [
+      "secrets/default.nix"
       # Host-specific home configuration
       "hosts/${name}/home.nix"
       "home/base"
