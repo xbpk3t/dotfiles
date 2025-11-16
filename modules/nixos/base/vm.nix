@@ -20,6 +20,8 @@
   # boot.kernelModules = ["kvm-intel"];
   # boot.extraModprobeConfig = "options kvm_intel nested=1"; # for intel cpu
 
+  # https://get.docker.com/
+
   boot.kernelModules = ["vfio-pci"];
 
   # https://mynixos.com/nixpkgs/options/virtualisation

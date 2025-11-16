@@ -9,8 +9,10 @@
     # pkgs is optional for the fixtures but exposing it makes future tests easy.
     inherit pkgs;
   };
-in
-  haumea.lib.load {
+in {
+  format = "json";
+  expr = haumea.lib.load {
     src = ../../fixtures/haumea;
     inputs = moduleInputs;
-  }
+  };
+}

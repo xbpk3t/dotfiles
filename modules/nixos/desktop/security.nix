@@ -1,4 +1,9 @@
 {pkgs, ...}: {
+  # https://mynixos.com/nixpkgs/options/security.apparmor
+  # PLAN AppArmor
+
+  # https://mynixos.com/nixpkgs/package/bubblewrap
+
   # security with polkit
   security.polkit.enable = true;
   # security with gnome-kering

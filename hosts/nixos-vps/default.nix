@@ -20,5 +20,10 @@ in {
 
   hardware.enableRedistributableFirmware = lib.mkDefault false;
 
+  # Disable the scheduled nixos-upgrade job because the VPS root FS is read-only during deployments.
+  system.autoUpgrade.enable = lib.mkForce false;
+  systemd.services."nixos-upgrade".enable = lib.mkForce false;
+  systemd.timers."nixos-upgrade".enable = lib.mkForce false;
+
   system.stateVersion = "24.11";
 }
