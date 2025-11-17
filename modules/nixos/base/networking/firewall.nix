@@ -4,6 +4,9 @@
     # localsend
     53317
 
+    # cloudflare wrangler login auth using port
+    8976
+
     # tcp ports for testing & sharing
     63080
     63081
