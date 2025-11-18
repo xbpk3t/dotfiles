@@ -1,0 +1,28 @@
+_: {
+  # 【配置 sub-store】
+  # 为啥选择 sub-store 而非 https://github.com/Toperlock/sing-box-subscribe
+  # [搭 Docker版 Sub-Store 带 http-meta 实现 集合订阅 测延迟 排序 筛选 生成新订阅 定时任务上传Gist](https://zelikk.blogspot.com/2025/05/docker-sub-store-http-meta-gist.html)
+  # [通过Docker在VPS上架设Sub-Store-整点猫咪](https://surge.tel/22/2953/)
+  # [sub-store-org/Sub-Store: Advanced Subscription Manager for QX, Loon, Surge, Stash, Egern and Shadowrocket!](https://github.com/sub-store-org/Sub-Store)
+  # [写了个 sub-store 的懒人配置 - 开发调优 - LINUX DO](https://linux.do/t/topic/660141)
+  # [节点的订阅管理\分享-我的方案 - 资源荟萃 - LINUX DO](https://linux.do/t/topic/333959)
+  # [sing-box 裸核运行指南+批量机场节点导入配置模板教程（适用 windows/OpenWRT） - 开发调优 - LINUX DO](https://linux.do/t/topic/770312)
+  # [](https://raw.githubusercontent.com/Keywos/rule/main/rename.js)
+
+  # https://github.com/sub-store-org/Sub-Store
+  # https://github.com/einverne/dockerfile/blob/master/sub-web/docker-compose.yml
+
+  # FIXME 节点打野
+  # [野王轮流坐，今天到你啦 - 开发调优 / 开发调优, Lv1 - LINUX DO](https://linux.do/t/topic/881775)
+  #  [全自动获取免费机场节点/订阅方法分享【立即实现代理节点自由】 - 开发调优 / 开发调优, Lv1 - LINUX DO](https://linux.do/t/topic/38413)
+
+  # [2025-10-19]
+  # https://linux.do/t/topic/231929 每个节点名字前有机场名，有分流
+  # https://linux.do/t/topic/128839/6
+  # https://linux.do/t/topic/785811
+  # https://linux.do/t/topic/938696
+
+  # 想法很好很天真，云端测速，多端的singbox直接吃现成的（默认latency排序，singbox默认读取第一个node）
+  #但是之前忽略了一点，目前sub-store是跑在HK节点的。而我所有需要跑singbox进程的端的网络环境就比较复杂了。
+  #所以这里这个问题的最优解是什么？是直接本地singbox测速转换节点？但是singbox cli 本身不支持这个操作，所以怎么实现呢？还是说有更好的方案？
+}
