@@ -125,6 +125,12 @@ tasks:
       - echo "🚀 正在通过 Colmena 部署 nixos-vps..."
       - colmena apply -t nixos-vps
 
+  colmena-hk:
+    des: Deploy host nixos-vps to HK nodes
+    cmd: colmena apply --impure --on nixos-vps
+
+
+
 
 #  用途：跟踪某个应用程序的文件访问行为。
 #  分析：
