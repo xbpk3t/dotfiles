@@ -41,6 +41,7 @@
         "modules/base"
         "modules/nixos/base"
         "modules/nixos/vps"
+        "modules/nixos/extra"
       ];
     home-modules = map mylib.relativeToRoot [
       "secrets/default.nix"
@@ -54,4 +55,10 @@ in {
     // {
       genSpecialArgs = vpsSpecialArgs;
     });
+
+  colmenaProfiles.${name} = {
+    inherit (modules) system nixos-modules home-modules;
+    genSpecialArgs = vpsSpecialArgs;
+    defaultTargetUser = "root";
+  };
 }

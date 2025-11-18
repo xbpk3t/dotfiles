@@ -68,4 +68,11 @@ in {
       genSpecialArgs = genSpecialArgs;
       system = "x86_64-linux";
     });
+
+  colmenaProfiles.${name} = {
+    system = "x86_64-linux";
+    inherit (modules) nixos-modules home-modules;
+    genSpecialArgs = genSpecialArgs;
+    defaultTargetUser = myvars.username;
+  };
 }

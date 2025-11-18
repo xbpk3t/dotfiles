@@ -12,17 +12,23 @@ _: rec {
   prefixLength = 24;
 
   colmenaTargets = {
-    nixos-vps = {
-      targetHost = "10.254.0.2";
+    nixos-cntr = {
+      targetHosts = ["10.254.0.2"];
       targetUser = "root";
-      # Override when deploying to a remote VPS.
       targetPort = null;
     };
 
-    nixos-hk = {
-      targetHost = "103.85.224.63";
+    nixos-vps = {
+      targetHosts = [
+        "103.85.224.63"
+      ];
       targetUser = "root";
-      # Override when deploying to a remote VPS.
+      targetPort = null;
+    };
+
+    nixos-ws = {
+      targetHosts = ["192.168.234.194"];
+      targetUser = "luck";
       targetPort = null;
     };
   };

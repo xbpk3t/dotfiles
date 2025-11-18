@@ -1,6 +1,13 @@
 {...}: let
   mkPrefixedPaths = prefix: modules: map (path: "${prefix}/" + path) modules;
-  mkTags = attrs: attrs // {server = true;};
+  mkTags = names:
+    builtins.listToAttrs (
+      map (name: {
+        inherit name;
+        value = true;
+      })
+      names
+    );
 in {
   nixosConfigurations.nixos-vps = {
     system = "x86_64-linux";
@@ -9,14 +16,32 @@ in {
         "base"
         "nixos/base"
         "nixos/vps"
+        "nixos/extra"
+        "nixos/cntr"
       ]
       ++ mkPrefixedPaths "home" [
         # Servers only need headless core modules plus the minimal NixOS set
         "base/core"
         "nixos/base"
       ];
-    tags = mkTags {
-      region = "AP-south";
-    };
+  };
+
+  nixosConfigurations.nixos-ws = {
+    system = "x86_64-linux";
+    modules =
+      mkPrefixedPaths "modules" [
+        "base"
+        "nixos/base"
+        "nixos/desktop"
+      ]
+      ++ mkPrefixedPaths "home" [
+        "base"
+        "nixos"
+      ];
+    tags = mkTags [
+      "workstation"
+      "graphics"
+      "wayland"
+    ];
   };
 }
