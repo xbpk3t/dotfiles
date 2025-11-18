@@ -74,4 +74,49 @@
 #    }
 #  );
 #}
-{}
+{
+  config,
+  lib,
+  mylib,
+  ...
+}:
+with lib; let
+  cfg = config.modules.services.cloudflared;
+in {
+  options.modules.services.cloudflared = {
+    enable = mkEnableOption "Cloudflared tunnel client";
+
+    settings = mkOption {
+      type = types.attrs;
+      default = {};
+      example = {
+        package = "pkgs.cloudflared";
+        tunnels."example-tunnel" = {
+          credentialsFile = "/run/secrets/cloudflared.json";
+          default = "http_status:404";
+        };
+      };
+      description = "Pass-through options merged into services.cloudflared.* (except enable).";
+    };
+
+    ingress = mkOption {
+      type = types.nullOr (mylib.ingressOption "Cloudflared");
+      default = null;
+      description = "Expose Cloudflared-originated dashboards (e.g. Zero Trust UI) via the shared proxy.";
+    };
+  };
+
+  config = mkMerge [
+    (mkIf cfg.enable {
+      services.cloudflared = cfg.settings // {enable = true;};
+    })
+
+    (
+      mkIf (mylib.ingressEnabled cfg.ingress)
+      (mylib.mkReverseProxyIngress {
+        modulePath = "modules.services.cloudflared";
+        ingress = cfg.ingress;
+      })
+    )
+  ];
+}

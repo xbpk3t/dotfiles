@@ -27,36 +27,37 @@
     if builtins.length hosts == 1
     then name
     else let
-      sanitizedHost =
-        lib.strings.sanitizeDerivationName (
-          lib.strings.replaceStrings ["." ":" "/"] ["-" "-" "-"] host
-        );
+      sanitizedHost = lib.strings.sanitizeDerivationName (
+        lib.strings.replaceStrings ["." ":" "/"] ["-" "-" "-"] host
+      );
     in "${name}-${sanitizedHost}";
 
   mkNodes = name: group: let
     profile = colmenaProfiles.${name} or null;
     hosts = group.targetHosts or [];
-    hostList = if lib.isList hosts then hosts else [hosts];
+    hostList =
+      if lib.isList hosts
+      then hosts
+      else [hosts];
     defaultUser = profile.defaultTargetUser or "root";
   in
     if profile == null || hostList == []
     then {}
     else let
-      nodeAttrs = host:
-        let
-          nodeName = mkNodeName name hostList host;
-        in {
-          ${nodeName} = mylib.colmenaSystem {
-            inherit inputs lib myvars;
-            system = profile.system;
-            nixos-modules = profile."nixos-modules";
-            home-modules = profile."home-modules" or [];
-            genSpecialArgs = profile.genSpecialArgs;
-            targetHost = host;
-            targetUser = group.targetUser or defaultUser;
-            targetPort = group.targetPort or null;
-          };
+      nodeAttrs = host: let
+        nodeName = mkNodeName name hostList host;
+      in {
+        ${nodeName} = mylib.colmenaSystem {
+          inherit inputs lib myvars;
+          system = profile.system;
+          nixos-modules = profile."nixos-modules";
+          home-modules = profile."home-modules" or [];
+          genSpecialArgs = profile.genSpecialArgs;
+          targetHost = host;
+          targetUser = group.targetUser or defaultUser;
+          targetPort = group.targetPort or null;
         };
+      };
     in
       lib.attrsets.mergeAttrsList (map nodeAttrs hostList);
 
