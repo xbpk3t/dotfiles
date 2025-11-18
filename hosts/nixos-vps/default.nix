@@ -10,6 +10,7 @@ in {
   imports = [
     ./hardware.nix
     ./disko.nix
+    ./modules.nix
   ];
 
   boot.loader = {

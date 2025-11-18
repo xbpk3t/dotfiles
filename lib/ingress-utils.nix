@@ -1,4 +1,4 @@
-{lib ? null}: let
+{}: let
   toMessage = modulePath: field: "${modulePath}.ingress.${field} must be set when ingress.enable = true.";
 in {
   ingressEnabled = ingress: ingress != null && (ingress.enable or false);
