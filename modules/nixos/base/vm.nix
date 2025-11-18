@@ -228,6 +228,27 @@
           ];
         };
 
+        # Ensure the `./data` directory is writable by UID 1001 (the user that runs the container):
+        #   mkdir -p data
+        #   sudo chown -R 1001:1001 data
+        openlist = {
+          autoStart = false;
+          image = "openlistteam/openlist:latest";
+          volumes = [
+            #            "/home/luck/Desktop/dotfiles/manifests/docker/openlist/data:/opt/openlist/data:rw"
+            #            "/home/luck/Downloads:/home/luck/Downloads:ro"
+            #            "/home/luck/Downloads/vscs-video:/home/luck/Downloads/vscs-video:ro"
+          ];
+          ports = [
+            "5244:5244/tcp"
+          ];
+          log-driver = "journald";
+          #          extraOptions = [
+          #            "--network-alias=openlist"
+          #            "--network=openlist_default"
+          #          ];
+        };
+
         watchtower = {
           autoStart = false;
 
