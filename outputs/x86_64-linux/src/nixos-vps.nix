@@ -41,7 +41,7 @@
         "modules/base"
         "modules/nixos/base"
         "modules/nixos/vps"
-        "modules/nixos/extra"
+        "modules/nixos/cntr"
       ];
     home-modules = map mylib.relativeToRoot [
       "secrets/default.nix"
