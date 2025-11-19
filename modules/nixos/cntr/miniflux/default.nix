@@ -2,18 +2,14 @@
   config,
   lib,
   mylib,
+  pkgs,
   ...
 }:
 with lib; let
   cfg = config.modules.services.miniflux;
-  ingressDomain =
-    if cfg.ingress == null
-    then null
-    else (cfg.ingress.domain or null);
-  ingressUrl =
-    if ingressDomain == null || ingressDomain == ""
-    then null
-    else "https://${ingressDomain}";
+  composeFile = pkgs.writeText "miniflux-compose.yml" (builtins.readFile ./compose.yml);
+  serviceName = "miniflux";
+  stateDir = "/var/lib/${serviceName}";
 in {
   # https://mynixos.com/nixpkgs/options/services.miniflux
   # https://mynixos.com/nixpkgs/package/miniflux
@@ -43,45 +39,48 @@ in {
   # https://github.com/miniflux/v2/pull/2415
 
   options.modules.services.miniflux = {
-    enable = mkEnableOption "Miniflux RSS reader";
-
-    settings = mkOption {
-      type = types.attrs;
-      default = {};
-      example = {
-        adminCredentialsFile = "/run/secrets/miniflux-admin";
-        config = {
-          CLEANUP_ARCHIVE_UNREAD_DAYS = 90;
-          BASE_URL = "https://feeds.example.com";
-        };
-        database = {
-          type = "postgresql";
-          host = "127.0.0.1";
-          port = 5432;
-        };
-      };
-      description = "Pass-through options merged into services.miniflux.* (except enable).";
-    };
+    enable = mkEnableOption "Miniflux stack managed via podman-compose";
 
     ingress = mkOption {
-      type = types.nullOr (mylib.ingressOption "Miniflux");
+      type = types.nullOr (mylib.ingressOption "Miniflux (compose)");
       default = null;
       description = "Expose Miniflux through the shared reverse proxy.";
+    };
+
+    projectName = mkOption {
+      type = types.str;
+      default = "miniflux";
+      description = "COMPOSE_PROJECT_NAME used by podman-compose.";
     };
   };
 
   config = mkMerge [
     (mkIf cfg.enable {
-      services.miniflux = mkMerge [
-        {
-          enable = true;
-          config.CREATE_ADMIN = 0;
-        }
-        (mkIf (ingressUrl != null) {
-          config.BASE_URL = ingressUrl;
-        })
-        cfg.settings
+      systemd.tmpfiles.rules = [
+        "d ${stateDir} 0750 root root -"
       ];
+
+      systemd.services.${serviceName} = {
+        description = "Miniflux via podman-compose";
+        path = [pkgs.podman pkgs.podman-compose pkgs.coreutils];
+        after = ["network-online.target"];
+        wants = ["network-online.target"];
+        wantedBy = ["multi-user.target"];
+        environment = {
+          COMPOSE_PROJECT_NAME = cfg.projectName;
+        };
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+          WorkingDirectory = stateDir;
+          ExecStart = ''
+            ${pkgs.podman-compose}/bin/podman-compose -f ${composeFile} up -d
+          '';
+          ExecStop = ''
+            ${pkgs.podman-compose}/bin/podman-compose -f ${composeFile} down
+          '';
+        };
+      };
     })
 
     (
