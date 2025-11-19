@@ -65,6 +65,14 @@ in {
 
       # Sing-box subscription URL
       singboxUrl = mkRootSecret "singbox/url";
+
+      # Shared API tokens
+      youtubeApiKey = mkUserSecret "youtube/api_key";
+      yuqueToken = mkUserSecret "yuque/token";
+      githubAccessToken = mkUserSecret "github/access_token";
+      pixivRefreshToken = mkUserSecret "pixiv/refresh_token";
+      spotifyClientId = mkUserSecret "spotify/client_id";
+      spotifyClientSecret = mkUserSecret "spotify/client_secret";
     };
   };
 }

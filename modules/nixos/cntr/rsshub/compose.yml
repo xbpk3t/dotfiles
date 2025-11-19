@@ -1,0 +1,84 @@
+---
+# https://github.com/einverne/dockerfile/blob/master/rsshub/docker-compose.yml
+
+
+x-common-variables: &common-variables
+  TZ: ${TZ:-Asia/Shanghai}
+
+x-common-logging: &common-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+x-common-restart: &common-restart
+  restart: "no"
+
+x-backend-network: &backend-network
+  networks:
+    - backend
+
+
+
+services:
+  rsshub:
+    image: diygod/rsshub:latest
+    container_name: rsshub
+    <<: *common-restart
+    ports:
+      - '1200:1200'
+    environment:
+      NODE_ENV: production
+      CACHE_TYPE: memory
+      #      PROXY_URI: 'socks5h://warp:1080'
+      #      PROXY_URI: 'http://192.168.64.2:1080'
+      #      PROXY_URL_REGEX: (..)?(bilibili)(/.)?
+      #      REDIS_URL: 'redis://redis:6379/'
+      PUPPETEER_WS_ENDPOINT: 'ws://browserless:3000'
+      YOUTUBE_KEY: "${YOUTUBE_KEY}"
+      YUQUE_TOKEN: "${YUQUE_TOKEN}"
+      GITHUB_ACCESS_TOKEN: "${GITHUB_ACCESS_TOKEN}"
+      PIXIV_REFRESHTOKEN: "${PIXIV_REFRESHTOKEN}"
+      # BILIBILI_COOKIE_3461573033068685: ''
+      SPOTIFY_CLIENT_ID: "${SPOTIFY_CLIENT_ID}"
+      SPOTIFY_CLIENT_SECRET: "${SPOTIFY_CLIENT_SECRET}"
+    depends_on:
+      # - redis
+      - browserless
+      # - warp
+
+  browserless:
+    # See issue 6680
+    image: browserless/chrome:1.43-chrome-stable
+    container_name: rsshub-browserless
+    <<: *common-restart
+    ulimits:
+      core:
+        hard: 0
+        soft: 0
+
+#  warp:
+#    image: aleskxyz/warp-svc:latest
+#    container_name: rsshub-warp
+#    ports:
+#      - '1080:1080'
+#    expose:
+#      - 1080
+#    restart: always
+#    environment:
+#      WARP_LICENSE: 2jn61O3X-54r08TpQ-9M8ZV7x4
+#      FAMILIES_MODE: full
+#    volumes:
+#      - ./warp:/var/lib/cloudflare-warp
+
+
+#  redis:
+#    image: redis:6.2
+#    container_name: rsshub-redis
+#    restart: always
+#    volumes:
+#      - redis:/data
+
+
+#volumes:
+#  redis:

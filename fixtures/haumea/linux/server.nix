@@ -16,7 +16,6 @@ in {
         "base"
         "nixos/base"
         "nixos/vps"
-        "nixos/extra"
         "nixos/cntr"
       ]
       ++ mkPrefixedPaths "home" [

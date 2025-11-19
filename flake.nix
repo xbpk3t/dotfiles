@@ -132,6 +132,11 @@
       url = "github:zhaofengli/colmena";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    nix-managed-docker-compose = {
+      url = "github:efirestone/nix-managed-docker-compose";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs: import ./outputs inputs;
