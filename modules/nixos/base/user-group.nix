@@ -25,6 +25,11 @@
     home = "/home/${myvars.username}";
     isNormalUser = true;
     shell = pkgs.zsh; # 显式设置用户 shell 为 zsh
+
+    # !!! 需要添加该配置，否则无法使用 ssh luck@host 登录目标host
+    openssh.authorizedKeys.keys =
+      myvars.mainSshAuthorizedKeys ++ myvars.secondaryAuthorizedKeys;
+
     extraGroups = [
       myvars.username
       "users"
