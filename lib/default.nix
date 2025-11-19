@@ -3,6 +3,7 @@
   macosSystem = import ./macos.nix;
   nixosSystem = import ./nixos.nix;
   colmenaSystem = import ./colmena-system.nix;
+  composeLib = import ./compose.nix {inherit lib;};
   attrs = import ./attrs.nix {inherit lib;};
   ingressOption = import ./ingress-option.nix {inherit lib;};
   ingressUtils = import ./ingress-utils.nix {inherit lib;};
@@ -23,7 +24,7 @@
         ) (builtins.readDir path)
       )
     );
-in
+in (
   {
     inherit
       macosSystem
@@ -36,3 +37,5 @@ in
       ;
   }
   // ingressUtils
+  // composeLib
+)
