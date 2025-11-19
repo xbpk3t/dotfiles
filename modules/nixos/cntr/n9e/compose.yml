@@ -1,0 +1,173 @@
+---
+
+
+
+# YAML 锚点定义 - 公共配置模板
+x-common-variables: &common-variables
+  TZ: ${TZ:-Asia/Shanghai}
+
+x-common-logging: &common-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+x-common-restart: &common-restart
+  restart: "no"
+
+x-backend-network: &backend-network
+  networks:
+    - backend
+
+services:
+  # 夜莺监控系统 Nightingale Monitoring System
+  # 注意: nightingale 使用独立的 MySQL/Redis 实例，不能复用主数据库
+  # 原因: 1) 数据隔离 2) 版本差异 3) 配置专用化
+  nightingale:
+    image: flashcatcloud/nightingale:${NIGHTINGALE_VERSION:-8.2.0}
+    container_name: devenv_nightingale
+    environment:
+      <<: *common-variables
+      GIN_MODE: release
+    volumes:
+      - ./configs/nightingale:/app/etc:ro
+    ports:
+      - "${NIGHTINGALE_PORT:-17000}:17000"
+      - "${NIGHTINGALE_IBEX_PORT:-20090}:20090"
+    <<: [*backend-network, *common-restart]
+    logging: *common-logging
+    depends_on:
+      n9e-mysql:
+        condition: service_healthy
+      n9e-redis:
+        condition: service_healthy
+      n9e-victoriametrics:
+        condition: service_started
+
+  n9e-mysql:
+    image: mysql:${MYSQL_VERSION:-8.3.0}
+    container_name: devenv_nightingale_mysql
+    environment:
+      <<: *common-variables
+      MYSQL_ROOT_PASSWORD: ${NIGHTINGALE_MYSQL_ROOT_PASSWORD:-1234}
+      MYSQL_USER: ${NIGHTINGALE_MYSQL_USERNAME:-n9e}
+      MYSQL_PASSWORD: ${NIGHTINGALE_MYSQL_PASSWORD:-n9e123}
+      MYSQL_DATABASE: ${NIGHTINGALE_MYSQL_DATABASE:-n9e_v6}
+    command: [
+      '--default-authentication-plugin=mysql_native_password',
+      '--character-set-server=utf8mb4',
+      '--collation-server=utf8mb4_unicode_ci'
+    ]
+    volumes:
+      - nightingale_mysql_data:/var/lib/mysql
+      - ./configs/mysql/initsql:/docker-entrypoint-initdb.d/:ro
+      - ./configs/mysql/my.cnf:/etc/my.cnf:ro
+    ports:
+      - "${NIGHTINGALE_MYSQL_PORT:-13306}:3306"
+    <<: [*backend-network, *common-restart]
+    logging: *common-logging
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  n9e-redis:
+    image: redis:${REDIS_VERSION:-6.2}
+    container_name: devenv_nightingale_redis
+    environment:
+      <<: *common-variables
+    ports:
+      - "${NIGHTINGALE_REDIS_PORT:-16379}:6379"
+    <<: [*backend-network, *common-restart]
+    logging: *common-logging
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  n9e-victoriametrics:
+    image: victoriametrics/victoria-metrics:${NIGHTINGALE_VM_VERSION:-v1.79.12}
+    container_name: devenv_nightingale_victoriametrics
+    environment:
+      <<: *common-variables
+    volumes:
+      - nightingale_vm_data:/victoria-metrics-data
+    ports:
+      - "${NIGHTINGALE_VM_PORT:-18428}:8428"
+    <<: [*backend-network, *common-restart]
+    logging: *common-logging
+    command:
+      - "--loggerTimezone=Asia/Shanghai"
+      - "--storageDataPath=/victoria-metrics-data"
+      - "--retentionPeriod=30d"
+
+
+
+
+  n9e-categraf:
+    image: flashcatcloud/categraf:${NIGHTINGALE_CATEGRAF_VERSION:-latest}
+    container_name: devenv_nightingale_categraf
+    environment:
+      <<: *common-variables
+      HOST_PROC: /hostfs/proc
+      HOST_SYS: /hostfs/sys
+      HOST_MOUNT_PREFIX: /hostfs
+    volumes:
+      - ./configs/categraf:/etc/categraf/conf:ro
+      - /:/hostfs:ro
+    <<: [*backend-network, *common-restart]
+    logging: *common-logging
+    depends_on:
+      nightingale:
+        condition: service_started
+
+
+  # 核心 Prometheus Exporters
+  # 恢复传统的独立 exporter 配置
+
+  # Blackbox Exporter - 黑盒监控 (HTTP/TCP/ICMP)
+  blackbox_exporter:
+    image: "prom/blackbox-exporter:latest"
+    container_name: "devenv_blackbox_exporter"
+    hostname: "blackbox_exporter"
+    environment:
+      <<: *common-variables
+    volumes:
+      - ./configs/nightingale/etc-blackbox:/config:ro
+    command:
+      - "--config.file=/config/blackbox.yml"
+    ports:
+      - "${BLACKBOX_EXPORTER_PORT:-9115}:9115"
+    <<: [*backend-network, *common-restart]
+    logging: *common-logging
+
+  # Redis Exporter - Redis 监控
+  redis_exporter:
+    image: "oliver006/redis_exporter:latest"
+    container_name: "devenv_redis_exporter"
+    hostname: "redis_exporter"
+    environment:
+      <<: *common-variables
+      REDIS_ADDR: n9e-redis:6379
+      REDIS_PASSWORD: ""
+    ports:
+      - "${REDIS_EXPORTER_PORT:-9121}:9121"
+    <<: [*backend-network, *common-restart]
+    logging: *common-logging
+    depends_on:
+      - n9e-redis
+
+  # SSL Exporter - SSL/TLS 证书监控
+  ssl_exporter:
+    image: "ribbybibby/ssl_exporter:latest"
+    container_name: "devenv_ssl_exporter"
+    hostname: "ssl_exporter"
+    environment:
+      <<: *common-variables
+    ports:
+      - "${SSL_EXPORTER_PORT:-9219}:9219"
+    <<: [*backend-network, *common-restart]
+    logging: *common-logging
