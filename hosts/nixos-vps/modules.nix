@@ -30,7 +30,7 @@ in {
     ingress = {
       enable = true;
       domain = domain "miniflux";
-      target = upstream 8080;
+      target = upstream 5254;
     };
   };
 
@@ -63,12 +63,12 @@ in {
   #    };
   #  };
 
-  modules.services.ntfy = {
-    enable = false;
-    ingress = {
-      enable = true;
-      domain = domain "ntfy";
-      target = upstream 2586;
-    };
-  };
+  #  modules.services.ntfy = {
+  #    enable = false;
+  #    ingress = {
+  #      enable = true;
+  #      domain = domain "ntfy";
+  #      target = upstream 2586;
+  #    };
+  #  };
 }

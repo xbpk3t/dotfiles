@@ -1,5 +1,4 @@
-_:
-{
+_: {
   # https://github.com/alireza0/s-ui
   # https://github.com/alireza0/s-ui-frontend
 
@@ -17,4 +16,3 @@ _:
   # 自建组两台机器，一台LA机器，DMIT大妈的的T1（我的主力落地鸡，美西节点，服务全开，¥37/年（折合来说¥12/月，比机场便宜），1C1G20GB1TB流量千兆带宽，网络好配置差，只做落地鸡（BWG 类似配置但是2C的机器$50/年）），另一台HK机器（备用落地鸡，我的主力VPS兼作落地，sub-store就在这台机器上跑，跑完把订阅URL分发到我所有workstation和homelab机器上）
   # 我的所有机器都直接走VLAN，不走公网，所以不需要担心被人打野
 }
-F
