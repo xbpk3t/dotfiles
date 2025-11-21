@@ -154,12 +154,12 @@ cws:
   args:
     - "https://cws-database.com/explore?limit=25&offset=0"
 
-moemail:
-  description: moemail
-  icon: moemail
-  binary: xdg-open
-  args:
-    - "https://moemail.app/moe"
+#moemail:
+#  description: moemail
+#  icon: moemail
+#  binary: xdg-open
+#  args:
+#    - "https://moemail.app/moe"
 
 ossinsight.io:
   description: ossinsight.io
@@ -182,12 +182,12 @@ yaml-to-go:
   args:
     - "https://zhwt.github.io/yaml-to-go/"
 
-modelscope:
-  description: modelscope
-  icon: modelscope
-  binary: xdg-open
-  args:
-    - "https://modelscope.cn/my/accountsettings"
+#modelscope:
+#  description: modelscope
+#  icon: modelscope
+#  binary: xdg-open
+#  args:
+#    - "https://modelscope.cn/my/accountsettings"
 
 web-check:
   description: web-check
@@ -433,12 +433,6 @@ chatgpt:
   args:
     - "https://chatgpt.com/"
 
-fastsend:
-  description: fastsend
-  icon: fastsend
-  binary: xdg-open
-  args:
-    - "https://fastsend.ing/zh"
 
 fofa:
   description: fofa
@@ -454,11 +448,12 @@ pm:
   args:
     - "https://www.woshipm.com/"
 
-zp:
-  description: zp
-  binary: xdg-open
-  args:
-    - "https://open.bigmodel.cn/finance-center/finance/overview"
+#zp:
+#  description: zp
+#  binary: xdg-open
+#  args:
+#    - "https://open.bigmodel.cn/finance-center/finance/overview"
+
 
 onlinetools.com:
   description: onlinetools.com
@@ -488,12 +483,13 @@ bitiful:
   args:
     - "https://send.bitiful.com/"
 
-folo:
-  description: folo
-  icon: folo
+fastsend:
+  description: fastsend
+  icon: fastsend
   binary: xdg-open
   args:
-    - "https://app.follow.is/"
+    - "https://fastsend.ing/zh"
+
 
 youtube-music:
   description: youm
@@ -563,11 +559,11 @@ netbird:
   args:
     - "https://app.netbird.io/peers"
 
-88code:
-  description: 88code
-  binary: xdg-open
-  args:
-    - "https://www.88code.org/user-dashboard"
+#88code:
+#  description: 88code
+#  binary: xdg-open
+#  args:
+#    - "https://www.88code.org/user-dashboard"
 
 ping0:
   description: ping0
