@@ -1,0 +1,40 @@
+---
+# https://mynixos.com/nixpkgs/options/services.beszel
+
+
+name: beszel
+
+services:
+  beszel:
+    image: henrygd/beszel:latest
+    container_name: beszel
+    restart: unless-stopped
+    ports:
+      - 8090:8090
+    volumes:
+      - beszel-data:/beszel_data
+      - beszel-socket:/beszel_socket
+
+  beszel-agent:
+    image: henrygd/beszel-agent:latest
+    container_name: beszel-agent
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - beszel-agent:/var/lib/beszel-agent
+      - beszel-socket:/beszel_socket
+      # 可选，如果你想看容器指标
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # monitor other disks / partitions by mounting a folder in /extra-filesystems
+      - /mnt/disk/.beszel:/extra-filesystems/sda1:ro
+    environment:
+      LISTEN: 45876
+      KEY: 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPaKzM8ICeozIWMviaMF/sCVc+PTqQ7CLxJrexgqRQ8m'
+      TOKEN: e8836675-dfcd-4d0c-9008-b3c57eb1e4bc
+      HUB_URL: https://beszel.lucc.dev
+
+
+volumes:
+  beszel-data:
+  beszel-socket:
+  beszel-agent:

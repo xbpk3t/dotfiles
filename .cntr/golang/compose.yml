@@ -1,0 +1,194 @@
+---
+
+x-common-variables: &common-variables
+  TZ: ${TZ:-Asia/Shanghai}
+
+x-common-logging: &common-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+x-common-restart: &common-restart
+  restart: "no"
+
+x-backend-network: &backend-network
+  networks:
+    - backend
+
+
+networks:
+  backend:
+    driver: ${NETWORKS_DRIVER:-bridge}
+    name: devenv_backend
+
+
+volumes:
+  mysql_data:
+    name: devenv_mysql_data
+  redis_data:
+    name: devenv_redis_data
+  clickhouse_data:
+    name: devenv_clickhouse_data
+  clickhouse_logs:
+    name: devenv_clickhouse_logs
+  prometheus_data:
+    name: devenv_prometheus_data
+  grafana_data:
+    name: devenv_grafana_data
+  nightingale_mysql_data:
+    name: devenv_nightingale_mysql_data
+  nightingale_redis_data:
+    name: devenv_nightingale_redis_data
+  nightingale_vm_data:
+    name: devenv_nightingale_vm_data
+  n8n_pgsql_data:
+    name: devenv_n8n_pgsql_data
+
+# 服务容器配置
+services:
+  #  # 开发环境 - Golang
+  #  golang:
+  #    profiles: ["dev"]
+  #    build:
+  #      context: ./golang
+  #    container_name: devenv_golang
+  #    environment:
+  #      <<: *common-variables
+  #    privileged: true
+  #    volumes:
+  #      - ${CODE_PATH_HOST:-../}:/usr/src/code
+  #    ports:
+  #      - "${GOLANG_PORT_8000:-8000}:8000"
+  #      - "${GOLANG_PORT_8001:-8001}:8001"
+  #      - "${GOLANG_PORT_8002:-8002}:8002"
+  #      - "${GOLANG_PORT_8003:-8003}:8003"
+  #      - "${GOLANG_PORT_9000:-9000}:9000"
+  #      - "${GOLANG_PORT_9001:-9001}:9001"
+  #      - "${GOLANG_PORT_9002:-9002}:9002"
+  #      - "${GOLANG_PORT_9003:-9003}:9003"
+  #    stdin_open: true
+  #    tty: true
+  #    <<: [*backend-network, *common-restart]
+  #    logging: *common-logging
+
+  # 数据库服务
+  etcd:
+    image: bitnami/etcd:latest
+    container_name: devenv_etcd
+    environment:
+      <<: *common-variables
+      ALLOW_NONE_AUTHENTICATION: true
+      ETCD_ADVERTISE_CLIENT_URLS: http://etcd:2379
+    ports:
+      - "${ETCD_PORT:-2379}:2379"
+    <<: [*backend-network, *common-restart]
+    logging: *common-logging
+    healthcheck:
+      test: ["CMD", "etcdctl", "endpoint", "health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  mysql:
+    image: mysql:${MYSQL_VERSION:-5.7}
+    container_name: devenv_mysql
+    environment:
+      <<: *common-variables
+      MYSQL_USER: ${MYSQL_USERNAME}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    command: [
+      '--character-set-server=utf8mb4',
+      '--collation-server=utf8mb4_unicode_ci',
+      '--default-authentication-plugin=mysql_native_password'
+    ]
+    privileged: true
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    <<: [*backend-network, *common-restart]
+    logging: *common-logging
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  redis:
+    image: redis:${REDIS_VERSION:-7-alpine}
+    container_name: devenv_redis
+    environment:
+      <<: *common-variables
+    volumes:
+      - redis_data:/data
+      - ./configs/redis.sh:/usr/local/bin/redis-optimize.sh:ro
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    <<: [*backend-network, *common-restart]
+    logging: *common-logging
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Caddy - 反向代理和认证
+  caddy:
+    image: stefanprodan/caddy:${CADDY_VERSION:-latest}
+    container_name: devenv_caddy
+    environment:
+      <<: *common-variables
+      ADMIN_USER: ${CADDY_ADMIN_USER:-admin}
+      ADMIN_PASSWORD: ${CADDY_ADMIN_PASSWORD:-admin}
+    volumes:
+      - ./configs/caddy:/etc/caddy:ro
+    ports:
+      - "${CADDY_GRAFANA_PORT:-3001}:3000"
+      - "${CADDY_PROMETHEUS_PORT:-9099}:9090"
+      - "${CADDY_ALERTMANAGER_PORT:-9094}:9093"
+      - "${CADDY_PUSHGATEWAY_PORT:-9092}:9091"
+    depends_on:
+      - prometheus
+      - grafana
+      - alertmanager
+      - pushgateway
+    <<: [*backend-network, *common-restart]
+    logging: *common-logging
+
+  # 链路追踪
+  jaeger:
+    image: jaegertracing/all-in-one:${JAEGER_VERSION:-1.28}
+    container_name: devenv_jaeger
+    environment:
+      <<: *common-variables
+      COLLECTOR_OTLP_ENABLED: true
+    ports:
+      - "${JAEGER_PORT:-16686}:16686"
+      - "${JAEGER_OTLP_PORT:-4317}:4317"
+      - "${JAEGER_OTLP_HTTP_PORT:-4318}:4318"
+    <<: [*backend-network, *common-restart]
+    logging: *common-logging
+
+  # 分布式事务管理
+  dtm:
+    image: yedf/dtm:latest
+    container_name: devenv_dtm
+    environment:
+      <<: *common-variables
+    entrypoint:
+      - "/app/dtm/dtm"
+      - "-c=/app/dtm/configs/config.yaml"
+    volumes:
+      - ./configs/dtm-config.yml:/app/dtm/configs/config.yaml:ro
+    ports:
+      - "${DTM_HTTP_PORT:-36789}:36789"
+      - "${DTM_GRPC_PORT:-36790}:36790"
+    depends_on:
+      etcd:
+        condition: service_healthy
+    <<: [*backend-network, *common-restart]
+    logging: *common-logging

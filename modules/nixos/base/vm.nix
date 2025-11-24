@@ -28,7 +28,7 @@
   # https://mynixos.com/nixpkgs/options/virtualisation.docker
   # https://mynixos.com/nixpkgs/options/virtualisation.podman
   virtualisation = {
-    podman.enable = true;
+    podman.enable = false;
     docker = {
       enable = true;
       # Create a `docker` alias for podman, to use it as a drop-in replacement
@@ -61,7 +61,7 @@
     };
 
     # https://mynixos.com/nixpkgs/options/virtualisation.oci-containers
-    oci-containers.backend = "podman";
+    oci-containers.backend = "docker";
 
     # Usage: https://wiki.nixos.org/wiki/Waydroid
     # waydroid.enable = true;

@@ -23,6 +23,6 @@ in
     systemd.services."getty@tty1".enable = lib.mkForce false;
     systemd.services."serial-getty@ttyS0".enable = lib.mkForce false;
 
-    # Ensure the container build target is available with Podman defaults.
-    virtualisation.oci-containers.backend = lib.mkDefault "podman";
+    # Ensure the container build target is available with docker defaults.
+    virtualisation.oci-containers.backend = lib.mkDefault "docker";
   }
