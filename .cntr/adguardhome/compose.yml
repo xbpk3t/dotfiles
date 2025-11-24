@@ -1,0 +1,30 @@
+---
+# https://mynixos.com/nixpkgs/package/adguardhome
+# https://mynixos.com/nixpkgs/options/services.adguardhome
+
+# https://github.com/einverne/dockerfile/blob/master/adguardhome/docker-compose.yml
+
+version: '3.8'
+services:
+  adguardhome:
+    image: adguard/adguardhome
+    container_name: adguardhome
+    restart: unless-stopped
+    ports:
+      - 53:53/tcp
+      - 53:53/udp
+      - 80:80/tcp # Web interface port (can be changed)
+      - 443:443/tcp # HTTPS for web interface (optional)
+      - 3000:3000/tcp # Initial setup port (can be changed)
+    volumes:
+      - adh-data/work:/opt/adguardhome/work
+      - adh-data/conf:/opt/adguardhome/conf
+    environment:
+      # Optional: Set PUID and PGID for file permissions
+      # - PUID=1000
+      # - PGID=1000
+      - TZ=America/New_York # Replace with your timezone
+
+
+volumes:
+  adh-data:

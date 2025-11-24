@@ -1,0 +1,22 @@
+---
+# https://help.onethingcloud.com/7cb4/6047/d664
+
+
+name: wxedge
+
+services:
+  wxedge:
+    # 其实就是 https://hub.docker.com/r/onething1/wxedge
+    # 这个是wxy自己的container registry
+    image: images-cluster.xycloud.com/wxedge/wxedge:latest
+    container_name: wxedge
+    restart: unless-stopped
+    privileged: true
+    network_mode: host
+    tmpfs: /run,/tmp
+    environment:
+      - NIC_LIST=eth0,eth1
+    volumes:
+      - /mnt/nvme1/wxedge:/storage
+      - /mnt/sda1/cache:/storage/cache1
+      - /mnt/sda2/cache:/storage/cache2
