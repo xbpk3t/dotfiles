@@ -32,7 +32,10 @@
     system = "x86_64-linux";
     inherit lib myvars;
     nixos-modules =
-      [inputs.sops-nix.nixosModules.sops]
+      [
+        inputs.sops-nix.nixosModules.sops
+        inputs.disko.nixosModules.disko
+      ]
       ++ map mylib.relativeToRoot [
         "hosts/${name}/default.nix"
         "modules/base"
@@ -51,4 +54,10 @@ in {
     // {
       genSpecialArgs = vpsSpecialArgs;
     });
+
+  colmenaProfiles.${name} = {
+    inherit (modules) system nixos-modules home-modules;
+    genSpecialArgs = vpsSpecialArgs;
+    defaultTargetUser = "root";
+  };
 }
