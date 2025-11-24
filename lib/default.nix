@@ -3,10 +3,7 @@
   macosSystem = import ./macos.nix;
   nixosSystem = import ./nixos.nix;
   colmenaSystem = import ./colmena-system.nix;
-  composeLib = import ./compose.nix {inherit lib;};
   attrs = import ./attrs.nix {inherit lib;};
-  ingressOption = import ./ingress-option.nix {inherit lib;};
-  ingressUtils = import ./ingress-utils.nix {inherit lib;};
 
   # use path relative to the root of the project
   relativeToRoot = lib.path.append ../.;
@@ -24,18 +21,13 @@
         ) (builtins.readDir path)
       )
     );
-in (
-  {
-    inherit
-      macosSystem
-      nixosSystem
-      colmenaSystem
-      attrs
-      ingressOption
-      scanPaths
-      relativeToRoot
-      ;
-  }
-  // ingressUtils
-  // composeLib
-)
+in {
+  inherit
+    macosSystem
+    nixosSystem
+    colmenaSystem
+    attrs
+    scanPaths
+    relativeToRoot
+    ;
+}
