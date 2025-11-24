@@ -1,0 +1,90 @@
+---
+# https://miniflux.app/docs/docker.html#docker-compose
+# https://github.com/electh/nextflux/blob/main/compose.yml
+
+# https://github.com/electh/ReactFlux/issues/402
+
+# https://mynixos.com/nixpkgs/options/services.miniflux
+
+
+name: miniflux
+
+
+services:
+  miniflux:
+    image: miniflux/miniflux:latest
+    container_name: miniflux
+    ports:
+      - "5254:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgres://miniflux:secret@db/miniflux?sslmode=disable
+      - RUN_MIGRATIONS=1
+      - CREATE_ADMIN=1
+      - DISABLE_HSTS=1
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=test123
+
+      # 配置跨域，否则reactflux无法连接
+      - CORS_ORIGINS=https://rss.lucc.dev
+      - CORS_ALLOW_HEADERS=*
+
+      - DEBUG=0
+      - LOG_DATE_TIME=1
+      # 15 mins
+      - POLLING_FREQUENCY=15
+#      - LISTEN_ADDR=0.0.0.0:8080
+#      - BASE_URL=https://miniflux.lab.com/
+
+      - CLEANUP_FREQUENCY_HOURS=876000
+      - CLEANUP_ARCHIVE_READ_DAYS=36500
+      - CLEANUP_REMOVE_SESSIONS_DAYS=36500
+
+#      - PROXY_IMAGES=all
+    healthcheck:
+      test: ["CMD", "/usr/bin/miniflux", "-healthcheck", "auto"]
+    restart: unless-stopped
+
+
+  db:
+    image: postgres:17-alpine
+    container_name: miniflux-db
+    environment:
+      - POSTGRES_USER=miniflux
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_DB=miniflux
+    volumes:
+      - miniflux-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "miniflux"]
+      interval: 10s
+      start_period: 10s
+    restart: unless-stopped
+
+# https://github.com/electh/nextflux
+#  nextflux:
+#    image: electh/nextflux:latest
+#    container_name: nextflux
+#    ports:
+#      - 3000:3000
+#    depends_on:
+#      miniflux:
+#        condition: service_healthy
+#    restart: unless-stopped
+
+
+  # https://github.com/electh/ReactFlux
+  reactflux:
+    image: electh/reactflux:latest
+    container_name: reactflux
+    restart: unless-stopped
+    depends_on:
+      miniflux:
+        condition: service_healthy
+    ports:
+      - 3000:2000
+
+volumes:
+  miniflux-db:
