@@ -1,5 +1,6 @@
 {pkgs, ...}:
 # [Archlinux 笔记本省电设置 - 少数派](https://sspai.com/post/101744)
+# 启用 powertop、TLP、upower、CPU governor 以及键盘背光 udev 规则 | 针对笔记本，VPS 没有电池/背光，额外服务 (`powertop.service`, `tlp.service`) 只会占资源，还可能修改 CPU governor 影响性能稳定性
 {
   environment.systemPackages = with pkgs; [
     # https://mynixos.com/nixpkgs/package/powertop

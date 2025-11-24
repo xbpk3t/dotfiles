@@ -4,6 +4,9 @@
     # localsend
     53317
 
+    # cloudflare wrangler login auth using port
+    8976
+
     # tcp ports for testing & sharing
     63080
     63081
@@ -15,6 +18,13 @@
     63087
     63088
     63089
+
+    # KDE Connect
+    1714
+    1764
   ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
+  networking.firewall.allowedUDPPorts = [
+    1714
+    1764
+  ];
 }

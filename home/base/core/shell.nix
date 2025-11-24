@@ -28,6 +28,7 @@
         BROWSER = "chromium-browser";
         PWGEN_SECRET = config.sops.secrets.pwgenSk.path;
         GITHUB_TOKEN = "$(gh auth token)";
+        PNPM_HOME = "$HOME/.local/share/pnpm";
 
         MOBILE = config.sops.secrets.meMobile.path;
         PASS = config.sops.secrets.mePass.path;
@@ -194,11 +195,12 @@
       # MAYBE [2025-10-06] home.sessionPath -> programs.zsh.sessionVariables 现在zsh有bug，只能这么来处理
       #  [bug: home.sessionPath is broken with ZSH · Issue #2991 · nix-community/home-manager](https://github.com/nix-community/home-manager/issues/2991)
       sessionVariables = {
+        PNPM_HOME = "$HOME/.local/share/pnpm";
         PATH = lib.concatStringsSep ":" [
           #          "$HOME/.orbstack/bin"
           "$HOME/go/bin"
           "$HOME/.bun/bin"
-          "$HOME/.local/share/pnpm/bin"
+          "$PNPM_HOME"
           "$HOME/.local/bin" # rofi shells
 
           "$PATH" # 注意放到最后，且不要删除

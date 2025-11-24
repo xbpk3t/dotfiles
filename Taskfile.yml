@@ -19,3 +19,9 @@ tasks:
       - nix flake lock
       - nix flake check
       - nix flake metadata
+
+
+
+# 1. nix run nixpkgs#<pkg>, nix shell -p <pkg>, nix profile <pkg> 之间的区别？ 前两者都是临时安装，但是run不进入shell，并且通常用于执行flake。而shell则更多用于已有nix pkgs了，用来直接安装，并进入shell。而 profile则完全不推荐使用（并非nix的规范使用，profile是 nix-env -i 的继任者）。
+# 2. 后两者有啥区别？shell 不也是会在 $HOME/.config 里生成配置吗？ 二者区别在于，shell相当于把pkg临时加入PATH，退出shell，PATH就恢复原样了。而profile则永远加进去了，就“污染”了环境。
+# nix shell -p <pkg>

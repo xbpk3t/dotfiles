@@ -2,6 +2,7 @@
   # Import all library functions
   macosSystem = import ./macos.nix;
   nixosSystem = import ./nixos.nix;
+  colmenaSystem = import ./colmena-system.nix;
   attrs = import ./attrs.nix {inherit lib;};
 
   # use path relative to the root of the project
@@ -24,6 +25,7 @@ in {
   inherit
     macosSystem
     nixosSystem
+    colmenaSystem
     attrs
     scanPaths
     relativeToRoot

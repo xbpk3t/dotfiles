@@ -1,0 +1,28 @@
+---
+
+# 创建数据库
+# wrangler d1 create mydb
+
+# 本地执行 SQL（本地 D1）
+# wrangler d1 execute mydb --local --command="SELECT * FROM users;"
+# wrangler d1 execute mydb --local --file=./schema.sql
+
+
+# 远端执行 SQL（线上 D1）
+# wrangler d1 execute mydb --remote --command="SELECT * FROM users;"
+# wrangler d1 execute mydb --remote --file=./schema.sql
+
+# 打开数据库控制台（本地）
+# wrangler d1 shell mydb --local
+# wrangler d1 shell mydb --remote
+
+# 导出远端 D1（backup）
+# wrangler d1 export mydb --remote --output=backup.sql
+
+
+# 怎么把本地D1直接sync到remote?
+# 不支持该操作，需要拆分为两步
+# 1. 将本地 DB 导出为 SQL
+# sqlite3 local.db .dump > dump.sql
+# 2. 使用 Wrangler 导入到远端 D1
+# wrangler d1 execute <DATABASE_NAME> --remote --file=./dump.sql

@@ -22,7 +22,9 @@
 
     cloudflared # cloudflare tunnel
 
-    # wrangler # https://github.com/cloudflare/workers-sdk
+    # https://github.com/cloudflare/workers-sdk
+    # https://mynixos.com/nixpkgs/package/wrangler
+    # wrangler
 
     # API 工具
     grpcurl

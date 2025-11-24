@@ -6,9 +6,9 @@
   ...
 } @ args: let
   nixosSystemArgs = args // {inherit lib;};
-  name = "nixos-vps";
+  name = "nixos-cntr";
   customPkgsOverlay = import (mylib.relativeToRoot "pkgs/overlay.nix");
-  vpsSpecialArgs = system: let
+  cntrSpecialArgs = system: let
     pkgs = import inputs.nixpkgs {
       inherit system;
       config.allowUnfree = true;
@@ -52,12 +52,12 @@ in {
   nixosConfigurations.${name} = mylib.nixosSystem (nixosSystemArgs
     // modules
     // {
-      genSpecialArgs = vpsSpecialArgs;
+      genSpecialArgs = cntrSpecialArgs;
     });
 
   colmenaProfiles.${name} = {
     inherit (modules) system nixos-modules home-modules;
-    genSpecialArgs = vpsSpecialArgs;
+    genSpecialArgs = cntrSpecialArgs;
     defaultTargetUser = "root";
   };
 }
