@@ -7,12 +7,13 @@
     # https://mynixos.com/nixpkgs/package/baidupcs-go
     # https://github.com/qjfoidnh/BaiduPCS-Go
     # [2025-11-13] 临时使用后注释掉。还是很好用的。
-    # baidupcs-go
+    baidupcs-go
   ];
 
+  # https://mynixos.com/home-manager/options/programs.rclone
   programs.rclone = {
     enable = true;
-    package = pkgs.rclone; # 可选：覆盖默认包
+    package = pkgs.rclone;
 
     remotes = {
       r2 = {
@@ -29,6 +30,15 @@
           secret_access_key = config.sops.secrets.rcloneR2SecretAccessKey.path;
         };
       };
+
+      #      oss = {
+      #        config = {
+      #
+      #        };
+      #        secrets = {
+      #
+      #        };
+      #      };
     };
 
     # 暂时移除 sops-nix 依赖，避免服务启动失败
