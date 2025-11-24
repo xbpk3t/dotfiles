@@ -53,6 +53,9 @@ in {
 
     ln -sf ${fuzzelPath}/fuzzel-text-actions.nu $HOME/.local/bin/fuzzel-text-actions
     chmod +x $HOME/.local/bin/fuzzel-text-actions
+
+    ln -sf ${fuzzelPath}/nosleep.nu $HOME/.local/bin/nosleep
+    chmod +x $HOME/.local/bin/nosleep
   '';
 
   xdg.configFile."raffi/raffi.yaml".source = config.lib.file.mkOutOfStoreSymlink "${fuzzelPath}/raffi.yml";
