@@ -15,11 +15,13 @@ in {
     recommendedProxySettings = true;
 
     virtualHosts = {
-      "rss.lucc.dev" = mkProxy 5254;
-      "rsshub.lucc.dev" = mkProxy 1200;
-      "uptime.lucc.dev" = mkProxy 3001;
-      "ntfy.lucc.dev" = mkProxy 8020;
       "beszel.lucc.dev" = mkProxy 8090;
+      "rsshub.lucc.dev" = mkProxy 1200;
+      "pan.lucc.dev" = mkProxy 5244;
+      "ntfy.lucc.dev" = mkProxy 8020;
+
+      # "rss.lucc.dev" = mkProxy 5254;
+      # "uptime.lucc.dev" = mkProxy 3001;
     };
   };
 
