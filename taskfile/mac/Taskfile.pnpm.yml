@@ -4,6 +4,11 @@ version: "3"
 
 #- pnpm config set prefix <目标目录> # 修改全局包位置
 #- pnpm install -g <pkg> # 全局安装
+# pnpm install --force
+## 注意也就是说 pnpm 无论是否 添加 --force 只会处理 package.json 里面已经有的 dependencies，如果报错 failed to resolve import，如果是该dep本身就不存在，那么无论怎么 install 都装不上
+## 加了 --force 之后会做 1、清除缓存的构建产物。2、让所有依赖重新跑 preinstall/postinstall。3、重新生成 node_modules 和链接 4、重新从 store 中 hard link
+
+
 #- pnpm rm -g <pkg> # 全局卸载，相当于npm uninstall，rm是uninstall的alias，需要注意的是只写pkg名就可以了，不要加version. 比如 npm rm -g create-react-app.
 
 tasks:
