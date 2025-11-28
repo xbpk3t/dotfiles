@@ -271,15 +271,21 @@ tasks:
 
   list-inactive:
     desc: "列出非活跃系统服务"
+    interactive: true
+    silent: true
     cmds:
       - systemctl list-units -all --state=inactive
 
   list-failed:
     desc: "列出失败的系统服务"
+    interactive: true
+    silent: true
     cmds:
       - systemctl list-units -all --state=failed
 
   list-systemd:
     desc: "列出 systemd 相关服务"
+    interactive: true
+    silent: true
     cmds:
       - systemctl list-units systemd-*

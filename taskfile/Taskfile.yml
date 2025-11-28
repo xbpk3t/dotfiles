@@ -32,7 +32,7 @@ includes:
   shell: taskfile/kernel/Taskfile.shell.yml
   ssh: taskfile/kernel/Taskfile.ssh.yml
   tcpdump: taskfile/kernel/Taskfile.tcpdump.yml
-  systemd: taskfile/kernel/Taskfile.systemd.yml
+  sysd: taskfile/kernel/Taskfile.systemd.yml
 
   # mac
   mac: taskfile/mac/Taskfile.mac.yml
