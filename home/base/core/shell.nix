@@ -25,13 +25,13 @@
       {
         # 通用配置
         EDITOR = "nvim";
-        BROWSER = "chromium-browser";
-        PWGEN_SECRET = config.sops.secrets.pwgenSk.path;
+        # BROWSER = "chromium-browser";
         GITHUB_TOKEN = "$(gh auth token)";
         PNPM_HOME = "$HOME/.local/share/pnpm";
 
-        MOBILE = config.sops.secrets.meMobile.path;
-        PASS = config.sops.secrets.mePass.path;
+        PWGEN_SECRET = builtins.readFile config.sops.secrets.pwgenSk.path;
+        MOBILE = builtins.readFile config.sops.secrets.meMobile.path;
+        PASS = builtins.readFile config.sops.secrets.mePass.path;
 
         # GitHub API rate limit fix
         # Commented out because it causes GitHub API 401 errors
@@ -40,8 +40,7 @@
 
         # Locale
         LANG = "en_US.UTF-8";
-        #        LC_CTYPE = "en_US.UTF-8";
-        #
+        # LC_CTYPE = "en_US.UTF-8";
         LC_CTYPE = "zh_CN.UTF-8";
         LC_COLLATE = "C"; # Avoids locale lookup errors
       }
