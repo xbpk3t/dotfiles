@@ -1,0 +1,29 @@
+---
+# https://mynixos.com/nixpkgs/options/services.umami
+# https://github.com/umami-software/umami
+
+name: umami
+
+services:
+  umami:
+    image: ghcr.io/mikecao/umami:latest
+    ports:
+      - "3000:3000" # Map host port 3000 to container port 3000
+    environment:
+      DATABASE_URL: postgresql://umami:umami@db:5432/umami # Adjust for your database
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  db:
+    image: postgres:14-alpine # Or mysql:8
+    environment:
+      POSTGRES_DB: umami
+      POSTGRES_USER: umami
+      POSTGRES_PASSWORD: umami # Change this to a strong password
+    volumes:
+      - db_data:/var/lib/postgresql/data # Or /var/lib/mysql for MySQL
+    restart: unless-stopped
+
+volumes:
+  db_data:

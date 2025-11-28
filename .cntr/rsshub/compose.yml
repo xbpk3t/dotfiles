@@ -46,6 +46,11 @@ services:
       # - redis
       - browserless
       # - warp
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS --max-time 10 http://localhost:1200/healthz >/dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   browserless:
     # See issue 6680
@@ -56,6 +61,11 @@ services:
       core:
         hard: 0
         soft: 0
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS --max-time 10 http://localhost:3000/pressure >/dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 #  warp:
 #    image: aleskxyz/warp-svc:latest

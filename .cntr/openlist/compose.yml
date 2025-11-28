@@ -1,9 +1,10 @@
 ---
+# docker exec -it openlist ./openlist admin set <pwd>
 
-# docker-compose.yml
+
 services:
   openlist:
-    image: 'openlistteam/openlist:latest'
+    image: openlistteam/openlist:latest
     container_name: openlist
     user: '0:0' # Please replace `0:0` with the actual user ID and group ID you want to use to run OpenList.
     volumes:
@@ -13,6 +14,12 @@ services:
     environment:
       - UMASK=022
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:5244/ping >/dev/null 2>&1 || curl -fsS http://localhost:5244/ping >/dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
 
 volumes:
   openlist:
