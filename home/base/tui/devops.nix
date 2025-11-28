@@ -57,5 +57,9 @@
     imagemagick
     exiftool
     graphviz
+
+    # static file server
+    # https://mynixos.com/nixpkgs/package/dufs
+    dufs
   ];
 }
