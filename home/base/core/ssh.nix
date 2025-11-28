@@ -30,9 +30,12 @@ in {
 
   config = lib.mkIf cfg.enable {
     home.packages = with pkgs; [
-      sshs
       termscp
       sshpass
+
+      # https://mynixos.com/nixpkgs/package/lazyssh
+      # https://github.com/Adembc/lazyssh
+      lazyssh
     ];
 
     programs.ssh = {

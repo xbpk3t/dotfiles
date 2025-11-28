@@ -147,6 +147,15 @@ docs:
   args:
     - "https://docs.lucc.dev/"
 
+blog:
+  description: blog
+  icon: blog
+  binary: xdg-open
+  args:
+    - "https://blog.lucc.dev/"
+
+
+
 cws:
   description: cws
   icon: cws
@@ -280,12 +289,20 @@ pocketcasts:
   args:
     - "https://play.pocketcasts.com/new-releases"
 
-markdownpreview:
-  description: markdownpreview
-  icon: markdownpreview
+#markdownpreview:
+#  description: markdownpreview
+#  icon: markdownpreview
+#  binary: xdg-open
+#  args:
+#    - "https://markdownlivepreview.dev/"
+
+markdown-preview:
+  description: markdown-preview
   binary: xdg-open
   args:
-    - "https://markdownlivepreview.dev/"
+    - https://hackmd.io/
+
+
 
 reddit-hotlist:
   description: reddit-hotlist
@@ -525,6 +542,13 @@ cf:
   binary: xdg-open
   args:
     - "https://dash.cloudflare.com/"
+
+edgeone:
+  description: edgeone
+  binary: xdg-open
+  args:
+    - https://console.tencentcloud.com/edgeone/
+
 
 flomo:
   description: flomo
