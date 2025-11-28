@@ -23,15 +23,20 @@
       # "goland"
       # "google-chrome"
 
-      # "tencent-lemon"
+      "tencent-lemon"
 
       # "rustdesk"
 
-      #      "orbstack"
-      #      "reqable"
+      "reqable"
 
-      #      "wechat"
-      #      "wireshark-app"
+      "wechat"
+      "wireshark-app"
+
+      #      "orbstack"
+
+      # https://github.com/insanum/gcalcli
+      # https://formulae.brew.sh/formula/gcalcli
+      # https://github.com/ajrosen/icalPal
     ];
     # 开启这个配置，以及autoUpdate。完全由nix管理brew
     greedyCasks = true;
