@@ -31,7 +31,8 @@ in
         {
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
-          home-manager.backupFileExtension = "home-manager.backup";
+          # home-manager.backupFileExtension = "hm.bk";
+          home-manager.backupFileExtension = null;
 
           home-manager.extraSpecialArgs = specialArgs;
           home-manager.users."${myvars.username}".imports =
