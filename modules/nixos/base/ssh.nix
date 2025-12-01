@@ -47,5 +47,7 @@
 
   # Add terminfo database of all known terminals to the system profile.
   # https://github.com/NixOS/nixpkgs/blob/nixos-25.05/nixos/modules/config/terminfo.nix
-  environment.enableAllTerminfo = true;
+  # [2025-11-28] 设置为false，因为 termbench-pro 在rebuild时报错。
+  # 绝大多数常用终端（xterm, foot, kitty, wezterm, tmux 等）在 NixOS 主包里已经自带 terminfo，使用它们时不会有任何变化。只有当你运行“系统上没有安装、但 SSH 到别的机器时又需要正确 terminfo”的冷门终端名（例如 contour、某些古老/自编译终端）时，远端才可能因为 TERM 无法匹配而退回到 vt100 之类的兼容模式。对日常开发和常见终端来说几乎不会遇到。
+  environment.enableAllTerminfo = false;
 }
