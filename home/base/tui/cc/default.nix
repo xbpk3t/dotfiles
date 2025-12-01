@@ -5,7 +5,8 @@
   config,
   ...
 }: let
-  mcpPackages = inputs.mcp-servers-nix.packages.${pkgs.system};
+  hostSystem = pkgs.stdenv.hostPlatform.system;
+  mcpPackages = inputs.mcp-servers-nix.packages.${hostSystem};
   mkStdIO = pkg: {
     type = "stdio";
     command = lib.getExe pkg;
@@ -61,7 +62,7 @@
 in {
   # https://github.com/numtide/nix-ai-tools
   home.packages =
-    (with inputs.nix-ai-tools.packages.${pkgs.system}; [
+    (with inputs.nix-ai-tools.packages.${hostSystem}; [
       claude-code-router
 
       # [2025-11-13] No longer use qwen
@@ -120,7 +121,7 @@ in {
     # https://mynixos.com/home-manager/options/programs.codex
     codex = {
       enable = true;
-      package = inputs.nix-ai-tools.packages.${pkgs.system}.codex;
+      package = inputs.nix-ai-tools.packages.${hostSystem}.codex;
 
       # https://github.com/openai/codex/blob/main/docs/config.md
       settings = {
@@ -148,7 +149,7 @@ in {
 
     claude-code = {
       enable = true;
-      package = inputs.nix-ai-tools.packages.${pkgs.system}.claude-code;
+      package = inputs.nix-ai-tools.packages.${hostSystem}.claude-code;
       settings = {
         theme = "dark";
         outputStyle = "Explanatory";
