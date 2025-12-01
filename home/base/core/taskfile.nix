@@ -8,7 +8,7 @@
     # source = config.lib.file.mkOutOfStoreSymlink "${myvars.projectRoot}/taskfile";
     # source = "${myvars.projectRoot}/taskfile";
 
-    source = mylib.relativeToRoot "taskfile";
+    source = mylib.relativeToRoot ".taskfile";
     recursive = true;
     force = true;
   };
@@ -16,7 +16,7 @@
   home.file."Taskfile.yml" = {
     # source = config.lib.file.mkOutOfStoreSymlink "${myvars.projectRoot}/taskfile/Taskfile.yml";
 
-    source = mylib.relativeToRoot "taskfile/Taskfile.yml";
+    source = mylib.relativeToRoot ".taskfile/Taskfile.yml";
     force = true;
   };
 
