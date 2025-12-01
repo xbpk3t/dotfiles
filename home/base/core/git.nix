@@ -34,6 +34,14 @@
 
     settings = {
       alias = {
+        br = "branch --sort=-committerdate";
+        co = "checkout";
+        df = "diff";
+        com = "commit -a";
+        gs = "stash";
+        gp = "pull";
+        lg = "log --graph --pretty=format:'%Cred%h%Creset - %C(yellow)%d%Creset %s %C(green)(%cr)%C(bold blue) <%an>%Creset' --abbrev-commit";
+        st = "status";
       };
       user = {
         name = "xbpk3t";
@@ -81,21 +89,10 @@
         date = "iso"; # ISO 8601 date format
       };
     };
+  };
 
-    diff-so-fancy = {
-      enable = true;
-      #      enableGitIntegration = true;
-    };
-
-    aliases = {
-      br = "branch --sort=-committerdate";
-      co = "checkout";
-      df = "diff";
-      com = "commit -a";
-      gs = "stash";
-      gp = "pull";
-      lg = "log --graph --pretty=format:'%Cred%h%Creset - %C(yellow)%d%Creset %s %C(green)(%cr)%C(bold blue) <%an>%Creset' --abbrev-commit";
-      st = "status";
-    };
+  programs.diff-so-fancy = {
+    enable = true;
+    enableGitIntegration = true;
   };
 }

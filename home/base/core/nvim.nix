@@ -1149,6 +1149,10 @@ in {
                   })
                 '';
               };
+
+              # MAYBE fidget.nvim
+              # https://mynixos.com/nixpkgs/package/vimPlugins.fidget-nvim
+              # https://github.com/j-hui/fidget.nvim
             };
         };
 

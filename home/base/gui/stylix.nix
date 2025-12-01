@@ -12,6 +12,7 @@
     enable = lib.mkDefault true;
 
     autoEnable = lib.mkDefault true;
+    enableReleaseChecks = false;
 
     # Home Manager integration settings
     #    homeManagerIntegration = {
