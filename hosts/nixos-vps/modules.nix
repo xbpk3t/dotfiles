@@ -18,7 +18,8 @@ in {
       "beszel.lucc.dev" = mkProxy 8090;
       "rsshub.lucc.dev" = mkProxy 1200;
       "pan.lucc.dev" = mkProxy 5244;
-      "ntfy.lucc.dev" = mkProxy 8020;
+      "pt.lucc.dev" = mkProxy 9443;
+      "n8n.lucc.dev" = mkProxy 5678;
 
       # "rss.lucc.dev" = mkProxy 5254;
       # "uptime.lucc.dev" = mkProxy 3001;
