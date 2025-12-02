@@ -18,6 +18,7 @@
       else "/home";
   };
 
+  # /home/luck/.config/sops-nix/secrets/
   mkUserSecret = key:
     {
       inherit key;
