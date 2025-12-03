@@ -13,7 +13,7 @@
       # FIXME 暂时开启密码登录
       # 禁用密码认证，只允许公钥认证
       # PasswordAuthentication = false; # disable password login
-      PasswordAuthentication = true; # disable password login
+      PasswordAuthentication = false; # disable password login
 
       # Additional SSH optimizations from Linux-Optimizer
       # Disable DNS lookup to speed up connections

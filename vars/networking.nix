@@ -13,7 +13,9 @@ _: rec {
 
   colmenaTargets = {
     nixos-cntr = {
-      targetHosts = ["10.254.0.2"];
+      targetHosts = [
+        "10.254.0.2"
+      ];
       targetUser = "root";
       targetPort = null;
     };
@@ -27,7 +29,9 @@ _: rec {
     };
 
     nixos-ws = {
-      targetHosts = ["192.168.234.194"];
+      targetHosts = [
+        "192.168.234.194"
+      ];
       targetUser = "luck";
       targetPort = null;
     };
