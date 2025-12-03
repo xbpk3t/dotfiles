@@ -42,8 +42,6 @@
 
     croc # https://github.com/schollz/croc
 
-
-
     # 磁盘健康/检测
     # https://mynixos.com/nixpkgs/package/smartmontools
     # smartctl（smartmontools）：读/写盘的 S.M.A.R.T. 数据，支持 SATA/USB/部分 NVMe，快速健康概览、离线/短测。

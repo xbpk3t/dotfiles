@@ -44,7 +44,7 @@ in {
   # Enable sops
   sops = {
     defaultSopsFile = ./secrets.yaml;
-    age.keyFile = "${platform.homePath}/${myvars.username}/.config/sops/age/keys.txt";
+    age.keyFile = lib.mkDefault "${platform.homePath}/${myvars.username}/.config/sops/age/keys.txt";
     age.sshKeyPaths = []; # Disable SSH key import
     gnupg.home = null; # Disable GPG key import
 
@@ -66,6 +66,7 @@ in {
 
       # Sing-box subscription URL
       singboxUrl = mkRootSecret "singbox/url";
+      singboxToken = mkRootSecret "singbox/token";
 
       # Shared API tokens
       youtubeApiKey = mkUserSecret "youtube/api_key";
