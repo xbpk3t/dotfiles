@@ -30,10 +30,10 @@ in {
     util-linux
     gawk
 
-# 已经引入了 home/base/core，所以注释掉
-#    jq
-#    helix
-#    nushell
+    # 已经引入了 home/base/core，所以注释掉
+    #    jq
+    #    helix
+    #    nushell
   ];
 
   # 确保占位目录存在
