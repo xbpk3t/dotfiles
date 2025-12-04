@@ -241,6 +241,12 @@
     };
 
     # Better grep
+    # 注意rg并不兼容grep（本身的用法），所以不推荐直接把grep作为rg的alias使用（否则每次都要 \grep 才能使用grep命令，很容易混淆用法）
+    # 不兼容的几点：
+    # - 是否递归：rg默认递归，而grep则需要 -r 才能递归查找
+    # - 忽略规则：rg默认会忽略dotfiles (.git, .github, ...) 而grep不会忽略这些文件
+    # - 输出格式、排序、并行：rg会并行查找，所以最终输出格式与实际文件排序无关
+    # - 正则语法与选项兼容度：二者的regex引擎不同。rg默认用 Rust regex，引擎特性跟 grep 不同。而grep则默认 POSIX BRE/ERE 作为regex引擎。
     ripgrep = {
       enable = true;
 
