@@ -52,7 +52,13 @@ in {
     secrets = {
       meMobile = mkUserSecret "me/mobile";
       mePass = mkUserSecret "me/pass";
+
+      mail = mkUserSecret "me/mail";
+      mailGoogle = mkUserSecret "me/mail_google";
+      mailMe = mkUserSecret "me/mail_me";
+
       pwgenSk = mkUserSecret "pwgen/sk";
+
       # Rclone R2 secrets
       rcloneR2AccessKeyId = mkUserSecret "rclone/r2/access_key_id";
       rcloneR2SecretAccessKey = mkUserSecret "rclone/r2/secret_access_key";
