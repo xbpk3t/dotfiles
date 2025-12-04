@@ -35,6 +35,7 @@
       "users"
       "wheel"
       "networkmanager" # for nmtui / nm-connection-editor
+      "nix-users" # allow nix-daemon access
       "docker"
       "podman"
       "wireshark"
