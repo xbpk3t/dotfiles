@@ -1,5 +1,7 @@
 {lib, ...}: let
-  upstream = port: "http://127.0.0.1:${toString port}";
+  # Always talk HTTPS to backends. If a service only exposes HTTP, set up TLS there first
+  # or revert this helper locally.
+  upstream = port: "https://127.0.0.1:${toString port}";
 
   # Per‑vhost defaults so adding new domains only requires mkProxy entry.
   vhostDefaults = {
@@ -30,6 +32,10 @@
       locations."/" = {
         proxyPass = upstream port;
         proxyWebsockets = true;
+        extraConfig = ''
+          proxy_ssl_server_name on;
+          proxy_ssl_verify off;  # backends often use self-signed/internal certs
+        '';
       };
     };
 
