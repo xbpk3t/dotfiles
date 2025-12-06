@@ -980,14 +980,30 @@ in {
     };
 
     # [yaziPlugins - MyNixOS](https://mynixos.com/nixpkgs/packages/yaziPlugins)
+    #  git = pkgs.yaziPlugins.git; 是显式赋值（等价展开：git = (pkgs.yaziPlugins).git;），不需要 inherit 语法糖。inherit (pkgs.yaziPlugins) git; 只是把同名字段搬过来的简写。两者作用相同，只是写法不同。
+    # 另外，注意 plugins = pkgs.yaziPlugins 意味着直接import进来上面所有plugins (但是部分plugin会有兼容性问题（比如说 mactag 只支持darwin，无法在linux下使用），所以不建议这么配置)
     plugins = {
       # Ensure git.yazi is always present for inline status and blame info
       git = pkgs.yaziPlugins.git;
-      inherit (pkgs.yaziPlugins) lazygit;
-      inherit (pkgs.yaziPlugins) full-border;
-      inherit (pkgs.yaziPlugins) smart-enter;
+
+      # https://mynixos.com/nixpkgs/package/yaziPlugins.lazygit
+      lazygit = pkgs.yaziPlugins.lazygit;
+      full-border = pkgs.yaziPlugins.full-border;
+      smart-enter = pkgs.yaziPlugins.smart-enter;
       # used to preview archive
-      inherit (pkgs.yaziPlugins) ouch;
+      ouch = pkgs.yaziPlugins.ouch;
+
+      # https://mynixos.com/nixpkgs/package/yaziPlugins.duckdb
+      duckdb = pkgs.yaziPlugins.duckdb;
+
+      # https://mynixos.com/nixpkgs/package/yaziPlugins.wl-clipboard
+      # https://github.com/orhnk/system-clipboard.yazi
+      # https://github.com/Slackadays/ClipBoard
+      # Yazi 自己默认只有「内部剪切板」，不会自动往系统剪贴板里写东西。
+      # Yazi 里按 y / d 这些，是往 Yazi 内部的 yank 缓冲区 里放文件，用来在 Yazi 里 p 粘贴移动 / 复制。但是默认情况下，你 yank 了文件之后，是不能直接在浏览器、编辑器里 Ctrl+V 出路径的——那是“系统剪贴板”的事。
+      # 之所以使用 system-clipboard.yazi
+      # 用的是 cb 这个跨平台 clipboard 工具，所以理论上 Linux / macOS / Windows 统一一套调用方式，不用管 X11 / Wayland / macOS 命令差异。复制的是 文件路径传给 cb，然后由 Clipboard 这个程序负责和系统剪贴板交互，你也可以借它的历史、多剪贴板等高级功能（取决于你怎么用 cb）。
+      wl-clipboard = pkgs.yaziPlugins.wl-clipboard;
     };
 
     initLua = ''

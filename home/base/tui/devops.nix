@@ -60,6 +60,8 @@
 
     # static file server
     # https://mynixos.com/nixpkgs/package/dufs
+    # https://github.com/sigoden/dufs
+    # https://github.com/cnphpbb/deploy.stack/blob/main/dufs/config/config.yaml ???
     dufs
   ];
 }
