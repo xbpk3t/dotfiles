@@ -19,8 +19,11 @@
       # 5min 熄屏
       {
         timeout = 300;
-        command = "${pkgs.niri}/bin/niri msg action power-off-monitors";
-        resumeCommand = "${pkgs.niri}/bin/niri msg action power-on-monitors";
+#        command = "${pkgs.niri}/bin/niri msg action power-off-monitors";
+#        resumeCommand = "${pkgs.niri}/bin/niri msg action power-on-monitors";
+
+        command = "${pkgs.hyprland}/bin/hyprctl dispatch dpms off";
+        resumeCommand = "${pkgs.hyprland}/bin/hyprctl dispatch dpms on";
       }
 
       # Lock screen after another 5 minutes (total 10 min inactivity)
