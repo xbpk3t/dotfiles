@@ -2,7 +2,8 @@
   modules.desktop = {
     nvidia.enable = true;
 
-    niri.enable = true;
+    niri.enable = false;
+    hyprland.enable = true;
 
     zed.enable = false;
 
