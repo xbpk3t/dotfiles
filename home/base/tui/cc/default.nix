@@ -181,4 +181,7 @@ in {
       };
     };
   };
+
+  # Allow Home Manager to overwrite ~/.codex/config.toml without backups/prompts
+  home.file.".codex/config.toml".force = true;
 }
