@@ -106,12 +106,17 @@
 
   programs.helix = {
     enable = true;
+
+    defaultEditor = true;
+
     settings = {
       editor = {
         color-modes = true;
         bufferline = "multiple";
 
         #        clipboard = "system";  # 自动选择（推荐）
+
+        # soft-wrap = true;
 
         lsp = {
           display-messages = true;
@@ -135,6 +140,37 @@
         };
 
         whitespace.render.tab = "all";
+
+        idle-timeout = 0;
+        completion-trigger-len = 1;
+
+        line-number = "relative";
+
+        file-picker.hidden = false;
+
+        end-of-line-diagnostics = "hint";
+        inline-diagnostics.cursor-line = "warning";
+        soft-wrap = {
+          enable = true;
+          # 下面这些可选，根据自己喜好开：
+          # max-wrap = 25;
+          # max-indent-retain = 0;
+          # wrap-indicator = "";
+        };
+
+        # ------ 自动保存（auto-save）------
+        # Helix 新版已经支持自动保存，包括“延时保存”和“失去焦点时保存”:contentReference[oaicite:0]{index=0}
+        auto-save = {
+          # 失去终端焦点时保存（切到别的窗口 / 切桌面等）
+          focus-lost = true;
+
+          # 修改后一段时间自动保存
+          after-delay = {
+            enable = true;
+            # 毫秒：3000 = 3 秒
+            timeout = 3000;
+          };
+        };
       };
       keys = {
         normal = {

@@ -1,6 +1,4 @@
 ---
-
-
 pwgen:
   description: pwgen
   icon: pwgen
@@ -12,12 +10,10 @@ snippet:
   icon: "text-snippet"
   binary: raffi-snippet
 
-
 gh:
   description: gh
   icon: github
   binary: raffi-gh
-
 
 gh-search:
   description: ghs
@@ -26,8 +22,6 @@ gh-search:
   args:
     - "--search-url"
     - "https://www.github.com/search?q={{query}}&type=repositories"
-
-
 
 cc:
   description: cc
@@ -87,7 +81,6 @@ translate:
   args:
     - https://app.immersivetranslate.com/text#zh-CN/en
 
-
 bz:
   description: bz
   icon: bz
@@ -95,7 +88,6 @@ bz:
   args:
     - "--search-url"
     - "https://search.bilibili.com/all?keyword={{query}}"
-
 
 #
 zashboard:
@@ -154,7 +146,29 @@ blog:
   args:
     - "https://blog.lucc.dev/"
 
+beszel:
+  description: beszel
+  binary: xdg-open
+  args:
+    - https://beszel.lucc.dev
 
+pan:
+  description: pan
+  binary: xdg-open
+  args:
+    - https://pan.lucc.dev
+
+portainer:
+  description: portainer
+  binary: xdg-open
+  args:
+    - https://pt.lucc.dev
+
+n8n:
+  description: n8n
+  binary: xdg-open
+  args:
+    - https://n8n.lucc.dev
 
 cws:
   description: cws
@@ -302,8 +316,6 @@ markdown-preview:
   args:
     - https://hackmd.io/
 
-
-
 reddit-hotlist:
   description: reddit-hotlist
   icon: reddit-hotlist
@@ -450,7 +462,6 @@ chatgpt:
   args:
     - "https://chatgpt.com/"
 
-
 fofa:
   description: fofa
   icon: fofa
@@ -470,7 +481,6 @@ pm:
 #  binary: xdg-open
 #  args:
 #    - "https://open.bigmodel.cn/finance-center/finance/overview"
-
 
 onlinetools.com:
   description: onlinetools.com
@@ -506,7 +516,6 @@ fastsend:
   binary: xdg-open
   args:
     - "https://fastsend.ing/zh"
-
 
 youtube-music:
   description: youm
@@ -548,7 +557,6 @@ edgeone:
   binary: xdg-open
   args:
     - https://console.tencentcloud.com/edgeone/
-
 
 flomo:
   description: flomo
@@ -617,14 +625,11 @@ gg:
     - "--prompt"
     - "google: "
 
-
-
 ap-news:
   description: APNews
   binary: xdg-open
   args:
     - https://apnews.com/world-news
-
 
 DMIT:
   description: DMIT
