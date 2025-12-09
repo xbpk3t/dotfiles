@@ -1,7 +1,13 @@
 {lib, ...}: let
-  # Always talk HTTPS to backends. If a service only exposes HTTP, set up TLS there first
-  # or revert this helper locally.
-  upstream = port: "https://127.0.0.1:${toString port}";
+  # 根据服务决定是否对回源启用 HTTPS；允许按域名逐个关闭。
+  upstream = {
+    port,
+    httpsUpstream,
+  }: "${
+    if httpsUpstream
+    then "https"
+    else "http"
+  }://127.0.0.1:${toString port}";
 
   # Per‑vhost defaults so adding new domains only requires mkProxy entry.
   vhostDefaults = {
@@ -26,16 +32,22 @@
     ];
   };
 
-  mkProxy = port:
+  mkProxy = {
+    port,
+    httpsUpstream ? false,
+  }:
     vhostDefaults
     // {
       locations."/" = {
-        proxyPass = upstream port;
+        proxyPass = upstream {inherit port httpsUpstream;};
         proxyWebsockets = true;
-        extraConfig = ''
-          proxy_ssl_server_name on;
-          proxy_ssl_verify off;  # backends often use self-signed/internal certs
-        '';
+        extraConfig =
+          if httpsUpstream
+          then ''
+            proxy_ssl_server_name on;
+            proxy_ssl_verify off;  # backends often use self-signed/internal certs
+          ''
+          else "";
       };
     };
 
@@ -51,11 +63,14 @@ in {
     recommendedTlsSettings = true;
 
     virtualHosts = {
-      "beszel.lucc.dev" = mkProxy 8090;
-      "rsshub.lucc.dev" = mkProxy 1200;
-      "pan.lucc.dev" = mkProxy 5244;
-      "pt.lucc.dev" = mkProxy 9443;
-      "n8n.lucc.dev" = mkProxy 5678;
+      "beszel.lucc.dev" = mkProxy {port = 8090;};
+      "rsshub.lucc.dev" = mkProxy {port = 1200;};
+      "pan.lucc.dev" = mkProxy {port = 5244;};
+      "pt.lucc.dev" = mkProxy {
+        port = 9443;
+        httpsUpstream = true;
+      };
+      "n8n.lucc.dev" = mkProxy {port = 5678;};
 
       # "rss.lucc.dev" = mkProxy 5254;
       # "uptime.lucc.dev" = mkProxy 3001;
