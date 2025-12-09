@@ -8,6 +8,7 @@
 }:
 with lib; let
   cfgWayland = config.modules.desktop.wayland;
+  cfgGnome = config.modules.desktop.gnome or {};
 in {
   imports = mylib.scanPaths ./.;
 
@@ -18,7 +19,15 @@ in {
   };
 
   config = mkMerge [
-    (mkIf cfgWayland.enable {
+    (mkIf cfgGnome.enable {
+      # GNOME 走 gdm + gnome-shell，Wayland 优先
+      services.greetd.enable = false;
+
+      # GNOME 相关设置在 modules/nixos/desktop/gnome.nix 中完成
+      # 这里仅保证 Wayland 图形目标启用
+      systemd.defaultUnit = "graphical.target";
+    })
+    (mkIf (cfgWayland.enable && (!cfgGnome.enable)) {
       ####################################################################
       #  NixOS's Configuration for Wayland based Window Manager
       ####################################################################

@@ -72,7 +72,11 @@ in {
   # NOTE: nixpkgs.config.allowUnfree is already set in genSpecialArgs (outputs/default.nix)
   # Do NOT set it here when using specialArgs.pkgs as it will be ignored and cause warnings
 
-  modules.desktop.wayland.enable = true;
+  # 切换到 GNOME（Wayland 默认），避免 greetd/hyprland 冲突
+  modules.desktop = {
+    wayland.enable = false;
+    gnome.enable = true;
+  };
 
   # Set system state version
   system.stateVersion = "24.11";
