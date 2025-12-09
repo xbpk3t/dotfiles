@@ -24,7 +24,7 @@
     sessionVariables =
       {
         # 通用配置
-        EDITOR = "nvim";
+        # EDITOR = "nvim";
         # BROWSER = "chromium-browser";
         GITHUB_TOKEN = "$(gh auth token)";
         PNPM_HOME = "$HOME/.local/share/pnpm";
@@ -237,7 +237,10 @@
     fd = {
       enable = true;
       hidden = true;
-      ignores = [".git/" "node_modules/"];
+      ignores = [
+        ".git/"
+        "node_modules/"
+      ];
     };
 
     # Better grep
