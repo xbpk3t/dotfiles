@@ -42,9 +42,7 @@
     # imv
 
     wl-clipboard # copying and pasting
-    hyprpicker # color picker
     brightnessctl
-    hyprshot # screen shot
     wf-recorder # screen recording
     # audio
     alsa-utils # provides amixer/alsamixer/...

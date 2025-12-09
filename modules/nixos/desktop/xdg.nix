@@ -13,7 +13,6 @@
           "com.raggesilver.BlackBox.desktop"
           "org.gnome.Terminal.desktop"
         ];
-      niri = my_terminal_desktop;
       default = my_terminal_desktop;
     };
   };

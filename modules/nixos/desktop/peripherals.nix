@@ -59,9 +59,6 @@
   services = {
     # Enable CUPS to print documents.
     printing.enable = lib.mkDefault false;
-    # Enable geolocation services.
-    geoclue2.enable = lib.mkDefault false;
-
     udev.packages = with pkgs; [
       gnome-settings-daemon
       # platformio # udev rules for platformio
