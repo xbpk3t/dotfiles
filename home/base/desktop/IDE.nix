@@ -20,7 +20,8 @@
 # };
 {
   home.packages = with pkgs; [
-    jetbrains.goland
+    # jetbrains.goland
+    goland-2025-3
   ];
 
   # https://mynixos.com/home-manager/options/programs.vscode
