@@ -52,6 +52,7 @@
         "modules/base"
         "modules/nixos/base"
         "modules/nixos/desktop"
+        "modules/nixos/extra/devtools-nix.nix"
       ];
     home-modules = map mylib.relativeToRoot [
       "secrets/default.nix"
