@@ -4,7 +4,7 @@
   myvars,
   ...
 }: let
-  fuzzelPath = "${myvars.projectRoot}/home/nixos/gui/fuzzel";
+  fuzzelPath = "${myvars.projectRoot}/home/nixos/desktop/fuzzel";
 in {
   home.packages = with pkgs; [
     raffi
