@@ -11,7 +11,7 @@ in {
   };
 
   config = mkIf cfg.enable {
-    # https://mynixos.com/home-manager/options/programs.wezterm
+    # https://mynixos.com/home-manager/optiokns/programs.wezterm
     # 几乎完美的wezterm配置
     # 这里需要注意，使用stylix时，会自动配置wezterm的主配置文件 wezterm.lua，具体参考
     # https://github.com/nix-community/stylix/blob/master/modules/wezterm/hm.nix

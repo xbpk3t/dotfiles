@@ -1,8 +1,4 @@
-{
-  pkgs,
-  lib,
-  ...
-}:
+{pkgs, ...}:
 # media - control and enjoy audio/video
 {
   home.packages = with pkgs; [
@@ -21,12 +17,6 @@
 
     nvitop
   ];
-
-  programs.mpv = {
-    enable = lib.mkDefault false;
-    defaultProfiles = ["gpu-hq"];
-    scripts = [pkgs.mpvScripts.mpris];
-  };
 
   services = {
     playerctld.enable = true;
