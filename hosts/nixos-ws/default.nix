@@ -56,7 +56,6 @@ in {
 
   # 切换到 GNOME（Wayland 默认），避免 greetd/hyprland 冲突
   modules.desktop = {
-    wayland.enable = false;
     gnome.enable = true;
   };
 
@@ -72,7 +71,7 @@ in {
   modules.networking.singbox.enable = true;
 
   # Allow user-space input remapping tools (xremap)
-  hardware.uinput.enable = true;
+  # hardware.uinput.enable = true;
 
   # k3s Kubernetes with PAG stack
   # modules.k3s = {
