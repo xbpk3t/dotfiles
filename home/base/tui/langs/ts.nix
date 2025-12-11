@@ -1,28 +1,5 @@
 {pkgs, ...}: {
   home.packages = with pkgs; [
-    # https://mynixos.com/nixpkgs/package/devenv
-    devenv
-
-    # Python
-    python313
-
-    # Rust (pure nixpkgs toolchain)
-    rustc
-    cargo
-    rustfmt
-    clippy
-    rust-analyzer
-
-    # 其他语言
-    # php
-    # elixir
-    # android-tools
-
-    lua
-
-    # haskell
-    # cabal-install
-
     # Node.js 生态
     nodejs
     nodePackages.eslint
