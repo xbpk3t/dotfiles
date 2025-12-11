@@ -10,7 +10,7 @@
   };
 
   # Deploy KDL configuration file
-  xdg.configFile."zellij/config.kdl".source = ./zellij-config.kdl;
+  xdg.configFile."zellij/config.kdl".source = ./config.kdl;
 
   # only works in bash/zsh, not nushell
   home.shellAliases = {

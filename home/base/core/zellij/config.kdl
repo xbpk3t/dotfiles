@@ -177,10 +177,6 @@ layout {
                     command_git_branch_format "#[fg=#89B4FA] {stdout} "
                     command_git_branch_interval "10"
                     command_git_branch_rendermode "static"
-                    // Datetime
-                    datetime "#[fg=#6C7086,bold] {format} "
-                    datetime_format "%Y-%m-%d %H:%M"
-                    datetime_timezone "Asia/Shanghai"
                 }
             }
         }
