@@ -9,6 +9,8 @@ in {
   userfullname = "lucas";
   mail = "yyzw@live.com";
 
+  timeZone = "Asia/Shanghai";
+
   networking = import ./networking.nix {inherit lib;};
 
   # Global system preferences (used by all hosts)
