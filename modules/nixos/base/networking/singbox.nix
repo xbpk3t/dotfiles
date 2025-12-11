@@ -37,65 +37,10 @@ in {
     # 独立的配置下载服务，与 sing-box 主服务解耦
     systemd.services.singbox-update-config = {
       description = "Update Sing-box Configuration from Subscription URL";
-
-      # 使用 systemd 内置的重试机制，比自己写 shell 脚本更优雅
-      #      serviceConfig = {
-      #        Type = "oneshot";
-      #        User = "root";
-      #
-      #        # 重试配置：失败后自动重试，使用指数退避
-      #        Restart = "on-failure";
-      #      };
-
       # StartLimit* 作用于 [Unit]，在 NixOS 中需要放在 serviceConfig 之外
       startLimitBurst = 3; # 最多重试 3 次
       startLimitIntervalSec = 3600; # 1 小时内最多重试 5 次 # 1h -> 3600s
-
       script = ''
-        set -euo pipefail
-
-        # Read subscription URL from secret
-        SUBSCRIPTION_URL=$(cat ${config.sops.secrets.singboxUrl.path})
-
-        # Create config directory if it doesn't exist
-        mkdir -p /etc/sing-box
-
-        # 临时文件，下载成功后再替换正式配置
-        TEMP_CONFIG="/etc/sing-box/config.json.tmp"
-        CONFIG_FILE="/etc/sing-box/config.json"
-
-        echo "Downloading sing-box configuration from subscription URL..."
-
-        # Download configuration with retry and timeout
-        # -f: fail silently on HTTP errors
-        # -S: show error even with -s
-        # -L: follow redirects
-        # --retry 3: retry 3 times on transient errors
-        # --retry-delay 5: wait 5 seconds between retries
-        # --retry-max-time 60: max 60 seconds for all retries
-        # --connect-timeout 30: connection timeout 30 seconds
-        # --max-time 120: max total time 120 seconds
-        ${pkgs.curl}/bin/curl -fsSL \
-          --retry 3 \
-          --retry-delay 5 \
-          --retry-max-time 60 \
-          --connect-timeout 30 \
-          --max-time 120 \
-          "$SUBSCRIPTION_URL" \
-          -o "$TEMP_CONFIG"
-
-        # Verify the downloaded file is valid JSON
-        if ! ${pkgs.jq}/bin/jq empty "$TEMP_CONFIG" 2>/dev/null; then
-          echo "Error: Downloaded configuration is not valid JSON"
-          rm -f "$TEMP_CONFIG"
-          exit 1
-        fi
-
-        # 原子性替换配置文件
-        mv -f "$TEMP_CONFIG" "$CONFIG_FILE"
-        chmod 600 "$CONFIG_FILE"
-
-        echo "Sing-box configuration updated successfully"
       '';
     };
 
