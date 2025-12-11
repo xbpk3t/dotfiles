@@ -1,5 +1,4 @@
 {
-  pkgs,
   config,
   lib,
   ...
@@ -29,15 +28,6 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    home.packages = with pkgs; [
-      termscp
-      sshpass
-
-      # https://mynixos.com/nixpkgs/package/lazyssh
-      # https://github.com/Adembc/lazyssh
-      lazyssh
-    ];
-
     programs.ssh = {
       enable = true;
       enableDefaultConfig = false;
