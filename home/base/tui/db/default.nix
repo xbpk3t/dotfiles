@@ -11,5 +11,11 @@
     #    pgcli
     #    mongosh
     #    sqlite
+
+    # https://mynixos.com/nixpkgs/package/duckdb
+    duckdb
+
+    # https://mynixos.com/nixpkgs/package/csvkit
+    csvkit
   ];
 }

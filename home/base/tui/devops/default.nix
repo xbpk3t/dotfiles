@@ -41,7 +41,6 @@
     # 其他实用工具
     watch
     rsync
-    cowsay
 
     # 证书和密钥管理
     openssl
