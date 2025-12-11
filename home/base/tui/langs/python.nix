@@ -1,4 +1,8 @@
-_: {
+{pkgs, ...}: {
+  home.packages = with pkgs; [
+    python313
+  ];
+
   # https://mynixos.com/home-manager/options/programs.uv
   programs.uv = {
     enable = true;

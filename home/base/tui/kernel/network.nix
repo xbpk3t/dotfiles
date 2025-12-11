@@ -22,6 +22,7 @@
     # wifi with TUI
     # https://github.com/pythops/impala
     # https://mynixos.com/nixpkgs/package/impala
+    # 只有个人的minimal机器需要（VPS或者desktop都用不到）
     impala
 
     # dis
