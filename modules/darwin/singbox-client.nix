@@ -17,7 +17,11 @@ in {
     launchd.daemons.singbox-update-config = {
       serviceConfig = {
         Label = "local.singbox.update-config";
-        ProgramArguments = ["/etc/sing-box/update-config.sh"];
+        ProgramArguments = [
+          "${pkgs.zsh}/bin/zsh"
+          "-c"
+          ''${pkgs.task}/bin/task -g singbox:update-config''
+        ];
 
         # 系统启动后 5 分钟首次运行
         RunAtLoad = true;

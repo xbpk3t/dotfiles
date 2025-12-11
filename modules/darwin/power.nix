@@ -1,18 +1,27 @@
-# Darwin power management configuration
-# macOS-specific power settings and optimizations
 _: {
   # Power management settings
   # Note: Most power settings in macOS are managed through System Preferences
   # or pmset command line tool. nix-darwin has limited power management options.
+  # https://mynixos.com/nix-darwin/options/power
 
   power = {
-    restartAfterFreeze = true; # 系统冻结后自动重启
+    # 系统冻结后自动重启
+    restartAfterFreeze = true;
+
+    restartAfterPowerFailure = true;
+
     # restartAfterPowerFailure = false; # 断电后自动开机 [Option is not supported on all devices.] 我的机器不支持该key
     sleep = {
-      allowSleepByPowerButton = true; # 允许电源键触发睡眠（macos本身默认就是短按电源键触发睡眠，所以使用true）
-      computer = 20; # 20 分钟后系统睡眠
-      display = 5; # 5 分钟后屏幕关闭
-      harddisk = 15; # 15 分钟后硬盘睡眠
+      # 允许电源键触发睡眠（macos本身默认就是短按电源键触发睡眠，所以使用true）
+      allowSleepByPowerButton = true;
+
+      # 20 分钟后系统睡眠
+      computer = 20;
+      # 5 分钟后屏幕关闭
+      display = 5;
+      # 15 分钟后硬盘睡眠
+      # 控制机械盘空转后多久停转(sudo.is (https://www.sudo.is/docs/macos/))。SSD/NVMe 没有马达可停，所以“Put hard disks to sleep” 对内置 SSD 影响极小；多数资料称对 SSD 没收益，甚至可能因少数固件 bug 造成卡 (pcoutlet.com (https://pcoutlet.com/parts/storage-drives/what-is-put-hard-disks-to-sleep-when-possible))
+      harddisk = 15;
     };
   };
 
