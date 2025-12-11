@@ -13,7 +13,7 @@
           "${pkgs.zsh}/bin/zsh"
           "-c"
           ''
-            task -g mac-cleanup:cron-task
+            ${pkgs.task}/bin/task -g mac-cleanup:cron-task
           ''
         ];
         StartCalendarInterval = [
