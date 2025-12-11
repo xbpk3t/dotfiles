@@ -21,12 +21,13 @@
 
     # Network services configuration to suppress warnings
     # This tells nix-darwin which network services to manage
-    knownNetworkServices = [
-      "Wi-Fi"
-      "Ethernet"
-      "USB 10/100/1000 LAN"
-      "Thunderbolt Bridge"
-    ];
+    # 不需要手动列出。若接口名不匹配只会产生警告，可留空让 nix-darwin 自动发现。
+    #    knownNetworkServices = [
+    #      "Wi-Fi"
+    #      "Ethernet"
+    #      "USB 10/100/1000 LAN"
+    #      "Thunderbolt Bridge"
+    #    ];
 
     # DNS configuration
     dns = [
