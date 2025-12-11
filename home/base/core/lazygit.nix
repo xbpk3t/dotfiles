@@ -1,7 +1,9 @@
 {pkgs, ...}: {
   home.packages = with pkgs; [
     lazygit
-    delta # 新增 delta 以支持 side-by-side diff
+    # 新增 delta 以支持 side-by-side diff
+    # lazygit 对 delta 依赖
+    delta
   ];
 
   # https://mynixos.com/nixpkgs/options/programs.lazygit
