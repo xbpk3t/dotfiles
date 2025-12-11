@@ -44,12 +44,11 @@ includes:
   me: taskfile/mac/Taskfile.me.yml
   alfred: taskfile/mac/Taskfile.alfred.yml
   pnpm: taskfile/mac/Taskfile.pnpm.yml
-  ww: taskfile/mac/Taskfile.bookmark.yml
-  wf: taskfile/mac/Taskfile.workflow.yml
-  z: taskfile/mac/Taskfile.z.yml
-  ss: taskfile/mac/Taskfile.snippets.yml
   ruler: taskfile/mac/Taskfile.ruler.yml
+  singbox: taskfile/mac/Taskfile.singbox.yml
 
+
+  # works
   sec: taskfile/works/Taskfile.sec.yml
 
 tasks:
