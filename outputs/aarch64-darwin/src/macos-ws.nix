@@ -44,7 +44,6 @@
         # Host-specific configuration
         "hosts/${name}/default.nix"
         "secrets/default.nix"
-        "modules/base"
         "modules/darwin"
       ];
     home-modules = map mylib.relativeToRoot [
