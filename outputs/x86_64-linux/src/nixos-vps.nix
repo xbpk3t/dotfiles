@@ -39,7 +39,6 @@
       ++ map mylib.relativeToRoot [
         "hosts/${name}/default.nix"
         "secrets/default.nix"
-        "modules/base"
         "modules/nixos/base"
         "modules/nixos/vps"
       ];
