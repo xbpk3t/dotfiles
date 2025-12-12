@@ -49,7 +49,6 @@
         "hosts/${name}/default.nix"
         # common
         "secrets/default.nix"
-        "modules/base"
         "modules/nixos/base"
         "modules/nixos/desktop"
         "modules/nixos/extra/devtools-nix.nix"
