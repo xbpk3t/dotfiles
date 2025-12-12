@@ -10,5 +10,15 @@
     # https://mynixos.com/nixpkgs/package/john
     # used to crack passwords
     john
+
+    # https://github.com/bpftrace/bpftrace
+    # BPF trace：内核动态跟踪
+    bpftrace
+
+    # 监控当前运行的 BPF 程序
+    bpftop
+
+    # BPF 可视化流量/包速率监控
+    bpfmon
   ];
 }
