@@ -1,47 +1,5 @@
-# Cross-platform shared package management
-# Contains packages common to all platforms but not in minimal set
-# Organized by category in a single systemPackages definition
 {pkgs, ...}: {
-  environment.systemPackages = with pkgs; [
-    # Basic utilities
-    curl
-    wget
-
-    tree
-
-    zip
-    unzip
-
-    # System utilities
-    screen
-
-    # Development tools
-    gcc
-    gnumake
-    cmake
-
-    dateutils # 操作日期和时间表达式 dateadd、datediff、strptime
-
-    # 文件处理
-    tree
-    file
-    which
-
-    # 压缩工具
-    zip
-    unzip
-    p7zip
-    xz
-    zstd
-
-    gnupg
-    # 挪到base里，因为darwin和nixos都需要使用sops-nix
-    sops
-    age
-    openssh
-
-    croc # https://github.com/schollz/croc
-
+  home.packages = with pkgs; [
     # 磁盘健康/检测
     # https://mynixos.com/nixpkgs/package/smartmontools
     # smartctl（smartmontools）：读/写盘的 S.M.A.R.T. 数据，支持 SATA/USB/部分 NVMe，快速健康概览、离线/短测。
