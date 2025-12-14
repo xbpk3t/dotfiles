@@ -26,7 +26,7 @@
       "goland"
       "tencent-lemon"
       "wechat"
-
+      "firefox"
       # "reqable"
       # "wireshark-app"
       # "google-chrome"
