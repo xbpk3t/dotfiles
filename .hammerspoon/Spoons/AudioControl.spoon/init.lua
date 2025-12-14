@@ -70,7 +70,7 @@ local function isHeadphoneConnected()
   local deviceName = currentDevice:name()
   -- 检查设备名称是否包含耳机相关关键词
   local headphoneKeywords = {
-    "headphone", "headset", "earphone", "earbud", "airpods", "beats",
+    "headphone", "headset", "earphone", "earbud", "airpods", "beats", "FreeBuds",
     "耳机", "耳麦", "头戴", "入耳"
   }
 
