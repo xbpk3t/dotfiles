@@ -42,15 +42,15 @@
       [inputs.sops-nix.darwinModules.sops]
       ++ map mylib.relativeToRoot [
         # Host-specific configuration
-        "hosts/${name}/default.nix"
-        "secrets/default.nix"
+        "hosts/${name}/home.nix"
+        "secrets/home.nix"
         "modules/darwin"
       ];
     home-modules = map mylib.relativeToRoot [
-      "secrets/default.nix"
+      "secrets/home.nix"
       # Host-specific home configuration
       "hosts/${name}/home.nix"
-      "home/base"
+      "home/base/core"
       "home/darwin"
     ];
   };
