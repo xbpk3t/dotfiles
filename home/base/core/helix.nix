@@ -108,12 +108,6 @@
     languages = {
       language = [
         {
-          name = "nix";
-          auto-format = true;
-          formatter.command = "${nixfmt}/bin/nixfmt";
-          language-servers = ["nil"];
-        }
-        {
           name = "rust";
           auto-format = true;
           language-servers = ["rust-analyzer"];
@@ -121,10 +115,6 @@
       ];
       language-server.rust-analyzer.config.check = {
         command = "clippy";
-      };
-      language-server.nil = {
-        commands = "${inputs.nil}/bin/nil";
-        config = {};
       };
     };
   };
