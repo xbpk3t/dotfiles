@@ -22,6 +22,8 @@
       Defaults env_keep += "AWS_*"
       Defaults env_keep += "GOOGLE_*"
       Defaults env_keep += "DOCKER_*"
+      # Keep Nix-related paths/certs so sudoed nix stays usable
+      Defaults env_keep += "PATH NIX_PATH NIX_SSL_CERT_FILE"
 
       # Security settings
       Defaults !tty_tickets
@@ -31,7 +33,8 @@
       Defaults passwd_tries=3
       Defaults badpass_message="Password incorrect, please try again"
       Defaults passprompt="[sudo] password for %p: "
-      Defaults secure_path="/etc/profiles/per-user/%p/bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+      # 依次是 Determinate Nix
+      Defaults secure_path="/nix/var/nix/profiles/default/bin:/etc/profiles/per-user/%p/bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 
       # Passwordless sudo for admin group (optional, uncomment if needed)
       # %admin ALL=(ALL) NOPASSWD: ALL
