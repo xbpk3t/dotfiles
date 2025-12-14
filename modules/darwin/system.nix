@@ -43,7 +43,7 @@
       NSGlobalDomain = {
         # Time configuration
         AppleICUForce24HourTime = true;
-        AppleInterfaceStyle = null; # Dark or null for light mode
+        AppleInterfaceStyle = "Dark"; # Dark or null for light mode
 
         # Keyboard settings
         KeyRepeat = 2; # Set to fastest
