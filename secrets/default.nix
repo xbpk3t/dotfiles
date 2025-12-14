@@ -12,6 +12,10 @@
       if pkgs.stdenv.isDarwin
       then "staff"
       else "users";
+    rootGroup =
+      if pkgs.stdenv.isDarwin
+      then "wheel"
+      else "root";
     homePath =
       if pkgs.stdenv.isDarwin
       then "/Users"
@@ -36,7 +40,7 @@
     }
     // lib.optionalAttrs isSystemConfig {
       owner = "root";
-      group = "root";
+      group = platform.rootGroup;
     };
 in {
   # https://github.com/Guno327/nixcfg/tree/main/secrets sops相关配置参考该repo
