@@ -1,6 +1,6 @@
 {pkgs, ...}: {
   # Nix/NixOS 开发与调试常用 CLI
-  environment.systemPackages = with pkgs; [
+  home.packages = with pkgs; [
     # === 代码检查与格式化 ===
     # 发现 nix 里未使用的变量/绑定
     deadnix
