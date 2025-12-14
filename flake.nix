@@ -110,13 +110,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # mac-app-util - Fix .app programs installed by Nix on Mac
-    # https://github.com/hraban/mac-app-util
-    mac-app-util = {
-      url = "github:hraban/mac-app-util";
-      inputs.nixpkgs.follows = "nixpkgs-darwin";
-    };
-
     # colmena - NixOS deployment tool
     # https://github.com/zhaofengli/colmena
     colmena = {
