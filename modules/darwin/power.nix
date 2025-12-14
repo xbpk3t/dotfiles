@@ -7,8 +7,8 @@ _: {
   power = {
     # 系统冻结后自动重启
     restartAfterFreeze = true;
-
-    restartAfterPowerFailure = true;
+    # error: restarting after power failure is not supported on your machine. Please ensure that `power.restartAfterPowerFailure` is not set.
+    # restartAfterPowerFailure = true;
 
     # restartAfterPowerFailure = false; # 断电后自动开机 [Option is not supported on all devices.] 我的机器不支持该key
     sleep = {
