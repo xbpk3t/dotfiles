@@ -92,10 +92,10 @@
     };
 
     targets = {
-      qt = {
-        enable = true;
-        platform = "qtct";
-      };
+      #qt = {
+      #  enable = true;
+      #  platform = "qtct";
+      #};
 
       rofi.enable = false;
       zed.enable = false;
@@ -120,10 +120,10 @@
     # swaybg
 
     # https://mynixos.com/nixpkgs/package/bibata-cursors
-    bibata-cursors
+    # bibata-cursors
 
     # https://github.com/ful1e5/apple_cursor
     # https://mynixos.com/nixpkgs/package/apple-cursor
-    apple-cursor
+    # apple-cursor
   ];
 }

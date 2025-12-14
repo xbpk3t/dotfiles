@@ -29,9 +29,9 @@
         GITHUB_TOKEN = "$(gh auth token)";
         PNPM_HOME = "$HOME/.local/share/pnpm";
 
-        PWGEN_SECRET = builtins.readFile config.sops.secrets.pwgenSk.path;
-        MOBILE = builtins.readFile config.sops.secrets.meMobile.path;
-        PASS = builtins.readFile config.sops.secrets.mePass.path;
+        # PWGEN_SECRET = builtins.readFile config.sops.secrets.pwgenSk.path;
+        # MOBILE = builtins.readFile config.sops.secrets.meMobile.path;
+        # PASS = builtins.readFile config.sops.secrets.mePass.path;
 
         # GitHub API rate limit fix
         # Commented out because it causes GitHub API 401 errors
