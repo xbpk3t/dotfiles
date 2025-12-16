@@ -30,15 +30,11 @@
     #    ];
 
     # DNS configuration
-    dns = [
-      "1.1.1.1" # Cloudflare
-      "1.0.0.1" # Cloudflare secondary
-      "8.8.8.8" # Google
-      "8.8.4.4" # Google secondary
-    ];
+    # 不强制公共 DNS，交给系统/路由或 TUN 下发，避免被拦截时解析失败。
+    dns = lib.mkDefault [];
 
-    # DNS search domains
-    search = ["home" "local" "lan"];
+    # DNS search domains（默认空）
+    search = lib.mkDefault [];
 
     wakeOnLan = {
       enable = false;

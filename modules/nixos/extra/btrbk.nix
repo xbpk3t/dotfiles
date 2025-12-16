@@ -16,6 +16,8 @@
   #
   # ==================================================================
 
+  # 仅 btrfs 且需要快照/备份的主机才用，适合放到 homelab 或 server-backup profile，下沉出 base。
+
   services.btrbk.instances.btrbk = {
     # How often this btrbk instance is started. See systemd.time(7) for more information about the format.
     onCalendar = "Tue,Sat *-*-* 3:45:20";

@@ -8,7 +8,7 @@ with lib; let
   cfg = config.modules.desktop.gnome;
 in {
   options.modules.desktop.gnome = {
-    enable = mkEnableOption "GNOME desktop (GDM + gnome-shell, Wayland-first)";
+    enable = mkEnableOption "GNOME desktop";
   };
 
   config = mkIf cfg.enable {
@@ -19,11 +19,15 @@ in {
     services = {
       xserver = {
         enable = true;
-        displayManager.gdm = {
-          enable = true;
-          wayland = true;
-        };
-        desktopManager.gnome.enable = true;
+      };
+
+      displayManager.gdm = {
+        enable = true;
+        wayland = true;
+      };
+
+      desktopManager = {
+        gnome.enable = true;
       };
 
       gnome = {
@@ -40,6 +44,9 @@ in {
       # 挂载/回收站等桌面功能
       # GNOME 的回收站/挂载/网络位置依赖它，NixOS gnome 模块未必自动开启，建议保留。
       gvfs.enable = true;
+      udisks2.enable = true;
+      # 开缩略图守护进程（会自动带上对应包）
+      tumbler.enable = true;
 
       # enable bluetooth & gui pairing tools - blueman
       # or you can use cli:
@@ -64,5 +71,17 @@ in {
       gnome-tweaks
       gnomeExtensions.appindicator
     ];
+
+    # KDE Connect 端口仅在 GNOME 桌面启用时开放
+    networking.firewall = {
+      allowedTCPPorts = [
+        1714
+        1764
+      ];
+      allowedUDPPorts = [
+        1714
+        1764
+      ];
+    };
   };
 }
