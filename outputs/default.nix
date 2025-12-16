@@ -56,9 +56,9 @@
 
   # modules for each supported system
   darwinSystems = {
-    x86_64-darwin = import ./x86_64-darwin (args inputs
+    aarch64-darwin = import ./aarch64-darwin (args inputs
       // {
-        system = "x86_64-darwin";
+        system = "aarch64-darwin";
         inherit self;
       });
   };

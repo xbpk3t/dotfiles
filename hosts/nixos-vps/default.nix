@@ -20,28 +20,23 @@ in {
     grub = {
       enable = true;
       version = 2;
-      device = lib.mkDefault diskDevice;
-      efiSupport = lib.mkDefault true;
-      efiInstallAsRemovable = lib.mkDefault true;
+      device = diskDevice;
+      efiSupport = true;
+      efiInstallAsRemovable = true;
     };
   };
 
   networking = {
-    hostName = lib.mkDefault "nixos-vps";
-    useDHCP = lib.mkDefault true;
-    nameservers = lib.mkDefault nameservers;
+    hostName = "nixos-vps";
+    useDHCP = true;
+    nameservers = nameservers;
     useHostResolvConf = lib.mkForce false;
   };
 
   services.resolved = {
-    enable = lib.mkDefault true;
+    enable = true;
     fallbackDns = nameservers;
   };
-
-  services.vpsSecurity.enable = lib.mkDefault true;
-
-  # !!!
-  # boot.isContainer = true;
 
   hardware.enableRedistributableFirmware = lib.mkForce false;
 

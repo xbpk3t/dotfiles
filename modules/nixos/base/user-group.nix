@@ -41,6 +41,8 @@
       "wireshark"
       "adbusers" # android debugging
       "libvirtd" # virt-viewer / qemu
+      "input" # allow input event access (xremap etc.)
+      "uinput" # allow creating virtual input devices
     ];
   };
 

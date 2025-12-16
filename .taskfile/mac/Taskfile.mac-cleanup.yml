@@ -289,7 +289,19 @@ tasks:
 
 
 
-
+  cron-task:
+    desc: "Run scheduled system cleanup"
+    vars:
+      TIMESTAMP:
+        sh: date +"%Y-%m-%d %H:%M:%S"
+      LOG_FILE: '{{.HOME}}/Library/Logs/system-cleanup.log'
+    cmds:
+      - 'echo "{{.TIMESTAMP}}: Starting system cleanup" >> "{{.LOG_FILE}}"'
+      - 'find "$HOME/Library/Caches" -type f -mtime +30 -delete >> "{{.LOG_FILE}}" 2>&1'
+      - 'find "$HOME/Library/Logs" -name "*.log" -mtime +30 -size +10M -delete >> "{{.LOG_FILE}}" 2>&1'
+      - task -g brew:cleanup
+      - task -g pnpm:cleanup
+      - 'echo "{{.TIMESTAMP}}: System cleanup completed" >> "{{.LOG_FILE}}"'
       # Execute command if it exists
 #      - if: 'has (index .SERVICES_CMD.map) .SERVICE'
 #        vars:

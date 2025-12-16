@@ -12,7 +12,7 @@
 in {
   format = "json";
   expr = haumea.lib.load {
-    src = ../../fixtures/haumea;
+    src = ../fixtures/haumea;
     inputs = moduleInputs;
   };
 }

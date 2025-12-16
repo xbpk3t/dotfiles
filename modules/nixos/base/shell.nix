@@ -85,7 +85,6 @@
         "correct" # 自动纠正命令拼写错误
         "cdable_vars" # 允许 cd 到变量名
         "check_jobs" # 退出时检查后台任务
-        # "checkwinsize" # 检查窗口大小变化 zsh没有该项，bash的专有option
         "no_case_glob" # 处理忽略大小写的通配符
         "extended_glob" # 启用扩展通配符
         "nomatch" # 如果通配符没有匹配，报错
@@ -93,6 +92,8 @@
         "pushd_ignore_dups" # 忽略 pushd 重复目录
         "pushd_silent" # 静默 pushd
         "auto_pushd" # 自动 pushd
+
+        # "checkwinsize" # 检查窗口大小变化 zsh没有该项，bash的专有option
       ];
     };
   };
