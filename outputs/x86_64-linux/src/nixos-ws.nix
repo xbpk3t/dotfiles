@@ -57,9 +57,6 @@
       # Host-specific home configuration
       "hosts/${name}/home.nix"
       "home/base"
-      # Ensure terminal options (kitty/ghostty) are always in scope for home modules
-      "home/base/desktop/terminal/kitty.nix"
-      "home/base/desktop/terminal/ghostty.nix"
       "home/nixos"
     ];
   };
