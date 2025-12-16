@@ -48,7 +48,14 @@ in {
   # Enable sops
   sops = {
     defaultSopsFile = ./secrets.yaml;
-    age.keyFile = lib.mkDefault "${platform.homePath}/${myvars.username}/.config/sops/age/keys.txt";
+
+    # darwin和linux对于sops的默认path不同
+    # failed to create reader for decrypting sops data key with age: no identity matched any of the recipients. Did not find keys in locations 'SOPS_AGE_SSH_PRIVATE_KEY_FILE','/Users/luck/.ssh/id_rsa', 'SOPS_AGE_KEY','SOPS_AGE_KEY_FILE', and 'SOPS_AGE_KEY_CMD'.
+    age.keyFile =
+      if pkgs.stdenv.isDarwin
+      then "${platform.homePath}/${myvars.username}/Library/Application Support/sops/age/keys.txt"
+      else "${platform.homePath}/${myvars.username}/.config/sops/age/keys.txt";
+
     age.sshKeyPaths = []; # Disable SSH key import
     gnupg.home = null; # Disable GPG key import
 
