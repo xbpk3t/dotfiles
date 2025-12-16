@@ -8,7 +8,7 @@ with lib; let
   cfg = config.services.desktop.aerospace;
 in {
   options.services.desktop.aerospace = {
-    enable = mkEnableOption "ghostty terminal";
+    enable = mkEnableOption "Enable aerospace";
   };
 
   config = mkIf cfg.enable {
