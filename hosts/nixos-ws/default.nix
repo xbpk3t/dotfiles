@@ -17,6 +17,7 @@ in {
     # Include the results of the hardware scan
     ./hardware.nix
     ./nvidia.nix
+    ./home.nix
   ];
 
   # Hostname & NetworkManager (GNOME Wi‑Fi 依赖 NM)

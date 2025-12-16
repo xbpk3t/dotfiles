@@ -1,4 +1,8 @@
-{myvars, lib, ...}: {
+{
+  myvars,
+  lib,
+  ...
+}: {
   # Set your time zone.
   time.timeZone = lib.mkDefault (myvars.timeZone or "Asia/Shanghai");
 

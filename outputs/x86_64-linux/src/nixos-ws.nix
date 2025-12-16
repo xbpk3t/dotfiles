@@ -51,13 +51,15 @@
         "secrets/default.nix"
         "modules/nixos/base"
         "modules/nixos/desktop"
-        "modules/nixos/extra/devtools-nix.nix"
       ];
     home-modules = map mylib.relativeToRoot [
       "secrets/default.nix"
       # Host-specific home configuration
       "hosts/${name}/home.nix"
       "home/base"
+      # Ensure terminal options (kitty/ghostty) are always in scope for home modules
+      "home/base/desktop/terminal/kitty.nix"
+      "home/base/desktop/terminal/ghostty.nix"
       "home/nixos"
     ];
   };

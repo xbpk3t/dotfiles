@@ -11,7 +11,8 @@
     # 三者是互补关系：smartctl/ nvme-cli 负责健康信息，badblocks 做面向介质的全盘扫描。
     # https://mynixos.com/nixpkgs/package/nvme-cli
     # NVMe 健康：nvme smart-log /dev/nvme0
-    nvme-cli
+    # TODO  Package ‘nvme-cli-2.15’ in /nix/store/snv4mwg8fqhabjsh4ckypw0f3wqi4cpj-source/pkgs/by-name/nv/nvme-cli/package.nix:47 is not available on the requested hostPlatform:
+    # nvme-cli
 
     # badblocks（e2fsprogs 内）：逐扇区读写/只读扫描找坏块，时间长，适合深度体检或新盘出厂验证
     # https://mynixos.com/nixpkgs/package/e2fsprogs
