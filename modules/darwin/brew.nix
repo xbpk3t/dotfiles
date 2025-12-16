@@ -19,6 +19,11 @@
   homebrew = {
     enable = true;
 
+    brews = [
+      # https://github.com/gruntwork-io/fetch
+      "fetch"
+    ];
+
     # 以下casks根据重要性排序
     casks = [
       "alfred"

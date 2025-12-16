@@ -3,8 +3,6 @@
   projectRoot = "/home/${username}/Desktop/dotfiles";
 in {
   inherit username projectRoot;
-  # TODO: remove once all modules use projectRoot directly
-  projectDir = projectRoot;
 
   userfullname = "lucas";
   mail = "yyzw@live.com";
@@ -33,11 +31,6 @@ in {
   #    2. Never leave the device and never sent over the network.
   # 2. Or just use hardware security keys like Yubikey/CanoKey.
   mainSshAuthorizedKeys = [
-    # The main ssh keys for daily usage
-    #    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIKlN+Q/GxvwxDX/OAjJHaNFEznEN4Tw4E4TwqQu/eD6 ryan@idols-ai"
-    #    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJwoI5MAogEa726jwwHL5EgM1X/i2A5d2pgV7i7t8fzB ryan@shoukei"
-    #    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDc1PNTXzzvd93E+e9LXvnEzqgUI5gMTEF/IitvzgmL+ ryan@frieren"
-
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDth3yFJZ2p5tID2W2AHI3s6t6B8oU3nSVBIJANNxyIG nixos-cntr"
 
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF7x+rABbX8F5M7o3JhuzC3nifn3/ePgLXp5WaW/8FiE nixos-vps"

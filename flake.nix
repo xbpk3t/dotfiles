@@ -47,7 +47,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    darwin = {
+    nix-darwin = {
       url = "github:lnl7/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
@@ -63,25 +63,11 @@
       inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
 
+    flake-parts.url = "github:hercules-ci/flake-parts";
     # Stylix theming system
     stylix = {
       url = "github:nix-community/stylix";
       inputs.nixpkgs.follows = "nixpkgs-darwin";
-    };
-
-    # haumea for module loading
-    haumea = {
-      url = "github:nix-community/haumea/v0.2.2";
-      inputs.nixpkgs.follows = "nixpkgs-darwin";
-    };
-
-    # namaka for snapshot testing
-    namaka = {
-      url = "github:nix-community/namaka/v0.2.1";
-      inputs = {
-        haumea.follows = "haumea";
-        nixpkgs.follows = "nixpkgs";
-      };
     };
 
     # https://github.com/numtide/flake-utils
@@ -96,6 +82,9 @@
       url = "github:natsukium/mcp-servers-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # nixos-unified for NU autowiring scaffold
+    nixos-unified.url = "github:srid/nixos-unified";
 
     # https://github.com/nix-community/NUR
     nur = {
@@ -118,5 +107,14 @@
     };
   };
 
-  outputs = inputs: import ./outputs inputs;
+  # nixos-unified autowiring; see modules/flake/*
+  outputs = inputs:
+    inputs.nixos-unified.lib.mkFlake {
+      inherit inputs;
+      root = ./.;
+      specialArgs = {
+        mylib = import ./lib { inherit (inputs.nixpkgs) lib; };
+        myvars = import ./vars { inherit (inputs.nixpkgs) lib; };
+      };
+    };
 }

@@ -183,6 +183,7 @@
     };
   };
 
+  # TODO nightlight 本身尚未提供相应配置项，可能需要用该cli预配置
   # https://github.com/smudge/nightlight
   # https://mynixos.com/nixpkgs/package/nightlight
 

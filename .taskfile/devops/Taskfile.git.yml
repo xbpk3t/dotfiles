@@ -159,7 +159,9 @@ tasks:
     desc: 下载指定文件夹（使用 gruntwork-io/fetch）
     preconditions:
       - sh: command -v fetch
+        msg: fetch cli not found
       - sh: command -v gh
+        msg: gh cli not found
     vars:
       DEFAULT_BRANCH:
         sh: gh repo view {{.CLI_ARGS}} --json defaultBranchRef --jq .defaultBranchRef.name

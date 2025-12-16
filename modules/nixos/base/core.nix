@@ -3,7 +3,7 @@
   myvars,
   ...
 }: let
-  hostFlakePath = myvars.projectRoot or "/etc/nixos";
+  hostFlakePath = "/etc/nixos";
 in {
   boot.loader.systemd-boot = {
     # we use Git for version control, so we don't need to keep too many generations.
