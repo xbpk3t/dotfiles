@@ -21,5 +21,7 @@
     nvf.enable = true;
   };
 
-  modules.networking.netbird.enable = true;
+  modules.networking = {
+    netbird.enable = true;
+  };
 }
