@@ -7,7 +7,6 @@
 with lib; let
   cfg = config.modules.networking.singbox;
 in {
-  #############################################################################
   # Sing-box Module - System-level Proxy Service
   #
   # Sing-box requires root privileges to create TUN interfaces.
@@ -25,6 +24,8 @@ in {
   #      path = "/var/cache/sing-box/cache.db";
   #      store_fakeip = true;
   #    };
+
+  # 只有desktop才需要引入singbox（因为所有VPS默认本身都不需要挂singbox），所以放在这里
   options.modules.networking.singbox = {
     enable = mkEnableOption "sing-box proxy service";
   };

@@ -183,6 +183,9 @@
     };
   };
 
+  # https://github.com/smudge/nightlight
+  # https://mynixos.com/nixpkgs/package/nightlight
+
   # Time zone and locale settings
   time = {
     timeZone = myvars.timeZone;
