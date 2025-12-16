@@ -1,7 +1,8 @@
 {pkgs, ...}: {
   home.packages = with pkgs; [
     # https://mynixos.com/nixpkgs/package/lshw
-    lshw
+    # Not support Darwin
+    # lshw
   ];
 
   programs.fastfetch = {
