@@ -101,12 +101,18 @@
 
       # Window manager settings
       WindowManager = {
+        # window分组策略
+        AppWindowGroupingBehavior = true;
+
         # 自动隐藏 Stage Manager 条
         AutoHide = false;
         # 开启点击壁纸显示桌面
         EnableStandardClickToShowDesktop = true;
+
         # 平铺窗口时启用边距
-        EnableTiledWindowMargins = true;
+        # Tiled windows have margins (Dock & Desktop -> window) -> Turn off
+        EnableTiledWindowMargins = false;
+
         # 启用拖动窗口到屏幕边缘进行平铺
         EnableTilingByEdgeDrag = true;
         # 启用按住 Alt 键进行窗口平铺
@@ -122,8 +128,6 @@
         StandardHideWidgets = true;
         # 隐藏 Stage Manager 中的小部件
         StageManagerHideWidgets = true;
-        # window分组策略
-        AppWindowGroupingBehavior = true;
       };
 
       # Mission control settings
@@ -142,6 +146,7 @@
       };
 
       SoftwareUpdate = {
+        # 是否自动更新MacOS
         AutomaticallyInstallMacOSUpdates = false;
       };
 
@@ -182,6 +187,8 @@
       };
     };
   };
+
+  # FIXME Date format (Language -> Date and number formats) -> Year-Month-Day (other than Year/Month-Day)
 
   # https://github.com/smudge/nightlight
   # https://mynixos.com/nixpkgs/package/nightlight
