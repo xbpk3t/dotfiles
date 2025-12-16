@@ -1,6 +1,5 @@
 {
   config,
-  lib,
   modulesPath,
   ...
 }: {
@@ -21,10 +20,11 @@
   boot.kernelModules = [];
   boot.extraModulePackages = [];
 
-  hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
-  hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+  networking.useDHCP = true;
 
-  networking.useDHCP = lib.mkDefault true;
+  nixpkgs.hostPlatform = "x86_64-linux";
 
-  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
+  # 通用微码更新策略：仅在允许可再分发固件时启用
+  hardware.cpu.intel.updateMicrocode = config.hardware.enableRedistributableFirmware;
+  hardware.cpu.amd.updateMicrocode = config.hardware.enableRedistributableFirmware;
 }

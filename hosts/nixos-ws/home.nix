@@ -1,9 +1,7 @@
 {...}: {
   modules.desktop = {
     nvidia.enable = true;
-
-    niri.enable = false;
-    hyprland.enable = true;
+    gnome.enable = true;
 
     zed.enable = false;
 
@@ -21,5 +19,9 @@
 
   modules.tui = {
     nvf.enable = true;
+  };
+
+  modules.networking = {
+    netbird.enable = true;
   };
 }
