@@ -20,4 +20,6 @@
   modules.tui = {
     nvf.enable = true;
   };
+
+  modules.networking.netbird.enable = true;
 }

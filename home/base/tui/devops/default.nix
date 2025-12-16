@@ -1,4 +1,8 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  mylib,
+  ...
+}: {
   home.packages = with pkgs; [
     # dotbot # 用nix的mkOutOfStoreSymlink代替了
     pre-commit
@@ -78,4 +82,6 @@
     # 计算子网掩码/网段
     ipcalc
   ];
+
+  imports = mylib.scanPaths ./.;
 }

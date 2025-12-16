@@ -11,7 +11,8 @@
     dig
     mtr
 
-    nexttrace # 可视化路由跟踪工具
+    # TODO Cannot build '/nix/store/h6sh3skvp41yl4962rw27g70pxrr71zl-nexttrace-1.5.0.drv'. Reason: builder failed with exit code 1.
+    # nexttrace # 可视化路由跟踪工具
 
     gping # ping, but with a graph(TUI)
     #  doggo # DNS client for humans
@@ -23,7 +24,8 @@
     # https://github.com/pythops/impala
     # https://mynixos.com/nixpkgs/package/impala
     # 只有个人的minimal机器需要（VPS或者desktop都用不到）
-    impala
+    # TODO Package ‘impala-0.4.1’ in /nix/store/iz5q6k82n7yq5fz1b0zhwkpf4sanis4r-source/pkgs/by-name/im/impala/package.nix:20 is not available on the requested hostPlatform:
+    # impala
 
     # dis
     ncdu

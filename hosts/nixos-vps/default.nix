@@ -38,8 +38,6 @@ in {
     fallbackDns = nameservers;
   };
 
-  services.vpsSecurity.enable = lib.mkDefault true;
-
   hardware.enableRedistributableFirmware = lib.mkForce false;
 
   # Disable scheduled upgrades to avoid conflicts with immutable deployments.
