@@ -20,26 +20,26 @@ in {
   '';
   # https://mynixos.com/nixpkgs/options/security
 
-  config = {
-    security = mkMerge [
-      {
-        # 基础安全基线（不含 AppArmor/SELinux）
+  config = mkMerge [
+    {
+      # 内核与进程隔离相关的安全 sysctl（作用域需在顶层）
+      boot.kernel.sysctl = {
+        # 仅 root 可读 dmesg
+        "kernel.dmesg_restrict" = 1;
+        # 隐藏内核指针
+        "kernel.kptr_restrict" = 2;
+        # 禁止跨用户 ptrace
+        "kernel.yama.ptrace_scope" = 1;
+        # 防止硬链接提权
+        "fs.protected_hardlinks" = 1;
+        # 防止符号链接攻击
+        "fs.protected_symlinks" = 1;
+        # 如果关闭 systemd-coredump，则使用普通 core 文件名
+        # "kernel.core_pattern" = "core";
+      };
 
-        # 内核与进程隔离相关的安全 sysctl
-        boot.kernel.sysctl = {
-          # 仅 root 可读 dmesg
-          "kernel.dmesg_restrict" = 1;
-          # 隐藏内核指针
-          "kernel.kptr_restrict" = 2;
-          # 禁止跨用户 ptrace
-          "kernel.yama.ptrace_scope" = 1;
-          # 防止硬链接提权
-          "fs.protected_hardlinks" = 1;
-          # 防止符号链接攻击
-          "fs.protected_symlinks" = 1;
-          # 如果关闭 systemd-coredump，则使用普通 core 文件名
-          # "kernel.core_pattern" = "core";
-        };
+      security = {
+        # 基础安全基线（不含 AppArmor/SELinux）
 
         # 审计日志，记录关键安全事件
         auditd.enable = lib.mkDefault false;
@@ -64,9 +64,26 @@ in {
         sudo.extraConfig = lib.mkAfter ''
           Defaults logfile="/var/log/sudo.log"
         '';
-      }
+      };
 
-      (mkIf isServer {
+      # 默认关闭 systemd-coredump，避免生成大体积 core 文件
+      systemd.coredump.enable = false;
+
+      networking.firewall = mkMerge [
+        {
+          # 基线：保留由其他模块设置的值，这里不强制开启
+        }
+        (mkIf isServer {
+          # 服务器强制开启防火墙，只放行 22，并记录拒绝
+          enable = lib.mkForce true;
+          allowedTCPPorts = lib.mkDefault [22];
+          logRefusedConnections = lib.mkDefault true;
+        })
+      ];
+    }
+
+    (mkIf isServer {
+      security = {
         # 服务器角色：pam/审计等的默认偏向保守；可选启用高 ulimit 档
         pam.loginLimits =
           if enableHighLimits
@@ -180,14 +197,19 @@ in {
               value = "0";
             }
           ];
-        users = {
-          # 让 /etc/passwd 等完全由 Nix 声明管理，禁止用 passwd/useradd 等在机器上临时改用户或密码。VPS 通常当作不可变基础设施，防止手动漂移和被入侵者添加账户；桌面常见场景是需要临时改密码或加本地用户，因此不默认强制。
-          mutableUsers = mkDefault false;
-          # 为 root 预置救援公钥：禁用密码登录后仍可用该密钥 SSH 登入修复系统
-          users.root.openssh.authorizedKeys.keys = authorizedKeys;
-        };
+
         sudo.wheelNeedsPassword = lib.mkDefault true;
-        services.fail2ban = {
+      };
+
+      users = {
+        # 让 /etc/passwd 等完全由 Nix 声明管理，禁止用 passwd/useradd 等在机器上临时改用户或密码。VPS 通常当作不可变基础设施，防止手动漂移和被入侵者添加账户；桌面常见场景是需要临时改密码或加本地用户，因此不默认强制。
+        mutableUsers = mkDefault false;
+        # 为 root 预置救援公钥：禁用密码登录后仍可用该密钥 SSH 登入修复系统
+        users.root.openssh.authorizedKeys.keys = authorizedKeys;
+      };
+
+      services = {
+        fail2ban = {
           # 启用 fail2ban 反暴力破解
           enable = true;
           # 选用默认包
@@ -224,148 +246,133 @@ in {
               };
             };
           };
+        };
 
-          /*
-          # 以下保持注释，按需解除注释即可恢复完整的入侵防御与杀毒配置
-          clamav = {
-            daemon = {
-              enable = true;
-              settings = {
-                LogFile = "/var/log/clamav/clamd.log";
-                LogTime = true;
-                LogClean = false;
-                LogSyslog = false;
-                LogFacility = "LOG_LOCAL6";
-                LogVerbose = false;
-                LogRotate = true;
-                DatabaseDirectory = "/var/lib/clamav";
-                MaxScanSize = "100M";
-                MaxFileSize = "25M";
-                MaxRecursion = 16;
-                MaxFiles = 10000;
-                MaxEmbeddedPE = "10M";
-                MaxHTMLNormalize = "10M";
-                MaxHTMLNoTags = "2M";
-                MaxScriptNormalize = "5M";
-                MaxZipTypeRcg = "1M";
-                MaxThreads = 12;
-                ReadTimeout = 180;
-                CommandReadTimeout = 5;
-                SendBufTimeout = 200;
-                MaxQueue = 100;
-                IdleTimeout = 30;
-                SelfCheck = 3600;
-                User = "clamav";
-                AllowSupplementaryGroups = true;
-                TCPSocket = 3310;
-                TCPAddr = "127.0.0.1";
-                ExcludePath = [
-                  "^/proc/"
-                  "^/sys/"
-                  "^/dev/"
-                  "^/run/"
-                  "^/tmp/"
-                  "^/var/tmp/"
-                ];
-              };
-            };
-
-            updater = {
-              enable = true;
-              frequency = 6;
-              settings = {
-                UpdateLogFile = "/var/log/clamav/freshclam.log";
-                LogVerbose = false;
-                LogSyslog = false;
-                LogFacility = "LOG_LOCAL6";
-                LogFileMaxSize = "2M";
-                LogRotate = true;
-                LogTime = true;
-                DatabaseDirectory = "/var/lib/clamav";
-                DatabaseOwner = "clamav";
-                DNSDatabaseInfo = "current.cvd.clamav.net";
-                DatabaseMirror = [
-                  "db.local.clamav.net"
-                  "database.clamav.net"
-                ];
-                MaxAttempts = 5;
-                ConnectTimeout = 30;
-                ReceiveTimeout = 30;
-                NotifyClamd = "/etc/clamav/clamd.conf";
-                Checks = 24;
-              };
-            };
-          };
-
-          logrotate = {
+        /*
+        # 以下保持注释，按需解除注释即可恢复完整的入侵防御与杀毒配置
+        clamav = {
+          daemon = {
             enable = true;
             settings = {
-              "/var/log/fail2ban.log" = {
-                frequency = "weekly";
-                rotate = 4;
-                compress = true;
-                delaycompress = true;
-                missingok = true;
-                notifempty = true;
-                create = "640 root adm";
-                postrotate = "systemctl reload fail2ban || true";
-              };
-
-              "/var/log/clamav/*.log" = {
-                frequency = "weekly";
-                rotate = 4;
-                compress = true;
-                delaycompress = true;
-                missingok = true;
-                notifempty = true;
-                create = "640 clamav clamav";
-                postrotate = "systemctl reload clamav-daemon || true";
-              };
+              LogFile = "/var/log/clamav/clamd.log";
+              LogTime = true;
+              LogClean = false;
+              LogSyslog = false;
+              LogFacility = "LOG_LOCAL6";
+              LogVerbose = false;
+              LogRotate = true;
+              DatabaseDirectory = "/var/lib/clamav";
+              MaxScanSize = "100M";
+              MaxFileSize = "25M";
+              MaxRecursion = 16;
+              MaxFiles = 10000;
+              MaxEmbeddedPE = "10M";
+              MaxHTMLNormalize = "10M";
+              MaxHTMLNoTags = "2M";
+              MaxScriptNormalize = "5M";
+              MaxZipTypeRcg = "1M";
+              MaxThreads = 12;
+              ReadTimeout = 180;
+              CommandReadTimeout = 5;
+              SendBufTimeout = 200;
+              MaxQueue = 100;
+              IdleTimeout = 30;
+              SelfCheck = 3600;
+              User = "clamav";
+              AllowSupplementaryGroups = true;
+              TCPSocket = 3310;
+              TCPAddr = "127.0.0.1";
+              ExcludePath = [
+                "^/proc/"
+                "^/sys/"
+                "^/dev/"
+                "^/run/"
+                "^/tmp/"
+                "^/var/tmp/"
+              ];
             };
           };
-          */
+
+          updater = {
+            enable = true;
+            frequency = 6;
+            settings = {
+              UpdateLogFile = "/var/log/clamav/freshclam.log";
+              LogVerbose = false;
+              LogSyslog = false;
+              LogFacility = "LOG_LOCAL6";
+              LogFileMaxSize = "2M";
+              LogRotate = true;
+              LogTime = true;
+              DatabaseDirectory = "/var/lib/clamav";
+              DatabaseOwner = "clamav";
+              DNSDatabaseInfo = "current.cvd.clamav.net";
+              DatabaseMirror = [
+                "db.local.clamav.net"
+                "database.clamav.net"
+              ];
+              MaxAttempts = 5;
+              ConnectTimeout = 30;
+              ReceiveTimeout = 30;
+              NotifyClamd = "/etc/clamav/clamd.conf";
+              Checks = 24;
+            };
+          };
         };
-      })
 
-      (mkIf isDesktop {
-        # https://mynixos.com/nixpkgs/options/security.apparmor
-        # PLAN AppArmor
-
-        # https://mynixos.com/nixpkgs/package/bubblewrap
-
-        # 桌面特定：密钥/代理便捷功能
-        # seahorse is a GUI App for GNOME Keyring.
-        programs.seahorse.enable = true;
-
-        # The OpenSSH agent remembers private keys for you
-        # so that you don’t have to type in passphrases every time you make an SSH connection.
-        # Use `ssh-add` to add a key to the agent.
-        programs.ssh.startAgent = true;
-
-        # gpg agent with pinentry
-        programs.gnupg.agent = {
+        logrotate = {
           enable = true;
-          pinentryPackage = pkgs.pinentry-qt;
-          # default-cache-ttl in seconds (4 hours)
-          settings.default-cache-ttl = 4 * 60 * 60;
-          enableSSHSupport = false;
+          settings = {
+            "/var/log/fail2ban.log" = {
+              frequency = "weekly";
+              rotate = 4;
+              compress = true;
+              delaycompress = true;
+              missingok = true;
+              notifempty = true;
+              create = "640 root adm";
+              postrotate = "systemctl reload fail2ban || true";
+            };
+
+            "/var/log/clamav/*.log" = {
+              frequency = "weekly";
+              rotate = 4;
+              compress = true;
+              delaycompress = true;
+              missingok = true;
+              notifempty = true;
+              create = "640 clamav clamav";
+              postrotate = "systemctl reload clamav-daemon || true";
+            };
+          };
         };
-      })
-    ];
+        */
+      };
+    })
 
-    # 默认关闭 systemd-coredump，避免生成大体积 core 文件
-    systemd.coredump.enable = false;
+    (mkIf isDesktop {
+      # https://mynixos.com/nixpkgs/options/security.apparmor
+      # PLAN AppArmor
 
-    networking.firewall = mkMerge [
-      {
-        # 基线：保留由其他模块设置的值，这里不强制开启
-      }
-      (mkIf isServer {
-        # 服务器强制开启防火墙，只放行 22，并记录拒绝
-        enable = lib.mkForce true;
-        allowedTCPPorts = lib.mkDefault [22];
-        logRefusedConnections = lib.mkDefault true;
-      })
-    ];
-  };
+      # https://mynixos.com/nixpkgs/package/bubblewrap
+
+      # 桌面特定：密钥/代理便捷功能
+      # seahorse is a GUI App for GNOME Keyring.
+      programs.seahorse.enable = true;
+
+      # The OpenSSH agent remembers private keys for you
+      # so that you don’t have to type in passphrases every time you make an SSH connection.
+      # Use `ssh-add` to add a key to the agent.
+      programs.ssh.startAgent = true;
+
+      # gpg agent with pinentry
+      programs.gnupg.agent = {
+        enable = true;
+        pinentryPackage = pkgs.pinentry-qt;
+        # default-cache-ttl in seconds (4 hours)
+        settings.default-cache-ttl = 4 * 60 * 60;
+        enableSSHSupport = false;
+      };
+    })
+  ];
 }
