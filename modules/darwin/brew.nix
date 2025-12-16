@@ -1,7 +1,6 @@
 {
   inputs,
   myvars,
-  pkgs,
   ...
 }: {
   imports = [
@@ -11,13 +10,19 @@
   nix-homebrew = {
     enable = true;
     # Apple Silicon 常需 Rosetta 装 x86 cask
-    enableRosetta = pkgs.stdenv.isAarch64;
+    # enableRosetta = pkgs.stdenv.isAarch64;
+    enableRosetta = false;
     user = myvars.username;
     autoMigrate = true;
   };
 
   homebrew = {
     enable = true;
+
+    brews = [
+      # https://github.com/gruntwork-io/fetch
+      "fetch"
+    ];
 
     # 以下casks根据重要性排序
     casks = [
