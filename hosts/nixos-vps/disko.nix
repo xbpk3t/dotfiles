@@ -13,8 +13,6 @@
   #- 决策建议：
   #  - 需要可重复部署/自动装机 → 留 disko.nix。
   #  - 只做滚动维护、不折腾重装 → 移除也行，但记得在 host 里保留 fileSystems/swapDevices 描述现有分区。
-
-
   # VPS 提供的默认虚拟磁盘设备路径，可被上层覆写
   defaultDisk = "/dev/vda";
   # 用 mkDefault 便于在其他主机上重写磁盘设备名

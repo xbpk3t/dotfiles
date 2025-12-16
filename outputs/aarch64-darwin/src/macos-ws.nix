@@ -43,9 +43,11 @@
       ++ map mylib.relativeToRoot [
         "secrets/default.nix"
         "modules/darwin"
+        "hosts/${name}/default.nix"
       ];
     home-modules = map mylib.relativeToRoot [
       "secrets/default.nix"
+      "hosts/${name}/home.nix"
       "home/base"
       "home/darwin"
     ];
