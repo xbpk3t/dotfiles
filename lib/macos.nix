@@ -26,8 +26,6 @@ in
       ]
       ++ (lib.optionals ((lib.lists.length home-modules) > 0) [
         home-manager.darwinModules.home-manager
-        # mac-app-util - Fix .app programs installed by Nix on Mac
-        inputs.mac-app-util.darwinModules.default
         {
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
@@ -39,8 +37,6 @@ in
             home-modules
             ++ [
               inputs.nvf.homeManagerModules.default
-              # mac-app-util home-manager module
-              inputs.mac-app-util.homeManagerModules.default
               inputs.sops-nix.homeManagerModules.sops
             ];
         }

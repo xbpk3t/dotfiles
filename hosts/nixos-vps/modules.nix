@@ -1,4 +1,5 @@
 {lib, ...}: let
+  # FIXME [2025-12-16] 之后完全迁移到Dokploy之后，就不需要这部分了。全部应用相关的，都由 Dokploy托管
   # 根据服务决定是否对回源启用 HTTPS；允许按域名逐个关闭。
   upstream = {
     port,

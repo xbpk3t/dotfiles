@@ -1,8 +1,13 @@
 {
+  config,
+  lib,
   myvars,
   pkgs,
   ...
-}: {
+}: let
+  inherit (lib) mkIf;
+  isDesktop = config.modules.roles.isDesktop;
+in {
   ###################################################################################
   #
   #  Virtualisation - Libvirt(QEMU/KVM) / Docker / LXD / WayDroid
@@ -76,8 +81,9 @@
     # lxd.enable = true;
   };
 
+  # 只在Desktop下添加 nixos container. 否则在VPS里（即使不启用）也会占用磁盘
   # https://mynixos.com/nixpkgs/option/containers
-  containers = {
+  containers = mkIf isDesktop {
     nixos-minimal = {
       # 配置为不要自启，需要 sudo nixos-container start nixos-minimal 手动启动
       autoStart = false;

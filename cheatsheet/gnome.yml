@@ -1,0 +1,74 @@
+---
+# GNOME本身内置的快捷键
+
+
+
+- type: 活动与应用
+  cmds:
+    - cmd: Super
+      des: 打开活动概览（显示所有窗口与工作区）
+    - cmd: Super + A
+      des: 打开应用程序概览（所有应用图标）
+
+- type: 窗口管理
+  cmds:
+    - cmd: Super + ↑
+      des: 最大化当前窗口
+    - cmd: Super + ↓
+      des: 还原当前窗口（从最大化恢复）
+    - cmd: Super + H
+      des: 隐藏当前窗口（类似最小化）
+    - cmd: Alt + F4
+      des: 关闭当前窗口
+    - cmd: Alt + Tab
+      des: 在应用间切换（按住 Alt，反复点 Tab）
+    - cmd: Super + Tab
+      des: 在应用间切换（部分发行版启用）
+
+- type: 工作区
+  cmds:
+    - cmd: Super + Page Up
+      des: 切换到上一个工作区
+    - cmd: Super + Page Down
+      des: 切换到下一个工作区
+    - cmd: Super + Shift + Page Up
+      des: 将当前窗口移动到上一个工作区
+    - cmd: Super + Shift + Page Down
+      des: 将当前窗口移动到下一个工作区
+    - cmd: Ctrl + Alt + ↑/↓
+      des: 在工作区之间切换（部分发行版）
+
+- type: 截图
+  cmds:
+    - cmd: PrtSc
+      des: 打开 GNOME 截图工具（可选全屏/窗口/区域/录屏）
+    - cmd: Shift + PrtSc
+      des: 直接进入区域截图模式
+    - cmd: Alt + PrtSc
+      des: 截取当前活动窗口
+
+- type: 系统操作
+  cmds:
+    - cmd: Super + L
+      des: 锁屏
+    - cmd: Ctrl + Alt + L
+      des: 锁屏（部分系统）
+    - cmd: Ctrl + Alt + Delete
+      des: 打开关机/重启等选项（视发行版）
+    - cmd: Ctrl + Alt + T
+      des: 打开终端（很多发行版默认）
+    - cmd: Alt + F2
+      des: 运行命令小窗口（输入 r 可重启 GNOME Shell，Xorg 下有效）
+
+- type: 通用编辑
+  cmds:
+    - cmd: Ctrl + C / X / V
+      des: 复制 / 剪切 / 粘贴
+    - cmd: Ctrl + Z / Y
+      des: 撤销 / 重做
+    - cmd: Ctrl + A
+      des: 全选
+    - cmd: Ctrl + S
+      des: 保存当前文档
+    - cmd: Ctrl + Q
+      des: 退出当前应用（多数 GNOME 应用支持）

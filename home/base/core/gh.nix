@@ -7,7 +7,7 @@ _: {
       git_protocol = "https";
 
       # 编辑器设置
-      editor = "nvim";
+      editor = "helix";
 
       # 提示设置
       prompt = "enabled";
