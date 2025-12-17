@@ -78,22 +78,23 @@ in {
   # NOTE: nixpkgs.config.allowUnfree is already set in genSpecialArgs (outputs/default.nix)
   # Do NOT set it here when using specialArgs.pkgs as it will be ignored and cause warnings
 
-  # 切换到 GNOME（Wayland 默认），避免 greetd/hyprland 冲突
-  modules.desktop = {
-    gnome.enable = true;
-  };
-
   # Set system state version
   system.stateVersion = "24.11";
 
-  # NetBird VPN client (enabled by default in module)
-  # All configuration is handled in modules/nixos/base/networking/netbird.nix
-  # To disable: modules.networking.netbird.client.enable = false;
-
-  # Sing-box proxy service
-  # Configuration file must be at /etc/sing-box/config.json
-  modules.networking.singbox.enable = true;
-
+  modules = {
+    desktop = {
+      # 切换到 GNOME（Wayland 默认），避免 greetd/hyprland 冲突
+      gnome.enable = true;
+    };
+    networking = {
+      # Sing-box proxy service
+      # Configuration file must be at /etc/sing-box/config.json
+      singbox.enable = true;
+      # NetBird VPN client (enabled by default in module)
+      # All configuration is handled in modules/nixos/base/networking/netbird.nix
+      netbird.enable = true;
+    };
+  };
   # Allow user-space input remapping tools (xremap)
   # hardware.uinput.enable = true;
 
