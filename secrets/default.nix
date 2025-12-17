@@ -22,7 +22,7 @@
       else "/home";
   };
 
-  # /home/luck/.config/sops-nix/secrets/
+  # $HOME/.config/sops-nix/secrets/
   mkUserSecret = key:
     {
       inherit key;
