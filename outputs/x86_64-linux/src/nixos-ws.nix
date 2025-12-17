@@ -19,7 +19,6 @@
       config.allowUnfree = true;
       config.nvidia.acceptLicense = true;
       overlays = [
-        inputs.nur.overlays.default
         customPkgsOverlay
       ];
     };

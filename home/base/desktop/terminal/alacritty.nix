@@ -21,7 +21,6 @@ in {
           shell = {
             program = "${pkgs.zsh}/bin/zsh";
             args = [
-              kk
               "-c"
               "${pkgs.zellij}/bin/zellij"
             ];

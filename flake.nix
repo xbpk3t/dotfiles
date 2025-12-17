@@ -97,12 +97,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # https://github.com/nix-community/NUR
-    nur = {
-      url = "github:nix-community/NUR";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     # nixos-cli - Modern NixOS management CLI
     # https://github.com/nix-community/nixos-cli
     nixos-cli = {
