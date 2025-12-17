@@ -5,8 +5,11 @@
 
     zed.enable = false;
 
+    alacritty.enable = true;
     kitty.enable = false;
     ghostty.enable = false;
+
+    firefox.enable = true;
   };
 
   modules.ssh = {
@@ -19,9 +22,5 @@
 
   modules.tui = {
     nvf.enable = true;
-  };
-
-  modules.networking = {
-    netbird.enable = true;
   };
 }
