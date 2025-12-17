@@ -1,4 +1,12 @@
 {
+  config,
+  lib,
+  myvars,
+  ...
+}: let
+  inherit (lib) mkIf;
+  cfg = config.programs.wireshark.enable;
+in {
   # https://mynixos.com/nixpkgs/options/programs.wireshark
   programs.wireshark = {
     enable = true;
@@ -7,4 +15,7 @@
     # Whether to allow users in the 'wireshark' group to capture USB traffic (via udev rules).
     usbmon.enable = false;
   };
+
+  users.groups = mkIf cfg {wireshark = {};};
+  users.users."${myvars.username}".extraGroups = mkIf cfg ["wireshark"];
 }

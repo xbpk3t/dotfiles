@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  myvars,
   ...
 }:
 with lib; let
@@ -19,6 +20,12 @@ in {
       autoStart = true;
       openFirewall = true;
       logLevel = "info";
+      # 监听端口
+      port = 51820;
+      # 默认建议用 wt0
+      interface = "wt0";
+      # 可省略，默认为 attr 名
+      name = "netbird";
 
       # Keep SSH on system side; disable NetBird firewall/ssh handling.
       config = {
@@ -41,5 +48,8 @@ in {
       "L+ /var/run/netbird/sock - - - - /var/run/netbird-default/sock"
       "d /var/run/netbird-default 0755 netbird-default netbird-default -"
     ];
+
+    # 添加用户组
+    users.users."${myvars.username}".extraGroups = ["netbird"];
   };
 }
