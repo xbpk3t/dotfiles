@@ -1,6 +1,5 @@
 {
   pkgs,
-  inputs,
   config,
   lib,
   ...
@@ -10,10 +9,6 @@ in {
   options.modules.desktop.firefox = with lib; {
     enable = mkEnableOption "Firefox Enable";
   };
-
-  imports = [
-    inputs.nur.modules.homeManager.default
-  ];
 
   config = lib.mkIf cfg.enable {
     home = {
@@ -49,28 +44,28 @@ in {
           name = "default";
           isDefault = true;
 
-          extensions = {
-            force = true;
-            packages = let
-              addons = pkgs.nur.repos.rycee.firefox-addons;
-            in [
-              # 相比chrome缺少 Easy Scraper
-              # Note: Some extensions are not available in NUR, commented out:
-              # - adguard-adblocker (not in NUR, using ublock-origin instead)
-              # - immersive-translate (not in NUR)
-              # - recent-tab-switcher (not in NUR)
-              # - auth-helper (not in NUR)
-
-              addons.onetab
-              addons.wappalyzer
-              # addons.ublock-origin
-
-              # Use Cookie-Editor other than cookies.txt.
-              # pros 1. CE support import cookie. 2. multiple formats. JSON / Netscape / header string，方便和别的工具互通。
-              # cons 1. 不支持一键导出所有站点所有 cookie
-              # Cookie-Editor
-            ];
-          };
+          #          extensions = {
+          #            force = true;
+          #            packages = let
+          #              addons = pkgs.nur.repos.rycee.firefox-addons;
+          #            in [
+          #              # 相比chrome缺少 Easy Scraper
+          #              # Note: Some extensions are not available in NUR, commented out:
+          #              # - adguard-adblocker (not in NUR, using ublock-origin instead)
+          #              # - immersive-translate (not in NUR)
+          #              # - recent-tab-switcher (not in NUR)
+          #              # - auth-helper (not in NUR)
+          #
+          #              addons.onetab
+          #              addons.wappalyzer
+          #              # addons.ublock-origin
+          #
+          #              # Use Cookie-Editor other than cookies.txt.
+          #              # pros 1. CE support import cookie. 2. multiple formats. JSON / Netscape / header string，方便和别的工具互通。
+          #              # cons 1. 不支持一键导出所有站点所有 cookie
+          #              # Cookie-Editor
+          #            ];
+          #          };
 
           search = {
             force = true;
