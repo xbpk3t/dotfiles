@@ -14,10 +14,11 @@
       trash-cli
     ];
 
-    # PLAN fzf-tab
+    # PLAN 目前 fzf-tab 的使用非常麻烦（需要替代掉默认的zsh tab），等有更好的nix支持之后，再添加
     # https://github.com/0xtter/nixos-configuration/blob/main/home-manager/thomas.nix
     # https://www.youtube.com/watch?v=eKkFbvanlP8
     # https://github.com/Aloxaf/fzf-tab
+    # https://mynixos.com/nixpkgs/package/zsh-fzf-tab
 
     # 环境变量
     # Note: Dynamic variables (those using command substitution) are set in zsh initContent
@@ -57,12 +58,114 @@
   };
 
   programs = {
+    # https://mynixos.com/home-manager/options/programs.bash
+    bash = {
+      enable = true;
+    };
+
+    # https://mynixos.com/home-manager/options/programs.zsh
     zsh = {
       enable = true;
       # 自动纠错
       autocd = true;
 
+      enableCompletion = true;
+      # 终端和颜色集成
+      enableVteIntegration = true;
+      # hm没有该配置，暂存
+      # enableLsColors = true;
+
+      # 历史管理优化
+      # hm没有该配置，暂存
+      # histFile = "$HOME/.zsh_history";
+
+      # zsh 的 shell 选项设置（性能优化）
+      # 性能优化配置
+      # hm没有该配置，暂存
+      # enableGlobalCompInit = true;
+
+      # 为命令行着色（合法命令绿色、未知命令红色等）
+      # https://mynixos.com/home-manager/options/programs.zsh.syntaxHighlighting
+      # https://mynixos.com/nixpkgs/options/programs.zsh.syntaxHighlighting
+      syntaxHighlighting = {
+        enable = true;
+        styles = {
+          # 未知命令 -> 红色；其余采用默认主题
+          "unknown-token" = "fg=red,bold";
+        };
+      };
+
+      # 命令行自动补全/联想（zsh-autosuggestions）
+      # https://mynixos.com/home-manager/options/programs.zsh.autosuggestion
+      # https://mynixos.com/nixpkgs/options/programs.zsh.autosuggestions
+      # 相较 modules 缺少 async
+      autosuggestion = {
+        enable = true;
+        # 仅从历史里提示，避免与补全菜单冲突；若想更激进可加 "completion"
+        strategy = ["history"];
+        highlight = "fg=cyans"; # 使用暗灰色，避免喧宾夺主
+      };
+
+      # 结构化 zsh 选项配置
+      setOptions = [
+        # 历史相关选项
+        "append_history" # 追加历史而不是覆盖
+        "hist_verify" # 历史展开时先验证
+        "hist_ignore_dups" # 忽略重复命令
+        "hist_ignore_space" # 忽略以空格开头的命令
+        "hist_no_store" # 不存储 history 命令本身
+
+        # 性能和便利性选项
+        "auto_cd" # 启用自动 cd 功能
+        "correct" # 自动纠正命令拼写错误
+        "cdable_vars" # 允许 cd 到变量名
+        "check_jobs" # 退出时检查后台任务
+        "no_case_glob" # 处理忽略大小写的通配符
+        "extended_glob" # 启用扩展通配符
+        "nomatch" # 如果通配符没有匹配，报错
+        "notify" # 立即报告后台任务状态
+        "pushd_ignore_dups" # 忽略 pushd 重复目录
+        "pushd_silent" # 静默 pushd
+        "auto_pushd" # 自动 pushd
+
+        # "checkwinsize" # 检查窗口大小变化 zsh没有该项，bash的专有option
+      ];
+
+      # !!! 注意把 shellAliases 放到hm里（来复用），而非放到 modules里
       shellAliases = {
+        # 目录导航
+        # zsh 支持 "-" 作为别名，直接使用
+        "-" = "cd -";
+        "..." = "../..";
+        "...." = "../../..";
+        "....." = "../../../..";
+        "......" = "../../../../..";
+        # zsh 支持数字历史导航
+        "-1" = "cd -1";
+        "-2" = "cd -2";
+        "-3" = "cd -3";
+        "-4" = "cd -4";
+        "-5" = "cd -5";
+
+        # 权限和基础命令
+        "_" = "sudo ";
+        "c" = "clear";
+
+        # 现代工具替代
+        "cat" = "bat";
+        "find" = "fd --hidden"; # 使用 fd 替代 find，显示隐藏文件
+        "grep" = "rg";
+
+        # 文件操作
+        ll = "eza -la";
+        la = "eza -a";
+        lls = "eza -la --sort=size --reverse --total-size";
+        "md" = "mkdir -p";
+        "rd" = "rmdir";
+
+        # 编辑器
+        "vim" = "LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 nvim";
+
         #    # 搜索时包含隐藏文件
         #    rgh = "rg --hidden";
         #    # 只搜索文件名
@@ -79,8 +182,9 @@
         #    # 只显示匹配的文件名
         #    rgfiles = "rg -l";
         ps = "procs";
-        find = "fd";
-        grep = "ripgrep";
+
+        # rg跟grep本身不兼容，所以不要写alias，否则每次用grep都要用 \grep
+        # grep = "ripgrep";
 
         # TUI tool aliases
         t = "btop";
@@ -90,6 +194,7 @@
         v = "nvim .";
       };
 
+      # https://mynixos.com/home-manager/options/programs.zsh.history
       history = {
         size = 10000;
         save = 10000;
@@ -164,10 +269,6 @@
             return 1
           fi
         }
-
-
-
-
 
         # ===== 性能优化 =====
         # 减少不必要的路径扫描
