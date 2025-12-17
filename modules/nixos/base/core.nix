@@ -21,4 +21,10 @@ in {
     FLAKE = lib.mkDefault hostFlakePath;
     NIXOS_CONFIG = lib.mkDefault hostFlakePath;
   };
+
+  # 添加用户可用的 shell 到 /etc/shells
+  environment.shells = with pkgs; [
+    bashInteractive
+    zsh
+  ];
 }

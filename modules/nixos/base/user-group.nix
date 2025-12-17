@@ -6,6 +6,16 @@
   # Don't allow mutation of users outside the config.
   users.mutableUsers = false;
 
+  # 设置系统默认用户 shell
+  # 这会影响新创建的用户和通过 users.defaultUserShell 设置的用户
+  users.defaultUserShell = pkgs.zsh;
+
+  # ===== Shell 相关环境变量 =====
+  # 可以在这里添加 shell 相关的全局环境变量
+  # environment.variables = {
+  #   SHELL = "${pkgs.zsh}/bin/zsh";
+  # };
+
   users.groups = {
     "${myvars.username}" = {};
     dialout = {};
