@@ -5,7 +5,7 @@
   pkgs,
   ...
 }: let
-  inherit (lib) mkIf;
+  inherit (lib) mkIf mkMerge optionals;
   isDesktop = config.modules.roles.isDesktop;
 in {
   ###################################################################################
@@ -80,6 +80,18 @@ in {
 
     # lxd.enable = true;
   };
+
+  # Service-scoped user/group wiring
+  users.groups = mkMerge [
+    (mkIf config.virtualisation.docker.enable {docker = {};})
+    (mkIf config.virtualisation.podman.enable {podman = {};})
+    (mkIf config.virtualisation.libvirtd.enable {libvirtd = {};})
+  ];
+
+  users.users."${myvars.username}".extraGroups =
+    optionals config.virtualisation.docker.enable ["docker"]
+    ++ optionals config.virtualisation.podman.enable ["podman"]
+    ++ optionals config.virtualisation.libvirtd.enable ["libvirtd"];
 
   # 只在Desktop下添加 nixos container. 否则在VPS里（即使不启用）也会占用磁盘
   # https://mynixos.com/nixpkgs/option/containers
