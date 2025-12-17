@@ -1,10 +1,7 @@
 {lib}: let
   username = "luck";
-  projectRoot = "/home/${username}/Desktop/dotfiles";
 in {
-  inherit username projectRoot;
-  # TODO: remove once all modules use projectRoot directly
-  projectDir = projectRoot;
+  inherit username;
 
   userfullname = "lucas";
   mail = "yyzw@live.com";
