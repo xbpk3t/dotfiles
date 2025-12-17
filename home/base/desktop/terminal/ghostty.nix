@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }:
 with lib; let
@@ -14,8 +15,11 @@ in {
     # https://mynixos.com/home-manager/options/programs.ghostty
     # https://mynixos.com/nixpkgs/package/ghostty
     programs.ghostty = {
-      enable = true;
-      #package = pkgs.ghostty;
+      enable = pkgs.stdenv.isLinux;
+      # !!! On macOS the nixpkgs derivation is unsupported; allow Homebrew Cask to supply the app.
+      # 注意 darwin 下直接使用brew安装ghostty，但是如果要做条件化判断，会比较麻烦，所以直接写到 brew.nix 里
+      # 注意mac上使用brew（因为hm不支持）安装 ghostty，而非 alacritty
+      package = pkgs.ghostty;
 
       installVimSyntax = true;
       installBatSyntax = true;
