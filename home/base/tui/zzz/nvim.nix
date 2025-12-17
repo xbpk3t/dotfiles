@@ -6,21 +6,6 @@
 }:
 with lib; let
   cfg = config.modules.tui.nvf;
-  scratchNvim = pkgs.vimUtils.buildVimPlugin {
-    pname = "scratch.nvim";
-    version = "2025-11-04";
-    src = pkgs.fetchFromGitHub {
-      owner = "LintaoAmons";
-      repo = "scratch.nvim";
-      rev = "1e78854fd3140411b231d5b6f9b3559b1ba5de77";
-      sha256 = "18f6lwq6lh4qazr688hxr2qpzipdmqng24w4ikwbmgw84ngyhp9b";
-    };
-    dependencies = with pkgs.vimPlugins; [
-      plenary-nvim
-      telescope-nvim
-    ];
-    doCheck = false;
-  };
   deleteCurrentFileLua = ''
     local function delete_current_file()
       local buf = vim.api.nvim_get_current_buf()
@@ -659,75 +644,6 @@ in {
                   vim.api.nvim_set_hl(0, "MatchParen", { fg = "#2d2a2e", bg = "#f6a434", bold = true })
                 '';
               };
-              #
-              # "todo-comments.nvim" = {
-              #   package = todo-comments-nvim;
-              #   event = [{event = "User"; pattern = "LazyFile";}];
-              #   keys = [
-              #     {
-              #       key = "<leader>ft";
-              #       mode = ["n"];
-              #       action = ":TodoTelescope<CR>";
-              #       desc = "Todos (all tags)";
-              #     }
-              #     {
-              #       key = "<leader>fT";
-              #       mode = ["n"];
-              #       action = ":TodoTelescope keywords=TODO,FIX<CR>";
-              #       desc = "Only TODO/FIX";
-              #     }
-              #   ];
-              #   after = ''
-              #     require("todo-comments").setup({
-              #       signs = true,
-              #       merge_keywords = true,
-              #       colors = {
-              #         error = { "#ff6188" },
-              #         warning = { "#ffd866" },
-              #         info = { "#78dce8" },
-              #         hint = { "#ab9df2" },
-              #         default = { "#a9dc76" },
-              #         test = { "#ffb454" },
-              #       },
-              #       keywords = {
-              #         FIX = { icon = " ", color = "error", alt = { "FIXME", "BUG", "FIXIT", "ISSUE" } },
-              #         TODO = { icon = " ", color = "info", alt = { "TASK", "TODO!" } },
-              #         HACK = { icon = " ", color = "warning" },
-              #         WARN = { icon = " ", color = "warning", alt = { "WARNING", "XXX" } },
-              #         PERF = { icon = " ", color = "warning", alt = { "OPTIM", "PERFORMANCE", "OPTIMIZE" } },
-              #         NOTE = { icon = " ", color = "hint", alt = { "INFO" } },
-              #         TEST = { icon = " ", color = "test", alt = { "TESTING", "QA", "ASSERT" } },
-              #         CHORE = { icon = " ", color = "default", alt = { "CHORE", "CLEANUP" } },
-              #       },
-              #       highlight = {
-              #         before = "",
-              #         keyword = "wide_bg",
-              #         after = "fg",
-              #         pattern = [[.*<(KEYWORDS)\s*(\([^)]*\))?:]],
-              #         exclude = { "diff" },
-              #       },
-              #       search = {
-              #         command = "rg",
-              #         args = {
-              #           "--color=never",
-              #           "--no-heading",
-              #           "--with-filename",
-              #           "--line-number",
-              #           "--column",
-              #           "--hidden",
-              #           "--follow",
-              #           "--no-ignore",
-              #         },
-              #         pattern = [[\b(KEYWORDS)(\([^)]*\))?:]],
-              #       },
-              #     })
-              #     local ok_telescope, telescope = pcall(require, "telescope")
-              #     if ok_telescope then
-              #       pcall(telescope.load_extension, "todo-comments")
-              #     end
-              #   '';
-              # };
-
               "auto-save.nvim" = {
                 package = auto-save-nvim;
                 lazy = false;
@@ -1096,37 +1012,6 @@ in {
               };
             })
             // {
-              "scratch.nvim" = {
-                package = scratchNvim;
-                keys = [
-                  {
-                    key = "<leader>sn";
-                    mode = ["n"];
-                    action = ":Scratch<CR>";
-                    desc = "Scratch: new";
-                  }
-                  {
-                    key = "<leader>so";
-                    mode = ["n"];
-                    action = ":ScratchOpen<CR>";
-                    desc = "Scratch: picker";
-                  }
-                ];
-                after = ''
-                  local ok_scratch, scratch = pcall(require, "scratch")
-                  if not ok_scratch then
-                    return
-                  end
-                  scratch.setup({
-                    scratch_file_dir = vim.fn.stdpath("cache") .. "/scratch.nvim",
-                    window_cmd = "rightbelow vsplit",
-                    use_telescope = true,
-                    file_picker = "telescope",
-                    filetypes = { "lua", "nix", "yaml", "yml", "markdown", "md", "sh", "go" },
-                  })
-                '';
-              };
-
               "yazi.nvim" = {
                 package = pkgs.vimPlugins."yazi-nvim";
                 cmd = ["Yazi"];
@@ -1149,10 +1034,6 @@ in {
                   })
                 '';
               };
-
-              # MAYBE fidget.nvim
-              # https://mynixos.com/nixpkgs/package/vimPlugins.fidget-nvim
-              # https://github.com/j-hui/fidget.nvim
             };
         };
 
