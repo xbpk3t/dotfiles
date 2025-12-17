@@ -1,4 +1,5 @@
 {pkgs, ...}: {
+  # https://mynixos.com/home-manager/options/programs.helix
   programs.helix = {
     enable = true;
     defaultEditor = true;
@@ -6,11 +7,14 @@
     extraPackages = [pkgs.marksman];
 
     settings = {
+      # https://docs.helix-editor.com/master/editor.html
       editor = {
         color-modes = true;
         bufferline = "multiple";
 
-        clipboard = "system"; # 自动选择（推荐）
+        # 不需要配置，应该让helix自动检测剪贴板（以适应不同OS，比如说 mac上应设置 pasteboard，而linux则应该设置为 wayland, x-clip 之类的。就很麻烦，没必要）
+        # clipboard-provider = "system";
+
         soft-wrap = {
           enable = true;
           # 下面这些可选，根据自己喜好开：
