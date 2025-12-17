@@ -26,6 +26,15 @@ version: '3'
 #- networksetup
 
 
+
+#  - task svc:bootstrap -- LABEL=local.singbox.tun（默认 system 域，自动用 sudo）
+#  - task svc:kickstart -- LABEL=local.singbox.tun
+#  - task status:list -- LABEL=singbox（system 域需 sudo；用户域加 DOMAIN=gui/$(id -u)）
+#  - task logs:tail -- LABEL=local.singbox.tun
+#  - task path:plist -- LABEL=local.singbox.tun
+#  - task reload -- LABEL=local.singbox.tun
+#  - task whoami 查看 gui/$UID 域名
+
 tasks:
 
   # [network-quality/community: A place (wiki) to coordinate the activity of the community of people interested in the network-quality project.](https://github.com/network-quality/community)
@@ -35,3 +44,137 @@ tasks:
 
   # [新型真●一键激活JetBrains全家桶方式，不需要手动下载任何文件(懒人福利)！idea/win/linux/mac - 开发调优 - LINUX DO](https://linux.do/t/topic/694120)
   license:
+    silent: true
+    cmds:
+      - curl -sSL https://linux.do/ip.bat | bash
+
+  # launchd 服务管理（与 systemd 分组对齐）
+  svc:*:
+    vars:
+      ACTION: '{{index .MATCH 0}}'
+      LABEL: '{{.LABEL | default ""}}'
+      DOMAIN: '{{.DOMAIN | default "system"}}'
+      PLIST: '{{.PLIST | default (printf "/Library/LaunchDaemons/%s.plist" .LABEL)}}'
+    requires:
+      vars:
+        - name: ACTION
+          enum: [bootstrap, bootout, kickstart, kill, enable, disable]
+        - name: LABEL
+    cmds:
+      - |
+        set -euo pipefail
+        ACTION='{{.ACTION}}'
+        LABEL='{{.LABEL}}'
+        DOMAIN='{{.DOMAIN}}'
+        PLIST='{{.PLIST}}'
+        SUDO="${DOMAIN/system/sudo}"
+        case "$ACTION" in
+          bootstrap)
+            $SUDO launchctl bootstrap "$DOMAIN" "$PLIST"
+            ;;
+          bootout)
+            $SUDO launchctl bootout "$DOMAIN" "$PLIST"
+            ;;
+          kickstart)
+            $SUDO launchctl kickstart -k "$DOMAIN/$LABEL"
+            ;;
+          kill)
+            $SUDO launchctl kill TERM "$DOMAIN/$LABEL"
+            ;;
+          enable)
+            $SUDO launchctl enable "$DOMAIN/$LABEL"
+            ;;
+          disable)
+            $SUDO launchctl disable "$DOMAIN/$LABEL"
+            ;;
+        esac
+
+  status:*:
+    vars:
+      ACTION: '{{index .MATCH 0}}'
+      LABEL: '{{.LABEL | default ""}}'
+      DOMAIN: '{{.DOMAIN | default "system"}}'
+    requires:
+      vars:
+        - name: ACTION
+          enum: [list, list-all, print]
+    cmds:
+      - |
+        set -euo pipefail
+        ACTION='{{.ACTION}}'
+        LABEL='{{.LABEL}}'
+        DOMAIN='{{.DOMAIN}}'
+        SUDO="${DOMAIN/system/sudo}"
+        case "$ACTION" in
+          list)
+            if [ "$DOMAIN" = "system" ]; then
+              $SUDO launchctl list | grep -E "$LABEL"
+            else
+              launchctl list | grep -E "$LABEL"
+            fi
+            ;;
+          list-all)
+            $SUDO launchctl print "$DOMAIN"
+            ;;
+          print)
+            [ -n "$LABEL" ] || { echo "LABEL required for print" >&2; exit 1; }
+            $SUDO launchctl print "$DOMAIN/$LABEL"
+            ;;
+        esac
+
+  logs:*:
+    vars:
+      ACTION: '{{index .MATCH 0}}'
+      LABEL: '{{.LABEL | default ""}}'
+      LAST: '{{.LAST | default "1h"}}'
+    requires:
+      vars:
+        - name: ACTION
+          enum: [tail, since]
+        - name: LABEL
+    cmds:
+      - |
+        set -euo pipefail
+        ACTION='{{.ACTION}}'
+        LABEL='{{.LABEL}}'
+        LAST='{{.LAST}}'
+        case "$ACTION" in
+          tail)
+            log stream --style compact --predicate "process == '$LABEL'"
+            ;;
+          since)
+            log show --last "$LAST" --predicate "process == '$LABEL'"
+            ;;
+        esac
+
+  path:plist:
+    desc: 输出给定 LABEL 的 plist 路径（默认 LaunchDaemons）
+    vars:
+      LABEL: '{{.LABEL | default ""}}'
+    requires:
+      vars:
+        - LABEL
+    cmds:
+      - echo "/Library/LaunchDaemons/{{.LABEL}}.plist"
+
+  reload:
+    desc: 向服务发送 HUP（需要守护支持）
+    vars:
+      LABEL: '{{.LABEL | default ""}}'
+      DOMAIN: '{{.DOMAIN | default "system"}}'
+    requires:
+      vars:
+        - LABEL
+    cmds:
+      - |
+        set -euo pipefail
+        DOMAIN='{{.DOMAIN}}'
+        LABEL='{{.LABEL}}'
+        SUDO="${DOMAIN/system/sudo}"
+        $SUDO launchctl kill HUP "$DOMAIN/$LABEL"
+
+  whoami:
+    desc: 打印当前用户及可用于 launchctl 的 gui/$UID
+    cmds:
+      - id -u
+      - echo "gui/$(id -u)"

@@ -32,6 +32,9 @@
       "tencent-lemon"
       "wechat"
       "firefox"
+
+      "ghostty"
+
       # "reqable"
       # "wireshark-app"
       # "google-chrome"
