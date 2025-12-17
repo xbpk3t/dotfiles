@@ -6,4 +6,9 @@
       vps.enable = true;
     };
   };
+
+  modules.desktop = {
+    alacritty.enable = false;
+    ghostty.enable = true;
+  };
 }
