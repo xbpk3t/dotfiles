@@ -1,36 +1,39 @@
-{pkgs, ...}: {
-  home.packages = with pkgs; [
-    # 网络工具 (excluding wget/curl which are in minimal)
+{
+  lib,
+  pkgs,
+  ...
+}: {
+  home.packages = with pkgs;
+    [
+      # 网络工具 (excluding wget/curl which are in minimal)
+      mosh
+      fping
+      inetutils
+      # https://mynixos.com/nixpkgs/package/dig
+      dig
+      mtr
 
-    # 经常需要在目标host上手动使用这些cli来检查和判断具体问题
+      gping # ping, but with a graph(TUI)
+      #  doggo # DNS client for humans
 
-    mosh
-    fping
-    inetutils
-    # https://mynixos.com/nixpkgs/package/dig
-    dig
-    mtr
+      duf # Disk Usage/Free Utility - a better 'df' alternative
+      #  du-dust # A more intuitive version of `du` in rust
 
-    # TODO Cannot build '/nix/store/h6sh3skvp41yl4962rw27g70pxrr71zl-nexttrace-1.5.0.drv'. Reason: builder failed with exit code 1.
-    # nexttrace # 可视化路由跟踪工具
+      ncdu
 
-    gping # ping, but with a graph(TUI)
-    #  doggo # DNS client for humans
+      # rename
+      rnr # https://github.com/ismaelgv/rnr
+    ]
+    # Linux-only tools; Darwin 上直接跳过，避免 hostPlatform 不可用的求值错误
+    ++ lib.optionals stdenv.isLinux [
+      # nexttrace 可视化路由跟踪工具
+      nexttrace
 
-    duf # Disk Usage/Free Utility - a better 'df' alternative
-    #  du-dust # A more intuitive version of `du` in rust
-
-    # wifi with TUI
-    # https://github.com/pythops/impala
-    # https://mynixos.com/nixpkgs/package/impala
-    # 只有个人的minimal机器需要（VPS或者desktop都用不到）
-    # TODO Package ‘impala-0.4.1’ in /nix/store/iz5q6k82n7yq5fz1b0zhwkpf4sanis4r-source/pkgs/by-name/im/impala/package.nix:20 is not available on the requested hostPlatform:
-    # impala
-
-    # dis
-    ncdu
-
-    # rename
-    rnr # https://github.com/ismaelgv/rnr
-  ];
+      # wifi with TUI
+      # https://github.com/pythops/impala
+      # https://mynixos.com/nixpkgs/package/impala
+      # 只有个人的minimal机器需要（VPS或者desktop都用不到）
+      # impala（Wi‑Fi TUI），仅在 Linux 上可用
+      impala
+    ];
 }

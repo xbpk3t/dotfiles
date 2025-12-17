@@ -21,7 +21,8 @@ in {
     # policy: https://mozilla.github.io/policy-templates/
     # settings: about:config
     programs.firefox = {
-      enable = true;
+      # !!! 注意firefox不支持类似 ghostty.nix 的 package这么处理，所以只能在mac上直接禁用该hm配置
+      enable = pkgs.stdenv.isLinux;
       package = pkgs.firefox;
 
       # Language packs
