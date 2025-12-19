@@ -15,6 +15,7 @@
     nix-output-monitor
     nix-index
     colmena
+    # https://mynixos.com/nixpkgs/package/nvd
     nvd
   ];
 
@@ -57,19 +58,21 @@
     buildDocs = false;
   };
 
-  programs.nix-index = {
-    enable = true;
-  };
-
-  # Nix Helper (nh) configuration
-  # https://github.com/viperML/nh
-  programs.nh = {
-    enable = true;
-    clean = {
+  programs = {
+    nix-index = {
       enable = true;
-      extraArgs = "--keep-since 7d --keep 5";
     };
-    flake = myvars.projectRoot;
+
+    # Nix Helper (nh) configuration
+    # https://github.com/viperML/nh
+    nh = {
+      enable = true;
+      clean = {
+        enable = true;
+        extraArgs = "--keep-since 7d --keep 5";
+      };
+      flake = myvars.projectRoot;
+    };
   };
 
   # nixos-cli - Modern NixOS management CLI
@@ -78,6 +81,7 @@
   # Note: nixos-cli is installed as a package (see environment.systemPackages above)
   # It provides commands like: nixos build, nixos switch, nixos test, etc.
   # Configuration is done via environment variables and config files
+  # NIXOS_CONFIG="$HOME/Desktop/dotfiles" nixos apply
   services.nixos-cli = {
     enable = true;
     config = {
