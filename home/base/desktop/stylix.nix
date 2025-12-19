@@ -3,7 +3,9 @@
   lib,
   inputs,
   ...
-}: {
+}: let
+  isLinux = pkgs.stdenv.isLinux;
+in {
   imports = [
     inputs.stylix.homeModules.stylix
   ];
@@ -91,18 +93,20 @@
       };
     };
 
-    targets = {
-      #qt = {
-      #  enable = true;
-      #  platform = "qtct";
-      #};
-
-      rofi.enable = false;
-      zed.enable = false;
-      helix.enable = false;
-      # 配置 Firefox profile names 以避免 stylix warning
-      firefox.profileNames = ["default"];
-    };
+    targets =
+      {
+        rofi.enable = false;
+        zed.enable = false;
+        helix.enable = false;
+        # 配置 Firefox profile names 以避免 stylix warning
+        firefox.profileNames = ["default"];
+      }
+      // lib.optionalAttrs isLinux {
+        qt = {
+          enable = true;
+          platform = "qtct";
+        };
+      };
     # 使用默认 cursor，但是改小size
     #    cursor = {
     ##      package = pkgs.bibata-cursors;
@@ -115,15 +119,18 @@
     #    };
   };
 
-  home.packages = with pkgs; [
-    # stylix image as wallpaper, swaybg is required to achieve the effect
-    # swaybg
+  home.packages = with pkgs;
+    [
+    ]
+    ++ lib.optionals isLinux [
+      # stylix image as wallpaper, swaybg is required to achieve the effect
+      # swaybg
 
-    # https://mynixos.com/nixpkgs/package/bibata-cursors
-    # bibata-cursors
+      # https://mynixos.com/nixpkgs/package/bibata-cursors
+      bibata-cursors
 
-    # https://github.com/ful1e5/apple_cursor
-    # https://mynixos.com/nixpkgs/package/apple-cursor
-    # apple-cursor
-  ];
+      # https://github.com/ful1e5/apple_cursor
+      # https://mynixos.com/nixpkgs/package/apple-cursor
+      apple-cursor
+    ];
 }
