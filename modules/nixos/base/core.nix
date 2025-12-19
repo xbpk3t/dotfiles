@@ -1,6 +1,7 @@
 {
   lib,
   myvars,
+  pkgs,
   ...
 }: let
   hostFlakePath = myvars.projectRoot or "/etc/nixos";

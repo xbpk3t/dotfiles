@@ -9,6 +9,11 @@
   # 设置系统默认用户 shell
   # 这会影响新创建的用户和通过 users.defaultUserShell 设置的用户
   users.defaultUserShell = pkgs.zsh;
+  programs = {
+    # 必须在modules里让zsh生效（但是具体bash, zsh的自定义配置则放到hm里），否则会报错
+    bash.enable = true;
+    zsh.enable = true;
+  };
 
   # ===== Shell 相关环境变量 =====
   # 可以在这里添加 shell 相关的全局环境变量

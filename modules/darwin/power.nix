@@ -21,6 +21,7 @@ _: {
       display = 5;
       # 15 分钟后硬盘睡眠
       # 控制机械盘空转后多久停转(sudo.is (https://www.sudo.is/docs/macos/))。SSD/NVMe 没有马达可停，所以“Put hard disks to sleep” 对内置 SSD 影响极小；多数资料称对 SSD 没收益，甚至可能因少数固件 bug 造成卡 (pcoutlet.com (https://pcoutlet.com/parts/storage-drives/what-is-put-hard-disks-to-sleep-when-possible))
+      # 结论：对于SSD来说没用
       harddisk = 15;
     };
   };
