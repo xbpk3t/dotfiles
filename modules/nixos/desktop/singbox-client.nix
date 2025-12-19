@@ -7,11 +7,40 @@
 with lib; let
   cfg = config.modules.networking.singbox;
   cfg_path = "/tmp/sing-box/config.json";
+  updateScript = pkgs.writeScriptBin "singbox-update" ''
+    #!${pkgs.nushell}/bin/nu
+    ${builtins.readFile ../../../.taskfile/mac/singbox/update-config.nu}
+  '';
 in {
   # Sing-box Module - System-level Proxy Service
   #
   # Sing-box requires root privileges to create TUN interfaces.
   # Configuration file is fixed at /etc/sing-box/config.json
+
+  # https://mynixos.com/nixpkgs/options/services.sing-box
+
+  # PLAN [2025-12-18] 暂时还是直接curl把配置拉到本地，直接run。之后再考虑用下面这种写法（）。注意，我需要让mac和nixos复用singbox的config.json，但是只有nixos有singbox的options支持，那么就需要
+  # 归根到底，现在singbox client的主流方案就两种，用 services.sing-box 或者 直接 systemd里跑 sing-box run. 前者更nix，但是代价是1、所有outbounds也会直接写入到 /nix/store 里。2、动态outbounds很麻烦，只有在 systemd曾插入hook这么一种方案（否则只能放弃动态更新，直接写死到settings里，如果是自建节点，可以考虑这么处理，但是机场则不行）
+
+  # 1、在 mac 和 nixos 之间复用
+  # 2、定期 curl subscribe url, extract outbounds.
+  # 3. 合并 静态 + 动态outbounds
+  # 4. 把 update跟 singbox 解耦。更新失败直接使用之前的config.json 。所以update里做了原子写，不会直接替换目标path的config.json
+
+  # 目标path的选择
+  #  - /tmp 会被系统清理或重启消失，不保证持久；sing-box 服务如果在启动时读不到它会失败。
+  #  - /run 也是临时的，但适合“运行时生成”的文件；系统启动时由 service 生成。
+  #  - /var/lib/private（或 StateDirectory）是持久的，适合保存“上次成功的 outbounds”。
+  #  - /etc 更像“静态配置”，不建议用来写入运行时生成文件。
+  # 结论：你现在用 /tmp 能跑，但可靠性最差；建议至少换到 /var/lib（持久）或 /run（临时但可控）。
+
+  # https://raw.githubusercontent.com/sunziping2016/flakes/refs/heads/master/modules/default/sing-box.nix TUN 客户端模块，动态合并 outbounds
+  # https://raw.githubusercontent.com/tillycode/homelab/refs/heads/master/nixos/profiles/services/sing-box-router.nix 路由器侧（TUN + FakeIP + Clash API），算「客户端网关」
+  # https://github.com/qbisi/nixos-config/blob/master/config/sing-box/client.nix  桌面/笔电侧客户端（TUN + tproxy，含 Clash API）
+
+  # https://raw.githubusercontent.com/deltathetawastaken/dotfiles/refs/heads/main/pkgs/socks.nix 侧重多套 socks/http 代理与网命名空间，主要是客户端/跳板用
+  # https://github.com/oluceps/nixos-config/blob/trival/modules/sing-box.nix  通用 service 包装（从凭据加载 config），不特指 server
+  # https://github.com/penglei/nix-configs/blob/main/nixos/modules/sing-box-client.nix
 
   # 只有desktop才需要引入singbox（因为所有VPS默认本身都不需要挂singbox），所以放在这里
   options.modules.networking.singbox = {
@@ -22,7 +51,6 @@ in {
     # Install sing-box package
     environment.systemPackages = [
       pkgs.sing-box
-      pkgs.go-task
       pkgs.curl
       pkgs.jq
     ];
@@ -40,15 +68,10 @@ in {
 
       serviceConfig = {
         Type = "oneshot";
-        Environment = [
-          "CONFIG_FILE=${cfg_path}"
-          # PATH 覆盖，确保找到 task/curl/jq
-          "PATH=/run/wrappers/bin:/run/current-system/sw/bin:${pkgs.go-task}/bin:${pkgs.curl}/bin:${pkgs.jq}/bin:/usr/bin:/bin"
-        ];
-        WorkingDirectory = "/home/${myvars.username}/Desktop/dotfiles";
-        ExecStart = ''
-          ${pkgs.bash}/bin/bash -c 'SINGBOX_URL="$(cat ${config.sops.secrets.singboxUrl.path})" exec ${pkgs.go-task}/bin/task --taskfile "${taskfile_path}" update-config'
-        '';
+        ExecStart = "${updateScript}/bin/singbox-update --url-file ${config.sops.secrets.singboxUrl.path} --config ${cfg_path}";
+        # Treat curl timeout (28) as non-fatal so activation doesn't roll back; timer will retry.
+        SuccessExitStatus = [0 28];
+        TimeoutStartSec = "2min";
       };
     };
 
