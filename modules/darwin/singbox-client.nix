@@ -8,6 +8,10 @@
 with lib; let
   cfg = config.modules.networking.singbox;
   cfg_path = "/tmp/sing-box/config.json";
+  updateScript = pkgs.writeScriptBin "singbox-update" ''
+    #!${pkgs.nushell}/bin/nu
+    ${builtins.readFile ../../../.taskfile/mac/singbox/update-config.nu}
+  '';
 in {
   options.modules.networking.singbox = {
     enable = mkEnableOption "sing-box service";
@@ -22,28 +26,24 @@ in {
     # Install sing-box package for user
     environment.systemPackages = [
       pkgs.sing-box
-      pkgs.go-task
       pkgs.curl
       pkgs.jq
     ];
 
     # Launchd daemon: 调用 Taskfile 直接更新订阅配置
-    # task -g singbox:update-config SINGBOX_URL="$(cat $HOME/.config/sops-nix/secrets/singboxUrl)" CONFIG_FILE="/tmp/sing-box/config.json"
-
-    # task --taskfile $HOME/taskfile/mac/Taskfile.singbox.yml update-config SINGBOX_URL="$(cat $HOME/.config/sops-nix/secrets/singboxUrl)" CONFIG_FILE="/tmp/sing-box/config.json"
-
-    # sudo launchctl list | rg singbox
     launchd.daemons.singbox-update-config = {
       serviceConfig = {
         Label = "local.singbox.update-config";
-        # 使用 task CLI 运行 singbox:update-config，并把订阅 URL 作为参数传入
         ProgramArguments = [
-          "/bin/sh"
-          "-c"
-          ''            CONFIG_FILE="${cfg_path}" \
-                        SINGBOX_URL="$(cat ${config.sops.secrets.singboxUrl.path})" \
-                        exec ${pkgs.go-task}/bin/task --taskfile /Users/${myvars.username}/taskfile/mac/Taskfile.singbox.yml update-config''
+          "${updateScript}/bin/singbox-update"
+          "--url"
+          "${config.sops.secrets.singboxUrl.path}"
+          "--config"
+          "${cfg_path}"
         ];
+        EnvironmentVariables = {
+          PATH = "/etc/profiles/per-user/${myvars.username}/bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
+        };
 
         # 开机后立即运行一次
         RunAtLoad = true;
@@ -52,10 +52,6 @@ in {
 
         StandardOutPath = "/Users/${myvars.username}/Library/Logs/sing-box-update.log";
         StandardErrorPath = "/Users/${myvars.username}/Library/Logs/sing-box-update.log";
-
-        EnvironmentVariables = {
-          PATH = "/etc/profiles/per-user/${myvars.username}/bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
-        };
       };
     };
 
