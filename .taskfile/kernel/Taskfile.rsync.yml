@@ -45,6 +45,101 @@ version: '3'
 
 # rsync -avz --delete --progress -e "ssh -o StrictHostKeyChecking=no" /Users/lhgtqb7bll/Desktop/nix-config/ luck@192.168.71.7:~/Desktop/nix-config/
 
+
+
+
+
+
+
+
+# rsync 怎么跨host传文件？
+
+
+# `rsync` 跨 host 传文件，最常见就是走 **SSH**。基本语法就是把路径写成 `user@host:/path` 这种“远端路径”形式。
+#
+### 1) 本机 → 远端
+#
+#```bash
+#rsync -avzP /local/dir/  user@remote:/remote/dir/
+#```
+#
+#* `-a` 归档模式（保留权限/时间戳/软链接等）
+#* `-v` 详细输出
+#* `-z` 压缩（带宽小/延迟高时有用）
+#* `-P` = `--partial --progress`（断点保留 + 进度）
+#
+#**注意尾部斜杠：**
+#
+#* `/local/dir/`（有 `/`）表示“同步目录内容”到目标目录
+#* `/local/dir`（没 `/`）表示“把 dir 目录本身”放到目标目录下
+#
+### 2) 远端 → 本机
+#
+#```bash
+#rsync -avzP user@remote:/remote/dir/  /local/dir/
+#```
+#
+### 3) 远端A → 远端B（你这台机器当跳板执行）
+#
+#```bash
+#rsync -avzP -e ssh user@hostA:/path/file  user@hostB:/path/
+#```
+#
+#说明：数据一般会经过你这台机器（取决于版本/参数），大文件更建议在其中一台远端上直接执行 rsync 到另一台远端。
+#
+### 4) 指定 SSH 端口/密钥/参数
+#
+#```bash
+#rsync -avzP -e "ssh -p 2222 -i ~/.ssh/id_ed25519" /local/dir/ user@remote:/remote/dir/
+#```
+#
+### 5) 常用“更像部署”的选项
+#
+#* 删除目标端多余文件（让目标完全镜像源）：
+#
+#```bash
+#rsync -avzP --delete /src/ user@remote:/dst/
+#```
+#
+#* 排除/包含：
+#
+#```bash
+#rsync -avzP --exclude '*.log' --exclude node_modules/ /src/ user@remote:/dst/
+#```
+#
+#* 先演练不真正执行（强烈推荐）：
+#
+#```bash
+#rsync -avzP --dry-run /src/ user@remote:/dst/
+#```
+#
+#* 限速：
+#
+#```bash
+#rsync -avzP --bwlimit=20m /src/ user@remote:/dst/
+#```
+#
+### 6) 远端需要 sudo 写入目标目录
+#
+#如果远端目录要 root 权限：
+#
+#```bash
+#rsync -avzP --rsync-path="sudo rsync" /local/file user@remote:/protected/path/
+#```
+#
+#前提：远端 `user` 有 sudo 权限（可能会提示输密码；无密码 sudo 最顺畅）。
+#
+#---
+#
+#如果你告诉我：
+#
+#1. 你是“本机→远端”还是“远端→本机”还是“A→B”；
+#2. 要传的是单个文件还是目录；
+#3. SSH 端口是否默认 22；
+#   我可以把命令给你写成可直接复制的一行。
+
+
+
 tasks:
   default:
     cmd: rsync -avz --delete --progress -e
