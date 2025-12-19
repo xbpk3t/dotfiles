@@ -1,58 +1,16 @@
 ---
 version: '3'
 
-vars:
-  # 允许通过环境变量或 CLI 覆盖，未设置时使用系统路径
-  CONFIG_FILE: '{{.CONFIG_FILE | default "/tmp/sing-box/config.json"}}'
-  TEMP_CONFIG: '{{.TEMP_CONFIG | default "/tmp/sing-box/config.json.tmp"}}'
 
 tasks:
-
   # Create a script to download sing-box configuration with retry logic
   # 独立的配置下载脚本，与 sing-box 主服务解耦
   update-config:
     desc: 下载订阅并原子更新 sing-box 配置（需要 SINGBOX_URL）
-    requires:
-      vars: [SINGBOX_URL]
-    env:
-      CONFIG_FILE: '{{.CONFIG_FILE}}'
-      TEMP_CONFIG: '{{.TEMP_CONFIG}}'
     preconditions:
       - sh: command -v curl
         msg: "找不到 curl，可通过 env CURL=... 指定绝对路径"
       - sh: command -v jq
         msg: "找不到 jq，可通过 env JQ=... 指定绝对路径"
     set: [pipefail]
-    cmds:
-      - mkdir -p "$(dirname "$CONFIG_FILE")"
-
-      # -f: fail silently on HTTP errors
-      # -S: show error even with -s
-      # -L: follow redirects
-      # --retry 3: retry 3 times on transient errors
-      # --retry-delay 5: wait 5 seconds between retries
-      # --retry-max-time 60: max 60 seconds for all retries
-      # --connect-timeout 30: connection timeout 30 seconds
-      # --max-time 120: max total time 120 seconds
-      # 部分 CDN 对 HTTP/2 支持不稳定，Nix 提供的 curl 默认优先 h2，launchd 环境下容易被 reset。
-      # 强制使用 HTTP/1.1 避免 TLS reset；即使在用户 shell 用到 /usr/bin/curl 也兼容。
-      - curl --http1.1 -fsSL --retry 3 --retry-delay 5 --retry-max-time 60 --connect-timeout 30 --max-time 120 "{{.SINGBOX_URL}}" -o "$TEMP_CONFIG"
-
-      # Verify the downloaded file is valid JSON
-      - jq empty "$TEMP_CONFIG" || { echo "Downloaded configuration is not valid JSON"; rm -f "$TEMP_CONFIG"; exit 1; }
-      # 原子性替换配置文件
-      - mv -f "$TEMP_CONFIG" "$CONFIG_FILE"
-      - chmod 600 "$CONFIG_FILE"
-      - echo "Sing-box configuration updated successfully"
-
-
-
-  run:
-    desc: 前台启动 sing-box（使用 CONFIG_FILE 指定的配置）
-    env:
-      CONFIG_FILE: '{{.CONFIG_FILE}}'
-    requires:
-      vars: [CONFIG_FILE]
-    set: [pipefail]
-    cmds:
-      - ${SING_BOX_BIN:-sing-box} run -c "${CONFIG_FILE}"
+    cmd: nu ./singbox/update-config.nu

@@ -10,7 +10,8 @@ in {
   # Or disable the firewall altogether.
   # 默认开启（如果workstation等场景不需要时，则在hosts中overrides该配置）
   # 服务器建议开启防火墙，桌面可以依赖 NetworkManager 自动规则
-  networking.firewall.enable = lib.mkDefault true;
+  # [2025-12-19]
+  networking.firewall.enable = lib.mkDefault false;
 
   # Enable the OpenSSH daemon.
   # https://mynixos.com/nixpkgs/options/services.openssh
@@ -137,5 +138,6 @@ in {
   # https://github.com/NixOS/nixpkgs/blob/nixos-25.05/nixos/modules/config/terminfo.nix
   # [2025-11-28] 设置为false，因为 termbench-pro 在rebuild时报错。
   # 绝大多数常用终端（xterm, foot, kitty, wezterm, tmux 等）在 NixOS 主包里已经自带 terminfo，使用它们时不会有任何变化。只有当你运行“系统上没有安装、但 SSH 到别的机器时又需要正确 terminfo”的冷门终端名（例如 contour、某些古老/自编译终端）时，远端才可能因为 TERM 无法匹配而退回到 vt100 之类的兼容模式。对日常开发和常见终端来说几乎不会遇到。
-  environment.enableAllTerminfo = false;
+  # [2025-12-17] 还是需要启用该配置。mac上用ghostty通过ssh到 nixos-desktop，如果未启用该配置，就无法使用Ctrl+u等快捷操作。甚至无法删除已输入命令。
+  environment.enableAllTerminfo = true;
 }
