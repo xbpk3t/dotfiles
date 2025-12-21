@@ -9,9 +9,9 @@ def main [
   --config: path = "/tmp/sing-box/config.json"
   --temp: path = ""
 ] {
-  let resolved_url = if ($url_file | str length) > 0 { open --raw $url_file | str trim }
-    else if ($url | str length) > 0 { $url }
-    else { error make { msg: "Need --url or --url-file" } }
+  # Nushell requires `else` to appear on the same line as the preceding `}`.
+  # Keep the whole conditional on one line to avoid "Command `else` not found".
+  let resolved_url = if ($url_file | str length) > 0 { open --raw $url_file | str trim } else if ($url | str length) > 0 { $url } else { error make { msg: "Need --url or --url-file" } }
 
   let tmp = if ($temp | str length) > 0 { $temp } else { $config | path dirname | path join "config.json.tmp" }
 

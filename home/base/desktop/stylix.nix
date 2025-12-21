@@ -123,9 +123,6 @@ in {
     [
     ]
     ++ lib.optionals isLinux [
-      # stylix image as wallpaper, swaybg is required to achieve the effect
-      # swaybg
-
       # https://mynixos.com/nixpkgs/package/bibata-cursors
       bibata-cursors
 
