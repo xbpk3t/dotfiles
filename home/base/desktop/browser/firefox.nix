@@ -21,6 +21,7 @@ in {
     # policy: https://mozilla.github.io/policy-templates/
     # settings: about:config
     programs.firefox = {
+      # 在mac上可以使用hm安装的ff，但是样式完全错误（比如说 UI缩放），但是使用brew安装的ff就是可用的。我对比了前后两个方案生成的相应ff配置文件，也没什么头绪。所以最终选择直接禁止在mac上使用hm安装的ff
       # !!! 注意firefox不支持类似 ghostty.nix 的 package这么处理，所以只能在mac上直接禁用该hm配置
       enable = pkgs.stdenv.isLinux;
       package = pkgs.firefox;
