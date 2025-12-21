@@ -6,6 +6,8 @@
   # https://mynixos.com/nixpkgs/options/services.restic
   # 仅在 NixOS 端定时备份 docs-images 到 Cloudflare R2
 
+  # https://raw.githubusercontent.com/notthebee/nix-config/refs/heads/main/modules/homelab/backup/default.nix
+
   services.restic.backups."docs-images" = {
     initialize = true;
 

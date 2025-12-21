@@ -2,6 +2,14 @@
   username = "luck";
   projectRoot = "/home/${username}/Desktop/dotfiles";
 in {
+  # FIXME 移除掉所有 myvars. 正确的做法是所有的 username, mail 这些都应该配置到host里（类似 nixos-unified 这种）。
+  ## 1、最多的就是 username = "luck"; 有37处
+  ## 2、mainSshAuthorizedKeys 和 secondaryAuthorizedKeys 合计7次
+  ## 3、initialHashedPassword 有 2次
+  ## 4、还有比较麻烦的就是 colmenaTargets
+  ## 5、myvars.mail 有 3次
+  ## projectRoot 也被 nixos-cli 之类的被调用，也确实有用。
+
   inherit username projectRoot;
   # TODO: remove once all modules use projectRoot directly
   projectDir = projectRoot;
