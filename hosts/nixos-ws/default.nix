@@ -28,6 +28,10 @@ in {
       dns = "systemd-resolved";
       # 默认使用 wpa_supplicant；若需要 iwd 后端可再开启：
       # wifi.backend = "iwd";
+
+      # 让 NM 把 802-11-wireless.powersave 设为“关闭”(数值 2)
+      # 禁用 wifi自动省电（否则在机器挂机一段时间后，ssh连接会非常卡）
+      wifi.powersave = false;
     };
     inherit nameservers;
   };
@@ -112,4 +116,14 @@ in {
   # };
 
   #  modules.networking.netbird.enable = false;
+
+  # https://mynixos.com/nixpkgs/options/services.cron
+  # 使用 NixOS 自带 cron，每日运行 task 里的 rclone:sync-docs-images
+  # 因为这些cron并不通用，所以放在host里
+  services.cron = {
+    enable = true;
+
+    # 需要真正可用的 sendmail/MTA 才能投递 MAILTO；如未配置邮件服务，请留空或自建 msmtp/postfix。
+    mailto = lib.mkDefault ""; # 如需邮件，在主机级覆写为有效邮箱
+  };
 }
