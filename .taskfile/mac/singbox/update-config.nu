@@ -35,6 +35,7 @@ def main [
   }
 
   mv -f $tmp $config
-  chmod 0o600 $config
+  # coreutils chmod expects octal without the `0o` prefix
+  chmod 600 $config
   print ("Sing-box configuration updated -> " + $config)
 }
