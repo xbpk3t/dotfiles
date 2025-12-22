@@ -1,4 +1,6 @@
 {pkgs, ...}: {
+  # [2025-12-21] 注意之所以没有放到 nixos/base/i18n.nix 里，是因为fcitx5需要graphical支持。且desktop本身一定已经配置了input，并不需要minimal去配置input
+
   # 几点心得：
   # 1、可以看到，最后我把所有之前的配置都注释掉了，因为实际上全都是默认配置，那么为啥要写了？
   # 2、应该全部都用nix配置，而非之前的conf文件写法（用 home.file直接symlink）。这里需要注意的是并不需要很多人的 0, 1, 2 这种写法（或者 key."0" 这种写法），如果不写这些东西，直接写主key，默认就是0。
@@ -343,9 +345,9 @@
     };
   };
 
-  # 环境变量
-  home.sessionVariables = {
-    # 输入法相关环境变量
+  # 输入法与 Wayland 环境（仅 GNOME 会话下生效，避免污染其他会话）
+  environment.sessionVariables = {
+    # 输入法相关env
     GTK_IM_MODULE = "fcitx";
     QT_IM_MODULE = "fcitx";
     XMODIFIERS = "@im=fcitx";
