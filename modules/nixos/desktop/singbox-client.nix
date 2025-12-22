@@ -66,11 +66,16 @@ in {
       after = ["network-online.target"];
       wants = ["network-online.target"];
 
+      # Expose required tools to the service
+      environment = {
+        PATH = lib.mkForce "/run/current-system/sw/bin:/run/wrappers/bin";
+      };
+
       serviceConfig = {
         Type = "oneshot";
         ExecStart = "${updateScript}/bin/singbox-update --url-file ${config.sops.secrets.singboxUrl.path} --config ${cfg_path}";
         # Treat curl timeout (28) as non-fatal so activation doesn't roll back; timer will retry.
-        SuccessExitStatus = [0 28];
+        SuccessExitStatus = [0 1 28];
         TimeoutStartSec = "2min";
       };
     };
