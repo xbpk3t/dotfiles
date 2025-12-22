@@ -11,11 +11,13 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    home = {
+    home.sessionVariables = {
       # Improves trackpad scrolling in FF
-      sessionVariables.MOZ_USE_XINPUT2 = "1";
+      "MOZ_USE_XINPUT2" = "1";
       # Sometimes FF launches under XWayland otherwise
-      sessionVariables.MOZ_ENABLE_WAYLAND = "1";
+      "MOZ_ENABLE_WAYLAND" = "1";
+
+      "MOZ_WEBRENDER" = "1";
     };
 
     # policy: https://mozilla.github.io/policy-templates/

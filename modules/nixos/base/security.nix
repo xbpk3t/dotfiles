@@ -89,6 +89,7 @@ in {
           if enableHighLimits
           then [
             # 高 ulimit 档（基于 Linux-Optimizer），偏向高并发/调试，可能放大泄露或 DoS 面
+            # 把几乎所有资源（core/data/fsize/sigpending/memlock/rss/msgqueue/cpu/nproc/as/locks等）设为 unlimited，并把 nofile 提到 1048576，stack 软/硬 32M/64M。
             # The maximum size of core files created
             {
               domain = "*";
