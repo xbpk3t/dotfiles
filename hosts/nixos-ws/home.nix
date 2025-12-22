@@ -1,6 +1,5 @@
 {...}: {
   modules.desktop = {
-    nvidia.enable = true;
     gnome.enable = true;
 
     zed.enable = false;

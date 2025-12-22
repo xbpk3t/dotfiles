@@ -1,4 +1,9 @@
-{myvars, ...}:
+{
+  myvars,
+  config,
+  lib,
+  ...
+}:
 #############################################################
 #
 #  nixos-ws - NixOS Workstation
@@ -16,7 +21,6 @@ in {
   imports = [
     # Include the results of the hardware scan
     ./hardware.nix
-    ./nvidia.nix
   ];
 
   # Hostname & NetworkManager (GNOME Wi‑Fi 依赖 NM)
@@ -86,6 +90,18 @@ in {
   system.stateVersion = "24.11";
 
   modules = {
+    hardware = {
+      nvidia = {
+        enable = true;
+        # 使用 470.xx legacy 驱动，专门支持 Pascal 架构
+        # MX350 是 legacy GPU，使用闭源驱动
+        package = config.boot.kernelPackages.nvidiaPackages.legacy_470;
+
+        open = false;
+        powerManagement = false;
+      };
+    };
+
     desktop = {
       # 切换到 GNOME（Wayland 默认），避免 greetd/hyprland 冲突
       gnome.enable = true;

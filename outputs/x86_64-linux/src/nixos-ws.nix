@@ -46,6 +46,8 @@
       ++ map mylib.relativeToRoot [
         # Host-specific configuration
         "hosts/${name}/default.nix"
+        "modules/nixos/hardware/nvidia.nix"
+
         # common
         "secrets/default.nix"
         "modules/nixos/base"
