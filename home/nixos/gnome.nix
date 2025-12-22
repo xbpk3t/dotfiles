@@ -11,44 +11,6 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    # GNOME 常用工具与扩展
-    home.packages = with pkgs; [
-      gnome-tweaks
-      # 顶栏托盘图标（AppIndicator 支持）
-      gnomeExtensions.appindicator
-
-      # https://mynixos.com/nixpkgs/package/gnomeExtensions.clipboard-indicator
-      gnomeExtensions.clipboard-indicator
-      # 将 Dash 变为 Dock，可自定义位置/自动隐藏
-      # https://github.com/micheleg/dash-to-dock
-      gnomeExtensions.dash-to-dock
-      # 窗口平铺/网格助手
-      gnomeExtensions.tiling-assistant
-      # 顶栏防休眠/防锁屏开关
-      gnomeExtensions.caffeine
-
-      # 键盘重映射工具及配置
-      # https://mynixos.com/nixpkgs/package/xremap
-      # xremap
-      # xremap GNOME 扩展（Wayland 前台窗口名称查询）
-      # https://mynixos.com/nixpkgs/package/gnomeExtensions.xremap
-      # gnomeExtensions.xremap
-      # gnome-macos-remap-wayland
-    ];
-
-    # 输入法与 Wayland 环境（仅 GNOME 会话下生效，避免污染其他会话）
-    home.sessionVariables = {
-      GTK_IM_MODULE = "fcitx";
-      QT_IM_MODULE = "fcitx";
-      XMODIFIERS = "@im=fcitx";
-      # 强制 Firefox/GTK 使用原生 Wayland，避免 XWayland 下缩放偏差
-      MOZ_ENABLE_WAYLAND = "1";
-      # JetBrains IDE（含 GoLand）启用 Wayland 渲染；新版本默认支持，老版本需此开关
-      JBR_ENABLE_WAYLAND = "1";
-      # 让 Firefox 默认 125% UI 缩放，匹配你原先 1.25~1.5 的体验
-      # MOZ_CONFIG_DEVPIXELS_PER_PX = "1.25";
-    };
-
     # https://mynixos.com/home-manager/options/services.kdeconnect
     services.kdeconnect = {
       enable = true;
