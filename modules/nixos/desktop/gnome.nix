@@ -66,11 +66,37 @@ in {
     # GNOME 依赖 dconf
     programs.dconf.enable = true;
 
-    # 基础 GNOME 工具
+    # GNOME 常用工具与扩展
     environment.systemPackages = with pkgs; [
       gnome-tweaks
+      # 顶栏托盘图标（AppIndicator 支持）
       gnomeExtensions.appindicator
+
+      # https://mynixos.com/nixpkgs/package/gnomeExtensions.clipboard-indicator
+      gnomeExtensions.clipboard-indicator
+      # 将 Dash 变为 Dock，可自定义位置/自动隐藏
+      # https://github.com/micheleg/dash-to-dock
+      gnomeExtensions.dash-to-dock
+      # 窗口平铺/网格助手
+      gnomeExtensions.tiling-assistant
+      # 顶栏防休眠/防锁屏开关
+      gnomeExtensions.caffeine
+
+      # 键盘重映射工具及配置
+      # https://mynixos.com/nixpkgs/package/xremap
+      # xremap
+      # xremap GNOME 扩展（Wayland 前台窗口名称查询）
+      # https://mynixos.com/nixpkgs/package/gnomeExtensions.xremap
+      # gnomeExtensions.xremap
+      # gnome-macos-remap-wayland
     ];
+
+    # XDG portal 只保留 GNOME/GTK，避免与其他 compositor portal 冲突
+    xdg.portal = {
+      enable = true;
+      extraPortals = [pkgs.xdg-desktop-portal-gnome];
+      config.common.default = ["gnome" "gtk"];
+    };
 
     # KDE Connect 端口仅在 GNOME 桌面启用时开放
     networking.firewall = {
