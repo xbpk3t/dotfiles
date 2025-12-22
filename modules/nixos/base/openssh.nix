@@ -42,6 +42,8 @@ in {
 
         # 连接优化与基础加固（通用基线）
         # 关闭反向 DNS，加速握手
+        # VerifyReverseMapping 配置项（反向解析 + 校验是否能映射回同一IP）已经deprecated，且整合到 UseDns 里（UseDNS 会“lookup remote host name，并检查反查得到的主机名再解析回来的 IP 是否还是同一个 IP”）。
+        # UseDns = false; 就已经是“跳过反向 DNS（以及那套映射校验）”
         UseDns = false;
         Ciphers = [
           "aes256-ctr"
@@ -120,16 +122,15 @@ in {
       })
 
       (mkIf isServer {
+        # VPS 不提供图形，关闭 X11 转发
+        X11Forwarding = false;
+
         # 服务器场景：保持最小信任域，关闭 GSSAPI/SASL 等域认证通道
         # 禁用键盘交互（含 OTP/PAM），减少暴力破解面
         KbdInteractiveAuthentication = false;
-        # VPS 不提供图形，关闭 X11 转发
-        X11Forwarding = false;
+
         # 禁止代理转发，避免泄露本地凭据
         AllowAgentForwarding = false;
-        # 再次明确禁用 DNS 反查，保持一致
-        UseDns = false;
-        PermitTunnel = false;
       })
     ];
   };
