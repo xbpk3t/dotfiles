@@ -4,6 +4,7 @@
     hosts = {
       github.enable = true;
       vps.enable = true;
+      hk.enable = true;
     };
   };
 
