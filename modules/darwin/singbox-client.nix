@@ -8,9 +8,11 @@
 with lib; let
   cfg = config.modules.networking.singbox;
   cfg_path = "/tmp/sing-box/config.json";
+  # 注意 darwin 和 nixos 的目录层级不同，所以这里是向上两层，而非三层
   updateScript = pkgs.writeScriptBin "singbox-update" ''
     #!${pkgs.nushell}/bin/nu
-    ${builtins.readFile ../../../.taskfile/mac/singbox/update-config.nu}
+    # two ".." are enough to reach repo root; three would escape into /nix/store and be rejected in pure evaluation
+    ${builtins.readFile ../../.taskfile/mac/singbox/update-config.nu}
   '';
 in {
   options.modules.networking.singbox = {
