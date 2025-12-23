@@ -24,6 +24,14 @@ in {
           description = "Enable VPS SSH configuration";
         };
       };
+
+      hk = {
+        enable = lib.mkOption {
+          type = lib.types.bool;
+          default = false;
+          description = "Enable HK VPS SSH configuration";
+        };
+      };
     };
   };
 
@@ -61,6 +69,17 @@ in {
             user = "root";
             port = 22;
             identityFile = config.sops.secrets.sshVpsPrivateKey.path;
+          };
+        }
+        // lib.optionalAttrs cfg.hosts.hk.enable {
+          # match both alias 和 裸IP 在一条 Host 规则
+          # 只有 Host hk，当你写 ssh luck@103.85.224.63，OpenSSH 先用精确 Host/IP 匹配，没有找到，再走 Host *，没用上 HK 的 key，所以被拒。
+          "hk 103.85.224.63" = {
+            hostname = "103.85.224.63";
+            user = "luck";
+            port = 22;
+            identityFile = config.sops.secrets.sshHKPrivateKey.path;
+            identitiesOnly = true;
           };
         };
     };

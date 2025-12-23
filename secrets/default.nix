@@ -75,8 +75,9 @@ in {
       rcloneR2SecretAccessKey = mkUserSecret "rclone/r2/secret_access_key";
 
       # SSH secrets
-      sshGithubPrivateKey = mkUserSecret "ssh/github/private_key";
-      sshVpsPrivateKey = mkUserSecret "ssh/vps/private_key";
+      sshGithubPrivateKey = mkUserSecret "ssh/github";
+      sshVpsPrivateKey = mkUserSecret "ssh/vps";
+      sshHKPrivateKey = mkUserSecret "ssh/hk";
 
       # zAI API secrets
       claudeZaiToken = mkUserSecret "claude/zai/token";
