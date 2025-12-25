@@ -1,11 +1,8 @@
 {
   lib,
-  myvars,
   pkgs,
   ...
-}: let
-  hostFlakePath = myvars.projectRoot or "/etc/nixos";
-in {
+}: {
   boot.loader.systemd-boot = {
     # we use Git for version control, so we don't need to keep too many generations.
     configurationLimit = lib.mkDefault 10;
@@ -14,14 +11,6 @@ in {
   };
 
   boot.loader.timeout = lib.mkDefault 8; # wait for x seconds to select the boot entry
-
-  # Ensure nix tooling resolves the flake inside OCI containers instead of relying on host paths.
-  programs.nh.flake = lib.mkDefault hostFlakePath;
-
-  environment.sessionVariables = {
-    FLAKE = lib.mkDefault hostFlakePath;
-    NIXOS_CONFIG = lib.mkDefault hostFlakePath;
-  };
 
   # 添加用户可用的 shell 到 /etc/shells
   environment.shells = with pkgs; [
