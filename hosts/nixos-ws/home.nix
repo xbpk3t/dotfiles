@@ -9,6 +9,8 @@
     ghostty.enable = false;
 
     firefox.enable = true;
+
+    jetbrains-remote.enable = true;
   };
 
   modules.ssh = {

@@ -11,5 +11,7 @@
   modules.desktop = {
     alacritty.enable = false;
     ghostty.enable = true;
+
+    vscode.enable = true;
   };
 }

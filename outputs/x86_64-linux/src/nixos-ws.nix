@@ -52,6 +52,7 @@
         "secrets/default.nix"
         "modules/nixos/base"
         "modules/nixos/desktop"
+        "modules/nixos/extra/vscode-remote.nix"
       ];
     home-modules = map mylib.relativeToRoot [
       "secrets/default.nix"

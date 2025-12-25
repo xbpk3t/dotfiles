@@ -54,7 +54,9 @@ in {
         # 默认关闭转发，按角色再放开
         # 禁止 TCP 转发，降低横向移动风险
         # 不需要Desktop作为跳板机，所以也同样设置为false。那么就抽到common里。
-        AllowTcpForwarding = false;
+        # [2025-12-24] 用来做 remote dev，需要开启该配置项
+        AllowTcpForwarding = "local";
+
         # 禁止反向端口绑定到 0.0.0.0
         GatewayPorts = "no";
         # 默认关闭隧道，按角色再放开

@@ -69,6 +69,12 @@
       inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
 
+    # https://github.com/nix-community/nixos-vscode-server
+    vscode-server = {
+      url = "github:nix-community/nixos-vscode-server";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # haumea for module loading
     haumea = {
       url = "github:nix-community/haumea/v0.2.2";
@@ -108,6 +114,11 @@
     # https://github.com/zhaofengli/colmena
     colmena = {
       url = "github:zhaofengli/colmena";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    nixos-wsl = {
+      url = "github:nix-community/nixos-wsl/main";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
