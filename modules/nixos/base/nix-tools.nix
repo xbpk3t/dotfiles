@@ -1,6 +1,5 @@
 {
   lib,
-  myvars,
   inputs,
   pkgs,
   ...
@@ -12,11 +11,6 @@
   # Additional Nix management tools
   environment.systemPackages = with pkgs; [
     inputs.nixos-cli.packages.${pkgs.system}.default
-    nix-output-monitor
-    nix-index
-    colmena
-    # https://mynixos.com/nixpkgs/package/nvd
-    nvd
   ];
 
   nix = {
@@ -26,6 +20,8 @@
       auto-optimise-store = true;
       connect-timeout = 10;
       log-lines = 25;
+
+      # 构建过程中磁盘空间低于阈值时，临时触发 GC，直到回到 max-free
       min-free = 128000000;
       max-free = 1000000000;
       trusted-users = ["@wheel"];
@@ -41,6 +37,7 @@
       # Or add to your shell profile for persistence
     '';
 
+    # 定时GC
     gc = {
       # 使用 nh 来管理垃圾回收，禁用内置的 nix.gc
       automatic = lib.mkDefault false;
@@ -56,23 +53,6 @@
     enableParallelBuilding = true;
     buildManPages = false;
     buildDocs = false;
-  };
-
-  programs = {
-    nix-index = {
-      enable = true;
-    };
-
-    # Nix Helper (nh) configuration
-    # https://github.com/viperML/nh
-    nh = {
-      enable = true;
-      clean = {
-        enable = true;
-        extraArgs = "--keep-since 7d --keep 5";
-      };
-      flake = myvars.projectRoot;
-    };
   };
 
   # nixos-cli - Modern NixOS management CLI
@@ -111,10 +91,13 @@
         man = ["manual"];
       };
 
+      # https://nix-community.github.io/nixos-cli/settings.html#apply
       apply = {
         imply_impure_with_tag = true;
         use_git_commit_msg = true;
         ignore_dirty_tree = true;
+        # 使用 nom 来优化output
+        use_nom = true;
       };
     };
   };
@@ -122,13 +105,4 @@
   security.sudo.extraConfig = ''
     Defaults env_keep += "NO_COLOR"
   '';
-
-  # Configure nixos-cli
-  # Set the flake path for nixos-cli to use
-  environment.sessionVariables = let
-    projectPath = myvars.projectRoot;
-  in {
-    FLAKE = projectPath;
-    NIXOS_CONFIG = projectPath;
-  };
 }
