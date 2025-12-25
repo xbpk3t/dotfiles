@@ -10,10 +10,6 @@ env:
 
 
 tasks:
-  default:
-    desc: 用sshs列出本地所有ssh，并直接连接
-    interactive: true
-    cmd: sshs
 
   setup-ssh:
     desc: Setup SSH for a new host

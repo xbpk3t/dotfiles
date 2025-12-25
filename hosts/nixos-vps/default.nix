@@ -2,16 +2,13 @@
   config,
   lib,
   myvars,
+  mylib,
   ...
 }: let
   inherit (myvars.networking) nameservers;
   diskDevice = lib.attrByPath ["disko" "devices" "disk" "vda" "device"] "/dev/vda" config;
 in {
-  imports = [
-    ./hardware.nix
-    ./disko.nix
-    ./modules.nix
-  ];
+  imports = mylib.scanPaths ./.;
 
   boot.loader = {
     systemd-boot.enable = lib.mkForce false;
