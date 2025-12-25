@@ -26,6 +26,7 @@ version: '3'
 #- networksetup
 
 
+# [launchctl Doc](https://fig.io/manual/launchctl/print)
 
 #  - task svc:bootstrap -- LABEL=local.singbox.tun（默认 system 域，自动用 sudo）
 #  - task svc:kickstart -- LABEL=local.singbox.tun
