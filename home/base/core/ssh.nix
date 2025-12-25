@@ -5,6 +5,7 @@
 }: let
   cfg = config.modules.ssh;
 in {
+  # 给ssh的各host做了配置化启用，方便给不同 nix host自定义配置（比如说workstation可能会启用全部host，而VPS则不启用任何host）
   options.modules.ssh = {
     enable = lib.mkEnableOption "SSH configuration module";
 

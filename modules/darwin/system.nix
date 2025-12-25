@@ -1,6 +1,7 @@
 {myvars, ...}: {
   # Shared macOS system preferences with default values
   # Host-specific configurations can override these defaults
+  # 不需要去查什么Darwin的SystemPreferences，只需要去查nix-darwin的文档即可。因为并非所有配置项，都提供了nix配置项。
   system = {
     # Set the primary user for this specific machine (can be overridden)
     primaryUser = myvars.username;
@@ -40,10 +41,12 @@
       };
 
       # Global settings
+      # https://mynixos.com/nix-darwin/options/system.defaults.NSGlobalDomain
       NSGlobalDomain = {
         # Time configuration
         AppleICUForce24HourTime = true;
-        AppleInterfaceStyle = "Dark"; # Dark or null for light mode
+        # Dark or null for light mode
+        AppleInterfaceStyle = "Dark";
 
         # Keyboard settings
         KeyRepeat = 2; # Set to fastest

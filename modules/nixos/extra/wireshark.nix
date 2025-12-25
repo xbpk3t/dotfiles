@@ -8,6 +8,7 @@
   cfg = config.programs.wireshark.enable;
 in {
   # https://mynixos.com/nixpkgs/options/programs.wireshark
+  # https://mynixos.com/nixpkgs/package/wireshark
   programs.wireshark = {
     enable = true;
     # Whether to allow users in the 'wireshark' group to capture network traffic(via a setcap wrapper).
