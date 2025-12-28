@@ -19,7 +19,7 @@ in {
     ];
 
     programs.vscode = {
-      enable = true;
+      enable = pkgs.stdenv.isLinux;
       package = pkgs.vscode;
 
       # 保证 settings, ext, keybinds 相应配置文件可写
@@ -32,19 +32,13 @@ in {
         enableExtensionUpdateCheck = true;
 
         extensions = with pkgs.vscode-extensions; [
-          tuttieee.emacs-mcx
-
-          # https://mynixos.com/nixpkgs/package/vscode-extensions.ziglang.vscode-zig
-          # https://mynixos.com/nixpkgs/package/vscode-extensions.tiehuis.zig
-          # used to replace tiehuis.zig
-          ziglang.vscode-zig
-
           rust-lang.rust-analyzer
           kahole.magit
           graphql.vscode-graphql
-          catppuccin.catppuccin-vsc
+
           bbenoist.nix
           jnoortheen.nix-ide
+
           golang.go
           ms-python.python
           redhat.vscode-yaml
@@ -61,13 +55,23 @@ in {
 
           ms-vscode.makefile-tools
           ms-vscode-remote.remote-ssh
-          ms-vscode-remote.remote-ssh-edit
+          # ms-vscode-remote.remote-ssh-edit
           ms-vscode-remote.remote-containers
           github.vscode-pull-request-github
           ibm.output-colorizer
-          oderwat.indent-rainbow
           formulahendry.code-runner
           gruntfuggly.todo-tree
+
+          # oderwat.indent-rainbow
+
+          # tuttieee.emacs-mcx
+
+          # https://mynixos.com/nixpkgs/package/vscode-extensions.ziglang.vscode-zig
+          # https://mynixos.com/nixpkgs/package/vscode-extensions.tiehuis.zig
+          # used to replace tiehuis.zig
+          # ziglang.vscode-zig
+
+          # catppuccin.catppuccin-vsc
         ];
 
         userSettings = {
