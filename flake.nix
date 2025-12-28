@@ -121,6 +121,16 @@
       url = "github:nix-community/nixos-wsl/main";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # https://github.com/tak-bro/aicommit2
+    # aicommit2.url = "github:tak-bro/aicommit2";
+
+    # mac-app-util - Fix .app programs installed by Nix on Mac
+    # https://github.com/hraban/mac-app-util
+    mac-app-util = {
+      url = "github:hraban/mac-app-util";
+      inputs.nixpkgs.follows = "nixpkgs-darwin";
+    };
   };
 
   outputs = inputs: import ./outputs inputs;
