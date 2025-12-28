@@ -17,6 +17,21 @@
 
 
 
+
+:::tip
+
+把 Linux-Optimizer 里的linux优化都整合到nixos配置里。
+
+:::
+
+
+
+
+
+
+
+
+
 ### 2025-12-21
 
 把 modules/nixos/ws 直接移除掉了

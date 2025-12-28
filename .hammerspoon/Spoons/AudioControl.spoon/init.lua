@@ -22,9 +22,7 @@ obj.logger = hs.logger.new('AudioControl')
 --- 受信任的 WiFi 网络列表（白名单）
 --- 连接到这些网络时保持正常音量，其他网络时静音
 obj.trustedSSIDs = {
-  "MUDU",           -- 公司网络
-  "Home-WiFi",      -- 家庭网络
-  "Cafe-Guest",     -- 常去咖啡厅
+  "212",
 }
 
 --- AudioControl.trustedVolume

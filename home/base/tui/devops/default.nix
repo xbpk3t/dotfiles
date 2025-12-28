@@ -5,12 +5,9 @@
 }: {
   home.packages = with pkgs; [
     # dotbot # 用nix的mkOutOfStoreSymlink代替了
-    pre-commit
 
-    # CICD
-    # ansible  # Temporarily disabled due to hash mismatch in ncclient dependency
-    opentofu
-    cf-terraforming
+    # https://mynixos.com/nixpkgs/package/pre-commit
+    pre-commit
 
     # 代码质量和分析
     shellcheck
