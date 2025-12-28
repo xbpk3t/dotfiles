@@ -5,7 +5,7 @@
   myvars,
   ...
 }: let
-  inherit (lib) mkMerge mkIf mkDefault mkEnableOption;
+  inherit (lib) mkMerge mkIf mkDefault mkEnableOption mkOption types;
   isDesktop = config.modules.roles.isDesktop;
   isServer = config.modules.roles.isServer;
   # 高 ulimit 开关（放宽资源限制）
@@ -18,6 +18,14 @@ in {
     启用高 ulimit 档（基于 Linux-Optimizer）：放宽 nofile/stack 等资源限制，适合高并发/压测/调试。
     默认关闭以保持安全基线（core=0）。
   '';
+  options.modules.security.enableFirewall = mkOption {
+    type = types.bool;
+    default = isServer;
+    description = ''
+      是否启用主机防火墙。默认服务器角色开启，桌面关闭。
+      适用于“私网 homelab 但仍标记为 server”这类场景的显式关停。
+    '';
+  };
   # https://mynixos.com/nixpkgs/options/security
 
   config = mkMerge [
@@ -70,14 +78,15 @@ in {
       systemd.coredump.enable = false;
 
       networking.firewall = mkMerge [
-        {
-          # 基线：保留由其他模块设置的值，这里不强制开启
-        }
-        (mkIf isServer {
-          # 服务器强制开启防火墙，只放行 22，并记录拒绝
+        (mkIf config.modules.security.enableFirewall {
+          # 服务器/显式开启：强制开防火墙，至少放行 22，并记录拒绝
           enable = lib.mkForce true;
           allowedTCPPorts = lib.mkDefault [22];
           logRefusedConnections = lib.mkDefault true;
+        })
+        (mkIf (!config.modules.security.enableFirewall) {
+          # 显式关闭：覆盖上游强制开启
+          enable = lib.mkForce false;
         })
       ];
     }
