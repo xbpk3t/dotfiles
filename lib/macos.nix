@@ -26,6 +26,8 @@ in
       ]
       ++ (lib.optionals ((lib.lists.length home-modules) > 0) [
         home-manager.darwinModules.home-manager
+        # mac-app-util - Fix .app programs installed by Nix on Mac
+        # inputs.mac-app-util.darwinModules.default
         {
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
@@ -38,6 +40,11 @@ in
             ++ [
               inputs.nvf.homeManagerModules.default
               inputs.sops-nix.homeManagerModules.sops
+
+              # MAU的hm
+              # 大部分Desktop都是用hm安装，所以只需要配置MAU的hm即可
+              # 另外注意：
+              inputs.mac-app-util.homeManagerModules.default
             ];
         }
       ]);
