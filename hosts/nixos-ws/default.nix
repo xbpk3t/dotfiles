@@ -114,6 +114,10 @@ in {
       # All configuration is handled in modules/nixos/base/networking/netbird.nix
       netbird.enable = true;
     };
+
+    extra = {
+      vscode-remote.enable = true;
+    };
   };
   # Allow user-space input remapping tools (xremap)
   # hardware.uinput.enable = true;
