@@ -12,6 +12,6 @@
     alacritty.enable = false;
     ghostty.enable = true;
 
-    vscode.enable = true;
+    vscode.enable = false;
   };
 }
