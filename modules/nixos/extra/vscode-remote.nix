@@ -31,6 +31,6 @@ in {
     };
 
     # 允许用户会话常驻，保证 auto-fix-vscode-server 等 user services 重启后自动运行
-    services.logind.lingerUsers = ["luck"];
+    # services.logind.lingerUsers = ["luck"];
   };
 }

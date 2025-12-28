@@ -1,65 +1,51 @@
 {
-  # NOTE: the args not used in this file CAN NOT be removed!
-  # because haumea pass argument lazily,
-  # and these arguments are used in the functions like `mylib.nixosSystem`, etc.
   inputs,
+  lib,
   mylib,
   myvars,
-  lib,
   ...
 } @ args: let
   nixosSystemArgs = args // {inherit lib;};
+  name = "nixos-homelab";
 
-  name = "nixos-ws";
-
+  # 与 nixos-ws 共用 overlay；禁用 NVIDIA 但保留 unfree 支持
   genSpecialArgs = system: let
     customPkgsOverlay = import (mylib.relativeToRoot "pkgs/overlay.nix");
     pkgs = import inputs.nixpkgs {
       inherit system;
       config.allowUnfree = true;
-      config.nvidia.acceptLicense = true;
-      overlays = [
-        customPkgsOverlay
-      ];
+      overlays = [customPkgsOverlay];
     };
   in {
-    inherit
-      inputs
-      mylib
-      myvars
-      pkgs
-      ;
-
-    # use unstable branch for some packages to get the latest updates
+    inherit inputs mylib myvars pkgs;
     pkgs-unstable = import inputs.nixpkgs-unstable or inputs.nixpkgs {
       inherit system;
       config.allowUnfree = true;
-      overlays = [
-        customPkgsOverlay
-      ];
+      overlays = [customPkgsOverlay];
     };
   };
 
   modules = {
+    system = "x86_64-linux";
+    inherit lib myvars;
     nixos-modules =
       [inputs.sops-nix.nixosModules.sops]
       ++ map mylib.relativeToRoot [
-        # Host-specific configuration
         "hosts/${name}/default.nix"
-        "modules/nixos/hardware/nvidia.nix"
-
-        # common
         "secrets/default.nix"
         "modules/nixos/base"
-        "modules/nixos/desktop"
+        "modules/nixos/hardware/nvidia.nix"
         "modules/nixos/extra/singbox-client.nix"
         "modules/nixos/extra/vscode-remote.nix"
+
+        # homelab 需要时可启用 k3s 模块，先在 host 层决定
+        # "modules/nixos/homelab/k3s.nix"
       ];
     home-modules = map mylib.relativeToRoot [
       "secrets/default.nix"
-      # Host-specific home configuration
       "hosts/${name}/home.nix"
-      "home/base"
+      "home/base/core"
+      "home/base/tui"
       "home/nixos"
     ];
   };
@@ -68,13 +54,11 @@ in {
     // modules
     // {
       genSpecialArgs = genSpecialArgs;
-      system = "x86_64-linux";
     });
 
   colmenaProfiles.${name} = {
-    system = "x86_64-linux";
-    inherit (modules) nixos-modules home-modules;
+    inherit (modules) system nixos-modules home-modules;
     genSpecialArgs = genSpecialArgs;
-    defaultTargetUser = myvars.username;
+    defaultTargetUser = myvars.username or "root";
   };
 }
