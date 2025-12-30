@@ -376,12 +376,30 @@
     };
 
     # Atuin shell history
+    # https://mynixos.com/home-manager/options/programs.atuin
+
     atuin = {
       enable = true;
       enableZshIntegration = true;
       settings = {
-        auto_sync = false;
-        search_mode = "prefix";
+        # 多端同步是merge，而非replace
+        auto_sync = true;
+        # 默认30min同步，显式声明，不修改
+        sync_frequency = "30m";
+        # 直接使用官方服务，没必要自建
+        sync_address = "https://api.atuin.sh";
+
+        # https://wiki.nixos.org/wiki/Atuin
+        # 用来在不同host之间自动sync，否则 在一台机器上注册/导入/首次同步，需要执行 atuin register 以及 atuin import auto，最后 atuin sync 手动同步。就很麻烦。
+        # encryption key must be base64; session token is a UUID-like string
+        # encryption key：用于加密你的本地/同步历史，必须是随机的 256‑bit 值并以 Base64 存储。
+        key_path = config.sops.secrets.autinKey.path;
+        # session token：登录云端 API 的“会话令牌”，通常是一个带连字符的 UUID 字符串。
+        session_path = config.sops.secrets.autinSession.path;
+
+        # 相比prefix更好用
+        search_mode = "fuzzy";
+
         filter_mode = "global";
         style = "compact";
         inline_height = 20;
