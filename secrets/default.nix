@@ -93,6 +93,10 @@ in {
       pixivRefreshToken = mkUserSecret "pixiv/refresh_token";
       spotifyClientId = mkUserSecret "spotify/client_id";
       spotifyClientSecret = mkUserSecret "spotify/client_secret";
+
+      # Atuin
+      autinKey = mkUserSecret "atuin/key";
+      autinSession = mkUserSecret "atuin/session";
     };
   };
 }
