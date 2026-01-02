@@ -10,9 +10,7 @@
   isServer = config.modules.roles.isServer;
   # 高 ulimit 开关（放宽资源限制）
   enableHighLimits = config.modules.security.enableHighLimits or false;
-  authorizedKeys =
-    (myvars.mainSshAuthorizedKeys or [])
-    ++ (myvars.secondaryAuthorizedKeys or []);
+  authorizedKeys = myvars.SSHPubKeys or [];
 in {
   options.modules.security.enableHighLimits = mkEnableOption ''
     启用高 ulimit 档（基于 Linux-Optimizer）：放宽 nofile/stack 等资源限制，适合高并发/压测/调试。
