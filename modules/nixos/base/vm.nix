@@ -123,7 +123,7 @@ in {
         };
 
         users.users.root.openssh.authorizedKeys.keys =
-          myvars.mainSshAuthorizedKeys or [];
+          myvars.SSHPubKeys or [];
 
         system.stateVersion = "24.11";
       };
