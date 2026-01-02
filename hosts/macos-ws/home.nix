@@ -2,9 +2,10 @@
   modules.ssh = {
     enable = true;
     hosts = {
-      github.enable = true;
-      vps.enable = true;
-      hk.enable = true;
+      # github.enable = true;
+      hk-claw.enable = true;
+      hk-hdy.enable = true;
+      LA.enable = true;
     };
   };
 
