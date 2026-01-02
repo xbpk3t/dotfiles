@@ -4,7 +4,7 @@
 in {
   # FIXME 移除掉所有 myvars. 正确的做法是所有的 username, mail 这些都应该配置到host里（类似 nixos-unified 这种）。
   ## 1、最多的就是 username = "luck"; 有37处
-  ## 2、mainSshAuthorizedKeys 和 secondaryAuthorizedKeys 合计7次
+  ## 2、SSHPubKeys 7次
   ## 3、initialHashedPassword 有 2次
   ## 4、还有比较麻烦的就是 colmenaTargets
   ## 5、myvars.mail 有 3次
@@ -40,18 +40,11 @@ in {
   #      ```
   #    2. Never leave the device and never sent over the network.
   # 2. Or just use hardware security keys like Yubikey/CanoKey.
-  mainSshAuthorizedKeys = [
-    # The main ssh keys for daily usage
-    #    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIKlN+Q/GxvwxDX/OAjJHaNFEznEN4Tw4E4TwqQu/eD6 ryan@idols-ai"
-    #    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJwoI5MAogEa726jwwHL5EgM1X/i2A5d2pgV7i7t8fzB ryan@shoukei"
-    #    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDc1PNTXzzvd93E+e9LXvnEzqgUI5gMTEF/IitvzgmL+ ryan@frieren"
-
+  SSHPubKeys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDth3yFJZ2p5tID2W2AHI3s6t6B8oU3nSVBIJANNxyIG nixos-cntr"
 
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF7x+rABbX8F5M7o3JhuzC3nifn3/ePgLXp5WaW/8FiE nixos-vps"
-  ];
-  secondaryAuthorizedKeys = [
-    # the backup ssh keys for disaster recovery
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMzYT0Fpcp681eHY5FJV2G8Mve53iX3hMOLGbVvfL+TF ryan@romantic"
+
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFbnHbU+syywmhd+ywtJwsc8+IKuuph5Ol+TmxC8pZHH luck@macos-ws"
   ];
 }
