@@ -33,7 +33,7 @@
     inherit (myvars) initialHashedPassword;
     # 设置 root shell 为 zsh
     shell = pkgs.zsh;
-    openssh.authorizedKeys.keys = myvars.mainSshAuthorizedKeys ++ myvars.secondaryAuthorizedKeys;
+    openssh.authorizedKeys.keys = myvars.SSHPubKeys;
   };
 
   users.users."${myvars.username}" = {
@@ -46,7 +46,7 @@
 
     # !!! 需要添加该配置，否则无法使用 ssh luck@host 登录目标host
     openssh.authorizedKeys.keys =
-      myvars.mainSshAuthorizedKeys ++ myvars.secondaryAuthorizedKeys;
+      myvars.SSHPubKeys;
 
     extraGroups = [
       myvars.username
