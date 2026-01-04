@@ -57,7 +57,7 @@ in {
 
     networking = {
       singbox.enable = true;
-      netbird.enable = true;
+      tailscale.enable = true;
     };
 
     # 私网 homelab：显式关闭内置防火墙
