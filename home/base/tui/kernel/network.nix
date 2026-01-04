@@ -3,6 +3,7 @@
   pkgs,
   ...
 }: {
+  # https://github.com/nicolaka/netshoot 参考该repo提供的一些
   home.packages = with pkgs;
     [
       # 网络工具 (excluding wget/curl which are in minimal)
@@ -96,6 +97,8 @@
 
       # 实用工具集（ts 等小工具）
       moreutils
+
+      # https://github.com/zachwilke/netops
     ]
     # Linux-only tools; Darwin 上直接跳过，避免 hostPlatform 不可用的求值错误
     ++ lib.optionals stdenv.isLinux [
@@ -109,4 +112,8 @@
       # impala（Wi‑Fi TUI），仅在 Linux 上可用
       impala
     ];
+
+  # TODO trippy
+  # https://mynixos.com/home-manager/options/programs.trippy
+  # https://github.com/fujiapple852/trippy
 }

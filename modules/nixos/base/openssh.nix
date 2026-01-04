@@ -25,6 +25,9 @@ in {
         # 禁用密码认证，强制公钥
         PasswordAuthentication = false;
 
+        #  PermitRootLogin = "yes";
+        #  PasswordAuthentication = true;
+
         # 提高日志粒度便于审计，记录认证阶段详情但不过度冗长
         LogLevel = "VERBOSE";
         # 将 SSH 日志放入 AUTHPRIV，避免混入系统日志并限制读取范围
