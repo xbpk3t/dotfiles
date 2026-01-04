@@ -35,6 +35,8 @@
 
       "ghostty"
 
+      "tailscale-app"
+
       # "reqable"
       # "wireshark-app"
       # "google-chrome"
@@ -52,8 +54,8 @@
       # 只安装nix配置的pkg，除此之外全部移除
       cleanup = "zap";
       # 每次rebuild时，自动升级brew
-      autoUpdate = true;
-      upgrade = true;
+      autoUpdate = false;
+      upgrade = false;
     };
   };
 }
