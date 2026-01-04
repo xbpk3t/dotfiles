@@ -51,5 +51,9 @@ in {
 
     # 添加用户组
     users.users."${myvars.username}".extraGroups = ["netbird"];
+
+    environment.shellAliases = {
+      nbs = "netbird";
+    };
   };
 }
