@@ -76,9 +76,9 @@ in {
 
       # SSH secrets
       sshGithubPrivateKey = mkUserSecret "ssh/github";
-      sshHKClawPrivateKey = mkUserSecret "ssh/hk-claw";
-      sshHKPrivateKey = mkUserSecret "ssh/hk-hdy";
-      sshLAPrivateKey = mkUserSecret "ssh/la-rn";
+      sshHKClawPrivateKey = mkUserSecret "ssh/HK-claw";
+      sshHKPrivateKey = mkUserSecret "ssh/HK-hdy";
+      sshLAPrivateKey = mkUserSecret "ssh/LA-RN";
 
       # zAI API secrets
       claudeZaiToken = mkUserSecret "claude/zai/token";
