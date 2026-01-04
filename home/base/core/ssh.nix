@@ -72,7 +72,7 @@ in {
           # HDY机器
           # match both alias 和 裸IP 在一条 Host 规则
           # 只有 Host hk，当你写 ssh luck@103.85.224.63，OpenSSH 先用精确 Host/IP 匹配，没有找到，再走 Host *，没用上 HK 的 key，所以被拒。
-          "hk-hdy 103.85.224.63" = {
+          "HK-hdy 103.85.224.63" = {
             hostname = "103.85.224.63";
             user = "luck";
             port = 22;
@@ -82,7 +82,7 @@ in {
         }
         // lib.optionalAttrs cfg.hosts.LA.enable {
           # RN机器
-          "la-rn 142.171.154.61" = {
+          "LA-RN 142.171.154.61" = {
             hostname = "142.171.154.61";
             user = "luck";
             port = 22;
@@ -91,7 +91,7 @@ in {
           };
         }
         // lib.optionalAttrs cfg.hosts.vps.enable {
-          "hk-claw 47.79.17.202" = {
+          "HK-claw 47.79.17.202" = {
             hostname = "47.79.17.202";
             user = "root";
             port = 22;
