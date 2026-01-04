@@ -44,7 +44,6 @@
     home-modules = map mylib.relativeToRoot [
       "secrets/default.nix"
       "home/base/core"
-      "home/nixos"
     ];
   };
 in {
