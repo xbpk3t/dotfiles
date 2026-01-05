@@ -1,5 +1,6 @@
 # Helper to build colmena node entries that share the same modules/home-modules
 # as nixosConfigurations.
+# lib/colmena-system.nix 仍在用：lib/mkColmenaRole.nix 内部为每个 target 生成节点时，最终调用的就是 mylib.colmenaSystem 来拼出 deployment + NixOS/Home Manager imports，所以它是“底层构造器”；mkColmenaRole 只是把多主机扇出、命名、tags 封装了一层。换言之，链路是：角色文件 → mkColmenaRole →colmenaSystem。所以 colmena-system.nix 还在发挥作用，不是闲置。
 {
   lib,
   inputs,

@@ -5,8 +5,9 @@
   myvars,
   ...
 } @ args: let
-  nixosSystemArgs = args // {inherit lib;};
   name = "nixos-homelab";
+  tags = [name "homelab"];
+  ssh-user = myvars.username or "root";
 
   # 与 nixos-ws 共用 overlay；禁用 NVIDIA 但保留 unfree 支持
   genSpecialArgs = system: let
@@ -49,16 +50,19 @@
       "home/nixos"
     ];
   };
-in {
-  nixosConfigurations.${name} = mylib.nixosSystem (nixosSystemArgs
-    // modules
-    // {
-      genSpecialArgs = genSpecialArgs;
-    });
-
-  colmenaProfiles.${name} = {
-    inherit (modules) system nixos-modules home-modules;
-    genSpecialArgs = genSpecialArgs;
-    defaultTargetUser = myvars.username or "root";
+  role = mylib.mkColmenaRole {
+    inherit lib mylib genSpecialArgs modules args name;
+    system = "x86_64-linux";
+    baseTags = tags;
+    targets = [
+      {
+        host = "192.168.5.178";
+        user = ssh-user;
+        tags = tags;
+        port = null;
+      }
+    ];
   };
+in {
+  inherit (role) nixosConfigurations colmena;
 }

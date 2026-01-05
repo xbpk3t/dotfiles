@@ -8,9 +8,9 @@
   lib,
   ...
 } @ args: let
-  nixosSystemArgs = args // {inherit lib;};
-
   name = "nixos-ws";
+  tags = [name "desktop"];
+  ssh-user = myvars.username;
 
   genSpecialArgs = system: let
     customPkgsOverlay = import (mylib.relativeToRoot "pkgs/overlay.nix");
@@ -63,18 +63,19 @@
       "home/nixos"
     ];
   };
-in {
-  nixosConfigurations.${name} = mylib.nixosSystem (nixosSystemArgs
-    // modules
-    // {
-      genSpecialArgs = genSpecialArgs;
-      system = "x86_64-linux";
-    });
-
-  colmenaProfiles.${name} = {
+  role = mylib.mkColmenaRole {
+    inherit lib mylib genSpecialArgs modules args name;
     system = "x86_64-linux";
-    inherit (modules) nixos-modules home-modules;
-    genSpecialArgs = genSpecialArgs;
-    defaultTargetUser = myvars.username;
+    baseTags = tags;
+    targets = [
+      {
+        host = "192.168.234.194";
+        user = ssh-user;
+        tags = tags;
+        port = null;
+      }
+    ];
   };
+in {
+  inherit (role) nixosConfigurations colmena;
 }

@@ -3,6 +3,7 @@
   macosSystem = import ./macos.nix;
   nixosSystem = import ./nixos.nix;
   colmenaSystem = import ./colmena-system.nix;
+  mkColmenaRole = import ./mkColmenaRole.nix;
   attrs = import ./attrs.nix {inherit lib;};
 
   # use path relative to the root of the project
@@ -26,6 +27,7 @@ in {
     macosSystem
     nixosSystem
     colmenaSystem
+    mkColmenaRole
     attrs
     scanPaths
     relativeToRoot
