@@ -131,6 +131,9 @@
       url = "github:hraban/mac-app-util";
       inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
+
+    # Declarative Dokploy stack for NixOS
+    nix-dokploy.url = "github:el-kurto/nix-dokploy";
   };
 
   outputs = inputs: import ./outputs inputs;
