@@ -38,6 +38,7 @@
         "modules/nixos/hardware/nvidia.nix"
         "modules/nixos/extra/singbox-client.nix"
         "modules/nixos/extra/vscode-remote.nix"
+        "modules/nixos/homelab/dokploy.nix"
 
         # homelab 需要时可启用 k3s 模块，先在 host 层决定
         # "modules/nixos/homelab/k3s.nix"

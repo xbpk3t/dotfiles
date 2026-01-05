@@ -60,6 +60,10 @@ in {
       tailscale.enable = true;
     };
 
+    homelab = {
+      dokploy.enable = true;
+    };
+
     # 私网 homelab：显式关闭内置防火墙
     security.enableFirewall = false;
 
