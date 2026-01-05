@@ -6,7 +6,7 @@ in {
   ## 1、最多的就是 username = "luck"; 有37处
   ## 2、SSHPubKeys 7次
   ## 3、initialHashedPassword 有 2次
-  ## 4、还有比较麻烦的就是 colmenaTargets
+  ## 4、原先的 colmenaTargets 已移除，目标主机改由各 role 节点文件内声明
   ## 5、myvars.mail 有 3次
   ## projectRoot 也被 nixos-cli 之类的被调用，也确实有用。
 

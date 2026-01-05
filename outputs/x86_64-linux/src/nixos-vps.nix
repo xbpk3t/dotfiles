@@ -5,8 +5,9 @@
   myvars,
   ...
 } @ args: let
-  nixosSystemArgs = args // {inherit lib;};
   name = "nixos-vps";
+  tags = [name "vps"];
+  ssh-user = "root";
   customPkgsOverlay = import (mylib.relativeToRoot "pkgs/overlay.nix");
   vpsSpecialArgs = system: let
     pkgs = import inputs.nixpkgs {
@@ -46,16 +47,26 @@
       "home/base/core"
     ];
   };
-in {
-  nixosConfigurations.${name} = mylib.nixosSystem (nixosSystemArgs
-    // modules
-    // {
-      genSpecialArgs = vpsSpecialArgs;
-    });
 
-  colmenaProfiles.${name} = {
-    inherit (modules) system nixos-modules home-modules;
+  targets = [
+    {
+      host = "103.85.224.63";
+      user = ssh-user;
+      tags = tags;
+    }
+    {
+      host = "142.171.154.61";
+      user = ssh-user;
+      tags = tags;
+    }
+  ];
+
+  role = mylib.mkColmenaRole {
+    inherit lib mylib modules args name targets;
     genSpecialArgs = vpsSpecialArgs;
-    defaultTargetUser = "root";
+    system = "x86_64-linux";
+    baseTags = tags;
   };
+in {
+  inherit (role) nixosConfigurations colmena;
 }
