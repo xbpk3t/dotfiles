@@ -7,7 +7,8 @@
     compose2nix
 
     # Kubernetes 工具
-    minikube
+    # MAYBE fatal error: out of memory allocating arena map / failed to create OS thread 内存不够，导致整个依赖链（home-manager-path 等）被挂起。
+    # minikube
 
     kompose
     kube-linter # https://github.com/stackrox/kube-linter
@@ -20,7 +21,11 @@
 
     kubernetes-polaris
     conftest
-    kty # https://github.com/grampelberg/kty
+
+    # TODO ??? error occurred: Command "/nix/store/r9wbjib6xxjkyb9yvjvrkl4sq61i2lyn-gcc-wrapper-15.2.0/bin/cc" "-O3" "-ffunction-sections" "-fdata-sections" "-fPIC" "-m64" "-I" "/build/source/target/x86_64-unknown-linux-gnu/release/build/onig_sys-aaedb31d5d4019c3/out" "-I" "oniguruma/src" "-DHAVE_UNISTD_H=1" "-DHAVE_SYS_TYPES_H=1" "-DHAVE_SYS_TIME_H=1" "-o" "/build/source/target/x86_64-unknown-linux-gnu/release/build/onig_sys-aaedb31d5d4019c3/out/c77b18e714869709-regparse.o" "-c" "oniguruma/src/regparse.c" with args cc did not execute successfully (status code exit status: 1).
+    # https://github.com/grampelberg/kty
+    # kty
+
     kubectl-graph # https://github.com/steveteuber/kubectl-graph  最近接手了一个规模比较大的集群，光是整理集群中的资源就使人头昏眼花，虽然我自认 kubectl 使用的已经十分熟练，但是上千个 k8s Resource 看下来还是不堪重负。在不能为集群安装任何其他工具的情况下，可以改造的就只有我自己的 Client 端，也就是 kubectl 了。本文就介绍一个有趣的 kubectl 插件：kubectl-graph。
 
     cilium-cli # https://github.com/cilium/cilium-cli

@@ -68,7 +68,7 @@ in {
             identitiesOnly = true;
           };
         }
-        // lib.optionalAttrs cfg.hosts.hk.enable {
+        // lib.optionalAttrs cfg.hosts.hk-hdy.enable {
           # HDY机器
           # match both alias 和 裸IP 在一条 Host 规则
           # 只有 Host hk，当你写 ssh luck@103.85.224.63，OpenSSH 先用精确 Host/IP 匹配，没有找到，再走 Host *，没用上 HK 的 key，所以被拒。
@@ -90,7 +90,7 @@ in {
             identitiesOnly = true;
           };
         }
-        // lib.optionalAttrs cfg.hosts.vps.enable {
+        // lib.optionalAttrs cfg.hosts.hk-claw.enable {
           "HK-claw 47.79.17.202" = {
             hostname = "47.79.17.202";
             user = "root";
@@ -99,5 +99,8 @@ in {
           };
         };
     };
+
+    # 覆盖 ~/.ssh/config
+    home.file.".ssh/config".force = true;
   };
 }
