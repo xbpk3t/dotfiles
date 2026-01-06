@@ -7,11 +7,12 @@
 }:
 with lib; let
   cfg = config.modules.networking.singbox;
-  cfg_path = "/tmp/sing-box/config.json";
+  cfg_path = "/var/lib/sing-box/config.json";
+  outbounds_path = "/var/lib/sing-box/outbounds.json";
+  baseJson = pkgs.writeText "singbox-base.json" (builtins.toJSON (import ../../lib/singbox-config.nix));
   # 注意 darwin 和 nixos 的目录层级不同，所以这里是向上两层，而非三层
   updateScript = pkgs.writeScriptBin "singbox-update" ''
     #!${pkgs.nushell}/bin/nu
-    # two ".." are enough to reach repo root; three would escape into /nix/store and be rejected in pure evaluation
     ${builtins.readFile ../../.taskfile/mac/singbox/update-config.nu}
   '';
 in {
@@ -22,7 +23,7 @@ in {
   # !!!
   # 1、注意这两个launchd 都需要作为 system级（而非用户级）
   ## - 保持 TUN 主服务为 system 级 daemon：创建 TUN 设备和路由需要 root，system 域的launchd 保证开机即生效且不受用户登录/退出影响。
-  ## - “更新订阅”也可以继续放 system 级：它要读 sops secret（root 权限更自然），而且生成的 /tmp/sing-box/config.json 直接给 root 级 sing-box 用。
+  ## - “更新订阅”也可以继续放 system 级：它要读 sops secret（root 权限更自然），而且生成的 /var/lib/sing-box/config.json 直接给 root 级 sing-box 用。
   # 2、本身这个singbox机制是很简单的。先用 update-config 把 config.json 拉到本地，然后直接 sing-box run -c config.json 跑起来即可。但是为了保证服务稳定可用，所以需要以下配置。
   config = mkIf cfg.enable {
     # Install sing-box package for user
@@ -40,8 +41,12 @@ in {
           "${updateScript}/bin/singbox-update"
           "--url"
           "${config.sops.secrets.singboxUrl.path}"
+          "--base"
+          "${baseJson}"
           "--config"
           "${cfg_path}"
+          "--outbounds"
+          "${outbounds_path}"
         ];
         EnvironmentVariables = {
           PATH = "/etc/profiles/per-user/${myvars.username}/bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
@@ -73,7 +78,9 @@ in {
           SuccessfulExit = false;
           NetworkState = true;
         };
-        WorkingDirectory = "/tmp";
+        # keep runtime artifacts (routes cache, crash dumps) alongside generated config
+        # so the daemon never touches /tmp (which can be swept or have wrong perms)
+        WorkingDirectory = "/var/lib/sing-box";
         StandardOutPath = "/Users/${myvars.username}/Library/Logs/sing-box.log";
         StandardErrorPath = "/Users/${myvars.username}/Library/Logs/sing-box.log";
         EnvironmentVariables = {
