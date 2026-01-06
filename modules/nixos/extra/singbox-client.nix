@@ -6,13 +6,25 @@
 }:
 with lib; let
   cfg = config.modules.networking.singbox;
-  cfg_path = "/var/lib/sing-box/config.json";
-  outbounds_path = "/var/lib/sing-box/outbounds.json";
-  baseJson = pkgs.writeText "singbox-base.json" (builtins.toJSON (import ../../../lib/singbox-config.nix));
-  updateScript = pkgs.writeScriptBin "singbox-update" ''
-    #!${pkgs.nushell}/bin/nu
-    ${builtins.readFile ../../../.taskfile/mac/singbox/update-config.nu}
-  '';
+  servers = [
+    {
+      tag = "vps-103";
+      server = "103.85.224.63";
+      port = 8443;
+    }
+    {
+      tag = "vps-142";
+      server = "142.171.154.61";
+      port = 8443;
+    }
+  ];
+  secrets = {
+    uuid = config.sops.placeholder.singboxUUID;
+    publicKey = config.sops.placeholder.singboxPubKey;
+    shortId = config.sops.placeholder.singboxID;
+  };
+  configJson = import ../../../lib/singbox-config.nix (secrets // {inherit servers;});
+  clientConfigPath = config.sops.templates."singbox-client.json".path;
 in {
   # Sing-box Module - System-level Proxy Service
   #
@@ -53,51 +65,10 @@ in {
     # Install sing-box package
     environment.systemPackages = [
       pkgs.sing-box
-      pkgs.curl
-      pkgs.jq
     ];
 
-    # 使用 Task 下载订阅配置，解耦主服务
-    systemd.services.singbox-update-config = {
-      description = "Update Sing-box Configuration from Subscription URL";
-      # 最多重试 3 次
-      startLimitBurst = 3;
-      # 1 小时内最多重试 3 次
-      startLimitIntervalSec = 3600;
-      wantedBy = ["multi-user.target"];
-      after = ["network-online.target"];
-      wants = ["network-online.target"];
-
-      # Expose required tools to the service
-      environment = {
-        PATH = lib.mkForce "/run/current-system/sw/bin:/run/wrappers/bin";
-      };
-
-      serviceConfig = {
-        Type = "oneshot";
-        ExecStart = "${updateScript}/bin/singbox-update --url-file ${config.sops.secrets.singboxUrl.path} --base ${baseJson} --config ${cfg_path} --outbounds ${outbounds_path}";
-        # Treat curl timeout (28) as non-fatal so activation doesn't roll back; timer will retry.
-        SuccessExitStatus = [0 1 28];
-        TimeoutStartSec = "2min";
-      };
-    };
-
-    # Systemd timer to update sing-box configuration every 12 hours
-    systemd.timers.singbox-update-config = {
-      description = "Timer for Sing-box Configuration Update";
-      wantedBy = ["timers.target"];
-
-      timerConfig = {
-        # 系统启动后 5 分钟首次运行
-        OnBootSec = "5min";
-        # 之后每 12 小时运行一次
-        OnUnitActiveSec = "12h";
-        # 如果错过了运行时间，立即运行
-        Persistent = true;
-        # 添加随机延迟 0-30 分钟，避免所有机器同时请求
-        RandomizedDelaySec = "30min";
-      };
-    };
+    # 运行时渲染配置，避免密钥进入 /nix/store
+    sops.templates."singbox-client.json".content = builtins.toJSON configJson;
 
     # Create systemd system service for sing-box (requires root for TUN interface)
     systemd.services.singbox = {
@@ -111,7 +82,7 @@ in {
       serviceConfig = {
         Type = "simple";
         # 统一使用 cfg_path 指定的配置文件
-        ExecStart = "${pkgs.sing-box}/bin/sing-box run -c ${cfg_path}";
+        ExecStart = "${pkgs.sing-box}/bin/sing-box run -c ${clientConfigPath}";
         Restart = "always";
         RestartSec = "5s";
 
