@@ -48,6 +48,10 @@ in {
     "vm.overcommit_ratio" = lib.mkForce 100;
   };
 
+  services = {
+    dokploy-server.enable = true;
+  };
+
   networking.firewall.allowedTCPPorts = lib.mkAfter [80 443];
 
   system.stateVersion = "24.11";
