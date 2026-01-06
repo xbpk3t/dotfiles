@@ -86,6 +86,11 @@ in {
       # Sing-box subscription URL
       singboxUrl = mkRootSecret "singbox/url";
       singboxToken = mkRootSecret "singbox/token";
+      singboxUUID = mkRootSecret "singbox/UUID";
+      singboxPriKey = mkRootSecret "singbox/PrivateKey";
+      singboxPubKey = mkRootSecret "singbox/PublicKey";
+      singboxID = mkRootSecret "singbox/ID";
+      # singboxHy2Password = mkRootSecret "singbox/hy2/password";
 
       # Shared API tokens
       youtubeApiKey = mkUserSecret "youtube/api_key";

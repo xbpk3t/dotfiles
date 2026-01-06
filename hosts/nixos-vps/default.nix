@@ -50,6 +50,7 @@ in {
 
   services = {
     dokploy-server.enable = true;
+    singbox-server.enable = true;
   };
 
   networking.firewall.allowedTCPPorts = lib.mkAfter [80 443];
