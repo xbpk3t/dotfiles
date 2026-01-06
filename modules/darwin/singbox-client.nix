@@ -7,14 +7,25 @@
 }:
 with lib; let
   cfg = config.modules.networking.singbox;
-  cfg_path = "/var/lib/sing-box/config.json";
-  outbounds_path = "/var/lib/sing-box/outbounds.json";
-  baseJson = pkgs.writeText "singbox-base.json" (builtins.toJSON (import ../../lib/singbox-config.nix));
-  # 注意 darwin 和 nixos 的目录层级不同，所以这里是向上两层，而非三层
-  updateScript = pkgs.writeScriptBin "singbox-update" ''
-    #!${pkgs.nushell}/bin/nu
-    ${builtins.readFile ../../.taskfile/mac/singbox/update-config.nu}
-  '';
+  servers = [
+    {
+      tag = "LA-RN";
+      server = "142.171.154.61";
+      port = 8443;
+    }
+    {
+      tag = "HK-hdy";
+      server = "103.85.224.63";
+      port = 8443;
+    }
+  ];
+  secrets = {
+    uuid = config.sops.placeholder.singboxUUID;
+    publicKey = config.sops.placeholder.singboxPubKey;
+    shortId = config.sops.placeholder.singboxID;
+  };
+  configJson = import ../../lib/singbox-config.nix (secrets // {inherit servers;});
+  clientConfigPath = config.sops.templates."singbox-client.json".path;
 in {
   options.modules.networking.singbox = {
     enable = mkEnableOption "sing-box service";
@@ -26,41 +37,12 @@ in {
   ## - “更新订阅”也可以继续放 system 级：它要读 sops secret（root 权限更自然），而且生成的 /var/lib/sing-box/config.json 直接给 root 级 sing-box 用。
   # 2、本身这个singbox机制是很简单的。先用 update-config 把 config.json 拉到本地，然后直接 sing-box run -c config.json 跑起来即可。但是为了保证服务稳定可用，所以需要以下配置。
   config = mkIf cfg.enable {
-    # Install sing-box package for user
     environment.systemPackages = [
       pkgs.sing-box
-      pkgs.curl
-      pkgs.jq
     ];
 
-    # Launchd daemon: 调用 Taskfile 直接更新订阅配置
-    launchd.daemons.singbox-update-config = {
-      serviceConfig = {
-        Label = "local.singbox.update-config";
-        ProgramArguments = [
-          "${updateScript}/bin/singbox-update"
-          "--url"
-          "${config.sops.secrets.singboxUrl.path}"
-          "--base"
-          "${baseJson}"
-          "--config"
-          "${cfg_path}"
-          "--outbounds"
-          "${outbounds_path}"
-        ];
-        EnvironmentVariables = {
-          PATH = "/etc/profiles/per-user/${myvars.username}/bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
-        };
-
-        # 开机后立即运行一次
-        RunAtLoad = true;
-        # 每 12 小时运行一次 (43200 秒)
-        StartInterval = 43200;
-
-        StandardOutPath = "/Users/${myvars.username}/Library/Logs/sing-box-update.log";
-        StandardErrorPath = "/Users/${myvars.username}/Library/Logs/sing-box-update.log";
-      };
-    };
+    # 运行时渲染配置，避免密钥进入 /nix/store
+    sops.templates."singbox-client.json".content = builtins.toJSON configJson;
 
     # sing-box TUN 代理服务 (需要 root 权限创建 TUN 接口)
     # 主服务只负责运行 sing-box，不再负责下载配置
@@ -71,7 +53,7 @@ in {
           "${pkgs.sing-box}/bin/sing-box"
           "run"
           "-c"
-          "${cfg_path}"
+          "${clientConfigPath}"
         ];
         RunAtLoad = true;
         KeepAlive = {
