@@ -1,105 +1,95 @@
 {
   pkgs,
-  inputs,
-  lib,
   config,
   ...
 }: let
-  hostSystem = pkgs.stdenv.hostPlatform.system;
-  mcpPackages = inputs.mcp-servers-nix.packages.${hostSystem};
-  mkStdIO = pkg: {
-    type = "stdio";
-    command = lib.getExe pkg;
-  };
   McpServers = {
-    filesystem = mkStdIO mcpPackages.mcp-server-filesystem;
-    "sequential-thinking" = mkStdIO mcpPackages.mcp-server-sequential-thinking;
-    memory = mkStdIO mcpPackages.mcp-server-memory;
-    "nixos-mcp" = mkStdIO pkgs.mcp-nixos;
-    octocode = {
-      type = "stdio";
-      command = "pnpm";
-      args = [
-        "dlx"
-        "octocode-mcp@latest"
-      ];
-    };
-    ddg = {
-      type = "stdio";
-      command = "pnpm";
-      args = [
-        "dlx"
-        "duckduckgo-mcp-server"
-      ];
-    };
-    deepwiki = {
-      type = "http";
-      url = "https://mcp.deepwiki.com/mcp";
-    };
-    context7 = mkStdIO mcpPackages.context7-mcp;
-    github = {
-      type = "http";
-      url = "https://api.githubcopilot.com/mcp/";
-    };
-    "code-index" = {
-      type = "stdio";
-      command = "uvx";
-      args = ["code-index-mcp"];
-    };
-    "chrome-devtools" = {
-      type = "stdio";
-      command = "npx";
-      args = ["-y" "chrome-devtools-mcp@latest"];
-    };
-    "github-mcp" = {
-      type = "stdio";
-      command = lib.getExe pkgs.github-mcp-server;
-      env = {
-        GITHUB_PERSONAL_ACCESS_TOKEN = "$GITHUB_TOKEN";
-      };
-    };
+    #    filesystem = mkStdIO mcpPackages.mcp-server-filesystem;
+    #    "sequential-thinking" = mkStdIO mcpPackages.mcp-server-sequential-thinking;
+    #    memory = mkStdIO mcpPackages.mcp-server-memory;
+    #    "nixos-mcp" = mkStdIO pkgs.mcp-nixos;
+    #    octocode = {
+    #      type = "stdio";
+    #      command = "pnpm";
+    #      args = [
+    #        "dlx"
+    #        "octocode-mcp@latest"
+    #      ];
+    #    };
+    #    ddg = {
+    #      type = "stdio";
+    #      command = "pnpm";
+    #      args = [
+    #        "dlx"
+    #        "duckduckgo-mcp-server"
+    #      ];
+    #    };
+    #    deepwiki = {
+    #      type = "http";
+    #      url = "https://mcp.deepwiki.com/mcp";
+    #    };
+    #    context7 = mkStdIO mcpPackages.context7-mcp;
+    #    github = {
+    #      type = "http";
+    #      url = "https://api.githubcopilot.com/mcp/";
+    #    };
+    #    "code-index" = {
+    #      type = "stdio";
+    #      command = "uvx";
+    #      args = ["code-index-mcp"];
+    #    };
+    #    "chrome-devtools" = {
+    #      type = "stdio";
+    #      command = "npx";
+    #      args = ["-y" "chrome-devtools-mcp@latest"];
+    #    };
+    #    "github-mcp" = {
+    #      type = "stdio";
+    #      command = lib.getExe pkgs.github-mcp-server;
+    #      env = {
+    #        GITHUB_PERSONAL_ACCESS_TOKEN = "$GITHUB_TOKEN";
+    #      };
+    #    };
   };
 in {
-  # https://github.com/numtide/nix-ai-tools
-  home.packages =
-    (with inputs.nix-ai-tools.packages.${hostSystem}; [
-      claude-code-router
+  home.packages = with pkgs; [
+    # claude-code-router
 
-      # [2025-11-13] No longer use qwen
-      # qwen-code
+    # [2025-11-13] No longer use qwen
+    # qwen-code
 
-      # https://github.com/github/spec-kit
-      spec-kit
-    ])
-    ++ (with pkgs; [
-      # https://mynixos.com/nixpkgs/package/github-mcp-server
-      github-mcp-server
+    # https://github.com/github/spec-kit
+    # spec-kit
 
-      # https://mynixos.com/nixpkgs/package/mcp-nixos
-      mcp-nixos
+    # ruler
 
-      # https://mynixos.com/nixpkgs/package/gitea-mcp-server
-      gitea-mcp-server
-
-      # https://mynixos.com/nixpkgs/package/playwright-mcp
-      playwright-mcp
-
-      # https://mynixos.com/nixpkgs/package/terraform-mcp-server
-      terraform-mcp-server
-
-      # https://mynixos.com/nixpkgs/package/mcp-k8s-go
-      mcp-k8s-go
-
-      # https://mynixos.com/nixpkgs/package/aks-mcp-server
-      aks-mcp-server
-
-      # https://mynixos.com/nixpkgs/package/mcp-grafana
-      mcp-grafana
-
-      # https://mynixos.com/nixpkgs/package/fluxcd-operator-mcp
-      fluxcd-operator-mcp
-    ])
-    ++ [pkgs.ruler];
+    #      # https://mynixos.com/nixpkgs/package/github-mcp-server
+    #      github-mcp-server
+    #
+    #      # https://mynixos.com/nixpkgs/package/mcp-nixos
+    #      mcp-nixos
+    #
+    #      # https://mynixos.com/nixpkgs/package/gitea-mcp-server
+    #      gitea-mcp-server
+    #
+    #      # https://mynixos.com/nixpkgs/package/playwright-mcp
+    #      playwright-mcp
+    #
+    #      # https://mynixos.com/nixpkgs/package/terraform-mcp-server
+    #      terraform-mcp-server
+    #
+    #      # https://mynixos.com/nixpkgs/package/mcp-k8s-go
+    #      mcp-k8s-go
+    #
+    #      # https://mynixos.com/nixpkgs/package/aks-mcp-server
+    #      aks-mcp-server
+    #
+    #      # https://mynixos.com/nixpkgs/package/mcp-grafana
+    #      mcp-grafana
+    #
+    #      # https://mynixos.com/nixpkgs/package/fluxcd-operator-mcp
+    #      fluxcd-operator-mcp
+  ];
 
   home = {
     sessionVariables = {
@@ -121,7 +111,7 @@ in {
     # https://mynixos.com/home-manager/options/programs.codex
     codex = {
       enable = true;
-      package = inputs.nix-ai-tools.packages.${hostSystem}.codex;
+      package = pkgs.codex;
 
       # https://github.com/openai/codex/blob/main/docs/config.md
       settings = {
@@ -147,39 +137,39 @@ in {
       '';
     };
 
-    claude-code = {
-      enable = true;
-      package = inputs.nix-ai-tools.packages.${hostSystem}.claude-code;
-      settings = {
-        theme = "dark";
-        outputStyle = "Explanatory";
-        includeCoAuthoredBy = false;
-        cleanupPeriodDays = 7;
-
-        editor = {
-          lineNumbers = true;
-          wordWrap = true;
-          minimap = false;
-          theme = "auto";
-        };
-        #  behavior = {
-        #    autoSave = true;
-        #    confirmOnExit = false;
-        #    showLineNumbers = true;
-        #  };
-        mcpServers = McpServers;
-        permissions = {
-          additionalDirectories = [
-            "~/Desktop"
-          ];
-          ask = [
-            "Bash(git push:*)"
-          ];
-          deny = [];
-          defaultMode = "plan";
-        };
-      };
-    };
+    #    claude-code = {
+    #      enable = true;
+    #      package = pkgs.claude-code;
+    #      settings = {
+    #        theme = "dark";
+    #        outputStyle = "Explanatory";
+    #        includeCoAuthoredBy = false;
+    #        cleanupPeriodDays = 7;
+    #
+    #        editor = {
+    #          lineNumbers = true;
+    #          wordWrap = true;
+    #          minimap = false;
+    #          theme = "auto";
+    #        };
+    #        #  behavior = {
+    #        #    autoSave = true;
+    #        #    confirmOnExit = false;
+    #        #    showLineNumbers = true;
+    #        #  };
+    #        mcpServers = McpServers;
+    #        permissions = {
+    #          additionalDirectories = [
+    #            "~/Desktop"
+    #          ];
+    #          ask = [
+    #            "Bash(git push:*)"
+    #          ];
+    #          deny = [];
+    #          defaultMode = "plan";
+    #        };
+    #      };
+    #    };
   };
 
   # Allow Home Manager to overwrite ~/.codex/config.toml without backups/prompts
