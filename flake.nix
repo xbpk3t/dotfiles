@@ -14,9 +14,11 @@
 
     trusted-public-keys = [
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+
       "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
+
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-      "numtide.cachix.org-1:2ps1kLBUWjxIneOy1Ik6cQjb41X0iXVXeHigGmycPPE="
+
       "watersucks.cachix.org-1:6gadPC5R8iLWQ3EUtfu3GFrVY7X6I4Fwz/ihW25Jbv8="
     ];
 
@@ -94,9 +96,6 @@
     utils.url = "github:numtide/flake-utils";
     nixos-hardware.url = "github:nixos/nixos-hardware";
 
-    # https://github.com/numtide/nix-ai-tools
-    nix-ai-tools.url = "github:numtide/nix-ai-tools";
-
     # https://github.com/natsukium/mcp-servers-nix
     mcp-servers-nix = {
       url = "github:natsukium/mcp-servers-nix";
@@ -124,13 +123,6 @@
 
     # https://github.com/tak-bro/aicommit2
     # aicommit2.url = "github:tak-bro/aicommit2";
-
-    # mac-app-util - Fix .app programs installed by Nix on Mac
-    # https://github.com/hraban/mac-app-util
-    mac-app-util = {
-      url = "github:hraban/mac-app-util";
-      inputs.nixpkgs.follows = "nixpkgs-darwin";
-    };
 
     # Declarative Dokploy stack for NixOS
     nix-dokploy.url = "github:el-kurto/nix-dokploy";
