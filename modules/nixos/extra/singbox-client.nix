@@ -6,7 +6,9 @@
 }:
 with lib; let
   cfg = config.modules.networking.singbox;
-  cfg_path = "/tmp/sing-box/config.json";
+  cfg_path = "/var/lib/sing-box/config.json";
+  outbounds_path = "/var/lib/sing-box/outbounds.json";
+  baseJson = pkgs.writeText "singbox-base.json" (builtins.toJSON (import ../../../lib/singbox-config.nix));
   updateScript = pkgs.writeScriptBin "singbox-update" ''
     #!${pkgs.nushell}/bin/nu
     ${builtins.readFile ../../../.taskfile/mac/singbox/update-config.nu}
@@ -73,7 +75,7 @@ in {
 
       serviceConfig = {
         Type = "oneshot";
-        ExecStart = "${updateScript}/bin/singbox-update --url-file ${config.sops.secrets.singboxUrl.path} --config ${cfg_path}";
+        ExecStart = "${updateScript}/bin/singbox-update --url-file ${config.sops.secrets.singboxUrl.path} --base ${baseJson} --config ${cfg_path} --outbounds ${outbounds_path}";
         # Treat curl timeout (28) as non-fatal so activation doesn't roll back; timer will retry.
         SuccessExitStatus = [0 1 28];
         TimeoutStartSec = "2min";
@@ -114,8 +116,8 @@ in {
         RestartSec = "5s";
 
         # Security: Required capabilities for TUN interface
-        AmbientCapabilities = "CAP_NET_ADMIN CAP_NET_BIND_SERVICE";
-        CapabilityBoundingSet = "CAP_NET_ADMIN CAP_NET_BIND_SERVICE";
+        AmbientCapabilities = "CAP_NET_ADMIN CAP_NET_BIND_SERVICE CAP_DAC_OVERRIDE";
+        CapabilityBoundingSet = "CAP_NET_ADMIN CAP_NET_BIND_SERVICE CAP_DAC_OVERRIDE";
 
         # Run as root (required for TUN interface creation)
         User = "root";
@@ -124,9 +126,14 @@ in {
         # Note: Cannot use ProtectHome or ProtectSystem=strict as they would
         # prevent reading config from /etc or accessing /home
         NoNewPrivileges = false; # Must be false for capabilities
-        # 需访问宿主 /tmp/sing-box/config.json，因此禁用 PrivateTmp
+        # 需访问宿主 /var/lib/sing-box/config.json，因此禁用 PrivateTmp
         PrivateTmp = false;
       };
     };
+
+    # Ensure state dir exists with correct ownership before service start
+    systemd.tmpfiles.rules = [
+      "d /var/lib/sing-box 0700 root root -"
+    ];
   };
 }
