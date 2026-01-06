@@ -18,7 +18,6 @@ in {
     # systemctl status dokploy*
     # docker stack ps dokploy
 
-
     # 几点注意：
     # 1、启动时可能缺少 ingress 这个 network，需要用 docker network create --ingress --driver overlay ingress 添加该network
     # 2、卸载时，注意需要移除掉 /var/lib/dokploy 里的数据
