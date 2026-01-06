@@ -69,7 +69,9 @@
 
     # https://mynixos.com/nixpkgs/package/dogdns
     # DNS 查询与诊断工具
-    dogdns
+    # 'dogdns' has been removed as it is unmaintained upstream and vendors insecure dependencies. Consider switching to 'doggo', a similar tool.
+    # dogdns
+    # doggo
 
     # https://mynixos.com/nixpkgs/package/termshark
     # 基于终端界面的 Wireshark
