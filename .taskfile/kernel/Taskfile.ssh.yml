@@ -61,3 +61,8 @@ tasks:
   verify:
     desc: "task -g ssh:verify PPK_PATH=/etc/ssh/github/private_key"
     cmd: ssh-keygen -y -e -f {{.PPK_PATH}} >/dev/null && echo "格式合法" || echo "仍不合法"
+
+
+  clear:
+    desc: 从 $HOME/.ssh/known_hosts 里删除旧记录 # 之前一直是直接删除掉整个文件的，实际上可以通过该命令只删除指定host，不影响其他host
+    cmd: ssh-keygen -R {{.HOST}}

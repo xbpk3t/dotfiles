@@ -27,6 +27,11 @@
       trusted-users = ["@wheel"];
       # https://github.com/NixOS/nix/issues/11728
       download-buffer-size = 524288000;
+
+      # 默认 max-jobs = 10，并行太高容易把内存打爆或触发 ulimit -u
+      # https://nix.dev/manual/nix/2.28/command-ref/conf-file.html#conf-max-jobs
+      max-jobs = 5;
+      cores = 2;
     };
     extraOptions = ''
       experimental-features = nix-command flakes
