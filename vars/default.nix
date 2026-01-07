@@ -17,6 +17,8 @@ in {
   userfullname = "lucas";
   mail = "yyzw@live.com";
 
+  Domain = "lucc.dev";
+
   timeZone = "Asia/Shanghai";
 
   networking = import ./networking.nix {inherit lib;};

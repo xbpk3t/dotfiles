@@ -7,22 +7,12 @@
 }:
 with lib; let
   cfg = config.modules.networking.singbox;
-  servers = [
-    {
-      tag = "LA-RN";
-      server = "142.171.154.61";
-      port = 8443;
-    }
-    {
-      tag = "HK-hdy";
-      server = "103.85.224.63";
-      port = 8443;
-    }
-  ];
+  servers = myvars.networking.singboxServers;
   secrets = {
-    uuid = config.sops.placeholder.singboxUUID;
-    publicKey = config.sops.placeholder.singboxPubKey;
-    shortId = config.sops.placeholder.singboxID;
+    uuid = config.sops.placeholder.singbox_UUID;
+    publicKey = config.sops.placeholder.singbox_PubKey;
+    shortId = config.sops.placeholder.singbox_ID;
+    hy2Password = config.sops.placeholder.singbox_Hy2Pwd;
   };
   configJson = import ../../lib/singbox-config.nix (secrets // {inherit servers;});
   clientConfigPath = config.sops.templates."singbox-client.json".path;
