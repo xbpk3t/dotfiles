@@ -26,8 +26,8 @@
           acl = "private";
         };
         secrets = {
-          access_key_id = config.sops.secrets.rcloneR2AccessKeyId.path;
-          secret_access_key = config.sops.secrets.rcloneR2SecretAccessKey.path;
+          access_key_id = config.sops.secrets.cf_r2_AK.path;
+          secret_access_key = config.sops.secrets.cf_r2_SK.path;
         };
       };
 

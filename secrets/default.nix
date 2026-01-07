@@ -59,50 +59,47 @@ in {
     age.sshKeyPaths = []; # Disable SSH key import
     gnupg.home = null; # Disable GPG key import
 
-    # Define secrets
     secrets = {
-      meMobile = mkUserSecret "me/mobile";
-      mePass = mkUserSecret "me/pass";
+      # Me
+      me_pwgen = mkUserSecret "me/pwgen";
 
-      mail = mkUserSecret "me/mail";
-      mailGoogle = mkUserSecret "me/mail_google";
-      mailMe = mkUserSecret "me/mail_me";
+      # Cloudflare
+      # cf_account = mkUserSecret "cloudflare/account_id";
+      # cfTokenDNS = mkUserSecret "cloudflare/token/DNS";
+      cf_r2_AK = mkUserSecret "cloudflare/r2/ak";
+      cf_r2_SK = mkUserSecret "cloudflare/r2/sk";
 
-      pwgenSk = mkUserSecret "pwgen/sk";
+      # SSH
+      ssh_github = mkUserSecret "ssh/github";
+      ssh_clawcloud = mkUserSecret "ssh/claw";
+      ssh_hdy = mkUserSecret "ssh/hdy";
+      ssh_racknerd = mkUserSecret "ssh/RN";
 
-      # Rclone R2 secrets
-      rcloneR2AccessKeyId = mkUserSecret "rclone/r2/access_key_id";
-      rcloneR2SecretAccessKey = mkUserSecret "rclone/r2/secret_access_key";
+      # LLM
+      LLM_GLM = mkUserSecret "LLM/GLM";
+      LLM_deepseek = mkUserSecret "LLM/deepseek";
 
-      # SSH secrets
-      sshGithubPrivateKey = mkUserSecret "ssh/github";
-      sshHKClawPrivateKey = mkUserSecret "ssh/HK-claw";
-      sshHKPrivateKey = mkUserSecret "ssh/HK-hdy";
-      sshLAPrivateKey = mkUserSecret "ssh/LA-RN";
-
-      # zAI API secrets
-      claudeZaiToken = mkUserSecret "claude/zai/token";
-
-      # Sing-box subscription URL
-      singboxUrl = mkRootSecret "singbox/url";
-      singboxToken = mkRootSecret "singbox/token";
-      singboxUUID = mkRootSecret "singbox/UUID";
-      singboxPriKey = mkRootSecret "singbox/PrivateKey";
-      singboxPubKey = mkRootSecret "singbox/PublicKey";
-      singboxID = mkRootSecret "singbox/ID";
-      # singboxHy2Password = mkRootSecret "singbox/hy2/password";
+      # singbox
+      singbox_UUID = mkRootSecret "singbox/UUID";
+      singbox_pri_key = mkRootSecret "singbox/pri_key";
+      singbox_pub_key = mkRootSecret "singbox/pub_key";
+      singbox_ID = mkRootSecret "singbox/id";
+      singbox_hy2_pwd = mkRootSecret "singbox/hy2_pwd";
 
       # Shared API tokens
-      youtubeApiKey = mkUserSecret "youtube/api_key";
-      yuqueToken = mkUserSecret "yuque/token";
-      githubAccessToken = mkUserSecret "github/access_token";
-      pixivRefreshToken = mkUserSecret "pixiv/refresh_token";
-      spotifyClientId = mkUserSecret "spotify/client_id";
-      spotifyClientSecret = mkUserSecret "spotify/client_secret";
+      #      youtubeApiKey = mkUserSecret "youtube/api_key";
+      #      yuqueToken = mkUserSecret "yuque/token";
+      #      githubAccessToken = mkUserSecret "github/access_token";
+      #      pixivRefreshToken = mkUserSecret "pixiv/refresh_token";
+      #      spotifyClientId = mkUserSecret "spotify/client_id";
+      #      spotifyClientSecret = mkUserSecret "spotify/client_secret";
 
       # Atuin
-      autinKey = mkUserSecret "atuin/key";
-      autinSession = mkUserSecret "atuin/session";
+      autin_key = mkUserSecret "atuin/key";
+      autin_session = mkUserSecret "atuin/session";
+
+      # Acme
+      acme_cloudflare_env = mkUserSecret "acme/cloudflare_env";
     };
   };
 }

@@ -3,7 +3,6 @@
   uuid,
   publicKey,
   shortId,
-  hy2Password ? null,
   sni ? "www.bing.com",
   flow ? "xtls-rprx-vision",
   fingerprint ? "chrome",
@@ -32,10 +31,6 @@ let
     if builtins.match ".*:.*" ip != null
     then "${ip}/128"
     else "${ip}/32";
-  addIf = cond: attrs:
-    if cond
-    then attrs
-    else {};
   toVlessOutbound = s: let
     base = {
       type = "vless";
@@ -62,32 +57,51 @@ let
     if packetEncoding == null
     then base
     else base // {packet_encoding = packetEncoding;};
-  toHy2Outbound = s:
-    if !(s ? hy2)
+  toCfOutbound = s:
+    if !(s ? cf)
     then null
     else let
-      pw =
-        if s.hy2 ? password
-        then s.hy2.password
-        else hy2Password;
-    in
-      if pw == null
-      then throw "singbox-config: hy2Password is required when servers.*.hy2 is set"
-      else
-        {
-          type = "hysteria2";
-          tag = mkTag "hy2" s;
-          server = s.server;
-          server_port = s.hy2.port or 443;
-          password = pw;
-          tls = {
-            enabled = true;
-            server_name = s.hy2.server_name;
-            alpn = ["h3"];
-          };
-        }
-        // (addIf (s.hy2 ? up_mbps) {up_mbps = s.hy2.up_mbps;})
-        // (addIf (s.hy2 ? down_mbps) {down_mbps = s.hy2.down_mbps;});
+      cf = s.cf;
+      server =
+        if cf ? server
+        then cf.server
+        else if cf ? domain
+        then cf.domain
+        else throw "singbox-config: servers.*.cf.server or .domain is required";
+      serverName =
+        if cf ? server_name
+        then cf.server_name
+        else if cf ? domain
+        then cf.domain
+        else server;
+      wsPath =
+        if cf ? wsPath
+        then cf.wsPath
+        else if cf ? path
+        then cf.path
+        else "/ws";
+    in {
+      type = "vless";
+      tag = mkTag "cf" s;
+      server = server;
+      server_port = cf.port or 443;
+      uuid = uuid;
+      tls = {
+        enabled = true;
+        server_name = serverName;
+        utls = {
+          enabled = true;
+          fingerprint = fingerprint;
+        };
+      };
+      transport = {
+        type = "ws";
+        path = wsPath;
+        headers = {
+          Host = serverName;
+        };
+      };
+    };
 in {
   # https://sing-box.sagernet.org/configuration/log/
   log = {
@@ -517,8 +531,8 @@ in {
   # 选择器，把多个自建节点聚合到一个入口
   outbounds = let
     vlessOuts = map toVlessOutbound servers;
-    hy2Outs = builtins.filter (o: o != null) (map toHy2Outbound servers);
-    outs = vlessOuts ++ hy2Outs;
+    cfOuts = builtins.filter (o: o != null) (map toCfOutbound servers);
+    outs = vlessOuts ++ cfOuts;
   in
     outs
     ++ [
