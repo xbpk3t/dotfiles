@@ -64,9 +64,6 @@
     # https://github.com/cnphpbb/deploy.stack/blob/main/dufs/config/config.yaml ???
     dufs
 
-    # tcpdump 网络抓包
-    tcpdump
-
     # https://mynixos.com/nixpkgs/package/dogdns
     # DNS 查询与诊断工具
     # 'dogdns' has been removed as it is unmaintained upstream and vendors insecure dependencies. Consider switching to 'doggo', a similar tool.
