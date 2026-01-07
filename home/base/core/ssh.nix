@@ -64,7 +64,7 @@ in {
             hostname = "ssh.github.com";
             user = "git";
             port = 443;
-            identityFile = config.sops.secrets.sshGithubPrivateKey.path;
+            identityFile = config.sops.secrets.ssh_github.path;
             identitiesOnly = true;
           };
         }
@@ -76,7 +76,7 @@ in {
             hostname = "103.85.224.63";
             user = "luck";
             port = 22;
-            identityFile = config.sops.secrets.sshHKPrivateKey.path;
+            identityFile = config.sops.secrets.ssh_hdy.path;
             identitiesOnly = true;
           };
         }
@@ -86,7 +86,7 @@ in {
             hostname = "142.171.154.61";
             user = "luck";
             port = 22;
-            identityFile = config.sops.secrets.sshLAPrivateKey.path;
+            identityFile = config.sops.secrets.ssh_racknerd.path;
             identitiesOnly = true;
           };
         }
@@ -95,7 +95,7 @@ in {
             hostname = "47.79.17.202";
             user = "root";
             port = 22;
-            identityFile = config.sops.secrets.sshHKClawPrivateKey.path;
+            identityFile = config.sops.secrets.ssh_clawcloud.path;
           };
         };
     };

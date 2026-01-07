@@ -17,7 +17,7 @@
     enable = true;
     hosts = {
       github.enable = true;
-      vps.enable = true;
+      hk-hdy.enable = true;
     };
   };
 

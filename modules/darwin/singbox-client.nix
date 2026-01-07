@@ -10,9 +10,8 @@ with lib; let
   servers = myvars.networking.singboxServers;
   secrets = {
     uuid = config.sops.placeholder.singbox_UUID;
-    publicKey = config.sops.placeholder.singbox_PubKey;
+    publicKey = config.sops.placeholder.singbox_pub_key;
     shortId = config.sops.placeholder.singbox_ID;
-    hy2Password = config.sops.placeholder.singbox_Hy2Pwd;
   };
   configJson = import ../../lib/singbox-config.nix (secrets // {inherit servers;});
   clientConfigPath = config.sops.templates."singbox-client.json".path;

@@ -30,10 +30,6 @@
         GITHUB_TOKEN = "$(gh auth token)";
         PNPM_HOME = "$HOME/.local/share/pnpm";
 
-        # PWGEN_SECRET = builtins.readFile config.sops.secrets.pwgenSk.path;
-        # MOBILE = builtins.readFile config.sops.secrets.meMobile.path;
-        # PASS = builtins.readFile config.sops.secrets.mePass.path;
-
         # GitHub API rate limit fix
         # Commented out because it causes GitHub API 401 errors
         # See: https://discourse.nixos.org/t/nix-commands-fail-github-requests-401-without-sudo/30038
@@ -393,9 +389,9 @@
         # 用来在不同host之间自动sync，否则 在一台机器上注册/导入/首次同步，需要执行 atuin register 以及 atuin import auto，最后 atuin sync 手动同步。就很麻烦。
         # encryption key must be base64; session token is a UUID-like string
         # encryption key：用于加密你的本地/同步历史，必须是随机的 256‑bit 值并以 Base64 存储。
-        key_path = config.sops.secrets.autinKey.path;
+        key_path = config.sops.secrets.autin_key.path;
         # session token：登录云端 API 的“会话令牌”，通常是一个带连字符的 UUID 字符串。
-        session_path = config.sops.secrets.autinSession.path;
+        session_path = config.sops.secrets.autin_session.path;
 
         # 相比prefix更好用
         search_mode = "fuzzy";
