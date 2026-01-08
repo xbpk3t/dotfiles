@@ -2,22 +2,12 @@
   config,
   lib,
   pkgs,
+  myvars,
   ...
 }:
 with lib; let
   cfg = config.modules.networking.singbox;
-  servers = [
-    {
-      tag = "vps-103";
-      server = "103.85.224.63";
-      port = 8443;
-    }
-    {
-      tag = "vps-142";
-      server = "142.171.154.61";
-      port = 8443;
-    }
-  ];
+  servers = myvars.networking.singboxServers;
   secrets = {
     uuid = config.sops.placeholder.singboxUUID;
     publicKey = config.sops.placeholder.singboxPubKey;
