@@ -7,7 +7,7 @@
   flow ? "xtls-rprx-vision",
   fingerprint ? "chrome",
   packetEncoding ? "xudp",
-  extraOutbounds ? (import ./singbox-extra-outbounds.nix),
+  extraOutbounds ? [],
 }:
 # https://sing-box.sagernet.org/configuration/
 # [Sing-box realip配置方案 - 开发调优 - LINUX DO](https://linux.do/t/topic/175470)
@@ -20,7 +20,7 @@
 ## endpoints (通常用于 WireGuard/Tailscale 等系统接口。未使用即可保持为空。)
 # 在mac里调试singbox的几个核心命令（注意mac下systemd不会自动restart）
 ## rebuild 生成新的 config.json
-## sudo launchctl kickstart "system/local.singbox.tun"
+## sudo launchctl kickstart -k "system/local.singbox.tun" # 注意 -k 强制重启 launchd 服务（会杀掉旧进程）。否则有可能无法加载最新配置
 # 另外一个注意项：注意extraOutbounds，之所以需要外部可用节点（而非完全自建），就是因为我使用colmena批量部署，如果 singbox-server.nix 配置有问题，就会导致本地网络直接挂掉了。并且也不好排查问题。此时如果有外部可用节点，那么可以直接切换到外部可用节点，然后结合singbox client和server排查问题，会更高效。
 let
   baseLabel = s:
@@ -31,7 +31,7 @@ let
     else if s ? tag
     then s.tag
     else s.server;
-  mkTag = proto: s: "[${proto}] ${baseLabel s}";
+  mkTag = proto: s: "${proto}-${baseLabel s}";
   toCidr = ip:
     if builtins.match ".*:.*" ip != null
     then "${ip}/128"
@@ -62,53 +62,6 @@ let
     if packetEncoding == null
     then base
     else base // {packet_encoding = packetEncoding;};
-  toCfOutbound = s:
-    if !(s ? cf)
-    then null
-    else let
-      cf = s.cf;
-      server =
-        if cf ? server
-        then cf.server
-        else if cf ? domain
-        then cf.domain
-        else throw "singbox-config: servers.*.cf.server or .domain is required";
-      serverName =
-        if cf ? server_name
-        then cf.server_name
-        else if cf ? domain
-        then cf.domain
-        else server;
-      wsPath =
-        if cf ? wsPath
-        then cf.wsPath
-        else if cf ? path
-        then cf.path
-        else "/ws";
-    in {
-      type = "vless";
-      tag = mkTag "cf" s;
-      server = server;
-      server_port = cf.port or 443;
-      uuid = uuid;
-      tls = {
-        enabled = true;
-        server_name = serverName;
-        # CF WebSocket 需强制 http/1.1，且部分节点在 utls 下会握手异常
-        alpn = ["http/1.1"];
-        utls = {
-          enabled = false;
-          fingerprint = fingerprint;
-        };
-      };
-      transport = {
-        type = "ws";
-        path = wsPath;
-        headers = {
-          Host = serverName;
-        };
-      };
-    };
 in {
   # https://sing-box.sagernet.org/configuration/log/
   log = {
@@ -524,8 +477,7 @@ in {
   # 选择器，把多个自建节点聚合到一个入口
   outbounds = let
     vlessOuts = map toVlessOutbound servers;
-    cfOuts = builtins.filter (o: o != null) (map toCfOutbound servers);
-    outs = vlessOuts ++ cfOuts ++ extraOutbounds;
+    outs = vlessOuts ++ extraOutbounds;
   in
     outs
     ++ [
