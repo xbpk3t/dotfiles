@@ -7,17 +7,44 @@
 with lib; let
   cfg = config.services.singbox-server;
   port = 8443;
-  hy2Port = 8443;
   # 伪装握手目标域名（随便换一个稳定的大站都行）
   handshakeServer = "www.bing.com";
-  # HY2 证书对应的域名（需有有效证书）
   zone = myvars.Domain;
-  hy2ServerName = "hy2.${zone}";
+  servers = myvars.networking.singboxServers or [];
+  hostName = config.networking.hostName or null;
+  targetHost =
+    if hostName == null
+    then null
+    else hostName;
+  node =
+    if targetHost != null
+    then lib.findFirst (s: (s.hostName or null) == targetHost) null servers
+    else null;
+  cfCfg =
+    if node != null && node ? cf
+    then node.cf
+    else null;
+  cfEnabled = cfCfg != null;
+  cfServerName =
+    if cfEnabled
+    then (cfCfg.domain or cfCfg.server)
+    else null;
+  cfPort =
+    if cfEnabled
+    then (cfCfg.port or 443)
+    else 443;
+  cfWsPath =
+    if cfEnabled
+    then (cfCfg.wsPath or cfCfg.path or "/ws")
+    else "/ws";
   acmeCertName = zone;
-  acmeDir = config.security.acme.certs."${acmeCertName}".directory;
+  acmeDir =
+    if cfEnabled
+    then config.security.acme.certs."${acmeCertName}".directory
+    else "/var/lib/acme/${acmeCertName}";
 in {
   options.services.singbox-server = {
-    enable = mkEnableOption "sing-box server (Reality + HY2)";
+    enable = mkEnableOption "sing-box server (Reality + optional CF)";
   };
 
   # vless+reality
@@ -28,26 +55,26 @@ in {
     ############################################################
 
     # 注意这里使用 templates 而非直接
-    sops.secrets.acmeCfEnv = {
+    sops.secrets.acme_cloudflare_env = {
       owner = mkForce "acme";
       group = mkForce "acme";
       mode = "0400";
     };
 
-    security.acme = {
+    security.acme = mkIf cfEnabled {
       acceptTerms = true;
       #      defaults.email = "admin@${zone}";
       defaults.email = myvars.mail;
 
       certs."${acmeCertName}" = {
-        domain = "hy2.${zone}";
+        domain = cfServerName;
         extraDomainNames = [];
 
         dnsProvider = "cloudflare";
 
         # 注意这里
         # https://mynixos.com/nixpkgs/option/security.acme.certs.%3Cname%3E.environmentFile
-        environmentFile = config.sops.secrets.acmeCfEnv.path;
+        environmentFile = config.sops.secrets.acme_cloudflare_env.path;
 
         # 让 sing-box 能读到 key/fullchain
         group = "sing-box";
@@ -70,68 +97,69 @@ in {
           level = "info";
         };
 
-        inbounds = [
-          {
-            type = "vless";
-            tag = "vless-reality";
-            listen = "::";
-            listen_port = port;
+        inbounds =
+          [
+            {
+              type = "vless";
+              tag = "vless-reality";
+              listen = "::";
+              listen_port = port;
 
-            users = [
-              {
-                uuid = {_secret = config.sops.secrets.singbox_UUID.path;};
-                flow = "xtls-rprx-vision";
-              }
-            ];
+              users = [
+                {
+                  uuid = {_secret = config.sops.secrets.singbox_UUID.path;};
+                  flow = "xtls-rprx-vision";
+                }
+              ];
 
-            tls = {
-              enabled = true;
-              server_name = handshakeServer;
-
-              reality = {
+              tls = {
                 enabled = true;
+                server_name = handshakeServer;
 
-                handshake = {
-                  server = handshakeServer;
-                  server_port = 443;
+                reality = {
+                  enabled = true;
+
+                  handshake = {
+                    server = handshakeServer;
+                    server_port = 443;
+                  };
+
+                  # 从 sops 文件读入
+                  private_key = {_secret = config.sops.secrets.singbox_pri_key.path;};
+
+                  # short_id 允许多个，这里只用一个
+                  short_id = [
+                    {_secret = config.sops.secrets.singbox_ID.path;}
+                  ];
                 };
-
-                # 从 sops 文件读入
-                private_key = {_secret = config.sops.secrets.singbox_PriKey.path;};
-
-                # short_id 允许多个，这里只用一个
-                short_id = [
-                  {_secret = config.sops.secrets.singbox_ID.path;}
-                ];
               };
-            };
-          }
+            }
+          ]
+          ++ optionals cfEnabled [
+            {
+              type = "vless";
+              tag = "vless-cf";
+              listen = "::";
+              listen_port = cfPort;
 
-          {
-            type = "hysteria2";
-            tag = "hy2";
-            listen = "::";
-            listen_port = hy2Port;
+              users = [
+                {
+                  uuid = {_secret = config.sops.secrets.singbox_UUID.path;};
+                }
+              ];
 
-            users = [
-              {
-                password = {_secret = config.sops.secrets.singbox_Hy2Pwd.path;};
-              }
-            ];
+              tls = {
+                enabled = true;
+                certificate_path = "${acmeDir}/fullchain.pem";
+                key_path = "${acmeDir}/key.pem";
+              };
 
-            # 可按需调整带宽上限；留空则使用客户端默认
-            up_mbps = 100;
-            down_mbps = 100;
-
-            tls = {
-              enabled = true;
-              server_name = hy2ServerName;
-              alpn = ["h3"];
-              certificate_path = "${acmeDir}/fullchain.pem";
-              key_path = "${acmeDir}/key.pem";
-            };
-          }
-        ];
+              transport = {
+                type = "ws";
+                path = cfWsPath;
+              };
+            }
+          ];
 
         outbounds = [
           {
@@ -149,7 +177,6 @@ in {
     };
 
     # 放行端口
-    networking.firewall.allowedTCPPorts = [port];
-    networking.firewall.allowedUDPPorts = [hy2Port];
+    networking.firewall.allowedTCPPorts = [port] ++ optionals cfEnabled [cfPort];
   };
 }

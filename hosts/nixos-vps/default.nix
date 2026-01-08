@@ -24,7 +24,16 @@ in {
   };
 
   networking = {
-    hostName = "nixos-vps";
+    hostName = let
+      targetHost = config.deployment.targetHost or null;
+      sanitized =
+        if targetHost == null
+        then null
+        else lib.strings.replaceStrings ["." ":" "/"] ["-" "-" "-"] targetHost;
+    in
+      if sanitized == null
+      then "nixos-vps"
+      else "nixos-vps-${sanitized}";
     useDHCP = true;
     nameservers = nameservers;
     useHostResolvConf = lib.mkForce false;
@@ -50,6 +59,7 @@ in {
 
   services = {
     dokploy-server.enable = true;
+    # 注意cf套壳没做 配置化启用。需要去 vars里配置，如果 singboxServers 里该 IP 的节点 有 cf 字段 → 自动开 CF inbound；如果没有 cf 字段 → 不会开 CF inbound
     singbox-server.enable = true;
   };
 
