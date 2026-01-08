@@ -7,14 +7,8 @@
 }:
 with lib; let
   cfg = config.modules.networking.singbox;
-  servers = myvars.networking.singboxServers;
-  secrets = {
-    uuid = config.sops.placeholder.singbox_UUID;
-    publicKey = config.sops.placeholder.singbox_pub_key;
-    shortId = config.sops.placeholder.singbox_ID;
-  };
-  configJson = import ../../lib/singbox-config.nix (secrets // {inherit servers;});
-  clientConfigPath = config.sops.templates."singbox-client.json".path;
+  client = import ../../lib/singbox/client-config.nix {inherit config myvars lib;};
+  clientConfigPath = client.clientConfigPath;
 in {
   options.modules.networking.singbox = {
     enable = mkEnableOption "sing-box service";
@@ -31,7 +25,7 @@ in {
     ];
 
     # 运行时渲染配置，避免密钥进入 /nix/store
-    sops.templates."singbox-client.json".content = builtins.toJSON configJson;
+    sops.templates."singbox-client.json".content = client.templatesContent;
 
     # sing-box TUN 代理服务 (需要 root 权限创建 TUN 接口)
     # 主服务只负责运行 sing-box，不再负责下载配置
