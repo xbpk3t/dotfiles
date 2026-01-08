@@ -7,6 +7,7 @@
   flow ? "xtls-rprx-vision",
   fingerprint ? "chrome",
   packetEncoding ? "xudp",
+  extraOutbounds ? (import ./singbox-extra-outbounds.nix),
 }:
 # https://sing-box.sagernet.org/configuration/
 # [Sing-box realip配置方案 - 开发调优 - LINUX DO](https://linux.do/t/topic/175470)
@@ -17,6 +18,10 @@
 # 1、未配置
 ## certificate (若需要屏蔽某些 CA 或使用 Mozilla/Chrome 根证书列表，可显式配置。不配置时使用系统证书存储。)
 ## endpoints (通常用于 WireGuard/Tailscale 等系统接口。未使用即可保持为空。)
+# 在mac里调试singbox的几个核心命令（注意mac下systemd不会自动restart）
+## rebuild 生成新的 config.json
+## sudo launchctl kickstart "system/local.singbox.tun"
+# 另外一个注意项：注意extraOutbounds，之所以需要外部可用节点（而非完全自建），就是因为我使用colmena批量部署，如果 singbox-server.nix 配置有问题，就会导致本地网络直接挂掉了。并且也不好排查问题。此时如果有外部可用节点，那么可以直接切换到外部可用节点，然后结合singbox client和server排查问题，会更高效。
 let
   baseLabel = s:
     if s ? label
@@ -89,8 +94,10 @@ let
       tls = {
         enabled = true;
         server_name = serverName;
+        # CF WebSocket 需强制 http/1.1，且部分节点在 utls 下会握手异常
+        alpn = ["http/1.1"];
         utls = {
-          enabled = true;
+          enabled = false;
           fingerprint = fingerprint;
         };
       };
@@ -109,7 +116,7 @@ in {
     disabled = false;
     # 设置为warn，防止日志喷涌. 改为info
     level = "info";
-    # 注意这个log path跟systemd本身生成的log不是一码事。如果不设置这个path，systemd生成的日志没有timestamp，很难排查问题
+    # 注意这个log path跟systemd本身生成的log（$HOME/Library/Logs/sing-box.log）不是一码事。如果不设置这个path，systemd生成的日志没有timestamp，很难排查问题
     output = "/tmp/singbox.log";
     timestamp = true;
   };
@@ -255,7 +262,7 @@ in {
         tag = "remote";
         server = "223.5.5.5";
         path = "/dns-query";
-        detour = "select";
+        detour = "GLOBAL";
       }
       # 旧写法（rcode server 已废弃）
       # {
@@ -488,21 +495,7 @@ in {
       {
         # 强制 cache.nixos.org 走自建节点（默认会默认直连，很慢）
         domain_suffix = ["cache.nixos.org"];
-        outbound = "select";
-      }
-      {
-        # 旧规则：所有 TUN 流量直接走 select，会导致国内站点也走代理
-        # inbound = [
-        #   "tun-in"
-        # ];
-        # outbound = "select";
-      }
-      {
-        port = [
-          443
-        ];
-        network = "tcp";
-        outbound = "direct";
+        outbound = "GLOBAL";
       }
       {
         rule_set = "geoip-cn";
@@ -520,7 +513,7 @@ in {
         inbound = [
           "tun-in"
         ];
-        outbound = "select";
+        outbound = "GLOBAL";
       }
     ];
   };
@@ -532,15 +525,30 @@ in {
   outbounds = let
     vlessOuts = map toVlessOutbound servers;
     cfOuts = builtins.filter (o: o != null) (map toCfOutbound servers);
-    outs = vlessOuts ++ cfOuts;
+    outs = vlessOuts ++ cfOuts ++ extraOutbounds;
   in
     outs
     ++ [
+      # urltest 负责测速与自动选优；select 保留手动选择，默认指向 urltest 以展示延迟
+      {
+        type = "urltest";
+        tag = "urltest";
+        outbounds = map (o: o.tag) outs;
+        url = "http://www.gstatic.com/generate_204";
+        interval = "5m";
+        tolerance = 50;
+      }
       {
         type = "selector";
         tag = "select";
-        outbounds = map (o: o.tag) outs;
-        default = (builtins.head outs).tag;
+        outbounds = ["urltest"] ++ map (o: o.tag) outs;
+        default = "urltest";
+      }
+      {
+        type = "selector";
+        tag = "GLOBAL";
+        outbounds = ["select"];
+        default = "select";
       }
       {
         type = "direct";
