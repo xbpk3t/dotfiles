@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  myvars,
   ...
 }:
 with lib; let
@@ -9,78 +8,14 @@ with lib; let
   port = 8443;
   # 伪装握手目标域名（随便换一个稳定的大站都行）
   handshakeServer = "www.bing.com";
-  zone = myvars.Domain;
-  servers = myvars.networking.singboxServers or [];
-  hostName = config.networking.hostName or null;
-  targetHost =
-    if hostName == null
-    then null
-    else hostName;
-  node =
-    if targetHost != null
-    then lib.findFirst (s: (s.hostName or null) == targetHost) null servers
-    else null;
-  cfCfg =
-    if node != null && node ? cf
-    then node.cf
-    else null;
-  cfEnabled = cfCfg != null;
-  cfServerName =
-    if cfEnabled
-    then (cfCfg.domain or cfCfg.server)
-    else null;
-  cfPort =
-    if cfEnabled
-    then (cfCfg.port or 443)
-    else 443;
-  cfWsPath =
-    if cfEnabled
-    then (cfCfg.wsPath or cfCfg.path or "/ws")
-    else "/ws";
-  acmeCertName = zone;
-  acmeDir =
-    if cfEnabled
-    then config.security.acme.certs."${acmeCertName}".directory
-    else "/var/lib/acme/${acmeCertName}";
 in {
   options.services.singbox-server = {
-    enable = mkEnableOption "sing-box server (Reality + optional CF)";
+    enable = mkEnableOption "sing-box server (Reality)";
   };
 
   # vless+reality
 
   config = mkIf cfg.enable {
-    ############################################################
-    # 1) Cloudflare DNS-01 自动签证书（不占 80/443 TCP）
-    ############################################################
-
-    # 注意这里使用 templates 而非直接
-    sops.secrets.acme_cloudflare_env = {
-      owner = mkForce "acme";
-      group = mkForce "acme";
-      mode = "0400";
-    };
-
-    security.acme = mkIf cfEnabled {
-      acceptTerms = true;
-      #      defaults.email = "admin@${zone}";
-      defaults.email = myvars.mail;
-
-      certs."${acmeCertName}" = {
-        domain = cfServerName;
-        extraDomainNames = [];
-
-        dnsProvider = "cloudflare";
-
-        # 注意这里
-        # https://mynixos.com/nixpkgs/option/security.acme.certs.%3Cname%3E.environmentFile
-        environmentFile = config.sops.secrets.acme_cloudflare_env.path;
-
-        # 让 sing-box 能读到 key/fullchain
-        group = "sing-box";
-      };
-    };
-
     # 通过以下命令生成 singbox node 的相应metadata，直接放到sops里，并且分发到所有nodes里。没必要分开配置，方便client端组装。
     # sing-box generate uuid
     # sing-box generate reality-keypair
@@ -97,69 +32,43 @@ in {
           level = "info";
         };
 
-        inbounds =
-          [
-            {
-              type = "vless";
-              tag = "vless-reality";
-              listen = "::";
-              listen_port = port;
+        inbounds = [
+          {
+            type = "vless";
+            tag = "vless-reality";
+            listen = "::";
+            listen_port = port;
 
-              users = [
-                {
-                  uuid = {_secret = config.sops.secrets.singbox_UUID.path;};
-                  flow = "xtls-rprx-vision";
-                }
-              ];
+            users = [
+              {
+                uuid = {_secret = config.sops.secrets.singbox_UUID.path;};
+                flow = "xtls-rprx-vision";
+              }
+            ];
 
-              tls = {
+            tls = {
+              enabled = true;
+              server_name = handshakeServer;
+
+              reality = {
                 enabled = true;
-                server_name = handshakeServer;
 
-                reality = {
-                  enabled = true;
-
-                  handshake = {
-                    server = handshakeServer;
-                    server_port = 443;
-                  };
-
-                  # 从 sops 文件读入
-                  private_key = {_secret = config.sops.secrets.singbox_pri_key.path;};
-
-                  # short_id 允许多个，这里只用一个
-                  short_id = [
-                    {_secret = config.sops.secrets.singbox_ID.path;}
-                  ];
+                handshake = {
+                  server = handshakeServer;
+                  server_port = 443;
                 };
-              };
-            }
-          ]
-          ++ optionals cfEnabled [
-            {
-              type = "vless";
-              tag = "vless-cf";
-              listen = "::";
-              listen_port = cfPort;
 
-              users = [
-                {
-                  uuid = {_secret = config.sops.secrets.singbox_UUID.path;};
-                }
-              ];
+                # 从 sops 文件读入
+                private_key = {_secret = config.sops.secrets.singbox_pri_key.path;};
 
-              tls = {
-                enabled = true;
-                certificate_path = "${acmeDir}/fullchain.pem";
-                key_path = "${acmeDir}/key.pem";
+                # short_id 允许多个，这里只用一个
+                short_id = [
+                  {_secret = config.sops.secrets.singbox_ID.path;}
+                ];
               };
-
-              transport = {
-                type = "ws";
-                path = cfWsPath;
-              };
-            }
-          ];
+            };
+          }
+        ];
 
         outbounds = [
           {
@@ -177,6 +86,6 @@ in {
     };
 
     # 放行端口
-    networking.firewall.allowedTCPPorts = [port] ++ optionals cfEnabled [cfPort];
+    networking.firewall.allowedTCPPorts = [port];
   };
 }
