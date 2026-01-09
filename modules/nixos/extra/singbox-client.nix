@@ -7,7 +7,7 @@
 }:
 with lib; let
   cfg = config.modules.networking.singbox;
-  client = import ../../../lib/singbox/client-config.nix {inherit config myvars lib;};
+  client = import ../../../lib/singbox/client-config.nix {inherit config myvars lib pkgs;};
   clientConfigPath = client.clientConfigPath;
 in {
   # https://mynixos.com/nixpkgs/options/services.sing-box
