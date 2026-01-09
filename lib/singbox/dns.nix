@@ -67,39 +67,37 @@
     }
   ];
 
+  # 不需要全部保留。最少可用集通常是：
+  # - fakeip（TUN 必需）
+  # - local（国内解析）
+  # - remote（外站解析，且必须走代理 detour）
+  # - tx（给 DoH 解析做 bootstrap / fallback）
+  # 其它比如 udp 1.1.1.1、DoT 8.8.8.8、google/cloudflare DoH 都是“备选/冗余”，保留是为了故障转移或调试方便。
   servers = [
-    # 自己新增的
+    # Plain UDP resolver (Cloudflare 1.1.1.1).
+    # Use only as a simple fallback; UDP is easiest to intercept/poison on hostile networks.
     {
       type = "udp";
       server = "1.1.1.1";
     }
-    # 之前的fakeip，整合到servers里了（新格式）
+    # FakeIP pool definition for TUN mode.
+    # All A/AAAA lookups mapped to this pool when rule selects "fakeip".
     {
       type = "fakeip";
       tag = "fakeip";
       inet4_range = "198.18.0.0/15";
       inet6_range = "fc00::/18";
     }
-    # 旧写法（legacy DNS server）
-    # {
-    #   address = "tls://8.8.8.8";
-    # }
-    # 新写法（DoT）
+
+    # DNS-over-TLS to Google (8.8.8.8:853).
+    # Encrypts DNS, but still a direct egress unless you add a detour.
     {
       type = "tls";
       server = "8.8.8.8";
     }
 
-    # google doh（旧写法）
-    # {
-    #   tag = "google";
-    #   address = "https://dns.google/dns-query";
-    #   address_resolver = "tx";
-    #   address_strategy = "ipv4_only";
-    #   strategy = "ipv4_only";
-    #   client_subnet = "1.0.1.0";
-    # }
-    # google doh（新写法）
+    # Google DNS-over-HTTPS endpoint.
+    # Uses "tx" to resolve dns.google via a domestic resolver to avoid bootstrap failures.
     {
       type = "https";
       tag = "google";
@@ -110,50 +108,45 @@
         strategy = "ipv4_only";
       };
     }
-    # 腾讯提供的DNS查询服务（旧写法）
-    # {
-    #   address = "https://223.5.5.5/dns-query";
-    #   detour = "direct";
-    #   tag = "tx";
-    # }
-    # 腾讯提供的DNS查询服务（新写法）
+
+    # Cloudflare DNS-over-HTTPS endpoint.
+    # Also bootstrapped via "tx" so the DoH hostname resolves locally first.
+    {
+      type = "https";
+      tag = "cloudflare-dns";
+      server = "1.1.1.1";
+      path = "/dns-query";
+      domain_resolver = {
+        server = "tx";
+        strategy = "ipv4_only";
+      };
+    }
+
+    # Domestic DoH resolver used for bootstrap and CN domain resolution.
+    # Keep this reachable without proxy to avoid circular dependency.
     {
       type = "https";
       tag = "tx";
       server = "223.5.5.5";
       path = "/dns-query";
     }
-    # 旧写法（legacy DNS server）
-    # {
-    #   address = "https://223.5.5.5/dns-query";
-    #   detour = "direct";
-    #   tag = "local";
-    # }
-    # 新写法（本地 DNS tag）
+
+    # "local" DNS tag: domestic DoH resolver for CN domains and direct mode.
+    # Typically used by rules like geosite-cn or clash_mode=direct.
     {
       type = "https";
       tag = "local";
       server = "223.5.5.5";
       path = "/dns-query";
     }
-    # 新写法（远端 DNS tag，用于全局模式）
+    # "remote" DNS tag: for global mode / foreign domains.
+    # IMPORTANT: detour must point to a proxy outbound to avoid DNS poisoning.
     {
       type = "https";
       tag = "remote";
       server = "223.5.5.5";
       path = "/dns-query";
-      # detour = "GLOBAL";
+      detour = "select";
     }
-
-    # 旧写法（rcode server 已废弃）
-    # {
-    #   address = "rcode://success";
-    #   tag = "block";
-    # }
-    # 旧写法（legacy fakeip server）
-    # {
-    #   address = "fakeip";
-    #   tag = "fakeip";
-    # }
   ];
 }

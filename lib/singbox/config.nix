@@ -1,22 +1,26 @@
 {
-  pkgs,
   outbounds,
   ruleSets,
-}:
-# https://sing-box.sagernet.org/configuration/
-# [Sing-box realip配置方案 - 开发调优 - LINUX DO](https://linux.do/t/topic/175470)
-# https://github.com/MetaCubeX/meta-rules-dat
-# [最好用的 sing-box 一键安装脚本 - 233Boy](https://233boy.com/sing-box/sing-box-script/)
-# https://linux.do/t/topic/1146113/5
-# 注意
-# 1、未配置
-## certificate (若需要屏蔽某些 CA 或使用 Mozilla/Chrome 根证书列表，可显式配置。不配置时使用系统证书存储。)
-## endpoints (通常用于 WireGuard/Tailscale 等系统接口。未使用即可保持为空。)
-# 在mac里调试singbox的几个核心命令（注意mac下systemd不会自动restart）
-## rebuild 生成新的 config.json
-## sudo launchctl kickstart -k "system/local.singbox.tun" # 注意 -k 强制重启 launchd 服务（会杀掉旧进程）。否则有可能无法加载最新配置
-# 另外一个注意项：注意extraOutbounds，之所以需要外部可用节点（而非完全自建），就是因为我使用colmena批量部署，如果 singbox-server.nix 配置有问题，就会导致本地网络直接挂掉了。并且也不好排查问题。此时如果有外部可用节点，那么可以直接切换到外部可用节点，然后结合singbox client和server排查问题，会更高效。
-{
+}: {
+  # [Sing-box realip配置方案 - 开发调优 - LINUX DO](https://linux.do/t/topic/175470)
+  # https://github.com/MetaCubeX/meta-rules-dat
+  # [最好用的 sing-box 一键安装脚本 - 233Boy](https://233boy.com/sing-box/sing-box-script/)
+  # https://linux.do/t/topic/1146113/5
+
+  # https://github.com/shuritch/nixos/blob/main/src/modules/core/services/other/sing-box.nix
+  # https://github.com/nukdokplex/ncaa/blob/master/nixos-modules/sing-box-client.nix
+  # https://github.com/ourgal/snowfall/blob/main/lib/sing-box/default.nix
+  # https://github.com/kaseiwang/flakes/blob/master/nixos/n3160/networking.nix#L294
+
+  # 注意
+  # 1、未配置
+  ## certificate (若需要屏蔽某些 CA 或使用 Mozilla/Chrome 根证书列表，可显式配置。不配置时使用系统证书存储。)
+  ## endpoints (通常用于 WireGuard/Tailscale 等系统接口。未使用即可保持为空。)
+  # 在mac里调试singbox的几个核心命令（注意mac下systemd不会自动restart）
+  ## rebuild 生成新的 config.json
+  ## sudo launchctl kickstart -k "system/local.singbox.tun" # 注意 -k 强制重启 launchd 服务（会杀掉旧进程）。否则有可能无法加载最新配置
+  # 另外一个注意项：注意extraOutbounds，之所以需要外部可用节点（而非完全自建），就是因为我使用colmena批量部署，如果 singbox-server.nix 配置有问题，就会导致本地网络直接挂掉了。并且也不好排查问题。此时如果有外部可用节点，那么可以直接切换到外部可用节点，然后结合singbox client和server排查问题，会更高效。
+
   # https://sing-box.sagernet.org/configuration/log/
   log = {
     # 开启便于debug
@@ -29,6 +33,7 @@
   };
 
   dns = import ./dns.nix;
+  # route.nix only accepts ruleSets; keep args aligned to avoid eval errors
   route = import ./route.nix {inherit ruleSets;};
   outbounds = outbounds;
 
@@ -72,7 +77,10 @@
       enabled = true;
       store_fakeip = true;
       store_rdrc = true;
-      path = "/var/cache/sing-box/cache.db";
+
+      # [2026-01-09] 注意为了兼容NixOS，要写 /var/lib/sing-box/cache.db，因为services.sing-box 只保证创建了 /var/lib/sing-box（StateDirectory/WorkingDirectory）。所以如果写其他path，如果我们不去patch这个services，这个自定义path的 cache.db 是无法创建的，所以无法启动
+      # path = "/var/cache/sing-box/cache.db";
+      path = "/var/lib/sing-box/cache.db";
     };
     clash_api = {
       external_controller = "127.0.0.1:9090";
@@ -82,7 +90,8 @@
       # https://github.com/MetaCubeX/metacubexd
       # https://mynixos.com/nixpkgs/package/metacubexd
       # https://mynixos.com/nixpkgs/package/zashboard
-      external_ui = pkgs.zashboard;
+      # 'zashboard' has been removed because upstream repository
+      # external_ui = pkgs.zashboard;
     };
   };
 

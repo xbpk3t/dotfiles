@@ -4,7 +4,8 @@
   auto_detect_interface = true;
 
   # dns.final 和 route.final 为空时都会退回“第一个 server/outbound”，建议显式配置以避免隐式行为
-  final = "";
+  # 默认走 selector，所以显示声明为走 select（这里跟）
+  final = "select";
 
   # 新写法：作为全局默认域名解析器，替代 outbound DNS rule item
   default_domain_resolver = "local";
@@ -33,25 +34,28 @@
     {
       action = "route";
       rule_set = "geosite-openai";
-      outbound = "OpenAI";
+      # 注意这里
+      outbound = "select";
     }
-    # 从机场的config.json里拿到的
-    #      {
-    #        action = "resolve";
-    #        strategy = "prefer_ipv4";
-    #      }
-    #      {
-    #        clash_mode = "direct";
-    #        outbound = "direct";
-    #      }
-    #      {
-    #        clash_mode = "global";
-    #        outbound = "select";
-    #      }
-    #      {
-    #        ip_is_private = true;
-    #        outbound = "direct";
-    #      }
+    {
+      ip_is_private = true;
+      action = "route";
+      outbound = "direct";
+    }
+
+    {
+      action = "resolve";
+      strategy = "prefer_ipv4";
+    }
+    {
+      clash_mode = "direct";
+      outbound = "direct";
+    }
+    {
+      clash_mode = "global";
+      outbound = "select";
+    }
+
     {
       # 强制 cache.nixos.org 走自建节点（默认会默认直连，很慢）
       domain_suffix = ["cache.nixos.org"];
