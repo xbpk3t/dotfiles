@@ -1,5 +1,6 @@
 {
   config,
+  pkgs,
   myvars,
   lib,
   ...
@@ -12,14 +13,19 @@ with lib; let
     shortId = config.sops.placeholder.singbox_ID;
     flyingbirdPassword = config.sops.placeholder.singbox_flyingbird;
   };
-  extraOutbounds = import ./extra-outbounds.nix {
-    flyingbirdPassword = secrets.flyingbirdPassword;
+
+  ruleSets = import ./ruleset.nix {
+    enableRuleSetExtras = true;
   };
-  configJson = import ./config.nix {
-    inherit servers extraOutbounds;
+  outbounds = import ./outbounds.nix {
+    inherit servers;
     uuid = secrets.uuid;
     publicKey = secrets.publicKey;
     shortId = secrets.shortId;
+    flyingbirdPassword = secrets.flyingbirdPassword;
+  };
+  configJson = import ./config.nix {
+    inherit outbounds ruleSets pkgs;
   };
   clientConfigPath = config.sops.templates."singbox-client.json".path;
   templatesContent = builtins.toJSON configJson;
