@@ -7,11 +7,48 @@ tasks:
     desc: Report a snapshot of current processes
     cmd: ps aux
 
-  kill-port:
-    desc: Kill processes running on a specific port
-    cmd: lsof -t -i :{{.port}} | xargs kill
+  kp:
+    desc: Kill process listening on a TCP port (cross-platform)
     vars:
-      port: "{{.port | default 8080}}"
+      port: '{{.port | default 8080}}'
+      signal: '{{.signal | default "TERM"}}'
+    cmds:
+      - task: kp:linux
+        vars: {port: "{{.port}}", signal: "{{.signal}}"}
+      - task: kp:darwin
+        vars: {port: "{{.port}}", signal: "{{.signal}}"}
+
+  kp:linux:
+    desc: Linux implementation (fuser)
+    platforms: [linux]
+    vars:
+      port: '{{.port | default 8080}}'
+      signal: '{{.signal | default "TERM"}}'
+    preconditions:
+      - sh: command -v fuser >/dev/null 2>&1
+        msg: "fuser not found. Install psmisc (e.g. nix profile install nixpkgs#psmisc / add pkgs.psmisc)."
+    cmds:
+      # fuser 在端口空闲时会返回非 0，所以这里用 ignore_error
+      - cmd: sudo fuser -k -{{.signal}} {{.port}}/tcp
+        ignore_error: true
+    internal: true
+    silent: true
+    interactive: true
+
+  kp:darwin:
+    desc: Darwin implementation (lsof)
+    platforms: [darwin]
+    vars:
+      port: '{{.port | default 8080}}'
+      signal: '{{.signal | default "TERM"}}'
+    cmds:
+      # 没有监听者时：lsof 退出码非 0；我们用 ignore_error + status 来避免 kill 空参数
+      - cmd: sudo lsof -nP -tiTCP:{{.port}} -sTCP:LISTEN | xargs -r sudo kill -{{.signal}}
+        ignore_error: true
+    internal: true
+    silent: true
+    interactive: true
+
 
   # Network diagnostic tasks
   dig:

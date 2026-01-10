@@ -1,4 +1,5 @@
 # https://sing-box.sagernet.org/configuration/dns/
+# https://sing-box.sagernet.org/manual/proxy/client/#basic-tun-usage-for-chinese-users
 {
   # 开启后会让每个 DNS 服务器缓存独立，但会轻微降低性能。
   independent_cache = true;
