@@ -96,12 +96,6 @@
     utils.url = "github:numtide/flake-utils";
     nixos-hardware.url = "github:nixos/nixos-hardware";
 
-    # https://github.com/natsukium/mcp-servers-nix
-    mcp-servers-nix = {
-      url = "github:natsukium/mcp-servers-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     # nixos-cli - Modern NixOS management CLI
     # https://github.com/nix-community/nixos-cli
     nixos-cli = {

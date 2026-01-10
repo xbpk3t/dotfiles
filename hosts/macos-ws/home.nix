@@ -15,4 +15,8 @@
 
     vscode.enable = false;
   };
+
+  modules.AI = {
+    codex.enable = true;
+  };
 }
