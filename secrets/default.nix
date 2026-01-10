@@ -95,6 +95,8 @@ in {
       #      spotifyClientId = mkUserSecret "spotify/client_id";
       #      spotifyClientSecret = mkUserSecret "spotify/client_secret";
 
+      API_context7 = mkUserSecret "API/context7";
+
       # Atuin
       autin_key = mkUserSecret "atuin/key";
       autin_session = mkUserSecret "atuin/session";
