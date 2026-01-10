@@ -35,6 +35,16 @@ in {
     fallbackDns = nameservers;
   };
 
+  modules.networking = {
+    tailscale = {
+      enable = true;
+      derper = {
+        enable = true;
+        acmeEmail = myvars.mail;
+      };
+    };
+  };
+
   hardware.enableRedistributableFirmware = lib.mkForce false;
 
   # Disable scheduled upgrades to avoid conflicts with immutable deployments.
