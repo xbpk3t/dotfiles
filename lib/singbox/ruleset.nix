@@ -40,6 +40,8 @@
     if enableRuleSetExtras
     then [
       # https://github.com/xmdhs/sing-box-ruleset
+      # AdGuard 官方提供了原始的 AdGuard DNS Filter（简化域名过滤列表），用于 DNS 级广告和跟踪阻挡。
+      # sing-box 官方不支持直接加载 AdGuard 的 txt 格式，需要先用 sing-box 工具转换为二进制 .srs 格式。因此，没有 SagerNet/sing-box 官方提供的预转换 .srs 文件。
       {
         format = "binary";
         tag = "AdGuardSDNSFilter";
@@ -48,6 +50,8 @@
         download_detour = "direct";
       }
       # https://github.com/curl/curl/wiki/DNS-over-HTTPS
+      # Google Chrome 本身有内置的 DoH 提供商列表（用于自动升级功能），但 Google 没有公开一个独立的 JSON 文件 作为“Chrome DoH servers list”。
+      # Chrome 浏览器内置或支持的 DNS over HTTPS (DoH) 服务器列表（域名或模板），用于在 sing-box 的 DNS 规则中匹配并特殊处理（如强制使用特定上游或绕过）。
       {
         format = "source";
         tag = "chrome-doh";
