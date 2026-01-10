@@ -55,6 +55,8 @@
       user = ssh-user;
       tags = tags;
     }
+    # colmena --impure apply --on nixos-vps-142-171-154-61
+    # rebuild单个host
     {
       host = "142.171.154.61";
       user = ssh-user;

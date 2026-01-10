@@ -27,16 +27,24 @@
 
 
 
+### tailscale/netbird
 
+:::tip
 
+作为 host=nixos-vps，所有VPS就既是 tailscale 的 client (=node) 和 Derp Relay Server
 
+:::
 
+需要注意的是，对于 client来说，部署是很简单的。
 
-### 2025-12-21
+但是对于 Derp 来说，要求必须TLS证书，所以使用ACME的DNS-01签发。这里的问题在于，URL的 subdomain 需要动态生成（不可能多台VPS去抢注同一个域名，如果是同一个固定域名，那么只有第一个VPS可以抢注成功，后面的都会失败，也不符合我们的需求）。
 
-把 modules/nixos/ws 直接移除掉了
+这里有两台路线，
 
-因为
+一条是直接使用为colmena写的targets metadata作为hosts数据源，让我们可以动态生成 config.networking.hostName。但是这里的问题在于，如果使用colmena targets作为数据源，有两个需求无法满足：1、我希望不只是 hosts/nixos-vps，其他hosts也可以直接实现类似效果。2、不只是colmena，其他部署方式也可以动态生成hostName。总之因为实现复杂性，所以放弃该方案。
+
+另一个方案则简单得多，维护两套 hosts metadata确实麻烦，但是从实现来说，却容易得多。直接复用了之前在 vars/networking.nix 里给 singbox 维护的 vpsNodes作为数据源。然后添加了 lib/node-id.nix 用来通过IP匹配node，又在colmena里实现了动态生成 hostName（而非直接修改 hosts/nixos-vps 的 hostName，注意这点有天壤之别）
+
 
 
 

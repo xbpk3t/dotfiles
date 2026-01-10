@@ -6,7 +6,8 @@
   ...
 }:
 with lib; let
-  servers = myvars.networking.singboxServers;
+  # singbox 与 derper 复用同一份节点清单，避免重复维护
+  servers = myvars.networking.vpsNodes;
   # NOTE:
   # - Darwin: we render a full JSON file via sops template (see modules/darwin/singbox-client.nix),
   #   so placeholders are required during evaluation and are substituted when the template is rendered.
