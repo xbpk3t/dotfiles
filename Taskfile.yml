@@ -1,4 +1,9 @@
+---
+# 用于处理一些通用（darwin和nixos都支持）且常用的task
+
 version: '3'
+
+
 
 includes:
   sk:
@@ -19,6 +24,24 @@ tasks:
       - nix flake lock
       - nix flake check
       - nix flake metadata
+
+
+  why:
+    desc: "定位失败 pkg：选择配置类型/Host + 失败 drv，然后跑 why-depends"
+    vars:
+      KIND:
+        sh: 'd="$(nix eval --raw .#darwinConfigurations --apply "x: builtins.toString (builtins.length (builtins.attrNames x))" 2>/dev/null || echo 0)"; n="$(nix eval --raw .#nixosConfigurations --apply "x: builtins.toString (builtins.length (builtins.attrNames x))" 2>/dev/null || echo 0)"; { [ "$d" != "0" ] && echo darwin; [ "$n" != "0" ] && echo nixos; } | gum choose --header "选择配置类型"'
+      HOST:
+        sh: 'nix eval --raw ".#{{.KIND}}Configurations" --apply "x: builtins.concatStringsSep \"\\n\" (builtins.attrNames x)" | gum choose --header "选择 Host"'
+      FAILED_DRV:
+        sh: 'gum input --prompt "失败 .drv 路径: "'
+      SYSTEM_DRV:
+        sh: 'test "{{.KIND}}" = "darwin" && nix eval --raw ".#darwinConfigurations.{{.HOST}}.system.drvPath" || nix eval --raw ".#nixosConfigurations.{{.HOST}}.config.system.build.toplevel.drvPath"'
+    cmds:
+      - 'gum style --bold "SYSTEM_DRV: {{.SYSTEM_DRV}}"'
+      - 'gum style --bold "FAILED_DRV: {{.FAILED_DRV}}"'
+      - 'nix why-depends --all --derivation "{{.SYSTEM_DRV}}" "{{.FAILED_DRV}}" 2>&1 | gum pager'
+      - 'gum confirm "看 nix log？" && nix log "{{.FAILED_DRV}}" 2>&1 | gum pager || true'
 
 
 
