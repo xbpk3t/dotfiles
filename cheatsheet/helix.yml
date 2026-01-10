@@ -1,0 +1,90 @@
+---
+
+- type: 高频操作
+  cmds:
+    - cmd: x
+      des: 选中该行
+    - des: helix里我怎么批量注释？
+      cmd:
+    # <Space> c ：智能切换注释（toggle comments）这会自动为每行行首添加或移除注释符号（比如 #），并且如果语言支持块注释（如 /* */），它会优先选择合适的类型。通常对于 # 这种行注释，它会直接在每行首加 # 。
+    # <Space> <A-c> （即 Space + Alt-c）：强制使用 行注释（toggle line comments）这会严格地在每行首添加 #（或语言对应的行注释符号），适合你想要的“每个行首加入#”的效果。
+    # Ctrl-c ：另一个快捷键，也对应 toggle comments（效果同 <Space> c）。
+
+    - des: helix里怎么删除当前行？类似vim的dd
+      cmd: x选中多行之后，直接 d 删除选中行  # helix是“先选内容，后操作”的逻辑（所以没有dd，要比dd更好）
+
+
+    - des: 删除选中内容并进入插入模式（类似 vim c）
+      cmd: c
+    - des: 复制（yank）选中内容
+      cmd: y
+    - des: 在选中后/前粘贴
+      cmd: p / P
+    - des: 撤销 / 重做
+      cmd: u / U
+    - des: 在行首/行尾进入插入模式
+      cmd: I / A
+    - des: 在当前行下/上新建一行并进入插入
+      cmd: o / O
+
+- type: 选择与多光标
+  cmds:
+    - des: 进入选择/扩展模式（移动即扩展选择）
+      cmd: v
+    - des: 收拢所有多选，只剩主光标
+      cmd: ;
+    - des: 翻转选择方向（交换光标与锚点）
+      cmd: <A-;
+    - des: 用正则选中所有匹配项（超级实用）
+      cmd: s
+    - des: 在当前行复制选择到下一行（快速多光标）
+      cmd: C
+    - des: 在当前行复制选择到上一行
+      cmd: <A-C>
+    - des: 选中整个文件
+      cmd: # %
+
+- type: 移动与跳转
+  cmds:
+    - des: 单词级移动（开始/结束）
+      cmd: w / b / e
+    - des: 向前/向后找到字符（可多次 , / ; 跳下一个）
+      cmd: f<char> / t<char>
+    - des: 跳转到文件首/尾
+      cmd: gg / G
+    - des: 半页/整页上下移动
+      cmd: <C-u> / <C-d>    （半页）
+        <C-b> / <C-f>    （整页）
+
+- type: 搜索相关
+  cmds:
+    - des: 正向/反向搜索（支持正则）
+      cmd: /    或    ?
+    - des: 跳到下一个/上一个匹配
+      cmd: n / N
+    - des: 用当前选中内容作为搜索词（自动加词边界）
+      cmd: # *
+
+- type: Space菜单高频
+  cmds:
+    - des: 打开文件选择器（从工作区根目录）
+      cmd: <Space> f
+    - des: 打开当前缓冲区列表
+      cmd: <Space> b
+    - des: 打开符号选择器（快速跳函数/变量）
+      cmd: <Space> s
+    - des: 打开命令面板（搜任何命令/快捷键）
+      cmd: <Space> ?
+    - des: 跳转到定义（LSP）
+      cmd: <Space> g d    （或 g d）
+    - des: 查找所有引用
+      cmd: <Space> g r
+
+- type: 视图调整（让屏幕舒服）
+  cmds:
+    - des: 当前行居中 / 置顶 / 置底
+      cmd: z c / z t / z b
+    - des: 垂直居中当前行（最常用）
+      cmd: z z
+    - des: 进入粘性视图模式（hjkl 直接平滑滚动）
+      cmd: Z
