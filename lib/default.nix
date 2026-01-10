@@ -2,6 +2,8 @@
   # Import all library functions
   macosSystem = import ./macos.nix;
   nixosSystem = import ./nixos.nix;
+  # 提供统一的节点 ID 生成器，供 colmena/nixos 模块复用
+  nodeId = import ./node-id.nix {inherit lib;};
   colmenaSystem = import ./colmena-system.nix;
   mkColmenaRole = import ./mkColmenaRole.nix;
   attrs = import ./attrs.nix {inherit lib;};
@@ -28,6 +30,7 @@ in {
     nixosSystem
     colmenaSystem
     mkColmenaRole
+    nodeId
     attrs
     scanPaths
     relativeToRoot
