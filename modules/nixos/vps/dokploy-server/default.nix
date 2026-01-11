@@ -53,38 +53,36 @@ in {
     environment.etc."dokploy/traefik/traefik.yml".text = builtins.readFile ./traefik.yml;
     environment.etc."dokploy/traefik/dynamic/middlewares.yml".text = builtins.readFile ./middlewares.yml;
 
-    # Traefik（容器方式），与 Dokploy 动态路由机制保持一致
-    systemd.services.dokploy-traefik = {
-      description = "Dokploy Traefik container";
+    # [2026-01-11] 之前是systemd里跑docker run，改为更NixOS的方案
+    # 用更 declarative 的 oci-containers 管 Traefik，行为等价于 docker run
+    virtualisation.oci-containers.backend = "docker";
+    virtualisation.oci-containers.containers.dokploy-traefik = {
+      image = "traefik:v3.6.1";
+      autoStart = true;
+
+      # 关键点：必须加入 dokploy overlay 网络，否则动态路由回源会走 overlay IP 而不可达（导致504）
+      # 这里用 extraOptions 是因为 oci-containers schema 没有 networks 选项
+      extraOptions = ["--network=dokploy-network"];
+
+      volumes = [
+        "/var/run/docker.sock:/var/run/docker.sock"
+        "/etc/dokploy/traefik/traefik.yml:/etc/traefik/traefik.yml"
+        "/etc/dokploy/traefik/dynamic:/etc/dokploy/traefik/dynamic"
+      ];
+
+      # 保持与现有行为一致：对外提供 HTTP/HTTPS/HTTP3 入口
+      ports = [
+        "80:80/tcp"
+        "443:443/tcp"
+        "443:443/udp"
+      ];
+    };
+
+    # 先确保 Swarm + overlay network 已创建，否则容器会因 network not found 启动失败
+    # oci-containers 生成的 unit 名为 docker-<container>.service
+    systemd.services."docker-dokploy-traefik" = {
       after = ["docker.service" "dokploy-swarm.service"];
       requires = ["docker.service" "dokploy-swarm.service"];
-      path = [pkgs.docker];
-      serviceConfig = {
-        Type = "oneshot";
-        RemainAfterExit = true;
-      };
-      script = ''
-        if docker ps -a --format '{{.Names}}' | grep -q '^dokploy-traefik$'; then
-          echo "Starting existing Traefik container..."
-          docker start dokploy-traefik
-        else
-          echo "Creating and starting Traefik container..."
-          docker run -d \
-            --name dokploy-traefik \
-            --network dokploy-network \
-            --restart=always \
-            -v /var/run/docker.sock:/var/run/docker.sock \
-            -v /etc/dokploy/traefik/traefik.yml:/etc/traefik/traefik.yml \
-            -v /etc/dokploy/traefik/dynamic:/etc/dokploy/traefik/dynamic \
-            -p 80:80/tcp \
-            -p 443:443/tcp \
-            -p 443:443/udp \
-            traefik:v3.6.1
-        fi
-      '';
-      serviceConfig.ExecStop = "${pkgs.docker}/bin/docker stop dokploy-traefik || true";
-      serviceConfig.ExecStopPost = "${pkgs.docker}/bin/docker rm dokploy-traefik || true";
-      wantedBy = ["multi-user.target"];
     };
 
     # Swarm init + overlay network (idempotent)
