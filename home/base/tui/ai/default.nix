@@ -2,6 +2,7 @@
   imports = [
     ./codex.nix
     ./claude.nix
+    ./opencode.nix
   ];
 
   home.packages = with pkgs; [
