@@ -3,11 +3,12 @@
   pkgs,
   lib,
   myvars,
+  mylib,
   ...
 }:
 with lib; let
   cfg = config.modules.networking.singbox;
-  client = import ../../lib/singbox/client-config.nix {inherit config myvars lib pkgs;};
+  client = import ../../lib/singbox/client-config.nix {inherit config myvars mylib lib pkgs;};
   clientConfigPath = client.clientConfigPath;
 in {
   options.modules.networking.singbox = {
