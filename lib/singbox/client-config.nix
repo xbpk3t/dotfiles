@@ -2,13 +2,12 @@
   config,
   pkgs,
   lib,
+  mylib,
   ...
 }:
 with lib; let
-  # singbox 节点清单由 colmena targets 统一派生并注入：
-  # - 这样就不再依赖 vars/networking.nix 的 vpsNodes
-  # - 若未注入（非 colmena 场景），列表为空以避免误用
-  servers = config._module.args.singboxServers or [];
+  # singbox 节点清单直接从 inventory 读取，避免经过 vars/networking.nix
+  servers = (import (mylib.relativeToRoot "inventory/nixos-vps.nix")).singboxServers;
   # NOTE:
   # - Darwin: we render a full JSON file via sops template (see modules/darwin/singbox-client.nix),
   #   so placeholders are required during evaluation and are substituted when the template is rendered.
