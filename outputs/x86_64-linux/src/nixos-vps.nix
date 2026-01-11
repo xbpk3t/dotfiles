@@ -49,11 +49,19 @@
     ];
   };
 
+  # VPS 节点清单已迁移到 colmena targets 的 meta.singbox 内统一维护
   targets = [
     {
       host = "103.85.224.63";
       user = ssh-user;
       tags = tags;
+      # singbox 节点元信息：由 colmena targets 统一维护
+      meta = {
+        singbox = {
+          label = "HK-hdy";
+          port = 8443;
+        };
+      };
     }
     # colmena --impure apply --on nixos-vps-142-171-154-61
     # rebuild单个host
@@ -61,6 +69,13 @@
       host = "142.171.154.61";
       user = ssh-user;
       tags = tags;
+      # singbox 节点元信息：由 colmena targets 统一维护
+      meta = {
+        singbox = {
+          label = "LA-RN";
+          port = 8443;
+        };
+      };
     }
   ];
 
