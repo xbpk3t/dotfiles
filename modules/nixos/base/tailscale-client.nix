@@ -2,7 +2,6 @@
   config,
   lib,
   pkgs,
-  myvars,
   ...
 }:
 with lib; let
@@ -10,6 +9,8 @@ with lib; let
   # nodeId 由 colmena 注入，用来保证每台机器有唯一标识；
   # 不依赖 hostname，避免多机同名导致域名/证书冲突。
   nodeId = config._module.args.nodeId or config.networking.hostName;
+  # hostMeta 同样由 colmena 注入，包含派生的 hostName / derpDomain 等信息
+  hostMeta = config._module.args.hostMeta or null;
 in {
   options.modules.networking.tailscale = {
     enable = mkEnableOption "Tailscale client (WireGuard-based mesh VPN) on this host";
@@ -20,8 +21,12 @@ in {
       # 需要
       domain = mkOption {
         type = types.str;
-        # 统一用 nodeId 生成 derp 域名，避免 hostname 重复导致证书冲突。
-        default = "derp-${nodeId}.lucc.dev";
+        # 统一用 hostMeta 生成 derp 域名，避免 hostname 重复导致证书冲突。
+        # 注意：hostMeta 由 colmena 注入；如果未注入，则退回到 nodeId 的默认拼接。
+        default =
+          if hostMeta != null
+          then hostMeta.derpDomain
+          else "derp-${nodeId}.lucc.dev";
         description = "Public domain name for this DERP node.";
       };
 
@@ -84,17 +89,15 @@ in {
     })
 
     (mkIf cfg.derper.enable {
-      # 确保当前节点能在统一清单中找到（否则无法确定唯一域名/证书）。
-      assertions = let
-        nodeEntry = lib.lists.findFirst (n: (n.hostName or "") == nodeId) null myvars.networking.vpsNodes;
-      in [
+      # 确保当前节点有 hostMeta（否则无法确定唯一域名/证书）。
+      assertions = [
         {
           assertion = cfg.derper.acmeEmail != "";
           message = "modules.networking.tailscale.derper.acmeEmail must be set when derper is enabled.";
         }
         {
-          assertion = nodeEntry != null;
-          message = "modules.networking.tailscale.derper requires a matching entry in myvars.networking.vpsNodes (hostName == nodeId).";
+          assertion = hostMeta != null;
+          message = "modules.networking.tailscale.derper requires hostMeta from colmena targets metadata.";
         }
       ];
 
