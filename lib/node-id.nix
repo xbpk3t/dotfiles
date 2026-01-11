@@ -23,10 +23,10 @@ in rec {
     nodeId,
     meta ? {},
   }: let
-    domainBase = meta.derpDomainBase or "lucc.dev";
-    derpPrefix = meta.derpSubdomainPrefix or "derp";
+    domainBase = meta.derpDomainBase or meta.tailscale.derpDomainBase or "lucc.dev";
+    derpPrefix = meta.derpSubdomainPrefix or meta.tailscale.derpSubdomainPrefix or "derp";
     hostName = meta.hostName or nodeId;
-    derpDomain = meta.derpDomain or "${derpPrefix}-${nodeId}.${domainBase}";
+    derpDomain = meta.derpDomain or meta.tailscale.derpDomain or "${derpPrefix}-${nodeId}.${domainBase}";
   in {
     inherit roleName targetHost nodeId hostName derpDomain;
     # 保留原始 meta 以便模块侧按需取用其它字段
