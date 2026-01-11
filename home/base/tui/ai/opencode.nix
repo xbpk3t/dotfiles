@@ -11,7 +11,6 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-
     # https://mynixos.com/home-manager/options/programs.opencode
     # themes: using stylix
     programs.opencode = {
@@ -107,8 +106,6 @@ in {
           model = "opencode/gpt-5.1-codex";
         };
       };
-
-
     };
   };
 }

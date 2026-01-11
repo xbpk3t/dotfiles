@@ -1,7 +1,11 @@
-{mylib, ...}: {
+{
+  mylib,
+  pkgs,
+  ...
+}: {
   imports = mylib.scanPaths ./.;
 
-  environment.shells = with pkgs; [
+  environment.systemPackages = with pkgs; [
     # https://mynixos.com/nixpkgs/package/psmisc
     # https://gitlab.com/psmisc/psmisc
     # Install it for fuser
