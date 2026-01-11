@@ -24,7 +24,8 @@ in {
   };
 
   networking = {
-    hostName = "nixos-vps";
+    # hostName 由 inventory 注入；这里提供默认值，避免单机调试时为空
+    hostName = lib.mkDefault "nixos-vps";
     useDHCP = true;
     nameservers = nameservers;
     useHostResolvConf = lib.mkForce false;
