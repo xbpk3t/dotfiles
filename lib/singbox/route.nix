@@ -59,7 +59,7 @@
     {
       # 强制 cache.nixos.org 走自建节点（默认会默认直连，很慢）
       domain_suffix = ["cache.nixos.org"];
-      outbound = "GLOBAL";
+      outbound = "select";
     }
     {
       rule_set = "geoip-cn";
@@ -77,7 +77,7 @@
       inbound = [
         "tun-in"
       ];
-      outbound = "GLOBAL";
+      outbound = "select";
     }
   ];
 }
