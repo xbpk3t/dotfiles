@@ -418,10 +418,8 @@
         # Get editor completions based on the config schema
         "$schema" = "https://starship.rs/config-schema.json";
 
-        # 两行提示符：第一行保留 $all 的默认模块顺序；第二行显示输入符号
         format = lib.concatStrings [
           "$all"
-          "\n"
           "$character"
         ];
 
@@ -431,8 +429,7 @@
         ];
 
         # Inserts a blank line between shell prompts
-        # 我们已经在 format 里手动换行，这里关闭避免额外空行
-        add_newline = false;
+        add_newline = true;
 
         # Replace the '❯' symbol in the prompt with '➜'
         character = {
@@ -456,10 +453,7 @@
         directory = {
           truncation_length = 0;
           truncate_to_repo = false;
-          # 路径色块：使用 bright-* 命名色，兼顾可读性与可维护性
-          style = "bg:bright-blue fg:black";
-          # 路径色块显示为 pill（圆角胶囊）
-          format = "[](fg:bright-blue)[ $path ]($style)[](fg:bright-blue) ";
+          style = "bold #82AAFF";
         };
 
         git_branch = {
@@ -480,11 +474,9 @@
         #      };
 
         cmd_duration = {
-          # 右侧耗时色块：使用 bright-* 命名色，兼顾可读性与可维护性
-          style = "bg:bright-yellow fg:black";
-          # 右侧耗时显示为 pill（圆角胶囊）
-          format = "[](fg:bright-yellow)[  $duration ]($style)[](fg:bright-yellow)";
+          format = "[$duration]($style) ";
           min_time = 0; # 单位：ms，500ms 即 0.5 秒
+          style = "bright-yellow";
         };
 
         hostname = {

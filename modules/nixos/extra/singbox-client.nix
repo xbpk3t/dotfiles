@@ -8,7 +8,15 @@
 }:
 with lib; let
   cfg = config.modules.networking.singbox;
-  client = import ../../../lib/singbox/client-config.nix {inherit config myvars mylib lib pkgs;};
+  client = import ../../../lib/singbox/client-config.nix {
+    inherit
+      config
+      myvars
+      mylib
+      lib
+      pkgs
+      ;
+  };
 in {
   # https://mynixos.com/nixpkgs/options/services.sing-box
 
@@ -18,6 +26,8 @@ in {
   };
 
   config = mkIf cfg.enable {
+    # systemctl status sing-box.service
+    # sudo journalctl -u sing-box -n 50 --no-pager
     services.sing-box = {
       enable = true;
       settings = client.configJson;
