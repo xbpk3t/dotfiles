@@ -21,6 +21,8 @@
   deploymentBase =
     {
       inherit tags targetHost targetUser;
+      # 让所有 colmena 节点都直接走 Target 构建（之后再改为复用homelab 的 closure）
+      buildOnTarget = true;
     }
     // lib.optionalAttrs (targetPort != null) {inherit targetPort;};
   homeManagerModules = lib.optionals (home-modules != []) [
