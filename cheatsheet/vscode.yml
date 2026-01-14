@@ -1,0 +1,98 @@
+---
+
+- topic: 高频操作
+  cmds:
+    - cmd: Cmd + P
+      des: 快速打开文件（Quick Open）
+      score: 5
+
+    # - cmd: Cmd + P  然后输入 :行号
+    #   des: 同时支持跳到行号（例如 main.ts:120）
+    # - cmd: Cmd + P  然后输入 @符号
+    #   des: 在当前文件按符号跳转（等价于 Cmd + Shift + O）
+    # - cmd: Cmd + P  然后输入 #文本
+    #   des: 在当前文件内搜索（相当于 Cmd + F 的另一种入口）
+
+
+
+
+    - cmd: Shift + Cmd + P
+      des: 命令面板（Command Palette）
+    - cmd: Cmd + B
+      des: Toggle 侧边栏（Sidebar）
+    - cmd: Cmd + W
+      des: 关闭当前编辑器 Tab
+    - cmd: Cmd + K  然后 Cmd + W
+      des: 关闭所有编辑器 Tab
+    - cmd: Cmd + \
+      des: 拆分编辑器（Split Editor）
+    - cmd: Ctrl + Tab
+      des: 在最近使用的编辑器之间切换
+    - cmd: Cmd + ,
+      des: 打开设置（Settings）
+    - cmd: Cmd + K  然后 Cmd + S
+      des: 打开快捷键设置（Keyboard Shortcuts）
+
+    - des: Keymap 界面
+      cmd: Cmd + S
+
+
+
+- topic: 常用Tool Window
+  cmds:
+    - cmd: Ctrl + `
+      des: 打开终端（Toggle Terminal）
+    - cmd: Cmd + Shift + E
+      des: 打开资源管理器（Explorer）
+
+    - cmd: Cmd + Shift + F
+      des: 全局搜索（Search in Files）
+    - cmd: Cmd + Shift + G
+      des: 打开源代码管理（Source Control）
+    - cmd: Cmd + Shift + D
+      des: 打开调试面板（Debug）
+    - cmd: Cmd + Shift + X
+      des: 打开扩展视图（Extensions）
+
+
+- topic: 编辑区
+  cmds:
+    - des: 删除该行
+      cmd: Cmd + X
+    - des: 复制该行（到下一行）
+      cmd:
+
+
+
+- topic: Terminal
+  cmds:
+    - cmd: Cmd + Shift + T # 原键位是 Ctrl + Shift + `
+      des: 新建一个终端（Create New Terminal）
+    - des: 关闭Terminal Tab
+      cmd: Cmd + W # 新增这个快捷键
+
+
+
+- topic: scratches
+  cmds:
+    - des: 打开 scratches files list
+      cmd: Cmd + Ctrl + T
+    - des: 新建 scratches
+      cmd: Cmd + Ctrl + N
+
+
+
+- topic: Debug
+  cmds:
+    - cmd: F5
+      des: 开始/继续调试
+    - cmd: Shift + F5
+      des: 停止调试
+    - cmd: F9
+      des: Toggle 断点
+    - cmd: F10
+      des: 单步跳过（Step Over）
+    - cmd: F11
+      des: 单步进入（Step Into）
+    - cmd: Shift + F11
+      des: 单步跳出（Step Out）
