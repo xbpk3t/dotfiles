@@ -113,6 +113,12 @@
       impala
     ];
 
+  # ncurses 的无线网卡监控工具
+  # 带 capabilities 的 wrapper（setcap wrapper），让普通用户也能用到 wavemon 的一些需要特权的功能（不需要你再自己去折腾 setcap/wrapper）。
+  # https://mynixos.com/nixpkgs/package/wavemon
+  # https://mynixos.com/nixpkgs/option/programs.wavemon.enable
+  # programs.wavemon.enable = pkgs.stdenv.isLinux;
+
   # TODO trippy
   # https://mynixos.com/home-manager/options/programs.trippy
   # https://github.com/fujiapple852/trippy

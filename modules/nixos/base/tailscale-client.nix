@@ -7,6 +7,9 @@
 with lib; let
   cfg = config.modules.networking.tailscale;
 in {
+  # https://mynixos.com/nixpkgs/options/services.tailscale
+  # https://nixos.wiki/wiki/Tailscale
+
   options.modules.networking.tailscale = {
     enable = mkEnableOption "Tailscale client (WireGuard-based mesh VPN) on this host";
 
@@ -65,7 +68,6 @@ in {
         pkgs.tailscale
       ];
 
-      # https://mynixos.com/nixpkgs/options/services.tailscale
       services.tailscale = {
         enable = true;
         package = pkgs.tailscale;

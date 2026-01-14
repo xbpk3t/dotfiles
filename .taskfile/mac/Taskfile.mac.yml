@@ -13,7 +13,7 @@ version: '3'
 #- pmset -a disablesleep 1 # 作用为防止系统休眠；注意，输入这条指令后MacBook不会进入休眠状态
 #- pmset -a disablesleep 0 # 恢复，上面命令的相反
 #- caffeinate, # Running caffeinate with no flags or arguments prevents your Mac from going to sleep as long as the command continues to run.
-#
+
 #- pbcopy
 #- pbpaste
 #- sips

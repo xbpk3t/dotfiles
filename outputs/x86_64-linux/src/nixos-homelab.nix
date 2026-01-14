@@ -6,7 +6,10 @@
   ...
 } @ args: let
   name = "nixos-homelab";
-  tags = [name "homelab"];
+  tags = [
+    name
+    "homelab"
+  ];
   ssh-user = myvars.username or "root";
 
   # 与 nixos-ws 共用 overlay；禁用 NVIDIA 但保留 unfree 支持
@@ -18,7 +21,12 @@
       overlays = [customPkgsOverlay];
     };
   in {
-    inherit inputs mylib myvars pkgs;
+    inherit
+      inputs
+      mylib
+      myvars
+      pkgs
+      ;
     pkgs-unstable = import inputs.nixpkgs-unstable or inputs.nixpkgs {
       inherit system;
       config.allowUnfree = true;
@@ -30,7 +38,9 @@
     system = "x86_64-linux";
     inherit lib myvars;
     nixos-modules =
-      [inputs.sops-nix.nixosModules.sops]
+      [
+        inputs.sops-nix.nixosModules.sops
+      ]
       ++ map mylib.relativeToRoot [
         "hosts/${name}/default.nix"
         "secrets/default.nix"
@@ -38,6 +48,7 @@
         "modules/nixos/hardware/nvidia.nix"
         "modules/nixos/extra/singbox-client.nix"
         "modules/nixos/extra/vscode-remote.nix"
+        "modules/nixos/extra/fhs.nix"
         "modules/nixos/homelab/dokploy.nix"
 
         # homelab 需要时可启用 k3s 模块，先在 host 层决定
@@ -49,10 +60,18 @@
       "home/base/core"
       "home/base/tui"
       "home/nixos"
+      "home/extra/jetbrains-remote.nix"
     ];
   };
   role = mylib.mkColmenaRole {
-    inherit lib mylib genSpecialArgs modules args name;
+    inherit
+      lib
+      mylib
+      genSpecialArgs
+      modules
+      args
+      name
+      ;
     system = "x86_64-linux";
     baseTags = tags;
     targets = [
