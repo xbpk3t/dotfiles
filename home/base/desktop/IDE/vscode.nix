@@ -13,11 +13,6 @@ in {
   # https://mynixos.com/home-manager/options/programs.vscode
   # https://mynixos.com/nixpkgs/packages/vscode-extensions
   config = lib.mkIf cfg.enable {
-    home.packages = with pkgs; [
-      # https://mynixos.com/nixpkgs/package/nixd
-      nixd
-    ];
-
     programs.vscode = {
       enable = pkgs.stdenv.isLinux;
       package = pkgs.vscode;

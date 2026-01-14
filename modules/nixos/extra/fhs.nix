@@ -38,10 +38,14 @@
   #
   # You can overwrite `NIX_LD_LIBRARY_PATH` in the environment where you run the non-NixOS binaries to customize the
   # search path for shared libraries.
+
+  # nix-ld 解决的是动态链接器（外来二进制找不到 ld-linux 和库）的运行问题。
   programs.nix-ld = {
     enable = true;
     libraries = with pkgs; [
       stdenv.cc.cc
+      openssl
+      zlib
     ];
   };
 }
