@@ -7,6 +7,15 @@ tasks:
     desc: Report a snapshot of current processes
     cmd: ps aux
 
+
+  #  # 优先优雅退出（推荐）
+  #  kill -TERM $(lsof -ti :8080)
+  #  # 仍不退出再强杀（谨慎）
+  #  kill -KILL $(lsof -ti :8080)
+  #  # 优雅杀（推荐）
+  #  fuser -k 8080/tcp
+  #  # 或者明确用 TERM
+  #  fuser -k -TERM 8080/tcp
   kp:
     desc: Kill process listening on a TCP port (cross-platform)
     vars:

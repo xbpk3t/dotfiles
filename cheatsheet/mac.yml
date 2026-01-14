@@ -1,0 +1,31 @@
+---
+
+
+- topic: mac 快捷键
+  cmds:
+    - cmd: CMD+opt+w
+      des: 关闭当前软件所有窗口
+    - cmd: CMD+opt+D
+      des: 切换 Dock 的显示隐藏
+    - cmd: CMD+opt+esc
+      des: 强制退出程序
+    - cmd: CMD+ 空格键 (我改成了“输入法切换”键，更符合自己的使用习惯)
+      des: 切换输入法
+    - cmd: CMD+Shift+R
+      des: 浏览器强制刷新
+    - cmd: CMD+option+v
+      des: 剪切
+    - cmd: 在 finder 下直接 CMD+Shift+.
+      des: 查看隐藏文件
+    - cmd: CMD+Shift+G
+      des: 根据路径查找文件
+    - cmd: CMD+backspace（退格键）
+      des: 删除文件的快捷键
+    - cmd: 点击一张图片，按“空格键”打开，然后通过“方向键”来控制上一张图和下一张图
+      des: 预览图片
+    - cmd: CMD+z/CMD+Shift+z
+      des: 撤销和反撤销
+    - cmd: CMD+option+n
+      des: 新建 txt 文件
+
+# how to horizontal scroll mouse shortcut? mac # shift+scroll

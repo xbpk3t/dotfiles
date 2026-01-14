@@ -171,6 +171,13 @@ tasks:
 # 这里的 -u 是啥意思？
 # 搭配
 
+# journalctl -u traefik --since "2026-01-10" --no-pager | tail -n 50
+
+
+# curl -vk --resolve beszel.lucc.dev
+
+
+
 
 
 # 性能分析组
