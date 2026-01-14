@@ -7,6 +7,7 @@
   colmenaSystem = import ./colmena-system.nix;
   mkColmenaRole = import ./mkColmenaRole.nix;
   attrs = import ./attrs.nix {inherit lib;};
+  langs = import ./langs.nix;
 
   # use path relative to the root of the project
   relativeToRoot = lib.path.append ../.;
@@ -32,6 +33,7 @@ in {
     mkColmenaRole
     node
     attrs
+    langs
     scanPaths
     relativeToRoot
     ;
