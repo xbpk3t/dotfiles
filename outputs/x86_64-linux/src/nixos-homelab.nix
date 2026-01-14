@@ -10,7 +10,6 @@
     name
     "homelab"
   ];
-  ssh-user = myvars.username or "root";
 
   # 与 nixos-ws 共用 overlay；禁用 NVIDIA 但保留 unfree 支持
   genSpecialArgs = system: let
@@ -45,11 +44,12 @@
         "hosts/${name}/default.nix"
         "secrets/default.nix"
         "modules/nixos/base"
+        "modules/nixos/homelab"
+
         "modules/nixos/hardware/nvidia.nix"
         "modules/nixos/extra/singbox-client.nix"
         "modules/nixos/extra/vscode-remote.nix"
         "modules/nixos/extra/fhs.nix"
-        "modules/nixos/homelab/dokploy.nix"
 
         # homelab 需要时可启用 k3s 模块，先在 host 层决定
         # "modules/nixos/homelab/k3s.nix"
@@ -76,8 +76,9 @@
     baseTags = tags;
     targets = [
       {
-        host = "192.168.5.178";
-        user = ssh-user;
+        host = "100.81.204.63";
+        # user = ssh-user;
+        user = "root";
         tags = tags;
         port = null;
       }
