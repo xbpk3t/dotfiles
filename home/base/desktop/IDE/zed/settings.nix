@@ -7,6 +7,13 @@
   # - [类似CMD+E切换最近修改文件]
   # - [内存开销并不低] LSP没有lazy load机制，默认LSP很多都是node实现的，单个进程都在80MB，开10个就是800MB内存开销
 
+  # [2026-01-12] 尝试Remote Development，所以再次尝试zed，最终证实仍然不好用
+  # - [theme] 没有好theme，我只喜欢Monokai，但是挑了不少theme都很丑（完全不如goland内置的Color Scheme）。很多人都认为zed本身有色差（很糊，相较于goland，很多字都看不清，费眼睛），我也这么认为。
+  # - [git] 同样是 changelist/staging，但是zed并不支持path（这样就很不清晰）
+  # - [scratch] 没有scratch（当然可以通过 CMD+shift+P 里使用 workspace: new file 可以打开一个类似goland里Buffer的文件，但是1、不支持文件类型。2、不支持通过shortcut直接打开scratches列表）
+  # - [DB插件]
+  # - [TODO]
+
   # 可供参考的zed配置
   # https://github.com/linkfrg/dotfiles/blob/main/modules/home-manager/software/zed/settings.nix
   # https://github.com/pabloagn/rhodium/blob/main/home/apps/ides/zed/default.nix
@@ -18,8 +25,12 @@
   "base_keymap" = "JetBrains";
 
   # 直接使用stylix的theme
-  # "ui_font_size" = 16;
-  # "buffer_font_size" = 13;
+  # [2026-01-12] stylix对GUI的处理有一定偏差，所以禁用了stylix管理，我们手动管理zed的theme
+  # UI大小
+  "ui_font_size" = 16;
+  # 编辑区字体大
+  "buffer_font_size" = 13;
+
   "tab_size" = 2;
   "preferred_line_length" = 120;
   # 换行，按照editor编辑区的可用width自动调整
@@ -32,16 +43,17 @@
     "metrics" = false;
   };
 
-  # "theme" = {
-  # "mode" = "dark";
-  # "light" = "One Light";
-  # Monokai for zed
-  # "dark" = "Zedokai";
-  # };
+  "theme" = {
+    "mode" = "dark";
+    "light" = "One Light";
+    # Monokai for zed
+    "dark" = "Zedokai";
+  };
 
   # zed的scrollbar太粗了，所以禁用
+  # [2026-01-12] bug已fix，所以改为system
   "scrollbar" = {
-    "show" = "never";
+    "show" = "system";
   };
 
   # 禁用连字符
@@ -74,6 +86,7 @@
     "font_features" = {
       "calt" = false;
     };
+    # Terminal fontsize
     "font_size" = 12;
     "line_height" = "comfortable";
     "minimum_contrast" = 45;
@@ -87,7 +100,7 @@
 
     "scrollbar" = {
       # 同上，同样因为zed的scrollbar太粗了
-      "show" = "never";
+      "show" = "system";
     };
   };
 
@@ -107,7 +120,7 @@
 
   # 仅限mac有该配置
   # 支持多个项目在同一个window，但是相应的如果配置后，就无法使用CMD+`来通过切换window来切换项目了。所以需要增加相应的自定义shortcut
-  "use_system_window_tabs" = true;
+  # "use_system_window_tabs" = true;
 
   "indent_guides" = {
     "enabled" = true;
@@ -132,7 +145,7 @@
     "auto_fold_dirs" = true;
     "drag_and_drop" = true;
     "scrollbar" = {
-      "show" = "never";
+      "show" = "system";
     };
     "sticky_scroll" = true;
     "show_diagnostics" = "all";
