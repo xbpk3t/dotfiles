@@ -20,7 +20,7 @@
     then name
     else "${name}-${sanitize host}";
 
-  commonArgs = modules // args // {inherit system;};
+  commonArgs = modules // args // {inherit system genSpecialArgs;};
 
   # 从所有 colmena targets 统一派生 singbox 服务器清单：
   # - 只要 target.meta.singbox 存在，就加入列表
