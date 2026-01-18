@@ -8,15 +8,15 @@
   # 之前只用一个 packages 列表同时给 home.packages 和 ides，
   # 这会把“运行时 JDK”也塞进 ides（语义不对），并且 IDE 可能不带 JBR 导致远端自检失败。
   # 现在把“IDE”和“运行时”拆开：ides 只放 IDE，JDK 单独装并显式指定给 GoLand。
-  idePkgs = with pkgs.jetbrains; [
+  idePkgs = with pkgs; [
     # jetbrains.goland
     # https://mynixos.com/nixpkgs/package/jetbrains.goland
-    goland
+    jetbrains.goland
   ];
   # 远端是 headless，只需要运行时，不需要 JCEF；用 jdk-no-jcef 更轻也更匹配用途
-  runtimePkgs = with pkgs.jetbrains; [
+  runtimePkgs = with pkgs; [
     # https://mynixos.com/nixpkgs/package/jetbrains.jdk-no-jcef
-    jdk-no-jcef
+    jetbrains.jdk-no-jcef
   ];
 in {
   options.modules.extra.jetbrains-remote = with lib; {

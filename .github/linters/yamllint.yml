@@ -3,9 +3,9 @@
 
 extends: default
 yaml-files:
-  - "*.yml"
-  - "*.yaml"
-  - "*.yamllint"
+  - '*.yml'
+  - '*.yaml'
+  - '*.yamllint'
 rules:
   document-start: disable
   line-length:
@@ -26,7 +26,7 @@ rules:
     min-spaces-inside-empty: -1
     max-spaces-inside-empty: -1
   truthy:
-    allowed-values: ["true", "false", "on"] # 自定义添加gh-ac的values
+    allowed-values: ['true', 'false', 'on'] # 自定义添加gh-ac的values
     check-keys: true
 
   #  trailing-spaces: # Use this rule to forbid trailing spaces at the end of lines.

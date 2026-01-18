@@ -59,10 +59,6 @@
       "duckduckgo-mcp-server"
     ];
   };
-  deepwiki = {
-    type = "http";
-    url = "https://mcp.deepwiki.com/mcp";
-  };
 
   "code-index" = {
     type = "stdio";
@@ -76,10 +72,29 @@
     args = ["-y" "chrome-devtools-mcp@latest"];
   };
 
+  deepwiki = {
+    type = "stdio";
+    command = "npx";
+    args = ["-y" "mcp-remote" "https://mcp.deepwiki.com/mcp"];
+  };
+
   # [2026-01-09] 只保留HTTP版本，移除了stdio的本地版本
+  #  github = {
+  #    type = "http";
+  #    url = "https://api.githubcopilot.com/mcp/";
+  #    bearer_token_env_var = "CODEX_GITHUB_PERSONAL_ACCESS_TOKEN";
+  #  };
   github = {
-    type = "http";
-    url = "https://api.githubcopilot.com/mcp/";
-    bearer_token_env_var = "CODEX_GITHUB_PERSONAL_ACCESS_TOKEN";
+    type = "stdio";
+    command = "npx";
+    args = [
+      "-y"
+      "mcp-remote"
+      "https://api.githubcopilot.com/mcp/"
+      "--transport"
+      "http-only"
+      "--header"
+      "Authorization: Bearer YOUR_GITHUB_PAT"
+    ];
   };
 }

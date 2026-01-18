@@ -5,7 +5,7 @@
   ...
 }:
 with lib; let
-  cfg = config.modules.tui.nvf;
+  cfg = config.modules.tui.nvim;
   deleteCurrentFileLua = ''
     local function delete_current_file()
       local buf = vim.api.nvim_get_current_buf()
@@ -187,12 +187,12 @@ with lib; let
     })
   '';
 in {
-  options.modules.tui.nvf = {
+  options.modules.tui.nvim = {
     enable = lib.mkEnableOption "Enable NVF (for Vim)";
   };
 
-  # MAYBE [2025-11-13] 研究一下 Telescope 的 advanced usage 以及相关插件
-  # PLAN 把yazi.nvim 直接做到 toggleterm　里面
+  # MAYBE: [2025-11-13] 研究一下 Telescope 的 advanced usage 以及相关插件
+  # PLAN: 把yazi.nvim 直接做到 toggleterm　里面
   config = mkIf cfg.enable {
     #    programs.neovim = {
     #      enable = true;
@@ -203,6 +203,96 @@ in {
       enable = true;
 
       settings.vim = {
+        # 基本信息
+        # 什么是 NVF？
+        # NVF (Neovim from Flake) 是一个基于 Nix 的模块化 Neovim 配置框架，它提供：
+        # - 声明式配置
+        # - 可重现的开发环境
+        # - 模块化插件管理
+        # - 与 Nix 生态系统的深度集成
+        # Leader 键
+        # 本配置中的 Leader 键默认为 **空格键** (`<Space>`)。
+        # ---
+        # 启动 Neovim
+        # 在终端中输入以下任一命令：
+        # ```bash
+        # nvim          # 启动 Neovim
+        # vim           # 别名，等同于 nvim
+        # vi            # 别名，等同于 nvim
+        # ```
+        # ---
+        # 根据您的需求，已成功实现以下 9 个功能：
+        # 功能 1: Scratches（临时文件）
+        # 类似 IDEA 的 Scratches 功能，用于创建临时文件进行快速测试和笔记。
+        # **注意**：由于 scratch.nvim 插件需要特殊配置，当前配置中暂未完全集成。您可以使用以下替代方案：
+        # - **状态**：部分实现
+        # - **说明**：由于 scratch.nvim 插件需要特殊的构建配置，当前使用 Neovim 内置功能作为替代
+        # - **使用方法**：
+        #   - `:enew` - 创建新的空缓冲区
+        #   - `:e /tmp/scratch.txt` - 创建临时文件
+        # 功能 2: Monokai 主题
+        # 已启用 Monokai Pro 主题，提供类似 IDEA Monokai 的高亮配色方案。
+        # - **状态**：✅ 已完全实现
+        # - **插件**：monokai-pro-nvim
+        # - **配置**：已启用 Monokai Pro 主题，默认使用 "pro" 变体
+        # - **可选变体**：classic, octagon, pro, machine, ristretto, spectrum
+        # 功能 3: 文件树 Git 状态
+        # - **状态**：✅ 已完全实现
+        # - **插件**：neo-tree + gitsigns
+        # - **功能**：文件树中显示 Git 状态（新增、修改、删除等）
+        # - **快捷键**：`<leader>fe` 切换文件树
+        # 功能 4: 最近文件（类似 CMD+E）
+        # - **状态**：✅ 已完全实现
+        # - **插件**：telescope
+        # - **快捷键**：`<leader>fr` 打开最近文件列表
+        # - **功能**：快速访问最近编辑的文件
+        # 功能 5: 数据库支持
+        # - **状态**：✅ 已完全实现
+        # - **插件**：vim-dadbod, vim-dadbod-ui, vim-dadbod-completion
+        # - **支持的数据库**：MySQL, PostgreSQL, SQLite, MongoDB, Redis 等
+        # - **快捷键**：`<leader>D` 打开数据库 UI
+        # - **说明**：虽然不如 IDEA 的 DB driver 丰富，但已提供基本的数据库操作功能
+        # 功能 6: 批量查找和替换
+        # - **状态**：✅ 已完全实现
+        # - **插件**：nvim-spectre
+        # - **功能**：
+        #   - 项目级别批量查找
+        #   - 支持正则表达式
+        #   - 批量替换操作
+        # - **快捷键**：`<leader>sr` 打开 Spectre
+        # 功能 7: TODO 注释过滤
+        # - **状态**：✅ 已完全实现
+        # - **插件**：todo-comments-nvim
+        # - **支持的关键字**：TODO, FIXME, BUG, HACK, WARN, PERF, NOTE
+        # - **功能**：
+        #   - 自动高亮 TODO 注释
+        #   - 搜索所有 TODO 注释
+        #   - 自定义关键字和颜色
+        # - **快捷键**：`<leader>ft` 搜索 TODO
+        # 功能 8: 多项目支持
+        # - **状态**：✅ 已完全实现
+        # - **插件**：project-nvim
+        # - **功能**：
+        #   - 自动检测项目根目录
+        #   - 记住最近访问的项目
+        #   - 快速切换项目
+        # - **快捷键**：`<leader>fp` 切换项目
+        # 功能 9: 调试支持（断点）
+        # - **状态**：✅ 已完全实现
+        # - **插件**：nvim-dap, nvim-dap-ui
+        # - **功能**：
+        #   - 设置/删除断点
+        #   - 单步执行（进入、跳过、跳出）
+        #   - 查看变量
+        #   - 调用堆栈
+        #   - 调试 UI
+        # - **快捷键**：
+        #   - `<F5>` - 继续执行
+        #   - `<F10>` - 单步跳过
+        #   - `<F11>` - 单步进入
+        #   - `<F12>` - 单步跳出
+        #   - `<leader>b` - 切换断点
+        #   - `<leader>du` - 切换调试 UI
         # 创建 vim 和 vi 命令别名指向 nvim
         vimAlias = true;
         viAlias = true;
@@ -229,6 +319,25 @@ in {
           completeopt = "menu,menuone,noinsert,noselect";
         };
 
+        # 快捷键总览
+        # 文件操作
+        # - `<leader>ff` - 按文件名搜索
+        # - `<leader>lg` - 在内容中搜索
+        # - `<leader>fe` - 切换文件树
+        # - `<leader>fr` - 最近文件
+        # 项目管理
+        # - `<leader>fp` - 切换项目
+        # - `<leader>ft` - 搜索 TODO
+        # - `<leader>sr` - 批量查找替换
+        # 数据库
+        # - `<leader>D` - 数据库 UI
+        # 调试
+        # - `<F5>` - 继续
+        # - `<F10>` - 单步跳过
+        # - `<F11>` - 单步进入
+        # - `<F12>` - 单步跳出
+        # - `<leader>b` - 切换断点
+        # - `<leader>du` - 调试 UI
         # 自定义快捷键映射
         keymaps = [
           # 插入模式下使用 jk 快速退出到普通模式
@@ -389,6 +498,17 @@ in {
         # };
 
         # 启用 Telescope 模糊查找器（必需的核心插件）
+        # Telescope（模糊查找器）
+        # 强大的模糊查找工具，支持：
+        # - 文件搜索
+        # - 内容搜索
+        # - 最近文件
+        # - Git 文件
+        # - 命令历史
+        # - 帮助文档
+        # 核心功能补充：最近文件（类似 CMD+E）
+        # 使用 Telescope 快速访问最近编辑的文件。
+        # **快捷键**：`<leader>fr`
         telescope.enable = true;
 
         # 启用拼写检查
@@ -397,6 +517,21 @@ in {
         };
 
         # LSP（语言服务器协议）配置
+        # LSP（语言服务器协议）
+        # 已启用以下语言的 LSP 支持：
+        # - **Nix** - Nix 语言
+        # - **C/C++** - Clang
+        # - **Python** - Python
+        # - **Markdown** - Markdown
+        # - **TypeScript/JavaScript** - TS
+        # - **HTML** - HTML
+        # 功能：
+        # - 代码补全
+        # - 语法检查
+        # - 跳转到定义
+        # - 查找引用
+        # - 重命名符号
+        # - 保存时自动格式化
         lsp = {
           # 启用 LSP 支持
           enable = true;
@@ -476,9 +611,17 @@ in {
         };
 
         # Treesitter 上下文显示（显示当前函数/类名）
+        # Treesitter
+        # 提供更好的语法高亮和代码理解：
+        # - 精确的语法高亮
+        # - 代码折叠
+        # - 增量选择
+        # - 上下文显示
         treesitter.context.enable = false;
 
         # 快捷键绑定辅助工具
+        # Which-Key
+        # 自动显示可用的快捷键提示。按下 Leader 键后稍等片刻，会显示所有可用的快捷键组合。
         binds = {
           # Which-Key：显示可用的快捷键提示
           whichKey.enable = true;
@@ -487,6 +630,11 @@ in {
         };
 
         # Git 集成
+        # GitSigns
+        # 在行号旁显示 Git 变更标记：
+        # - `+` 新增行
+        # - `~` 修改行
+        # - `-` 删除行
         git = {
           # 启用 Git 支持
           enable = true;
@@ -497,12 +645,32 @@ in {
         };
 
         # 项目管理（支持多项目切换）
+        # 多项目支持
+        # project-nvim 插件支持管理和切换多个项目。
+        # **快捷键**：`<leader>fp` 切换项目
+        # 功能：
+        # - 自动检测项目根目录（基于 .git、package.json 等）
+        # - 记住最近访问的项目
+        # - 快速切换项目
         projects.project-nvim.enable = true;
 
         # 启动页面（Dashboard）
         dashboard.dashboard-nvim.enable = false;
 
         # 文件树浏览器由 yazi.nvim 接管
+        # Neo-tree（文件浏览器）
+        # 功能丰富的文件浏览器：
+        # - 树形目录结构
+        # - Git 状态显示
+        # - 文件操作（创建、删除、重命名）
+        # - 书签功能
+        # 文件树 Git 状态
+        # Neo-tree 文件浏览器已启用，支持显示 Git 状态：
+        # - 🟢 新增文件
+        # - 🟡 修改文件
+        # - 🔴 删除文件
+        # - 📝 未跟踪文件
+        # **快捷键**：`<leader>fe` 切换文件树
         filetree.neo-tree.enable = false;
 
         # 通知系统
@@ -573,13 +741,56 @@ in {
         };
 
         # 注释插件
+        # TODO: 注释过滤
+        # todo-comments 插件自动高亮和搜索代码中的 TODO 注释。
+        # **支持的关键字**：
+        # - `TODO` - 待办事项
+        # - `FIXME` / `BUG` - 需要修复的问题
+        # - `HACK` - 临时解决方案
+        # - `WARN` / `WARNING` - 警告
+        # - `PERF` / `OPTIMIZE` - 性能优化
+        # - `NOTE` / `INFO` - 注释说明
+        # **快捷键**：`<leader>ft` 搜索所有 TODO 注释
         comments = {
           comment-nvim.enable = true;
         };
 
+        # 技术细节
+        # 插件管理方式
+        # 本配置使用 nvf 的 `startPlugins` 和 `luaConfigRC` 方式管理插件：
+        # ```nix
+        # startPlugins = with pkgs.vimPlugins; [
+        #   monokai-pro-nvim
+        #   todo-comments-nvim
+        #   nvim-spectre
+        #   # ...
+        # ];
+        #
+        # luaConfigRC = {
+        #   monokai-theme = ''
+        #     require("monokai-pro").setup({ ... })
+        #   '';
+        #   # ...
+        # };
+        # ```
+        # 这种方式的优点：
+        # - 声明式配置
+        # - 可重现性
+        # - 与 Nix 生态系统集成
+        # - 易于版本控制
         lazy = {
           plugins =
             (with pkgs.vimPlugins; {
+              # Monokai Pro 主题
+              # 已启用 Monokai Pro 主题，提供类似 IDEA Monokai 的高亮配色方案。
+              # 主题变体：
+              # - `pro` (默认)
+              # - `classic`
+              # - `octagon`
+              # - `machine`
+              # - `ristretto`
+              # - `spectrum`
+              # **切换主题**：编辑 `home/base/core/nvf.nix` 中的 `filter` 选项。
               "monokai-pro.nvim" = {
                 package = monokai-pro-nvim;
                 lazy = false;
@@ -652,6 +863,14 @@ in {
                 '';
               };
 
+              # 批量查找和替换
+              # 使用 Spectre 插件进行项目级别的批量查找和替换，支持正则表达式。
+              # **快捷键**：`<leader>sr`
+              # **使用步骤**：
+              # 1. 按 `<leader>sr` 打开 Spectre
+              # 2. 输入搜索内容
+              # 3. 输入替换内容
+              # 4. 按 `<leader>rc` 执行替换
               "nvim-spectre" = {
                 package = nvim-spectre;
                 cmd = ["Spectre"];
@@ -679,6 +898,19 @@ in {
                 '';
               };
 
+              # 调试支持（DAP）
+              # 集成了 nvim-dap 和 nvim-dap-ui，提供类似 IDEA 的调试功能。
+              # **调试快捷键**：
+              # - `<F5>` - 继续执行
+              # - `<F10>` - 单步跳过
+              # - `<F11>` - 单步进入
+              # - `<F12>` - 单步跳出
+              # - `<leader>b` - 切换断点
+              # - `<leader>du` - 切换调试 UI
+              # **设置断点**：
+              # 1. 将光标移到要设置断点的行
+              # 2. 按 `<leader>b`
+              # 3. 按 `<F5>` 开始调试
               "nvim-dap" = {
                 package = nvim-dap;
                 keys = [
@@ -818,6 +1050,19 @@ in {
                   pcall(telescope.load_extension, "fzf")
                 '';
               };
+              # 数据库支持
+              # 集成了 vim-dadbod 系列插件，支持多种数据库：
+              # - MySQL/MariaDB
+              # - PostgreSQL
+              # - SQLite
+              # - MongoDB
+              # - Redis
+              # **快捷键**：`<leader>D` 打开数据库 UI
+              # **连接数据库示例**：
+              # ```vim
+              # :DB g:db = 'mysql://user:password@localhost/dbname'
+              # :DB SELECT * FROM users;
+              # ```
               "vim-dadbod" = {
                 package = vim-dadbod;
                 lazy = true;

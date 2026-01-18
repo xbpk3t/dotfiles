@@ -97,7 +97,11 @@ in {
       {
         rofi.enable = false;
         zed.enable = false;
+        # helix本身有内置theme，比stylix提供的要好很多
         helix.enable = false;
+
+        # 给 opencode 开启 stylix 后，会报错
+        opencode.enable = false;
         # 配置 Firefox profile names 以避免 stylix warning
         firefox.profileNames = ["default"];
       }

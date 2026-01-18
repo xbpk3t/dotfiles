@@ -2,6 +2,9 @@
   # https://wiki.nixos.org/wiki/Distrobox
   # https://mynixos.com/home-manager/options/programs.distrobox
 
+  # https://github.com/phanirithvij/distrobox-tui
+  # https://mynixos.com/nixpkgs/package/distrobox-tui
+
   programs.distrobox = {
     # Not support for Darwin
     enable = pkgs.stdenv.isLinux;

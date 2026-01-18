@@ -119,7 +119,7 @@
   # https://mynixos.com/nixpkgs/option/programs.wavemon.enable
   # programs.wavemon.enable = pkgs.stdenv.isLinux;
 
-  # TODO trippy
+  # TODO: trippy
   # https://mynixos.com/home-manager/options/programs.trippy
   # https://github.com/fujiapple852/trippy
 }

@@ -28,7 +28,7 @@ tasks:
     cmds:
       - echo "正在构建并切换 {{.OS}} 配置..."
       #      - sudo {{.REBUILD_CMD}} switch --flake .#{{.HOSTNAME}}
-      - sudo {{.REBUILD_CMD}} switch --flake .#macos-ws --show-trace # FIXME
+      - sudo {{.REBUILD_CMD}} switch --flake .#macos-ws --show-trace # FIXME:
       - echo "切换到新配置完成！"
 
 
@@ -42,7 +42,7 @@ tasks:
       - echo "✅ nix-darwin 配置应用成功！"
 
 
-  # FIXME 其实可以直接使用 嵌套task，直接复用build就可以了，后面直接添加参数 --show-trace
+  # FIXME: 其实可以直接使用 嵌套task，直接复用build就可以了，后面直接添加参数 --show-trace
   darwin-debug:
     desc: "使用详细输出构建并切换（用于调试）"
     cmds:

@@ -1,5 +1,6 @@
 {
   servers,
+  lib,
   uuid,
   publicKey,
   shortId,
@@ -7,7 +8,7 @@
   flow ? "xtls-rprx-vision",
   fingerprint ? "chrome",
   packetEncoding ? "xudp",
-  flyingbirdPassword,
+  hy2Password,
 }: let
   baseLabel = s:
     if s ? label
@@ -18,6 +19,10 @@
     then s.tag
     else s.server;
   mkTag = proto: s: "${proto}-${baseLabel s}";
+  addIf = cond: attrs:
+    if cond
+    then attrs
+    else {};
 
   toVlessOutbound = s: let
     base = {
@@ -47,131 +52,38 @@
     else base // {packet_encoding = packetEncoding;};
 
   vlessOuts = map toVlessOutbound servers;
+  toHy2Outbound = s:
+    if !(s ? hy2)
+    then null
+    else let
+      hy2 = s.hy2;
+      domain = hy2.domain or null;
+      port = hy2.port or s.port or 8443;
+    in
+      if domain == null
+      then throw "singbox: servers.*.hy2.domain is required"
+      else
+        {
+          type = "hysteria2";
+          tag = mkTag "hy2" s;
+          server = s.server;
+          server_port = port;
+          password = hy2Password;
+          tls = {
+            enabled = true;
+            server_name = domain;
+            alpn = ["h3"];
+          };
+        }
+        // (addIf (hy2 ? up_mbps) {up_mbps = hy2.up_mbps;})
+        // (addIf (hy2 ? down_mbps) {down_mbps = hy2.down_mbps;});
+
+  hy2Outs = lib.lists.filter (o: o != null) (map toHy2Outbound servers);
 
   extraOutbounds = [
-    {
-      tag = "Singapore-01";
-      type = "trojan";
-      server = "fbxt0765gh0pielsss.ftisthebest.com";
-      server_port = 56241;
-      password = flyingbirdPassword;
-      tls = {
-        server_name = "fbxt0765gh0pielsss.ftisthebest.com";
-        insecure = true;
-        enabled = true;
-      };
-    }
-    {
-      tag = "Singapore-02";
-      type = "trojan";
-      server = "fbxt0765gh0pielsss.ftisthebest.com";
-      server_port = 56242;
-      password = flyingbirdPassword;
-      tls = {
-        server_name = "fbxt0765gh0pielsss.ftisthebest.com";
-        insecure = true;
-        enabled = true;
-      };
-    }
-    {
-      tag = "Singapore-03";
-      type = "trojan";
-      server = "fbxt0765gh0pielsss.ftisthebest.com";
-      server_port = 56243;
-      password = flyingbirdPassword;
-      tls = {
-        server_name = "fbxt0765gh0pielsss.ftisthebest.com";
-        insecure = true;
-        enabled = true;
-      };
-    }
-    {
-      tag = "Singapore-04";
-      type = "trojan";
-      server = "fbxt0765gh0pielsss.ftisthebest.com";
-      server_port = 56244;
-      password = flyingbirdPassword;
-      tls = {
-        server_name = "fbxt0765gh0pielsss.ftisthebest.com";
-        insecure = true;
-        enabled = true;
-      };
-    }
-    {
-      tag = "Singapore-05";
-      type = "trojan";
-      server = "fbxt0765gh0pielsss.ftisthebest.com";
-      server_port = 56245;
-      password = flyingbirdPassword;
-      tls = {
-        server_name = "fbxt0765gh0pielsss.ftisthebest.com";
-        insecure = true;
-        enabled = true;
-      };
-    }
-    {
-      tag = "Singapore-06";
-      type = "trojan";
-      server = "fbxt0765gh0pielsss.ftisthebest.com";
-      server_port = 56246;
-      password = flyingbirdPassword;
-      tls = {
-        server_name = "fbxt0765gh0pielsss.ftisthebest.com";
-        insecure = true;
-        enabled = true;
-      };
-    }
-    {
-      tag = "Singapore-07";
-      type = "trojan";
-      server = "fbxt0765gh0pielsss.ftisthebest.com";
-      server_port = 56247;
-      password = flyingbirdPassword;
-      tls = {
-        server_name = "fbxt0765gh0pielsss.ftisthebest.com";
-        insecure = true;
-        enabled = true;
-      };
-    }
-    {
-      tag = "Singapore-08";
-      type = "trojan";
-      server = "fbxt0765gh0pielsss.ftisthebest.com";
-      server_port = 56248;
-      password = flyingbirdPassword;
-      tls = {
-        server_name = "fbxt0765gh0pielsss.ftisthebest.com";
-        insecure = true;
-        enabled = true;
-      };
-    }
-    {
-      tag = "Singapore-09";
-      type = "trojan";
-      server = "fbxt0765gh0pielsss.ftisthebest.com";
-      server_port = 56249;
-      password = flyingbirdPassword;
-      tls = {
-        server_name = "fbxt0765gh0pielsss.ftisthebest.com";
-        insecure = true;
-        enabled = true;
-      };
-    }
-    {
-      tag = "Singapore-10";
-      type = "trojan";
-      server = "fbxt0765gh0pielsss.ftisthebest.com";
-      server_port = 56250;
-      password = flyingbirdPassword;
-      tls = {
-        server_name = "fbxt0765gh0pielsss.ftisthebest.com";
-        insecure = true;
-        enabled = true;
-      };
-    }
   ];
 
-  outs = vlessOuts ++ extraOutbounds;
+  outs = vlessOuts ++ hy2Outs ++ extraOutbounds;
 in
   outs
   ++ [

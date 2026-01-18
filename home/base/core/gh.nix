@@ -51,6 +51,8 @@ _: {
 
     # 扩展配置
     extensions = [
+      # https://github.com/dlvhdr/gh-dash
+      # https://mynixos.com/home-manager/options/programs.gh-dash
       # "gh-dash"  # 如果你想使用 gh-dash 扩展
     ];
 

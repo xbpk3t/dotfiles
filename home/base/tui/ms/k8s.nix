@@ -7,7 +7,7 @@
     compose2nix
 
     # Kubernetes 工具
-    # MAYBE fatal error: out of memory allocating arena map / failed to create OS thread 内存不够，导致整个依赖链（home-manager-path 等）被挂起。
+    # MAYBE: fatal error: out of memory allocating arena map / failed to create OS thread 内存不够，导致整个依赖链（home-manager-path 等）被挂起。
     # minikube
 
     kompose
@@ -22,7 +22,7 @@
     kubernetes-polaris
     conftest
 
-    # TODO ??? error occurred: Command "/nix/store/r9wbjib6xxjkyb9yvjvrkl4sq61i2lyn-gcc-wrapper-15.2.0/bin/cc" "-O3" "-ffunction-sections" "-fdata-sections" "-fPIC" "-m64" "-I" "/build/source/target/x86_64-unknown-linux-gnu/release/build/onig_sys-aaedb31d5d4019c3/out" "-I" "oniguruma/src" "-DHAVE_UNISTD_H=1" "-DHAVE_SYS_TYPES_H=1" "-DHAVE_SYS_TIME_H=1" "-o" "/build/source/target/x86_64-unknown-linux-gnu/release/build/onig_sys-aaedb31d5d4019c3/out/c77b18e714869709-regparse.o" "-c" "oniguruma/src/regparse.c" with args cc did not execute successfully (status code exit status: 1).
+    # TODO: ??? error occurred: Command "/nix/store/r9wbjib6xxjkyb9yvjvrkl4sq61i2lyn-gcc-wrapper-15.2.0/bin/cc" "-O3" "-ffunction-sections" "-fdata-sections" "-fPIC" "-m64" "-I" "/build/source/target/x86_64-unknown-linux-gnu/release/build/onig_sys-aaedb31d5d4019c3/out" "-I" "oniguruma/src" "-DHAVE_UNISTD_H=1" "-DHAVE_SYS_TYPES_H=1" "-DHAVE_SYS_TIME_H=1" "-o" "/build/source/target/x86_64-unknown-linux-gnu/release/build/onig_sys-aaedb31d5d4019c3/out/c77b18e714869709-regparse.o" "-c" "oniguruma/src/regparse.c" with args cc did not execute successfully (status code exit status: 1).
     # https://github.com/grampelberg/kty
     # kty
 
