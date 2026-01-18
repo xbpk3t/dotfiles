@@ -32,5 +32,32 @@ in {
       enable = true;
       settings = client.configJson;
     };
+
+    # Q: Why add extra systemd deps if services.sing-box already creates the unit?
+    # A: The upstream module doesn't bind sing-box to systemd-networkd. When
+    #    networkd restarts (e.g. during colmena apply), the TUN link/routes can
+    #    be reset while sing-box keeps running, causing "service alive but no
+    #    traffic" (e.g. TLS EOF to cache.nixos.org). We bind the lifecycle so
+    #    sing-box restarts and re-injects routes after networkd restarts.
+    #
+    # Q: Isn't After=network-online.target enough?
+    # A: After/Wants only affect start order, not restart coupling. Without
+    #    PartOf/BindsTo, a networkd restart won't restart sing-box.
+    #
+    # Q: Why not change the upstream module?
+    # A: Keep a local drop-in here to avoid forking; adjust if upstream adds this.
+    #
+    # Ref:
+    # https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/services/networking/sing-box.nix
+    #
+    # github.com/NixOS/nixpkgs/blob/master/nixos/tests/sing-box.nix/
+    #
+    # 以上这些问题都可以通过查看以上源码中，有所体现
+    systemd.services.sing-box = {
+      after = ["systemd-networkd.service" "network-online.target"];
+      wants = ["network-online.target"];
+      partOf = ["systemd-networkd.service"];
+      bindsTo = ["systemd-networkd.service"];
+    };
   };
 }

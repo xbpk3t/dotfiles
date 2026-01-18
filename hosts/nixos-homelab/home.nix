@@ -1,6 +1,7 @@
 {...}: {
   modules.extra = {
-    jetbrains-remote.enable = true;
+    jetbrains-remote.enable = false;
+    zed-remote.enable = true;
   };
 
   modules.AI = {

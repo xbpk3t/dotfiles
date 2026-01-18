@@ -27,6 +27,12 @@
     - des: 在当前行下/上新建一行并进入插入
       cmd: o / O
 
+    - des: helix是否能有类似 file explorer 这种东西？现在这个是没有目录结构的，我希望有目录结构
+      cmd:  # <space>e：打开 file explorer（层级式），从 workspace root 开始
+
+  # <space>E：从当前文件所在目录打开 file explorer（更像“就地浏览”）
+
+
 - type: 选择与多光标
   cmds:
     - des: 进入选择/扩展模式（移动即扩展选择）

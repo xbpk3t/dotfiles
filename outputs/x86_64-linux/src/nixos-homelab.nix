@@ -61,6 +61,7 @@
       "home/base/tui"
       "home/nixos"
       "home/extra/jetbrains-remote.nix"
+      "home/extra/zed-remote.nix"
     ];
   };
   role = mylib.mkColmenaRole {
