@@ -43,9 +43,6 @@
     watch
     rsync
 
-    # 证书和密钥管理
-    openssl
-
     # 基础媒体处理
     ffmpeg
 

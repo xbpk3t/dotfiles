@@ -61,6 +61,38 @@
           WorkingDirectory = "/Users/${myvars.username}";
         };
       };
+
+      # 因为 nh
+      nh-clean-all = {
+        serviceConfig = {
+          Label = "local.nh.clean.all";
+          ProgramArguments = [
+            "/etc/profiles/per-user/${myvars.username}/bin/nh"
+            "clean"
+            "all"
+            "--keep-since"
+            "7d"
+            "--keep"
+            "5"
+          ];
+          StartCalendarInterval = [
+            {
+              Hour = 3;
+              Minute = 15;
+            }
+          ];
+          RunAtLoad = true;
+          ThrottleInterval = 86400;
+
+          StandardOutPath = "/Users/${myvars.username}/Library/Logs/nh-clean.log";
+          StandardErrorPath = "/Users/${myvars.username}/Library/Logs/nh-clean.log";
+          EnvironmentVariables = {
+            # Avoid PATH entries with spaces (nh clean all bug).
+            PATH = "/etc/profiles/per-user/${myvars.username}/bin:/run/current-system/sw/bin:/usr/bin:/bin:/usr/sbin:/sbin";
+          };
+          WorkingDirectory = "/Users/${myvars.username}";
+        };
+      };
     };
   };
 }

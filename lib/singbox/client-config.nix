@@ -6,8 +6,23 @@
   ...
 }:
 with lib; let
-  # singbox 节点清单直接从 inventory 读取，避免经过 vars/networking.nix
-  servers = (import (mylib.relativeToRoot "inventory/nixos-vps.nix")).singboxServers;
+  # singbox 节点清单直接从 inventory/nodes 读取，避免重复手写
+  inventory = import (mylib.relativeToRoot "inventory/nixos-vps.nix");
+  nodes = inventory.nodes or {};
+  servers = lib.lists.filter (s: s != null) (
+    lib.attrsets.mapAttrsToList (
+      name: node:
+        if node ? singbox
+        then
+          node.singbox
+          // {
+            hostName = node.hostName or name;
+            server = node.singbox.server or node.targetHost;
+          }
+        else null
+    )
+    nodes
+  );
   # NOTE:
   # - Darwin: we render a full JSON file via sops template (see modules/darwin/singbox-client.nix),
   #   so placeholders are required during evaluation and are substituted when the template is rendered.
@@ -22,12 +37,24 @@ with lib; let
       publicKey = config.sops.placeholder.singbox_pub_key;
       shortId = config.sops.placeholder.singbox_ID;
       flyingbirdPassword = config.sops.placeholder.singbox_flyingbird;
+      hy2Password = config.sops.placeholder.singbox_hy2_pwd;
     }
     else {
-      uuid = {_secret = config.sops.secrets.singbox_UUID.path;};
-      publicKey = {_secret = config.sops.secrets.singbox_pub_key.path;};
-      shortId = {_secret = config.sops.secrets.singbox_ID.path;};
-      flyingbirdPassword = {_secret = config.sops.secrets.singbox_flyingbird.path;};
+      uuid = {
+        _secret = config.sops.secrets.singbox_UUID.path;
+      };
+      publicKey = {
+        _secret = config.sops.secrets.singbox_pub_key.path;
+      };
+      shortId = {
+        _secret = config.sops.secrets.singbox_ID.path;
+      };
+      flyingbirdPassword = {
+        _secret = config.sops.secrets.singbox_flyingbird.path;
+      };
+      hy2Password = {
+        _secret = config.sops.secrets.singbox_hy2_pwd.path;
+      };
     };
 
   ruleSets = import ./ruleset.nix {
@@ -35,14 +62,16 @@ with lib; let
   };
   outbounds = import ./outbounds.nix {
     inherit servers;
+    inherit lib;
     uuid = secrets.uuid;
     publicKey = secrets.publicKey;
     shortId = secrets.shortId;
     flyingbirdPassword = secrets.flyingbirdPassword;
+    hy2Password = secrets.hy2Password;
   };
-  # config.nix only accepts outbounds + ruleSets; keep args aligned to avoid eval errors
+  # config.nix requires pkgs for external_ui plus outbounds/ruleSets
   configJson = import ./config.nix {
-    inherit outbounds ruleSets;
+    inherit outbounds ruleSets pkgs;
   };
   clientConfigPath = config.sops.templates."singbox-client.json".path;
   templatesContent = builtins.toJSON configJson;

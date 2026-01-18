@@ -31,6 +31,7 @@ in {
         features = {
           web_search_request = true;
           streamable_shell = true;
+
           rmcp_client = true;
           unified_exec = true;
           view_image_tool = true;

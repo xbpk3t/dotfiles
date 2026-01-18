@@ -1,5 +1,5 @@
 {pkgs, ...}: {
-  # FIXME 玩下 nix + TF
+  # FIXME: 玩下 nix + TF
 
   # https://mynixos.com/nixpkgs/packages/terraform-providers
   # https://github.com/terranix/terranix

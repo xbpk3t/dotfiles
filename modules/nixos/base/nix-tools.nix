@@ -6,7 +6,7 @@
 }: {
   imports = [inputs.nixos-cli.nixosModules.nixos-cli];
 
-  # MAYBE https://github.com/triton/triton/blob/master/pkgs/all-pkgs/s/systemd/default.nix 这个配置太牛逼了，之后学着搞下
+  # MAYBE: https://github.com/triton/triton/blob/master/pkgs/all-pkgs/s/systemd/default.nix 这个配置太牛逼了，之后学着搞下
 
   # Additional Nix management tools
   environment.systemPackages = with pkgs; [
@@ -32,6 +32,9 @@
       # https://nix.dev/manual/nix/2.28/command-ref/conf-file.html#conf-max-jobs
       max-jobs = 5;
       cores = 2;
+
+      # 禁止 git dirty 输出（这个warn没意义）
+      warn-dirty = false;
     };
     extraOptions = ''
       experimental-features = nix-command flakes

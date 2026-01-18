@@ -82,6 +82,9 @@ in {
       # 顶栏防休眠/防锁屏开关
       gnomeExtensions.caffeine
 
+      # https://mynixos.com/nixpkgs/package/gnomeExtensions.zed-search-provider
+      # ???
+
       # 键盘重映射工具及配置
       # https://mynixos.com/nixpkgs/package/xremap
       # xremap

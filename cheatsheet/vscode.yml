@@ -61,6 +61,11 @@
       cmd: Cmd + X
     - des: 复制该行（到下一行）
       cmd:
+    - des: 最上、最下
+      cmd: CMD + ↑/↓
+    - des: 跳转到 cursor 的上一个位置
+      cmd:  # 回到上一个光标/跳转位置：Ctrl + -
+      # 前进到下一个位置：Ctrl + Shift + -
 
 
 
