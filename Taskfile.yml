@@ -24,6 +24,7 @@ tasks:
       - nix flake lock
       - nix flake check
       - nix flake metadata
+      -
 
 
   why:

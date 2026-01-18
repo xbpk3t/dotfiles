@@ -3,6 +3,9 @@
   myvars,
   ...
 }: {
+  # 我们常说（对Nix来说） Docker是 escape hatch，其实在Nix里，brew也是 escape hatch
+  # 我们可以把
+
   imports = [
     inputs.nix-homebrew.darwinModules.nix-homebrew
   ];
@@ -28,7 +31,11 @@
     casks = [
       "alfred"
       "hammerspoon"
+      "visual-studio-code"
+
       "goland"
+      "jetbrains-toolbox"
+
       "tencent-lemon"
       "wechat"
       "firefox"
@@ -37,9 +44,11 @@
 
       "tailscale-app"
 
+      # [2026-01-17] 在mac上我选择用chrome，而非firefox。因为
+      "google-chrome"
+
       # "reqable"
       # "wireshark-app"
-      # "google-chrome"
       # "rustdesk"
       # "orbstack"
 

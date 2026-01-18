@@ -360,7 +360,7 @@ in {
 
     (mkIf isDesktop {
       # https://mynixos.com/nixpkgs/options/security.apparmor
-      # PLAN AppArmor
+      # PLAN: AppArmor
 
       # https://mynixos.com/nixpkgs/package/bubblewrap
 

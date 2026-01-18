@@ -317,7 +317,7 @@
     '';
   };
 
-  # MAYBE Date format (Language -> Date and number formats) -> Year-Month-Day (other than Year/Month-Day). 查了一下目前确实没有这个配置项，用来修改默认 date format
+  # MAYBE: Date format (Language -> Date and number formats) -> Year-Month-Day (other than Year/Month-Day). 查了一下目前确实没有这个配置项，用来修改默认 date format
 
   # https://github.com/smudge/nightlight
   # https://mynixos.com/nixpkgs/package/nightlight

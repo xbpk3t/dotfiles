@@ -44,6 +44,10 @@
       sops
       age
       openssh
+
+      # 证书和密钥管理
+      # [2026-01-15] 需要在目标host上检查证书问题
+      openssl
     ]
     ++
     # 之前放在 hosts/nixos-vps 里，但是实际上VPS并不需要这两个pkg，所以放在homelab里

@@ -74,8 +74,8 @@ in {
         # 为了方便，调整为允许整个 tailnet 连接。不会有任何安全问题。
         # 只是放宽了你本机的本地防火墙/服务访问范围；但 Tailscale 能不能连上 取决于你的 tailnet ACL/SSH policy 和是否在同一个 tailnet。
         #   - 不在同一个 tailnet 的设备：根本不会有 100.64/10 的地址，也不会通过 Tailscale 直连 → 连不上。
-  # - 在同一个 tailnet，但 ACL 不允许访问该设备/端口：即使你本机放开了网段 → 依然连不上。
-  # - 在同一个 tailnet且 ACL 允许访问：那才会被你本机规则放行。
+        # - 在同一个 tailnet，但 ACL 不允许访问该设备/端口：即使你本机放开了网段 → 依然连不上。
+        # - 在同一个 tailnet且 ACL 允许访问：那才会被你本机规则放行。
         allowedTailscaleIp = "100.64.0.0/10";
       };
     };

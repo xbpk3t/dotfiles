@@ -12,6 +12,7 @@
 
   rule_set = ruleSets;
 
+  # direct规则要在任何可能把它们送进 select 的规则之前
   rules = [
     # [2026-01-09] 自建节点后，无法通过ssh连接到节点VPS。之前通过 ip_cidr 解决该问题。但是直接设置 protocol是更好的方案
     {
@@ -20,6 +21,18 @@
         "ssh"
         "rdp"
         "ntp"
+      ];
+      action = "route";
+      outbound = "direct";
+    }
+    {
+      # JetBrains Remote Dev / Toolbox downloads should bypass proxy to avoid TLS EOF/timeouts.
+      # 注意加到了
+      domain_suffix = [
+        "download.jetbrains.com"
+        "download-cdn.jetbrains.com.cn"
+        "jetbrains.com"
+        "jetbrains.net"
       ];
       action = "route";
       outbound = "direct";

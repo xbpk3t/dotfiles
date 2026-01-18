@@ -2,7 +2,7 @@
   username = "luck";
   projectRoot = "/home/${username}/Desktop/dotfiles";
 in {
-  # FIXME 移除掉所有 myvars. 正确的做法是所有的 username, mail 这些都应该配置到host里（类似 nixos-unified 这种）。
+  # FIXME: 移除掉所有 myvars. 正确的做法是所有的 username, mail 这些都应该配置到host里（类似 nixos-unified 这种）。
   ## 1、最多的就是 username = "luck"; 有37处
   ## 2、SSHPubKeys 7次
   ## 3、initialHashedPassword 有 2次

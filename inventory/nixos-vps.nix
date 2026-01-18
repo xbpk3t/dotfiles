@@ -10,6 +10,9 @@
         label = "LA-RN";
         server = "142.171.154.61";
         port = 8443;
+        hy2 = {
+          domain = "hy2-nixos-vps-dev.lucc.dev";
+        };
       };
     };
 
@@ -23,22 +26,10 @@
         label = "HK-hdy";
         server = "103.85.224.63";
         port = 8443;
+        hy2 = {
+          domain = "hy2-nixos-vps-svc.lucc.dev";
+        };
       };
     };
   };
-
-  singboxServers = [
-    {
-      hostName = "nixos-vps-dev";
-      label = "LA-RN";
-      server = "142.171.154.61";
-      port = 8443;
-    }
-    {
-      hostName = "nixos-vps-svc";
-      label = "HK-hdy";
-      server = "103.85.224.63";
-      port = 8443;
-    }
-  ];
 }
