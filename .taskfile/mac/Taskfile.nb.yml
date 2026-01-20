@@ -1,0 +1,83 @@
+---
+version: '3'
+
+vars:
+  SCRATCH_NOTEBOOK: scratch
+
+
+tasks:
+  _nb:ensure:
+    internal: true
+    silent: true
+    interactive: true
+    preconditions:
+      - sh: command -v nb >/dev/null 2>&1
+        msg: "nb not found"
+
+  _nb:ensure_picker:
+    internal: true
+    silent: true
+    interactive: true
+    preconditions:
+      - sh: command -v gum >/dev/null 2>&1
+        msg: "gum is required"
+
+  new:
+    desc: "Create a scratch file and open in Zed"
+    silent: true
+    interactive: true
+    requires:
+      vars:
+        - SCRATCH_NOTEBOOK
+    cmds:
+      - task: _nb:ensure
+      - task: _nb:ensure_picker
+      - '{{.TASKFILE_DIR}}/scripts/nb/new.sh "{{.SCRATCH_NOTEBOOK}}"'
+
+  list:
+    desc: "List scratch files and open selection in Zed"
+    silent: true
+    interactive: true
+    requires:
+      vars:
+        - SCRATCH_NOTEBOOK
+    cmds:
+      - task: _nb:ensure
+      - task: _nb:ensure_picker
+      - '{{.TASKFILE_DIR}}/scripts/nb/list.sh "{{.SCRATCH_NOTEBOOK}}"'
+
+  search:
+    desc: "Search scratch files and open selection in Zed"
+    silent: true
+    interactive: true
+    requires:
+      vars:
+        - SCRATCH_NOTEBOOK
+    cmds:
+      - task: _nb:ensure
+      - task: _nb:ensure_picker
+      - '{{.TASKFILE_DIR}}/scripts/nb/search.sh "{{.SCRATCH_NOTEBOOK}}"'
+
+  rename:
+    desc: "Rename a scratch file"
+    silent: true
+    interactive: true
+    requires:
+      vars:
+        - SCRATCH_NOTEBOOK
+    cmds:
+      - task: _nb:ensure
+      - task: _nb:ensure_picker
+      - '{{.TASKFILE_DIR}}/scripts/nb/rename.sh "{{.SCRATCH_NOTEBOOK}}"'
+
+  delete:
+    desc: "Delete a scratch file"
+    silent: true
+    interactive: true
+    requires:
+      vars:
+        - SCRATCH_NOTEBOOK
+    cmds:
+      - task: _nb:ensure
+      - task: _nb:ensure_picker
+      - '{{.TASKFILE_DIR}}/scripts/nb/delete.sh "{{.SCRATCH_NOTEBOOK}}"'
