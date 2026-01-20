@@ -15,7 +15,12 @@ in {
 
   config = lib.mkIf cfg.enable {
     # 仅在远端需要的LSP/工具链
-    home.packages = lspPackages;
+    home.packages =
+      lspPackages
+      ++ [
+        # Zed Remote 上也要安装，否则无法使用nb
+        nb
+      ];
 
     # 提供Zed remote server的期望路径
     home.file.".zed_server" = {

@@ -3,6 +3,17 @@
 # 2) 渲染能力不同：.icls 支持背景/下划线/错误条纹等效果，Zed 主题字段并不完全覆盖。
 # 3) 字段缺失与语义差异：部分项在 Zed 中没有对应键（如选区、光标/匹配细分），只能近似处理。
 #
+# Markdown fenced code block 背景需求说明：
+# 1) 需求：在 Markdown 的 fenced code block 里，实现“整块矩形淡绿色背景”（含空白与行尾到右边界），类似 IDEA。
+# 2) 为什么无法在 Zed 里实现：Zed 主题只能给 Tree-sitter 的 capture（syntax token）设置颜色/背景；Markdown 的 code block
+#    内容被注入为目标语言的 token（如 string/property/punctuation），JSON 里没有“code block 容器”这类 capture，
+#    因此无法对“整块 block”上背景，只能对文字 token 上背景。
+# 3) 妥协方案与实现：
+#    - 方案 A（全局影响，最简单）：在 theme 的 syntax.<capture> 上加 background_color（如 string/property/keyword/punctuation 等），
+#      代价是所有文件都会受影响，不仅是 Markdown code block。
+#    - 方案 B（仅限 Markdown，成本高）：自建/覆盖 Markdown language extension，在 highlights.scm 给 code_fence_content 打专用 capture
+#      （例如 @markup.raw.block），再在 theme 里只对该 capture 设置 background_color；仍然只能给文字 token 上底色，无法铺满整块。
+#
 #
 # 也可以选择直接用 theme-overrides，但是我懒得再安装拓展，所以直接自己创建theme
 # https://zed.dev/docs/themes#theme-overrides
@@ -188,7 +199,8 @@
             color = "#a6e22e";
           };
           link_text = {
-            color = "#f92672";
+            # 对齐 IDEA：Markdown 链接文本改为浅蓝（原先红色留给 Markdown 结构符号）
+            color = "#c7c7ff";
           };
           link_uri = {
             color = "#a6e22e";
@@ -222,7 +234,8 @@
           # "punctuation.list_marker" = { color = "#919288"; };
           # "punctuation.special" = { color = "#919288"; };
           punctuation = {
-            color = "#f8f8f2";
+            # Markdown code fence / emphasis 等符号统一改红（全局标点会受影响）
+            color = "#f92672";
           };
           "punctuation.bracket" = {
             color = "#f8f8f2";
@@ -231,7 +244,8 @@
             color = "#f8f8f2";
           };
           "punctuation.list_marker" = {
-            color = "#f8f8f2";
+            # Markdown 无序/有序列表标记改红（全局 list marker 会受影响）
+            color = "#f92672";
           };
           "punctuation.special" = {
             color = "#f8f8f2";
@@ -256,12 +270,17 @@
           tag = {
             color = "#f92672";
           };
+
+          # Markdown heading 改成红色
+          # 注意在Zed里，整个heading是作为整体出现的（而非拆分为 # 和 title内容 两部分，所以渲染时，也只能作为整体渲染为红色）“标题整行是一个 title capture（# 和文字都在一起）”
+          title = {
+            color = "#f92672";
+          };
+          # 同上，只能作为整体进行渲染
           "text.literal" = {
             color = "#e6db74";
           };
-          title = {
-            color = "#e6db74";
-          };
+
           # 对齐 IDEA CLASS_REFERENCE / TYPE_REFERENCE = #a6e22e
           # type = { color = "#66d9ef"; };
           type = {
