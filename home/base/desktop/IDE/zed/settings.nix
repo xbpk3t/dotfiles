@@ -1,5 +1,4 @@
-_:
-let
+_: let
   # OpenType Feature tags
   # 连字符相关配置
   # https://learn.microsoft.com/en-us/typography/opentype/spec/featurelist
@@ -19,8 +18,7 @@ let
   };
 
   exts = import ./extensions.nix;
-in
-{
+in {
   # [2025-10-12] 目前zed相较goland的一些缺失功能
   # - [git side-by-side viewer] https://github.com/zed-industries/zed/discussions/26770
   #
@@ -39,9 +37,14 @@ in
   #
   # - [git] 同样是 changelist/staging，但是zed并不支持path（这样就很不清晰）
   #
-  # - [scratch] 没有scratch（当然可以通过 CMD+shift+P 里使用 workspace: new file 可以打开一个类似goland里Buffer的文件，但是1、不支持文件类型。2、不支持通过shortcut直接打开scratches列表）
+  #
+  # - ✅ [scratch] 没有scratch（当然可以通过 CMD+shift+P 里使用 workspace: new file 可以打开一个类似goland里Buffer的文件，但是1、不支持文件类型。2、不支持通过shortcut直接打开scratches列表）
+  # 用 nb cli + zed task 替代实现了
+  #
+  #
   #
   # - ✅ [DB插件] 用 webapp 替代了（这个feat也没必要强求）
+  #
   #
   # - ✅ [TODO-Tree] 一个高频需求，社区也有很多实现。目前的问题在于 交付形态。zed官方希望最终效果是类似 goland/vscode 的那种在Pannel展示的 TODO Tree，但是 目前zed官方不打算实现这个需求，而extension开发也没有提供UI支持，这样社区也没办法做这个需求。所以可能暂时无法实现该需求。
   # 目前的
@@ -56,6 +59,24 @@ in
   #
   # [git commit history]
   # []
+
+  # [2026-01-19]
+  # https://www.reddit.com/r/ZedEditor/comments/1mvqlph/zed_is_awesome_but_it_lacks_some_crucial/
+  # 这篇文章的吐槽挺到位的
+  # - 配置体验不一致：有的设置用 true/false，有的用 "enabled"/"disabled"，还有 "on"/"off"，即便只是二选一也不统一，观感和可维护性都很差。
+  #
+  # - Ctrl+Click 跳转/引用的交互很别扭（最大痛点）：
+  #
+  # - 在 VSCode 里常见的是“peek 小窗”或直接跳转；但在 Zed 里 Ctrl+Click 会先开一个“搜索式的新 tab”展示引用/定义，然后还得 Alt+Enter 再跳转，楼主觉得这是多余的中间步骤，极其影响效率。
+  #
+  # - 补全不带括号：方法名补全后只插入方法名，不自动补 ()（楼主认为 VSCode 往往能调）。
+  #
+  # - 改键删除的行为反直觉：删掉 keybinding 时不是移除条目/按键，而是把 command 变成 <null>，等于“保留壳子”，让人困惑。
+  #
+  # - 标签页管理能力弱：找不到“多行 tab wrap”或“显示当前打开 tab 数量”等，导致可见 tab 很少，需要疯狂横向滚动或完全依赖
+  #
+  # - [Local History] https://github.com/zed-industries/zed/discussions/24004
+  # 确实是非常有用的功能，但是zed不支持，也没有第三方工具可以替代解决该问题
 
   # MAYBE[2026-01-18]: zed 是否会提供类似 hx --health 这种查看所有本身 xxx  LSP 的命令？
 
@@ -200,7 +221,7 @@ in
         activate_script = "default";
       };
     };
-    env = { };
+    env = {};
     font_family = ".ZedMono";
     font_features = fontFeatures;
     # Terminal fontsize
@@ -392,7 +413,7 @@ in
   # https://zed.dev/docs/configuring-zed#scroll-beyond-last-line
   # 默认 one_page. 在编辑区里，无论什么文件类型，都可以拉到最后一行，导致下面整块全都是一片空白
   # 完全禁用。文件底部将固定在编辑器的底端，无法继续向下滚动。
-  scroll_beyond_last_line = "off";
+  scroll_beyond_last_line = "vertical_scroll_margin";
 
   # https://linux.do/t/topic/929471
   language_models = {
@@ -420,6 +441,9 @@ in
 
   # Remote Development Configuration
   # https://zed.dev/docs/remote-development
+  #
+  # !!!
+  # 目前zed不支持 Auto Reconnect，必须要手动重连
   ssh_connections = [
     {
       host = "100.81.204.63";
@@ -455,6 +479,79 @@ in
         "nil"
       ];
     };
+
+    YAML = {
+      # WHAT: 关闭 YAML 的保存时自动格式化（Format on Save）。
+      # WHY:
+      #   你习惯在注释之间留空行，但很多 formatter（尤其是基于 prettier 风格的 YAML formatter）
+      #   会在保存时重排空白行，导致“空行被吞/被合并”。关掉保存自动格式化后，
+      #   Zed 不会在保存时替你改文本，你手写的空行能稳定保留。
+      format_on_save = "off";
+      # WHAT: 关闭“输入时格式化”（on-type formatting）。
+      # WHY:
+      #   即使你关了保存格式化，有些编辑器仍可能在你输入换行、缩进、补全等过程中触发格式化，
+      #   也可能间接引发空白行/注释布局被改写。这里直接关掉，保证“只有你手动 Format 才会改”。
+      use_on_type_format = false;
+      tab_size = 2;
+      # WHAT: 明确指定 YAML 语言使用的语言服务器（language servers）。
+      # WHY:
+      #   Zed 允许一个语言挂多个 LSP（甚至来自扩展的 server）。
+      #   你希望 YAML 的行为（诊断/补全/格式化能力）尽量稳定、可预测，所以这里显式指定：
+      #   - "yaml-language-server"：作为 YAML 的主要/标准 LSP（提供 schema、诊断、部分格式化能力等）
+      #   - "!docker-compose"：把名为 docker-compose 的语言服务器从 YAML 的候选列表里排除
+      #
+      #   ⚠ 注意：
+      #   - 这里的 "!docker-compose" 不是文件名匹配（不是“compose.yml 才排除”），
+      #     它排除的是“语言服务器 ID/名称”。
+      #   - 目的通常是避免 Docker Compose 扩展把自己的 YAML 解析/诊断混进来导致误报或行为冲突，
+      #     让 YAML 统一由 yaml-language-server 处理。
+      language_servers = [
+        "yaml-language-server"
+        "!docker-compose"
+      ];
+      # WHAT: 指定 YAML 的 formatter 使用 language_server。
+      # WHY:
+      #   Zed 对 YAML 默认可能走内置/外部 formatter（例如 prettier）。
+      #   你这里显式选 "language_server" 的好处是：
+      #   - 格式化逻辑与 YAML 的 LSP 保持一致（同一套 server、同一套 settings）
+      #   - 方便在下方 lsp.yaml-language-server.settings.yaml.format.* 中集中控制格式化参数
+      #
+      #   同时你已经把 format_on_save 关掉了，所以这不会影响“保存吞空行”的问题；
+      #   它只决定你手动触发 Format 时使用谁来格式化。
+      formatter = "language_server";
+    };
+
+    Go = {
+      language_servers = [
+        # 保留默认LSP，再追加
+        "..."
+
+        "gopls"
+
+        # golangci-lint 并非预配置LSP，所以这里手动配置
+        "golangci-lint"
+      ];
+    };
+
+    Python = {
+      formatter = "language_server";
+      format_on_save = "on";
+      tab_size = 4;
+    };
+
+    JavaScript = {
+      formatter = {
+        external = {
+          command = "prettier";
+          arguments = [
+            "--stdin-filepath"
+            "{buffer_path}"
+          ];
+        };
+      };
+      format_on_save = "on";
+      tab_size = 2;
+    };
   };
 
   lsp = {
@@ -472,6 +569,28 @@ in
             # what: 用来控制 nil 是否会自动评估 flake 的 inputs（例如调用 nix flake show 去获取 inputs 的 outputs/结构），以提供更准确的补全与类型推断。
             # why (false): 在 evaluate sops-nix 时，会触发对不存在路径（如 dev/private）的访问，导致 nix flake show 失败并在 Zed 里报错。所以设置为false
             autoEvalInputs = false;
+          };
+        };
+      };
+    };
+
+    yaml-language-server = {
+      settings = {
+        yaml = {
+          format = {
+            enable = true;
+            # WHAT: 设置“打印宽度/换行阈值”为 3000。
+            # WHY:
+            #   这对应你在 yamllint 里 “line-length max: 3000” 的偏好：
+            #   你宁愿保持一行很长，也不希望 formatter 自动折行。
+            #   设置很大可以显著减少 formatter 引入的换行 diff。
+            printWidth = 3000;
+            # WHAT: 控制类似 `{ a: 1 }` / `{a: 1}` 这种“花括号内是否保留空格”的倾向。
+            # WHY:
+            #   你在其它语言（TS/Prettier）也很在意这类 spacing 一致性。
+            #   对 YAML formatter 来说，bracketSpacing=false 通常更“紧凑”，
+            #   能避免在括号内自动插入空格（减少你不想要的风格改动）。
+            bracketSpacing = false;
           };
         };
       };
