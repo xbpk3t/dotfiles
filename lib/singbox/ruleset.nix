@@ -1,3 +1,7 @@
+# NOTE: 使用新的 rule-set 方式 (sing-box 1.8.0+)，而非被 deprecated 的旧 GeoIP/Geosite 功能
+# 旧方式：在 route 配置中直接定义 geoip/geosite 字段（1.12.0 已移除）
+# 新方式：使用 rule_set 对象，通过远程 .srs 文件加载规则集
+# 参考: https://sing-box.sagernet.org/configuration/route/rule_set/
 {
   ruleSetSource ? "primary",
   enableRuleSetExtras ? false,
