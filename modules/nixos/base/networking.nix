@@ -60,6 +60,8 @@ in {
     (mkIf isServer {
       # Server tuning: 更激进的 buffer/queue/ECN/overcommit，适合高并发高带宽；小内存或旧网络设备请谨慎
 
+      #
+
       # Network core settings
       # 使用 fq qdisc；老内核可能不支持
       "net.core.default_qdisc" = "fq";
@@ -121,7 +123,16 @@ in {
       # 写脏页比例，提升写性能，需监控内存
       "vm.dirty_ratio" = 20;
       # 严格 overcommit，稳定性更高，小内存可能更早 OOM
-      "vm.overcommit_memory" = 2;
+      #
+      #
+      # [2026-01-20] 从 2 -> 1
+      # 给homelab做rebuild时，返回 error: unable to fork: Cannot allocate memory
+      # 查了一下 commit limit 不够 导致的拒绝分配，而不是物理内存不足。
+      # - 机器 vm.overcommit_memory=2（严格模式）
+      # - 当前 Committed_AS 很接近 CommitLimit
+      # - 当 Nix 构建需要 fork 或分配大量虚拟内存时被拒绝
+      #  这不是“空闲内存不足”，而是 commit 配额不足。
+      "vm.overcommit_memory" = 1;
       "vm.overcommit_ratio" = 100;
 
       # Network configuration
@@ -149,4 +160,15 @@ in {
       "kernel.panic" = 1;
     })
   ];
+
+  # PLAN[2026-01-20]: https://github.com/kaseiwang/flakes/blob/master/nixos/n3160/networking.nix#L294
+  #
+  # https://mynixos.com/nixpkgs/options/services.hostapd
+  # services.hostapd
+  # services.kaseinet
+  # services.smartdns
+  # services.ddns
+  # services.ntpd-rs
+  # services.resolved
+  # services.chinaRoute
 }
