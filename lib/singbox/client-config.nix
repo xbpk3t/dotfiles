@@ -36,6 +36,7 @@ with lib; let
       uuid = config.sops.placeholder.singbox_UUID;
       publicKey = config.sops.placeholder.singbox_pub_key;
       shortId = config.sops.placeholder.singbox_ID;
+      clashSecret = config.sops.placeholder.singbox_clash_secret;
       flyingbirdPassword = config.sops.placeholder.singbox_flyingbird;
       hy2Password = config.sops.placeholder.singbox_hy2_pwd;
     }
@@ -48,6 +49,9 @@ with lib; let
       };
       shortId = {
         _secret = config.sops.secrets.singbox_ID.path;
+      };
+      clashSecret = {
+        _secret = config.sops.secrets.singbox_clash_secret.path;
       };
       flyingbirdPassword = {
         _secret = config.sops.secrets.singbox_flyingbird.path;
@@ -72,6 +76,7 @@ with lib; let
   # config.nix requires pkgs for external_ui plus outbounds/ruleSets
   configJson = import ./config.nix {
     inherit outbounds ruleSets pkgs;
+    clashSecret = secrets.clashSecret;
   };
   clientConfigPath = config.sops.templates."singbox-client.json".path;
   templatesContent = builtins.toJSON configJson;
