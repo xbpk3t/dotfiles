@@ -23,6 +23,41 @@ in {
     enable = mkEnableOption "Jetbrains IDE Remote Development Enable";
   };
 
+  # 怎么排查 jetbrains remote 服务相关问题？
+  #
+  # 最重要的排查方向只有两个：
+  ## 远端 IDE 进程到底有没有真正启动？（如果启动了，是否输出了可被 Toolbox 解析的 Join Link？）
+  ## 远端运行时/JDK 和启动参数是否正确？（JDK 路径是否正确？是否被 vmoptions 或 javaagent 干扰？）
+  #
+  #
+  #
+  #
+  #
+  #
+  # 常见根因清单（按概率排序）
+  #
+  # 1. **JDK/JBR 路径错误**（尤其是 NixOS / 非标准安装）
+  # 2. **vmoptions 注入 javaagent / 破解类输出**导致 stdout 解析失败
+  # 3. **Toolbox 实际启动旧版本**，但你配置修改的是新版本
+  # 4. **远端 IDE 进程确实启动了但 stdout 被污染**（多个输出）
+  # 5. **网络问题导致连接超时**（较少，但仍需检查）
+
+  #
+  # # 远端运行状态
+  # goland-remote-dev-server status
+
+  # # 远端环境变量
+  # printenv | rg -i 'GOLAND_JDK|IDEA_JDK|JAVA'
+
+  # # Toolbox 实际启动路径
+  # cat ~/.local/share/JetBrains/Toolbox/channels/Goland-*.json
+
+  # # vmoptions 是否有 javaagent
+  # rg -n 'javaagent|ja-netfilter' ~/.config/JetBrains/GoLand*/goland64.vmoptions
+
+  # # 手动启动看看 stdout
+  # /nix/store/.../goland/bin/goland serverMode /path/to/project
+
   config = lib.mkIf cfg.enable {
     # https://mynixos.com/nixpkgs/package/jetbrains.gateway
 

@@ -140,6 +140,9 @@ in {
     ];
   };
 
+  # FIXME: https://mynixos.com/nixpkgs/options/services.autossh
+  # ??? https://mynixos.com/nix-darwin/options/services.autossh mac 是否需要安装这个？
+
   # Add terminfo database of all known terminals to the system profile.
   # https://github.com/NixOS/nixpkgs/blob/nixos-25.05/nixos/modules/config/terminfo.nix
   # [2025-11-28] 设置为false，因为 termbench-pro 在rebuild时报错。
