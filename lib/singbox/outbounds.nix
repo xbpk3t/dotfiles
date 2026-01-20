@@ -9,6 +9,7 @@
   fingerprint ? "chrome",
   packetEncoding ? "xudp",
   hy2Password,
+  flyingbirdPassword,
 }: let
   baseLabel = s:
     if s ? label
@@ -80,37 +81,39 @@
 
   hy2Outs = lib.lists.filter (o: o != null) (map toHy2Outbound servers);
 
+  # 用来存别人（比如机场）的nodes
   extraOutbounds = [
   ];
 
   outs = vlessOuts ++ hy2Outs ++ extraOutbounds;
 in
-  outs
-  ++ [
-    # urltest 负责测速与自动选优
-    {
-      type = "urltest";
-      tag = "urltest";
-      outbounds = map (o: o.tag) outs;
-      url = "http://www.gstatic.com/generate_204";
-      interval = "5m";
-      tolerance = 50;
-    }
-    # select 保留手动选择，默认指向 urltest 以展示延迟
-    {
-      type = "selector";
-      tag = "select";
-      outbounds = ["urltest"] ++ map (o: o.tag) outs;
-      default = "urltest";
-    }
-    {
-      type = "selector";
-      tag = "GLOBAL";
-      outbounds = ["select"];
-      default = "select";
-    }
-    {
-      type = "direct";
-      tag = "direct";
-    }
-  ]
+  # 这里 builtins.seq 的写法是为了避免 deadnix 报错 unused var
+  builtins.seq flyingbirdPassword (outs
+    ++ [
+      # urltest 负责测速与自动选优
+      {
+        type = "urltest";
+        tag = "urltest";
+        outbounds = map (o: o.tag) outs;
+        url = "http://www.gstatic.com/generate_204";
+        interval = "5m";
+        tolerance = 50;
+      }
+      # select 保留手动选择，默认指向 urltest 以展示延迟
+      {
+        type = "selector";
+        tag = "select";
+        outbounds = ["urltest"] ++ map (o: o.tag) outs;
+        default = "urltest";
+      }
+      {
+        type = "selector";
+        tag = "GLOBAL";
+        outbounds = ["select"];
+        default = "select";
+      }
+      {
+        type = "direct";
+        tag = "direct";
+      }
+    ])

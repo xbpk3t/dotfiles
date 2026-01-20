@@ -86,6 +86,7 @@ in {
       singbox_ID = mkRootSecret "singbox/id";
       singbox_hy2_pwd = mkRootSecret "singbox/hy2_pwd";
       singbox_flyingbird = mkRootSecret "singbox/flyingbird";
+      singbox_clash_secret = mkRootSecret "singbox/clash_secret";
 
       # Shared API tokens
       #      youtubeApiKey = mkUserSecret "youtube/api_key";

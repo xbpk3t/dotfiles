@@ -2,6 +2,7 @@
   outbounds,
   ruleSets,
   pkgs,
+  clashSecret,
 }: {
   # [Sing-box realip配置方案 - 开发调优 - LINUX DO](https://linux.do/t/topic/175470)
   # https://github.com/MetaCubeX/meta-rules-dat
@@ -85,9 +86,8 @@
     };
     clash_api = {
       external_controller = "0.0.0.0:9090";
-      # Clash API 若监听在 0.0.0.0，官方强烈要求设置 secret。但是这里为了省事，所以不设置
-      # Clash API 如果开放到非本机地址必须设置 `secret`
-      secret = "REDACTED";
+      # Clash API 若监听在 0.0.0.0，官方强烈要求设置 secret
+      secret = clashSecret;
       # https://github.com/MetaCubeX/metacubexd
       # https://mynixos.com/nixpkgs/package/metacubexd
       # https://mynixos.com/nixpkgs/package/zashboard
