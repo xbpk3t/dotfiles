@@ -21,4 +21,79 @@
     "show_command" = true; # 展示实际运行的命令
     "reveal_target" = "center"; # 输出面板出现时居中
   }
+  {
+    "label" = "Scratch: New";
+    "command" = "task";
+    "args" = [
+      "-g"
+      "nb:new"
+    ];
+    "use_new_terminal" = true;
+    "allow_concurrent_runs" = false;
+    "reveal" = "always";
+    "hide" = "never";
+    "show_summary" = true;
+    "show_command" = true;
+    "reveal_target" = "center";
+  }
+  {
+    "label" = "Scratch: List";
+    "command" = "task";
+    "args" = [
+      "-g"
+      "nb:list"
+    ];
+    "use_new_terminal" = true;
+    "allow_concurrent_runs" = false;
+    "reveal" = "always";
+    "hide" = "never";
+    "show_summary" = true;
+    "show_command" = true;
+    "reveal_target" = "center";
+  }
+  {
+    "label" = "Scratch: Search";
+    "command" = "task";
+    "args" = [
+      "-g"
+      "nb:search"
+    ];
+    "use_new_terminal" = true;
+    "allow_concurrent_runs" = false;
+    "reveal" = "always";
+    "hide" = "never";
+    "show_summary" = true;
+    "show_command" = true;
+    "reveal_target" = "center";
+  }
+  {
+    "label" = "Scratch: Rename";
+    "command" = "task";
+    "args" = [
+      "-g"
+      "nb:rename"
+    ];
+    "use_new_terminal" = true;
+    "allow_concurrent_runs" = false;
+    "reveal" = "always";
+    "hide" = "never";
+    "show_summary" = true;
+    "show_command" = true;
+    "reveal_target" = "center";
+  }
+  {
+    "label" = "Scratch: Delete";
+    "command" = "task";
+    "args" = [
+      "-g"
+      "nb:delete"
+    ];
+    "use_new_terminal" = true;
+    "allow_concurrent_runs" = false;
+    "reveal" = "always";
+    "hide" = "never";
+    "show_summary" = true;
+    "show_command" = true;
+    "reveal_target" = "center";
+  }
 ]

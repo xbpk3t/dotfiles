@@ -64,6 +64,9 @@
   # 注意该插件不支持自定义 TODO Tag (比如说我需要的 PLAN)
   "comment" = true;
 
+  # https://github.com/zed-extensions/log
+  "log" = true;
+
   # "catppuccin"
   # "material-icon-theme"
   # "wakatime"

@@ -14,7 +14,14 @@ in {
 
   config = lib.mkIf cfg.enable {
     # Add zed to using zed-cli, otherwise "zed not found"
-    home.packages = with pkgs; [zed];
+    home.packages = with pkgs; [
+      zed
+
+      # https://mynixos.com/nixpkgs/package/nb
+      # https://github.com/xwmx/nb
+      # 在zed里用来补充 scratches 这个功能
+      nb
+    ];
 
     # https://mynixos.com/home-manager/options/programs.zed-editor
     # https://github.com/NixOS/nixpkgs/blob/master/pkgs/by-name/ze/zed-editor/package.nix

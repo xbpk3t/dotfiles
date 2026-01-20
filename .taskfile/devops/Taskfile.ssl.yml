@@ -1,0 +1,61 @@
+---
+
+#   sudo openssl x509 -noout -subject -issuer -in /var/lib/acme/lucc.dev/fullchain.pem
+
+# ifconfig | rg -n "^utun|^tun" -n
+# ifconfig -a | sed -n '45,120p'
+#
+#
+#
+# • Ran ifconfig | rg -n "^utun|^tun" -n
+# └ 50:1:utun0 (16):
+#   54:1:utun1 (17):
+#   … +4 lines
+#   77:1:utun6 (24):
+#   81:1:utun7 (28):
+
+#
+# • Ran ifconfig -a | sed -n '45,120p'
+#   └   flags         POINTOPOINT MULTICAST
+#       mtu           1280
+#     … +50 lines
+#       flags         UP POINTOPOINT RUNNING MULTICAST
+#       mtu           9000
+
+# • Ran netstat -rn -f inet | sed -n '1,80p'
+#   └ Routing tables
+
+#     … +33 lines
+#     255.255.255.255/32 link#11            UCS                   en0      !
+#     255.255.255.255/32 link#27            UCSI                utun5
+
+# • Ran netstat -rn -f inet6 | sed -n '1,80p'
+  # └ Routing tables
+
+  #   … +78 lines
+  #   ff02::%utun7/32                         fe80::a4a4:5ea9:23c6:229b%utun7
+  #   UmCI                utun7
+
+
+
+# • 我这边已经在你本机跑了检查，结论是：是的，当前系统层面所有 IPv4/IPv6 流量都会
+  # 先进入 sing-box 的 TUN（utun7），然后再由 sing-box 内部规则决定走 direct 还是
+  # GLOBAL。
+
+  # 证据（本机路由表）：
+
+  # - IPv4 有 1/1 和 128/1 都指向 utun7
+  # - IPv6 有 2000::/3 等大段前缀也指向 utun7
+
+  # 这就是典型的“全局 TUN 接管”。
+
+  # ———
+
+  # 你可以自己验证（本机）
+
+  # 1. 看路由是否全量进 utun7：
+
+  # netstat -rn -f inet | sed -n '1,40p'
+  # netstat -rn -f inet6 | sed -n '1,40p'
+
+  # 重点看有没有 1/1、128/1、2000::/3 指向 utun7。
