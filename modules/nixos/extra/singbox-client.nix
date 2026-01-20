@@ -33,6 +33,24 @@ in {
       settings = client.configJson;
     };
 
+    # Hardening system DNS against ISP poisoning.
+    # WHY: On some networks the ISP DNS resolves chatgpt.com to wrong IP ranges
+    # (e.g. Meta/Facebook), which causes TLS SNI/cert mismatches and intermittent
+    # codex "stream disconnected" errors even though sing-box is healthy.
+    # NOTE: sing-box 1.12.x doesn't support a DNS inbound, so we can't bind 53
+    # directly to sing-box. Instead we force systemd-resolved to use trusted
+    # upstreams with DNS-over-TLS to avoid polluted answers.
+    services.resolved = {
+      enable = true;
+      settings = {
+        Resolve = {
+          DNS = ["1.1.1.1" "8.8.8.8"];
+          DNSOverTLS = "yes";
+          FallbackDNS = mkDefault config.networking.nameservers;
+        };
+      };
+    };
+
     # Q: Why add extra systemd deps if services.sing-box already creates the unit?
     # A: The upstream module doesn't bind sing-box to systemd-networkd. When
     #    networkd restarts (e.g. during colmena apply), the TUN link/routes can
