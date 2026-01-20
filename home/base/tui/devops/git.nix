@@ -17,6 +17,14 @@
     # Automatically trims your branches whose tracking remote refs are merged or gone
     # It's really useful when you work on a project for a long time.
     git-trim # 自动清理 Git 分支
+
+    # https://mynixos.com/nixpkgs/package/serie
+    # https://github.com/lusingander/serie
+    serie
+
+    # https://mynixos.com/nixpkgs/package/tig
+    # https://github.com/jonas/tig
+    tig
   ];
 
   programs.diff-so-fancy = {
