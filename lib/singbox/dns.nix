@@ -9,6 +9,15 @@
   strategy = "prefer_ipv4";
 
   # DNS 规则顺序决定优先级，把“必须直连的域名”放在最前面。
+  #
+  # - 被封锁/限制的域名在每个国家都不一样（政策、法律、监管机构不同）。
+  # - 规则集的来源也不同，有的来自官方黑名单抓取，有的来自社区维护。
+  # - 很多列表按“用途/主题”划分：广告、跟踪、成人、流媒体解锁、国家审查等，不是
+  #   通用一份。
+  #
+  #
+  #
+  # [2026-01-20] antizapret 这个 rule_set 适用于绕过俄罗斯的域名封锁/审查，用不到
   rules = [
     # tailscale / NetBird 控制面 DNS 直连，防止 fakeip + TUN 抢路由
     # - tailscale.com / tailscale.io / ts.net: Tailscale 控制面 & DERP 域
