@@ -103,10 +103,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # colmena - NixOS deployment tool
-    # https://github.com/zhaofengli/colmena
-    colmena = {
-      url = "github:zhaofengli/colmena";
+    # deploy-rs - Multi-profile deployment tool
+    # https://github.com/serokell/deploy-rs
+    "deploy-rs" = {
+      url = "github:serokell/deploy-rs";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

@@ -50,3 +50,32 @@ tasks:
       - nix build ./nix#{{.BUILD_TARGET}} --show-trace --verbose --extra-experimental-features 'nix-command flakes'
       - echo "🔄 正在使用调试输出切换..."
       - sudo {{.REBUILD_CMD}} switch --flake ./nix#{{.HOSTNAME}} --show-trace --verbose
+
+  deploy-list:
+    desc: "列出 deploy-rs 节点"
+    cmds:
+      - 'nix eval --raw .#deploy.nodes --apply "x: builtins.concatStringsSep \"\\n\" (builtins.attrNames x)"'
+
+  deploy:
+    desc: "deploy-rs 部署（默认 system profile）"
+    vars:
+      HOST:
+        sh: 'nix eval --raw .#deploy.nodes --apply "x: builtins.concatStringsSep \"\\n\" (builtins.attrNames x)" | gum choose --header "选择节点"'
+    cmds:
+      - nix run github:serokell/deploy-rs -- .#{{.HOST}}
+
+  deploy-profile:
+    desc: "deploy-rs 部署指定 profile"
+    vars:
+      HOST:
+        sh: 'nix eval --raw .#deploy.nodes --apply "x: builtins.concatStringsSep \"\\n\" (builtins.attrNames x)" | gum choose --header "选择节点"'
+      PROFILE:
+        sh: 'gum input --prompt "Profile 名称 (默认 system): "'
+    cmds:
+      - |
+        profile="{{.PROFILE}}"
+        if [[ -z "$profile" ]]; then
+          nix run github:serokell/deploy-rs -- .#{{.HOST}}
+        else
+          nix run github:serokell/deploy-rs -- .#{{.HOST}}."$profile"
+        fi
