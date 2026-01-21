@@ -32,7 +32,7 @@ tasks:
     cmds:
       - task: _nb:ensure
       - task: _nb:ensure_picker
-      - '{{.TASKFILE_DIR}}/scripts/nb/new.sh "{{.SCRATCH_NOTEBOOK}}"'
+      - '{{.TASKFILE_DIR}}/scripts/scratches/new.sh "{{.SCRATCH_NOTEBOOK}}"'
 
   list:
     desc: "List scratch files and open selection in Zed"
@@ -44,7 +44,7 @@ tasks:
     cmds:
       - task: _nb:ensure
       - task: _nb:ensure_picker
-      - '{{.TASKFILE_DIR}}/scripts/nb/list.sh "{{.SCRATCH_NOTEBOOK}}"'
+      - '{{.TASKFILE_DIR}}/scripts/scratches/list.sh "{{.SCRATCH_NOTEBOOK}}"'
 
   search:
     desc: "Search scratch files and open selection in Zed"
@@ -56,7 +56,7 @@ tasks:
     cmds:
       - task: _nb:ensure
       - task: _nb:ensure_picker
-      - '{{.TASKFILE_DIR}}/scripts/nb/search.sh "{{.SCRATCH_NOTEBOOK}}"'
+      - '{{.TASKFILE_DIR}}/scripts/scratches/search.sh "{{.SCRATCH_NOTEBOOK}}"'
 
   rename:
     desc: "Rename a scratch file"
@@ -68,7 +68,7 @@ tasks:
     cmds:
       - task: _nb:ensure
       - task: _nb:ensure_picker
-      - '{{.TASKFILE_DIR}}/scripts/nb/rename.sh "{{.SCRATCH_NOTEBOOK}}"'
+      - '{{.TASKFILE_DIR}}/scripts/scratches/rename.sh "{{.SCRATCH_NOTEBOOK}}"'
 
   delete:
     desc: "Delete a scratch file"
@@ -80,4 +80,4 @@ tasks:
     cmds:
       - task: _nb:ensure
       - task: _nb:ensure_picker
-      - '{{.TASKFILE_DIR}}/scripts/nb/delete.sh "{{.SCRATCH_NOTEBOOK}}"'
+      - '{{.TASKFILE_DIR}}/scripts/scratches/delete.sh "{{.SCRATCH_NOTEBOOK}}"'
