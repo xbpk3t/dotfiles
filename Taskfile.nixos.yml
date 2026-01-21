@@ -75,7 +75,7 @@ tasks:
         if [[ "{{.OS}}" == "Darwin" ]]; then
           nix shell nixpkgs#git nixpkgs#neovim
         else
-          nix shell nixpkgs#git nixpkgs#neovim nixpkgs#colmena
+          nix shell nixpkgs#git nixpkgs#neovim nixpkgs#deploy-rs
         fi
 
   verify-store:
@@ -117,17 +117,36 @@ tasks:
     desc: "进入开发环境 shell"
     cmds:
       - echo "🐚 正在进入开发环境..."
-      - nix shell nixpkgs#git nixpkgs#neovim nixpkgs#colmena
+      - nix shell nixpkgs#git nixpkgs#neovim nixpkgs#deploy-rs
 
-  colmena-apply-vps:
-    desc: "使用 Colmena 部署 nixos-vps 容器"
+  deploy-list:
+    desc: "列出 deploy-rs 节点"
     cmds:
-      - echo "🚀 正在通过 Colmena 部署 nixos-vps..."
-      - colmena apply -t nixos-vps
+      - 'nix eval --raw .#deploy.nodes --apply "x: builtins.concatStringsSep \"\\n\" (builtins.attrNames x)"'
 
-  colmena-hk:
-    des: Deploy host nixos-vps to HK nodes
-    cmd: colmena apply --impure --on nixos-vps
+  deploy:
+    desc: "deploy-rs 部署（默认 system profile）"
+    vars:
+      HOST:
+        sh: 'nix eval --raw .#deploy.nodes --apply "x: builtins.concatStringsSep \"\\n\" (builtins.attrNames x)" | gum choose --header "选择节点"'
+    cmds:
+      - nix run github:serokell/deploy-rs -- .#{{.HOST}}
+
+  deploy-profile:
+    desc: "deploy-rs 部署指定 profile"
+    vars:
+      HOST:
+        sh: 'nix eval --raw .#deploy.nodes --apply "x: builtins.concatStringsSep \"\\n\" (builtins.attrNames x)" | gum choose --header "选择节点"'
+      PROFILE:
+        sh: 'gum input --prompt "Profile 名称 (默认 system): "'
+    cmds:
+      - |
+        profile="{{.PROFILE}}"
+        if [[ -z "$profile" ]]; then
+          nix run github:serokell/deploy-rs -- .#{{.HOST}}
+        else
+          nix run github:serokell/deploy-rs -- .#{{.HOST}}."$profile"
+        fi
 
 
 

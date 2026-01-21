@@ -6,10 +6,8 @@
   ...
 } @ args: let
   name = "nixos-homelab";
-  tags = [
-    name
-    "homelab"
-  ];
+  ssh-user = "root";
+  ssh-host = "100.81.204.63";
 
   # 与 nixos-ws 共用 overlay；禁用 NVIDIA 但保留 unfree 支持
   genSpecialArgs = system: let
@@ -64,27 +62,25 @@
       "home/extra/zed-remote.nix"
     ];
   };
-  role = mylib.mkColmenaRole {
-    inherit
-      lib
-      mylib
-      genSpecialArgs
-      modules
-      args
-      name
-      ;
-    system = "x86_64-linux";
-    baseTags = tags;
-    targets = [
-      {
-        host = "100.81.204.63";
-        # user = ssh-user;
-        user = "root";
-        tags = tags;
-        port = null;
-      }
-    ];
+  systemArgs = modules // args;
+  nixosConfig = mylib.nixosSystem (systemArgs
+    // {
+      inherit genSpecialArgs;
+    });
+  deployNode = mylib.inventory.deployRsNode {
+    inherit name;
+    node = {
+      primaryIp = ssh-host;
+      ssh = {
+        user = ssh-user;
+      };
+    };
+    nixosConfiguration = nixosConfig;
+    deployLib = inputs."deploy-rs".lib."x86_64-linux";
+    defaultSshUser = ssh-user;
+    remoteBuild = false;
   };
 in {
-  inherit (role) nixosConfigurations colmena;
+  nixosConfigurations.${name} = nixosConfig;
+  deploy.nodes.${name} = deployNode;
 }

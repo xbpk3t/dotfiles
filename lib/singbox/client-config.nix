@@ -17,7 +17,7 @@ with lib; let
           node.singbox
           // {
             hostName = node.hostName or name;
-            server = node.singbox.server or node.targetHost;
+            server = node.singbox.server or (mylib.inventory.primaryHostForNode name node);
           }
         else null
     )

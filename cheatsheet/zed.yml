@@ -1,4 +1,6 @@
 ---
+
+
 - topic: 高频操作
   cmds:
     - des: zed是否支持搜索，并直接打开搜索到的文件夹的path？我说的是在左侧 File Exploer 里面 # jetbrains IDE 都是支持这个操作的。如果不支持，有什么替代操作？
@@ -7,8 +9,17 @@
 
 
     - des: 【范围查找（也就是在文档的部分文本中进行查找）】
+      cmd:
+
+    - des: 文本内指定范围 查找/替换
       cmd: CMD+f, Search In Selection # 点搜索栏右侧的 Toggle Search Selection 按钮
 
+    - des: zed里怎么做filter suffix? 比如说只搜索 nix, yaml, go 之类的
+      cmd:
+        # 在 Include 里填：
+        # 只搜 Go：**/*.go
+        # 只搜 Nix：**/*.nix
+        # 只搜 YAML：**/*.yml 或 **/*.yaml
 
 
 #         - 【常用活动工具窗口】项目窗口、git 提交窗口、git 窗口、终端窗口、数据库窗口

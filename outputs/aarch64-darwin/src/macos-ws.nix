@@ -52,11 +52,26 @@
       "home/darwin"
     ];
   };
-in {
-  darwinConfigurations.${name} = mylib.macosSystem (macosSystemArgs
-    // modules
+  systemArgs = macosSystemArgs // modules;
+  darwinConfig = mylib.macosSystem (systemArgs
     // {
       genSpecialArgs = genSpecialArgs;
       system = "aarch64-darwin";
     });
+  deployNode = let
+    deployLib = inputs."deploy-rs".lib."aarch64-darwin";
+    sshUser = myvars.username;
+  in {
+    hostname = name;
+    inherit sshUser;
+    remoteBuild = true;
+    profiles.system = {
+      user = "root";
+      # nix-darwin exposes an activation script in the system closure
+      path = deployLib.activate.custom darwinConfig.system "./activate";
+    };
+  };
+in {
+  darwinConfigurations.${name} = darwinConfig;
+  deploy.nodes.${name} = deployNode;
 }

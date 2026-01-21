@@ -20,6 +20,9 @@
     darwinConfigurations = lib.attrsets.mergeAttrsList (
       map (it: it.darwinConfigurations or {}) dataWithoutPaths
     );
+    deploy = {
+      nodes = lib.attrsets.mergeAttrsList (map (it: it.deploy.nodes or {}) dataWithoutPaths);
+    };
   };
 in
   outputs

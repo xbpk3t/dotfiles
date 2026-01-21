@@ -7,7 +7,7 @@
 in rec {
   # 统一生成节点唯一 ID：
   # 1) 不依赖系统 hostname（避免多机同名冲突）
-  # 2) 只依赖 colmena 的 targetHost，保证可复现
+  # 2) 只依赖节点主机标识（如 primaryIp/ssh.host），保证可复现
   # 3) 便于在各模块里用同一套规则生成域名/标识
   nodeId = {
     roleName,
@@ -15,7 +15,7 @@ in rec {
   }: "${roleName}-${sanitize targetHost}";
 
   # 统一生成节点派生信息（hostName、DERP 域名等）：
-  # - 由 colmena targets 的 meta 提供输入（可选）
+  # - 由节点 meta 提供输入（可选）
   # - 所有派生字段从这里生成，避免模块内重复拼接
   hostMeta = {
     roleName,
