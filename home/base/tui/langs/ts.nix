@@ -5,7 +5,9 @@
     nodePackages.eslint
     pnpm
     nodePackages.serve # https://github.com/vercel/serve 用来preview本地打包好的dist文件（vite可以直接vite preview）
-    tsx
+
+    # [2026-01-21] rebuild error, hash mismatch, so comment it
+    # tsx
 
     typescript
     # error: 'ts-node' was removed because it is unmaintained, and since NodeJS 22.6.0+, experimental TypeScript support is built-in to NodeJS.

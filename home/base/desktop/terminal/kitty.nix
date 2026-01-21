@@ -12,6 +12,7 @@ in {
   };
 
   config = mkIf cfg.enable {
+    # https://mynixos.com/nixpkgs/package/kitty
     programs.kitty = {
       enable = true;
       package = pkgs.kitty;
