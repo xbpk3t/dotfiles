@@ -20,7 +20,9 @@
     nixosConfigurations = lib.attrsets.mergeAttrsList (
       map (it: it.nixosConfigurations or {}) dataWithoutPaths
     );
-    colmena = lib.attrsets.mergeAttrsList (map (it: it.colmena or {}) dataWithoutPaths);
+    deploy = {
+      nodes = lib.attrsets.mergeAttrsList (map (it: it.deploy.nodes or {}) dataWithoutPaths);
+    };
   };
 in
   outputs

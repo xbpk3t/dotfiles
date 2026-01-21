@@ -65,7 +65,6 @@
   };
 
   mkNodeRole = name: node: let
-    tags = [name "vps"] ++ (node.tags or []);
     nodeModule = mkNodeModule name node;
     modules =
       baseModules
@@ -73,21 +72,20 @@
         nixos-modules = baseModules.nixos-modules ++ [nodeModule];
       };
     systemArgs = modules // args;
-  in {
-    nixosConfigurations.${name} = mylib.nixosSystem (systemArgs
+    nixosConfig = mylib.nixosSystem (systemArgs
       // {
         inherit genSpecialArgs;
       });
-
-    colmena.${name} = mylib.colmenaSystem (systemArgs
-      // {
-        inherit genSpecialArgs tags;
-        targetHost = node.targetHost;
-        targetPort = node.targetPort or null;
-        targetUser = node.user or ssh-user;
-        ssh-user = node.user or ssh-user;
-        extraModules = [nodeModule];
-      });
+    deployNode = mylib.inventory.deployRsNode {
+      inherit name node;
+      nixosConfiguration = nixosConfig;
+      deployLib = inputs."deploy-rs".lib.${baseModules.system};
+      defaultSshUser = ssh-user;
+      remoteBuild = false;
+    };
+  in {
+    nixosConfigurations.${name} = nixosConfig;
+    deploy.nodes.${name} = deployNode;
   };
 
   nodeRoles = builtins.attrValues (builtins.mapAttrs mkNodeRole nodes);
@@ -96,7 +94,9 @@
     nixosConfigurations = lib.attrsets.mergeAttrsList (
       map (it: it.nixosConfigurations or {}) nodeRoles
     );
-    colmena = lib.attrsets.mergeAttrsList (map (it: it.colmena or {}) nodeRoles);
+    deploy = {
+      nodes = lib.attrsets.mergeAttrsList (map (it: it.deploy.nodes or {}) nodeRoles);
+    };
   };
 in
   merged

@@ -53,7 +53,7 @@ in {
 
     # Q: Why add extra systemd deps if services.sing-box already creates the unit?
     # A: The upstream module doesn't bind sing-box to systemd-networkd. When
-    #    networkd restarts (e.g. during colmena apply), the TUN link/routes can
+    #    networkd restarts (e.g. during deploy-rs apply), the TUN link/routes can
     #    be reset while sing-box keeps running, causing "service alive but no
     #    traffic" (e.g. TLS EOF to cache.nixos.org). We bind the lifecycle so
     #    sing-box restarts and re-injects routes after networkd restarts.

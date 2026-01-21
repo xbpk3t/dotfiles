@@ -109,14 +109,19 @@ in {
   evalTests = lib.lists.all (it: it.evalTests == {}) allSystemValues;
 
   # Namaka snapshot tests evaluate the fixtures under ./tests via haumea.
-  checks = inputs.namaka.lib.load {
-    src = self + "/tests/haumea";
-    inputs = {
-      inherit lib;
-      inherit (inputs) haumea;
-      pkgs = namakaTestSpecialArgs.pkgs;
-    };
-  };
+  checks =
+    (inputs.namaka.lib.load {
+      src = self + "/tests/haumea";
+      inputs = {
+        inherit lib;
+        inherit (inputs) haumea;
+        pkgs = namakaTestSpecialArgs.pkgs;
+      };
+    })
+    // builtins.mapAttrs (
+      _system: deployLib: deployLib.deployChecks self.deploy
+    )
+    inputs."deploy-rs".lib;
 
   # Development Shells
   devShells = forAllSystems (
@@ -149,21 +154,9 @@ in {
   # Format the nix code in this flake
   formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixfmt);
 
-  # Colmena deployment nodes are provided by each host file.
-  # https://colmena.cli.rs/unstable/introduction.html
-  # 使用方法: colmena apply
-  # 注意: 需要先配置 SSH 密钥认证到目标机器的 root 用户
-  colmena = let
-    colmenaNodes = lib.attrsets.mergeAttrsList (map (it: it.colmena or {}) linuxSystemValues);
-  in
-    {
-      meta = {
-        nixpkgs = import nixpkgs {
-          system = "x86_64-linux";
-          config.allowUnfree = true;
-        };
-        specialArgs = genSpecialArgs "x86_64-linux";
-      };
-    }
-    // colmenaNodes;
+  # deploy-rs deployment nodes are provided by each host file.
+  # https://github.com/serokell/deploy-rs
+  deploy = {
+    nodes = lib.attrsets.mergeAttrsList (map (it: it.deploy.nodes or {}) allSystemValues);
+  };
 }
