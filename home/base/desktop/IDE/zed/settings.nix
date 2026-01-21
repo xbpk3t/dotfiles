@@ -28,6 +28,8 @@ in {
   # - ✅ [通过CMD+`切换项目] 怎么通过 CMD+` 快捷键，直接在多个project之间切换？我在配置 use_system_window_tabs 之前，本身通过 CMD+` 这种mac本身提供的窗口切换来切换项目是可行的，但是在添加该配置之后，因为本身没有多窗口了，所以怎么需要配置哪个快捷键来保证类似操作？
   #
   # - ✅ [类似CMD+E切换最近修改文件]
+  # 直接用 Ctrl+Tab 切换一样的。但是存在一些bug
+  #
   #
   # - ✅ [内存开销并不低] LSP没有lazy load机制，默认LSP很多都是node实现的，单个进程都在80MB，开10个就是800MB内存开销
 
@@ -38,15 +40,15 @@ in {
   # - [git] 同样是 changelist/staging，但是zed并不支持path（这样就很不清晰）
   #
   #
-  # - ✅ [scratch] 没有scratch（当然可以通过 CMD+shift+P 里使用 workspace: new file 可以打开一个类似goland里Buffer的文件，但是1、不支持文件类型。2、不支持通过shortcut直接打开scratches列表）
+  # - 🔀 [scratch] 没有scratch（当然可以通过 CMD+shift+P 里使用 workspace: new file 可以打开一个类似goland里Buffer的文件，但是1、不支持文件类型。2、不支持通过shortcut直接打开scratches列表）
   # 用 nb cli + zed task 替代实现了
   #
   #
   #
-  # - ✅ [DB插件] 用 webapp 替代了（这个feat也没必要强求）
+  # - 🔀 [DB插件] 用 webapp 替代了（这个feat也没必要强求）
   #
   #
-  # - ✅ [TODO-Tree] 一个高频需求，社区也有很多实现。目前的问题在于 交付形态。zed官方希望最终效果是类似 goland/vscode 的那种在Pannel展示的 TODO Tree，但是 目前zed官方不打算实现这个需求，而extension开发也没有提供UI支持，这样社区也没办法做这个需求。所以可能暂时无法实现该需求。
+  # - 🔀 [TODO-Tree] 一个高频需求，社区也有很多实现。目前的问题在于 交付形态。zed官方希望最终效果是类似 goland/vscode 的那种在Pannel展示的 TODO Tree，但是 目前zed官方不打算实现这个需求，而extension开发也没有提供UI支持，这样社区也没办法做这个需求。所以可能暂时无法实现该需求。
   # 目前的
   # https://github.com/alexandretrotel/todo-tree
   # https://github.com/alexandretrotel/zed-todo-tree
@@ -57,10 +59,11 @@ in {
 
   # [2026-01-18]
   #
-  # [git commit history]
-  # []
-
-  # [2026-01-19]
+  # - 🔀 [git commit history]
+  # 用 tig, serie 可以替代实现该需求
+  #
+  #
+  #
   # https://www.reddit.com/r/ZedEditor/comments/1mvqlph/zed_is_awesome_but_it_lacks_some_crucial/
   # 这篇文章的吐槽挺到位的
   # - 配置体验不一致：有的设置用 true/false，有的用 "enabled"/"disabled"，还有 "on"/"off"，即便只是二选一也不统一，观感和可维护性都很差。
@@ -75,10 +78,22 @@ in {
   #
   # - 标签页管理能力弱：找不到“多行 tab wrap”或“显示当前打开 tab 数量”等，导致可见 tab 很少，需要疯狂横向滚动或完全依赖
   #
+  #
+  #
+  #
+  #
   # - [Local History] https://github.com/zed-industries/zed/discussions/24004
   # 确实是非常有用的功能，但是zed不支持，也没有第三方工具可以替代解决该问题
+  #
+  # - ✅ [Outline for mardown indent] https://github.com/zed-industries/zed/pull/45643
+  # v0.220.0 已经处理掉了
+  #
+  # - [Remote SSH Auto Reconnect]
+  # 目前zed不支持 Auto Reconnect，必须要手动重连
 
   # MAYBE[2026-01-18]: zed 是否会提供类似 hx --health 这种查看所有本身 xxx  LSP 的命令？
+  #
+  # https://zed.dev/docs/languages 文档里已经列出了所有langs的LSP
 
   # 可供参考的zed配置
   # https://github.com/linkfrg/dotfiles/blob/main/modules/home-manager/software/zed/settings.nix
@@ -441,9 +456,6 @@ in {
 
   # Remote Development Configuration
   # https://zed.dev/docs/remote-development
-  #
-  # !!!
-  # 目前zed不支持 Auto Reconnect，必须要手动重连
   ssh_connections = [
     {
       host = "100.81.204.63";

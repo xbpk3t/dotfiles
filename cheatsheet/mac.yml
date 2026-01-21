@@ -28,4 +28,8 @@
     - cmd: CMD+option+n
       des: 新建 txt 文件
 
+    - des: 表情
+      cmd: CMD + Ctrl + Space
+
+
 # how to horizontal scroll mouse shortcut? mac # shift+scroll
