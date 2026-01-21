@@ -62,12 +62,21 @@
     deployLib = inputs."deploy-rs".lib."aarch64-darwin";
     sshUser = myvars.username;
   in {
+    # What：部署目标地址（主机名/SSH alias）。
+    # Why：保持与 inventory/主机名一致，便于统一管理。
     hostname = name;
+    # What：SSH 用户名。
+    # Why：darwin 通常使用本地用户名进行远程连接。
     inherit sshUser;
+    # What：是否在远端构建。
+    # Why：darwin 的 system closure 必须在 darwin 端构建/激活。
     remoteBuild = true;
     profiles.system = {
+      # What：远端激活该 profile 的用户。
+      # Why：需要 root 权限写入系统级配置。
       user = "root";
-      # nix-darwin exposes an activation script in the system closure
+      # What：nix-darwin 的激活路径。
+      # Why：nix-darwin 的 system closure 内置 ./activate，需要用 activate.custom 指定入口。
       path = deployLib.activate.custom darwinConfig.system "./activate";
     };
   };

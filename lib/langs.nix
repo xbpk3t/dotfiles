@@ -29,8 +29,8 @@
       yaml-language-server
       # https://mynixos.com/nixpkgs/package/bash-language-server
       bash-language-server
-      # https://mynixos.com/nixpkgs/package/dockerfile-language-server-nodejs
-      dockerfile-language-server-nodejs
+      # https://mynixos.com/nixpkgs/package/dockerfile-language-server
+      dockerfile-language-server
 
       # https://mynixos.com/nixpkgs/package/terraform-ls
       terraform-ls

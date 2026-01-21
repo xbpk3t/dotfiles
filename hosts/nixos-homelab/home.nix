@@ -1,6 +1,5 @@
 {...}: {
   modules.extra = {
-    jetbrains-remote.enable = false;
     zed-remote.enable = true;
   };
 
