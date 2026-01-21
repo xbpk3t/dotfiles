@@ -74,6 +74,20 @@
   darwinSystemValues = builtins.attrValues darwinSystems;
   linuxSystemValues = builtins.attrValues linuxSystems;
   allSystemValues = darwinSystemValues ++ linuxSystemValues;
+  # NOTE: deploy-rs 的 checks 在“当前机器”执行。
+  # Why：在 Linux 上去 check/build darwin profile 会报
+  #      “Required system: aarch64-darwin”。因此 checks 必须限制在本机系统。
+  # What：deploy 仍暴露全平台节点用于跨平台部署，但 checks 仅覆盖当前系统。
+  currentSystem = builtins.currentSystem or null;
+  currentSystemValues =
+    if currentSystem != null && builtins.hasAttr currentSystem allSystems
+    then [allSystems.${currentSystem}]
+    else [];
+  # Why：deployChecks 会构建可激活的 profile，必须是本机可构建的系统。
+  # What：为 checks 构造一个“仅当前系统节点”的 deploy 视图。
+  deployCurrent = {
+    nodes = lib.attrsets.mergeAttrsList (map (it: it.deploy.nodes or {}) currentSystemValues);
+  };
 
   # Helper function to generate a set of attributes for each system
   forAllSystems = func: (nixpkgs.lib.genAttrs allSystemNames func);
@@ -118,10 +132,16 @@ in {
         pkgs = namakaTestSpecialArgs.pkgs;
       };
     })
-    // builtins.mapAttrs (
-      _system: deployLib: deployLib.deployChecks self.deploy
-    )
-    inputs."deploy-rs".lib;
+    // (
+      # Why：deployChecks 会构建可激活 profile；跨系统（如 Linux 上构建 darwin）
+      #      在本机不可构建。
+      # What：只对当前系统生成 deployChecks，并使用仅含本机节点的 deploy 视图。
+      if currentSystem != null && builtins.hasAttr currentSystem inputs."deploy-rs".lib
+      then {
+        ${currentSystem} = inputs."deploy-rs".lib.${currentSystem}.deployChecks deployCurrent;
+      }
+      else {}
+    );
 
   # Development Shells
   devShells = forAllSystems (
@@ -157,6 +177,8 @@ in {
   # deploy-rs deployment nodes are provided by each host file.
   # https://github.com/serokell/deploy-rs
   deploy = {
+    # Why：允许在同一入口下发跨平台部署（Linux + darwin + 其他 profile）。
+    # What：合并所有系统节点到 deploy.nodes；checks 已在上方限制为当前系统。
     nodes = lib.attrsets.mergeAttrsList (map (it: it.deploy.nodes or {}) allSystemValues);
   };
 }
