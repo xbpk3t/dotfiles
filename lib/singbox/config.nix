@@ -21,7 +21,9 @@
   # 在mac里调试singbox的几个核心命令（注意mac下systemd不会自动restart）
   ## rebuild 生成新的 config.json
   ## sudo launchctl kickstart -k "system/local.singbox.tun" # 注意 -k 强制重启 launchd 服务（会杀掉旧进程）。否则有可能无法加载最新配置
-  # 另外一个注意项：注意extraOutbounds，之所以需要外部可用节点（而非完全自建），就是因为我使用colmena批量部署，如果 singbox-server.nix 配置有问题，就会导致本地网络直接挂掉了。并且也不好排查问题。此时如果有外部可用节点，那么可以直接切换到外部可用节点，然后结合singbox client和server排查问题，会更高效。
+  # 另外一个注意项：注意 extraOutbounds，之所以需要外部可用节点（而非完全自建），就是因为我使用批量部署时，
+  # 如果 singbox-server.nix 配置有问题，会导致本地网络直接挂掉且不易排查。此时若有外部可用节点，
+  # 可以先切换到外部节点，再结合 singbox client/server 排查问题，会更高效。
 
   # https://sing-box.sagernet.org/configuration/log/
   log = {

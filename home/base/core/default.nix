@@ -57,7 +57,7 @@
       # 之所以放在这里，因为无论是nixos还是mac都会引入 home/base/desktop，严格对应关系引用
       nixos-anywhere
 
-      # 同上，同样只有workstation才有必要引入colmena
-      colmena
+      # 同上，同样只有 workstation 才有必要引入 deploy-rs
+      deploy-rs
     ];
 }

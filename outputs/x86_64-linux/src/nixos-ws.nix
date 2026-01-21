@@ -5,12 +5,11 @@
   inputs,
   mylib,
   myvars,
-  lib,
   ...
 } @ args: let
   name = "nixos-ws";
-  tags = [name "desktop"];
   ssh-user = myvars.username;
+  ssh-host = "192.168.234.194";
 
   genSpecialArgs = system: let
     customPkgsOverlay = import (mylib.relativeToRoot "pkgs/overlay.nix");
@@ -63,19 +62,25 @@
       "home/nixos"
     ];
   };
-  role = mylib.mkColmenaRole {
-    inherit lib mylib genSpecialArgs modules args name;
-    system = "x86_64-linux";
-    baseTags = tags;
-    targets = [
-      {
-        host = "192.168.234.194";
+  systemArgs = modules // args;
+  nixosConfig = mylib.nixosSystem (systemArgs
+    // {
+      inherit genSpecialArgs;
+    });
+  deployNode = mylib.inventory.deployRsNode {
+    inherit name;
+    node = {
+      primaryIp = ssh-host;
+      ssh = {
         user = ssh-user;
-        tags = tags;
-        port = null;
-      }
-    ];
+      };
+    };
+    nixosConfiguration = nixosConfig;
+    deployLib = inputs."deploy-rs".lib."x86_64-linux";
+    defaultSshUser = ssh-user;
+    remoteBuild = false;
   };
 in {
-  inherit (role) nixosConfigurations colmena;
+  nixosConfigurations.${name} = nixosConfig;
+  deploy.nodes.${name} = deployNode;
 }
