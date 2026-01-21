@@ -142,6 +142,66 @@ in {
 
   # FIXME: https://mynixos.com/nixpkgs/options/services.autossh
   # ??? https://mynixos.com/nix-darwin/options/services.autossh mac 是否需要安装这个？
+  #
+  # what: autossh 究竟有啥用？
+  # autossh 是一个“SSH 连接/隧道保活 + 掉线自动重连”的守护工具。
+  # 它会启动你指定的 ssh（常见是 -L/-R/-D 隧道），并监控连接是否真正可用；
+  # 一旦发现 ssh 退出、或连接“假活着但不通”，就自动重启 ssh。
+  #
+  # ww: 什么时候 autossh 特别有用？
+  #       - "长期跑端口转发/隧道：本地转发(-L)、反向转发(-R)、SOCKS(-D)"
+  # - "网络经常抖动、NAT/公司网络会重置、Wi-Fi 切换导致隧道易断"
+  # - "遇到“ssh 进程还在但链路已不通”的假活场景，需要主动探测并重启"
+  # - "无人值守需要自动重连（配合 systemd/容器守护时更常见）"
+  #
+  #
+  # hti: autossh 怎么判断连接是否还活着？
+  #
+  #       它可以用 -M 监控端口做探测（常见是成对端口回环测试），
+  # 或者关闭 -M 的监控机制（-M 0），改用 OpenSSH keepalive 让 ssh 发现断线后退出，
+  # 再由 autossh 负责拉起重连。
+  #
+  #
+  # htu: -M 0 是什么意思？为什么很多时候更推荐？
+  #
+  #       -M 0 会关闭 autossh 自己的监控端口机制；此时 autossh 只在 ssh 退出后重启。
+  # 通常配合 OpenSSH 的 ServerAliveInterval/ServerAliveCountMax，让“断线/假活”更快触发 ssh 退出，
+  # 然后由 autossh 重启，配置更简单、也更少依赖额外端口。
+  #
+  #
+  # 提升 SSH 使用体验/可靠性，还有哪些常用工具？
+  # - name: "mosh"
+  #   solves: "高延迟/抖动下交互更顺滑；断网/睡眠/换 IP 仍可继续会话"
+  #   best_for: "移动网络、经常切 Wi-Fi/睡眠的笔记本"
+  # - name: "Eternal Terminal (et)"
+  #   solves: "类似 mosh：自动重连、不易丢会话（体验更像“不断线的终端”）"
+  #   best_for: "希望断线后无感恢复交互会话"
+  # - name: "tmux / screen"
+  #   solves: "会话在远端持久运行；SSH 断了也不丢进程，重连再 attach"
+  #   best_for: "跑长命令、开发、多窗口管理（最通用、最稳）"
+  # - name: "OpenSSH 连接复用 (ControlMaster/ControlPersist)"
+  #   solves: "同一主机第二次起几乎秒连；ssh/scp/rsync 复用连接减少握手开销"
+  #   best_for: "频繁连接同一批机器、自动化脚本反复 ssh"
+  # - name: "sshuttle"
+  #   solves: "把 SSH 当传输层做“像 VPN 一样”的网段转发，少写一堆 -L/-R"
+  #   best_for: "需要更整体地访问内网网段（体验像 VPN）"
+  # - name: "autossh"
+  #   solves: "隧道/端口转发掉线自动重连；适合无人值守长期隧道"
+  #   best_for: "长期 -L/-R/-D，网络不稳或需要自愈"
+  #
+  #
+  #
+  # [技术选型] 我该怎么选？
+  #
+  # - "打字卡/高延迟抖动 → mosh"
+  # - "断线后不想丢工作现场 → ssh + tmux（或 et）"
+  # - "频繁 ssh/scp 到同一台 → ControlMaster/ControlPersist"
+  # - "隧道经常掉（-L/-R/-D） → autossh + keepalive"
+  # - "想像 VPN 一样用内网 → sshuttle"
+  #
+  #
+  #
+  # services.autossh = {};
 
   # Add terminfo database of all known terminals to the system profile.
   # https://github.com/NixOS/nixpkgs/blob/nixos-25.05/nixos/modules/config/terminfo.nix
