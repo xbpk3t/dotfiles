@@ -26,7 +26,7 @@
     "command" = "task";
     "args" = [
       "-g"
-      "nb:new"
+      "sc:new"
     ];
     "use_new_terminal" = true;
     "allow_concurrent_runs" = false;
@@ -41,7 +41,7 @@
     "command" = "task";
     "args" = [
       "-g"
-      "nb:list"
+      "sc:list"
     ];
     "use_new_terminal" = true;
     "allow_concurrent_runs" = false;
@@ -56,7 +56,7 @@
     "command" = "task";
     "args" = [
       "-g"
-      "nb:search"
+      "sc:search"
     ];
     "use_new_terminal" = true;
     "allow_concurrent_runs" = false;
@@ -71,7 +71,7 @@
     "command" = "task";
     "args" = [
       "-g"
-      "nb:rename"
+      "sc:rename"
     ];
     "use_new_terminal" = true;
     "allow_concurrent_runs" = false;
@@ -86,7 +86,7 @@
     "command" = "task";
     "args" = [
       "-g"
-      "nb:delete"
+      "sc:delete"
     ];
     "use_new_terminal" = true;
     "allow_concurrent_runs" = false;

@@ -46,7 +46,7 @@ includes:
   pnpm: taskfile/mac/Taskfile.pnpm.yml
   ruler: taskfile/mac/Taskfile.ruler.yml
   singbox: taskfile/mac/Taskfile.singbox.yml
-  nb: taskfile/mac/Taskfile.nb.yml
+  sc: taskfile/mac/Taskfile.scratches.yml
 
 
   # works
