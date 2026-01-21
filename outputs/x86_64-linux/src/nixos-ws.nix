@@ -40,6 +40,7 @@
   };
 
   modules = {
+    system = "x86_64-linux";
     nixos-modules =
       [inputs.sops-nix.nixosModules.sops]
       ++ map mylib.relativeToRoot [
