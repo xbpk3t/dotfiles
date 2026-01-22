@@ -13,7 +13,7 @@
   modules.desktop = {
     alacritty.enable = false;
     ghostty.enable = false;
-    kitty.enable = true;
+    kitty.enable = false;
 
     zed.enable = true;
     vscode.enable = false;

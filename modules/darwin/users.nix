@@ -13,6 +13,7 @@
       home = "/Users/${myvars.username}";
       description = myvars.username;
       shell = lib.mkDefault (pkgs.zsh + "/bin/zsh");
+      openssh.authorizedKeys.keys = myvars.SSHPubKeys;
     };
 
     # Note: Additional users should be created manually on macOS or via host-specific configuration
