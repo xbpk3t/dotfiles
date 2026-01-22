@@ -1,3 +1,7 @@
+---
+title: 从colmena迁移到deploy-rs
+---
+
 # 从 Colmena 到 deploy-rs：一次彻底的解耦迁移记录
 
 > 目标：用 deploy-rs 实现跨 profile（NixOS / nix-darwin / nix-on-droid）部署，同时把 inventory 从 Colmena 的部署字段中彻底解耦。
@@ -11,6 +15,74 @@
 - 因此需要一条“纯数据 inventory + deploy-rs 适配器”的路径。
 
 ---
+
+## colmena vs deploy-rs
+
+| 对比项（合并后）                                                    | Colmena | deploy-rs | 为什么这么判                                                                                                                                                                                 |
+| ------------------------------------------------------------------- | ------: | --------: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **批量部署体验：批量“选择”+ 批量“执行”**                            |      ✅ |        ✅ | Colmena 在“选择一批节点”上提供内建 tag/glob（`--on @tag`/glob），这是你日常批量操作最省心的部分。 deploy-rs 强在“执行批量 targets”，但“选择谁”更多靠 `--targets` 列表/封装而非内建标签语法。 |
+| **内置 Secrets/Keys 子系统（out-of-store + 生命周期/依赖集成）**    |      ✅ |        ❌ | Colmena 内建 `deployment.keys`，默认 `/run/keys`，可设上传时机并生成 systemd units。 deploy-rs 没有等价的内建 keys 子系统（通常靠 sops-nix/agenix）。                                        |
+| **多 Profile / 多用户 / 不止 NixOS system profile 的部署模型**      |      ❌ |        ✅ | deploy-rs 明确强调 multi-profile、任意用户、任意数量 profiles，不限于 root/NixOS system profile。                                                                                            |
+| **安全网：Magic Rollback（连不上自动回滚）**                        |      ❌ |        ✅ | deploy-rs README 明确提供并解释 Magic Rollback。 Colmena 没有把它作为同级“内建卖点/机制”写在文档中（更多是用户侧讨论需求）。                                                                 |
+| **对 Flakes 的绑定程度（兼容 legacy vs 强约束治理）**               |      ✅ |        ❌ | Colmena 同时一等支持 flake 与 `hive.nix`（非 flake）工作流。 deploy-rs 设计上更 flake-first（虽有兼容手段但主路径是 flakes）。                                                               |
+| **CI/静态校验：`nix flake check` 级别部署定义校验（deployChecks）** |      ❌ |        ✅ | deploy-rs 提供 `deployChecks` 并建议接入 flake `checks`。 Colmena 文档层面没有同等的 deployChecks 集成点。                                                                                   |
+| **并行度/规模化参数：文档化并行部署与限制项**                       |      ✅ |        ❌ | Colmena 有并行度文档，并提供 `--limit` / `--eval-node-limit` 等参数。 deploy-rs README 里不突出这一层“并行调参”的官方接口。                                                                  |
+
+---
+
+:::tip
+
+这里需要注意三个比较项
+
+:::
+
+### 批量部署
+
+:::tip
+
+二者都支持批量部署，只不过设计不同
+
+“一个选择 tag，另一个用 profile”
+
+**_从这点来说，deploy-rs 的使用体验更好_**
+
+:::
+
+- **Colmena 的强项是：内建“如何挑选一批节点”的表达能力**（tag、glob、`--on`）。
+- **deploy-rs 的强项是：内建“如何一次部署一批 targets/profiles”的机制**（`deploy <flake>` 全量、`--targets` 指定多个、multi-profile 模型）。
+
+- deploy-rs 不是“只能用 profile 选”，它是“用 **targets 列表**选”（目标可以是 node 或 node.profile），而不是“用 tag/glob 语法选”。
+
+### 内置 secrets 机制
+
+- Colmena：有 `deployment.keys` + `upload-keys`，默认 `/run/keys`，还能控制上传时机，并生成 systemd service。
+- deploy-rs：文档层面没有同等的“内建 secrets/keys 子系统”，通常靠 sops-nix/agenix 等外部方案。
+
+Colmena 的“内置 secrets/keys 子系统”通常意味着：
+
+- 明文不进 store、落到 `/run/keys`
+- 可控上传时机（pre/post activation）
+- systemd units 帮你建依赖关系
+  deploy-rs 没有同等的内建层，通常用 sops-nix/agenix 这种“系统层 secrets 模块”来做，而不是 deploy-rs 自己做。
+
+### 结论
+
+综上所述，非常明确的
+
+二者都支持的机制有：
+
+- 1、批量部署
+- 2、flake
+
+那么具体决策为：
+
+更需要 tag/glob 挑机器 + 内建 keys(out-of-store+时机+systemd) → Colmena 更贴合。
+
+更需要 multi-profile + magic rollback + flake check → deploy-rs 更贴合。
+
+---
+
+相较之下，**_我更需要 multi-profile 部署，所以最终选择 deploy-rs_**
 
 ## 本次迁移的核心设计
 
