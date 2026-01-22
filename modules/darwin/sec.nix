@@ -36,8 +36,9 @@
       # 依次是 Determinate Nix
       Defaults secure_path="/nix/var/nix/profiles/default/bin:/etc/profiles/per-user/%p/bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 
-      # Passwordless sudo for admin group (optional, uncomment if needed)
-      # %admin ALL=(ALL) NOPASSWD: ALL
+      # what: 允许 admin 组免密 sudo。
+      # why: deploy-rs 远程激活为非交互场景，没有 TTY 无法输入密码，会导致部署失败。
+      %admin ALL=(ALL) NOPASSWD: ALL
     '';
 
     # Certificate management
