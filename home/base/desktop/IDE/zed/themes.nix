@@ -150,9 +150,14 @@
         "scrollbar.thumb.hover_background" = "#fdfff126";
         "scrollbar.track.background" = "#272822";
         "scrollbar.track.border" = "#272822";
+
         # 对齐 IDEA TEXT_SEARCH_RESULT_ATTRIBUTES 背景 = #5F5F00
+        # [2026-01-22] 改成亮黄色，更显眼
+        #
         # "search.match_background" = "#3d3e38";
-        "search.match_background" = "#5f5f00";
+        # "search.match_background" = "#5f5f00";
+        "search.match_background" = "#ffcc00";
+
         "status_bar.background" = "#20211c";
         "surface.background" = "#3b3c35";
         syntax = {

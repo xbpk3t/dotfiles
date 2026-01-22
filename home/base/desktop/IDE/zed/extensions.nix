@@ -67,6 +67,14 @@
   # https://github.com/zed-extensions/log
   "log" = true;
 
+  # https://github.com/oxc-project/oxc-zed
+  #
+  # [2026-01-22] 会卡在 installing extensions 所以注释掉
+  #
+  # 用于 JS/TS 的 lint 与格式化
+  # 相较 ESLint 快很多（50–100x 这个量级）
+  # "oxc" = true;
+
   # "catppuccin"
   # "material-icon-theme"
   # "wakatime"

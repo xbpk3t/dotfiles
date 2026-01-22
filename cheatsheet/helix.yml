@@ -9,6 +9,45 @@
     # <Space> c ：智能切换注释（toggle comments）这会自动为每行行首添加或移除注释符号（比如 #），并且如果语言支持块注释（如 /* */），它会优先选择合适的类型。通常对于 # 这种行注释，它会直接在每行首加 # 。
     # <Space> <A-c> （即 Space + Alt-c）：强制使用 行注释（toggle line comments）这会严格地在每行首添加 #（或语言对应的行注释符号），适合你想要的“每个行首加入#”的效果。
     # Ctrl-c ：另一个快捷键，也对应 toggle comments（效果同 <Space> c）。
+    #
+    #
+    #
+    #
+    #
+    #
+    #
+    #
+    #
+    #
+    #
+    # Helix 里“整块变注释”的操作，本质是：**先把那段内容选成一个 selection，然后对 selection 执行 toggle comment**（Helix 的 selection-first）。([Helix][1])
+
+    # ### 最常用的两种按法（都行）
+
+    # #### 方式 A：`x` 选行 → `Space c` 注释
+
+    # 1. 光标放到要注释的第一行
+    # 2. 按 `x`：选中当前行；再连续按 `x` 会逐行向下扩展选区([Helix][1])
+    # 3. 按 `Space` 然后按 `c`：对选区执行 **Comment/uncomment selections**([Helix][1])
+
+    # > 在 YAML 里，它会按语言的 line comment 规则加 `#`。
+
+    # #### 方式 B：`v` 进入选择模式 → 移动扩选 → `Ctrl-c` 注释
+
+    # 1. `v` 进入 Select/extend mode（移动键会“扩展选区”而不是替换光标）([Helix][1])
+    # 2. 用 `j/k` 扩到你想覆盖的多行
+    # 3. `Ctrl-c`：Comment/uncomment the selections([Helix][1])
+
+    # ---
+
+    # ### 你之前感觉“Helix 能直接整块注释”的原因
+
+    # 因为 Helix 把“注释”当作对 selection 的一个操作（toggle），所以不需要你像 Vim 那样再手动给每行加 `#`。([Helix][1])
+
+    # > 如果你说的是 **Zed 的 helix_mode**：它是 *WIP*，并不是所有 Helix 键位都完全实现；但上面这两种（尤其 `Space c`）通常是最接近 Helix 正宗手感的做法。([zed.dev][2])
+
+    # [1]: https://docs.helix-editor.com/keymap.html "Keymap"
+    # [2]: https://zed.dev/docs/helix?utm_source=chatgpt.com "Helix Mode | Zed Code Editor Documentation"
 
     - des: helix里怎么删除当前行？类似vim的dd
       cmd: x选中多行之后，直接 d 删除选中行  # helix是“先选内容，后操作”的逻辑（所以没有dd，要比dd更好）
@@ -31,6 +70,14 @@
       cmd:  # <space>e：打开 file explorer（层级式），从 workspace root 开始
 
   # <space>E：从当前文件所在目录打开 file explorer（更像“就地浏览”）
+
+
+    - des: helix 下怎么剪贴已经选中的内容？我指的是到系统剪切板里
+    # 先选中一段文本（进入选择模式/扩选即可）
+    # 写入系统剪贴板：按 Space 然后按 y（有些版本/键位表会写成 Space + Y）
+    # 删除选区：按 d（这样就等价于“剪切”）
+    # 核心点：Space + y(/Y) 负责“进系统剪贴板”，d 负责“从文档移除”。
+
 
 
 - type: 选择与多光标
