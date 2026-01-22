@@ -8,6 +8,7 @@
   macosSystemArgs = args // {inherit lib;};
 
   name = "macos-ws";
+  ssh-host = "100.115.38.12";
 
   genSpecialArgs = system: let
     customPkgsOverlay = import (mylib.relativeToRoot "pkgs/overlay.nix");
@@ -64,7 +65,8 @@
   in {
     # What：部署目标地址（主机名/SSH alias）。
     # Why：保持与 inventory/主机名一致，便于统一管理。
-    hostname = name;
+    # 注意这里本应是 hostname = name，但是
+    hostname = ssh-host;
     # What：SSH 用户名。
     # Why：darwin 通常使用本地用户名进行远程连接。
     inherit sshUser;
