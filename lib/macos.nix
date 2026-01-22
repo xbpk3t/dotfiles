@@ -18,9 +18,10 @@ in
       ++ [
         (
           {...}: {
-            # Darwin 系统使用 nixpkgs-darwin，配置 allowBroken = true
-            nixpkgs.config.allowUnfree = true;
-            nixpkgs.config.allowBroken = true; # 允许安装 broken 包（如 zig）
+            # what: 让系统与 Home Manager 复用同一个预配置 pkgs 实例。
+            # why: 使用 home-manager.useGlobalPkgs 时，设置 nixpkgs.config/overlays 会触发警告；
+            #      通过 nixpkgs.pkgs 复用 specialArgs.pkgs 可避免该问题并保持一致性。
+            nixpkgs.pkgs = specialArgs.pkgs;
           }
         )
       ]

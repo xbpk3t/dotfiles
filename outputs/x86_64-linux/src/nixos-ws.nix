@@ -5,6 +5,7 @@
   inputs,
   mylib,
   myvars,
+  lib,
   ...
 } @ args: let
   name = "nixos-ws";
@@ -41,6 +42,8 @@
 
   modules = {
     system = "x86_64-linux";
+    # 说明：显式透传 lib，避免 deadnix 误删后导致下游 nixosSystem 缺参。
+    inherit lib;
     nixos-modules =
       [inputs.sops-nix.nixosModules.sops]
       ++ map mylib.relativeToRoot [
