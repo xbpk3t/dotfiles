@@ -162,6 +162,31 @@ in {
   # 再由 autossh 负责拉起重连。
   #
   #
+  # hti-2: autossh 跟 SSH内置的 ServerAliveInterval, ServerAliveCountMax, TCPKeepAlive 这套机制 有啥区别？
+  #
+  # 只配 ServerAlive*：
+  # ✅ 更不容易被“闲置超时”切断 + 更快发现断线
+  # ❌ 断了就断了，不会回来
+  #
+  # 用 autossh：
+  # ✅ 断了能自动回来（前提网络恢复）
+  # ❌ “回来”意味着一个全新的 SSH 连接，上层应用可能仍然会认为 session 断过了
+  #
+  # 它是什么：一个 wrapper/守护进程，帮你运行 ssh，并监控它是否还活着
+
+  # 机制：
+
+  # 当它检测到 ssh session 挂了/不可用，会 kill 掉并重新启动 ssh（重连）
+
+  # 它可以用两种方式检测：
+
+  # 以前常见：通过额外的监控端口（-M）做回环/探测
+
+  # 现在也经常：直接依赖 ssh 自己的 ServerAliveInterval 让 ssh 尽快失败，然后 autossh 负责拉起下一次（更简单）
+  #
+  #
+  #
+  #
   # htu: -M 0 是什么意思？为什么很多时候更推荐？
   #
   #       -M 0 会关闭 autossh 自己的监控端口机制；此时 autossh 只在 ssh 退出后重启。

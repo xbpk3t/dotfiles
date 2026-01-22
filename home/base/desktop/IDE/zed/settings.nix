@@ -88,12 +88,26 @@ in {
   # - ✅ [Outline for mardown indent] https://github.com/zed-industries/zed/pull/45643
   # v0.220.0 已经处理掉了
   #
+  #
   # - [Remote SSH Auto Reconnect]
   # 目前zed不支持 Auto Reconnect，必须要手动重连
+  #
+  #
+  # - []
+  # https://github.com/zed-industries/zed/issues/39206
 
   # MAYBE[2026-01-18]: zed 是否会提供类似 hx --health 这种查看所有本身 xxx  LSP 的命令？
   #
   # https://zed.dev/docs/languages 文档里已经列出了所有langs的LSP
+
+  # https://zed.dev/blog/hidden-gems-part-2
+  #
+  #
+  #
+  # - [git commit panel 可以点选并展示单个文件] 而非全部diff统一都全部列在Editor
+  # [Single-File Git Diff from Git Panel · zed-industries/zed · Discussion #38420](https://github.com/zed-industries/zed/discussions/38420)
+  #
+  #
 
   # 可供参考的zed配置
   # https://github.com/linkfrg/dotfiles/blob/main/modules/home-manager/software/zed/settings.nix
@@ -112,14 +126,41 @@ in {
   # icon_theme = Zed (Default);
   icon_theme = "Catppuccin Mocha";
 
+  # !!!
+  # 目前选择了最主流的 jetbrains + vim
+  #
+  #
   # 默认使用JB的键位
   base_keymap = "JetBrains";
+  #
+  #
+  # https://zed.dev/docs/vim
+  #
+  vim_mode = true;
 
   # 自动保存（默认off，所以需要自己手动设置）
   autosave = {
     after_delay = {
       milliseconds = 500;
     };
+  };
+
+  # 避免在日志/诊断/分享配置时泄露私密内容
+  redact_private_values = true;
+
+  # https://zed.dev/docs/reference/all-settings#file-types
+  #
+  # 补充文件类型识别，便于语法高亮/LSP
+  file_types = {
+    Dockerfile = [
+      "Dockerfile"
+      "Dockerfile.*"
+    ];
+    JSON = [
+      "json"
+      "jsonc"
+      "*.code-snippets"
+    ];
   };
 
   # 直接使用stylix的theme
@@ -155,14 +196,18 @@ in {
   ############ Search ###########
 
   # https://zed.dev/docs/configuring-zed#search
+  #
+  # 注意以下前4个配置项，只是用来配置，默认开关相应filter，而非相应按钮本身的展示与否
+  # 所以都设置为false
+  #
   search = {
     # 只匹配整词（缩小匹配范围）
-    whole_word = true;
-    case_sensitive = true;
-    include_ignored = true;
-
+    whole_word = false;
+    case_sensitive = false;
+    # 是否把 gitignored 文件也纳入搜索结果
+    include_ignored = false;
     # 【用regex批量查找/替换】
-    regex = true;
+    regex = false;
 
     # 是否在状态栏显示“项目搜索按钮”（不改变范围）
     button = true;
@@ -181,6 +226,9 @@ in {
 
   # https://zed.dev/docs/configuring-zed#file-scan-exclusions
   # 用来在搜索时，excludes这些文件
+  #
+  # why:
+  # - 排除构建产物/工具目录，加快索引与搜索
   file_scan_exclusions = [
     # Default Items
     "**/.git"
@@ -199,6 +247,18 @@ in {
     "**/node_modules"
     "**/dist"
     "**/.idea"
+
+    # below from [jellydn/zed-101-setup]
+    "**/out"
+    "**/.husky"
+    "**/.turbo"
+    "**/.vscode-test"
+    "**/.vscode"
+    "**/.next"
+    "**/.storybook"
+    "**/.tap"
+    "**/.nyc_output"
+    "**/report"
   ];
 
   # 即使被 git ignore，也强制纳入 Zed 的扫描/搜索（用于 .env* 这类默认不想进 git 但又想可搜索的文件）；但仍会被 file_scan_exclusions 盖掉。
@@ -236,7 +296,10 @@ in {
         activate_script = "default";
       };
     };
-    env = {};
+    env = {
+      # 终端中调用编辑器时等待 Zed 关闭
+      EDITOR = "zed --wait";
+    };
     font_family = ".ZedMono";
     font_features = fontFeatures;
     # Terminal fontsize
@@ -274,6 +337,12 @@ in {
     agent_review = false;
     code_actions = false;
   };
+
+  # 因为我设置了 TabTar = false
+  # 所以 EditorTab 也没必要设置了
+  #
+  #
+  # https://zed.dev/docs/reference/all-settings#editor-tabs
   tab_bar = {
     show = false;
     show_nav_history_buttons = false;
@@ -293,7 +362,9 @@ in {
     enabled = true;
     line_width = 1;
     active_line_width = 1;
-    coloring = "fixed";
+
+    # [2026-01-21] 改为 rainbow indentation，更清晰（但是bg仍然disable，否则会很干扰）
+    coloring = "indent_aware";
     background_coloring = "disabled";
   };
 
@@ -390,11 +461,12 @@ in {
   # Agent Configuration - Claude Code via ACP
   # Make sure you have the latest version of Zed
   # Find available agents in the Plus menu in the Agent Panel
-  agent = {
-    provider = "claude-code";
-    # Claude Code will run as an independent process via ACP
-    # Zed provides the UI for following edits, reviewing changes, and managing tasks
-  };
+  # agent = {
+  #   provider = "claude-code";
+  #   # Claude Code will run as an independent process via ACP
+  #   # Zed provides the UI for following edits, reviewing changes, and managing tasks
+  # };
+
   gutter = {
     line_numbers = true;
     runnables = true;
@@ -416,15 +488,36 @@ in {
     hunk_style = "staged_hollow";
   };
 
+  # 也就是 CMD+Shift+O 打开的文件搜索框
+  #
+  #
+  # 默认的几个配置项都很很易用，不需要修改
+  #
+  # file_icons
+  # modal_max_width
+  # skip_focus_for_active_in_search
+  #
+  file_finder = {
+    # 新开的pane出现在下面（默认up）
+    # pane_split_direction_horizontal = "down";
+  };
+
+  # 禁用相对行号（默认false，显式声明）
+  # 相对行号更利于 vim 式跳转/定位，但是我确实用不惯。
+  #
+  relative_line_numbers = "disabled";
+
+  # 禁用Tab补全，很干扰
+  show_edit_predictions = false;
+
   # AI Features Configuration
   features = {
-    # Enable AI features for Claude Code integration
-    copilot = false; # Keep GitHub Copilot disabled, using Claude Code instead
-    # Enable inline completion via AI
-    # 默认
-    # inline_completion_provider = supermaven; # or none if you prefer manual AI invocation
+    # https://zed.dev/docs/reference/all-settings#edit-prediction-provider
+    edit_prediction_provider = "none";
   };
-  hour_format = "hour24";
+
+  # hour_format = "hour24";
+
   # https://zed.dev/docs/configuring-zed#scroll-beyond-last-line
   # 默认 one_page. 在编辑区里，无论什么文件类型，都可以拉到最后一行，导致下面整块全都是一片空白
   # 完全禁用。文件底部将固定在编辑器的底端，无法继续向下滚动。
@@ -483,6 +576,14 @@ in {
   auto_update_extensions = exts;
 
   ############# Languages ###############
+  #
+  #
+  #
+
+  # https://zed.dev/docs/reference/all-settings#inlay-hints
+  inlay_hints = {
+    enabled = true;
+  };
 
   # https://zed.dev/docs/languages
   languages = {
@@ -546,9 +647,20 @@ in {
     };
 
     Python = {
-      formatter = "language_server";
-      format_on_save = "on";
       tab_size = 4;
+      format_on_save = "on";
+      # formatter = "language_server";
+      formatter = {
+        language_server = {
+          name = "ruff";
+        };
+      };
+
+      # pyright 负责类型分析，ruff 负责 lint/format
+      language_servers = [
+        "pyright"
+        "ruff"
+      ];
     };
 
     JavaScript = {
@@ -563,6 +675,15 @@ in {
       };
       format_on_save = "on";
       tab_size = 2;
+    };
+
+    TypeScript = {
+      inlay_hints = {
+        enabled = true;
+        show_parameter_hints = false;
+        show_other_hints = true;
+        show_type_hints = true;
+      };
     };
   };
 
@@ -605,6 +726,18 @@ in {
             bracketSpacing = false;
           };
         };
+      };
+    };
+
+    # 告诉 Tailwind LSP 这些字段也包含 class，保证补全/提示生效。
+    tailwindcss-language-server = {
+      settings = {
+        classAttributes = [
+          "class"
+          "className"
+          "ngClass"
+          "styles"
+        ];
       };
     };
   };
