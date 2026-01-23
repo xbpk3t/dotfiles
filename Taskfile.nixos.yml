@@ -9,15 +9,6 @@ vars:
 tasks:
   # ==================== NixOS 模板任务 ====================
 
-
-  update:
-    desc: "更新所有 flake 到最新版本，并查看更新内容"
-    cmds:
-      # - task: upgrade
-      - nix flake update # nix flake update --flake ./nix
-      - nix flake show
-
-
   update-input:
     desc: "Update specific flake input (usage: task nix:update-input INPUT=nixpkgs)"
     cmds:
@@ -125,12 +116,17 @@ tasks:
       - 'nix eval --raw .#deploy.nodes --apply "x: builtins.concatStringsSep \"\\n\" (builtins.attrNames x)"'
 
   deploy:
-    desc: "deploy-rs 部署（默认 system profile）"
-    vars:
-      HOST:
-        sh: 'nix eval --raw .#deploy.nodes --apply "x: builtins.concatStringsSep \"\\n\" (builtins.attrNames x)" | gum choose --header "选择节点"'
+    desc: "deploy-rs 部署（支持多选）"
     cmds:
-      - nix run github:serokell/deploy-rs -- .#{{.HOST}}
+      - |
+        hosts="$(nix eval --raw .#deploy.nodes --apply "x: builtins.concatStringsSep \"\\n\" (builtins.attrNames x)" | gum choose --no-limit --header "选择节点（可多选）")"
+        if [[ -z "$hosts" ]]; then
+          echo "No node selected"
+          exit 1
+        fi
+        while IFS= read -r host; do
+          nix run github:serokell/deploy-rs -- ".#${host}"
+        done <<< "$hosts"
 
   deploy-profile:
     desc: "deploy-rs 部署指定 profile"
@@ -147,34 +143,3 @@ tasks:
         else
           nix run github:serokell/deploy-rs -- .#{{.HOST}}."$profile"
         fi
-
-
-
-
-#  用途：跟踪某个应用程序的文件访问行为。
-#  分析：
-#  使用 strace 工具跟踪指定应用（{{.app}}）的文件相关系统调用，结合参数（{{.args}}）。
-#  过滤掉无关路径（如 /nix/store、/newroot、/proc），提取并整理访问的文件路径（去重并排序）。
-#  使用场景：调试或分析程序的文件依赖，检查哪些文件被程序实际访问（例如，排查配置缺失或权限问题）。
-#  示例：运行 trace-access app=notepad args="--file test.txt" 可以查看 Notepad 访问了哪些文件。
-  trace-access:
-    desc: "跟踪文件访问"
-    vars:
-      app: '{{.app}}'
-      args: '{{.args | default ""}}'
-    cmds:
-      - strace -f -t -e trace=file {{.app}} {{.args}} | complete | grep -v -E "(/nix/store|/newroot|/proc)" | grep -o '"(/.*)"' | sort | uniq
-
-#  用途：查看指定进程的环境变量。
-#  分析：
-#
-#  通过读取 /proc/{{.pid}}/environ 文件，获取指定进程 ID（{{.pid}}）的环境变量，并将结果格式化（将空字符 \0 替换为换行符 \n）。
-#  需要 sudo 权限以访问 /proc 下的文件。
-#  使用场景：调试进程运行环境，检查环境变量是否正确设置（例如，排查 PATH 或自定义变量问题）。
-#  示例：运行 penvof pid=1234 可以列出 PID 为 1234 的进程的所有环境变量。
-  penvof:
-    desc: "查看进程环境变量"
-    vars:
-      pid: '{{.pid}}'
-    cmds:
-      - sudo cat "/proc/{{.pid}}/environ" | tr '\0' '\n'

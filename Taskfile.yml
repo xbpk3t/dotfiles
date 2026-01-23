@@ -17,6 +17,17 @@ includes:
 # 遇到一个 nix/store cache问题，导致
 
 tasks:
+  deploy:
+    desc: "统一 deploy 入口（选择 nixos / darwin）"
+    cmds:
+      - |
+        os="$(printf "nixos\ndarwin\n" | gum choose --header "选择系统类型")"
+        if [[ -z "$os" ]]; then
+          echo "No system selected"
+          exit 1
+        fi
+        task "${os}:deploy"
+
   rm-flake:
     desc: "用来移除指定flake包"
     cmds:
@@ -24,6 +35,13 @@ tasks:
       - nix flake lock
       - nix flake check
       - nix flake metadata
+
+  update-flake:
+    desc: "更新所有 flake 到最新版本，并查看更新内容"
+    cmds:
+      # - task: upgrade
+      - nix flake update # nix flake update --flake ./nix
+      - nix flake show
 
 
 
