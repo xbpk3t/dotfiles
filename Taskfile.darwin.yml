@@ -57,12 +57,19 @@ tasks:
       - 'nix eval --raw .#deploy.nodes --apply "x: builtins.concatStringsSep \"\\n\" (builtins.attrNames x)"'
 
   deploy:
-    desc: "deploy-rs 部署（默认 system profile）"
+    desc: "deploy-rs 部署（支持多选）"
     vars:
       HOST:
-        sh: 'nix eval --raw .#deploy.nodes --apply "x: builtins.concatStringsSep \"\\n\" (builtins.attrNames x)" | gum choose --header "选择节点"'
+        sh: 'nix eval --raw .#deploy.nodes --apply "x: builtins.concatStringsSep \"\\n\" (builtins.attrNames x)" | gum choose --no-limit --header "选择节点（可多选）"'
     cmds:
-      - nix run github:serokell/deploy-rs -- .#{{.HOST}}
+      - |
+        if [[ -z "{{.HOST}}" ]]; then
+          echo "No node selected"
+          exit 1
+        fi
+        while IFS= read -r host; do
+          nix run github:serokell/deploy-rs -- ".#${host}"
+        done <<< "{{.HOST}}"
 
   deploy-profile:
     desc: "deploy-rs 部署指定 profile"
