@@ -298,7 +298,11 @@ in {
     };
     env = {
       # 终端中调用编辑器时等待 Zed 关闭
-      EDITOR = "zed --wait";
+      # [2026-01-23] 注意是 zeditor 而非 zed
+      # 这里指的是，在zed terminal里，EDITOR就被zed覆盖了
+      #
+      # [2026-01-23]
+      # EDITOR = "zeditor --wait";
     };
     font_family = ".ZedMono";
     font_features = fontFeatures;
