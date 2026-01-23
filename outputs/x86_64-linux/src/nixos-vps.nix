@@ -8,7 +8,7 @@
   myvars,
   ...
 } @ args: let
-  roleName = "nixos-vps";
+  name = "nixos-vps";
   ssh-user = "root";
   customPkgsOverlay = import (mylib.relativeToRoot "pkgs/overlay.nix");
 
@@ -22,15 +22,17 @@
         inputs.disko.nixosModules.disko
       ]
       ++ map mylib.relativeToRoot [
-        "hosts/${roleName}/default.nix"
+        "hosts/${name}/default.nix"
         "secrets/default.nix"
         "modules/nixos/base"
         "modules/nixos/vps"
         "modules/nixos/extra/k3s.nix"
       ];
     home-modules = map mylib.relativeToRoot [
+      "hosts/${name}/home.nix"
       "secrets/default.nix"
       "home/base/core"
+      "home/extra/zed-remote.nix"
     ];
   };
 
@@ -45,7 +47,12 @@
       overlays = [customPkgsOverlay];
     };
   in {
-    inherit inputs mylib myvars pkgs;
+    inherit
+      inputs
+      mylib
+      myvars
+      pkgs
+      ;
 
     pkgs-unstable = import inputs.nixpkgs-unstable or inputs.nixpkgs {
       inherit system;
@@ -54,22 +61,20 @@
     };
   };
 
-  mkNodeModule = name: node: {
-    # 变更项都放到 inventory，避免散落在各个 hosts
-    networking.hostName = node.hostName or name;
+  mkNodeModule = name: node:
+    {
+      # 变更项都放到 inventory，避免散落在各个 hosts
+      networking.hostName = node.hostName or name;
 
-    modules.networking.tailscale.derper = {
-      enable = true;
-      domain = node.tailscale.derpDomain;
-      acmeEmail = myvars.mail;
+      modules.networking.tailscale.derper = {
+        enable = true;
+        domain = node.tailscale.derpDomain;
+        acmeEmail = myvars.mail;
+      };
+    }
+    // lib.optionalAttrs (node ? k3s) {
+      modules.extra.k3s = node.k3s;
     };
-
-    # k3s agent：只从 inventory 注入 enable/role，其他配置在模块内固化
-    modules.extra.k3s = lib.mkIf (node ? k3s && (node.k3s.enable or false)) {
-      enable = true;
-      role = node.k3s.role;
-    };
-  };
 
   mkNodeRole = name: node: let
     nodeModule = mkNodeModule name node;
@@ -79,10 +84,12 @@
         nixos-modules = baseModules.nixos-modules ++ [nodeModule];
       };
     systemArgs = modules // args;
-    nixosConfig = mylib.nixosSystem (systemArgs
+    nixosConfig = mylib.nixosSystem (
+      systemArgs
       // {
         inherit genSpecialArgs;
-      });
+      }
+    );
     deployNode = mylib.inventory.deployRsNode {
       inherit name node;
       nixosConfiguration = nixosConfig;

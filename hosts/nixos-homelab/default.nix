@@ -91,7 +91,8 @@ in {
       k3s = {
         enable = true;
         role = "server";
-        serverAddr = "https://100.81.204.63:6443";
+        serverIP = "100.81.204.63";
+        serverPort = 6443;
       };
     };
   };
