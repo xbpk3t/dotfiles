@@ -104,6 +104,9 @@ in {
 
       # Acme
       acme_cloudflare_env = mkUserSecret "acme/cloudflare_env";
+
+      # k3s
+      k3s_token = mkRootSecret "k3s/token";
     };
   };
 }
