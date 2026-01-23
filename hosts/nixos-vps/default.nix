@@ -2,13 +2,15 @@
   config,
   lib,
   myvars,
-  mylib,
   ...
 }: let
   inherit (myvars.networking) nameservers;
   diskDevice = lib.attrByPath ["disko" "devices" "disk" "vda" "device"] "/dev/vda" config;
 in {
-  imports = mylib.scanPaths ./.;
+  imports = [
+    ./disko.nix
+    ./hardware.nix
+  ];
 
   boot.loader = {
     systemd-boot.enable = lib.mkForce false;
@@ -60,11 +62,16 @@ in {
   };
 
   services = {
-    dokploy-server.enable = true;
+    dokploy-server.enable = false;
     singbox-server.enable = true;
   };
 
-  networking.firewall.allowedTCPPorts = lib.mkAfter [80 443];
-
+  # k3s agent：VPS 统一作为 worker 节点
+  modules.extra.k3s = {
+    enable = true;
+    role = "agent";
+    serverIP = "100.81.204.63";
+    serverPort = 6443;
+  };
   system.stateVersion = "24.11";
 }
