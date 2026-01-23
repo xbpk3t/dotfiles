@@ -26,6 +26,7 @@
         "secrets/default.nix"
         "modules/nixos/base"
         "modules/nixos/vps"
+        "modules/nixos/extra/k3s.nix"
       ];
     home-modules = map mylib.relativeToRoot [
       "secrets/default.nix"
@@ -61,6 +62,12 @@
       enable = true;
       domain = node.tailscale.derpDomain;
       acmeEmail = myvars.mail;
+    };
+
+    # k3s agent：只从 inventory 注入 enable/role，其他配置在模块内固化
+    modules.extra.k3s = lib.mkIf (node ? k3s && (node.k3s.enable or false)) {
+      enable = true;
+      role = node.k3s.role;
     };
   };
 
