@@ -3,6 +3,10 @@
     nixos-vps-dev = {
       hostName = "nixos-vps-dev";
       primaryIp = "142.171.154.61";
+      k3s = {
+        enable = true;
+        role = "agent";
+      };
       tailscale = {
         derpDomain = "derp-nixos-vps-dev.lucc.dev";
       };
@@ -19,6 +23,10 @@
     nixos-vps-svc = {
       hostName = "nixos-vps-svc";
       primaryIp = "103.85.224.63";
+      k3s = {
+        enable = true;
+        role = "agent";
+      };
       tailscale = {
         derpDomain = "derp-nixos-vps-svc.lucc.dev";
       };

@@ -48,6 +48,7 @@
         "modules/nixos/extra/singbox-client.nix"
         "modules/nixos/extra/vscode-remote.nix"
         "modules/nixos/extra/fhs.nix"
+        "modules/nixos/extra/k3s.nix"
 
         # homelab 需要时可启用 k3s 模块，先在 host 层决定
         # "modules/nixos/homelab/k3s.nix"
