@@ -62,72 +62,109 @@
     # **使用 IPVS 模式的前提：** 如果计划或正在使用 `kube-proxy` 的 `ipvs` 模式，那么 `ipvsadm` 是必需的，因为 `kube-proxy` 需要用它来配置内核中的 IPVS 规则。同时，`ipvs` 模式本身通常也需要依赖 `ipset` 来实现某些功能。
     # **结论：** 如果你使用 `kube-proxy` 的默认 `iptables` 模式，`ipvsadm` 不是必需的。但如果你计划使用或正在使用性能更优的 `ipvs` 模式，那么 `ipvsadm` 是**必须安装**的。即使现在不用 IPVS 模式，预先安装它为将来可能的模式切换或性能优化做准备也是明智的，因此通常是**可选，但推荐安装**。
 
-    helm-dashboard # https://github.com/komodorio/helm-dashboard/
+    # https://github.com/komodorio/helm-dashboard/
+    helm-dashboard
 
-    #    # Kubernetes 相关工具
+    # Kubernetes 相关工具
     kubectl
     kubernetes-helm
-    #    kustomize
-    #    kind
-    #    minikube
-    #
-    #    # 可选的其他工具
-    k9s # K8s 终端 UI
-    #    stern        # 多 Pod 日志查看
-    #    kubectx      # 上下文切换
-    #    kubens       # 命名空间切换
-    #
-    #    # 数据库客户端
-    #    mysql-client
-    #    postgresql
-    #
-    #    # 网络工具
-    #    curl
-    #    wget
-    #    httpie
-    #
-    #    # 监控相关
-    #    prometheus-cli
-    #    grafana-loki
 
-    #    podman-compose
-    #    dive # explore docker layers
-    #    lazydocker # Docker terminal UI.
-    #    skopeo # copy/sync images between registries and local storage
-    #    go-containerregistry # provides `crane` & `gcrane`, it's similar to skopeo
+    # https://mynixos.com/packages/kubernetes-helmPlugins
+
+    # https://github.com/nix-community/nixhelm
     #
-    #    kubectl
-    #    kubectx # kubectx & kubens
-    #    kubie # same as kubectl-ctx, but per-shell (won’t touch kubeconfig).
-    #    kubectl-view-secret # kubectl view-secret
-    #    kubectl-tree # kubectl tree
-    #    kubectl-node-shell # exec into node
-    #    kubepug # kubernetes pre upgrade checker
-    #    kubectl-cnpg # cloudnative-pg's cli tool
     #
-    #    kubebuilder
-    #    istioctl
-    #    clusterctl # for kubernetes cluster-api
+    # https://nixos.wiki/wiki/Helm_and_Helmfile
+    #
+    #
+    # https://github.com/redpanda-data/helm-charts
+
+    # https://mynixos.com/nixpkgs/package/kustomize
+    #
+    # https://mynixos.com/nixpkgs/package/kustomize-sops
+    #
+    #
+    kustomize
+    kind
+    minikube
+
+    # 可选的其他工具
+    #
+    #
+    k9s # K8s 终端 UI
+    # stern        # 多 Pod 日志查看
+    # kubectx      # 上下文切换
+    # kubens       # 命名空间切换
+
+    # # 数据库客户端
+    # mysql-client
+    # postgresql
+
+    # # 网络工具
+    # curl
+    # wget
+    # httpie
+
+    # # 监控相关
+    # prometheus-cli
+    # grafana-loki
+
+    # podman-compose
+    # dive # explore docker layers
+    # lazydocker # Docker terminal UI.
+    # skopeo # copy/sync images between registries and local storage
+    # go-containerregistry # provides `crane` & `gcrane`, it's similar to skopeo
+
+    # kubectl
+    # kubectx # kubectx & kubens
+    # kubie # same as kubectl-ctx, but per-shell (won’t touch kubeconfig).
+    # kubectl-view-secret # kubectl view-secret
+    # kubectl-tree # kubectl tree
+    # kubectl-node-shell # exec into node
+    # kubepug # kubernetes pre upgrade checker
+    # kubectl-cnpg # cloudnative-pg's cli tool
+
+    # kubebuilder
+    # istioctl
+    # clusterctl # for kubernetes cluster-api
 
     # https://mynixos.com/nixpkgs/package/kubevirt
     kubevirt # virtctl
 
-    #    pkgs-stable.kubernetes-helm
-    #    fluxcd
-    #    argocd
-    #
-    #    ko # build go project to container image
+    # pkgs-stable.kubernetes-helm
+    # fluxcd
+    # argocd
+
+    # ko # build go project to container image
   ];
 
   programs = {
     # https://mynixos.com/home-manager/options/programs.k9s
+    #
+    #
     k9s = {
       enable = true;
-      skins = {default = {k9s = {body = {fgColor = "dodgerblue";};};};};
+      skins = {
+        default = {
+          k9s = {
+            body = {
+              fgColor = "dodgerblue";
+            };
+          };
+        };
+      };
       views = {
         # Move all nested views directly under programs.k9s.views
         "v1/pods" = {
-          columns = ["AGE" "NAMESPACE" "NAME" "IP" "NODE" "STATUS" "READY"];
+          columns = [
+            "AGE"
+            "NAMESPACE"
+            "NAME"
+            "IP"
+            "NODE"
+            "STATUS"
+            "READY"
+          ];
         };
       };
 
@@ -201,7 +238,15 @@
             scopes = ["po"];
             command = "kubectl";
             background = false;
-            args = ["logs" "-f" "$NAME" "-n" "$NAMESPACE" "--context" "$CLUSTER"];
+            args = [
+              "logs"
+              "-f"
+              "$NAME"
+              "-n"
+              "$NAMESPACE"
+              "--context"
+              "$CLUSTER"
+            ];
           };
 
           settings = {
