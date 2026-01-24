@@ -10,7 +10,6 @@ secrets/age.key
 *.age.key
 secrets/secrets_temp.yaml
 
-manifests/
 .cache/
 
 .codex/
@@ -23,3 +22,10 @@ specs/
 result
 result-*
 /.cntr/
+
+/PaaS
+/nixos-k3s
+/k3s-nix
+
+# For Taskfile checksum etc...
+/.task
