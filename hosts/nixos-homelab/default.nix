@@ -61,7 +61,7 @@ in {
     };
 
     homelab = {
-      dokploy.enable = true;
+      dokploy.enable = false;
       samba = {
         enable = true;
         shareName = "luck";

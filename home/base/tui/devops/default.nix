@@ -9,6 +9,13 @@
     # https://mynixos.com/nixpkgs/package/pre-commit
     pre-commit
 
+    # https://mynixos.com/nixpkgs/package/dos2unix
+    #
+    # [2026-01-24] 遇到了 CRLF 换行符 问题。
+    # yamllint 报 wrong new line character: expected \n 期望 LF，但文件是 CRLF。
+    # 可以直接用 dos2unix manifests/**/kustomization.yaml 批量解决问题
+    dos2unix
+
     # 代码质量和分析
     shellcheck
     yamllint

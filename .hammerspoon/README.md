@@ -161,10 +161,6 @@ spoon.TaskList:bindHotkeys({
 
 每个 Spoon 都有详细的 README 文档：
 
-- [AudioControl 文档](Spoons/AudioControl.spoon/README.md)
-- [BluetoothManager 文档](./Spoons/BluetoothManager.spoon/README.md)
-- [TaskList 文档](Spoons/TaskList.spoon/README.md)
-
 ## 🐛 故障排除
 
 ### 常见问题
