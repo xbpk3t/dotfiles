@@ -1,0 +1,48 @@
+---
+# [2026-01-25] 从colmena -> deploy-rs 之后，就不需要把 darwin 和 nixos 拆分到不同taskfile了（因为colmena不支持 multi-profile，所以darwin可能使用 darwin-rebuild 命令或者 nh这种第三方工具来部署，NixOS可能使用 nixos-cli 或者 colmena来部署，并不统一。但是切换到 deploy-rs 之后就不需要考虑这些问题了，统一使用 deploy-rs 进行部署即可）
+
+
+version: '3'
+
+vars:
+  # 统一获取 deploy-rs 节点列表，使用换行分隔，供交互选择/批量执行复用
+  NODES_CMD: "nix eval --raw .#deploy.nodes --apply 'x: builtins.concatStringsSep \"\\n\" (builtins.attrNames x)'"
+  # 并发执行上限（可通过环境变量 CONCURRENCY 覆盖）
+  CONCURRENCY_DEFAULT: "4"
+  CONCURRENCY_RESOLVED: '{{.CONCURRENCY | default .CONCURRENCY_DEFAULT}}'
+
+tasks:
+  list:
+    desc: "列出 deploy-rs 节点"
+    cmds:
+      - '{{.NODES_CMD}}'
+
+  default:
+    desc: "deploy-rs 部署（支持多选）"
+    vars:
+      HOSTS:
+        sh: '{{.NODES_CMD}} | gum choose --no-limit --header "选择节点（可多选）"'
+    cmds:
+      - |
+        if [[ -z "{{.HOSTS}}" ]]; then
+          echo "No node selected"
+          exit 1
+        fi
+        printf "%s\n" "{{.HOSTS}}" | xargs -n1 -P "{{.CONCURRENCY_RESOLVED}}" -I{} \
+          nix run github:serokell/deploy-rs -- ".#{}"
+
+  profile:
+    desc: "deploy-rs 部署指定 profile"
+    vars:
+      HOST:
+        sh: '{{.NODES_CMD}} | gum choose --header "选择节点"'
+      PROFILE:
+        sh: 'gum input --prompt "Profile 名称 (默认 system): "'
+    cmds:
+      - |
+        profile="{{.PROFILE}}"
+        if [[ -z "$profile" ]]; then
+          nix run github:serokell/deploy-rs -- .#{{.HOST}}
+        else
+          nix run github:serokell/deploy-rs -- .#{{.HOST}}."$profile"
+        fi
