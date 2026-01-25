@@ -59,6 +59,16 @@ in {
     age.sshKeyPaths = []; # Disable SSH key import
     gnupg.home = null; # Disable GPG key import
 
+    # [2026-01-24]
+    # context: 把dotfiles从homelab迁回mac之后，发现secrets无法在本地生成到 $HOME/.config/sops-nix/secrets. 导致所有服务都挂掉了。
+    #
+    # 关键问题是 sops‑nix 的 Home Manager 模块在 macOS 用 LaunchAgent，EnvironmentVariables 来自 sops.environment，而 PATH 被模块默认写成空字符串；因此 getconf 找不到，导致运行目录创建失败，进而只生成极少文件。这和你从 remote 切回本地、 LaunchAgent 被重建后 PATH 为空的现象一致。Home Manager 的 launchd 配置项确实是 launchd.agents.<name>.config，对应到 plist 的键值。
+    #
+    # 注意这里 lib.mkForce，因为如果不mkForce 仍然会按照默认 空字符串 赋值，导致该配置无效
+    #
+    # 让 sops-install-secrets 的 LaunchAgent 拿到可用 PATH（需要 getconf）
+    environment.PATH = lib.mkForce "/usr/bin:/bin:/usr/sbin:/sbin:/run/current-system/sw/bin:/etc/profiles/per-user/${myvars.username}/bin";
+
     secrets = {
       # Me
       me_pwgen = mkUserSecret "me/pwgen";
@@ -89,12 +99,12 @@ in {
       singbox_clash_secret = mkRootSecret "singbox/clash_secret";
 
       # Shared API tokens
-      #      youtubeApiKey = mkUserSecret "youtube/api_key";
-      #      yuqueToken = mkUserSecret "yuque/token";
-      #      githubAccessToken = mkUserSecret "github/access_token";
-      #      pixivRefreshToken = mkUserSecret "pixiv/refresh_token";
-      #      spotifyClientId = mkUserSecret "spotify/client_id";
-      #      spotifyClientSecret = mkUserSecret "spotify/client_secret";
+      # youtubeApiKey = mkUserSecret "youtube/api_key";
+      # yuqueToken = mkUserSecret "yuque/token";
+      # githubAccessToken = mkUserSecret "github/access_token";
+      # pixivRefreshToken = mkUserSecret "pixiv/refresh_token";
+      # spotifyClientId = mkUserSecret "spotify/client_id";
+      # spotifyClientSecret = mkUserSecret "spotify/client_secret";
 
       API_context7 = mkUserSecret "API/context7";
 
