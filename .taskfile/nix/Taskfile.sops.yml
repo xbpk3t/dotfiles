@@ -2,11 +2,12 @@
 version: '3'
 
 vars:
-  SOPS_FILE: secrets.yaml
+  # 配置：SOPS 源文件路径（可通过调用时传入 SOPS_FILE 覆盖，默认指向本项目 secrets 目录）
+  SOPS_FILE: '{{.SOPS_FILE | default (printf "%s/secrets/secrets.yaml" .USER_WORKING_DIR)}}'
 
 includes:
   # 引入 k8s 相关任务
-  k8s: ./Taskfile.k8s.yml
+  k8s: ./Taskfile.sops.k8s.yml
 
 tasks:
   # 编辑 secrets 文件
@@ -17,6 +18,7 @@ tasks:
   # 查看 secrets 文件内容
   view:
     desc: "查看解密后的 secrets 文件内容"
+    interactive: true
     cmd: 'sops -d {{.SOPS_FILE}}'
 
   # 加密 secrets 文件
@@ -57,43 +59,6 @@ tasks:
   # 列出所有加密的键
   list-keys:
     desc: "列出所有加密的键"
+    interactive: true
     cmds:
       - 'sops -d {{.SOPS_FILE}} | yq eval "keys" -'
-
-  # 获取特定键的值
-  get:
-    desc: "获取特定键的值"
-    cmds:
-      - |
-        if [ -z "{{.CLI_ARGS}}" ]; then
-          echo "用法: task get <键路径>"
-          echo "示例: task get rclone.r2.access_key_id"
-          echo "示例: task get ssh.github.private_key"
-          exit 1
-        fi
-        KEY_PATH="{{.CLI_ARGS}}"
-        sops -d {{.SOPS_FILE}} | yq eval ".$KEY_PATH" -
-
-  # 设置特定键的值
-  set:
-    desc: "设置特定键的值"
-    cmds:
-      - |
-        if [ -z "{{.CLI_ARGS}}" ]; then
-          echo "用法: task set <键路径> <值>"
-          echo "示例: task set rclone.r2.access_key_id 'new_key'"
-          exit 1
-        fi
-        KEY_PATH="{{.CLI_ARGS}}"
-        VALUE="${KEY_PATH#* }"
-        KEY_PATH="${KEY_PATH%% *}"
-        sops -d {{.SOPS_FILE}} | yq eval ".$KEY_PATH = \"$VALUE\"" - | sops -e /dev/stdin > {{.SOPS_FILE}}.tmp
-        mv {{.SOPS_FILE}}.tmp {{.SOPS_FILE}}
-        echo "已更新键: $KEY_PATH"
-
-  # 清理临时文件
-  clean:
-    desc: "清理临时文件"
-    cmds:
-      - 'rm -f secrets_decrypted.yaml {{.SOPS_FILE}}.tmp'
-      - 'echo "清理完成"'
