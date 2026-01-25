@@ -1,0 +1,26 @@
+---
+# Nix Store 维护相关任务（跨平台）
+
+version: '3'
+
+tasks:
+  repair-store:
+    desc: "修复 Nix Store 对象"
+    vars:
+      paths: '{{.paths}}'
+    cmds:
+      - 'echo "🔧 正在修复 Nix Store 对象: {{.paths}}"'
+      - nix store repair {{.paths}}
+
+  verify-store:
+    desc: "验证 Nix Store 完整性，检查损坏的 store 对象"
+    cmds:
+      - echo "🔍 正在验证 Nix Store 完整性..."
+      - nix store verify --all
+      - echo "✅ Nix Store 验证完成"
+
+  gcroot:
+    desc: "显示所有自动 GC 根目录"
+    cmds:
+      - echo "📂 Nix Store 自动 GC 根目录："
+      - ls -al /nix/var/nix/gcroots/auto/

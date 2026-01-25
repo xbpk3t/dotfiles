@@ -1,18 +1,18 @@
 version: '3'
 
 vars:
-  # 配置：统一的 SOPS secrets 源文件（唯一真相）
-  SOPS_FILE: secrets.yaml
-  # 配置：age 私钥文件路径，可通过环境变量 SOPS_AGE_KEY_FILE 覆盖
-  AGE_KEY_FILE: '{{.SOPS_AGE_KEY_FILE | default "age.key"}}'
+  # 配置：SOPS 源文件路径（可通过调用时传入 SOPS_FILE 覆盖）
+  SOPS_FILE: '{{.SOPS_FILE | default (printf "%s/secrets/secrets.yaml" .USER_WORKING_DIR)}}'
+  # 配置：age 私钥文件路径（可通过调用时传入 AGE_KEY_FILE 覆盖）
+  AGE_KEY_FILE: '{{.AGE_KEY_FILE | default (printf "%s/age.key" .USER_WORKING_DIR)}}'
   # 配置：Kubernetes Secret 名称
   K8S_SECRET_NAME: cluster-secrets
   # 配置：Kubernetes 命名空间
   K8S_NAMESPACE: flux-system
-  # 配置：生成的集群 Secret 输出目录
-  OUTPUT_DIR: ../manifests/config/secrets
-  # 配置：生成的集群 Secret 输出文件
-  OUTPUT_FILE: '{{.OUTPUT_DIR}}/cluster-secrets.sops.yaml'
+  # 配置：生成的集群 Secret 输出目录（可通过调用时传入 OUTPUT_DIR 覆盖）
+  OUTPUT_DIR: '{{.OUTPUT_DIR | default (printf "%s/manifests/config/secrets" .USER_WORKING_DIR)}}'
+  # 配置：生成的集群 Secret 输出文件（可通过调用时传入 OUTPUT_FILE 覆盖）
+  OUTPUT_FILE: '{{.OUTPUT_FILE | default (printf "%s/cluster-secrets.sops.yaml" .OUTPUT_DIR)}}'
   # 配置：SOPS 加密字段匹配规则
   SOPS_ENCRYPTED_REGEX: '^(data|stringData)$'
 
@@ -28,7 +28,7 @@ tasks:
       - sh: test -f "{{.SOPS_FILE}}"
         msg: "找不到 SOPS 文件: {{.SOPS_FILE}}"
       - sh: test -f "{{.AGE_KEY_FILE}}"
-        msg: "找不到 age 私钥文件: {{.AGE_KEY_FILE}}（可通过环境变量 SOPS_AGE_KEY_FILE 指定）"
+        msg: "找不到 age 私钥文件: {{.AGE_KEY_FILE}}（可通过 AGE_KEY_FILE 覆盖）"
       - sh: command -v sops >/dev/null 2>&1
         msg: "缺少依赖：sops"
       - sh: command -v yq >/dev/null 2>&1
