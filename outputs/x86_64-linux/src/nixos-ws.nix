@@ -82,7 +82,7 @@
     nixosConfiguration = nixosConfig;
     deployLib = inputs."deploy-rs".lib."x86_64-linux";
     defaultSshUser = ssh-user;
-    remoteBuild = false;
+    remoteBuild = true;
   };
 in {
   nixosConfigurations.${name} = nixosConfig;
