@@ -10,7 +10,7 @@ with lib; let
   port = 8443;
   # 伪装握手目标域名（随便换一个稳定的大站都行）
   handshakeServer = "www.bing.com";
-  inventory = import (mylib.relativeToRoot "inventory/nixos-vps.nix");
+  inventory = mylib.inventory."nixos-vps";
   nodeName = config.networking.hostName;
   singbox = mylib.inventory.singboxForHost inventory nodeName;
   hy2Enabled = singbox ? hy2;

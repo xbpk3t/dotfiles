@@ -6,9 +6,9 @@
   ...
 }:
 with lib; let
-  # singbox 节点清单直接从 inventory/nodes 读取，避免重复手写
-  inventory = import (mylib.relativeToRoot "inventory/nixos-vps.nix");
-  nodes = inventory.nodes or {};
+  # singbox 节点清单直接从 inventory 读取（lib/inventory/data.nix 分组结构）
+  inventory = mylib.inventory."nixos-vps";
+  nodes = inventory;
   servers = lib.lists.filter (s: s != null) (
     lib.attrsets.mapAttrsToList (
       name: node:

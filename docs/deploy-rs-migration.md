@@ -107,21 +107,21 @@ Colmena 的“内置 secrets/keys 子系统”通常意味着：
 
 相关文件：
 
-- `inventory/nixos-vps.nix`
-- `lib/inventory.nix`
+- `lib/inventory/data.nix`
+- `lib/inventory/utils.nix`
 
 ---
 
 ### 2) deploy-rs 适配器成为唯一部署入口
 
-新增 `lib/inventory.nix` 的 `deployRsNode`：
+新增 `lib/inventory/utils.nix` 的 `deployRsNode`：
 
 - 把纯数据节点映射成 deploy-rs 的 `deploy.nodes.<name>` 结构
 - 统一处理默认 SSH 用户、端口、远端构建策略
 
 相关文件：
 
-- `lib/inventory.nix`
+- `lib/inventory/utils.nix`
 - `outputs/x86_64-linux/src/nixos-vps.nix`
 - `outputs/x86_64-linux/src/nixos-ws.nix`
 - `outputs/x86_64-linux/src/nixos-homelab.nix`
@@ -160,7 +160,7 @@ Colmena 的“内置 secrets/keys 子系统”通常意味着：
 
 ## deploy-rs 主要配置项（what + why）
 
-以下为本仓库使用的 deploy-rs 核心字段（来自 `lib/inventory.nix` 的 `deployRsNode`）：
+以下为本仓库使用的 deploy-rs 核心字段（来自 `lib/inventory/utils.nix` 的 `deployRsNode`）：
 
 1. `hostname`
 
@@ -203,8 +203,8 @@ Colmena 的“内置 secrets/keys 子系统”通常意味着：
 
 1. **inventory 解耦**
 
-- `inventory/nixos-vps.nix`：`targetHost` -> `primaryIp`
-- `lib/inventory.nix`：新增 `primaryHostForNode` 与 `deployRsNode`
+- `lib/inventory/utils.nix`：`targetHost` -> `primaryIp`
+- `lib/inventory/utils.nix`：新增 `primaryHostForNode` 与 `deployRsNode`
 - `lib/singbox/client-config.nix`：用 `primaryHostForNode` 替代 `targetHost`
 
 2. **deploy-rs 输出**

@@ -64,10 +64,12 @@
     ];
   };
   systemArgs = modules // args;
-  nixosConfig = mylib.nixosSystem (systemArgs
+  nixosConfig = mylib.nixosSystem (
+    systemArgs
     // {
       inherit genSpecialArgs;
-    });
+    }
+  );
   deployNode = mylib.inventory.deployRsNode {
     inherit name;
     node = {
@@ -79,7 +81,9 @@
     nixosConfiguration = nixosConfig;
     deployLib = inputs."deploy-rs".lib."x86_64-linux";
     defaultSshUser = ssh-user;
-    remoteBuild = false;
+
+    # [2026-01-25] 目前dotfiles在mac本地，所以homelab应开启remoteBuild
+    remoteBuild = true;
   };
 in {
   nixosConfigurations.${name} = nixosConfig;
