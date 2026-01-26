@@ -19,6 +19,20 @@
   #
   # [2026-01-20] antizapret 这个 rule_set 适用于绕过俄罗斯的域名封锁/审查，用不到
   rules = [
+    # 重要：GitHub 域名必须返回真实 IP，不能走 FakeIP
+    # 否则会解析到 198.18.0.0/15 或 fc00::/18，导致集群内访问超时（如 Flux 拉取仓库失败）
+    {
+      domain_suffix = [
+        "github.com"
+        "githubusercontent.com"
+        "githubassets.com"
+        "github.io"
+      ];
+      # 这里走远端解析，但会通过代理出站（由 remote 的 detour 决定），可避免国内污染
+      server = "remote";
+      # 避免缓存污染，确保更新后立即生效
+      disable_cache = true;
+    }
     # tailscale / NetBird 控制面 DNS 直连，防止 fakeip + TUN 抢路由
     # - tailscale.com / tailscale.io / ts.net: Tailscale 控制面 & DERP 域
     # - netbird.io / web.netbird.io: NetBird 控制面域

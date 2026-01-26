@@ -1,5 +1,6 @@
 ---
 title: 从colmena迁移到deploy-rs
+date: 2026-01-20
 ---
 
 # 从 Colmena 到 deploy-rs：一次彻底的解耦迁移记录
