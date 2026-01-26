@@ -79,23 +79,65 @@
       # Shell aliases for convenience
       aliases = {
         # Generation management
-        sw = ["generation" "switch"];
-        ls = ["generation" "list"];
-        gendiff = ["generation" "diff"];
-        rollback = ["generation" "rollback"];
-        gendel = ["generation" "delete"];
-        gendelall = ["generation" "delete" "--all"];
+        sw = [
+          "generation"
+          "switch"
+        ];
+        ls = [
+          "generation"
+          "list"
+        ];
+        gendiff = [
+          "generation"
+          "diff"
+        ];
+        rollback = [
+          "generation"
+          "rollback"
+        ];
+        gendel = [
+          "generation"
+          "delete"
+        ];
+        gendelall = [
+          "generation"
+          "delete"
+          "--all"
+        ];
 
         # Apply/build operations
-        build = ["apply" "--no-activate" "--no-boot" "--output" "result"];
-        test = ["apply" "--no-boot" "-y"];
-        boot = ["apply" "--no-activate" "-y"];
-        dry = ["apply" "--dry"];
-        vm = ["apply" "--vm"];
+        build = [
+          "apply"
+          "--no-activate"
+          "--no-boot"
+          "--output"
+          "result"
+        ];
+        test = [
+          "apply"
+          "--no-boot"
+          "-y"
+        ];
+        boot = [
+          "apply"
+          "--no-activate"
+          "-y"
+        ];
+        dry = [
+          "apply"
+          "--dry"
+        ];
+        vm = [
+          "apply"
+          "--vm"
+        ];
 
         # Information and query
         opt = ["option"];
-        opts = ["option" "--non-interactive"];
+        opts = [
+          "option"
+          "--non-interactive"
+        ];
         man = ["manual"];
       };
 
