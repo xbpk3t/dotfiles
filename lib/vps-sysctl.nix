@@ -1,3 +1,14 @@
+### Inspired by https://www.omnitt.com/
+# 也就是 根据VPS的网络参数，来生成优化后的kernel参数
+#
+# https://github.com/emadtoranji/NetworkOptimizer/blob/main/optimize.sh
+# https://github.com/ylx2016/Linux-NetSpeed
+# https://github.com/wazar/sysctl-optimizer/blob/master/auto-optimize-sysctl.sh
+# https://github.com/ENGINYRING/sysctl-Generator/blob/main/sysctlgen.sh
+# https://github.com/jtsang4/nettune
+#
+#
+#
 {lib}: let
   inherit (lib) max min mkDefault;
 
