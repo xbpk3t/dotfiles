@@ -10,6 +10,11 @@
     extraPackages = [pkgs.marksman];
 
     settings = {
+      # https://docs.helix-editor.com/master/themes.html
+      theme = {
+        dark = "monokai";
+      };
+
       # https://docs.helix-editor.com/master/editor.html
       editor = {
         color-modes = true;

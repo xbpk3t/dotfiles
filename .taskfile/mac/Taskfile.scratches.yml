@@ -5,6 +5,8 @@ vars:
   SCRATCH_NOTEBOOK: scratch
 
 
+# FIXME[2026-01-26](fzf): 用 fzf 代替 gum filter. 现在这个gum也能用，但是无法直接preview里面的内容。目前是title和content都堆在一起了。但是fzf现在有问题，fzf会有两层，需要退出两次才能回到terminal，不确定怎没处理
+
 tasks:
   _nb:ensure:
     internal: true
