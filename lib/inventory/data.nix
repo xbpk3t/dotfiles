@@ -1,5 +1,5 @@
 {
-  nodes = {
+  nixos-vps = {
     nixos-vps-dev = {
       hostName = "nixos-vps-dev";
       primaryIp = "142.171.154.61";

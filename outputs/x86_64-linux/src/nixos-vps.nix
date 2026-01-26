@@ -37,8 +37,8 @@
   };
 
   # inventory（可变）：节点差异
-  inventory = import (mylib.relativeToRoot "inventory/nixos-vps.nix");
-  nodes = inventory.nodes;
+  inventory = mylib.inventory."nixos-vps";
+  nodes = inventory;
 
   genSpecialArgs = system: let
     pkgs = import inputs.nixpkgs {
@@ -95,7 +95,7 @@
       nixosConfiguration = nixosConfig;
       deployLib = inputs."deploy-rs".lib.${baseModules.system};
       defaultSshUser = ssh-user;
-      remoteBuild = false;
+      remoteBuild = true;
     };
   in {
     nixosConfigurations.${name} = nixosConfig;

@@ -5,10 +5,15 @@
   lib,
   ...
 } @ args: let
-  macosSystemArgs = args // {inherit lib;};
+  macosSystemArgs =
+    args
+    // {
+      inherit lib;
+    };
 
   name = "macos-ws";
-  ssh-host = "100.115.38.12";
+  # ssh-host = "100.115.38.12";
+  ssh-host = "127.0.0.1";
 
   genSpecialArgs = system: let
     customPkgsOverlay = import (mylib.relativeToRoot "pkgs/overlay.nix");
@@ -40,7 +45,9 @@
 
   modules = {
     darwin-modules =
-      [inputs.sops-nix.darwinModules.sops]
+      [
+        inputs.sops-nix.darwinModules.sops
+      ]
       ++ map mylib.relativeToRoot [
         "secrets/default.nix"
         "modules/darwin"
@@ -54,11 +61,13 @@
     ];
   };
   systemArgs = macosSystemArgs // modules;
-  darwinConfig = mylib.macosSystem (systemArgs
+  darwinConfig = mylib.macosSystem (
+    systemArgs
     // {
       genSpecialArgs = genSpecialArgs;
       system = "aarch64-darwin";
-    });
+    }
+  );
   deployNode = let
     deployLib = inputs."deploy-rs".lib."aarch64-darwin";
     sshUser = myvars.username;

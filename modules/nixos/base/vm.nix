@@ -2,11 +2,9 @@
   config,
   lib,
   myvars,
-  pkgs,
   ...
 }: let
   inherit (lib) mkIf mkMerge optionals;
-  isDesktop = config.modules.roles.isDesktop;
 in {
   ###################################################################################
   #
@@ -93,78 +91,7 @@ in {
     ++ optionals config.virtualisation.podman.enable ["podman"]
     ++ optionals config.virtualisation.libvirtd.enable ["libvirtd"];
 
-  # 只在Desktop下添加 nixos container. 否则在VPS里（即使不启用）也会占用磁盘
-  # https://mynixos.com/nixpkgs/option/containers
-  containers = mkIf isDesktop {
-    nixos-minimal = {
-      # 配置为不要自启，需要 sudo nixos-container start nixos-minimal 手动启动
-      autoStart = false;
-      ephemeral = false;
-      privateNetwork = true;
-      hostAddress = "10.254.0.1";
-      localAddress = "10.254.0.2";
-      specialArgs = {
-        inherit myvars;
-      };
-      config = {
-        imports = [
-          (pkgs.path + "/nixos/modules/profiles/minimal.nix")
-        ];
-
-        networking.hostName = "nixos-minimal";
-        networking.firewall.allowedTCPPorts = [22];
-
-        services.openssh = {
-          enable = true;
-          settings = {
-            PermitRootLogin = "prohibit-password";
-            PasswordAuthentication = false;
-          };
-        };
-
-        users.users.root.openssh.authorizedKeys.keys =
-          myvars.SSHPubKeys or [];
-
-        system.stateVersion = "24.11";
-      };
-    };
-
-    # https://nixos.wiki/wiki/NixOS_Containers
-    #    nextcloud = {
-    #      autoStart = false;
-    #      privateNetwork = true;
-    #      hostAddress = "192.168.100.10";
-    #      localAddress = "192.168.100.11";
-    #      hostAddress6 = "fc00::1";
-    #      localAddress6 = "fc00::2";
-    #      config = {
-    #        pkgs,
-    #        lib,
-    #        ...
-    #      }: {
-    #        services.nextcloud = {
-    #          enable = true;
-    #          package = pkgs.nextcloud28;
-    #          hostName = "localhost";
-    #          config.adminpassFile = "${pkgs.writeText "adminpass" "test123"}"; # DON'T DO THIS IN PRODUCTION - the password file will be world-readable in the Nix Store!
-    #        };
-    #
-    #        system.stateVersion = "23.11";
-    #
-    #        networking = {
-    #          firewall = {
-    #            enable = true;
-    #            allowedTCPPorts = [80];
-    #          };
-    #          # Use systemd-resolved inside the container
-    #          # Workaround for bug https://github.com/NixOS/nixpkgs/issues/162686
-    #          useHostResolvConf = lib.mkForce false;
-    #        };
-    #
-    #        services.resolved.enable = true;
-    #      };
-    #    };
-  };
+  # 只在桌面模块中定义 containers，避免 VPS 场景占用磁盘
 
   #  environment.systemPackages = with pkgs; [
   #    # This script is used to install the arm translation layer for waydroid

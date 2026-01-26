@@ -1,6 +1,14 @@
-{lib}: let
-  nodesOrEmpty = inventory: inventory.nodes or {};
-  # Why：inventory 是纯数据，可能同时提供 primaryIp/ip/ips/ssh.host。
+{
+  lib,
+  inventoryData,
+}: let
+  nodesOrEmpty = inventory:
+    if inventory == null
+    then {}
+    else inventory;
+  inventory = nodesOrEmpty inventoryData;
+  groupOrEmpty = name: inventory.${name} or {};
+  # Why：inventory 是纯数据（分组内节点结构），可能同时提供 primaryIp/ip/ips/ssh.host。
   # What：按优先级挑一个“主机地址”作为部署/连接默认值。
   primaryHostForNode = name: node: let
     candidates = [
@@ -26,6 +34,11 @@
     };
 in {
   inherit primaryHostForNode;
+  # 分组入口（简化调用）：mylib.inventory.<group>
+  "nixos-vps" = groupOrEmpty "nixos-vps";
+  "nixos-homelab" = groupOrEmpty "nixos-homelab";
+  "nixos-ws" = groupOrEmpty "nixos-ws";
+  "macos-ws" = groupOrEmpty "macos-ws";
 
   singboxForHost = inventory: hostName: let
     nodes = nodesOrEmpty inventory;
