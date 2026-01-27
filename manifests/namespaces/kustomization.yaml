@@ -18,4 +18,4 @@ resources:
   - resources/storage.yaml
   - resources/system.yaml
   - resources/vpn-apps.yaml
-  - resources/vpn-gateway.yaml
+  # - resources/vpn-gateway.yaml
