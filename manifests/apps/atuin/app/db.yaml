@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: atuin-db
+spec:
+  serviceName: atuin-db
+  replicas: 1
+  selector:
+    matchLabels:
+      app: atuin-db
+  template:
+    metadata:
+      labels:
+        app: atuin-db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:14
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: atuin-db
+                  key: ATUIN_DB_USERNAME
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: atuin-db
+                  key: ATUIN_DB_PASSWORD
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: atuin-db
+                  key: ATUIN_DB_NAME
+          volumeMounts:
+            - name: atuin-db
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: atuin-db
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: atuin-db
+spec:
+  selector:
+    app: atuin-db
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432

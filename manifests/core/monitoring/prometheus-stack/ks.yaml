@@ -1,0 +1,19 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: prometheus-crds
+  namespace: flux-system
+spec:
+  path: "./manifests/core/monitoring/prometheus-stack/crds"
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: prometheus-stack
+  namespace: flux-system
+spec:
+  path: "./manifests/core/monitoring/prometheus-stack/app"
+  dependsOn:
+    - name: zfs-localpv-volume
+    - name: traefik
+    - name: prometheus-crds
