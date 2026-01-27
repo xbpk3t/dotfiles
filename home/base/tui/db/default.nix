@@ -3,13 +3,18 @@
   mylib,
   ...
 }: {
+  imports = mylib.scanPaths ./.;
+
   home.packages = with pkgs; [
     # 数据库工具
     # mysql80  # 大型依赖，暂时移除
     # pgloader
 
-    # mysql-client # https://mynixos.com/nixpkgs/package/mysql-client
-    # postgresql # https://mynixos.com/nixpkgs/package/postgresql
+    # https://mynixos.com/nixpkgs/package/mysql-client
+    # mysql-client
+
+    # https://mynixos.com/nixpkgs/package/postgresql
+    # postgresql
 
     #    mycli
     #    pgcli
@@ -22,5 +27,4 @@
     # https://mynixos.com/nixpkgs/package/csvkit
     csvkit
   ];
-  imports = mylib.scanPaths ./.;
 }

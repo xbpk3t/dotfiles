@@ -1,10 +1,16 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - coredns/ks.yaml
-  - cilium/ks.yaml
+  # What：暂时沿用 k3s 内置 CoreDNS。
+  # Why：Flux 组件需要可用 DNS 才能拉 Helm chart；先避免与内置 CoreDNS 冲突。
+  # - coredns/ks.yaml
+  # What：暂时禁用 Cilium。
+  # Why：当前集群用 k3s 默认 flannel 即可；Cilium 失败会影响核心控制器健康检查。
+  # - cilium/ks.yaml
   - kube-vip/ks.yaml
   - traefik/ks.yaml
   - cert-manager/ks.yaml
-  - multus/ks.yaml
-  - external-dns/ks.yaml
+  # What：暂时禁用 multus/external-dns。
+  # Why：当前集群目标是先让核心与 apps 就绪；multus 需主 CNI 配置、external-dns 需 webhook/provider 配置，否则会卡住 core。
+  # - multus/ks.yaml
+  # - external-dns/ks.yaml

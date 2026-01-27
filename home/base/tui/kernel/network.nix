@@ -130,9 +130,9 @@
       # - 支持常见 TCP/UDP、端口扫描(-z)、代理(-x/-X)、UNIX socket(-U) 等
       # - 一般不主打/不提供内置 TLS（需要 TLS 时另用 openssl s_client 或改用 LibreSSL 版 netcat）
       # - 如果你主要做 “端口连通性/代理/UNIX socket 调试”，选它很合适
-      #
-      # [2026-01-25] Markup as broken, refusing to evaluate.
-      netcat-openbsd
+      # What：避免与 netcat（LibreSSL）产生 nc 手册冲突。
+      # Why：同时安装 netcat + netcat-openbsd 会在 home-manager buildEnv 冲突（nc.1.gz）。
+      # netcat-openbsd
     ];
 
   # ncurses 的无线网卡监控工具

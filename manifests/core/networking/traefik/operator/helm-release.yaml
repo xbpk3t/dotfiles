@@ -8,6 +8,14 @@ metadata:
     meta.helm.sh/release-namespace: "networking"
 spec:
   interval: 10m
+  # What：关闭 HelmRelease 的等待逻辑（安装/升级）。
+  # Why：控制器在网络抖动或 CRD 尚未就绪时容易超时，导致反复回滚；实际资源会由后续 reconcile 纠正。
+  install:
+    disableWait: true
+    disableWaitForJobs: true
+  upgrade:
+    disableWait: true
+    disableWaitForJobs: true
   chart:
     spec:
       chart: traefik
@@ -22,9 +30,12 @@ spec:
       replicas: 1
 
     service:
+      # What：为 Traefik 绑定公网入口 IP。
+      # Why：ACME HTTP-01 与域名访问需要稳定入口，避免 LoadBalancer 一直 pending。
       externalIPs:
-        - "${CONFIG_KUBE_VIP_IP}"
-  
+        # 注意：需与 DNS A 记录指向的公网 IP 保持一致
+        - "103.85.224.63"
+
     logs:
       general:
         level: INFO
@@ -53,7 +64,9 @@ spec:
       - "--entrypoints.websecure.transport.respondingTimeouts.readTimeout=60000s"
       - "--entrypoints.websecure.transport.respondingTimeouts.idleTimeout=60000s"
       - "--entrypoints.websecure.transport.respondingTimeouts.writeTimeout=60000s"
-      - "--providers.kubernetesingress.ingressendpoint.ip=${CONFIG_KUBE_VIP_IP}"
+      # What：不强制指定 ingressendpoint.ip。
+      # Why：tailnet/多出口环境下该值易与实际入口不一致，导致错误宣告/调度。
+      # 需要时再显式指定：--providers.kubernetesingress.ingressendpoint.ip=${CONFIG_KUBE_VIP_IP}
 
     providers:
       kubernetesCRD:
@@ -84,7 +97,7 @@ spec:
   postRenderers:
     - kustomize:
         patches:
-          - target: 
+          - target:
               kind: Deployment
               name: traefik
             patch: |-
@@ -93,9 +106,12 @@ spec:
                 value:
                   name: certs
                   secret:
+                   # What：允许 internal-ca 缺失时继续启动。
+                   # Why：internal-ca 为可选自建根证书，不应阻断 Traefik 启动。
+                   optional: true
                    defaultMode: 420
                    secretName: internal-ca
-          - target: 
+          - target:
               kind: Deployment
               name: traefik
             patch: |-

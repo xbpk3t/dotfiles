@@ -28,4 +28,3 @@ spec:
       servicemonitor:
         enabled: true
         prometheusInstance: monitoring
-

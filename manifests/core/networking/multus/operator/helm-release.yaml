@@ -16,5 +16,3 @@ spec:
         kind: HelmRepository
         name: rke2-charts
         namespace: flux-system
-
-

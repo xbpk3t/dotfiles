@@ -3,6 +3,9 @@ kind: PersistentVolumeClaim
 metadata:
   name: memos-data
 spec:
+  # What：显式使用 local-hostpath 存储类。
+  # Why：已禁用 k3s 内置 local-storage，需指定可用的 StorageClass 才能绑定 PVC。
+  storageClassName: local-hostpath
   accessModes:
     - ReadWriteOnce
   resources:

@@ -2,7 +2,8 @@
   inputs,
   myvars,
   ...
-}: {
+}:
+{
   # 我们常说（对Nix来说） Docker是 escape hatch，其实在Nix里，brew也是 escape hatch
   # 我们可以把
 
@@ -46,6 +47,8 @@
 
       # [2026-01-17] 在mac上我选择用chrome，而非firefox。因为
       "google-chrome"
+
+      "raycast"
 
       # "reqable"
       # "wireshark-app"

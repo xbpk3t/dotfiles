@@ -7,7 +7,8 @@
 } @ args: let
   name = "nixos-homelab";
   ssh-user = "root";
-  ssh-host = "100.81.204.63";
+  inventory = mylib.inventory."nixos-homelab";
+  nodes = inventory;
 
   # 与 nixos-ws 共用 overlay；禁用 NVIDIA 但保留 unfree 支持
   genSpecialArgs = system: let
@@ -63,29 +64,56 @@
       "home/extra/zed-remote.nix"
     ];
   };
-  systemArgs = modules // args;
-  nixosConfig = mylib.nixosSystem (
-    systemArgs
-    // {
-      inherit genSpecialArgs;
-    }
-  );
-  deployNode = mylib.inventory.deployRsNode {
-    inherit name;
-    node = {
-      primaryIp = ssh-host;
-      ssh = {
-        user = ssh-user;
-      };
-    };
-    nixosConfiguration = nixosConfig;
-    deployLib = inputs."deploy-rs".lib."x86_64-linux";
-    defaultSshUser = ssh-user;
 
-    # [2026-01-25] 目前dotfiles在mac本地，所以homelab应开启remoteBuild
-    remoteBuild = true;
+  mkNodeModule = name: node:
+    {
+      # What：hostName 由 inventory 注入。
+      # Why：避免单机调试时为空，同时统一节点元数据入口。
+      networking.hostName = node.hostName or name;
+    }
+    // lib.optionalAttrs (node ? k3s) {
+      modules.extra.k3s = node.k3s;
+    };
+
+  mkNodeRole = name: node: let
+    nodeModule = mkNodeModule name node;
+    modulesWithNode =
+      modules
+      // {
+        nixos-modules = modules.nixos-modules ++ [nodeModule];
+      };
+    systemArgs = modulesWithNode // args;
+    nixosConfig = mylib.nixosSystem (
+      systemArgs
+      // {
+        inherit genSpecialArgs;
+      }
+    );
+    deployNode = mylib.inventory.deployRsNode {
+      inherit name node;
+      nixosConfiguration = nixosConfig;
+      deployLib = inputs."deploy-rs".lib."x86_64-linux";
+      defaultSshUser = ssh-user;
+
+      # [2026-01-25] 目前 dotfiles 在 mac 本地，所以 homelab 应开启 remoteBuild
+      remoteBuild = true;
+    };
+  in {
+    nixosConfigurations.${name} = nixosConfig;
+    deploy.nodes.${name} = deployNode;
+  };
+
+  nodeRoles = builtins.attrValues (builtins.mapAttrs mkNodeRole nodes);
+
+  merged = {
+    nixosConfigurations = lib.attrsets.mergeAttrsList (
+      map (it: it.nixosConfigurations or {}) nodeRoles
+    );
+    deploy = {
+      nodes = lib.attrsets.mergeAttrsList (map (it: it.deploy.nodes or {}) nodeRoles);
+    };
   };
 in {
-  nixosConfigurations.${name} = nixosConfig;
-  deploy.nodes.${name} = deployNode;
+  nixosConfigurations = merged.nixosConfigurations;
+  deploy = merged.deploy;
 }

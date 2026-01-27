@@ -2,8 +2,10 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - authentication
-  - backup
+  # What：暂时禁用身份与备份子系统。
+  # Why：当前仅需 memos/rsshub；依赖的域名/外部存储尚未配置。
+  # - authentication
+  # - backup
   - database
   - monitoring
   - networking
