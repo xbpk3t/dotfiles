@@ -18,22 +18,20 @@ spec:
   values:
     controller:
       replicas: 1
-      
+
   postRenderers:
-    - kustomize: 
+    - kustomize:
         # see https://github.com/kubernetes-csi/csi-driver-nfs/blob/master/deploy/csi-nfs-controller.yaml
         patches:
-          - target: 
+          - target:
               kind: Deployment
               name: csi-nfs-controller
             patch: |
               - op: remove
                 path: /spec/template/spec/hostNetwork
-          - target: 
+          - target:
               kind: Deployment
               name: csi-nfs-controller
             patch: |
               - op: remove
                 path: /spec/template/spec/containers/4/livenessProbe
-
-  

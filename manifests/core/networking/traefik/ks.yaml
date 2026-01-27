@@ -17,14 +17,5 @@ spec:
   dependsOn:
     - name: kube-vip
     - name: traefik-crds
----
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-metadata:
-  name: traefik-settings
-  namespace: flux-system
-spec:
-  path: "./manifests/core/networking/traefik/settings"
-  dependsOn:
-    - name: traefik
-    - name: cert-manager
+# What：暂时禁用 traefik-settings。
+# Why：默认 TLS 证书依赖 SECRET_DOMAIN/issuer 配置，缺失会导致 core 健康检查失败。

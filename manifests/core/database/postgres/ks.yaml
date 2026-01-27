@@ -5,8 +5,8 @@ metadata:
   namespace: flux-system
 spec:
   path: "./manifests/core/database/postgres/operator"
-  dependsOn:
-    - name: prometheus-crds
+  # What：移除对 prometheus-crds 的依赖。
+  # Why：仅影响监控指标 CRD，postgres-operator 基础功能不依赖它。
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization

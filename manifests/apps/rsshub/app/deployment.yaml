@@ -12,6 +12,11 @@ spec:
       labels:
         app: rsshub
     spec:
+      # 只调度到 HK 节点（拓扑 + 业务角色）
+      nodeSelector:
+        topology.kubernetes.io/region: APAC
+        topology.kubernetes.io/zone: HK
+        node.kubernetes.io/role-svc: "true"
       containers:
         - name: rsshub
           image: diygod/rsshub:latest
@@ -81,6 +86,11 @@ spec:
       labels:
         app: browserless
     spec:
+      # 只调度到 HK 节点（拓扑 + 业务角色）
+      nodeSelector:
+        topology.kubernetes.io/region: APAC
+        topology.kubernetes.io/zone: HK
+        node.kubernetes.io/role-svc: "true"
       containers:
         - name: browserless
           image: browserless/chrome:1.43-chrome-stable

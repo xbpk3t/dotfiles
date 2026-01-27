@@ -38,7 +38,14 @@
     grpcurl
 
     # 基础工具
+    #
+    # [2026-01-25]
+    # https://mynixos.com/nixpkgs/package/coreutils-prefixed
+    # why: For stdbuf/gstdbuf. 需要 stdbuf 来实现 用于并行执行时让日志实时刷新、减少输出延迟/卡住的情况。
+    # what: 并不需要 coreutils-prefixed (这个pkg会提供一套 g* 的命令，以与 coreutils 避免冲突)，仅作记录
+    #
     coreutils
+
     findutils
     diffutils
     gawk

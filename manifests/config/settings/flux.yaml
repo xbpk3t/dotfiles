@@ -7,7 +7,9 @@ instance:
     kind: GitRepository
     # 公共仓库可直接走 HTTPS，无需 Secret，降低维护复杂度
     url: https://github.com/xbpk3t/dotfiles.git
-    ref: refs/heads/main
+    # What：指定 Flux 入口分支。
+    # Why：集群只跟随 PaaS 分支，避免误拉 main 造成配置不一致。
+    ref: refs/heads/PaaS
     # Flux 入口固定在 manifests/flux
     path: manifests/flux
     interval: 2m

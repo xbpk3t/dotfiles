@@ -17,4 +17,3 @@ values:
       clusterPoolIPv4PodCIDRList: ["${CONFIG_CLUSTER_PODS_NETWORK_IP_POOL}"]
 
 ```
-

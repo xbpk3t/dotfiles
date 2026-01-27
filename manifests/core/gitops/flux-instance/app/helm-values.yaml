@@ -82,4 +82,3 @@ instance:
         target:
           kind: Deployment
           name: helm-controller
-

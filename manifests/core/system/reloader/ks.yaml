@@ -5,8 +5,8 @@ metadata:
   namespace: flux-system
 spec:
   path: "./manifests/core/system/reloader/app"
-  dependsOn:
-    - name: prometheus-crds
+  # What：移除对 prometheus-crds 的依赖。
+  # Why：reloader 不依赖 Prometheus 指标 CRD，可独立启动。
   postBuild:
     substitute:
       APP_NAME: reloader

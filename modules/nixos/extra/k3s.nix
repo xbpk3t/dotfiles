@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: let
   inherit (lib) mkIf mkMerge;
@@ -24,16 +25,10 @@
         second >= 64 && second <= 127
     );
   serverAddr = "https://${cfg.serverIP}:${toString cfg.serverPort}";
-  serverFlags =
-    [
-      "--node-ip=${cfg.serverIP}"
-      "--advertise-address=${cfg.serverIP}"
-      "--tls-san=${cfg.serverIP}"
-      # 使用 --with-node-id 自动追加唯一 ID，避免多台同名主机冲突
-      "--with-node-id"
-    ]
-    # 如果 serverIP 是 tailnet 段，强制 flannel 走 tailscale0，避免对外通告 LAN 地址
-    ++ (lib.optional (isTailnetIP cfg.serverIP) "--flannel-iface=tailscale0");
+  flannelIfaceIP =
+    if cfg.nodeIP != ""
+    then cfg.nodeIP
+    else cfg.serverIP;
 in {
   # https://mynixos.com/nixpkgs/options/services.k3s
   #
@@ -73,9 +68,60 @@ in {
       default = 8472;
       description = "k3s flannel VXLAN UDP port";
     };
+
+    # 节点拓扑与角色标签（由 inventory 注入）
+    nodeName = mkOption {
+      type = types.str;
+      default = "";
+      description = "k3s node name (override hostname)";
+    };
+
+    nodeIP = mkOption {
+      type = types.str;
+      default = "";
+      description = "k3s node IP (k3s --node-ip)";
+    };
+
+    nodeExternalIP = mkOption {
+      type = types.str;
+      default = "";
+      description = "k3s node external IP (k3s --node-external-ip)";
+    };
+
+    region = mkOption {
+      type = types.str;
+      default = "";
+      description = "k3s topology region (topology.kubernetes.io/region)";
+    };
+
+    zone = mkOption {
+      type = types.str;
+      default = "";
+      description = "k3s topology zone (topology.kubernetes.io/zone)";
+    };
+
+    roles = mkOption {
+      type = types.listOf types.str;
+      default = [];
+      description = "k3s node roles (node.kubernetes.io/role-<role>=true)";
+    };
+
+    extraLabels = mkOption {
+      type = types.attrsOf types.str;
+      default = {};
+      description = "extra k3s node labels (key=value)";
+    };
   };
 
   config = lib.mkIf cfg.enable {
+    # What：为 k3s 提供 iptables/ip6tables、ipset、conntrack 工具。
+    # Why：k3s/kube-proxy 需要这些二进制来下发 Service/ClusterIP 规则，否则 10.43.0.1 等 ClusterIP 不可达。
+    environment.systemPackages = [
+      pkgs.iptables
+      pkgs.ipset
+      pkgs.conntrack-tools
+    ];
+
     assertions = [
       {
         assertion = validRole;
@@ -95,11 +141,41 @@ in {
       {
         enable = true;
         inherit role;
+        extraFlags =
+          # 固定 node-name，避免依赖主机 hostname
+          (lib.optional (cfg.nodeName != "") "--node-name=${cfg.nodeName}")
+          # What：固定 node-ip，确保 k3s 选择的通信地址稳定。
+          # Why：多网卡环境下避免选到非 tailnet/内网地址导致跨节点不通。
+          ++ (lib.optional (cfg.nodeIP != "") "--node-ip=${cfg.nodeIP}")
+          # What：对外可见 IP（仅公网节点需要）。
+          # Why：便于 node ExternalIP 展示与排查/对外访问。
+          ++ (lib.optional (cfg.nodeExternalIP != "") "--node-external-ip=${cfg.nodeExternalIP}")
+          # 标准拓扑标签：region/zone
+          ++ (lib.optional (cfg.region != "") "--node-label=topology.kubernetes.io/region=${cfg.region}")
+          ++ (lib.optional (cfg.zone != "") "--node-label=topology.kubernetes.io/zone=${cfg.zone}")
+          # 业务角色标签：node.kubernetes.io/role-<role>=true
+          # Why：kubelet 不允许通过 --node-labels 设置 node-role.kubernetes.io/*（会直接拒绝启动）。
+          ++ (lib.concatMap (roleName: ["--node-label=node.kubernetes.io/role-${roleName}=true"]) cfg.roles)
+          # 额外标签（需要时覆盖）
+          ++ (lib.mapAttrsToList (key: value: "--node-label=${key}=${value}") cfg.extraLabels)
+          # What：固定 flannel 走 tailscale0。
+          # Why：tailnet 统一承载 k3s 流量，避免 flannel 选错网卡导致跨节点不通。
+          ++ (lib.optional (flannelIfaceIP != "" && isTailnetIP flannelIfaceIP) "--flannel-iface=tailscale0");
       }
       (mkIf isServer {
         # 共享 token：由 sops 管理（k3s/token）
         agentTokenFile = tokenPath;
-        extraFlags = serverFlags;
+        extraFlags =
+          [
+            "--advertise-address=${cfg.serverIP}"
+            "--tls-san=${cfg.serverIP}"
+            # What：禁用 k3s 内置组件，交给 Flux 管理（避免与 HelmRelease 冲突）。
+            # Why：内置 coredns/metrics-server/local-storage/traefik 会抢占同名资源，导致 HelmRelease 失败。
+            "--disable=traefik,servicelb,metrics-server,local-storage"
+          ]
+          # What：当 nodeIP 未显式设置时，server 用 serverIP 作为 node-ip。
+          # Why：保证控制面节点至少有一个可用的固定节点地址。
+          ++ (lib.optional (cfg.nodeIP == "") "--node-ip=${cfg.serverIP}");
       })
       (mkIf isAgent {
         # agent 连接 homelab 控制面（Tailscale IP）
@@ -107,6 +183,36 @@ in {
         serverAddr = serverAddr;
       })
     ];
+
+    # What：补齐 cni0 的本地 PodCIDR 路由。
+    # Why：少数情况下 flannel 未自动写入主路由表，导致本机无法访问本机 Pod（CoreDNS 就绪探测超时）。
+    systemd.services.k3s-cni-route = {
+      description = "Ensure cni0 PodCIDR route exists";
+      after = ["k3s.service"];
+      wantedBy = ["multi-user.target"];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+      };
+      script = ''
+        if ! ${pkgs.iproute2}/bin/ip link show cni0 >/dev/null 2>&1; then
+          exit 0
+        fi
+        cidr="$(${pkgs.iproute2}/bin/ip -4 addr show cni0 | ${pkgs.gawk}/bin/awk '/inet / {print $2; exit}')"
+        if [ -n "$cidr" ]; then
+          net="$(CIDR="$cidr" ${pkgs.python3}/bin/python - <<'PY'
+import ipaddress, os
+cidr = os.environ.get("CIDR", "")
+if cidr:
+    print(ipaddress.ip_network(cidr, strict=False))
+PY
+          )"
+          if [ -n "$net" ]; then
+            ${pkgs.iproute2}/bin/ip route replace "$net" dev cni0
+          fi
+        fi
+      '';
+    };
 
     # k3s 基础端口放行：
     # - server：API Server 端口 + flannel UDP
