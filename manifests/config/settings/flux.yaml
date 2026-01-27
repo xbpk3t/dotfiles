@@ -1,0 +1,13 @@
+---
+instance:
+  distribution:
+    # renovate: datasource=github-releases depName=controlplaneio-fluxcd/distribution
+    version: 2.7.3
+  sync:
+    kind: GitRepository
+    # 公共仓库可直接走 HTTPS，无需 Secret，降低维护复杂度
+    url: https://github.com/xbpk3t/dotfiles.git
+    ref: refs/heads/main
+    # Flux 入口固定在 manifests/flux
+    path: manifests/flux
+    interval: 2m
