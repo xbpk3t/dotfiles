@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: n8n-db
+spec:
+  serviceName: n8n-db
+  replicas: 1
+  selector:
+    matchLabels:
+      app: n8n-db
+  template:
+    metadata:
+      labels:
+        app: n8n-db
+    spec:
+      containers:
+        - name: postgres
+          # compose 里使用 18-alpine，但 18 目前并不存在，建议 16
+          image: postgres:16-alpine
+          env:
+            - name: POSTGRES_DB
+              value: n8n
+            - name: POSTGRES_USER
+              value: n8n
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: n8n-secrets
+                  key: DB_PASSWORD
+          volumeMounts:
+            - name: n8n-pgsql
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: n8n-pgsql
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 20Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: n8n-db
+spec:
+  selector:
+    app: n8n-db
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432

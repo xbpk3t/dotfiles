@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: flux-system
+  name: cluster-settings
+data:
+  CONFIG_CLUSTER_PODS_NETWORK_IP_POOL: "10.42.0.0/16"
+  CONFIG_CLUSTER_SERVICE_NETWORK_IP_POOL: "10.43.0.0/16"
+  CONFIG_HOST_PATH_PREFIX: "/opt/k3s/data"
+  # 集群默认时区（会影响部分应用的默认行为）
+  CONFIG_TIMEZONE: "Asia/Shanghai"
+  # R2 兼容 S3 接口，仍复用 MINIO 命名以保持模板兼容
+  # 注意：这些值由 cluster-secrets 注入
+  # 重要：endpoint/bucket 需要与你的 Cloudflare R2 实际值一致
+  CONFIG_MINIO_BACKUP_SRC_ENDPOINT: "${CONFIG_MINIO_BACKUP_SRC_ENDPOINT}"
+  CONFIG_MINIO_BACKUP_DEST_ENDPOINT: "${CONFIG_MINIO_BACKUP_DEST_ENDPOINT}"
+  CONFIG_MINIO_BACKUP_POSTGRES_BUCKET: "${CONFIG_MINIO_BACKUP_POSTGRES_BUCKET}"
+  CONFIG_MINIO_BACKUP_REGION: "auto"
+  CONFIG_ZIGBEE2MQTT_DEVICE: "tcp://server02.lan:20108"
+  CONFIG_KUBE_VIP_IP: "10.0.1.2"
+  CONFIG_INFLUXDB_ORG: "homelab"
+  # 若需要对外访问 R2，可在这里保留可见域名（可留空）
+  CONFIG_MINIO_BACKUP_EXTERNAL_NAME: "${CONFIG_MINIO_BACKUP_EXTERNAL_NAME}"
+  CONFIG_NFS_STORAGE_CLASS_NAME: "nfs-storage"
+  CONFIG_POSTGRES_BACKUP_RETENTION: "7d"
+  CONFIG_DATABASE_NAMESPACE: "database"
+  CONFIG_SIGNAL_MAIL: "self@signal.localdomain"
+  CONFIG_MAIL_NOTIFICATION_HOST: "email2signal-mail.notification.svc"
+  CONFIG_MAIL_NOTIFICATION_PORT: "1025"
+  CONFIG_HUGO_WIKI_GITSYNC_REPO: "http://gitea-webui.apps.svc.cluster.local:3000/r/wiki-hugo.git"
+  CONFIG_HUGO_WIKI_GITSYNC_PERIOD: "2m"
+  CONFIG_WG_DNS: "10.0.1.1"
+  CONFIG_NETBOOT_XYZ_HOST_NETWORK_IP: "10.0.1.0"
+  CONFIG_NETBOOT_XYZ_HOST_INTERFACE: "br1"
+  CONFIG_ZFS_DEFAULT_POOLNAME: "zroot/volumes"
+  CONFIG_ZFS_REPROVISION_POOLNAME: "zroot/persistent"

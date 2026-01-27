@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudflared
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cloudflared
+  template:
+    metadata:
+      labels:
+        app: cloudflared
+    spec:
+      hostNetwork: true
+      containers:
+        - name: cloudflared
+          image: cloudflare/cloudflared:latest
+          env:
+            - name: TUNNEL_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: cloudflared-token
+                  key: TUNNEL_TOKEN
+          # 关键：强制 http2 + IPv6 边缘，规避隧道路由问题
+          command:
+            - cloudflared
+            - tunnel
+            - --protocol
+            - http2
+            - --edge-ip-version
+            - "6"
+            - --no-autoupdate
+            - run

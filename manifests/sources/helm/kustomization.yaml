@@ -1,0 +1,42 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - charts/angelnu-charts.yaml
+  - charts/authelia-charts.yaml
+  - charts/authentik-charts.yaml
+  - charts/backube-charts.yaml
+  - charts/bjw-s-charts.yaml
+  - charts/cilium-charts.yaml
+  - charts/cnpg-charts.yaml
+  - charts/controlplaneio-fluxcd-charts.yaml
+  - charts/coredns-charts.yaml
+  - charts/csi-driver-nfs-charts.yaml
+  - charts/democratic-csi-charts.yaml
+  - charts/drone-charts.yaml
+  - charts/external-dns-charts.yaml
+  - charts/fairwinds-charts.yaml
+  - charts/gitea-charts.yaml
+  - charts/grafana-charts.yaml
+  - charts/harbor-charts.yaml
+  - charts/harbor-container-webhook-charts.yaml
+  - charts/hashicorp-charts.yaml
+  - charts/influxdata-charts.yaml
+  - charts/jetstack-charts.yaml
+  - charts/k8tz-charts.yaml
+  - charts/kube-vip-charts.yaml
+  - charts/kubetail-charts.yaml
+  - charts/kyverno-charts.yaml
+  - charts/metrics-server-charts.yaml
+  - charts/minio-operator-charts.yaml
+  - charts/nvidia-charts.yaml
+  - charts/open-webui-charts.yaml
+  - charts/piraeus-charts.yaml
+  - charts/prometheus-community-charts.yaml
+  - charts/rke2-charts.yaml
+  - charts/runix-charts.yaml
+  - charts/stakater-charts.yaml
+  - charts/tailscale-charts.yaml
+  - charts/traefik-charts.yaml
+  - charts/vault-autounseal-charts.yaml
+  - charts/xenitab-charts.yaml
+  - charts/zfs-localpv-charts.yaml

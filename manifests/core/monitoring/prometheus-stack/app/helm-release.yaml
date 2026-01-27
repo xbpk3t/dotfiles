@@ -1,0 +1,167 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kube-prometheus-stack
+  namespace: monitoring
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: kube-prometheus-stack
+      version: 79.0.0
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus-community-charts
+        namespace: flux-system
+
+  values:
+    crds:
+      enabled: false
+      
+    cleanPrometheusOperatorObjectNames: true
+
+    kubeApiServer:
+      enabled: true
+      serviceMonitor:
+        metricRelabelings:
+          # Drop high cardinality labels
+          - action: drop
+            sourceLabels: ["__name__"]
+            regex: (apiserver|etcd|rest_client)_request(|_sli|_slo)_duration_seconds_bucket
+          - action: drop
+            sourceLabels: ["__name__"]
+            regex: (apiserver_response_sizes_bucket|apiserver_watch_events_sizes_bucket)
+
+    kubeControllerManager:
+      enabled: false
+
+    kubeEtcd:
+      enabled: false
+
+    kubelet:
+      enabled: true
+      serviceMonitor:
+        metricRelabelings:
+          # Drop high cardinality labels
+          - action: labeldrop
+            regex: (uid)
+          - action: labeldrop
+            regex: (id|name)
+          - action: drop
+            sourceLabels: ["__name__"]
+            regex: (rest_client_request_duration_seconds_bucket|rest_client_request_duration_seconds_sum|rest_client_request_duration_seconds_count)
+
+    kubeProxy:
+      enabled: false
+
+    kubeScheduler:
+      enabled: false
+
+    alertmanager:
+      enabled: true
+      config:
+        global:
+          resolve_timeout: 5m
+        receivers:
+          - name: "ignore"
+          - name: "email"
+            email_configs:
+              - to: ${CONFIG_SIGNAL_MAIL}
+                from: 'alertmanager@${SECRET_DOMAIN}'
+                smarthost: "${CONFIG_MAIL_NOTIFICATION_HOST}:${CONFIG_MAIL_NOTIFICATION_PORT}"
+                send_resolved: true
+                require_tls: false
+        route:
+          group_by: ["alertname", "job"]
+          group_wait: 1m
+          group_interval: 1m
+          repeat_interval: 24h
+          receiver: email
+          routes:
+            - receiver: "ignore"
+              matchers:
+                - alertname =~ "InfoInhibitor|Watchdog"
+            - receiver: email
+              matchers:
+                - severity = "critical"
+              continue: true
+        inhibit_rules:
+          - source_matchers:
+              - severity = "critical"
+            target_matchers:
+              - severity = "warning"
+            equal: ["alertname", "namespace"]
+
+      ingress:
+        enabled: true
+        ingressClassName: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        hosts:
+          - "alert.${SECRET_DOMAIN}"
+        tls:
+          - hosts:
+              - "alert.${SECRET_DOMAIN}"
+
+      alertmanagerSpec:
+        replicas: 1
+        storage:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: openebs-zfspv
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: 2Gi
+
+    grafana:
+      enabled: false
+      defaultDashboardsTimezone: "${CONFIG_TIMEZONE}"
+      forceDeployDatasources: false
+      forceDeployDashboards: false
+
+    nodeExporter:
+      # we install prometheus-node-exporter on host system
+      enabled: false
+
+    prometheus:
+      ingress:
+        enabled: true
+        ingressClassName: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        hosts:
+          - "prometheus.${SECRET_DOMAIN}"
+        tls:
+          - hosts:
+              - "prometheus.${SECRET_DOMAIN}"
+
+      prometheusSpec:
+        replicas: 1
+        replicaExternalLabelName: "__replica__"
+        ruleSelectorNilUsesHelmValues: false
+        serviceMonitorSelectorNilUsesHelmValues: false
+        podMonitorSelectorNilUsesHelmValues: false
+        probeSelectorNilUsesHelmValues: false
+        retention: 24h
+        enableAdminAPI: true
+        walCompression: true
+        enableFeatures:
+          - auto-gomaxprocs
+          - memory-snapshot-on-shutdown
+          - new-service-discovery-manager
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: openebs-zfspv
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: 5Gi
+
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128M
+

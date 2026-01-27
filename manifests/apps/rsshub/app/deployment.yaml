@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rsshub
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rsshub
+  template:
+    metadata:
+      labels:
+        app: rsshub
+    spec:
+      containers:
+        - name: rsshub
+          image: diygod/rsshub:latest
+          ports:
+            - containerPort: 1200
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: CACHE_TYPE
+              value: "memory"
+            - name: PUPPETEER_WS_ENDPOINT
+              value: "ws://browserless:3000"
+            - name: YOUTUBE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: rsshub-secrets
+                  key: YOUTUBE_KEY
+            - name: YUQUE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: rsshub-secrets
+                  key: YUQUE_TOKEN
+            - name: GITHUB_ACCESS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: rsshub-secrets
+                  key: GITHUB_ACCESS_TOKEN
+            - name: PIXIV_REFRESHTOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: rsshub-secrets
+                  key: PIXIV_REFRESHTOKEN
+            - name: SPOTIFY_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: rsshub-secrets
+                  key: SPOTIFY_CLIENT_ID
+            - name: SPOTIFY_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: rsshub-secrets
+                  key: SPOTIFY_CLIENT_SECRET
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 1200
+            initialDelaySeconds: 30
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 1200
+            initialDelaySeconds: 10
+            timeoutSeconds: 5
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: browserless
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: browserless
+  template:
+    metadata:
+      labels:
+        app: browserless
+    spec:
+      containers:
+        - name: browserless
+          image: browserless/chrome:1.43-chrome-stable
+          ports:
+            - containerPort: 3000
+          livenessProbe:
+            httpGet:
+              path: /pressure
+              port: 3000
+            initialDelaySeconds: 30
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /pressure
+              port: 3000
+            initialDelaySeconds: 10
+            timeoutSeconds: 5

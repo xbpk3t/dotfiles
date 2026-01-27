@@ -1,0 +1,74 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: &db ${APP_NAME}-postgresql
+  namespace: ${CONFIG_DATABASE_NAMESPACE}
+  annotations:
+    cnpg.io/skipEmptyWalArchiveCheck: enabled
+    # cnpg.io/skipWalArchiving: enabled
+spec:
+  instances: 1
+  imageCatalogRef:
+    apiGroup: postgresql.cnpg.io
+    kind: ImageCatalog
+    name: ${POSTGRES_CATALOG:-postgresql}
+    major: ${POSTGRES_MAJOR}
+  enableSuperuserAccess: ${POSTGRES_ENABLE_SUPERUSER:-false}
+  superuserSecret:
+    name: ${APP_NAME}-postgresql-superuser
+
+  monitoring:
+    enablePodMonitor: true
+    # Ref: https://github.com/cloudnative-pg/cloudnative-pg/issues/2501
+    podMonitorMetricRelabelings:
+      - {sourceLabels: ["cluster"], targetLabel: cnpg_cluster, action: replace}
+      - {regex: cluster, action: labeldrop}
+
+  backup:
+    retentionPolicy: "${CONFIG_POSTGRES_BACKUP_RETENTION}"
+    barmanObjectStore:
+      destinationPath: "s3://${CONFIG_MINIO_BACKUP_POSTGRES_BUCKET}/${APP_NAME}"
+      endpointURL: "http://${CONFIG_MINIO_BACKUP_DEST_ENDPOINT}"
+      wal:
+        compression: gzip
+      s3Credentials: &credentials
+        accessKeyId:
+          name: ${APP_NAME}-postgresql-backup-credentials
+          key: ACCESS_KEY_ID
+        secretAccessKey:
+          name: ${APP_NAME}-postgresql-backup-credentials
+          key: ACCESS_SECRET_KEY
+        region:
+          name: ${APP_NAME}-postgresql-backup-credentials
+          key: REGION
+
+  externalClusters:
+    - name: *db
+      barmanObjectStore:
+        destinationPath: "s3://${CONFIG_MINIO_BACKUP_POSTGRES_BUCKET}/${APP_NAME}"
+        endpointURL: "http://${CONFIG_MINIO_BACKUP_SRC_ENDPOINT}"
+        s3Credentials: *credentials
+
+  bootstrap:
+    ${POSTGRES_BOOTSTRAP_CMD:-recovery}:
+      source: *db
+      database: ${POSTGRES_DATABASE}
+      owner: ${SECRET_DATABASE_USER}
+      secret:
+        name: ${APP_NAME}-postgresql-credentials
+
+  #postgresql:
+  #  parameters:
+  #    wal_level: minimal
+  #    max_wal_senders: "0"
+  #    archive_mode: "off"
+
+  storage:
+    pvcTemplate:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 4Gi
+      storageClassName: openebs-zfspv
+      volumeMode: Filesystem

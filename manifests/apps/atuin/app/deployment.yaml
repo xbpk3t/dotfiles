@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: atuin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: atuin
+  template:
+    metadata:
+      labels:
+        app: atuin
+    spec:
+      containers:
+        - name: atuin
+          image: ghcr.io/atuinsh/atuin:latest
+          command:
+            - atuin
+            - server
+            - start
+          ports:
+            - containerPort: 8888
+          env:
+            - name: ATUIN_HOST
+              value: "0.0.0.0"
+            - name: ATUIN_OPEN_REGISTRATION
+              # 是否允许公开注册，请按需要调整
+              value: "true"
+            - name: ATUIN_DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: atuin-db
+                  key: ATUIN_DB_USERNAME
+            - name: ATUIN_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: atuin-db
+                  key: ATUIN_DB_PASSWORD
+            - name: ATUIN_DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: atuin-db
+                  key: ATUIN_DB_NAME
+            - name: ATUIN_DB_URI
+              value: "postgres://$(ATUIN_DB_USERNAME):$(ATUIN_DB_PASSWORD)@atuin-db/$(ATUIN_DB_NAME)"
+            - name: RUST_LOG
+              value: "info,atuin_server=debug"
+          volumeMounts:
+            - name: atuin-config
+              mountPath: /config
+      volumes:
+        - name: atuin-config
+          persistentVolumeClaim:
+            claimName: atuin-config

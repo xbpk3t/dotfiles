@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openlist
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: openlist
+  template:
+    metadata:
+      labels:
+        app: openlist
+    spec:
+      containers:
+        - name: openlist
+          image: openlistteam/openlist:latest
+          ports:
+            - containerPort: 5244
+          env:
+            - name: UMASK
+              value: "022"
+          securityContext:
+            # OpenList 需要写数据目录，保持 root 运行与 compose 一致
+            runAsUser: 0
+            runAsGroup: 0
+          volumeMounts:
+            - name: openlist-data
+              mountPath: /opt/openlist/data
+      volumes:
+        - name: openlist-data
+          persistentVolumeClaim:
+            claimName: openlist-data

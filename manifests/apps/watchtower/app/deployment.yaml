@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: watchtower
+spec:
+  # Kubernetes/Flux 已具备镜像更新能力，watchtower 仅保留占位
+  replicas: 0
+  selector:
+    matchLabels:
+      app: watchtower
+  template:
+    metadata:
+      labels:
+        app: watchtower
+    spec:
+      containers:
+        - name: watchtower
+          image: containrrr/watchtower
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+            - name: DOCKER_API_VERSION
+              value: "1.44"
+            - name: WATCHTOWER_POLL_INTERVAL
+              value: "86400"
+            - name: WATCHTOWER_CLEANUP
+              value: "true"
+            - name: WATCHTOWER_WARN_ON_HEAD_FAILURE
+              value: "never"
+          volumeMounts:
+            - name: docker-sock
+              mountPath: /var/run/docker.sock
+      volumes:
+        - name: docker-sock
+          hostPath:
+            path: /var/run/docker.sock
+            type: Socket
