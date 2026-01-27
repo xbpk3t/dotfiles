@@ -1,0 +1,171 @@
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: core
+  namespace: flux-system
+spec:
+  interval: 5m
+  timeout: 8m
+  retryInterval: 1m
+  dependsOn:
+    - name: namespaces
+    - name: sources
+    - name: config
+  path: ./manifests/core
+  prune: true
+  force: true
+  wait: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+  postBuild:
+    substitute: {}
+    substituteFrom:
+      - kind: ConfigMap
+        name: cluster-settings
+      - kind: Secret
+        name: cluster-secrets
+  patches:
+    - target:
+        group: kustomize.toolkit.fluxcd.io
+        version: v1
+        kind: Kustomization
+        labelSelector: substitution.flux.home.arpa/disabled notin (true)
+      patch: |-
+        apiVersion: kustomize.toolkit.fluxcd.io/v1
+        kind: Kustomization
+        metadata:
+          name: not-used
+        spec:
+          interval: 8m
+          timeout: 8m
+          retryInterval: 5m
+          force: true
+          prune: true
+          wait: true
+          sourceRef:
+            kind: GitRepository
+            name: flux-system
+          decryption:
+            provider: sops
+            secretRef:
+              name: sops-age
+          postBuild:
+            substituteFrom:
+              - kind: ConfigMap
+                name: cluster-settings
+              - kind: Secret
+                name: cluster-secrets
+
+    # NOTE: `$patch: merge` does not work and will always override/replace existing patches!
+    # ref:
+    # - [#306](https://github.com/kubernetes-sigs/kustomize/issues/306)
+    # - [strategic-merge-patch](https://github.com/kubernetes/community/blob/master/contributors/devel/sig-api-machinery/strategic-merge-patch.md)
+    # Workaround: Use `kustomize.patches/append: true` label on kustomize with patches
+    - target:
+        group: kustomize.toolkit.fluxcd.io
+        version: v1
+        kind: Kustomization
+        labelSelector: kustomize.patches/append notin (true)
+      patch: |-
+        apiVersion: kustomize.toolkit.fluxcd.io/v1
+        kind: Kustomization
+        metadata:
+          name: not-used
+        spec:
+          $patch: merge
+          patches:
+            - target:
+                group: helm.toolkit.fluxcd.io
+                version: v2
+                kind: HelmRelease
+                labelSelector: substitution.flux.home.arpa/disabled notin (true)
+              patch: |-
+                apiVersion: helm.toolkit.fluxcd.io/v2
+                kind: HelmRelease
+                metadata:
+                  name: not-used
+                spec:
+                  interval: 8m
+                  timeout: 8m
+                  chart:
+                    spec:
+                      interval: 15m
+                  install:
+                    crds: CreateReplace
+                    createNamespace: true
+                    remediation:
+                      retries: 3
+                  upgrade:
+                    crds: CreateReplace
+                    cleanupOnFail: true
+                    remediation:
+                      retries: 3
+
+    - target:
+        group: kustomize.toolkit.fluxcd.io
+        version: v1
+        kind: Kustomization
+        labelSelector: kustomize.patches/append in (true)
+      patch: |
+        - op: add
+          path: /spec/patches/-
+          value:
+            target:
+              group: helm.toolkit.fluxcd.io
+              version: v2
+              kind: HelmRelease
+              labelSelector: substitution.flux.home.arpa/disabled notin (true)
+            patch: |-
+              apiVersion: helm.toolkit.fluxcd.io/v2
+              kind: HelmRelease
+              metadata:
+                name: not-used
+              spec:
+                interval: 8m
+                timeout: 8m
+                chart:
+                  spec:
+                    interval: 15m
+                install:
+                  crds: CreateReplace
+                  createNamespace: true
+                  remediation:
+                    retries: 3
+                upgrade:
+                  crds: CreateReplace
+                  cleanupOnFail: true
+                  remediation:
+                    retries: 3
+
+    - target:
+        group: helm.toolkit.fluxcd.io
+        version: v2
+        kind: HelmRelease
+        labelSelector: substitution.flux.home.arpa/disabled notin (true)
+      patch: |-
+        apiVersion: helm.toolkit.fluxcd.io/v2
+        kind: HelmRelease
+        metadata:
+          name: not-used
+        spec:
+          interval: 8m
+          timeout: 8m
+          chart:
+            spec:
+              interval: 15m
+          install:
+            crds: CreateReplace
+            createNamespace: true
+            remediation:
+              retries: 3
+          upgrade:
+            crds: CreateReplace
+            cleanupOnFail: true
+            remediation:
+              retries: 3
