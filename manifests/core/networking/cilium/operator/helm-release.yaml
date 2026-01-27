@@ -65,15 +65,18 @@ spec:
           <<: *prometheus
 
         ingress:
-          enabled: true
+          # What：先关闭 Hubble UI Ingress。
+          # Why：SECRET_DOMAIN 未注入时会生成 "hubble."，Ingress 校验失败会阻断整套 core。
+          # 需要时：补齐 SECRET_DOMAIN 后再打开，并设置合法域名。
+          enabled: false
           className: traefik
           annotations:
             traefik.ingress.kubernetes.io/router.entrypoints: websecure
-          hosts:
-            - &host "hubble.${SECRET_DOMAIN}"
-          tls:
-            - hosts:
-                - *host
+          # hosts:
+          #   - &host "hubble.${SECRET_DOMAIN}"
+          # tls:
+          #   - hosts:
+          #       - *host
 
       metrics:
         enabled:

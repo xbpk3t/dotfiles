@@ -12,6 +12,11 @@ spec:
       labels:
         app: memos
     spec:
+      # 只调度到 HK 节点（拓扑 + 业务角色）
+      nodeSelector:
+        topology.kubernetes.io/region: APAC
+        topology.kubernetes.io/zone: HK
+        node.kubernetes.io/role-svc: "true"
       containers:
         - name: memos
           image: neosmemo/memos:stable

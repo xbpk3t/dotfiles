@@ -16,5 +16,3 @@ spec:
         kind: HelmRepository
         name: traefik-charts
         namespace: flux-system
-
-

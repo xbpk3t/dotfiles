@@ -9,8 +9,22 @@ spec:
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
-  name: ca-issuer
+  name: letsencrypt-http
   namespace: networking
 spec:
-  ca:
-    secretName: internal-ca
+  # What：使用 Let's Encrypt 颁发对外证书（DNS-01）。
+  # Why：memos/rsshub 需要公网域名证书；DNS-01 更稳定且不受回源限制。
+  acme:
+    # 证书申请邮箱（用于证书到期通知）
+    email: "${ME_MAIL}"
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: letsencrypt-http-account-key
+    solvers:
+      # What：使用 DNS-01（Cloudflare）完成验证。
+      # Why：避免 HTTP-01 受 Cloudflare 代理/回源限制影响（521），提升稳定性。
+      - dns01:
+          cloudflare:
+            apiTokenSecretRef:
+              name: cloudflare-api-token-secret
+              key: api-token

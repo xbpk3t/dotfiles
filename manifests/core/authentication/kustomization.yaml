@@ -2,5 +2,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - tinyauth/ks.yaml
-  - pocket-id/ks.yaml
+  # What：暂时禁用 tinyauth / pocket-id。
+  # Why：它们依赖 SECRET_DOMAIN 与 OAuth 配置，当前集群只需 memos/rsshub。
+  # - tinyauth/ks.yaml
+  # - pocket-id/ks.yaml

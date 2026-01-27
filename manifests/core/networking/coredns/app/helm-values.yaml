@@ -41,7 +41,7 @@ servers:
 extraConfig:
   import:
     parameters: /etc/coredns/custom/*.server
-    
+
 affinity:
   nodeAffinity:
     requiredDuringSchedulingIgnoredDuringExecution:
@@ -49,12 +49,12 @@ affinity:
         - matchExpressions:
             - key: node-role.kubernetes.io/control-plane
               operator: Exists
-              
+
 tolerations:
   - key: node-role.kubernetes.io/control-plane
     operator: Exists
     effect: NoSchedule
-    
+
 topologySpreadConstraints:
   - maxSkew: 1
     topologyKey: kubernetes.io/hostname
@@ -68,7 +68,7 @@ extraVolumes:
     configMap:
       name: coredns-custom
       optional: true
-      
+
 extraVolumeMounts:
   - name: custom-config-volume
     mountPath: /etc/coredns/custom

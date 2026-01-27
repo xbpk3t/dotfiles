@@ -1,7 +1,9 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - minio/ks.yaml
+  # What：暂时禁用 external MinIO。
+  # Why：需要配置 externalName/域名，否则 Service 校验失败影响 core。
+  # - minio/ks.yaml
   - local-hostpath/ks.yaml
   - zfs-localpv/ks.yaml
   - csi-driver-nfs/ks.yaml

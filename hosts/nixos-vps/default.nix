@@ -70,7 +70,7 @@ in {
   modules.extra.k3s = {
     enable = true;
     role = "agent";
-    serverIP = "100.81.204.63";
+    # serverIP 由 inventory 注入，避免多处重复维护
     serverPort = 6443;
   };
   system.stateVersion = "24.11";

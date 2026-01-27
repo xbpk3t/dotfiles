@@ -2,32 +2,39 @@
   myvars,
   lib,
   ...
-}: let
+}:
+let
   hostName = "nixos-homelab";
   inherit (myvars.networking) nameservers;
-in {
+in
+{
   imports = [
     ./hardware.nix
   ];
-
-  # 角色标记：走服务器基线，不启用桌面推导
-  modules.roles = {
-    isDesktop = false;
-    isServer = true;
-  };
 
   networking = {
     inherit hostName;
     useNetworkd = true; # 改用 systemd-networkd，更轻量
     networkmanager.enable = false;
     useDHCP = true; # 由 hardware.nix 的接口/或 networkd profiles 提供 DHCP
+    # 重要：避免 /etc/resolv.conf 指向 127.0.0.53（stub）
+    # k3s 的 CoreDNS 默认 forward 到 /etc/resolv.conf；若是 stub 会在 Pod 内超时
+    useHostResolvConf = lib.mkForce false;
     inherit nameservers;
   };
 
   services.resolved = {
     enable = true;
     fallbackDns = nameservers;
+    # 重要：关闭本地 stub（127.0.0.53），避免集群 DNS 走到不可达的本地回环
+    # settings = {
+    #   DNSStubListener = "no";
+    # };
   };
+
+  # 重要：显式使用 systemd-resolved 的真实上游解析结果
+  # Why：避免 /etc/resolv.conf 指向 stub-resolv.conf，导致 CoreDNS 解析超时
+  environment.etc."resolv.conf".source = lib.mkForce "/run/systemd/resolve/resolv.conf";
 
   # 启动与电源
   boot.loader = {
@@ -91,7 +98,7 @@ in {
       k3s = {
         enable = true;
         role = "server";
-        serverIP = "100.81.204.63";
+        # serverIP 由 inventory 注入，避免多处重复维护
         serverPort = 6443;
       };
     };
