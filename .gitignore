@@ -27,5 +27,9 @@ result-*
 /nixos-k3s
 /k3s-nix
 
+# Local scratch files
+/z/
+/zzzzz.md
+
 # For Taskfile checksum etc...
 /.task
