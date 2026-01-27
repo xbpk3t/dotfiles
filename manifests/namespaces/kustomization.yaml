@@ -17,5 +17,5 @@ resources:
   - resources/policy.yaml
   - resources/storage.yaml
   - resources/system.yaml
-  - resources/vpn-apps.yaml
+  # - resources/vpn-apps.yaml
   # - resources/vpn-gateway.yaml
