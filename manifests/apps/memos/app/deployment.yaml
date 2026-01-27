@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: memos
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: memos
+  template:
+    metadata:
+      labels:
+        app: memos
+    spec:
+      containers:
+        - name: memos
+          image: neosmemo/memos:stable
+          ports:
+            - containerPort: 5230
+          volumeMounts:
+            - name: memos-data
+              mountPath: /var/opt/memos
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+      volumes:
+        - name: memos-data
+          persistentVolumeClaim:
+            claimName: memos-data

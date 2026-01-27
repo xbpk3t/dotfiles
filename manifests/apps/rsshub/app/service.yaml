@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: rsshub
+spec:
+  selector:
+    app: rsshub
+  ports:
+    - name: http
+      port: 1200
+      targetPort: 1200
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: browserless
+spec:
+  selector:
+    app: browserless
+  ports:
+    - name: http
+      port: 3000
+      targetPort: 3000

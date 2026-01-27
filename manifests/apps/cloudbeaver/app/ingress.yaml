@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cloudbeaver
+  annotations:
+    # 按需启用证书签发
+    cert-manager.io/cluster-issuer: letsencrypt-http
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: cloudbeaver.lucc.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: cloudbeaver
+                port:
+                  number: 8978
+  tls:
+    - hosts:
+        - cloudbeaver.lucc.dev
+      secretName: cloudbeaver-tls

@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wxedge
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wxedge
+  template:
+    metadata:
+      labels:
+        app: wxedge
+    spec:
+      hostNetwork: true
+      containers:
+        - name: wxedge
+          image: onething1/wxedge
+          securityContext:
+            # 需要特权模式才能访问硬件与系统资源
+            privileged: true
+          env:
+            - name: NIC_LIST
+              # 改成 VPS 的公网网卡名
+              value: "eth0"
+          volumeMounts:
+            - name: wxedge-storage
+              mountPath: /storage
+            - name: run-tmpfs
+              mountPath: /run
+            - name: tmp-tmpfs
+              mountPath: /tmp
+      volumes:
+        - name: wxedge-storage
+          hostPath:
+            # 保持与原 compose 一致的宿主机路径
+            path: /mnt/data_sda3/docker/wxedge
+            type: DirectoryOrCreate
+        - name: run-tmpfs
+          emptyDir:
+            medium: Memory
+        - name: tmp-tmpfs
+          emptyDir:
+            medium: Memory

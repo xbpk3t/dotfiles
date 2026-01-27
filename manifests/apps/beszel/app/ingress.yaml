@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: beszel
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-http
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: beszel.lucc.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: beszel
+                port:
+                  number: 8090
+  tls:
+    - hosts:
+        - beszel.lucc.dev
+      secretName: beszel-tls

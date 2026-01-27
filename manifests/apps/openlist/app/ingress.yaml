@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: openlist
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-http
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: openlist.lucc.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: openlist
+                port:
+                  number: 5244
+  tls:
+    - hosts:
+        - openlist.lucc.dev
+      secretName: openlist-tls

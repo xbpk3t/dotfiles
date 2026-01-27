@@ -1,0 +1,31 @@
+# NOTE: 仅用于测试分支 PaaS。
+# 不要把这个文件合并到 main，否则生产也会创建测试入口。
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: dotfiles-paas
+  namespace: flux-system
+spec:
+  interval: 1m
+  url: https://github.com/xbpk3t/dotfiles.git
+  ref:
+    branch: PaaS
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: flux-system-paas
+  namespace: flux-system
+spec:
+  interval: 5m
+  path: ./manifests/flux
+  prune: true
+  wait: true
+  sourceRef:
+    kind: GitRepository
+    name: dotfiles-paas
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age

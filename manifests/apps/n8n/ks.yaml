@@ -1,0 +1,11 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: n8n
+  namespace: flux-system
+spec:
+  path: "./manifests/apps/n8n/app"
+  postBuild:
+    substitute:
+      APP_NAME: n8n
+      APP_NAMESPACE: apps

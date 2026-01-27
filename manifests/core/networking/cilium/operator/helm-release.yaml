@@ -1,0 +1,99 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: cilium
+  namespace: kube-system
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: cilium
+      version: 1.18.3
+      sourceRef:
+        kind: HelmRepository
+        name: cilium-charts
+        namespace: flux-system
+  valuesFrom:
+    - kind: ConfigMap
+      name: cilium-helm-values
+  values:
+    cni:
+      # required for multus
+      exclusive: false
+
+    updateStrategy:
+      type: RollingUpdate
+
+    prometheus: &prometheus
+      enabled: true
+      serviceMonitor:
+        enabled: true
+
+    dashboards: &dashboards
+      enabled: true
+      label: grafana_dashboard
+      namespace: monitoring
+      labelValue: "1"
+      annotations:
+        grafana_folder: "Cilium"
+
+    operator:
+      enabled: true
+      rollOutPods: true
+      replicas: 1
+      prometheus:
+        <<: *prometheus
+
+      dashboards:
+        <<: *dashboards
+
+    hubble:
+      enabled: true
+      dashboards:
+        <<: *dashboards
+
+      tls:
+        auto:
+          enabled: true
+          method: helm
+          certValidityDuration: 1095
+
+      ui:
+        enabled: true
+        prometheus:
+          <<: *prometheus
+
+        ingress:
+          enabled: true
+          className: traefik
+          annotations:
+            traefik.ingress.kubernetes.io/router.entrypoints: websecure
+          hosts:
+            - &host "hubble.${SECRET_DOMAIN}"
+          tls:
+            - hosts:
+                - *host
+
+      metrics:
+        enabled:
+          - dns:query
+          - drop
+          - tcp
+          - flow
+          - icmp
+          - http
+        serviceMonitor:
+          enabled: false
+        dashboards:
+          <<: *dashboards
+
+      relay:
+        enabled: true
+        prometheus:
+          <<: *prometheus
+
+      operator:
+        enabled: true
+        prometheus:
+          <<: *prometheus
