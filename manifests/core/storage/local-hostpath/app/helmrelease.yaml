@@ -57,7 +57,7 @@ spec:
           hostPath:
             path: *path
             type: DirectoryOrCreate
- 
+
     driver:
       config:
         driver: local-hostpath

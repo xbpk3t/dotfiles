@@ -51,7 +51,7 @@ spec:
         tls:
           - hosts:
               - *ingress
-        
+
     persistence:
       data:
         existingClaim: "${APP_NAME}-pvc"

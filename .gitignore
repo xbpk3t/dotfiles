@@ -33,3 +33,5 @@ result-*
 
 # For Taskfile checksum etc...
 /.task
+mac-*.md
+wake-*.sh
