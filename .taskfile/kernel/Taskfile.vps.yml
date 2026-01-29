@@ -1,0 +1,66 @@
+---
+version: "3"
+
+# - url: https://github.com/oneclickvirt/ecs
+# - url: https://github.com/xykt/IPQuality
+# - url: https://github.com/xykt/NetQuality
+
+
+# Why:
+# Q: 这个taskfile是用来干什么的？
+# A: 用来测试“新购入VPS”的IP质量、网络情况、解锁等指标。
+#
+#
+# Q: 为啥写了一个script，而taskfile来调用这个script呢？
+# A: 考虑到使用场景——针对新购入VPS，这种机器通常是没有安装go-task的，而go-task虽然现在是支持 remote-taskfiles的，但是仍作为 experiments feats. 因此写一个 script，就可以通过curl来直接调用，同时也给taskfile对应的入口，保证在NixOS刷机后，仍然可以用taskfile直接使用
+#
+## https://taskfile.dev/docs/experiments/remote-taskfiles
+#
+#
+#
+# Q: 具体怎么调用这个script?
+# - 全量体检
+# ./vps-check.sh
+#
+# - 快速体检（NetQuality 用延迟模式+低数据模式）
+# ./vps-check.sh --quick
+#
+# curl -fsSL <URL>/vps-check.sh | bash
+# curl -fsSL <URL>/vps-check.sh | bash -s -- --quick
+#
+#
+# Q: 为啥这3个工具都要跑？
+# A:
+# - ecs 做“全科初筛+硬件能力”
+# - NetQuality 把“网络”做深
+# - IPQuality 把“IP可用性/风险/解锁”做深
+# 结论：三个工具是互补关系，缺一不可
+
+
+
+
+
+tasks:
+  default:
+    cmds:
+      - task: full
+
+  full:
+    desc: "Full VPS check (ecs + NetQuality + IPQuality)"
+    cmds:
+      - ./vps-check.sh --full
+
+  quick:
+    desc: "Quick VPS check (NetQuality latency+low-data)"
+    cmds:
+      - ./vps-check.sh --quick
+
+  no-deps:
+    desc: "Run checks without trying to install deps (-n / -En)"
+    cmds:
+      - ./vps-check.sh --no-deps
+
+  out-local:
+    desc: "Write reports to local ./.reports"
+    cmds:
+      - ./vps-check.sh --out ./.reports

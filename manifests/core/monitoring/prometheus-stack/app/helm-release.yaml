@@ -9,7 +9,9 @@ spec:
   chart:
     spec:
       chart: kube-prometheus-stack
-      version: 79.0.0
+      # What：Pin 到指定稳定版本。
+      # Why：与 CRD 版本对齐，避免兼容性问题。
+      version: 80.11.0
       sourceRef:
         kind: HelmRepository
         name: prometheus-community-charts
@@ -20,6 +22,28 @@ spec:
       enabled: false
 
     cleanPrometheusOperatorObjectNames: true
+
+    defaultRules:
+      # What：仅保留核心告警规则，减少噪声与资源消耗。
+      # Why：小规模集群以节点/系统级监控为主。
+      create: true
+      rules:
+        alertmanager: true
+        etcd: false
+        kubeApiserver: true
+        kubeControllerManager: false
+        kubeProxy: false
+        kubeScheduler: false
+        kubelet: true
+        kubeStateMetrics: true
+        kubernetesApps: false
+        kubernetesResources: false
+        kubernetesStorage: false
+        kubernetesSystem: true
+        network: false
+        node: true
+        prometheus: true
+        windows: false
 
     kubeApiServer:
       enabled: true
@@ -63,15 +87,19 @@ spec:
       config:
         global:
           resolve_timeout: 5m
+          # What：使用 Resend SMTP 发送告警邮件。
+          # Why：不自建邮局，优先外部 SMTP 服务。
+          smtp_smarthost: "smtp.resend.com:587"
+          smtp_from: "${CONFIG_ALERT_EMAIL_FROM}"
+          smtp_auth_username: "resend"
+          smtp_auth_password: "${RESEND_PWD}"
+          smtp_require_tls: true
         receivers:
           - name: "ignore"
           - name: "email"
             email_configs:
-              - to: ${CONFIG_SIGNAL_MAIL}
-                from: 'alertmanager@${SECRET_DOMAIN}'
-                smarthost: "${CONFIG_MAIL_NOTIFICATION_HOST}:${CONFIG_MAIL_NOTIFICATION_PORT}"
+              - to: ${CONFIG_ALERT_EMAIL_TO}
                 send_resolved: true
-                require_tls: false
         route:
           group_by: ["alertname", "job"]
           group_wait: 1m
@@ -94,15 +122,9 @@ spec:
             equal: ["alertname", "namespace"]
 
       ingress:
-        enabled: true
-        ingressClassName: traefik
-        annotations:
-          traefik.ingress.kubernetes.io/router.entrypoints: websecure
-        hosts:
-          - "alert.${SECRET_DOMAIN}"
-        tls:
-          - hosts:
-              - "alert.${SECRET_DOMAIN}"
+        # What：Alertmanager 仅集群内访问，不对外暴露。
+        # Why：避免公网暴露管理入口。
+        enabled: false
 
       alertmanagerSpec:
         replicas: 1
@@ -114,37 +136,100 @@ spec:
               resources:
                 requests:
                   storage: 2Gi
+        resources:
+          # What：低资源配额，适配小型集群。
+          # Why：Alertmanager 负载较轻。
+          requests:
+            cpu: 25m
+            memory: 64Mi
+          limits:
+            memory: 128Mi
 
     grafana:
-      enabled: false
+      enabled: true
       defaultDashboardsTimezone: "${CONFIG_TIMEZONE}"
       forceDeployDatasources: false
       forceDeployDashboards: false
-
-    nodeExporter:
-      # we install prometheus-node-exporter on host system
-      enabled: false
-
-    prometheus:
+      adminPassword: "${GRAFANA_PWD}"
       ingress:
         enabled: true
         ingressClassName: traefik
         annotations:
+          # What：证书由 cert-manager 自动签发。
+          # Why：避免手工维护证书。
+          cert-manager.io/cluster-issuer: letsencrypt-http
+          # What：仅暴露 HTTPS 入口。
+          # Why：公网访问统一走 TLS。
           traefik.ingress.kubernetes.io/router.entrypoints: websecure
         hosts:
-          - "prometheus.${SECRET_DOMAIN}"
+          - "g.lucc.dev"
         tls:
           - hosts:
-              - "prometheus.${SECRET_DOMAIN}"
+              - "g.lucc.dev"
+      persistence:
+        # What：持久化 Grafana 数据（用户/仪表盘）。
+        # Why：避免重启丢失配置。
+        enabled: true
+        type: pvc
+        storageClassName: openebs-zfspv
+        accessModes: ["ReadWriteOnce"]
+        size: 5Gi
+      sidecar:
+        dashboards:
+          # What：自动加载带 grafana_dashboard 标签的 Dashboard。
+          # Why：与现有清单兼容。
+          enabled: true
+          label: grafana_dashboard
+      resources:
+        # What：低资源配额，适配小型集群。
+        # Why：Grafana 主要是查询与渲染。
+        requests:
+          cpu: 50m
+          memory: 128Mi
+        limits:
+          memory: 256Mi
+
+    nodeExporter:
+      # What：启用 chart 自带 node-exporter。
+      # Why：需要覆盖所有 k3s 节点的宿主机指标。
+      enabled: true
+      resources:
+        requests:
+          cpu: 25m
+          memory: 64Mi
+        limits:
+          memory: 128Mi
+
+    prometheus:
+      ingress:
+        # What：Prometheus 仅集群内访问，不对外暴露。
+        # Why：避免公网暴露管理入口。
+        enabled: false
 
       prometheusSpec:
         replicas: 1
         replicaExternalLabelName: "__replica__"
-        ruleSelectorNilUsesHelmValues: false
-        serviceMonitorSelectorNilUsesHelmValues: false
-        podMonitorSelectorNilUsesHelmValues: false
-        probeSelectorNilUsesHelmValues: false
-        retention: 24h
+        # What：仅选择带 release 标签的监控对象。
+        # Why：避免自动抓取业务应用指标。
+        ruleSelectorNilUsesHelmValues: true
+        serviceMonitorSelectorNilUsesHelmValues: true
+        podMonitorSelectorNilUsesHelmValues: true
+        probeSelectorNilUsesHelmValues: true
+        ruleSelector:
+          matchLabels:
+            release: kube-prometheus-stack
+        serviceMonitorSelector:
+          matchLabels:
+            release: kube-prometheus-stack
+        podMonitorSelector:
+          matchLabels:
+            release: kube-prometheus-stack
+        probeSelector:
+          matchLabels:
+            release: kube-prometheus-stack
+        # What：保留 30 天数据。
+        # Why：满足趋势分析，同时控制资源消耗。
+        retention: 30d
         enableAdminAPI: true
         walCompression: true
         enableFeatures:
@@ -158,9 +243,11 @@ spec:
               accessModes: ["ReadWriteOnce"]
               resources:
                 requests:
-                  storage: 5Gi
+                  storage: 20Gi
 
         resources:
           requests:
-            cpu: 50m
-            memory: 128M
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            memory: 512Mi
