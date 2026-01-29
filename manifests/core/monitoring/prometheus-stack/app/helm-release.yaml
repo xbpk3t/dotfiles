@@ -137,7 +137,7 @@ spec:
               accessModes: ["ReadWriteOnce"]
               resources:
                 requests:
-                  storage: 2Gi
+                  storage: 1Gi
         resources:
           # What：低资源配额，适配小型集群。
           # Why：Alertmanager 负载较轻。
@@ -175,7 +175,7 @@ spec:
         type: pvc
         storageClassName: openebs-zfspv
         accessModes: ["ReadWriteOnce"]
-        size: 5Gi
+        size: 2Gi
       sidecar:
         dashboards:
           # What：自动加载带 grafana_dashboard 标签的 Dashboard。
@@ -245,7 +245,7 @@ spec:
               accessModes: ["ReadWriteOnce"]
               resources:
                 requests:
-                  storage: 20Gi
+                  storage: 10Gi
 
         resources:
           requests:
