@@ -28,6 +28,9 @@ spec:
   values:
     deployment:
       replicas: 1
+      # 固定调度到 dev 节点（142 入口所在机器），确保 80/443 监听在正确节点
+      nodeSelector:
+        node.kubernetes.io/role-dev: "true"
 
     service:
       # What：为 Traefik 绑定公网入口 IP。
