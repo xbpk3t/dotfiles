@@ -34,7 +34,7 @@ spec:
       # Why：ACME HTTP-01 与域名访问需要稳定入口，避免 LoadBalancer 一直 pending。
       externalIPs:
         # 注意：需与 DNS A 记录指向的公网 IP 保持一致
-        - "103.85.224.63"
+        - "142.171.154.61"
 
     logs:
       general:
