@@ -213,6 +213,11 @@ spec:
         enabled: false
 
       prometheusSpec:
+        # What：Prometheus 镜像走 Docker Hub（prom/prometheus）。
+        # Why：避免 quay.io 拉取超时导致 ImagePullBackOff。
+        image:
+          repository: prom/prometheus
+          tag: v2.55.1
         replicas: 1
         replicaExternalLabelName: "__replica__"
         # What：仅选择带 release 标签的监控对象。
