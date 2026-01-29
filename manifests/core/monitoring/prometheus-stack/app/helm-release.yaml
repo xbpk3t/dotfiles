@@ -19,7 +19,9 @@ spec:
 
   values:
     crds:
-      enabled: false
+      # What：由 HelmRelease 安装 CRD。
+      # Why：替代单独 GitRepository 拉取，避免超时。
+      enabled: true
 
     cleanPrometheusOperatorObjectNames: true
 
