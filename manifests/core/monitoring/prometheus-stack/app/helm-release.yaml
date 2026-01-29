@@ -25,6 +25,14 @@ spec:
 
     cleanPrometheusOperatorObjectNames: true
 
+    prometheusOperator:
+      # What：显式覆盖 Prometheus 默认镜像来源（registry + base image）。
+      # Why：避免 quay.io 拉取 401/超时导致 ImagePullBackOff。
+      # Note：仅设置 global.imageRegistry 不一定对 Prometheus 生效。
+      # 参考：Prometheus Operator 默认镜像参数 & 社区 issue 反馈。
+      prometheusDefaultBaseImageRegistry: docker.io
+      prometheusDefaultBaseImage: prom/prometheus
+
     defaultRules:
       # What：仅保留核心告警规则，减少噪声与资源消耗。
       # Why：小规模集群以节点/系统级监控为主。
@@ -214,7 +222,8 @@ spec:
 
       prometheusSpec:
         # What：Prometheus 镜像走 Docker Hub（prom/prometheus）。
-        # Why：避免 quay.io 拉取超时导致 ImagePullBackOff。
+        # Why：避免 quay.io 拉取 401/超时导致 ImagePullBackOff。
+        # Note：该字段最终会写入 Prometheus CR spec.image（字符串）。
         image:
           registry: docker.io
           repository: prom/prometheus
