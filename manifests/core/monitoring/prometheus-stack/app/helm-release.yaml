@@ -216,6 +216,7 @@ spec:
         # What：Prometheus 镜像走 Docker Hub（prom/prometheus）。
         # Why：避免 quay.io 拉取超时导致 ImagePullBackOff。
         image:
+          registry: docker.io
           repository: prom/prometheus
           tag: v2.55.1
         replicas: 1
