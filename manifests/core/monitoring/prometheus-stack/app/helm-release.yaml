@@ -133,7 +133,9 @@ spec:
         storage:
           volumeClaimTemplate:
             spec:
-              storageClassName: openebs-zfspv
+              storageClassName: local-hostpath
+              # What：使用 local-hostpath 存储。
+              # Why：当前 openebs-zfspv 可用容量为 0，PVC 无法绑定。
               accessModes: ["ReadWriteOnce"]
               resources:
                 requests:
@@ -173,7 +175,9 @@ spec:
         # Why：避免重启丢失配置。
         enabled: true
         type: pvc
-        storageClassName: openebs-zfspv
+        storageClassName: local-hostpath
+        # What：使用 local-hostpath 存储。
+        # Why：当前 openebs-zfspv 可用容量为 0，PVC 无法绑定。
         accessModes: ["ReadWriteOnce"]
         size: 2Gi
       sidecar:
@@ -241,7 +245,9 @@ spec:
         storageSpec:
           volumeClaimTemplate:
             spec:
-              storageClassName: openebs-zfspv
+              storageClassName: local-hostpath
+              # What：使用 local-hostpath 存储。
+              # Why：当前 openebs-zfspv 可用容量为 0，PVC 无法绑定。
               accessModes: ["ReadWriteOnce"]
               resources:
                 requests:
