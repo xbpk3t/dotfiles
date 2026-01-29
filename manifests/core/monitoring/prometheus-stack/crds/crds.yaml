@@ -10,7 +10,9 @@ spec:
   ref:
     # TODO trace me via renovate
     # renovate: datasource=github-releases depName=prometheus-community/helm-charts
-    tag: kube-prometheus-stack-56.8.0
+    # What：与 HelmRelease 的 kube-prometheus-stack 版本对齐。
+    # Why：避免 CRD 与 chart 版本不匹配导致异常。
+    tag: kube-prometheus-stack-80.11.0
   ignore: |
     # exclude all
     /*

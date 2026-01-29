@@ -20,7 +20,7 @@
         # Why：VPS 具备公网能力，保留 ExternalIP 便于对外展示/诊断。
         nodeExternalIP = primaryIp;
         # 业务角色（用于 node-role.kubernetes.io/<role>=true）
-        roles = [ "dev" ];
+        roles = ["dev"];
         # 拓扑标签：region=NA，zone=LA
         region = "NA";
         zone = "LA";
@@ -33,7 +33,7 @@
       };
       singbox = {
         label = "LA-RN";
-        server = "142.171.154.61";
+        server = primaryIp;
         port = 8443;
         hy2 = {
           domain = "hy2-nixos-vps-dev.lucc.dev";
@@ -61,7 +61,7 @@
         # Why：VPS 具备公网能力，保留 ExternalIP 便于对外展示/诊断。
         nodeExternalIP = primaryIp;
         # 业务角色（用于 node-role.kubernetes.io/<role>=true）
-        roles = [ "svc" ];
+        roles = ["svc"];
         # 拓扑标签：region=APAC，zone=HK
         region = "APAC";
         zone = "HK";
@@ -74,7 +74,7 @@
       };
       singbox = {
         label = "HK-hdy";
-        server = "103.85.224.63";
+        server = primaryIp;
         port = 8443;
         hy2 = {
           domain = "hy2-nixos-vps-svc.lucc.dev";

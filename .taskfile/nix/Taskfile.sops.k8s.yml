@@ -4,7 +4,18 @@ vars:
   # 配置：SOPS 源文件路径（可通过调用时传入 SOPS_FILE 覆盖）
   SOPS_FILE: '{{.SOPS_FILE | default (printf "%s/secrets/secrets.yaml" .USER_WORKING_DIR)}}'
   # 配置：age 私钥文件路径（可通过调用时传入 AGE_KEY_FILE 覆盖）
-  AGE_KEY_FILE: '{{.AGE_KEY_FILE | default (printf "%s/age.key" .USER_WORKING_DIR)}}'
+  # 优先使用系统级 sops key（macOS/Linux），否则回退到项目内 age.key
+  AGE_KEY_FILE:
+    sh: |
+      if [ -n "${AGE_KEY_FILE:-}" ]; then
+        printf "%s" "$AGE_KEY_FILE"
+      elif [ -f "$HOME/Library/Application Support/sops/age/keys.txt" ]; then
+        printf "%s" "$HOME/Library/Application Support/sops/age/keys.txt"
+      elif [ -f "$HOME/.config/sops/age/keys.txt" ]; then
+        printf "%s" "$HOME/.config/sops/age/keys.txt"
+      else
+        printf "%s" "{{.USER_WORKING_DIR}}/age.key"
+      fi
   # 配置：Kubernetes Secret 名称
   K8S_SECRET_NAME: cluster-secrets
   # 配置：Kubernetes 命名空间

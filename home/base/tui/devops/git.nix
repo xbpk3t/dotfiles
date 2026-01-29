@@ -10,6 +10,8 @@
     # https://github.com/git-quick-stats/git-quick-stats
     git-quick-stats
     gitleaks
+
+    # https://mynixos.com/nixpkgs/package/gitlint
     gitlint
     # Git 大文件清理工具
     bfg-repo-cleaner
