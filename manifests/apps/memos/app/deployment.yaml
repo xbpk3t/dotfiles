@@ -28,6 +28,11 @@ spec:
           env:
             - name: TZ
               value: Asia/Shanghai
+            # 明确监听地址与端口，避免镜像默认值漂移导致 Service 端口失配
+            - name: MEMOS_ADDR
+              value: 0.0.0.0
+            - name: MEMOS_PORT
+              value: "5230"
       volumes:
         - name: memos-data
           persistentVolumeClaim:
