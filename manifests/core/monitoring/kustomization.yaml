@@ -2,6 +2,6 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - metrics-server/ks.yaml
-  # What：暂时禁用 Prometheus 栈。
-  # Why：依赖域名/告警配置（SECRET_DOMAIN 等），未配置会阻断 core。
-  # - prometheus-stack/ks.yaml
+  # What：启用 kube-prometheus-stack（Prometheus/Alertmanager/Grafana）。
+  # Why：已补齐域名与告警配置，允许监控栈上线。
+  - prometheus-stack/ks.yaml

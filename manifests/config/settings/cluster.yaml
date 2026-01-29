@@ -27,6 +27,12 @@ data:
   CONFIG_SIGNAL_MAIL: "self@signal.localdomain"
   CONFIG_MAIL_NOTIFICATION_HOST: "email2signal-mail.notification.svc"
   CONFIG_MAIL_NOTIFICATION_PORT: "1025"
+  # What：Alertmanager 邮件发送地址（Resend）。
+  # Why：集中配置，避免在 HelmRelease 中硬编码。
+  CONFIG_ALERT_EMAIL_FROM: "onboarding@resend.dev"
+  # What：Alertmanager 告警接收地址。
+  # Why：作为默认收件人，可按需替换。
+  CONFIG_ALERT_EMAIL_TO: "jeffcottlu@gmail.com"
   CONFIG_HUGO_WIKI_GITSYNC_REPO: "http://gitea-webui.apps.svc.cluster.local:3000/r/wiki-hugo.git"
   CONFIG_HUGO_WIKI_GITSYNC_PERIOD: "2m"
   CONFIG_WG_DNS: "10.0.1.1"
