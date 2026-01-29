@@ -4,7 +4,7 @@ version: '3'
 includes:
   sk:
     taskfile: ./.taskfile/nix/Taskfile.sops.yml
-    dir: '{{.USER_WORKING_DIR}}'
+    # dir: '{{.USER_WORKING_DIR}}'
   sops:
     taskfile: ./.taskfile/nix/Taskfile.sops.yml
     dir: '{{.USER_WORKING_DIR}}'

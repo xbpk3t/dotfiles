@@ -171,7 +171,7 @@ in {
             "--tls-san=${cfg.serverIP}"
             # What：禁用 k3s 内置组件，交给 Flux 管理（避免与 HelmRelease 冲突）。
             # Why：内置 coredns/metrics-server/local-storage/traefik 会抢占同名资源，导致 HelmRelease 失败。
-            "--disable=traefik,servicelb,metrics-server,local-storage"
+            "--disable=traefik,servicelb,metrics-server,local-storage,coredns"
           ]
           # What：当 nodeIP 未显式设置时，server 用 serverIP 作为 node-ip。
           # Why：保证控制面节点至少有一个可用的固定节点地址。
@@ -195,22 +195,22 @@ in {
         RemainAfterExit = true;
       };
       script = ''
-        if ! ${pkgs.iproute2}/bin/ip link show cni0 >/dev/null 2>&1; then
-          exit 0
-        fi
-        cidr="$(${pkgs.iproute2}/bin/ip -4 addr show cni0 | ${pkgs.gawk}/bin/awk '/inet / {print $2; exit}')"
-        if [ -n "$cidr" ]; then
-          net="$(CIDR="$cidr" ${pkgs.python3}/bin/python - <<'PY'
-import ipaddress, os
-cidr = os.environ.get("CIDR", "")
-if cidr:
-    print(ipaddress.ip_network(cidr, strict=False))
-PY
-          )"
-          if [ -n "$net" ]; then
-            ${pkgs.iproute2}/bin/ip route replace "$net" dev cni0
-          fi
-        fi
+                if ! ${pkgs.iproute2}/bin/ip link show cni0 >/dev/null 2>&1; then
+                  exit 0
+                fi
+                cidr="$(${pkgs.iproute2}/bin/ip -4 addr show cni0 | ${pkgs.gawk}/bin/awk '/inet / {print $2; exit}')"
+                if [ -n "$cidr" ]; then
+                  net="$(CIDR="$cidr" ${pkgs.python3}/bin/python - <<'PY'
+        import ipaddress, os
+        cidr = os.environ.get("CIDR", "")
+        if cidr:
+            print(ipaddress.ip_network(cidr, strict=False))
+        PY
+                  )"
+                  if [ -n "$net" ]; then
+                    ${pkgs.iproute2}/bin/ip route replace "$net" dev cni0
+                  fi
+                fi
       '';
     };
 
