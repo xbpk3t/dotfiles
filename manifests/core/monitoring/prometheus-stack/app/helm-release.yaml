@@ -160,8 +160,13 @@ spec:
     grafana:
       enabled: true
       defaultDashboardsTimezone: "${CONFIG_TIMEZONE}"
-      forceDeployDatasources: false
+      # What：强制部署内置数据源（Prometheus）。
+      # Why：保证 Grafana 开箱可用。
+      forceDeployDatasources: true
       forceDeployDashboards: false
+      # What：启用默认 Dashboard。
+      # Why：提供节点/集群的基础可视化视图。
+      defaultDashboardsEnabled: true
       adminPassword: "${GRAFANA_PWD}"
       ingress:
         enabled: true
@@ -176,7 +181,8 @@ spec:
         hosts:
           - "g.lucc.dev"
         tls:
-          - hosts:
+          - secretName: grafana-tls
+            hosts:
               - "g.lucc.dev"
       persistence:
         # What：持久化 Grafana 数据（用户/仪表盘）。
@@ -194,6 +200,10 @@ spec:
           # Why：与现有清单兼容。
           enabled: true
           label: grafana_dashboard
+        datasources:
+          # What：自动加载内置 Prometheus 数据源。
+          # Why：Grafana 启动即可查询指标。
+          enabled: true
       resources:
         # What：低资源配额，适配小型集群。
         # Why：Grafana 主要是查询与渲染。
