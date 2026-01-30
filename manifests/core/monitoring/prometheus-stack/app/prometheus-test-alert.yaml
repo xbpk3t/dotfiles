@@ -1,0 +1,23 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: prometheus-test-alert
+  namespace: monitoring
+  labels:
+    # What：让 Prometheus 识别该规则。
+    # Why：只选择带 release 标签的规则。
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: test-alerts
+      rules:
+        - alert: TestResendEmail
+          # What：测试告警（总是触发）。
+          # Why：验证 Alertmanager -> Resend SMTP 链路可用。
+          expr: vector(1)
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Test alert for Resend SMTP"
+            description: "This is a test alert to verify email delivery."
