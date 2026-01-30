@@ -7,11 +7,14 @@ metadata:
   namespace: flux-system
 spec:
   interval: 1m0s
+  # What：放宽 Git 拉取超时。
+  # Why：避免网络抖动导致拉取失败。
+  timeout: 5m0s
   ref:
     branch: PaaS
-  secretRef:
-    name: flux-system
-  url: ssh://git@github.com/xbpk3t/dotfiles
+  # What：使用 HTTPS 拉取仓库。
+  # Why：避免 SSH 认证链路带来的额外不确定性。
+  url: https://github.com/xbpk3t/dotfiles.git
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
