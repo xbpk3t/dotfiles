@@ -9,7 +9,7 @@ tasks:
       task -g gost LISTEN=:8080 TARGET=1.2.3.4:80
     platforms: [linux, darwin]
     preconditions:
-      - sh: command -v gost >/dev/null 2>&1
+      - sh: command -v gost
     requires:
       vars: [LISTEN, TARGET]
     cmds:
@@ -22,7 +22,7 @@ tasks:
       task -g gost:serve ARGS="-L socks5://:1080"
     platforms: [linux, darwin]
     preconditions:
-      - sh: command -v gost >/dev/null 2>&1
+      - sh: command -v gost
     requires:
       vars: [ARGS]
     cmds:
@@ -35,7 +35,7 @@ tasks:
       task -g gost:socks5 LISTEN=:1080
     platforms: [linux, darwin]
     preconditions:
-      - sh: command -v gost >/dev/null 2>&1
+      - sh: command -v gost
     requires:
       vars: [LISTEN]
     cmds:
@@ -47,7 +47,7 @@ tasks:
       task -g gost:http LISTEN=:8080
     platforms: [linux, darwin]
     preconditions:
-      - sh: command -v gost >/dev/null 2>&1
+      - sh: command -v gost
     requires:
       vars: [LISTEN]
     cmds:

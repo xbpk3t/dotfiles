@@ -58,7 +58,7 @@ tasks:
   analyze:
     desc: 在控制台显示完整的Git仓库分析报告
     preconditions:
-      - 'test -d .git || { echo "错误: 当前目录不是Git仓库"; exit 1; }'
+      - sh: 'test -d .git || { echo "错误: 当前目录不是Git仓库"; exit 1; }'
     cmds:
       - echo "================ 仓库概览 ================"
       - git-quick-stats --detailed-git-stats

@@ -2,6 +2,8 @@
 version: "3"
 
 tasks:
+
+  # TODO: 感觉应该直接通过import其他task，然后这里直接加载相应的task
   sysinfo:
     platforms: [linux]
     cmds:
@@ -26,8 +28,6 @@ tasks:
       # UDP连接数
       - ss -u | wc -l
 
-      # 拥塞控制算法
-      - sysctl -n net.ipv4.tcp_congestion_control
 
       # 默认队列算法
       - sysctl -n net.core.default_qdisc

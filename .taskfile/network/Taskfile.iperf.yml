@@ -1,0 +1,12 @@
+---
+version: '3'
+
+# - iperf3 - Network performance measurement tool
+# - iperf3 -c 192.168.30.2 # Test TCP throughput
+# - xxx # Test UDP throughput
+# - iperf3 -c 192.168.0.120 -P 30 -t 60 # Test multi-threaded TCP throughput
+# - iperf3 -u -c 192.168.1.1 -b 5M -P 30 -t 60 # Test multi-threaded UDP throughput
+# - iperf3 -c 192.168.0.120 -d -t 60 # Perform bidirectional TCP throughput test
+# - iperf3 -u -c 192.168.1.1 -b 100M -d -t 60 # Test bidirectional UDP throughput
+
+tasks:

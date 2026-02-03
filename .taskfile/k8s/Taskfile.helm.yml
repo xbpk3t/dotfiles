@@ -434,11 +434,3 @@ tasks:
       - 'test -n "{{.GITHUB_TOKEN}}" || (echo "错误: GITHUB_TOKEN 不能为空" && exit 1)'
       - 'test -d "{{.CHART_DIR}}" || (echo "错误: CHART_DIR {{.CHART_DIR}} 不存在" && exit 1)'
     silent: true
-
-  _check-tools:
-    internal: true
-    desc: "检查必要工具是否安装"
-    cmds:
-      - 'command -v helm >/dev/null 2>&1 || (echo "错误: helm 未安装" && exit 1)'
-      - echo "✅ 工具检查通过"
-    silent: true

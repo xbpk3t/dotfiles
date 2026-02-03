@@ -28,7 +28,7 @@ includes:
   linux: taskfile/kernel/Taskfile.linux.yml
   monitor: taskfile/kernel/Taskfile.monitor.yml
   pkg: taskfile/kernel/Taskfile.pkg.yml
-  net: taskfile/kernel/Taskfile.network.yml
+  net: taskfile/kernel/Taskfile.z.yml
   shell: taskfile/kernel/Taskfile.shell.yml
   ssh: taskfile/kernel/Taskfile.ssh.yml
   tcpdump: taskfile/kernel/Taskfile.tcpdump.yml
@@ -48,6 +48,22 @@ includes:
   singbox: taskfile/mac/Taskfile.singbox.yml
   sc: taskfile/mac/Taskfile.scratches.yml
 
+  # network
+  netw: taskfile/network/Taskfile.network.yml
+  gost: taskfile/network/Taskfile.gost.yml
+  ss: taskfile/network/Taskfile.ss.yml
+  tcp: taskfile/network/Taskfile.TCP.yml
+  throughput: taskfile/network/Taskfile.throughput.yml
+  dig: taskfile/network/Taskfile.dig.yml
+  whois: taskfile/network/Taskfile.whois.yml
+  ping: taskfile/network/Taskfile.ping.yml
+  tracepath: taskfile/network/Taskfile.tracepath.yml
+  traceroute: taskfile/network/Taskfile.traceroute.yml
+  nstat: taskfile/network/Taskfile.nstat.yml
+  nc: taskfile/network/Taskfile.ICMP.yml
+  nz: taskfile/network/Taskfile.z.yml
+
+
   # nix
   deploy: taskfile/nix/Taskfile.deploy.yml
   flake: taskfile/nix/Taskfile.flake.yml
@@ -57,6 +73,9 @@ includes:
 
   # works
   sec: taskfile/works/Taskfile.sec.yml
+
+
+
 
 tasks:
   default:
