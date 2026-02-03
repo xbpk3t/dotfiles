@@ -1,0 +1,15 @@
+---
+version: '3'
+
+tasks:
+  default:
+    desc: whois lookup (domain or IP)
+    summary: "task -g whois TARGET=example.com"
+    platforms: [linux, darwin]
+    requires:
+      vars: [TARGET]
+    preconditions:
+      - sh: command -v whois
+        msg: whois not found
+    cmds:
+      - whois {{.TARGET}}

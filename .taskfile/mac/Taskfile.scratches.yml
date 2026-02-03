@@ -13,7 +13,7 @@ tasks:
     silent: true
     interactive: true
     preconditions:
-      - sh: command -v nb >/dev/null 2>&1
+      - sh: command -v nb
         msg: "nb not found"
 
   _nb:ensure_picker:
@@ -21,7 +21,7 @@ tasks:
     silent: true
     interactive: true
     preconditions:
-      - sh: command -v gum >/dev/null 2>&1
+      - sh: command -v gum
         msg: "gum is required"
 
   new:

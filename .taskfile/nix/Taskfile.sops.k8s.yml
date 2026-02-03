@@ -40,13 +40,13 @@ tasks:
         msg: "找不到 SOPS 文件: {{.SOPS_FILE}}"
       - sh: test -f "{{.AGE_KEY_FILE}}"
         msg: "找不到 age 私钥文件: {{.AGE_KEY_FILE}}（可通过 AGE_KEY_FILE 覆盖）"
-      - sh: command -v sops >/dev/null 2>&1
+      - sh: command -v sops
         msg: "缺少依赖：sops"
-      - sh: command -v yq >/dev/null 2>&1
+      - sh: command -v yq
         msg: "缺少依赖：yq"
-      - sh: command -v jq >/dev/null 2>&1
+      - sh: command -v jq
         msg: "缺少依赖：jq"
-      - sh: command -v age-keygen >/dev/null 2>&1
+      - sh: command -v age-keygen
         msg: "缺少依赖：age-keygen"
 
   k8s:ensure-output-dir:

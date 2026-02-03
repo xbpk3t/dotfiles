@@ -1,0 +1,62 @@
+---
+version: '3'
+
+tasks:
+  default:
+    desc: ICMP echo (IPv4)
+    summary: "task -g ping HOST=1.1.1.1 [COUNT=5] [SIZE=56] [INTERVAL=1]"
+    platforms: [linux]
+    requires:
+      vars: [HOST]
+    vars:
+      COUNT: '{{.COUNT | default "5"}}'
+      # SIZE 是 payload（bytes），不含 IPv4+ICMP 头
+      SIZE: '{{.SIZE | default "56"}}'
+      # INTERVAL 单位为秒（seconds）
+      INTERVAL: '{{.INTERVAL | default "1"}}'
+    cmds:
+      - ping -c {{.COUNT}} -s {{.SIZE}} -i {{.INTERVAL}} {{.HOST}}
+
+  v6:
+    desc: ICMP echo (IPv6)
+    summary: "task -g ping:v6 HOST=ipv6.google.com [COUNT=5] [SIZE=56] [INTERVAL=1]"
+    platforms: [linux]
+    requires:
+      vars: [HOST]
+    vars:
+      COUNT: '{{.COUNT | default "5"}}'
+      # SIZE 是 payload（bytes），不含 IPv6+ICMPv6 头
+      SIZE: '{{.SIZE | default "56"}}'
+      # INTERVAL 单位为秒（seconds）
+      INTERVAL: '{{.INTERVAL | default "1"}}'
+    cmds:
+      - ping -6 -c {{.COUNT}} -s {{.SIZE}} -i {{.INTERVAL}} {{.HOST}}
+
+  pmtu:
+    desc: IPv4 DF ping for PMTU probing
+    summary: "task -g ping:pmtu HOST=1.1.1.1 [SIZE=1472] [COUNT=3]"
+    platforms: [linux]
+    requires:
+      vars: [HOST]
+    vars:
+      # DF (Don't Fragment) 用于触发 PMTU 反馈
+      SIZE: '{{.SIZE | default "1472"}}'
+      COUNT: '{{.COUNT | default "3"}}'
+    cmds:
+      - ping -M do -s {{.SIZE}} -c {{.COUNT}} {{.HOST}}
+
+  darwin:
+    desc: ICMP echo (IPv4, darwin)
+    summary: "task -g ping:darwin HOST=1.1.1.1 [COUNT=5] [SIZE=56] [INTERVAL=1]"
+    platforms: [darwin]
+    interactive: true
+    requires:
+      vars: [HOST]
+    vars:
+      COUNT: '{{.COUNT | default "30"}}'
+      # SIZE 是 payload（bytes），不含 IPv4+ICMP 头
+      SIZE: '{{.SIZE | default "56"}}'
+      # INTERVAL 单位为秒（seconds）
+      INTERVAL: '{{.INTERVAL | default "1"}}'
+    cmds:
+      - ping -c {{.COUNT}} -s {{.SIZE}} -i {{.INTERVAL}} {{.HOST}}

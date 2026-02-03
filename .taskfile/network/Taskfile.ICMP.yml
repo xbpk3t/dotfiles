@@ -1,0 +1,28 @@
+---
+version: '3'
+
+tasks:
+  pmtu:
+    desc: PMTU check (tracepath + DF ping)
+    summary: "task -g nc:pmtu HOST=1.1.1.1 [SIZE=1472] [COUNT=3] [TRACEROUTE=false]"
+    requires:
+      vars: [HOST]
+    vars:
+      # SIZE 是 payload，1472 = 1500 - 20(IPv4) - 8(ICMP)
+      SIZE: '{{.SIZE | default "1472"}}'
+      COUNT: '{{.COUNT | default "3"}}'
+      # TRACEROUTE=true 时追加 traceroute（可选）
+      TRACEROUTE: '{{.TRACEROUTE | default "false"}}'
+    cmds:
+      - task: tracepath
+        vars:
+          HOST: '{{.HOST}}'
+      - task: traceroute
+        vars:
+          HOST: '{{.HOST}}'
+        if: '{{.TRACEROUTE}}'
+      - task: ping:pmtu
+        vars:
+          HOST: '{{.HOST}}'
+          SIZE: '{{.SIZE}}'
+          COUNT: '{{.COUNT}}'

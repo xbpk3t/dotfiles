@@ -62,7 +62,7 @@ in {
   # - 🔀 [git commit history]
   # 用 tig, serie 可以替代实现该需求
   #
-  #
+  # TODO: dddd
   #
   # https://www.reddit.com/r/ZedEditor/comments/1mvqlph/zed_is_awesome_but_it_lacks_some_crucial/
   # 这篇文章的吐槽挺到位的
