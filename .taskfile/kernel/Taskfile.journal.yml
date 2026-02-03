@@ -1,0 +1,115 @@
+---
+version: "3"
+
+tasks:
+  # 日志管理组
+  # journal:*:
+  #   vars:
+  #     ACTION: '{{index .MATCH 0}}'
+  #     PARAM: '{{index .MATCH 1 | default ""}}'
+  #   requires:
+  #     vars:
+  #       - name: ACTION
+  #         enum:
+  #           - logs
+  #           - logs-follow
+  #           - logs-boot
+  #           - logs-boot-previous
+  #           - list-boots
+  #           - logs-kernel
+  #           - logs-error
+  #           - logs-warning
+  #           - logs-since
+  #           - logs-until
+  #           - disk-usage
+  #           - vacuum-time
+  #           - vacuum-size
+  #   cmds:
+  #     - echo "Starting {{.ACTION}}"
+  #     - journalctl {{.ACTION}} {{.PARAM}}
+
+  # sudo journalctl -u singbox -f
+  # 这里的 -u 是啥意思？
+  # 搭配
+
+  # journalctl -u traefik --since "2026-01-10" --no-pager | tail -n 50
+
+  # 日志管理组
+  recent:
+    desc: View recent system logs (journal)
+    summary: |
+      task -g journal:recent LINES=[200]
+    platforms: [linux]
+    cmds:
+      - |
+        lines="{{.LINES}}"
+        lines=${lines:-100}
+        journalctl -n "$lines" --no-pager
+
+  service:
+    desc: View logs of a specific service (journalctl -u)
+    summary: |
+      task -g journal:service SVC=sshd
+    platforms: [linux]
+    preconditions:
+      - sh: test -n "{{.SVC}}"
+    requires:
+      vars: [SVC]
+    cmds:
+      - journalctl -u "{{.SVC}}" -n 100 --no-pager
+
+  auth:
+    desc: View login/security logs
+    summary: |
+      task -g journal:auth
+    platforms: [linux]
+    cmds:
+      - |
+        echo "====== 最近登录日志 ======"
+        last -n 10
+        echo
+        echo "====== 认证日志 ======"
+        if [ -f /var/log/secure ]; then
+          tail -n 20 /var/log/secure
+        elif [ -f /var/log/auth.log ]; then
+          tail -n 20 /var/log/auth.log
+        else
+          echo "未找到安全日志文件"
+        fi
+
+  follow:
+    desc: Follow system or service logs
+    summary: |
+      task -g journal:follow SVC=[sshd]
+    platforms: [linux]
+    cmds:
+      - |
+        if [ -n "{{.SVC}}" ]; then
+          journalctl -u "{{.SVC}}" -f
+        else
+          journalctl -f
+        fi
+
+  vacuum-time:
+    desc: Vacuum journal by time (e.g. 7d/3d)
+    summary: |
+      task -g journal:vacuum-time KEEP=7d
+    platforms: [linux]
+    preconditions:
+      - sh: test -n "{{.KEEP}}"
+    requires:
+      vars: [KEEP]
+    cmds:
+      - journalctl --vacuum-time={{.KEEP}}
+
+  vacuum-size:
+    desc: Vacuum journal by size (e.g. 500M)
+    summary: |
+      task -g journal:vacuum-size SIZE=500M
+    platforms: [linux]
+    preconditions:
+      - sh: test -n "{{.SIZE}}"
+    requires:
+      vars: [SIZE]
+    cmds:
+      - journalctl --vacuum-size={{.SIZE}}

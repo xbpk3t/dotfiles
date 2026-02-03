@@ -1,0 +1,41 @@
+---
+version: "3"
+
+tasks:
+  sysinfo:
+    platforms: [linux]
+    cmds:
+      - uname -a
+      - cat /etc/os-release
+      # CPU型号
+      - lscpu
+      # CPU核心数
+      - nproc
+      - cat /proc/cpuinfo
+      - cat /proc/stat
+      - grep 'cpu ' /proc/stat
+      - uptime
+      # 物理内存
+      - free -b
+      # 虚拟内存（swap）
+      - free -m
+      - df -h
+
+      # TCP连接数
+      - ss -t | wc -l
+      # UDP连接数
+      - ss -u | wc -l
+
+      # 拥塞控制算法
+      - sysctl -n net.ipv4.tcp_congestion_control
+
+      # 默认队列算法
+      - sysctl -n net.core.default_qdisc
+
+      - curl -s --max-time 5 ipinfo.io
+
+      # DNS（nameserver 列表）
+      - cat /etc/resolv.conf
+
+      # 时区
+      - timedatectl show -p Timezone --value
