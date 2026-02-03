@@ -7,18 +7,34 @@
   home.packages = with pkgs;
     [
       # 网络工具 (excluding wget/curl which are in minimal)
+
+      # https://mynixos.com/nixpkgs/package/iputils
+      # - arping: send ARP REQUEST to a neighbour host
+      # - clockdiff: measure clock difference between hosts
+      # - ping: send ICMP ECHO_REQUEST to network hosts
+      # - tracepath: traces path to a network host discovering MTU along this path.
+      iputils
+
+      # https://mynixos.com/nixpkgs/package/iproute2
+      # nstat
+      iproute2
+
       mosh
       fping
       inetutils
       # https://mynixos.com/nixpkgs/package/dig
       dig
-      mtr
 
-      gping # ping, but with a graph(TUI)
+      # ping, but with a graph(TUI)
+      gping
       #  doggo # DNS client for humans
 
       duf # Disk Usage/Free Utility - a better 'df' alternative
       #  du-dust # A more intuitive version of `du` in rust
+
+      # https://mynixos.com/nixpkgs/package/mtr
+      # 同时支持 linux, darwin, windows
+      mtr
 
       ncdu
 
@@ -144,4 +160,9 @@
   # TODO: trippy
   # https://mynixos.com/home-manager/options/programs.trippy
   # https://github.com/fujiapple852/trippy
+
+  # https://mynixos.com/nixpkgs/options/programs.mtr
+  programs.mtr = {
+    enable = pkgs.stdenv.isLinux;
+  };
 }

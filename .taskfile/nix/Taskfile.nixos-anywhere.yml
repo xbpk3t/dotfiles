@@ -1,0 +1,160 @@
+---
+
+version: '3'
+
+
+#    ww:
+#      - 【练习题】nixos-anywhere 对目标host刷机，必须保证该机器原本的OS是linux吗？还是说windows, darwin 之类的也可以？ # 当然，因为 nixos-anywhere的核心机制就是 kexec，而kexec是linux kernel的专有功能（Windows、macOS（Darwin）或其他非 Linux 系统（如 BSD）根本不支持 kexec，因此无法直接从这些系统启动 NixOS installer）。
+#
+#    htu:
+#      - 【具体流程】核心4步（验、写、跑、验）
+#      # 1、验证3项（是否linux、是否SSH能通、是否nixos-anywhere命令可用）
+#      ## 测试 SSH 是否连通（注意这步并不需要做SSH免密登录。因为在刷机成功后还要再配置SSH免密，以供colmena使用，所以此时没必要配置）
+#      ## 验证 setsid 是否支持 --wait （处理 BusyBox `setsid` 无 `--wait` 导致的 kexec 失败。在部分救援系统（常见于 BusyBox/Alpine 环境）里，预装的 `setsid` 不包含 `--wait` 参数，nixos-anywhere 下载 kexec installer 后会执行 `setsid --wait /root/kexec/kexec/run`，因此直接报错并退出，安装不会继续。）
+#
+#      # 2、写相应 host（尽量简单（也即只写host的bootstrap层，包括 最小系统（SSH、用户、时区）、disko 布局、必要的网络配置），不要 hm / 大量 modules，加快 rebuild，后面由 colmena push closure）
+#
+#      # 3、执行 nixos-anywhere 命令（记得先安装 nixos-anywhere命令，记得）
+#      ## nix run github:nix-community/nixos-anywhere --flake .#my-host  --target-host root@TARGET_IP  --generate-hardware-config nixos-generate-config ./hardware-configuration.nix
+#      ##  实际执行命令 nixos-anywhere  --flake '/home/luck/Desktop/dotfiles#nixos-vps' root@103.85.224.63 --debug --no-reboot
+#
+#      # 4、验证是否刷机成功（uname, /etc/os-release）
+#      # 5、收尾（1、添加该host的SSH 2、添加该host到colmena）
+#    hti:
+#      - 【核心机制】kexec, disko, install, reboot
+#      # kexec phase
+#      ## 通过 SSH 登上目标机。
+#      ## 如果目标机不是 NixOS installer，就上传一个 NixOS installer 镜像，用 kexec 直接切到一个临时的 NixOS（内核热重启，但是不走 BIOS/UEFI）。
+#
+#      # disko phase
+#      ## 在这个临时 NixOS 里执行 disko，按你的 disk-config.nix：
+#      ## 卸载原来的东西
+#      ## 划分分区 / 建 ZFS/LUKS/LVM 等
+#      ## 格式化
+#      ## 挂载到 /mnt 之类的安装路径
+#
+#      # install phase
+#      ## 用 Nix 构建你 flake 里指定的 NixOS system（本地构建 or 目标机构建，由 --build-on 决定）。
+#      ## 把构建好的 system closure + disko script 复制到目标机。
+#      ## 在目标机上跑 nixos-install 风格的逻辑，把 system 装到刚刚分好的磁盘上。
+#
+#      # reboot phase
+#      ## 卸载 /mnt 的文件系统，必要时 export ZFS 池。
+#      ## 重启到新系统。
+#      ## 所以你看到的“黑盒”：跑一条命令 → 等若干分钟 → 机器自动重启 → 新 NixOS 起起来，就是这四段东西串在一起。
+#
+#      # “用 Nix + disko + kexec + ssh 拼出来的 远程全自动 NixOS 装机脚本，你只负责给一份 declarative 配置，它负责帮你：进 installer → 分区 → 安装 → 重启。”
+#    hto:
+#      - 【dd】
+
+
+
+
+tasks:
+  default:
+    desc: nixos-anywhere 远程刷机（默认 DRY_RUN=true：只打印不执行）
+    summary: task -g nixos-anywhere [FLAKE_REF="./dotfiles#nixos-vps"] TARGET=root@<IP> [DRY=false]
+    vars:
+      # 必填：flake 引用（path#nixosConfigurationName）
+      # 例：./dotfiles#nixos-vps
+      FLAKE_REF: '{{.FLAKE_REF | default ""}}'
+
+      # 必填：目标 SSH（通常 root@ip）
+      # 例：root@103.85.224.63
+      TARGET: '{{.TARGET | default ""}}'
+
+      # 可选：nixos-anywhere flags（保持原样透传）
+      # 例：--debug --no-reboot -i ~/.ssh/id_ed25519
+      # NOTES:
+      # 注意这里默认使用 --no-reboot，而非直接 reboot
+      # 因为“远程装机”的失误成本很高：一旦自动 reboot 后起不来，你可能就要进厂商 rescue / 控制台救火。
+      # - 避免“装完立刻断联”，方便你当场做验收/补救。可以做些检查，确认没有问题之后，再reboot。
+      # - 一些场景“立刻 reboot”确实更容易翻车（典型：ZFS）：社区里有过实际案例：安装后直接 reboot 可能因为 ZFS pool 未正确 export/导入策略 导致首次启动失败；--no-reboot 的 workaround 是你手动做 zpool export -a 再 reboot。
+      NA_ARGS: '{{.NA_ARGS | default "--debug --no-reboot"}}'
+
+      # 可选：DRY_RUN（bool）
+      # 默认 true：只打印命令；显式设置 DRY_RUN=false 才真正执行
+      DRY: '{{.DRY_RUN | default true | toBool}}'
+
+      # 可选：ssh options
+      # BatchMode=yes：避免卡在 password 交互（若你需要输入密码，请去掉该项）
+      SSH_OPTS: '{{.SSH_OPTS | default "-o BatchMode=yes -o ConnectTimeout=5"}}'
+    deps:
+      - task: _check_local
+      - task: _check_remote
+    cmds:
+      - task: _run
+
+  # 判断本地是否支持刷机
+  _check_local:
+    internal: true
+    vars:
+      FLAKE_REF: '{{.FLAKE_REF}}'
+      TARGET: '{{.TARGET}}'
+    preconditions:
+      - sh: test -n "{{.FLAKE_REF}}"
+        msg: '缺少 FLAKE_REF（例：FLAKE_REF="./dotfiles#nixos-vps"）'
+      - sh: echo "{{.FLAKE_REF}}" | grep -q "#"
+        msg: 'FLAKE_REF 必须包含 "#<nixosConfigurationName>"（例：./dotfiles#my-host）'
+      - sh: test -n "{{.TARGET}}"
+        msg: '缺少 TARGET（例：TARGET="root@1.2.3.4"）'
+      - sh: command -v ssh
+        msg: "本地缺少 ssh"
+      - sh: command -v nix
+        msg: "本地缺少 nix（用于 fallback: nix run）"
+
+  # 判断remote是否支持被刷机
+  _check_remote:
+    internal: true
+    vars:
+      TARGET: '{{.TARGET}}'
+      SSH_OPTS: '{{.SSH_OPTS}}'
+
+      # 远端 preflight：只列“命令”，失败统一报错并打印失败的命令
+      # 注意：这些命令在远端用 sh 执行；尽量写 POSIX sh
+      REMOTE_CHECKS:
+        # SSH 可达性
+        - 'true'
+        # 必须是 Linux（kexec 前提：Linux kernel 专有）
+        - 'test "$(uname -s)" = Linux'
+        # BusyBox/Alpine 常见坑：setsid 没有 --wait，会导致 kexec phase 失败
+        - 'setsid --help 2>&1 | grep -q -- --wait'
+        # kexec 可能被显式禁用：kexec_load_disabled=1（若该开关存在则检查）
+        - 'test ! -r /proc/sys/kernel/kexec_load_disabled || [ "$(cat /proc/sys/kernel/kexec_load_disabled)" != 1 ]'
+    cmds:
+      - for:
+          var: REMOTE_CHECKS
+        task: _ssh_assert
+        vars:
+          TARGET: '{{.TARGET}}'
+          SSH_OPTS: '{{.SSH_OPTS}}'
+          CMD: '{{.ITEM}}'
+
+  _ssh_assert:
+    internal: true
+    vars:
+      TARGET: '{{.TARGET}}'
+      SSH_OPTS: '{{.SSH_OPTS}}'
+      CMD: '{{.CMD}}'
+    preconditions:
+      - sh: ssh {{.SSH_OPTS}} "{{.TARGET}}" {{.CMD | quote}}
+        msg: |
+          远端 preflight 失败：{{.CMD}}
+          not satisfied, please check; otherwise can't execute nixos-anywhere
+
+  _run:
+    internal: true
+    vars:
+      FLAKE_REF: '{{.FLAKE_REF}}'
+      TARGET: '{{.TARGET}}'
+      NA_ARGS: '{{.NA_ARGS}}'
+      DRY: '{{.DRY_RUN | default true | toBool}}'
+
+      # 优先使用本地 nixos-anywhere；没有则 fallback 到 nix run（更快更稳）
+      NA_BIN:
+        sh: 'command -v nixos-anywhere && echo nixos-anywhere || echo "nix run --refresh github:nix-community/nixos-anywhere --"'
+    cmds:
+      # 1) 永远打印将要执行的命令（便于复制排查）
+      - cmd: echo {{.NA_BIN}} --flake {{.FLAKE_REF | quote}} --target-host {{.TARGET | quote}} {{.NA_ARGS}}
+      # 2) DRY_RUN=true 时不执行（跑一个 true 占位）；DRY_RUN=false 才真正执行
+      - cmd: '{{if .DRY}}true{{else}}{{.NA_BIN}} --flake {{.FLAKE_REF | quote}} --target-host {{.TARGET | quote}} {{.NA_ARGS}}{{end}}'

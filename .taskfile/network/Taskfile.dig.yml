@@ -1,0 +1,106 @@
+---
+version: '3'
+
+vars:
+  # 允许的记录类型（集中维护，避免重复）
+  DIG_TYPES: "A AAAA MX NS TXT SOA SRV"
+
+  # dig 基础命令
+  DIG_ANSWER: "dig +noall +answer"
+  DIG_SHORT: "dig +short"
+
+tasks:
+  _dig:
+    internal: true
+    desc: "Template: dig query"
+    platforms: [linux, darwin]
+    preconditions:
+      - sh: command -v dig
+        msg: dig not found
+      - sh: 'echo " {{.DIG_TYPES}} " | grep -q " {{.TYPE}} "'
+        msg: 'Invalid TYPE="{{.TYPE}}". Allowed: {{.DIG_TYPES}}'
+    cmds:
+      - |
+        if [ "{{.MODE}}" = "short" ]; then
+          # +short: 只输出核心结果
+          {{.DIG_SHORT}} {{ if .RESOLVER }}@{{.RESOLVER}} {{ end }}{{.HOST}} {{.TYPE}}
+        else
+          {{.DIG_ANSWER}} {{ if .RESOLVER }}@{{.RESOLVER}} {{ end }}{{.HOST}} {{.TYPE}}
+        fi
+
+  q:*:
+    desc: dig record by type (answer). e.g. q:A / q:TXT
+    summary: "task -g dig:q:A HOST=example.com"
+    platforms: [linux, darwin]
+    requires:
+      vars: [HOST]
+    vars:
+      TYPE: '{{index .MATCH 0}}'
+      MODE: answer
+    cmds:
+      - task: _dig
+        vars:
+          HOST: '{{.HOST}}'
+          TYPE: '{{.TYPE}}'
+          MODE: '{{.MODE}}'
+
+  s:*:
+    desc: dig record by type (+short)
+    summary: "task -g dig:s:A HOST=example.com"
+    platforms: [linux, darwin]
+    requires:
+      vars: [HOST]
+    vars:
+      TYPE: '{{index .MATCH 0}}'
+      MODE: short
+    cmds:
+      - task: _dig
+        vars:
+          HOST: '{{.HOST}}'
+          TYPE: '{{.TYPE}}'
+          MODE: '{{.MODE}}'
+
+  at:
+    desc: dig via specific DNS server
+    summary: "task -g dig:at HOST=example.com TYPE=A RESOLVER=1.1.1.1"
+    platforms: [linux, darwin]
+    requires:
+      vars: [HOST, TYPE, RESOLVER]
+    vars:
+      MODE: answer
+    cmds:
+      # @server: 指定 DNS server
+      - task: _dig
+        vars:
+          HOST: '{{.HOST}}'
+          TYPE: '{{.TYPE}}'
+          MODE: '{{.MODE}}'
+          RESOLVER: '{{.RESOLVER}}'
+
+  trace:
+    desc: dig with +trace
+    summary: "task -g dig:trace HOST=example.com TYPE=A"
+    platforms: [linux, darwin]
+    requires:
+      vars: [HOST, TYPE]
+    preconditions:
+      - sh: command -v dig
+        msg: dig not found
+      - sh: 'echo " {{.DIG_TYPES}} " | grep -q " {{.TYPE}} "'
+        msg: 'Invalid TYPE="{{.TYPE}}". Allowed: {{.DIG_TYPES}}'
+    cmds:
+      # +trace: 递归追踪权威链路
+      - dig {{.HOST}} {{.TYPE}} +trace
+
+  reverse:
+    desc: dig reverse lookup (-x)
+    summary: "task -g dig:reverse IP=1.1.1.1"
+    platforms: [linux, darwin]
+    requires:
+      vars: [IP]
+    preconditions:
+      - sh: command -v dig
+        msg: dig not found
+    cmds:
+      # -x: 反向解析 PTR
+      - dig -x {{.IP}} +noall +answer

@@ -1,0 +1,13 @@
+---
+version: '3'
+
+tasks:
+  default:
+    cmds:
+      # 拥塞控制算法
+      # cat /proc/sys/net/ipv4/tcp_available_congestion_control
+      - sysctl -n net.ipv4.tcp_congestion_control
+      - modinfo tcp_bbr 2>/dev/null | head
+
+      # 全局默认是否是 bbr
+      - sysctl net.ipv4.tcp_congestion_control

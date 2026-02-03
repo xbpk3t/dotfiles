@@ -1,0 +1,14 @@
+---
+version: '3'
+
+tasks:
+  icmp:
+    desc: Show ICMP/IP fragment counters
+    summary: "task -g nstat:icmp"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v nstat
+        msg: nstat not found
+    cmds:
+      # 关注 ICMP / IP fragment 相关 counters
+      - nstat -az | egrep 'Icmp|Icmp6|IpFrag|Ip6Frag'
