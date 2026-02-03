@@ -140,38 +140,6 @@ tasks:
       - echo "Starting {{.ACTION}}"
       - systemctl {{.ACTION}} {{.TARGET}}
 
-# 日志管理组
-  journal:*:
-    vars:
-      ACTION: '{{index .MATCH 0}}'
-      PARAM: '{{index .MATCH 1 | default ""}}'
-    requires:
-      vars:
-        - name: ACTION
-          enum:
-            - logs
-            - logs-follow
-            - logs-boot
-            - logs-boot-previous
-            - list-boots
-            - logs-kernel
-            - logs-error
-            - logs-warning
-            - logs-since
-            - logs-until
-            - disk-usage
-            - vacuum-time
-            - vacuum-size
-    cmds:
-      - echo "Starting {{.ACTION}}"
-      - journalctl {{.ACTION}} {{.PARAM}}
-
-# FIXME: 这整个taskfile都需要重新处理
-# sudo journalctl -u singbox -f
-# 这里的 -u 是啥意思？
-# 搭配
-
-# journalctl -u traefik --since "2026-01-10" --no-pager | tail -n 50
 
 
 # curl -vk --resolve beszel.lucc.dev
