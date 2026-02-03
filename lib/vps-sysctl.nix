@@ -52,8 +52,8 @@
     rttMs,
     memGiB,
     mode ? "performance",
-    cc ? "bbr",
-    qdisc ? "fq",
+    cc ? "bbr", # BBR, CUBIC
+    qdisc ? "fq", # FQ, CAKE, FQ_PIE
     cpuCores ? null,
   }: let
     m = modeTable.${mode} or modeTable.balanced;

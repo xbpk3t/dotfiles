@@ -42,25 +42,17 @@ version: "3"
 
 tasks:
   default:
-    cmds:
-      - task: full
-
-  full:
     desc: "Full VPS check (ecs + NetQuality + IPQuality)"
-    cmds:
-      - ./vps-check.sh --full
+    cmd: ./vps-check.sh --full
 
   quick:
     desc: "Quick VPS check (NetQuality latency+low-data)"
-    cmds:
-      - ./vps-check.sh --quick
+    cmd: ./vps-check.sh --quick
 
   no-deps:
     desc: "Run checks without trying to install deps (-n / -En)"
-    cmds:
-      - ./vps-check.sh --no-deps
+    cmd: ./vps-check.sh --no-deps
 
   out-local:
     desc: "Write reports to local ./.reports"
-    cmds:
-      - ./vps-check.sh --out ./.reports
+    cmd: ./vps-check.sh --out ./.reports
