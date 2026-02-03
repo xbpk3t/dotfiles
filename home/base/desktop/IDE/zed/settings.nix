@@ -108,6 +108,9 @@ in {
   # [Single-File Git Diff from Git Panel · zed-industries/zed · Discussion #38420](https://github.com/zed-industries/zed/discussions/38420)
   #
   #
+  #
+  # [2026-02-03]
+  # zed不支持 Local history，真的太蠢了。最近一周连续两次误操作导致本地未commit代码被冲掉（一次是将近两天的修改，这次是最近几天修改的taskfile，改了三四天了，想要一次commit上去），我知道都TM怪我没stash，怪我蠢。但是如果有Local history是不是能好点？用回goland了。
 
   # 可供参考的zed配置
   # https://github.com/linkfrg/dotfiles/blob/main/modules/home-manager/software/zed/settings.nix
