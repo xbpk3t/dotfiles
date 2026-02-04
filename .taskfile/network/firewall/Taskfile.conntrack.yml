@@ -1,0 +1,23 @@
+---
+version: '3'
+
+tasks:
+  list:
+    desc: conntrack list
+    summary: "task -g conntrack:list"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v conntrack
+        msg: conntrack not found
+    cmds:
+      - sudo conntrack -L
+
+  stats:
+    desc: conntrack stats
+    summary: "task -g conntrack:stats"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v conntrack
+        msg: conntrack not found
+    cmds:
+      - sudo conntrack -S

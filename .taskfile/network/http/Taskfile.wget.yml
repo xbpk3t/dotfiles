@@ -1,0 +1,17 @@
+---
+version: '3'
+
+tasks:
+  get:
+    desc: wget download
+    summary: "task -g wget:get URL=https://example.com [OUT=output.html]"
+    platforms: [linux, darwin]
+    requires:
+      vars: [URL]
+    vars:
+      OUT: '{{.OUT | default "-"}}'
+    preconditions:
+      - sh: command -v wget
+        msg: wget not found
+    cmds:
+      - wget -qO {{.OUT}} {{.URL}}

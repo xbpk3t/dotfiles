@@ -1,0 +1,26 @@
+---
+version: '3'
+
+tasks:
+  list:
+    desc: bpftrace list probes
+    summary: "task -g bpftrace:list"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v bpftrace
+        msg: bpftrace not found
+    cmds:
+      - sudo bpftrace -l
+
+  run:
+    desc: bpftrace run one-liner
+    summary: "task -g bpftrace:run PROG='kprobe:tcp_v4_connect { @[comm] = count(); }'"
+    platforms: [linux]
+    requires:
+      vars: [PROG]
+    preconditions:
+      - sh: command -v bpftrace
+        msg: bpftrace not found
+    cmds:
+      # PROG 为 bpftrace script
+      - sudo bpftrace '{{.PROG}}'

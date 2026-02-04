@@ -1,0 +1,28 @@
+---
+version: '3'
+
+tasks:
+  stats:
+    desc: ethtool stats
+    summary: "task -g ethtool:stats IFACE=eth0"
+    platforms: [linux]
+    requires:
+      vars: [IFACE]
+    preconditions:
+      - sh: command -v ethtool
+        msg: ethtool not found
+    cmds:
+      # -S: driver stats
+      - sudo ethtool -S {{.IFACE}}
+
+  info:
+    desc: ethtool info
+    summary: "task -g ethtool:info IFACE=eth0"
+    platforms: [linux]
+    requires:
+      vars: [IFACE]
+    preconditions:
+      - sh: command -v ethtool
+        msg: ethtool not found
+    cmds:
+      - sudo ethtool {{.IFACE}}

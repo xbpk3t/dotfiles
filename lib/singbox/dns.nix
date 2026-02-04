@@ -4,7 +4,7 @@
   # 开启后会让每个 DNS 服务器缓存独立，但会轻微降低性能。
   independent_cache = true;
   reverse_mapping = true;
-  final = "remote";
+  final = "local";
 
   strategy = "prefer_ipv4";
 

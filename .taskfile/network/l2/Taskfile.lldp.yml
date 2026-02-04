@@ -1,0 +1,13 @@
+---
+version: '3'
+
+tasks:
+  default:
+    desc: LLDP neighbors
+    summary: "task -g lldp"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v lldpctl
+        msg: lldpctl not found
+    cmds:
+      - lldpctl

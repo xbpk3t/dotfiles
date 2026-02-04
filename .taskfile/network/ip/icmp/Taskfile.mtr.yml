@@ -1,0 +1,75 @@
+---
+version: '3'
+
+
+#  影响探测方式（ICMP/TCP/UDP/SCTP）
+#
+#  TCP SYN（常用来绕过“禁 ping”）：mtr --tcp -P 443 -c 50 <host>
+#
+#  UDP：mtr --udp -P 33434 <host>
+
+#  输出格式（自动化/脚本）
+#
+#  JSON：mtr -r -c 50 --json <host>
+#
+#  CSV：mtr -r -c 50 --csv <host>（注意分隔符实际是 ;）
+#
+#  XML：mtr -r -c 50 --xml <host>
+
+
+
+
+#  显示/字段控制
+#
+#  不做 DNS 解析：mtr -n <host>
+#
+#  同时显示 hostname + IP：mtr -b <host>
+#
+#  自定义列顺序：mtr -o "LSD NBAW" <host>（Loss/Sent/…等字段）
+#
+#  AS 信息：mtr -z <host> 或 mtr --ipinfo 0 <host>
+
+
+#  路由/探测细节
+#
+#  IPv4/IPv6：mtr -4 <host> / mtr -6 <host>
+#
+#  间隔：mtr -i 0.5 <host>
+#
+#  指定出口网卡：mtr -I <iface> <host>
+#
+#  绑定源地址：mtr -a <src_ip> <host>
+
+
+tasks:
+  default:
+    desc: mtr report (IPv4)
+    summary: "task -g mtr HOST=1.1.1.1 [COUNT=50]"
+    platforms: [linux]
+    requires:
+      vars: [HOST]
+    vars:
+      COUNT: '{{.COUNT | default "50"}}'
+    preconditions:
+      - sh: command -v mtr
+        msg: mtr not found
+    cmds:
+      # -r: report
+      # -w: wide 宽报告（不截断主机名）
+      # -z: AS info
+      # -c: count
+      - mtr -rwzc {{.COUNT}} {{.HOST}}
+
+  v6:
+    desc: mtr report (IPv6)
+    summary: "task -g mtr:v6 HOST=ipv6.google.com [COUNT=50]"
+    platforms: [linux]
+    requires:
+      vars: [HOST]
+    vars:
+      COUNT: '{{.COUNT | default "50"}}'
+    preconditions:
+      - sh: command -v mtr
+        msg: mtr not found
+    cmds:
+      - mtr -6 -rwzc {{.COUNT}} {{.HOST}}
