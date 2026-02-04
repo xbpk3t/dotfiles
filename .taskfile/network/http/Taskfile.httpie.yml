@@ -1,0 +1,28 @@
+---
+version: '3'
+
+tasks:
+  get:
+    desc: httpie GET
+    summary: "task -g http:get URL=https://example.com"
+    platforms: [linux, darwin]
+    requires:
+      vars: [URL]
+    preconditions:
+      - sh: command -v http
+        msg: httpie not found
+    cmds:
+      - http --check-status --print=hb {{.URL}}
+
+  post-json:
+    desc: httpie POST JSON
+    summary: 'task -g http:post-json URL=https://example.com DATA:={"key":"value"}'
+    platforms: [linux, darwin]
+    requires:
+      vars: [URL, DATA]
+    preconditions:
+      - sh: command -v http
+        msg: httpie not found
+    cmds:
+      # DATA 为 JSON 字符串
+      - http --check-status --print=hb POST {{.URL}} '{{.DATA}}'

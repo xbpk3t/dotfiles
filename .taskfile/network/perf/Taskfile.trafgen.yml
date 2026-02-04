@@ -1,0 +1,26 @@
+---
+version: '3'
+
+tasks:
+  list:
+    desc: trafgen list examples
+    summary: "task -g trafgen:list"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v trafgen
+        msg: trafgen not found
+    cmds:
+      - trafgen --help
+
+  run:
+    desc: trafgen run config
+    summary: "task -g trafgen:run CONF=trafgen.cfg IFACE=eth0"
+    platforms: [linux]
+    requires:
+      vars: [CONF, IFACE]
+    preconditions:
+      - sh: command -v trafgen
+        msg: trafgen not found
+    cmds:
+      # CONF 为 trafgen 配置文件
+      - sudo trafgen -i {{.IFACE}} -c {{.CONF}}
