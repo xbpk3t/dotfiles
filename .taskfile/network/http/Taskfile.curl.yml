@@ -1,0 +1,15 @@
+---
+version: '3'
+
+tasks:
+  default:
+    desc: curl GET/HEAD
+    summary: "task -g curl URL=https://example.com"
+    platforms: [linux, darwin]
+    requires:
+      vars: [URL]
+    preconditions:
+      - sh: command -v curl
+        msg: curl not found
+    cmds:
+      - curl -fsSIL {{.URL}}

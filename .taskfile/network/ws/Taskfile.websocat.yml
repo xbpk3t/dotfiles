@@ -1,0 +1,27 @@
+---
+version: '3'
+
+tasks:
+  connect:
+    desc: websocat connect
+    summary: "task -g websocat:connect URL=ws://example.com/socket"
+    platforms: [linux, darwin]
+    requires:
+      vars: [URL]
+    preconditions:
+      - sh: command -v websocat
+        msg: websocat not found
+    cmds:
+      - websocat {{.URL}}
+
+  listen:
+    desc: websocat listen
+    summary: "task -g websocat:listen URL=ws-l:127.0.0.1:9000"
+    platforms: [linux, darwin]
+    requires:
+      vars: [URL]
+    preconditions:
+      - sh: command -v websocat
+        msg: websocat not found
+    cmds:
+      - websocat {{.URL}}

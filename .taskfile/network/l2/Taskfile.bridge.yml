@@ -1,0 +1,45 @@
+---
+version: '3'
+
+tasks:
+  link:
+    desc: bridge link show
+    summary: "task -g bridge:link"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v bridge
+        msg: bridge not found
+    cmds:
+      - bridge link show
+
+  vlan:
+    desc: bridge vlan show
+    summary: "task -g bridge:vlan"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v bridge
+        msg: bridge not found
+    cmds:
+      - bridge vlan show
+
+  fdb:
+    desc: bridge fdb show
+    summary: "task -g bridge:fdb"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v bridge
+        msg: bridge not found
+    cmds:
+      # fdb: forwarding database
+      - bridge fdb show
+
+  mdb:
+    desc: bridge mdb show
+    summary: "task -g bridge:mdb"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v bridge
+        msg: bridge not found
+    cmds:
+      # mdb: multicast database
+      - bridge mdb show

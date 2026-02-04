@@ -1,0 +1,34 @@
+---
+version: '3'
+
+tasks:
+  list:
+    desc: iptables list rules
+    summary: "task -g ipt:list"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v iptables
+        msg: iptables not found
+    cmds:
+      - sudo iptables -S
+
+  list6:
+    desc: ip6tables list rules
+    summary: "task -g ipt:list6"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v ip6tables
+        msg: ip6tables not found
+    cmds:
+      - sudo ip6tables -S
+
+  trace:
+    desc: iptables TRACE target
+    summary: "task -g ipt:trace"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v iptables
+        msg: iptables not found
+    cmds:
+      # TRACE: 旧方式调试规则命中（更推荐 nft monitor trace）
+      - sudo iptables -j TRACE

@@ -1,0 +1,40 @@
+---
+version: '3'
+
+tasks:
+  list:
+    desc: grpcurl list services
+    summary: "task -g grpcurl:list TARGET=host:50051"
+    platforms: [linux, darwin]
+    requires:
+      vars: [TARGET]
+    preconditions:
+      - sh: command -v grpcurl
+        msg: grpcurl not found
+    cmds:
+      - grpcurl {{.TARGET}} list
+
+  describe:
+    desc: grpcurl describe service
+    summary: "task -g grpcurl:describe TARGET=host:50051 SERVICE=helloworld.Greeter"
+    platforms: [linux, darwin]
+    requires:
+      vars: [TARGET, SERVICE]
+    preconditions:
+      - sh: command -v grpcurl
+        msg: grpcurl not found
+    cmds:
+      - grpcurl {{.TARGET}} describe {{.SERVICE}}
+
+  call:
+    desc: grpcurl call method
+    summary: 'task -g grpcurl:call TARGET=host:50051 METHOD=helloworld.Greeter/SayHello DATA={"name":"world"}'
+    platforms: [linux, darwin]
+    requires:
+      vars: [TARGET, METHOD, DATA]
+    preconditions:
+      - sh: command -v grpcurl
+        msg: grpcurl not found
+    cmds:
+      # DATA 为 JSON 字符串
+      - grpcurl -d '{{.DATA}}' {{.TARGET}} {{.METHOD}}

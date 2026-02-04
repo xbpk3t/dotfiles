@@ -1,0 +1,87 @@
+---
+version: '3'
+
+tasks:
+  link:
+    desc: ip link show (list links)
+    summary: "task -g ip:link"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v ip
+        msg: ip not found
+    cmds:
+      - ip link show
+
+  addr:
+    desc: ip addr show (list addresses)
+    summary: "task -g ip:addr"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v ip
+        msg: ip not found
+    cmds:
+      - ip addr show
+
+  route:
+    desc: ip route show (IPv4 routes)
+    summary: "task -g ip:route"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v ip
+        msg: ip not found
+    cmds:
+      - ip route show
+
+  route6:
+    desc: ip -6 route show (IPv6 routes)
+    summary: "task -g ip:route6"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v ip
+        msg: ip not found
+    cmds:
+      - ip -6 route show
+
+  rule:
+    desc: ip rule show (policy routing)
+    summary: "task -g ip:rule"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v ip
+        msg: ip not found
+    cmds:
+      - ip rule show
+
+  neigh:
+    desc: ip neigh show (ARP/NDP)
+    summary: "task -g ip:neigh"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v ip
+        msg: ip not found
+    cmds:
+      - ip neigh show
+
+  monitor:
+    desc: ip monitor (addr/route/neigh changes)
+    summary: "task -g ip:monitor"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v ip
+        msg: ip not found
+    cmds:
+      # 适合排查路由/邻居表变化
+      - ip monitor
+
+  route:get:
+    desc: ip route get (path to destination)
+    summary: "task -g ip:route:get DST=1.1.1.1"
+    platforms: [linux]
+    requires:
+      vars: [DST]
+    preconditions:
+      - sh: command -v ip
+        msg: ip not found
+    cmds:
+      # 查看目的地址的实际选路
+      - ip route get {{.DST}}

@@ -1,0 +1,40 @@
+---
+version: '3'
+
+tasks:
+  qdisc:
+    desc: tc qdisc show
+    summary: "task -g tc:qdisc IFACE=eth0"
+    platforms: [linux]
+    requires:
+      vars: [IFACE]
+    preconditions:
+      - sh: command -v tc
+        msg: tc not found
+    cmds:
+      # qdisc: queueing discipline
+      - sudo tc qdisc show dev {{.IFACE}}
+
+  class:
+    desc: tc class show
+    summary: "task -g tc:class IFACE=eth0"
+    platforms: [linux]
+    requires:
+      vars: [IFACE]
+    preconditions:
+      - sh: command -v tc
+        msg: tc not found
+    cmds:
+      - sudo tc class show dev {{.IFACE}}
+
+  filter:
+    desc: tc filter show
+    summary: "task -g tc:filter IFACE=eth0"
+    platforms: [linux]
+    requires:
+      vars: [IFACE]
+    preconditions:
+      - sh: command -v tc
+        msg: tc not found
+    cmds:
+      - sudo tc filter show dev {{.IFACE}}
