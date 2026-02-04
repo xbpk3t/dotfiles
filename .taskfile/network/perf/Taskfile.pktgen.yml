@@ -1,0 +1,24 @@
+---
+version: '3'
+
+tasks:
+  enable:
+    desc: pktgen load module
+    summary: "task -g pktgen:enable"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v modprobe
+        msg: modprobe not found
+    cmds:
+      # pktgen 为 kernel module
+      - sudo modprobe pktgen
+
+  status:
+    desc: pktgen status
+    summary: "task -g pktgen:status"
+    platforms: [linux]
+    preconditions:
+      - sh: test -d /proc/net/pktgen
+        msg: /proc/net/pktgen not found
+    cmds:
+      - ls /proc/net/pktgen

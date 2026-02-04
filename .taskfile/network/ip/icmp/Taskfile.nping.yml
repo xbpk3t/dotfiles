@@ -1,0 +1,34 @@
+---
+version: '3'
+
+tasks:
+  icmp:
+    desc: nping ICMP probe
+    summary: "task -g nping:icmp HOST=1.1.1.1 [SIZE=56] [COUNT=5]"
+    platforms: [linux]
+    requires:
+      vars: [HOST]
+    vars:
+      SIZE: '{{.SIZE | default "56"}}'
+      COUNT: '{{.COUNT | default "5"}}'
+    preconditions:
+      - sh: command -v nping
+        msg: nping not found
+    cmds:
+      # --icmp: ICMP probe, --data-length: payload bytes
+      - sudo nping --icmp {{.HOST}} --data-length {{.SIZE}} -c {{.COUNT}}
+
+  pmtu:
+    desc: nping ICMP for PMTU probing
+    summary: "task -g nping:pmtu HOST=1.1.1.1 [SIZE=1472]"
+    platforms: [linux]
+    requires:
+      vars: [HOST]
+    vars:
+      # SIZE 是 payload，1472 = 1500 - 20(IPv4) - 8(ICMP)
+      SIZE: '{{.SIZE | default "1472"}}'
+    preconditions:
+      - sh: command -v nping
+        msg: nping not found
+    cmds:
+      - sudo nping --icmp {{.HOST}} --data-length {{.SIZE}}

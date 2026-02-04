@@ -1,0 +1,28 @@
+---
+version: '3'
+
+tasks:
+  s_client:
+    desc: openssl s_client (TLS handshake)
+    summary: "task -g openssl:s_client HOST=example.com PORT=443"
+    platforms: [linux, darwin]
+    requires:
+      vars: [HOST, PORT]
+    preconditions:
+      - sh: command -v openssl
+        msg: openssl not found
+    cmds:
+      # -servername: SNI
+      - openssl s_client -connect {{.HOST}}:{{.PORT}} -servername {{.HOST}}
+
+  x509:
+    desc: openssl x509 view cert
+    summary: "task -g openssl:x509 CERT=cert.pem"
+    platforms: [linux, darwin]
+    requires:
+      vars: [CERT]
+    preconditions:
+      - sh: command -v openssl
+        msg: openssl not found
+    cmds:
+      - openssl x509 -noout -text -in {{.CERT}}

@@ -1,0 +1,41 @@
+---
+version: '3'
+
+tasks:
+  show:
+    desc: macchanger show current MAC
+    summary: "task -g macchanger:show IFACE=eth0"
+    platforms: [linux]
+    requires:
+      vars: [IFACE]
+    preconditions:
+      - sh: command -v macchanger
+        msg: macchanger not found
+    cmds:
+      - sudo macchanger -s {{.IFACE}}
+
+  random:
+    desc: macchanger random MAC
+    summary: "task -g macchanger:random IFACE=eth0"
+    platforms: [linux]
+    requires:
+      vars: [IFACE]
+    preconditions:
+      - sh: command -v macchanger
+        msg: macchanger not found
+    cmds:
+      # -r: random
+      - sudo macchanger -r {{.IFACE}}
+
+  permanent:
+    desc: macchanger reset permanent MAC
+    summary: "task -g macchanger:permanent IFACE=eth0"
+    platforms: [linux]
+    requires:
+      vars: [IFACE]
+    preconditions:
+      - sh: command -v macchanger
+        msg: macchanger not found
+    cmds:
+      # -p: reset to permanent
+      - sudo macchanger -p {{.IFACE}}

@@ -1,0 +1,24 @@
+---
+version: '3'
+
+tasks:
+  list:
+    desc: nft list ruleset
+    summary: "task -g nft:list"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v nft
+        msg: nft not found
+    cmds:
+      - sudo nft list ruleset
+
+  trace:
+    desc: nft monitor trace
+    summary: "task -g nft:trace"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v nft
+        msg: nft not found
+    cmds:
+      # trace: 追踪 packet 命中的规则
+      - sudo nft monitor trace

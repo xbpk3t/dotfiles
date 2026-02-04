@@ -33,7 +33,7 @@
       "hammerspoon"
       # "visual-studio-code"
 
-      # "goland"
+      "goland"
       # "jetbrains-toolbox"
 
       "tencent-lemon"

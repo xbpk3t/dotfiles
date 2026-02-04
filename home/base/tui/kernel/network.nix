@@ -8,22 +8,16 @@
     [
       # 网络工具 (excluding wget/curl which are in minimal)
 
-      # https://mynixos.com/nixpkgs/package/iputils
-      # - arping: send ARP REQUEST to a neighbour host
-      # - clockdiff: measure clock difference between hosts
-      # - ping: send ICMP ECHO_REQUEST to network hosts
-      # - tracepath: traces path to a network host discovering MTU along this path.
-      iputils
-
-      # https://mynixos.com/nixpkgs/package/iproute2
-      # nstat
-      iproute2
-
       mosh
       fping
       inetutils
+
       # https://mynixos.com/nixpkgs/package/dig
+      # https://mynixos.com/nixpkgs/package/dnslookup
+      # https://mynixos.com/nixpkgs/package/whois
       dig
+
+      # https://mynixos.com/nixpkgs/package/netperf
 
       # ping, but with a graph(TUI)
       gping
@@ -129,6 +123,17 @@
     ]
     # Linux-only tools; Darwin 上直接跳过，避免 hostPlatform 不可用的求值错误
     ++ lib.optionals stdenv.isLinux [
+      # https://mynixos.com/nixpkgs/package/iputils
+      # - arping: send ARP REQUEST to a neighbour host
+      # - clockdiff: measure clock difference between hosts
+      # - ping: send ICMP ECHO_REQUEST to network hosts
+      # - tracepath: traces path to a network host discovering MTU along this path.
+      iputils
+
+      # https://mynixos.com/nixpkgs/package/iproute2
+      # nstat
+      iproute2
+
       # nexttrace 可视化路由跟踪工具
       nexttrace
 
@@ -162,7 +167,7 @@
   # https://github.com/fujiapple852/trippy
 
   # https://mynixos.com/nixpkgs/options/programs.mtr
-  programs.mtr = {
-    enable = pkgs.stdenv.isLinux;
-  };
+  #  programs.mtr = {
+  #    enable = pkgs.stdenv.isLinux;
+  #  };
 }

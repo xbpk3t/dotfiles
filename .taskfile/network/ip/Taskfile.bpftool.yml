@@ -1,0 +1,34 @@
+---
+version: '3'
+
+tasks:
+  prog:
+    desc: bpftool prog show
+    summary: "task -g bpftool:prog"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v bpftool
+        msg: bpftool not found
+    cmds:
+      - sudo bpftool prog show
+
+  map:
+    desc: bpftool map show
+    summary: "task -g bpftool:map"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v bpftool
+        msg: bpftool not found
+    cmds:
+      - sudo bpftool map show
+
+  net:
+    desc: bpftool net list
+    summary: "task -g bpftool:net"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v bpftool
+        msg: bpftool not found
+    cmds:
+      # net: attach points
+      - sudo bpftool net

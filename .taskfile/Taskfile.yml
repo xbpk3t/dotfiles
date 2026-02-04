@@ -3,76 +3,100 @@ version: "3"
 
 includes:
   # devops
-  git: taskfile/devops/Taskfile.git.yml
-  linters: taskfile/devops/Taskfile.linters.yml
-  ansible: taskfile/devops/Taskfile.ansible.yml
-  gor: taskfile/devops/Taskfile.goreleaser.yml
-  caddy: taskfile/devops/Taskfile.caddy.yml
-  pc: taskfile/devops/Taskfile.pre-commit.yml
-  rclone: taskfile/devops/Taskfile.rclone.yml
-  tf: taskfile/devops/Taskfile.tf.yml
+  git: devops/Taskfile.git.yml
+  linters: devops/Taskfile.linters.yml
+  ansible: devops/Taskfile.ansible.yml
+  gor: devops/Taskfile.goreleaser.yml
+  caddy: devops/Taskfile.caddy.yml
+  pc: devops/Taskfile.pre-commit.yml
+  rclone: devops/Taskfile.rclone.yml
+  tf: devops/Taskfile.tf.yml
 
   # go
-  gz: taskfile/go/Taskfile.gz.yml
-  go: taskfile/go/Taskfile.go.yml
+  gz: go/Taskfile.gz.yml
+  go: go/Taskfile.go.yml
 
   # k8s
-  k3d: taskfile/k8s/Taskfile.k3d.yml
-  docker: taskfile/k8s/Taskfile.docker.yml
-  mk: taskfile/k8s/Taskfile.minikube.yml
-  dc: taskfile/k8s/Taskfile.dc.yml
-  helm: taskfile/k8s/Taskfile.helm.yml
-  k8s: taskfile/k8s/Taskfile.k8s.yml
+  k3d: k8s/Taskfile.k3d.yml
+  docker: k8s/Taskfile.docker.yml
+  mk: k8s/Taskfile.minikube.yml
+  dc: k8s/Taskfile.dc.yml
+  helm: k8s/Taskfile.helm.yml
+  k8s: k8s/Taskfile.k8s.yml
 
   # kernel
-  linux: taskfile/kernel/Taskfile.linux.yml
-  monitor: taskfile/kernel/Taskfile.monitor.yml
-  pkg: taskfile/kernel/Taskfile.pkg.yml
-  net: taskfile/kernel/Taskfile.z.yml
-  shell: taskfile/kernel/Taskfile.shell.yml
-  ssh: taskfile/kernel/Taskfile.ssh.yml
-  tcpdump: taskfile/kernel/Taskfile.tcpdump.yml
-  sysd: taskfile/kernel/Taskfile.systemd.yml
+  linux: kernel/Taskfile.linux.yml
+  monitor: kernel/Taskfile.monitor.yml
+  pkg: kernel/Taskfile.pkg.yml
+  shell: kernel/Taskfile.shell.yml
+  sysd: kernel/Taskfile.systemd.yml
 
   # mac
-  mac: taskfile/mac/Taskfile.mac.yml
-  mac-cleanup: taskfile/mac/Taskfile.mac-cleanup.yml
-  brew: taskfile/mac/Taskfile.brew.yml
-  img: taskfile/mac/Taskfile.img.yml
-  trzsz: taskfile/mac/Taskfile.trzsz.yml
-  scrapy: taskfile/mac/Taskfile.scrapy.yml
-  me: taskfile/mac/Taskfile.me.yml
-  alfred: taskfile/mac/Taskfile.alfred.yml
-  pnpm: taskfile/mac/Taskfile.pnpm.yml
-  ruler: taskfile/mac/Taskfile.ruler.yml
-  singbox: taskfile/mac/Taskfile.singbox.yml
-  sc: taskfile/mac/Taskfile.scratches.yml
+  mac: mac/Taskfile.mac.yml
+  mac-cleanup: mac/Taskfile.mac-cleanup.yml
+  brew: mac/Taskfile.brew.yml
+  img: mac/Taskfile.img.yml
+  trzsz: mac/Taskfile.trzsz.yml
+  scrapy: mac/Taskfile.scrapy.yml
+  me: mac/Taskfile.me.yml
+  alfred: mac/Taskfile.alfred.yml
+  pnpm: mac/Taskfile.pnpm.yml
+  ruler: mac/Taskfile.ruler.yml
+  sc: mac/Taskfile.scratches.yml
 
   # network
-  netw: taskfile/network/Taskfile.network.yml
-  gost: taskfile/network/Taskfile.gost.yml
-  ss: taskfile/network/Taskfile.ss.yml
-  tcp: taskfile/network/Taskfile.TCP.yml
-  throughput: taskfile/network/Taskfile.throughput.yml
-  dig: taskfile/network/Taskfile.dig.yml
-  whois: taskfile/network/Taskfile.whois.yml
-  ping: taskfile/network/Taskfile.ping.yml
-  tracepath: taskfile/network/Taskfile.tracepath.yml
-  traceroute: taskfile/network/Taskfile.traceroute.yml
-  nstat: taskfile/network/Taskfile.nstat.yml
-  nc: taskfile/network/Taskfile.ICMP.yml
-  nz: taskfile/network/Taskfile.z.yml
+  gost: network/proxy/Taskfile.gost.yml
+  ss: network/tcp/Taskfile.ss.yml
+  tcp: network/tcp/Taskfile.TCP.yml
+  throughput: network/perf/Taskfile.iperf.yml
+  dig: network/dns/Taskfile.dig.yml
+  whois: network/dns/Taskfile.whois.yml
+  ping: network/ip/icmp/Taskfile.ping.yml
+  tracepath: network/ip/icmp/Taskfile.tracepath.yml
+  traceroute: network/ip/icmp/Taskfile.traceroute.yml
+  nstat: network/ip/icmp/Taskfile.nstat.yml
+  nc: network/ip/icmp/Taskfile.ICMP.yml
+  nz: network/Taskfile.z.yml
+  ip: network/ip/Taskfile.iproute2.yml
+  mtr: network/ip/icmp/Taskfile.mtr.yml
+  fping: network/ip/icmp/Taskfile.fping.yml
+  hping: network/ip/icmp/Taskfile.hping3.yml
+  nping: network/ip/icmp/Taskfile.nping.yml
+  nft: network/firewall/Taskfile.nft.yml
+  ipt: network/firewall/Taskfile.iptables.yml
+  conntrack: network/firewall/Taskfile.conntrack.yml
+  ethtool: network/ip/Taskfile.ethtool.yml
+  tc: network/ip/Taskfile.tc.yml
+  bpftool: network/ip/Taskfile.bpftool.yml
+  bpftrace: network/ip/Taskfile.bpftrace.yml
+  netperf: network/perf/Taskfile.netperf.yml
+  trafgen: network/perf/Taskfile.trafgen.yml
+  pktgen: network/perf/Taskfile.pktgen.yml
+  nmap: network/scan/Taskfile.nmap.yml
+  naabu: network/scan/Taskfile.naabu.yml
+  arping: network/l2/Taskfile.arping.yml
+  bridge: network/l2/Taskfile.bridge.yml
+  lldp: network/l2/Taskfile.lldp.yml
+  wifi: network/l2/Taskfile.iw.yml
+  macchanger: network/l2/Taskfile.macchanger.yml
+  curl: network/http/Taskfile.curl.yml
+  http: network/http/Taskfile.httpie.yml
+  wget: network/http/Taskfile.wget.yml
+  openssl: network/tls/Taskfile.openssl.yml
+  swaks: network/mail/Taskfile.swaks.yml
+  grpcurl: network/grpc/Taskfile.grpcurl.yml
+  websocat: network/ws/Taskfile.websocat.yml
 
 
   # nix
-  deploy: taskfile/nix/Taskfile.deploy.yml
-  flake: taskfile/nix/Taskfile.flake.yml
-  store: taskfile/nix/Taskfile.store.yml
-  test: taskfile/nix/Taskfile.test.yml
-  sops: taskfile/nix/Taskfile.sops.yml
+  deploy: nix/Taskfile.deploy.yml
+  flake: nix/Taskfile.flake.yml
+  store: nix/Taskfile.store.yml
+  test: nix/Taskfile.test.yml
+  sops: nix/Taskfile.sops.yml
 
   # works
-  sec: taskfile/works/Taskfile.sec.yml
+  sec: works/Taskfile.sec.yml
 
 
 

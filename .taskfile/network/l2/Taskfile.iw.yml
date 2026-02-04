@@ -1,0 +1,26 @@
+---
+version: '3'
+
+tasks:
+  dev:
+    desc: iw dev (list wireless devices)
+    summary: "task -g wifi:dev"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v iw
+        msg: iw not found
+    cmds:
+      - iw dev
+
+  scan:
+    desc: iw scan (wireless scan)
+    summary: "task -g wifi:scan IFACE=wlan0"
+    platforms: [linux]
+    requires:
+      vars: [IFACE]
+    preconditions:
+      - sh: command -v iw
+        msg: iw not found
+    cmds:
+      # scan 需要无线接口处于 UP 状态
+      - sudo iw dev {{.IFACE}} scan
