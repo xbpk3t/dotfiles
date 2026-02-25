@@ -559,3 +559,77 @@ vars:
         # what: 用于 Remotion 最佳实践 相关任务
         # why: 领域偏视频/动画
         # - remotion-best-practices
+
+    # https://skills.sh/paulirish/dotfiles/modern-css
+
+
+tasks:
+  default:
+    desc: "按 Taskfile 内的 metadata 安装/同步 skills"
+    silent: true
+    interactive: true
+    summary: |
+      task -g skills
+      task -t ~/Desktop/dotfiles/.taskfile/Taskfile.yml skills
+    aliases:
+      - apply
+    preconditions:
+      - sh: command -v npx
+      - sh: 'test -n "{{range .SKILLS}}{{.repo}}{{end}}"'
+        msg: skills repo metadata is empty
+    cmds:
+      - for:
+          var: SKILLS
+          as: SKILL_ITEM
+        cmd: '{{.SKILLS_CMD}} add {{.SKILL_ITEM.repo}} --agent {{.DEFAULT_AGENT}} {{.SCOPE_FLAG}}{{if eq .DEFAULT_MODE "copy"}} --copy{{end}}{{range .SKILL_ITEM.skills}} --skill {{.}}{{end}}'
+
+  # https://context7.com/docs/skills
+  suggest:
+    desc: 根据项目依赖自动推荐 skills
+    cmd: ctx7 skills suggest
+    preconditions:
+      - sh: command -v ctx7
+
+
+  list:
+    silent: true
+    interactive: true
+    desc: "列出已安装的 skills"
+    summary: "task -g skills:list"
+    preconditions:
+      - sh: command -v npx
+    cmd: "{{.SKILLS_CMD}} list --agent {{.DEFAULT_AGENT}} {{.SCOPE_FLAG}}"
+
+  check:
+    silent: true
+    interactive: true
+    desc: "检查 skills 是否有可更新版本"
+    summary: task -g skills:check
+    preconditions:
+      - sh: command -v npx
+    cmd: "{{.SKILLS_CMD}} check --agent {{.DEFAULT_AGENT}} {{.SCOPE_FLAG}}"
+
+  update:
+    silent: true
+    interactive: true
+    desc: "更新已安装 skills"
+    summary: "task -g skills:update"
+    preconditions:
+      - sh: command -v npx
+    cmd: "{{.SKILLS_CMD}} update --agent {{.DEFAULT_AGENT}} {{.SCOPE_FLAG}}"
+
+  info:
+    desc: "查看 ctx7 skills 信息（gum 选择 repo）"
+    summary: "task -g skills:info"
+    silent: true
+    interactive: true
+    vars:
+      REPO:
+        sh: 'repos="{{range .SKILLS}}{{.repo}}\n{{end}}"; if [ -z "$repos" ]; then exit 0; fi; printf "%b" "$repos" | gum choose --header "选择 skills repo"'
+    preconditions:
+      - sh: command -v npx
+      - sh: command -v gum
+      - sh: 'test -n "{{range .SKILLS}}{{.repo}}{{end}}"'
+      - sh: 'test -n "{{.REPO}}"'
+        msg: No repo selected
+    cmd: '{{.CTX7_CMD}} skills info "/{{.REPO}}"'
