@@ -4,7 +4,7 @@ version: '3'
 tasks:
   list:
     desc: iptables list rules
-    summary: "task -g ipt:list"
+    summary: "task -g list"
     platforms: [linux]
     preconditions:
       - sh: command -v iptables
@@ -14,7 +14,7 @@ tasks:
 
   list6:
     desc: ip6tables list rules
-    summary: "task -g ipt:list6"
+    summary: "task -g list6"
     platforms: [linux]
     preconditions:
       - sh: command -v ip6tables
@@ -24,7 +24,7 @@ tasks:
 
   trace:
     desc: iptables TRACE target
-    summary: "task -g ipt:trace"
+    summary: "task -g trace"
     platforms: [linux]
     preconditions:
       - sh: command -v iptables

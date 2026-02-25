@@ -30,6 +30,8 @@ includes:
   pkg: kernel/Taskfile.pkg.yml
   shell: kernel/Taskfile.shell.yml
   sysd: kernel/Taskfile.systemd.yml
+  power: kernel/Taskfile.power.yml
+  proc: kernel/proc/default.yml
 
   # mac
   mac: mac/Taskfile.mac.yml
@@ -37,11 +39,11 @@ includes:
   brew: mac/Taskfile.brew.yml
   img: mac/Taskfile.img.yml
   trzsz: mac/Taskfile.trzsz.yml
-  scrapy: mac/Taskfile.scrapy.yml
+  # scrapy: mac/Taskfile.scrapy.yml
   me: mac/Taskfile.me.yml
-  alfred: mac/Taskfile.alfred.yml
+  # alfred: mac/Taskfile.alfred.yml
   pnpm: mac/Taskfile.pnpm.yml
-  ruler: mac/Taskfile.ruler.yml
+  # ruler: mac/Taskfile.ruler.yml
   sc: mac/Taskfile.scratches.yml
 
   # network
@@ -83,9 +85,10 @@ includes:
   http: network/http/Taskfile.httpie.yml
   wget: network/http/Taskfile.wget.yml
   openssl: network/tls/Taskfile.openssl.yml
-  swaks: network/mail/Taskfile.swaks.yml
   grpcurl: network/grpc/Taskfile.grpcurl.yml
   websocat: network/ws/Taskfile.websocat.yml
+  chrony: network/Taskfile.chrony.yml
+  nat: network/nat/Taskfile.nat.yml
 
 
   # nix
@@ -97,12 +100,15 @@ includes:
 
   # works
   sec: works/Taskfile.sec.yml
+  skills: works/AI/Taskfile.skills.yml
 
 
 
 
 tasks:
   default:
+    desc: "default 任务"
+    summary: "task -g default"
     silent: true
     interactive: true
     cmd: task -l

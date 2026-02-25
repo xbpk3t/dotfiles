@@ -4,7 +4,7 @@ version: '3'
 tasks:
   enable:
     desc: pktgen load module
-    summary: "task -g pktgen:enable"
+    summary: "task -g enable"
     platforms: [linux]
     preconditions:
       - sh: command -v modprobe
@@ -15,7 +15,7 @@ tasks:
 
   status:
     desc: pktgen status
-    summary: "task -g pktgen:status"
+    summary: "task -g status"
     platforms: [linux]
     preconditions:
       - sh: test -d /proc/net/pktgen

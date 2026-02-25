@@ -7,6 +7,7 @@ tasks:
   # 独立的配置下载脚本，与 sing-box 主服务解耦
   update-config:
     desc: 下载订阅并原子更新 sing-box 配置（需要 SINGBOX_URL）
+    summary: "task -g update-config"
     preconditions:
       - sh: command -v curl
         msg: "找不到 curl，可通过 env CURL=... 指定绝对路径"

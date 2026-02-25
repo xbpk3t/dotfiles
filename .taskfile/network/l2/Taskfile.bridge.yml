@@ -4,7 +4,7 @@ version: '3'
 tasks:
   link:
     desc: bridge link show
-    summary: "task -g bridge:link"
+    summary: "task -g link"
     platforms: [linux]
     preconditions:
       - sh: command -v bridge
@@ -14,7 +14,7 @@ tasks:
 
   vlan:
     desc: bridge vlan show
-    summary: "task -g bridge:vlan"
+    summary: "task -g vlan"
     platforms: [linux]
     preconditions:
       - sh: command -v bridge
@@ -24,7 +24,7 @@ tasks:
 
   fdb:
     desc: bridge fdb show
-    summary: "task -g bridge:fdb"
+    summary: "task -g fdb"
     platforms: [linux]
     preconditions:
       - sh: command -v bridge
@@ -35,7 +35,7 @@ tasks:
 
   mdb:
     desc: bridge mdb show
-    summary: "task -g bridge:mdb"
+    summary: "task -g mdb"
     platforms: [linux]
     preconditions:
       - sh: command -v bridge

@@ -4,7 +4,7 @@ version: '3'
 tasks:
   dev:
     desc: iw dev (list wireless devices)
-    summary: "task -g wifi:dev"
+    summary: "task -g dev"
     platforms: [linux]
     preconditions:
       - sh: command -v iw
@@ -14,7 +14,9 @@ tasks:
 
   scan:
     desc: iw scan (wireless scan)
-    summary: "task -g wifi:scan IFACE=wlan0"
+    summary: "task -g scan IFACE=<iface>"
+    vars:
+      IFACE: ''
     platforms: [linux]
     requires:
       vars: [IFACE]

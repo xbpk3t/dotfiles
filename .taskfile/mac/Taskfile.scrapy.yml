@@ -20,6 +20,8 @@ tasks:
   #- scrapy parse # 获取给定的URL并使用处理它的爬虫解析它，使用通过--callback选项传递的方法，或者parse如果没有给出
   #- scrapy bench # 测试本地硬件性能
   run:*:
+    desc: "run 通配任务"
+    summary: "task -g run:<SERVICE>"
     vars:
       SERVICE: '{{index .MATCH 0}}'
     requires:

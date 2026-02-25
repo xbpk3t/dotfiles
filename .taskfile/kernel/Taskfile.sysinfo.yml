@@ -1,10 +1,15 @@
 ---
 version: "3"
 
+includes:
+  memory: Taskfile.memory.yml
+
 tasks:
 
   # TODO: 感觉应该直接通过import其他task，然后这里直接加载相应的task
   sysinfo:
+    desc: "sysinfo 任务"
+    summary: "task -g sysinfo"
     platforms: [linux]
     cmds:
       - uname -a
@@ -17,10 +22,8 @@ tasks:
       - cat /proc/stat
       - grep 'cpu ' /proc/stat
       - uptime
-      # 物理内存
-      - free -b
-      # 虚拟内存（swap）
-      - free -m
+      # 物理内存 + swap（统一复用 memory 模块）
+      - task: memory:summary
       - df -h
 
       # TCP连接数

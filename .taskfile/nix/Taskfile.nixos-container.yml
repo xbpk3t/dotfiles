@@ -1,2 +1,5 @@
 ---
+version: "3"
+tasks: {}
+
 # https://nixos.org/manual/nixos/stable/#ch-containers

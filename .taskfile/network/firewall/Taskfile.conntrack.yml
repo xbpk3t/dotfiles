@@ -4,7 +4,7 @@ version: '3'
 tasks:
   list:
     desc: conntrack list
-    summary: "task -g conntrack:list"
+    summary: "task -g list"
     platforms: [linux]
     preconditions:
       - sh: command -v conntrack
@@ -14,7 +14,7 @@ tasks:
 
   stats:
     desc: conntrack stats
-    summary: "task -g conntrack:stats"
+    summary: "task -g stats"
     platforms: [linux]
     preconditions:
       - sh: command -v conntrack

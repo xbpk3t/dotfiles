@@ -4,7 +4,7 @@ version: '3'
 tasks:
   pmtu:
     desc: PMTU check (tracepath + DF ping)
-    summary: "task -g nc:pmtu HOST=1.1.1.1 [SIZE=1472] [COUNT=3] [TRACEROUTE=false]"
+    summary: "task -g pmtu HOST=<host> [SIZE=1472] [COUNT=3] [TRACEROUTE=false]"
     requires:
       vars: [HOST]
     vars:
@@ -13,6 +13,7 @@ tasks:
       COUNT: '{{.COUNT | default "3"}}'
       # TRACEROUTE=true 时追加 traceroute（可选）
       TRACEROUTE: '{{.TRACEROUTE | default "false"}}'
+      HOST: '{{.HOST | default ""}}'
     cmds:
       - task: tracepath
         vars:

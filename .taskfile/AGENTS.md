@@ -9,7 +9,7 @@ scope:
   symlink_target: "$HOME/taskfile"
   invocation:
     global: "task -g <task>"
-    debug: "task -f <taskfile-path> <task>"
+    debug: "task -t <taskfile-path> <task>"
 priority:
   must:
     - stability
@@ -24,13 +24,13 @@ entry_points:
   - ".taskfile/Taskfile.yml (root)"
 verification:
   list:
-    - "task -f <taskfile-path> --list"
+    - "task -t <taskfile-path> --list"
     - "task -g --list"
   dry_run:
-    - "task -f <taskfile-path> -n <task>"
+    - "task -t <taskfile-path> -n <task>"
     - "task -g -n <task>"
   run:
-    - "task -f <taskfile-path> <task>"
+    - "task -t <taskfile-path> <task>"
     - "task -g <task>"
 reporting:
   required_sections:
@@ -54,8 +54,8 @@ reporting:
 - 任务名、alias、输出格式被视为“稳定接口”。
 
 ### 1.2 调试方式（开发/排错路径）
-- 调试时必须使用：`task -f <taskfile-path> <task>`
-  - 例如：`task -f .taskfile/Taskfile.yml <task>`
+- 调试时必须使用：`task -t <taskfile-path> <task>`
+  - 例如：`task -t .taskfile/Taskfile.yml <task>`
   - 或指向某个被 includes 的子 taskfile（若需要单独验证）
 
 ---
@@ -149,10 +149,10 @@ reporting:
 
 1) **定位**：入口 → includes 链路 → 真实定义
 2) **修改**：最小 diff；避免高风险改动
-3) **调试验证（优先 task -f）**：
-   - `task -f <taskfile-path> --list`
-   - `task -f <taskfile-path> -n <affected-task>`（如支持）
-   - `task -f <taskfile-path> <affected-task>`（必要时；幂等任务建议连续跑两次）
+3) **调试验证（优先 task -t）**：
+   - `task -t <taskfile-path> --list`
+   - `task -t <taskfile-path> -n <affected-task>`（如支持）
+   - `task -t <taskfile-path> <affected-task>`（必要时；幂等任务建议连续跑两次）
 4) **全局路径验证（task -g）**：
    - `task -g --list`
    - `task -g -n <affected-task>`（如支持）
@@ -160,7 +160,7 @@ reporting:
 5) **汇报（最终回复必须包含）**：
    - Changed files
    - Changed tasks（入口/内部、alias 是否变化）
-   - Verification commands（分别列 task -f 与 task -g）
+   - Verification commands（分别列 task -t 与 task -g）
    - Risks & rollback
 
 ---
@@ -171,4 +171,4 @@ reporting:
 - `status` 只检查“文件存在”，不检查新旧/正确性，导致永远跳过。
 - 修改 `silent` / 输出文本导致脚本或 alias 解析失败。
 - 把复杂逻辑塞进 `vars: sh`，让任务不可维护/不可诊断。
-- 只在 `task -f` 通过但没验证 `task -g`（全局 symlink 路径可能存在差异）。
+- 只在 `task -t` 通过但没验证 `task -g`（全局 symlink 路径可能存在差异）。

@@ -3,6 +3,8 @@ version: '3'
 
 tasks:
   default:
+    desc: "default 任务"
+    summary: "task -g default"
     cmds:
       # 拥塞控制算法
       # cat /proc/sys/net/ipv4/tcp_available_congestion_control

@@ -53,7 +53,7 @@ version: '3'
 tasks:
   default:
     desc: nixos-anywhere 远程刷机（默认 DRY_RUN=true：只打印不执行）
-    summary: task -g nixos-anywhere [FLAKE_REF="./dotfiles#nixos-vps"] TARGET=root@<IP> [DRY=false]
+    summary: "task -g default"
     vars:
       # 必填：flake 引用（path#nixosConfigurationName）
       # 例：./dotfiles#nixos-vps
@@ -74,6 +74,7 @@ tasks:
 
       # 可选：DRY_RUN（bool）
       # 默认 true：只打印命令；显式设置 DRY_RUN=false 才真正执行
+      DRY_RUN: '{{.DRY_RUN | default "true"}}'
       DRY: '{{.DRY_RUN | default true | toBool}}'
 
       # 可选：ssh options

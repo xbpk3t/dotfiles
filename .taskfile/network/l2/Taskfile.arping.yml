@@ -4,12 +4,14 @@ version: '3'
 tasks:
   default:
     desc: arping (L2 reachability)
-    summary: "task -g arping HOST=192.168.1.1 [IFACE=eth0] [COUNT=5]"
+    summary: "task -g default HOST=<host> [COUNT=5] [IFACE=<iface>]"
     platforms: [linux]
     requires:
       vars: [HOST]
     vars:
       COUNT: '{{.COUNT | default "5"}}'
+      HOST: ''
+      IFACE: ''
     preconditions:
       - sh: command -v arping
         msg: arping not found

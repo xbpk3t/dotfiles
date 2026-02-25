@@ -4,7 +4,10 @@ version: '3'
 tasks:
   s_client:
     desc: openssl s_client (TLS handshake)
-    summary: "task -g openssl:s_client HOST=example.com PORT=443"
+    summary: "task -g s_client HOST=<host> PORT=<port>"
+    vars:
+      HOST: ''
+      PORT: ''
     platforms: [linux, darwin]
     requires:
       vars: [HOST, PORT]
@@ -17,7 +20,9 @@ tasks:
 
   x509:
     desc: openssl x509 view cert
-    summary: "task -g openssl:x509 CERT=cert.pem"
+    summary: "task -g x509 CERT=<path>"
+    vars:
+      CERT: ''
     platforms: [linux, darwin]
     requires:
       vars: [CERT]

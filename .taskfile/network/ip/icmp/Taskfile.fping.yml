@@ -4,12 +4,13 @@ version: '3'
 tasks:
   default:
     desc: fping (multi-host ping)
-    summary: "task -g fping HOSTS='1.1.1.1 8.8.8.8' [COUNT=5]"
+    summary: "task -g default HOSTS=<hosts> [COUNT=5]"
     platforms: [linux]
     requires:
       vars: [HOSTS]
     vars:
       COUNT: '{{.COUNT | default "5"}}'
+      HOSTS: ''
     preconditions:
       - sh: command -v fping
         msg: fping not found
@@ -19,7 +20,9 @@ tasks:
 
   sweep:
     desc: fping sweep CIDR
-    summary: "task -g fping:sweep CIDR=10.0.0.0/24"
+    summary: "task -g sweep CIDR=<cidr>"
+    vars:
+      CIDR: ''
     platforms: [linux]
     requires:
       vars: [CIDR]
