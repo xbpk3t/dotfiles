@@ -1,0 +1,561 @@
+---
+version: "3"
+
+dir: "{{.USER_WORKING_DIR}}"
+
+# https://skills.sh/
+
+# https://github.com/vercel-labs/skills
+# https://skills.sh/docs/cli
+# install
+# search
+# suggest
+# list
+# remove
+# generate
+
+# pnpm install -g ctx7
+
+vars:
+  SKILLS_CMD: "npx -y skills"
+  CTX7_CMD: "npx -y ctx7"
+  DEFAULT_AGENT: "codex"
+  # DEFAULT_SCOPE 影响是否追加 -g（global 安装到 ~/.agents/skills）
+  DEFAULT_SCOPE: "global"
+  # DEFAULT_MODE 使用 copy 可避免 symlink 失效
+  DEFAULT_MODE: "copy"
+  SCOPE_FLAG: "{{if eq .DEFAULT_SCOPE \"global\"}}-g{{end}}"
+  SKILLS:
+    # https://github.com/Leonxlnx/taste-skill
+    # https://x.com/vikingmute/status/2025842815721497009
+    - repo: Leonxlnx/taste-skill
+      skills:
+        # what: 用于 设计 taste frontend 相关任务
+        - design-taste-frontend
+    # https://github.com/JimLiu/baoyu-skills
+    - repo: jimliu/baoyu-skills
+      skills:
+        # what: 用于 baoyu article illustrator 相关任务
+        # why: 领域偏多媒体
+        # - baoyu-article-illustrator
+        # what: 用于 baoyu comic 相关任务
+        # why: 领域偏多媒体
+        # - baoyu-comic
+        # what: 用于 baoyu compress image 相关任务
+        # why: 偏专用/低频需求
+        # - baoyu-compress-image
+        # what: 用于 baoyu cover image 相关任务
+        # why: 领域偏多媒体
+        # - baoyu-cover-image
+        # what: 用于 baoyu danger gemini web 相关任务
+        # why: 领域偏多媒体
+        # - baoyu-danger-gemini-web
+        # what: 用于 baoyu danger x to markdown 相关任务
+        # why: 领域偏社媒/发布
+        # - baoyu-danger-x-to-markdown
+        # what: 用于 baoyu format markdown 相关任务
+        - baoyu-format-markdown
+        # what: 用于 baoyu image gen 相关任务
+        # why: 领域偏多媒体
+        # - baoyu-image-gen
+        # what: 用于 baoyu infographic 相关任务
+        # why: 领域偏多媒体
+        # - baoyu-infographic
+        # what: 用于 baoyu markdown to html 相关任务
+        # why: 领域偏社媒/发布
+        # - baoyu-markdown-to-html
+        # what: 用于 baoyu post to wechat 相关任务
+        # why: 领域偏社媒/发布
+        # - baoyu-post-to-wechat
+        # what: 用于 baoyu post to x 相关任务
+        # why: 领域偏社媒/发布
+        # - baoyu-post-to-x
+        # what: 用于 baoyu slide deck 相关任务
+        # why: 偏专用/低频需求
+        # - baoyu-slide-deck
+        # what: 用于 baoyu url to markdown 相关任务
+        - baoyu-url-to-markdown
+        # what: 用于 baoyu xhs images 相关任务
+        # why: 领域偏社媒/发布
+        # - baoyu-xhs-images
+        # what: 用于 release skills 相关任务
+        - release-skills
+    # https://github.com/ast-grep/agent-skill
+    - repo: ast-grep/agent-skill
+      skills:
+        # what: 用于 ast-grep 规则 相关任务
+        - ast-grep
+    # https://github.com/vercel-labs/agent-skills
+    - repo: vercel-labs/agent-skills
+      skills:
+        # what: 用于 React 组合模式 相关任务
+        - vercel-composition-patterns
+        # what: 用于 vercel 部署 相关任务
+        - vercel-deploy
+        # what: 用于 React/Next.js 性能最佳实践 相关任务
+        - vercel-react-best-practices
+        # what: 用于 React Native 最佳实践 相关任务
+        - vercel-react-native-skills
+        # what: 用于 Web 设计规范 相关任务
+        - web-design-guidelines
+    # https://github.com/antfu/skills
+    - repo: antfu/skills
+      skills:
+        # what: 用于 antfu 相关任务
+        - antfu
+        # what: 用于 nuxt 相关任务
+        - nuxt
+        # what: 用于 pinia 相关任务
+        # why: 领域偏区块链/加密
+        # - pinia
+        # what: 用于 pnpm 相关任务
+        - pnpm
+        # what: 用于 slidev 相关任务
+        - slidev
+        # what: 用于 tsdown 相关任务
+        - tsdown
+        # what: 用于 turborepo 相关任务
+        - turborepo
+        # what: 用于 unocss 相关任务
+        - unocss
+        # what: 用于 Vite 配置与使用 相关任务
+        - vite
+        # what: 用于 VitePress 文档 相关任务
+        - vitepress
+        # what: 用于 Vitest 测试 相关任务
+        - vitest
+        # what: 用于 Vue 相关任务
+        # why: 领域偏区块链/加密
+        # - vue
+        # what: 用于 Vue 最佳实践 相关任务
+        - vue-best-practices
+        # what: 用于 Vue Router 最佳实践 相关任务
+        - vue-router-best-practices
+        # what: 用于 Vue 测试最佳实践 相关任务
+        - vue-testing-best-practices
+        # what: 用于 vueuse functions 相关任务
+        - vueuse-functions
+        # what: 用于 Web 设计规范 相关任务
+        - web-design-guidelines
+    # https://github.com/wshobson/agents
+    - repo: wshobson/agents
+      skills:
+        # what: 用于 accessibility compliance 相关任务
+        - accessibility-compliance
+        # what: 用于 airflow dag 模式 相关任务
+        # why: 领域偏数据工程
+        # - airflow-dag-patterns
+        # what: 用于 angular migration 相关任务
+        - angular-migration
+        # what: 用于 anti reversing techniques 相关任务
+        - anti-reversing-techniques
+        # what: 用于 API 设计原则 相关任务
+        - api-design-principles
+        # what: 用于 架构 decision records 相关任务
+        - architecture-decision-records
+        # what: 用于 架构模式 相关任务
+        - architecture-patterns
+        # what: 用于 async python 模式 相关任务
+        - async-python-patterns
+        # what: 用于 attack tree construction 相关任务
+        # why: 领域偏量化/交易
+        # - attack-tree-construction
+        # what: 用于 认证/授权 implementation 模式 相关任务
+        - auth-implementation-patterns
+        # what: 用于 backtesting frameworks 相关任务
+        # why: 领域偏量化/交易
+        # - backtesting-frameworks
+        # what: 用于 bash defensive 模式 相关任务
+        - bash-defensive-patterns
+        # what: 用于 bats 测试 模式 相关任务
+        - bats-testing-patterns
+        # what: 用于 bazel build 优化 相关任务
+        - bazel-build-optimization
+        # what: 用于 billing automation 相关任务
+        - billing-automation
+        # what: 用于 binary analysis 模式 相关任务
+        - binary-analysis-patterns
+        # what: 用于 changelog automation 相关任务
+        - changelog-automation
+        # what: 用于 code review excellence 相关任务
+        - code-review-excellence
+        # what: 用于 competitive landscape 相关任务
+        # why: 偏专用/低频需求
+        # - competitive-landscape
+        # what: 用于 context driven development 相关任务
+        - context-driven-development
+        # what: 用于 cost 优化 相关任务
+        - cost-optimization
+        # what: 用于 cqrs implementation 相关任务
+        - cqrs-implementation
+        # what: 用于 data quality frameworks 相关任务
+        # why: 领域偏人事/法律
+        # - data-quality-frameworks
+        # what: 用于 data storytelling 相关任务
+        - data-storytelling
+        # what: 用于 数据库 migration 相关任务
+        - database-migration
+        # what: 用于 dbt transformation 模式 相关任务
+        # why: 领域偏数据工程
+        # - dbt-transformation-patterns
+        # what: 用于 debugging strategies 相关任务
+        - debugging-strategies
+        # what: 用于 defi protocol templates 相关任务
+        # why: 领域偏区块链/加密
+        # - defi-protocol-templates
+        # what: 用于 dependency upgrade 相关任务
+        - dependency-upgrade
+        # what: 用于 CI/CD 流水线设计 相关任务
+        - deployment-pipeline-design
+        # what: 用于 设计系统模式 相关任务
+        - design-system-patterns
+        # what: 用于 distributed tracing 相关任务
+        - distributed-tracing
+        # what: 用于 dotnet backend 模式 相关任务
+        - dotnet-backend-patterns
+        # what: 用于 e2e 测试 模式 相关任务
+        - e2e-testing-patterns
+        # what: 用于 embedding strategies 相关任务
+        - embedding-strategies
+        # what: 用于 employment contract templates 相关任务
+        # why: 领域偏人事/法律
+        # - employment-contract-templates
+        # what: 用于 错误处理 handling 模式 相关任务
+        - error-handling-patterns
+        # what: 用于 event store 设计 相关任务
+        - event-store-design
+        # what: 用于 fastapi templates 相关任务
+        - fastapi-templates
+        # what: 用于 gdpr data handling 相关任务
+        # why: 领域偏合规
+        # - gdpr-data-handling
+        # what: 用于 Git 高级工作流 相关任务
+        - git-advanced-workflows
+        # what: 用于 GitHub Actions 模板 相关任务
+        - github-actions-templates
+        # what: 用于 GitLab CI 模式 相关任务
+        - gitlab-ci-patterns
+        # what: 用于 gitops 工作流 相关任务
+        - gitops-workflow
+        # what: 用于 go concurrency 模式 相关任务
+        - go-concurrency-patterns
+        # what: 用于 godot gdscript 模式 相关任务
+        # why: 领域偏游戏开发
+        # - godot-gdscript-patterns
+        # what: 用于 grafana dashboards 相关任务
+        - grafana-dashboards
+        # what: 用于 Helm chart scaffolding 相关任务
+        - helm-chart-scaffolding
+        # what: 用于 hybrid cloud networking 相关任务
+        - hybrid-cloud-networking
+        # what: 用于 hybrid search implementation 相关任务
+        - hybrid-search-implementation
+        # what: 用于 incident runbook templates 相关任务
+        - incident-runbook-templates
+        # what: 用于 interaction 设计 相关任务
+        - interaction-design
+        # what: 用于 istio traffic management 相关任务
+        - istio-traffic-management
+        # what: 用于 JavaScript 测试 模式 相关任务
+        - javascript-testing-patterns
+        # what: 用于 K8s manifest generator 相关任务
+        - k8s-manifest-generator
+        # what: 用于 K8s 安全 policies 相关任务
+        - k8s-security-policies
+        # what: 用于 kpi dashboard 设计 相关任务
+        - kpi-dashboard-design
+        # what: 用于 langchain 架构 相关任务
+        - langchain-architecture
+        # what: 用于 linkerd 模式 相关任务
+        - linkerd-patterns
+        # what: 用于 llm evaluation 相关任务
+        - llm-evaluation
+        # what: 用于 market sizing analysis 相关任务
+        # why: 领域偏游戏开发
+        # - market-sizing-analysis
+        # what: 用于 memory forensics 相关任务
+        - memory-forensics
+        # what: 用于 memory safety 模式 相关任务
+        - memory-safety-patterns
+        # what: 用于 microservices 模式 相关任务
+        - microservices-patterns
+        # what: 用于 ml 流水线 工作流 相关任务
+        - ml-pipeline-workflow
+        # what: 用于 mobile android 设计 相关任务
+        - mobile-android-design
+        # what: 用于 mobile ios 设计 相关任务
+        - mobile-ios-design
+        # what: 用于 modern JavaScript 模式 相关任务
+        - modern-javascript-patterns
+        # what: 用于 monorepo management 相关任务
+        - monorepo-management
+        # what: 用于 mtls configuration 相关任务
+        # why: 偏专用/低频需求
+        # - mtls-configuration
+        # what: 用于 multi cloud 架构 相关任务
+        - multi-cloud-architecture
+        # what: 用于 multi reviewer 模式 相关任务
+        - multi-reviewer-patterns
+        # what: 用于 Next.js app router 模式 相关任务
+        - nextjs-app-router-patterns
+        # what: 用于 nft standards 相关任务
+        # why: 领域偏人事/法律
+        # - nft-standards
+        # what: 用于 nodejs backend 模式 相关任务
+        - nodejs-backend-patterns
+        # what: 用于 nx workspace 模式 相关任务
+        - nx-workspace-patterns
+        # what: 用于 on call handoff 模式 相关任务
+        - on-call-handoff-patterns
+        # what: 用于 openapi spec generation 相关任务
+        # why: 领域偏人事/法律
+        # - openapi-spec-generation
+        # what: 用于 parallel debugging 相关任务
+        - parallel-debugging
+        # what: 用于 parallel feature development 相关任务
+        - parallel-feature-development
+        # what: 用于 paypal integration 相关任务
+        - paypal-integration
+        # what: 用于 pci compliance 相关任务
+        - pci-compliance
+        # what: 用于 postgresql table 设计 相关任务
+        - postgresql-table-design
+        # what: 用于 postmortem writing 相关任务
+        - postmortem-writing
+        # what: 用于 projection 模式 相关任务
+        - projection-patterns
+        # what: 用于 prometheus configuration 相关任务
+        - prometheus-configuration
+        # what: 用于 prompt engineering 模式 相关任务
+        - prompt-engineering-patterns
+        # what: 用于 protocol reverse engineering 相关任务
+        - protocol-reverse-engineering
+        # what: 用于 python anti 模式 相关任务
+        - python-anti-patterns
+        # what: 用于 python background jobs 相关任务
+        - python-background-jobs
+        # what: 用于 python code style 相关任务
+        - python-code-style
+        # what: 用于 python configuration 相关任务
+        - python-configuration
+        # what: 用于 python 设计 模式 相关任务
+        - python-design-patterns
+        # what: 用于 python 错误处理 handling 相关任务
+        - python-error-handling
+        # what: 用于 python 可观测性 相关任务
+        - python-observability
+        # what: 用于 python packaging 相关任务
+        - python-packaging
+        # what: 用于 python 性能 优化 相关任务
+        - python-performance-optimization
+        # what: 用于 python project structure 相关任务
+        # why: 领域偏区块链/加密
+        # - python-project-structure
+        # what: 用于 python resilience 相关任务
+        - python-resilience
+        # what: 用于 python resource management 相关任务
+        - python-resource-management
+        # what: 用于 python 测试 模式 相关任务
+        - python-testing-patterns
+        # what: 用于 python type safety 相关任务
+        # why: 领域偏区块链/加密
+        # - python-type-safety
+        # what: 用于 rag implementation 相关任务
+        - rag-implementation
+        # what: 用于 React modernization 相关任务
+        - react-modernization
+        # what: 用于 React native 架构 相关任务
+        - react-native-architecture
+        # what: 用于 React native 设计 相关任务
+        - react-native-design
+        # what: 用于 React state management 相关任务
+        - react-state-management
+        # what: 用于 responsive 设计 相关任务
+        - responsive-design
+        # what: 用于 risk metrics calculation 相关任务
+        # why: 领域偏量化/交易
+        # - risk-metrics-calculation
+        # what: 用于 rust async 模式 相关任务
+        - rust-async-patterns
+        # what: 用于 saga orchestration 相关任务
+        - saga-orchestration
+        # what: 用于 sast configuration 相关任务
+        - sast-configuration
+        # what: 用于 screen reader 测试 相关任务
+        - screen-reader-testing
+        # what: 用于 secrets management 相关任务
+        - secrets-management
+        # what: 用于 安全需求提取 相关任务
+        - security-requirement-extraction
+        # what: 用于 service mesh 可观测性 相关任务
+        - service-mesh-observability
+        # what: 用于 shellcheck configuration 相关任务
+        - shellcheck-configuration
+        # what: 用于 similarity search 模式 相关任务
+        - similarity-search-patterns
+        # what: 用于 SLO 实施 相关任务
+        # why: 领域偏区块链/加密
+        # - slo-implementation
+        # what: 用于 solidity 安全 相关任务
+        # why: 领域偏区块链/加密
+        # - solidity-security
+        # what: 用于 spark 优化 相关任务
+        # why: 领域偏数据工程
+        # - spark-optimization
+        # what: 用于 SQL 优化 模式 相关任务
+        - sql-optimization-patterns
+        # what: 用于 startup financial modeling 相关任务
+        - startup-financial-modeling
+        # what: 用于 startup metrics framework 相关任务
+        - startup-metrics-framework
+        # what: 用于 stride analysis 模式 相关任务
+        - stride-analysis-patterns
+        # what: 用于 stripe integration 相关任务
+        - stripe-integration
+        # what: 用于 Tailwind 设计系统 相关任务
+        - tailwind-design-system
+        # what: 用于 task coordination strategies 相关任务
+        - task-coordination-strategies
+        # what: 用于 team communication protocols 相关任务
+        - team-communication-protocols
+        # what: 用于 team composition analysis 相关任务
+        - team-composition-analysis
+        # what: 用于 team composition 模式 相关任务
+        - team-composition-patterns
+        # what: 用于 temporal python 测试 相关任务
+        # why: 领域偏工作流引擎
+        # - temporal-python-testing
+        # what: 用于 Terraform module library 相关任务
+        - terraform-module-library
+        # what: 用于 threat mitigation mapping 相关任务
+        - threat-mitigation-mapping
+        # what: 用于 track management 相关任务
+        - track-management
+        # what: 用于 turborepo caching 相关任务
+        - turborepo-caching
+        # what: 用于 TypeScript advanced types 相关任务
+        - typescript-advanced-types
+        # what: 用于 unity ecs 模式 相关任务
+        # why: 领域偏游戏开发
+        # - unity-ecs-patterns
+        # what: 用于 uv package manager 相关任务
+        - uv-package-manager
+        # what: 用于 vector index tuning 相关任务
+        - vector-index-tuning
+        # what: 用于 visual 设计 foundations 相关任务
+        - visual-design-foundations
+        # what: 用于 wcag audit 模式 相关任务
+        - wcag-audit-patterns
+        # what: 用于 web component 设计 相关任务
+        - web-component-design
+        # what: 用于 web3 测试 相关任务
+        # why: 领域偏区块链/加密
+        # - web3-testing
+        # what: 用于 工作流 orchestration 模式 相关任务
+        # why: 领域偏工作流引擎
+        # - workflow-orchestration-patterns
+        # what: 用于 工作流 模式 相关任务
+        - workflow-patterns
+    # https://github.com/onmax/nuxt-skills
+    - repo: onmax/nuxt-skills
+      skills:
+        # what: 用于 document writer 相关任务
+        - document-writer
+        # what: 用于 motion 相关任务
+        - motion
+        # what: 用于 nuxt 相关任务
+        - nuxt
+        # what: 用于 nuxt better 认证/授权 相关任务
+        - nuxt-better-auth
+        # what: 用于 nuxt content 相关任务
+        - nuxt-content
+        # what: 用于 nuxt modules 相关任务
+        # why: 领域偏区块链/加密
+        # - nuxt-modules
+        # what: 用于 nuxt seo 相关任务
+        - nuxt-seo
+        # what: 用于 nuxt ui 相关任务
+        - nuxt-ui
+        # what: 用于 nuxthub 相关任务
+        # why: 领域偏区块链/加密
+        # - nuxthub
+        # what: 用于 pnpm 相关任务
+        - pnpm
+        # what: 用于 reka ui 相关任务
+        - reka-ui
+        # what: 用于 tresjs 相关任务
+        - tresjs
+        # what: 用于 ts library 相关任务
+        - ts-library
+        # what: 用于 tsdown 相关任务
+        - tsdown
+        # what: 用于 Vite 配置与使用 相关任务
+        - vite
+        # what: 用于 Vitest 测试 相关任务
+        - vitest
+        # what: 用于 Vue 相关任务
+        - vue
+        # what: 用于 vueuse 相关任务
+        - vueuse
+    # https://github.com/sanyuan0704/code-review-expert
+    # https://x.com/GitHub_Daily/status/2020346913690906774
+    - repo: sanyuan0704/code-review-expert
+      skills:
+        # what: 用于 Code Review 专家 相关任务
+        # why: 领域偏量化/交易
+        # - code-review-expert
+    # https://github.com/anthropics/skills
+    - repo: anthropics/skills
+      skills:
+        # what: 用于 algorithmic art 相关任务
+        - algorithmic-art
+        # what: 用于 brand 规范 相关任务
+        - brand-guidelines
+        # what: 用于 canvas 设计 相关任务
+        # why: 领域偏办公文档
+        # - canvas-design
+        # what: 用于 doc coauthoring 相关任务
+        - doc-coauthoring
+        # what: 用于 Word 文档处理 相关任务
+        # why: 领域偏办公文档
+        # - docx
+        # what: 用于 frontend 设计 相关任务
+        - frontend-design
+        # what: 用于 internal comms 相关任务
+        - internal-comms
+        # what: 用于 mcp builder 相关任务
+        - mcp-builder
+        # what: 用于 PDF 处理 相关任务
+        # why: 领域偏办公文档
+        # - pdf
+        # what: 用于 PPT 处理 相关任务
+        # why: 领域偏办公文档
+        # - pptx
+        # what: 用于 skill creator 相关任务
+        - skill-creator
+        # what: 用于 slack gif creator 相关任务
+        # why: 领域偏社媒/发布
+        # - slack-gif-creator
+        # what: 用于 template skill 相关任务
+        # why: 偏专用/低频需求
+        # - template-skill
+        # what: 用于 theme factory 相关任务
+        - theme-factory
+        # what: 用于 web artifacts builder 相关任务
+        - web-artifacts-builder
+        # what: 用于 webapp 测试 相关任务
+        - webapp-testing
+        # what: 用于 表格处理 相关任务
+        # why: 领域偏办公文档
+        # - xlsx
+    # https://github.com/millionco/react-doctor
+    # https://x.com/QingQ77/status/2023954643076985302
+    - repo: millionco/react-doctor
+      skills:
+        # what: 用于 动画最佳实践 相关任务
+        - animation-best-practices
+        # what: 用于 React 诊断 相关任务
+        - react-doctor
+        # what: 用于 Remotion 最佳实践 相关任务
+        # why: 领域偏视频/动画
+        # - remotion-best-practices
