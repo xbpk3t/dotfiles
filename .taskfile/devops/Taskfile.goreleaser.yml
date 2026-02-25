@@ -23,6 +23,8 @@ version: '3'
 tasks:
 
   run:*:
+    desc: "run 通配任务"
+    summary: "task -g run:<SERVICE>"
     vars:
       SERVICE: '{{index .MATCH 0}}'
     requires:
@@ -44,12 +46,14 @@ tasks:
   # 仅构建二进制
   build:
     desc: Build binaries without publishing
+    summary: "task -g build"
     cmds:
       - goreleaser build --snapshot --rm-dist
 
   # 完整发布流程
   release:
     desc: Full release workflow (build + publish)
+    summary: "task -g release"
     cmds:
       - task: run:healthcheck
       - task: run:check
