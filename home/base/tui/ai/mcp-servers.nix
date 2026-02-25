@@ -1,6 +1,10 @@
 {config}: {
   # 本MCP配置，可以在codex和claude-code中复用
 
+  # TODO: programs.mcp ???
+  # https://mynixos.com/home-manager/option/programs.mcp.servers
+  # https://github.com/zhongjis/nix-config/blob/935ac824ed0c27868b9ae4e75753c8ad94508dd0/modules/home-manager/features/mcp.nix#L15
+
   filesystem = {
     type = "stdio";
     command = "npx";
