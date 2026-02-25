@@ -29,6 +29,8 @@ vars:
 
 tasks:
   default:
+    desc: "default 任务"
+    summary: "task -g pc"
     cmd: "{{.PC_CLI}} run --all-files"  # 检查所有文件（非暂存区）
     dir: '{{.USER_WORKING_DIR}}'
     interactive: true
@@ -36,6 +38,7 @@ tasks:
 
   update:
     desc: 更新远程仓库版本
+    summary: "task -g pc:update"
     cmd: '{{.PC_CLI}} autoupdate'
     dir: '{{.USER_WORKING_DIR}}'
 #    internal: true
@@ -44,6 +47,7 @@ tasks:
   # 新增维护任务
   maintain:
     desc: 对全局Pre-commit的hook进行 clean+gc+重装 操作
+    summary: "task -g pc:maintain"
     cmds:
       - "{{.PC_CLI}} clean"  # 清理缓存
       - "{{.PC_CLI}} gc"     # 垃圾回收
@@ -52,23 +56,32 @@ tasks:
     dir: '{{.USER_WORKING_DIR}}'
 
   init-template:
+    desc: 初始化 Git templateDir 并写入 hook 脚本
+    summary: "task -g pc:init-template [CLI_ARGS]"
     cmd: "{{.PC_CLI}} init-templatedir {{.CLI_ARGS}}"  # 初始化Git模板
     dir: '{{.USER_WORKING_DIR}}'
 
   uninstall:
+    desc: 卸载 pre-commit hook 脚本
+    summary: "task -g pc:uninstall"
     cmd: "{{.PC_CLI}} uninstall"  # 卸载钩子
     dir: '{{.USER_WORKING_DIR}}'
 
   migrate:
+    desc: 迁移旧版 pre-commit 配置
+    summary: "task -g pc:migrate"
     cmd: '{{.PC_CLI}} migrate-config'  # 配置文件迁移
     dir: '{{.USER_WORKING_DIR}}'
 
   try-repo:
+    desc: 试运行指定仓库的 hooks
+    summary: "task -g pc:try-repo [CLI_ARGS]"
     cmd: '{{.PC_CLI}} try-repo {{.CLI_ARGS}}'  # 测试新仓库
     dir: '{{.USER_WORKING_DIR}}'
 
   hook:
     desc: 执行指定hook（交互式选择或直接运行检查）
+    summary: "task -g pc:hook"
     interactive: true
     dir: '{{.USER_WORKING_DIR}}'
     cmd: '{{.PC_CLI}} run {{.SELECTED}}'

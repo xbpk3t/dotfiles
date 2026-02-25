@@ -32,7 +32,7 @@ vars:
 
 
 tasks:
-  default:
+  # default:
   # Commented out to prevent auto-execution when included
   # desc: Init Git Repo
   # cmds:
@@ -49,7 +49,9 @@ tasks:
 
 
   config:
-    desc:  # 其实就是.gitconfig
+    desc: "config 任务"
+    summary: "task -g config"
+    # 其实就是.gitconfig
     cmd: git config --list
     interactive: true
 
@@ -57,6 +59,7 @@ tasks:
   # 主报告任务
   analyze:
     desc: 在控制台显示完整的Git仓库分析报告
+    summary: "task -g analyze"
     preconditions:
       - sh: 'test -d .git || { echo "错误: 当前目录不是Git仓库"; exit 1; }'
     cmds:
@@ -82,6 +85,8 @@ tasks:
 
   # 查看 tag list
   tag-list:
+    desc: "tag list 任务"
+    summary: "task -g tag-list"
     cmd:
 
 
@@ -91,6 +96,7 @@ tasks:
   # 怎么修改（上一次commit的，以及指定commit的） commit message? # git rebase -i：修改某次 commit 的 message。
   undo:
     desc: "使用 ugit 撤销上一次 Git 操作（支持交互式菜单）"
+    summary: "task -g undo"
     silent: true
     cmd: |
       if [ -z "{{.CLI_ARGS}}"]; then
@@ -129,6 +135,9 @@ tasks:
   # https://github.com/newren/git-filter-repo
   rewrite:
     desc: 怎么压缩 git 项目？
+    summary: "task -g rewrite FILES=<path>"
+    vars:
+      FILES: ''
     cmds:
       # - git rev-list --objects --all | grep "$(git verify-pack -v .git/objects/pack/*.idx | sort -k 3 -n | tail -10 | awk '{print$1}')"
 
@@ -143,20 +152,12 @@ tasks:
       vars: [FILES]
 
 
-  #- url: https://github.com/kubernetes/git-sync
-  #  des: 怎么保证repo和其upstream同步?
-  # fork 后如何同步源的最新代码：我fork出来的分支，怎么同步后来父分支的更新？ # [Syncing a fork - GitHub Docs](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork) git remote add <upstream> && git fetch <upstream> && git checkout main && git merge <upstream>/master
-  sync-upstream:
-
-
-  # 怎么合并多个 commit? rebase、merge、cherry pick都可以合并多个 commit，有啥区别? Why we'd better use merge?***" # rebase 操作和 cherry-pick 操作都会修改 commit-id，导致无法追溯问题。所以通常禁止使用，只允许 merge 操作公共分支（merge将两个分支上的所有提交记录合并成一个新的提交记录，并且保留原来的提交记录。这个操作不会修改提交记录的 SHA 值），方便 debug。
-  merge-commit:
-
 
   #- url: https://github.com/gruntwork-io/fetch
   #  des: 非常好用的工具，用来直接拉取github的指定folder（注意只能用于github）。工具很好，但是不适合日常使用，3个required参数，用起来有点麻烦。
   fetch:
     desc: 下载指定文件夹（使用 gruntwork-io/fetch）
+    summary: "task -g fetch"
     preconditions:
       - sh: command -v fetch
       - sh: command -v gh
@@ -169,12 +170,10 @@ tasks:
     interactive: true
 
 
-  #  - git gc 是啥意思？有啥用？ # [git clean - Reduce Git repository size - Stack Overflow](https://stackoverflow.com/questions/2116778/reduce-git-repository-size)
-  #  - If I delete a git branch, whether .git folder size will decrease or not? git gc # git gc --prune=now
-  git-gc:
-
 
   token:
+    desc: "token 任务"
+    summary: "task -g token"
     silent: true
     interactive: true
     cmd: 'echo {{.GH_TOKEN}}'
@@ -184,6 +183,7 @@ tasks:
   # [Manual | GitHub CLI](https://cli.github.com/manual/)
   gist:clear:
     desc: 清空所有gist
+    summary: "task -g gist:clear"
     interactive: true
     cmds:
       - "echo gist numbers: {{.GIST_LIST | splitLines | len}}"
@@ -194,6 +194,7 @@ tasks:
     vars:
       GIST_LIST:
         sh: gh gist list --limit 100 | awk '{print $1}'
+      ITEM: ''
 
   # 我现在main分支的代码挂了，我怎么把代码切到之前的某个正常commit，并且把这部分新增的commit切到一个新branch？操作的具体流程 # git checkout -b <new-branch> <existed-branch> && git reset --hard <commit-id> && git push -f
 
@@ -204,6 +205,7 @@ tasks:
 
   size:
     desc: 显示 Git 对象大小信息
+    summary: "task -g size"
     interactive: true
     cmds:
       - git count-objects -v
@@ -213,15 +215,12 @@ tasks:
 
   size-top:
     desc: 查看repo里的TopK大小的文件
+    summary: "task -g size-top"
     cmd: git verify-pack -v .git/objects/pack/*.idx | sort -k 3 -n | tail -{{.size}} | awk '{print$1}' | xargs -I {} sh -c 'git rev-list --objects --all | grep {}' || true
     interactive: true
     dir: '{{.USER_WORKING_DIR}}'
     vars:
       size: "{{.size | default 20}}"
-
-  #- git log --graph --date=short # 查看提交记录，相当于 glods
-  #- glods --grep <keywords> # 搜索提交记录，非常好用
-  glods:
 
 
 
@@ -236,6 +235,7 @@ tasks:
   #done
   search:
     desc: 从所有历史commit中查找指定字符串
+    summary: "task -g search"
     cmd: git rev-list --all | xargs git grep {{.str}}
     vars:
       str: '{{.str}}'
@@ -247,5 +247,28 @@ tasks:
   #- git remote rm origin && git remote add origin <url> # git 怎么修改远程仓库地址
   modify-origin:
     desc: 修改远程仓库地址
+    summary: "task -g modify-origin"
     cmd: git remote rm origin && git remote add origin {{.CLI_ARGS}}
     dir: '{{.USER_WORKING_DIR}}'
+
+
+  #- git log --graph --date=short # 查看提交记录，相当于 glods
+  #- glods --grep <keywords> # 搜索提交记录，非常好用
+  # glods:
+
+
+
+  #  - git gc 是啥意思？有啥用？ # [git clean - Reduce Git repository size - Stack Overflow](https://stackoverflow.com/questions/2116778/reduce-git-repository-size)
+  #  - If I delete a git branch, whether .git folder size will decrease or not? git gc # git gc --prune=now
+  # git-gc:
+
+
+
+  #- url: https://github.com/kubernetes/git-sync
+  #  des: 怎么保证repo和其upstream同步?
+  # fork 后如何同步源的最新代码：我fork出来的分支，怎么同步后来父分支的更新？ # [Syncing a fork - GitHub Docs](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork) git remote add <upstream> && git fetch <upstream> && git checkout main && git merge <upstream>/master
+  # sync-upstream:
+
+
+  # 怎么合并多个 commit? rebase、merge、cherry pick都可以合并多个 commit，有啥区别? Why we'd better use merge?***" # rebase 操作和 cherry-pick 操作都会修改 commit-id，导致无法追溯问题。所以通常禁止使用，只允许 merge 操作公共分支（merge将两个分支上的所有提交记录合并成一个新的提交记录，并且保留原来的提交记录。这个操作不会修改提交记录的 SHA 值），方便 debug。
+  # merge-commit:
