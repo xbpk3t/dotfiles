@@ -1,4 +1,135 @@
 ---
 version: '3'
 
+
+#  当然有。下面按“系统自带命令 / 第三方工具 / 常见排查套路”把 Linux 下和 **IP 协议（IPv4/IPv6、路由、邻居解析、转发、分片/PMTU、QoS、策略路由、抓包）**相关的工具列出来，你可以直接照着用。
+#
+#---
+#
+### 1) 系统自带（几乎所有发行版都有）
+#
+#### 查看/配置 IP、网卡、路由（iproute2）
+#
+#* `ip addr` / `ip a`：看 IPv4/IPv6 地址
+#* `ip link`：看链路状态、MTU、队列等
+#* `ip route` / `ip -6 route`：看路由表
+#* `ip rule`：看策略路由规则（PBR）
+#* `ip neigh`：看 ARP / NDP 邻居表
+#* `ip route get <dst>`：看到某个目的地址会走哪条路由、用哪个源地址
+#* `ip monitor`：实时监控地址/路由/邻居变化（排查很有用）
+#
+#  ### 连接与端口（socket 维度）
+#
+#* `ss -tulpn`：看监听端口与进程
+#* `ss -tin`：看 TCP 连接状态/拥塞窗口等（更偏 TCP，但排查 IP 连通也常用）
+#
+#  ### 基础连通/路径
+#
+#* `ping` / `ping6`：ICMP 连通性
+#* `traceroute` / `tracepath`：路径探测（`tracepath` 常用于 PMTU 相关排查）
+#* `mtr`（有些系统默认没有）：ping + traceroute 的结合
+#
+#  ### 分片/MTU/内核参数（sysctl）
+#
+#* `sysctl -a | grep -E 'net.ipv4|net.ipv6'`：查看 IP 栈相关参数
+#* 常见关注：
+#
+#* `net.ipv4.ip_forward` / `net.ipv6.conf.all.forwarding`：是否转发
+#* `net.ipv4.conf.*.rp_filter`：反向路径过滤（策略路由/NAT 场景经常踩坑）
+#* `net.ipv4.ip_no_pmtu_disc`：PMTU 探测开关（一般不建议乱改）
+#
+#  ### 防火墙/过滤（影响 IP 收发）
+#
+#* 新一些发行版：`nft`（nftables）
+#* 传统：`iptables` / `ip6tables` / `ebtables`
+#* 辅助：`conntrack -L`（连接跟踪表，NAT/防火墙排查必备，可能需要安装）
+#
+#  ### 抓包/统计（系统常见自带或默认仓库）
+#
+#* `tcpdump -i <iface> ...`：抓包（最直接）
+#* `sar -n DEV` / `nstat`：网络统计（`nstat` 看 IP 层统计很方便）
+#* `ethtool -S <iface>`：看网卡统计（驱动层计数，排查丢包很关键）
+#
+#---
+#
+### 2) 第三方工具（强烈推荐装）
+#
+#### 更强的路径/连通性诊断
+#
+#* `mtr`：持续探测路径抖动、丢包
+#* `fping`：批量/并发 ping，做探测/巡检很舒服
+#* `hping3`：自定义 TCP/UDP/ICMP 包（测试 MTU、探测策略、模拟流量）
+#* `nping`（nmap 套件）：可控探测包
+#
+#  ### 抓包与可视化
+#
+#* `Wireshark` / `tshark`：深度分析（tshark 适合服务器上用）
+#* `termshark`：终端里看 pcap（很方便）
+#
+#  ### IP 路由/策略路由/内核转发深挖
+#
+#* `iproute2` 自带就够强，但建议配合：
+#
+#* `bpftool`、`bpftrace`：看内核网络路径、丢包点（高级但非常强）
+#* `tc`（iproute2 里）：排查/配置 QoS、队列、限速、延迟注入等
+#
+#  ### 性能与压测
+#
+#* `iperf3`：吞吐/抖动测试（UDP 模式可看丢包）
+#* `netperf`：更细粒度的网络性能测试
+#* `pktgen`（内核模块）/ `trafgen`（netsniff-ng 套件）：发包压测（偏硬核）
+#
+#  ### “为什么这个包被丢了/走哪条规则？”
+#
+#* `nft monitor trace`：nftables 追踪包走过哪些规则（超级有用）
+#* `iptables -j TRACE`（旧时代方法，不如 nft 直观）
+#* `conntrack-tools`：NAT/状态跟踪排错
+#
+#  ### 实用小工具包
+#
+#* `net-tools`（老工具集合）：`ifconfig`/`route`/`arp`/`netstat`（不推荐新环境依赖，但遇到老文档会用到）
+#* `dnsutils`：`dig`/`nslookup`（IP 层问题常常“看起来像 IP”，其实是 DNS）
+#
+#---
+#
+### 3) 常见“IP 层”排查套路（给你一套顺序）
+#
+#1. **地址/链路**：`ip a`、`ip link`（UP 没？地址对不对？MTU？）
+#2. **路由/策略**：`ip route`、`ip rule`、`ip route get <dst>`
+#3. **邻居解析**：`ip neigh`（ARP/NDP 是否可达？是否 STALE/FAILED？）
+#4. **是否被防火墙拦**：`nft list ruleset` / `iptables -S`，必要时 `nft monitor trace`
+#5. **抓包确认真相**：两端/中间抓 `tcpdump -i ...` 看包有没有出/有没有回
+#6. **PMTU/分片问题**：`tracepath <dst>`，或用 `ping -M do -s <size>`（IPv4）测试
+#7. **性能/丢包**：`ethtool -S`、`sar -n DEV`、`nstat`、`iperf3`
+#
+#---
+#
+### 4) 你说的“IP协议”更偏哪块？
+#
+#  为了我给你更精准的命令清单，你可以按下面选一个方向（你直接回 1/2/3/4 即可）：
+#
+#  1. **IP 地址/路由/策略路由**
+#  2. **MTU/分片/PMTU**
+#  3. **防火墙/NAT（iptables/nft/conntrack）**
+#  4. **抓包与定位（tcpdump/wireshark）**
+#
+#  你选一个，我就按场景给你一套“必用命令 + 典型输出怎么解读 + 常见坑”。
+
+
+
+
+
+
+
+
+
+
 tasks:
+
+# TODO: 增加 tcpdump 抓包任务（用于 ICMP/PMTU 证据链）；建议包含：icmp/icmp6 过滤、DF 位包过滤、IPv4 Frag-needed(type=3 code=4) 与 IPv6 Packet Too Big(type=2) 过滤
+# TODO: 增加 tshark/termshark 解码任务（用于 ICMP/PMTU 结构化字段观察）；输出字段建议包含：mode/type/code、MTU/frag 字段（第三方工具可选）
+# TODO: 增加 sysctl 只读检查任务（用于 PMTU/转发/反向路径过滤）；建议覆盖：net.ipv4.ip_no_pmtu_disc、net.ipv4.tcp_mtu_probing、net.ipv4.ip_forward、net.ipv6.conf.all.forwarding、net.ipv4.conf.*.rp_filter
+# TODO: 增加 ip -6 route get 任务（IPv6 路径与源地址选择）
+# TODO: 增加 conntrack 查询任务（若 firewall 目录未覆盖）；例如 conntrack -L（用于 NAT/状态跟踪排障）
+# TODO: 增加 nft/iptables 可视化任务（若 firewall 目录未覆盖）；例如 nft list ruleset / nft monitor trace / iptables -S / ip6tables -S
+# TODO: 增加 sar -n DEV 统计任务（若 perf 目录未覆盖）；用于接口层吞吐与丢包趋势查看

@@ -1,19 +1,171 @@
 ---
 version: '3'
 
+includes:
+  # tools for playbook reuse
+  ping:
+    taskfile: ./ip/icmp/Taskfile.ping.yml
+  dig:
+    taskfile: ./dns/Taskfile.dig.yml
+
 tasks:
   pmtu:quick:
     desc: PMTU quick playbook (tracepath + DF ping)
-    summary: "task -g nz:pmtu:quick HOST=1.1.1.1 [SIZE=1472] [COUNT=3]"
+    summary: "task -g pmtu:quick HOST=<host> [SIZE=1472] [COUNT=3]"
     requires:
       vars: [HOST]
     vars:
       # SIZE 是 payload，1472 = 1500 - 20(IPv4) - 8(ICMP)
       SIZE: '{{.SIZE | default "1472"}}'
       COUNT: '{{.COUNT | default "3"}}'
+      HOST: '{{.HOST | default ""}}'
     cmds:
       - task: nc:pmtu
         vars:
           HOST: '{{.HOST}}'
           SIZE: '{{.SIZE}}'
           COUNT: '{{.COUNT}}'
+
+  wake:diag:
+    desc: wake network diagnose (macOS)
+    summary: "task -g wake:diag"
+    platforms: [darwin]
+    # output: 控制 Task 输出样式（interleaved 为默认）
+    output: interleaved
+    vars:
+      # OUT: 日志路径（默认写入 /tmp）
+      OUT: '{{.OUT | default (printf "/tmp/wake-net-diagnose-%s.log" (now | date "20060102-150405"))}}'
+      # WIFI_DEV: 当前主 Wi-Fi 设备名
+      WIFI_DEV:
+        sh: |
+          networksetup -listallhardwareports | awk '
+          $0 ~ /Hardware Port: (Wi-Fi|AirPort)/{getline; if ($1=="Device:") {print $2; exit}}
+          '
+      # NQ_MAX: networkQuality 最大运行时间（seconds）
+      # -M: Provide maximum runtime in seconds
+      NQ_MAX: '{{.NQ_MAX | default "10"}}'
+    preconditions:
+      - sh: command -v scutil
+        msg: scutil not found
+      - sh: command -v networksetup
+        msg: networksetup not found
+      - sh: command -v networkQuality
+        msg: networkQuality not found
+      - sh: command -v wdutil
+        msg: wdutil not found
+      - sh: command -v ping
+        msg: ping not found
+      - sh: command -v ifconfig
+        msg: ifconfig not found
+      - sh: command -v ipconfig
+        msg: ipconfig not found
+      - sh: command -v netstat
+        msg: netstat not found
+      - sh: command -v route
+        msg: route not found
+      - sh: command -v arp
+        msg: arp not found
+      - sh: command -v pmset
+        msg: pmset not found
+      - sh: command -v log
+        msg: log not found
+    cmds:
+      - 'echo "## wake-net-diagnose"'
+      - 'echo "ts=$(date)"'
+      - 'echo "host=$(scutil --get LocalHostName 2>/dev/null || true)"'
+      - echo
+
+      - sw_vers || true
+      - uname -a || true
+      - uptime || true
+      - pmset -g || true
+
+      - 'echo "## log: wake/sleep (last 2h)"'
+      - log show --last 2h --style syslog --predicate 'eventMessage contains "Wake" OR eventMessage contains "Sleep" OR eventMessage contains "Wake reason"' 2>/dev/null | tail -n 200 || true
+
+      - 'echo "## networksetup: hardware ports"'
+      - networksetup -listallhardwareports || true
+      - 'echo "## networksetup: services"'
+      - networksetup -listallnetworkservices || true
+
+      - 'echo "## Wi-Fi device: {{.WIFI_DEV}}"'
+      - networksetup -getinfo "Wi-Fi" || true
+      - "if [ -n \"{{.WIFI_DEV}}\" ]; then networksetup -getairportnetwork \"{{.WIFI_DEV}}\" || true; fi"
+      - networksetup -getdnsservers "Wi-Fi" || true
+      - networksetup -getwebproxy "Wi-Fi" || true
+      - networksetup -getsecurewebproxy "Wi-Fi" || true
+      - networksetup -getautoproxyurl "Wi-Fi" || true
+      - networksetup -getproxybypassdomains "Wi-Fi" || true
+
+      - 'echo "## ifconfig en0"'
+      - ifconfig en0 || true
+      - 'echo "## ifconfig en1"'
+      - ifconfig en1 || true
+      - 'echo "## ifconfig en2"'
+      - ifconfig en2 || true
+      - 'echo "## ifconfig bridge0"'
+      - ifconfig bridge0 || true
+      - 'echo "## ifconfig utun0"'
+      - ifconfig utun0 || true
+      - 'echo "## ifconfig utun1"'
+      - ifconfig utun1 || true
+      - 'echo "## ifconfig utun2"'
+      - ifconfig utun2 || true
+      - 'echo "## ifconfig utun3"'
+      - ifconfig utun3 || true
+
+      - 'echo "## ipconfig getpacket en0"'
+      - ipconfig getpacket en0 2>/dev/null | sed 's/^/  /' || true
+      - 'echo "## ipconfig getpacket en1"'
+      - ipconfig getpacket en1 2>/dev/null | sed 's/^/  /' || true
+
+      - 'echo "## route"'
+      - netstat -rn -f inet || true
+      - route -n get default 2>/dev/null || true
+      - 'echo "## resolv.conf"'
+      - cat /etc/resolv.conf || true
+      - 'echo "## scutil --dns (head)"'
+      - scutil --dns | head -n 200 || true
+      - 'echo "## scutil --nwi"'
+      - scutil --nwi || true
+
+      - 'echo "## wdutil info"'
+      - sudo -n wdutil info || true
+
+      - 'echo "## connectivity"'
+      - task: ping:darwin
+        vars:
+          HOST: 1.1.1.1
+          COUNT: 3
+          INTERVAL: 1
+      - task: ping:darwin
+        vars:
+          HOST: 8.8.8.8
+          COUNT: 3
+          INTERVAL: 1
+
+      - 'echo "## networkQuality -s"'
+      - networkQuality -s -M {{.NQ_MAX}} || true
+
+      - 'echo "## dns: system resolver"'
+      - task: dig:q:A
+        vars:
+          HOST: example.com
+      - 'echo "## dns: direct to 1.1.1.1"'
+      - task: dig:at
+        vars:
+          HOST: example.com
+          TYPE: A
+          RESOLVER: 1.1.1.1
+
+      - 'echo "## processes: sing-box"'
+      - ps aux | grep -i "[s]ing-box" || true
+
+      - 'echo "## launchctl list (sing)"'
+      - launchctl list | grep -i sing || true
+
+      - 'echo "## arp -a (gateway)"'
+      - arp -a | head -n 50 || true
+
+      - 'echo "## done"'
+      - 'echo "log={{.OUT}}"'

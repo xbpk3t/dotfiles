@@ -8,6 +8,8 @@ version: '3'
 tasks:
   rm:
     desc: "用来移除指定flake包"
+    summary: "task -g rm"
+    interactive: true
     cmds:
       - gum confirm "是否已经在flake.nix移除指定flake包了?"
       - nix flake lock
@@ -16,6 +18,7 @@ tasks:
 
   update:
     desc: "更新所有 flake 到最新版本，并查看更新内容"
+    summary: "task -g update"
     cmds:
       # - task: upgrade
       - nix flake update # nix flake update --flake ./nix
@@ -24,6 +27,9 @@ tasks:
 
   update-input:
     desc: "Update specific flake input (usage: task nix:update-input INPUT=nixpkgs)"
+    summary: "task -g update-input INPUT=<name>"
+    vars:
+      INPUT: ''
     cmds:
       - nix flake lock --update-input "{{.INPUT}}" ./nix
     requires:
@@ -43,6 +49,8 @@ tasks:
   # 遇到一个 nix/store cache问题，导致
   why:
     desc: "定位失败 pkg：选择配置类型/Host + 失败 drv，然后跑 why-depends"
+    summary: "task -g why"
+    interactive: true
     vars:
       KIND:
         sh: 'd="$(nix eval --raw .#darwinConfigurations --apply "x: builtins.toString (builtins.length (builtins.attrNames x))" 2>/dev/null || echo 0)"; n="$(nix eval --raw .#nixosConfigurations --apply "x: builtins.toString (builtins.length (builtins.attrNames x))" 2>/dev/null || echo 0)"; { [ "$d" != "0" ] && echo darwin; [ "$n" != "0" ] && echo nixos; } | gum choose --header "选择配置类型"'

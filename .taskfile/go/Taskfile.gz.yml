@@ -23,6 +23,7 @@ tasks:
   # 1. 创建新API项目
   api-new:
     desc: "创建新的API项目结构"
+    summary: "task -g api-new"
     vars:
       PROJECT_NAME: "{{default \"myproject\" .PROJECT_NAME}}"
     cmds:
@@ -34,6 +35,11 @@ tasks:
   # 2. 根据API文件生成Go代码
   api-gen:
     desc: "从API文件生成Go服务代码"
+    summary: "task -g api-gen API_FILE=<path>"
+    vars:
+      API_FILE: ''
+    requires:
+      vars: [API_FILE]
     cmds:
       - goctl api go -api {{.API_FILE}} -dir . --style=goZero
     dir: '{{.USER_WORKING_DIR}}'
@@ -43,6 +49,11 @@ tasks:
   # 3. 生成RPC服务代码
   rpc-gen:
     desc: "从Proto文件生成gRPC服务代码"
+    summary: "task -g rpc-gen PROTO_FILE=<path>"
+    vars:
+      PROTO_FILE: ''
+    requires:
+      vars: [PROTO_FILE]
     cmds:
       - goctl rpc protoc {{.PROTO_FILE}} --go_out=../ --go-grpc_out=../ --zrpc_out=../ --style=goZero
     dir: '{{.USER_WORKING_DIR}}'
@@ -52,6 +63,7 @@ tasks:
   # 4. 通用模型生成命令
   model-gen:
     desc: "通用MySQL模型生成器"
+    summary: "task -g model-gen"
     cmds:
       - |
         if [ -n "{{.DSN}}" ]; then
@@ -66,10 +78,13 @@ tasks:
     vars:
       OUT_DIR: "./model"
       CACHE: "true"
+      DSN: ''
+      SQL_FILE: ''
 
   # 5. 博客模型生成（具体示例）
   model-blog:
     desc: "生成博客模型（具体示例）"
+    summary: "task -g model-blog"
     cmds:
       - goctl model mysql ddl -src blog.sql -dir ./model
     dir: '{{.USER_WORKING_DIR}}'
@@ -79,6 +94,7 @@ tasks:
   # 6. 用户模型生成（具体示例）
   model-user:
     desc: "生成用户模型（带缓存）"
+    summary: "task -g model-user"
     cmds:
       - goctl model mysql ddl -src user.sql -dir ./users -c
     dir: '{{.USER_WORKING_DIR}}'
@@ -88,6 +104,7 @@ tasks:
   # 7. 完整工作流
   full-workflow:
     desc: "完整API+RPC+模型生成工作流"
+    summary: "task -g full-workflow"
     cmds:
       - task: api-new
         vars:
@@ -103,4 +120,6 @@ tasks:
       MODEL_SQL: "models.sql"
 
   swag:
+    desc: "swag 任务"
+    summary: "task -g swag"
     cmd: goctl api plugin -plugin goctl-swagger="swagger -filename demo.json" -api demo.api -dir .

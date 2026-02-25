@@ -70,6 +70,8 @@ version: '3'
 tasks:
 # 服务管理组
   service:*:
+    desc: Manage systemd services (start/stop/restart/etc.)
+    summary: "task -g sysd:service:<ACTION> [UNIT]"
     vars:
       ACTION: '{{index .MATCH 0}}'
       UNIT: '{{index .MATCH 1 | default ""}}'
@@ -94,6 +96,8 @@ tasks:
 
 # 状态查询组
   status:*:
+    desc: Query systemd unit status/listing
+    summary: "task -g sysd:status:<ACTION> [UNIT]"
     vars:
       ACTION: '{{index .MATCH 0}}'
       UNIT: '{{index .MATCH 1 | default ""}}'
@@ -118,6 +122,8 @@ tasks:
 
 # 系统管理组
   system:*:
+    desc: Manage system power/boot targets
+    summary: "task -g sysd:system:<ACTION> [TARGET]"
     vars:
       ACTION: '{{index .MATCH 0}}'
       TARGET: '{{index .MATCH 1 | default ""}}'
@@ -150,6 +156,8 @@ tasks:
 
 # 性能分析组
   analyze:*:
+    desc: Run systemd-analyze subcommands
+    summary: "task -g sysd:analyze:<ACTION> [UNIT]"
     vars:
       ACTION: '{{index .MATCH 0}}'
       UNIT: '{{index .MATCH 1 | default ""}}'
@@ -171,6 +179,8 @@ tasks:
 
 # 用户会话组
   login:*:
+    desc: Manage login sessions/users with loginctl
+    summary: "task -g sysd:login:<ACTION> [PARAM]"
     vars:
       ACTION: '{{index .MATCH 0}}'
       PARAM: '{{index .MATCH 1 | default ""}}'
@@ -192,6 +202,8 @@ tasks:
 
 # 主机名管理组
   hostname:*:
+    desc: Manage system hostname
+    summary: "task -g sysd:hostname:<ACTION> [VALUE]"
     vars:
       ACTION: '{{index .MATCH 0}}'
       VALUE: '{{index .MATCH 1 | default ""}}'
@@ -207,6 +219,8 @@ tasks:
 
 # 本地化管理组
   locale:*:
+    desc: Manage locale/keymap settings
+    summary: "task -g sysd:locale:<ACTION> [VALUE]"
     vars:
       ACTION: '{{index .MATCH 0}}'
       VALUE: '{{index .MATCH 1 | default ""}}'
@@ -225,6 +239,8 @@ tasks:
 
 # 时间管理组
   time:*:
+    desc: Manage time/ntp/timezone
+    summary: "task -g sysd:time:<ACTION> [VALUE]"
     vars:
       ACTION: '{{index .MATCH 0}}'
       VALUE: '{{index .MATCH 1 | default ""}}'
@@ -246,6 +262,7 @@ tasks:
 
   list-inactive:
     desc: "列出非活跃系统服务"
+    summary: "task -g sysd:list-inactive"
     interactive: true
     silent: true
     cmds:
@@ -253,6 +270,7 @@ tasks:
 
   list-failed:
     desc: "列出失败的系统服务"
+    summary: "task -g sysd:list-failed"
     interactive: true
     silent: true
     cmds:
@@ -260,6 +278,7 @@ tasks:
 
   list-systemd:
     desc: "列出 systemd 相关服务"
+    summary: "task -g sysd:list-systemd"
     interactive: true
     silent: true
     cmds:

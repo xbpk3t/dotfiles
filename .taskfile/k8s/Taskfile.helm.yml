@@ -14,6 +14,7 @@ vars:
   CHART_DIR: "charts"
   VALUES_FILE: "values.yaml"
   NAMESPACE: "default"
+  ENVIRONMENT: "default"
   RELEASE_NAME: "{{.CLI_ARGS}}"
   CHART_NAME: "{{.CLI_ARGS}}"
   REPO_NAME: "{{.CLI_ARGS}}"
@@ -32,6 +33,7 @@ vars:
 tasks:
   default:
     desc: "显示可用的 Helm 相关任务"
+    summary: "task -g default"
     cmd: task --list-all
 
   # ========================
@@ -39,6 +41,7 @@ tasks:
   # ========================
   repo:add:
     desc: "添加 Helm 仓库"
+    summary: "task -g repo:add REPO_NAME=<name> REPO_URL=<url>"
     cmds:
       - helm repo add {{.REPO_NAME}} {{.REPO_URL}}
       - helm repo update
@@ -48,16 +51,19 @@ tasks:
 
   repo:update:
     desc: "更新所有 Helm 仓库"
+    summary: "task -g repo:update"
     cmds:
       - helm repo update
       - echo "✅ 所有仓库更新完成"
 
   repo:list:
     desc: "列出已添加的 Helm 仓库"
+    summary: "task -g repo:list"
     cmd: helm repo list
 
   repo:remove:
     desc: "移除 Helm 仓库"
+    summary: "task -g repo:remove REPO_NAME=<name>"
     cmds:
       - helm repo remove {{.REPO_NAME}}
       - echo "✅ 仓库 {{.REPO_NAME}} 移除成功"
@@ -69,6 +75,7 @@ tasks:
   # ========================
   chart:create:
     desc: "创建新的 Helm Chart"
+    summary: "task -g chart:create CHART_NAME=<name>"
     cmds:
       - helm create {{.CHART_NAME}}
       - echo "✅ Chart {{.CHART_NAME}} 创建成功"
@@ -77,6 +84,7 @@ tasks:
 
   chart:lint:
     desc: "检查 Chart 语法和最佳实践"
+    summary: "task -g chart:lint CHART_NAME=<name>"
     cmds:
       - helm lint {{.CHART_DIR}}/{{.CHART_NAME}}
       - echo "✅ Chart {{.CHART_NAME}} 语法检查完成"
@@ -85,6 +93,7 @@ tasks:
 
   chart:package:
     desc: "打包 Chart 为 .tgz 文件"
+    summary: "task -g chart:package CHART_NAME=<name>"
     cmds:
       - helm package {{.CHART_DIR}}/{{.CHART_NAME}}
       - echo "✅ Chart {{.CHART_NAME}} 打包完成"
@@ -93,6 +102,7 @@ tasks:
 
   chart:template:
     desc: "渲染 Chart 模板（不部署）"
+    summary: "task -g chart:template RELEASE_NAME=<name> CHART_NAME=<name>"
     cmds:
       - helm template {{.RELEASE_NAME}} {{.CHART_DIR}}/{{.CHART_NAME}} --values {{.VALUES_FILE}} --namespace {{.NAMESPACE}}
     requires:
@@ -100,6 +110,7 @@ tasks:
 
   chart:dependency:
     desc: "管理 Chart 依赖"
+    summary: "task -g chart:dependency CHART_NAME=<name>"
     cmds:
       - helm dependency update {{.CHART_DIR}}/{{.CHART_NAME}}
       - echo "✅ Chart {{.CHART_NAME}} 依赖更新完成"
@@ -111,6 +122,7 @@ tasks:
   # ========================
   install:
     desc: "安装 Helm Release"
+    summary: "task -g install RELEASE_NAME=<name> CHART_NAME=<name>"
     cmds:
       - task: _validate-release-params
       - helm install {{.RELEASE_NAME}} {{.CHART_DIR}}/{{.CHART_NAME}} --values {{.VALUES_FILE}} --namespace {{.NAMESPACE}} --create-namespace
@@ -120,6 +132,7 @@ tasks:
 
   upgrade:
     desc: "升级 Helm Release"
+    summary: "task -g upgrade RELEASE_NAME=<name> CHART_NAME=<name>"
     cmds:
       - task: _validate-release-params
       - helm upgrade {{.RELEASE_NAME}} {{.CHART_DIR}}/{{.CHART_NAME}} --values {{.VALUES_FILE}} --namespace {{.NAMESPACE}}
@@ -129,6 +142,7 @@ tasks:
 
   uninstall:
     desc: "卸载 Helm Release"
+    summary: "task -g uninstall RELEASE_NAME=<name>"
     cmds:
       - helm uninstall {{.RELEASE_NAME}} --namespace {{.NAMESPACE}}
       - echo "✅ Release {{.RELEASE_NAME}} 卸载成功"
@@ -137,10 +151,12 @@ tasks:
 
   list:
     desc: "列出所有 Helm Releases"
+    summary: "task -g list"
     cmd: helm list --all-namespaces
 
   status:
     desc: "查看 Release 状态"
+    summary: "task -g status RELEASE_NAME=<name>"
     cmds:
       - helm status {{.RELEASE_NAME}} --namespace {{.NAMESPACE}}
     requires:
@@ -148,6 +164,7 @@ tasks:
 
   history:
     desc: "查看 Release 历史版本"
+    summary: "task -g history RELEASE_NAME=<name>"
     cmds:
       - helm history {{.RELEASE_NAME}} --namespace {{.NAMESPACE}}
     requires:
@@ -155,6 +172,9 @@ tasks:
 
   rollback:
     desc: "回滚 Release 到指定版本"
+    summary: "task -g rollback RELEASE_NAME=<name> REVISION=<rev>"
+    vars:
+      REVISION: ''
     cmds:
       - helm rollback {{.RELEASE_NAME}} {{.REVISION}} --namespace {{.NAMESPACE}}
       - echo "✅ Release {{.RELEASE_NAME}} 回滚到版本 {{.REVISION}} 成功"
@@ -178,6 +198,9 @@ tasks:
   # ========================
   plugin:install:
     desc: "安装 Helm 插件"
+    summary: "task -g plugin:install PLUGIN_URL=<url>"
+    vars:
+      PLUGIN_URL: ''
     cmds:
       - helm plugin install {{.PLUGIN_URL}}
       - echo "✅ 插件安装成功"
@@ -186,10 +209,14 @@ tasks:
 
   plugin:list:
     desc: "列出已安装的 Helm 插件"
+    summary: "task -g plugin:list"
     cmd: helm plugin list
 
   plugin:update:
     desc: "更新 Helm 插件"
+    summary: "task -g plugin:update PLUGIN_NAME=<name>"
+    vars:
+      PLUGIN_NAME: ''
     cmds:
       - helm plugin update {{.PLUGIN_NAME}}
       - echo "✅ 插件 {{.PLUGIN_NAME}} 更新成功"
@@ -198,6 +225,9 @@ tasks:
 
   plugin:uninstall:
     desc: "卸载 Helm 插件"
+    summary: "task -g plugin:uninstall PLUGIN_NAME=<name>"
+    vars:
+      PLUGIN_NAME: ''
     cmds:
       - helm plugin uninstall {{.PLUGIN_NAME}}
       - echo "✅ 插件 {{.PLUGIN_NAME}} 卸载成功"
@@ -209,6 +239,7 @@ tasks:
   # ========================
   diff:install:
     desc: "安装 helm-diff 插件"
+    summary: "task -g diff:install"
     cmds:
       - helm plugin install https://github.com/databus23/helm-diff
       - echo "✅ helm-diff 插件安装成功"
@@ -217,7 +248,9 @@ tasks:
 
   diff:upgrade:
     desc: "预览 helm upgrade 会产生的变化"
-    deps: [diff:install]
+    summary: "task -g diff:upgrade RELEASE_NAME=<name> CHART_NAME=<name>"
+    deps:
+      - 'diff:install'
     cmds:
       - task: _validate-release-params
       - helm diff upgrade {{.RELEASE_NAME}} {{.CHART_DIR}}/{{.CHART_NAME}} --values {{.VALUES_FILE}} --namespace {{.NAMESPACE}} --color
@@ -226,7 +259,12 @@ tasks:
 
   diff:release:
     desc: "比较两个 Release 的差异"
-    deps: [diff:install]
+    summary: "task -g diff:release RELEASE1=<name> RELEASE2=<name>"
+    vars:
+      RELEASE1: ''
+      RELEASE2: ''
+    deps:
+      - 'diff:install'
     cmds:
       - helm diff release {{.RELEASE1}} {{.RELEASE2}} --namespace {{.NAMESPACE}} --color
     requires:
@@ -234,7 +272,12 @@ tasks:
 
   diff:revision:
     desc: "比较 Release 的不同版本"
-    deps: [diff:install]
+    summary: "task -g diff:revision RELEASE_NAME=<name> REVISION1=<rev> REVISION2=<rev>"
+    vars:
+      REVISION1: ''
+      REVISION2: ''
+    deps:
+      - 'diff:install'
     cmds:
       - helm diff revision {{.RELEASE_NAME}} {{.REVISION1}} {{.REVISION2}} --namespace {{.NAMESPACE}} --color
     requires:
@@ -242,7 +285,11 @@ tasks:
 
   diff:rollback:
     desc: "预览 helm rollback 会产生的变化"
-    deps: [diff:install]
+    summary: "task -g diff:rollback RELEASE_NAME=<name> REVISION=<rev>"
+    vars:
+      REVISION: ''
+    deps:
+      - 'diff:install'
     cmds:
       - helm diff rollback {{.RELEASE_NAME}} {{.REVISION}} --namespace {{.NAMESPACE}} --color
     requires:
@@ -253,6 +300,7 @@ tasks:
   # ========================
   helmfile:install:
     desc: "安装 helmfile"
+    summary: "task -g helmfile:install"
     cmds:
       - |
         if ! command -v helmfile &> /dev/null; then
@@ -272,7 +320,9 @@ tasks:
 
   helmfile:apply:
     desc: "应用 helmfile 配置"
-    deps: [helmfile:install]
+    summary: "task -g helmfile:apply"
+    deps:
+      - 'helmfile:install'
     cmds:
       - task: _validate-helmfile
       - helmfile apply --environment {{.ENVIRONMENT | default "default"}}
@@ -280,7 +330,9 @@ tasks:
 
   helmfile:sync:
     desc: "同步 helmfile 状态"
-    deps: [helmfile:install]
+    summary: "task -g helmfile:sync"
+    deps:
+      - 'helmfile:install'
     cmds:
       - task: _validate-helmfile
       - helmfile sync --environment {{.ENVIRONMENT | default "default"}}
@@ -288,7 +340,9 @@ tasks:
 
   helmfile:destroy:
     desc: "销毁 helmfile 管理的资源"
-    deps: [helmfile:install]
+    summary: "task -g helmfile:destroy"
+    deps:
+      - 'helmfile:install'
     cmds:
       - task: _validate-helmfile
       - helmfile destroy --environment {{.ENVIRONMENT | default "default"}}
@@ -296,21 +350,28 @@ tasks:
 
   helmfile:diff:
     desc: "显示 helmfile 变更预览"
-    deps: [helmfile:install, diff:install]
+    summary: "task -g helmfile:diff"
+    deps:
+      - 'helmfile:install'
+      - 'diff:install'
     cmds:
       - task: _validate-helmfile
       - helmfile diff --environment {{.ENVIRONMENT | default "default"}} --color
 
   helmfile:template:
     desc: "渲染 helmfile 模板"
-    deps: [helmfile:install]
+    summary: "task -g helmfile:template"
+    deps:
+      - 'helmfile:install'
     cmds:
       - task: _validate-helmfile
       - helmfile template --environment {{.ENVIRONMENT | default "default"}}
 
   helmfile:list:
     desc: "列出 helmfile 管理的 releases"
-    deps: [helmfile:install]
+    summary: "task -g helmfile:list"
+    deps:
+      - 'helmfile:install'
     cmds:
       - task: _validate-helmfile
       - helmfile list --environment {{.ENVIRONMENT | default "default"}}
@@ -320,6 +381,7 @@ tasks:
   # ========================
   cr:install:
     desc: "安装 chart-releaser"
+    summary: "task -g cr:install"
     cmds:
       - |
         if ! command -v cr &> /dev/null; then
@@ -341,7 +403,9 @@ tasks:
 
   cr:package:
     desc: "打包 Charts 用于发布"
-    deps: [cr:install]
+    summary: "task -g cr:package"
+    deps:
+      - 'cr:install'
     cmds:
       - task: _validate-cr-params
       - cr package {{.CHART_DIR}}
@@ -349,7 +413,9 @@ tasks:
 
   cr:upload:
     desc: "上传 Chart 包到 GitHub Releases"
-    deps: [cr:install]
+    summary: "task -g cr:upload"
+    deps:
+      - 'cr:install'
     cmds:
       - task: _validate-cr-params
       - cr upload --owner {{.GITHUB_OWNER}} --git-repo {{.GITHUB_REPO}} --token {{.GITHUB_TOKEN}} --skip-existing
@@ -357,7 +423,9 @@ tasks:
 
   cr:index:
     desc: "生成 Chart 仓库索引"
-    deps: [cr:install]
+    summary: "task -g cr:index"
+    deps:
+      - 'cr:install'
     cmds:
       - task: _validate-cr-params
       - cr index --owner {{.GITHUB_OWNER}} --git-repo {{.GITHUB_REPO}} --token {{.GITHUB_TOKEN}} --push
@@ -365,7 +433,9 @@ tasks:
 
   cr:release:
     desc: "完整的 Chart 发布流程"
-    deps: [cr:install]
+    summary: "task -g cr:release"
+    deps:
+      - 'cr:install'
     cmds:
       - task: cr:package
       - task: cr:upload
@@ -377,6 +447,7 @@ tasks:
   # ========================
   deploy:
     desc: "完整的部署流程（lint -> diff -> install/upgrade）"
+    summary: "task -g deploy RELEASE_NAME=<name> CHART_NAME=<name>"
     cmds:
       - task: chart:lint
       - task: diff:upgrade
@@ -392,6 +463,7 @@ tasks:
 
   dev:setup:
     desc: "开发环境设置（安装必要工具）"
+    summary: "task -g dev:setup"
     cmds:
       - task: diff:install
       - task: helmfile:install
@@ -401,6 +473,9 @@ tasks:
   # [Artifact Hub](https://artifacthub.io/packages/search?sort=relevance&page=1) 用来查找 helm chart 的
   search:
     desc: "搜索 Helm Charts"
+    summary: "task -g search SEARCH_TERM=<term>"
+    vars:
+      SEARCH_TERM: ''
     cmds:
       - helm search repo {{.SEARCH_TERM}}
     requires:
@@ -408,6 +483,7 @@ tasks:
 
   show:
     desc: "显示 Chart 信息"
+    summary: "task -g show CHART_NAME=<name>"
     cmds:
       - helm show chart {{.CHART_NAME}}
       - echo "---"

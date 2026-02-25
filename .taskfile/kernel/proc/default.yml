@@ -1,0 +1,10 @@
+---
+version: "3"
+
+includes:
+  ns:
+    taskfile: ./Taskfile.ns.yml
+  cgroup:
+    taskfile: ./Taskfile.cgroup.yml
+  process:
+    taskfile: ./Taskfile.process.yml

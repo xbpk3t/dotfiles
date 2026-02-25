@@ -41,16 +41,21 @@ tasks:
   # [network-quality/community: A place (wiki) to coordinate the activity of the community of people interested in the network-quality project.](https://github.com/network-quality/community)
   nq:
     desc: macos内置speedtest命令
-    cmd: networkQuality
+    summary: "task -g nq"
+    cmd: networkQuality -s
 
   # [新型真●一键激活JetBrains全家桶方式，不需要手动下载任何文件(懒人福利)！idea/win/linux/mac - 开发调优 - LINUX DO](https://linux.do/t/topic/694120)
   license:
+    desc: "license 任务"
+    summary: "task -g license"
     silent: true
     cmds:
       - curl -sSL https://linux.do/ip.bat | bash
 
   # launchd 服务管理（与 systemd 分组对齐）
   svc:*:
+    desc: "svc 通配任务"
+    summary: "task -g svc:<ACTION> LABEL=<label> [DOMAIN=system] [PLIST=<path>]"
     vars:
       ACTION: '{{index .MATCH 0}}'
       LABEL: '{{.LABEL | default ""}}'
@@ -91,6 +96,8 @@ tasks:
         esac
 
   status:*:
+    desc: "status 通配任务"
+    summary: "task -g status:<ACTION> [LABEL=<label>] [DOMAIN=system]"
     vars:
       ACTION: '{{index .MATCH 0}}'
       LABEL: '{{.LABEL | default ""}}'
@@ -124,6 +131,8 @@ tasks:
         esac
 
   logs:*:
+    desc: "logs 通配任务"
+    summary: "task -g logs:<ACTION> LABEL=<label> [LAST=1h]"
     vars:
       ACTION: '{{index .MATCH 0}}'
       LABEL: '{{.LABEL | default ""}}'
@@ -150,6 +159,7 @@ tasks:
 
   path:plist:
     desc: 输出给定 LABEL 的 plist 路径（默认 LaunchDaemons）
+    summary: "task -g path:plist LABEL=<label>"
     vars:
       LABEL: '{{.LABEL | default ""}}'
     requires:
@@ -160,6 +170,7 @@ tasks:
 
   reload:
     desc: 向服务发送 HUP（需要守护支持）
+    summary: "task -g reload LABEL=<label> [DOMAIN=system]"
     vars:
       LABEL: '{{.LABEL | default ""}}'
       DOMAIN: '{{.DOMAIN | default "system"}}'
@@ -176,6 +187,7 @@ tasks:
 
   whoami:
     desc: 打印当前用户及可用于 launchctl 的 gui/$UID
+    summary: "task -g whoami"
     cmds:
       - id -u
       - echo "gui/$(id -u)"

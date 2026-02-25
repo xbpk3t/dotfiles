@@ -14,11 +14,13 @@ vars:
 tasks:
   list:
     desc: "列出 deploy-rs 节点"
+    summary: "task -g list"
     cmds:
       - '{{.NODES_CMD}}'
 
   default:
     desc: "deploy-rs 部署（支持多选）"
+    summary: "task -g default"
     vars:
       HOSTS:
         sh: '{{.NODES_CMD}} | gum choose --no-limit --header "选择节点（可多选）"'
@@ -33,6 +35,7 @@ tasks:
 
   profile:
     desc: "deploy-rs 部署指定 profile"
+    summary: "task -g profile"
     vars:
       HOST:
         sh: '{{.NODES_CMD}} | gum choose --header "选择节点"'

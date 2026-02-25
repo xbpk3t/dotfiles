@@ -5,8 +5,11 @@ tasks:
   # 转发通常是 gost 的最高频用法，因此作为默认入口
   default:
     desc: gost TCP/UDP forward (LISTEN + TARGET)
-    summary: |
-      task -g gost LISTEN=:8080 TARGET=1.2.3.4:80
+    summary: "task -g default LISTEN=<addr> TARGET=<addr>"
+    vars:
+      LISTEN: ''
+      TARGET: ''
+    # example: task -g gost LISTEN=:8080 TARGET=1.2.3.4:80
     platforms: [linux, darwin]
     preconditions:
       - sh: command -v gost
@@ -18,8 +21,10 @@ tasks:
   # 透传模式：适合复杂链路或自定义协议参数
   serve:
     desc: gost passthrough (ARGS)
-    summary: |
-      task -g gost:serve ARGS="-L socks5://:1080"
+    summary: "task -g serve ARGS=<args>"
+    vars:
+      ARGS: ''
+    # example: task -g gost:serve ARGS="-L socks5://:1080"
     platforms: [linux, darwin]
     preconditions:
       - sh: command -v gost
@@ -31,8 +36,10 @@ tasks:
   # 本地代理：常见的 SOCKS5 与 HTTP proxy
   socks5:
     desc: gost SOCKS5 proxy (LISTEN)
-    summary: |
-      task -g gost:socks5 LISTEN=:1080
+    summary: "task -g socks5 LISTEN=<addr>"
+    vars:
+      LISTEN: ''
+    # example: task -g gost:socks5 LISTEN=:1080
     platforms: [linux, darwin]
     preconditions:
       - sh: command -v gost
@@ -43,8 +50,10 @@ tasks:
 
   http:
     desc: gost HTTP proxy (LISTEN)
-    summary: |
-      task -g gost:http LISTEN=:8080
+    summary: "task -g http LISTEN=<addr>"
+    vars:
+      LISTEN: ''
+    # example: task -g gost:http LISTEN=:8080
     platforms: [linux, darwin]
     preconditions:
       - sh: command -v gost

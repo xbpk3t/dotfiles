@@ -15,6 +15,7 @@ tasks:
 
   setup-ssh:
     desc: Setup SSH for a new host
+    summary: "task -g setup-ssh"
     cmds:
       - task: ssh:generate-key
       - task: ssh:copy-key
@@ -23,6 +24,13 @@ tasks:
   # 默认使用 rsa 算法生成key，但是建议使用 ed25519算法，更安全更快。使用 -C 来标识，比如说github就标识gh，我通常直接把 identifier 和 passphrase密码 设置为相同的，防止忘掉。产生公钥与私钥对，其中id_rsa 私钥，保留不动即可，后续 ssh 命令会自动读取此文件。id_rsa.pub 公钥，此文件需要被保存至目标服务器，用作验证。
   generate-key:
     desc: 生成 SSH 密钥对（task -g ssh:generate-key HOST_ALIAS=github）
+    summary: "task -g generate-key HOST_ALIAS=<name>"
+    vars:
+      HOST_ALIAS: '{{.HOST_ALIAS | default ""}}'
+      SSH_KEY_DIR: '{{.SSH_KEY_DIR | default "~/.ssh"}}'
+      SSH_KEY_TYPE: '{{.SSH_KEY_TYPE | default "ed25519"}}'
+    requires:
+      vars: [HOST_ALIAS]
     cmds:
       - ssh-keygen -t {{.SSH_KEY_TYPE}} -C "{{.HOST_ALIAS}}" -f {{.SSH_KEY_DIR}}/id_{{.HOST_ALIAS}}
   # ssh-keygen -t ed25519 -f my_github_ed25519  -C "me@github"
@@ -40,6 +48,13 @@ tasks:
   # ⚠️ 复制之后最好在服务端验证一下。
   copy-key:
     desc: 上传公钥到目标服务器（task -g ssh:copy-key ）
+    summary: "task -g copy-key HOST=<host> HOST_ALIAS=<name>"
+    vars:
+      HOST: '{{.HOST | default ""}}'
+      HOST_ALIAS: '{{.HOST_ALIAS | default ""}}'
+      SSH_KEY_DIR: '{{.SSH_KEY_DIR | default "~/.ssh"}}'
+    requires:
+      vars: [HOST, HOST_ALIAS]
     cmds:
       - ssh-copy-id -i {{.SSH_KEY_DIR}}/id_{{.HOST_ALIAS}}.pub {{.USER}}@{{.HOST}}
   #  ssh-copy-id <user>@<ip>
@@ -53,6 +68,12 @@ tasks:
   # 修改 私钥和公钥 的权限
   set-permissions:
     desc: Set SSH file permissions
+    summary: "task -g set-permissions HOST_ALIAS=<name>"
+    vars:
+      HOST_ALIAS: '{{.HOST_ALIAS | default ""}}'
+      SSH_KEY_DIR: '{{.SSH_KEY_DIR | default "~/.ssh"}}'
+    requires:
+      vars: [HOST_ALIAS]
     cmds:
       - chmod 755 {{.SSH_KEY_DIR}}
       - chmod 600 {{.SSH_KEY_DIR}}/id_{{.HOST_ALIAS}}
@@ -62,9 +83,19 @@ tasks:
 
   verify:
     desc: "task -g ssh:verify PPK_PATH=/etc/ssh/github/private_key"
+    summary: "task -g verify PPK_PATH=<path>"
+    vars:
+      PPK_PATH: '{{.PPK_PATH | default ""}}'
+    requires:
+      vars: [PPK_PATH]
     cmd: ssh-keygen -y -e -f {{.PPK_PATH}} >/dev/null && echo "格式合法" || echo "仍不合法"
 
 
   clear:
     desc: 从 $HOME/.ssh/known_hosts 里删除旧记录 # 之前一直是直接删除掉整个文件的，实际上可以通过该命令只删除指定host，不影响其他host
+    summary: "task -g clear HOST=<host>"
+    vars:
+      HOST: '{{.HOST | default ""}}'
+    requires:
+      vars: [HOST]
     cmd: ssh-keygen -R {{.HOST}}

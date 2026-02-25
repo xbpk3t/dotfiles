@@ -5,6 +5,7 @@ tasks:
   # Process management tasks
   ps:
     desc: Report a snapshot of current processes
+    summary: "task -g ps"
     cmd: ps aux
 
 
@@ -18,6 +19,7 @@ tasks:
   #  fuser -k -TERM 8080/tcp
   kp:
     desc: Kill process listening on a TCP port (cross-platform)
+    summary: "task -g kp"
     vars:
       port: '{{.port | default 8080}}'
       signal: '{{.signal | default "TERM"}}'
@@ -62,6 +64,7 @@ tasks:
   # Network diagnostic tasks
   dig:
     desc: DNS lookup utility
+    summary: "task -g dig"
     cmd: dig {{.domain}}
     vars:
       domain: "{{.domain}}"
@@ -69,6 +72,7 @@ tasks:
   # File operations tasks
   create-file:
     desc: Create or overwrite a file with content
+    summary: "task -g create-file"
     cmd: echo "{{.content}}" > {{.filename}}
     vars:
       content: '{{.content}}'
@@ -77,6 +81,7 @@ tasks:
 
   append-file:
     desc: Append content to a file
+    summary: "task -g append-file"
     cmd: echo "{{.content}}" >> {{.filename}}
     vars:
       content: '{{.content | default ""}}'
@@ -85,12 +90,14 @@ tasks:
 
   clear-file:
     desc: Clear the contents of a file
+    summary: "task -g clear-file"
     cmd: cat /dev/null > {{.filename}}
     vars:
       filename: '{{.filename | default "output.txt"}}'
 
   top-words:
     desc: Show the top 10 most frequent words in a file
+    summary: "task -g top-words"
     cmd: cat {{.filename}} | sort | uniq -c | sort -k1,1nr | head -10
     vars:
       filename: '{{.filename | default "output.txt"}}'
@@ -98,6 +105,7 @@ tasks:
   # System performance monitoring tasks
   sar-cpu:
     desc: Monitor CPU utilization
+    summary: "task -g sar-cpu"
     cmd: sar -u {{.interval}} {{.count}}
     vars:
       interval: '{{.interval | default "1"}}'
@@ -105,6 +113,7 @@ tasks:
 
   sar-memory:
     desc: Monitor memory utilization
+    summary: "task -g sar-memory"
     cmd: sar -r {{.interval}} {{.count}}
     vars:
       interval: '{{.interval | default "1"}}'
@@ -112,6 +121,7 @@ tasks:
 
   sar-network:
     desc: Monitor network device statistics
+    summary: "task -g sar-network"
     cmd: sar -n DEV {{.interval}} {{.count}}
     vars:
       interval: '{{.interval | default "1"}}'
@@ -119,6 +129,7 @@ tasks:
 
   whoami:
     desc: Print the current user ID
+    summary: "task -g whoami"
     cmd: whoami
 
   # - history - Show recent commands
@@ -129,16 +140,22 @@ tasks:
   # - history -E # With timestamp format # 1  25.8.2025 09:55  touch .zshrc
   # - history -i # With timestamp format #  1  2025-08-25 09:55  touch .zshrc
   history:
+    desc: "history 任务"
+    summary: "task -g history"
+    vars:
+      str: ''
     cmd: history -i ｜ grep {{.str}}
 
   tree:
+    desc: "tree 任务"
+    summary: "task -g tree"
     cmd: tree -L 1
     dir: '{{.USER_WORKING_DIR}}'
     interactive: true
 
 #- 如果某个url需要auth才能访问，怎么在curl中添加token? # curl -H "X-Auth-Token: " url
 #- "***怎么在本地执行远程 vps 上的远程脚本（curl 方式执行 shell 脚本时如何传参（不具名参数和具名参数分别怎么传参））？***" # [通过命令下载执行恶意代码](https://juejin.cn/post/6950955375931686942) 由于直接调用了bash命令，因此在远程脚本需要传递具名参数时，为了区分是bash命令的参数还是远程脚本的，可以使用--作为区分，可以理解为分割线，--前面的比如-s属于bash，后面的-x abc -y xyz属于远程脚本的参数. curl -L <url> | bash -s -- -x abc -y xyz
-  curl:
+  # curl:
 
 
 
@@ -179,6 +196,7 @@ tasks:
 
   rename:
     desc: Rename files (and optionally directories recursively) by replacing a pattern with a new string (task rename [--recursive] <old> <new>, task rename-undo)
+    summary: "task -g linux:rename [--recursive] old new"
     cmds:
       - |
         if [ "{{.RECURSIVE}}" = "true" ]; then
@@ -220,9 +238,12 @@ tasks:
 #  示例：运行 trace-access app=notepad args="--file test.txt" 可以查看 Notepad 访问了哪些文件。
   trace-access:
     desc: "跟踪文件访问"
+    summary: 'task -g linux:trace-access app=cmd [args="--file test.txt"]'
     vars:
       app: '{{.app}}'
       args: '{{.args | default ""}}'
+    requires:
+      vars: [app]
     cmds:
       - strace -f -t -e trace=file {{.app}} {{.args}} | complete | grep -v -E "(/nix/store|/newroot|/proc)" | grep -o '"(/.*)"' | sort | uniq
 
@@ -235,7 +256,10 @@ tasks:
 #  示例：运行 penvof pid=1234 可以列出 PID 为 1234 的进程的所有环境变量。
   penvof:
     desc: "查看进程环境变量"
+    summary: "task -g linux:penvof pid=1234"
     vars:
       pid: '{{.pid}}'
+    requires:
+      vars: [pid]
     cmds:
       - sudo cat "/proc/{{.pid}}/environ" | tr '\0' '\n'

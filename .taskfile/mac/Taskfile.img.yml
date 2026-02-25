@@ -12,5 +12,6 @@ version: "3"
 tasks:
   j2p:
     desc: jpg-to-png
+    summary: "task -g j2p"
     dir: '{{.USER_WORKING_DIR}}'
     cmd: find . -type f \( -name "*.jpg" -o -name "*.JPG" -o -name "*.jpeg" \) -exec sh -c 'magick mogrify -format png "{}" && rm "{}"' \;

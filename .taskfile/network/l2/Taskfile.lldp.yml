@@ -4,7 +4,7 @@ version: '3'
 tasks:
   default:
     desc: LLDP neighbors
-    summary: "task -g lldp"
+    summary: "task -g default"
     platforms: [linux]
     preconditions:
       - sh: command -v lldpctl

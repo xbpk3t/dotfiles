@@ -30,11 +30,13 @@ vars:
 tasks:
   default:
     desc: "生成集群用的 SOPS Secret（入口任务）"
+    summary: "task -g default"
     deps:
       - k8s:generate
 
   k8s:check:
     desc: "检查 secrets 与 age 私钥是否存在"
+    summary: "task -g k8s:check"
     preconditions:
       - sh: test -f "{{.SOPS_FILE}}"
         msg: "找不到 SOPS 文件: {{.SOPS_FILE}}"
@@ -51,11 +53,13 @@ tasks:
 
   k8s:ensure-output-dir:
     desc: "确保输出目录存在"
+    summary: "task -g k8s:ensure-output-dir"
     cmds:
       - 'mkdir -p "{{.OUTPUT_DIR}}"'
 
   k8s:generate:
     desc: "渲染并加密集群 Secret"
+    summary: "task -g k8s:generate"
     deps:
       - k8s:check
       - k8s:ensure-output-dir

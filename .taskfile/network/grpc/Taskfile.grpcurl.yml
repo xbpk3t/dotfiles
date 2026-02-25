@@ -4,7 +4,9 @@ version: '3'
 tasks:
   list:
     desc: grpcurl list services
-    summary: "task -g grpcurl:list TARGET=host:50051"
+    summary: "task -g list TARGET=<host:port>"
+    vars:
+      TARGET: ''
     platforms: [linux, darwin]
     requires:
       vars: [TARGET]
@@ -16,7 +18,10 @@ tasks:
 
   describe:
     desc: grpcurl describe service
-    summary: "task -g grpcurl:describe TARGET=host:50051 SERVICE=helloworld.Greeter"
+    summary: "task -g describe TARGET=<host:port> SERVICE=<svc>"
+    vars:
+      SERVICE: ''
+      TARGET: ''
     platforms: [linux, darwin]
     requires:
       vars: [TARGET, SERVICE]
@@ -28,7 +33,11 @@ tasks:
 
   call:
     desc: grpcurl call method
-    summary: 'task -g grpcurl:call TARGET=host:50051 METHOD=helloworld.Greeter/SayHello DATA={"name":"world"}'
+    summary: "task -g call TARGET=<host:port> METHOD=<svc/method> DATA=<json>"
+    vars:
+      DATA: ''
+      METHOD: ''
+      TARGET: ''
     platforms: [linux, darwin]
     requires:
       vars: [TARGET, METHOD, DATA]

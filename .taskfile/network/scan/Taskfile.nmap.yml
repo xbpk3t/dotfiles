@@ -8,6 +8,7 @@ tasks:
   # 1. 主机发现
   host-discovery:
     desc: 主机发现相关任务
+    summary: "task -g host-discovery"
     cmds:
       - "echo \"选择主机发现方式:\""
       - "echo \"1. ping-scan - ICMP ping扫描\""
@@ -17,6 +18,7 @@ tasks:
 
   ping-scan:
     desc: ICMP ping扫描发现主机
+    summary: "task -g ping-scan"
     cmds:
       - "{{.NMAP}} -sn {{.CLI_ARGS}}"
     preconditions:
@@ -25,6 +27,7 @@ tasks:
 
   arp-scan:
     desc: ARP扫描(局域网专用)
+    summary: "task -g arp-scan"
     cmds:
       - "{{.NMAP}} -PR {{.CLI_ARGS}}"
     preconditions:
@@ -33,6 +36,7 @@ tasks:
 
   no-ping:
     desc: 跳过主机发现直接扫描
+    summary: "task -g no-ping"
     cmds:
       - "{{.NMAP}} -Pn {{.CLI_ARGS}}"
     preconditions:
@@ -42,6 +46,7 @@ tasks:
   # 2. 端口扫描
   port-scan:
     desc: 端口扫描相关任务
+    summary: "task -g port-scan"
     cmds:
       - "echo \"选择端口扫描方式:\""
       - "echo \"1. syn-scan - SYN半开扫描\""
@@ -52,6 +57,7 @@ tasks:
 
   syn-scan:
     desc: SYN半开扫描（默认）
+    summary: "task -g syn-scan"
     cmds:
       - "{{.NMAP}} -sS {{.CLI_ARGS}}"
     preconditions:
@@ -60,6 +66,7 @@ tasks:
 
   tcp-scan:
     desc: TCP全连接扫描
+    summary: "task -g tcp-scan"
     cmds:
       - "{{.NMAP}} -sT {{.CLI_ARGS}}"
     preconditions:
@@ -68,6 +75,7 @@ tasks:
 
   udp-scan:
     desc: UDP端口扫描
+    summary: "task -g udp-scan"
     cmds:
       - "{{.NMAP}} -sU {{.CLI_ARGS}}"
     preconditions:
@@ -76,6 +84,7 @@ tasks:
 
   port-range:
     desc: 指定端口范围扫描
+    summary: "task -g port-range"
     cmds:
       - "{{.NMAP}} -p {{.CLI_ARGS}}"
     preconditions:
@@ -85,6 +94,7 @@ tasks:
   # 3. 服务与系统识别
   fingerprint:
     desc: 服务与系统识别相关任务
+    summary: "task -g fingerprint"
     cmds:
       - "echo \"选择识别方式:\""
       - "echo \"1. version-detect - 服务版本探测\""
@@ -94,6 +104,7 @@ tasks:
 
   version-detect:
     desc: 服务版本探测
+    summary: "task -g version-detect"
     cmds:
       - "{{.NMAP}} -sV {{.CLI_ARGS}}"
     preconditions:
@@ -102,6 +113,7 @@ tasks:
 
   os-detect:
     desc: 操作系统检测
+    summary: "task -g os-detect"
     cmds:
       - "{{.NMAP}} -O {{.CLI_ARGS}}"
     preconditions:
@@ -110,6 +122,7 @@ tasks:
 
   aggressive:
     desc: 综合扫描模式（OS检测+版本探测+脚本扫描）
+    summary: "task -g aggressive"
     cmds:
       - "{{.NMAP}} -A {{.CLI_ARGS}}"
     preconditions:
@@ -119,6 +132,7 @@ tasks:
   # 4. 脚本扫描（NSE）
   script-scan:
     desc: 脚本扫描相关任务
+    summary: "task -g script-scan"
     cmds:
       - "echo \"选择脚本扫描方式:\""
       - "echo \"1. default-script - 默认安全脚本扫描\""
@@ -128,6 +142,7 @@ tasks:
 
   default-script:
     desc: 默认安全脚本扫描
+    summary: "task -g default-script"
     cmds:
       - "{{.NMAP}} --script default {{.CLI_ARGS}}"
     preconditions:
@@ -136,6 +151,7 @@ tasks:
 
   vuln-scan:
     desc: 漏洞检测脚本
+    summary: "task -g vuln-scan"
     cmds:
       - "{{.NMAP}} --script vuln {{.CLI_ARGS}}"
     preconditions:
@@ -144,6 +160,7 @@ tasks:
 
   ssl-cert:
     desc: TLS证书信息提取
+    summary: "task -g ssl-cert"
     cmds:
       - "{{.NMAP}} --script ssl-cert {{.CLI_ARGS}}"
     preconditions:
@@ -153,6 +170,7 @@ tasks:
   # 5. 输出与性能优化
   output-options:
     desc: 输出与性能优化相关任务
+    summary: "task -g output-options"
     cmds:
       - "echo \"选择输出方式:\""
       - "echo \"1. output-normal - 保存结果到文本文件\""
@@ -162,6 +180,7 @@ tasks:
 
   output-normal:
     desc: 保存结果到文本文件
+    summary: "task -g output-normal"
     cmds:
       - "{{.NMAP}} -oN result.txt {{.CLI_ARGS}}"
     preconditions:
@@ -170,6 +189,7 @@ tasks:
 
   output-xml:
     desc: 保存结果到XML文件
+    summary: "task -g output-xml"
     cmds:
       - "{{.NMAP}} -oX result.xml {{.CLI_ARGS}}"
     preconditions:
@@ -178,6 +198,7 @@ tasks:
 
   fast-scan:
     desc: 加速扫描（T4速度）
+    summary: "task -g fast-scan"
     cmds:
       - "{{.NMAP}} -T4 {{.CLI_ARGS}}"
     preconditions:
@@ -187,6 +208,7 @@ tasks:
   # 6. 隐蔽扫描技巧
   stealth-scan:
     desc: 隐蔽扫描技巧相关任务
+    summary: "task -g stealth-scan"
     cmds:
       - "echo \"选择隐蔽扫描方式:\""
       - "echo \"1. fragment - 分片数据包发送\""
@@ -196,6 +218,7 @@ tasks:
 
   fragment:
     desc: 分片数据包发送
+    summary: "task -g fragment"
     cmds:
       - "{{.NMAP}} -f {{.CLI_ARGS}}"
     preconditions:
@@ -204,6 +227,7 @@ tasks:
 
   decoy:
     desc: 诱饵IP混淆来源
+    summary: "task -g decoy"
     cmds:
       - "{{.NMAP}} -D {{.CLI_ARGS}}"
     preconditions:
@@ -212,6 +236,7 @@ tasks:
 
   source-port:
     desc: 伪造源端口
+    summary: "task -g source-port"
     cmds:
       - "{{.NMAP}} --source-port 53 {{.CLI_ARGS}}"
     preconditions:
@@ -221,6 +246,7 @@ tasks:
   # 实用组合命令
   quick-web-scan:
     desc: 快速扫描网段存活主机并探测Web服务
+    summary: "task -g quick-web-scan"
     cmds:
       - "echo \"快速扫描网段存活主机并探测Web服务\""
       - "echo \"使用示例: task nmap:quick-web-scan -- 192.168.1.0/24\""

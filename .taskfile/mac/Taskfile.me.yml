@@ -14,5 +14,6 @@ tasks:
 #    - 【2025-04-25】之前考虑“与其在其他平台写完简历，还是需要在【boss直聘】上在线编辑，不如在线写。” 但是毫无疑问，相较之下 rendercv是更好的方案。
   cv:
     desc: 用 rendercv 渲染简历
+    summary: "task -g me:cv [CLI_ARGS]"
     cmd: rendercv render {{.CLI_ARGS}}
     dir: '{{.USER_WORKING_DIR}}'
