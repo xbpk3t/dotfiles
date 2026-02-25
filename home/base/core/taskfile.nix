@@ -43,4 +43,9 @@ in {
   home.packages = with pkgs; [
     go-task
   ];
+
+  home.shellAliases = {
+    "tg" = "task -g";
+    "tgg" = "task -t ~/Desktop/dotfiles/.taskfile/Taskfile.yml";
+  };
 }
