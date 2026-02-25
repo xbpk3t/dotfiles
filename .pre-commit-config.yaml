@@ -227,3 +227,9 @@ repos:
     rev: v0.1.4
     hooks:
       - id: kdlfmt-format
+
+  - repo: https://github.com/thibaudcolas/pre-commit-stylelint
+    rev: v14.4.0
+    hooks:
+      - id: stylelint
+        args: ["--config", ".github/linters/stylelint.config.cjs"]

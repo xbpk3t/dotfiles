@@ -15,7 +15,7 @@
     ghostty.enable = false;
     kitty.enable = false;
 
-    zed.enable = true;
+    zed.enable = false;
     vscode.enable = false;
   };
 
