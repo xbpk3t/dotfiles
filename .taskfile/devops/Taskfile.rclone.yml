@@ -10,6 +10,7 @@ vars:
 tasks:
   default:
     desc: 上传本地文件到远程
+    summary: "task -g default"
     cmds:
       - task: '{{.TASK}}'
     vars:
@@ -20,6 +21,12 @@ tasks:
   sync:
     internal: true
     desc: rclone sync 操作
+    vars:
+      BUCKET: ''
+      DRY_RUN_FLAG: ''
+      LOCAL_PATH: ''
+    requires:
+      vars: [BUCKET, LOCAL_PATH]
     cmds:
 #      - '{{.RCLONE}} sync --update --checksum --fast-list --transfers 30 --s3-upload-concurrency 30 "{{.LOCAL_PATH}}" "{{.RCLONE_REMOTE}}:{{.BUCKET}}" --stats=10s --progress {{.DRY_RUN_FLAG}}'
       - '{{.RCLONE}} sync --update --checksum --fast-list --transfers 30 --s3-upload-concurrency 30 "{{.LOCAL_PATH}}" "{{.RCLONE_REMOTE}}:{{.BUCKET}}" --stats-one-line -v {{.DRY_RUN_FLAG}}'
@@ -27,6 +34,10 @@ tasks:
   bisync:
     internal: true
     desc: rclone bisync 操作
+    vars:
+      BUCKET: ''
+      DRY_RUN_FLAG: ''
+      LOCAL_PATH: ''
     cmds:
       - '{{.RCLONE}} bisync "{{.LOCAL_PATH}}" "{{.RCLONE_REMOTE}}:{{.BUCKET}}" --create-empty-src-dirs --resync --stats-one-line -v {{.DRY_RUN_FLAG}}'
     requires:
@@ -36,6 +47,10 @@ tasks:
   check:
     internal: true
     desc: rclone check 操作
+    vars:
+      BUCKET: ''
+      DRY_RUN_FLAG: ''
+      LOCAL_PATH: ''
     cmds:
       - '{{.RCLONE}} check "{{.LOCAL_PATH}}" "{{.RCLONE_REMOTE}}:{{.BUCKET}}" --size-only --one-way {{.DRY_RUN_FLAG}}'
     requires:
@@ -44,6 +59,7 @@ tasks:
 
   sync-docs-images:
     desc: 同步 docs-images 到远程（用于 systemd）
+    summary: "task -g rclone:sync-docs-images"
     cmds:
       - task: sync
         vars:
@@ -58,6 +74,7 @@ tasks:
 
   bisync-scratches:
     desc: 双向同步 scratches 到 R2
+    summary: "task -g rclone:bisync-scratches"
     cmds:
       - task: bisync
         vars:
@@ -74,8 +91,14 @@ tasks:
 
   config:
     desc: 查看 rclone 相关配置
+    summary: "task -g rclone:config BUCKET=bucket [TARGET_PATH=path]"
     interactive: true
     silent: true
+    vars:
+      BUCKET: ''
+      TARGET_PATH: ''
+    requires:
+      vars: [BUCKET]
     cmds:
       - echo "rclone 配置文件路径"
       - '{{.RCLONE}} config file'
@@ -95,6 +118,11 @@ tasks:
       - '{{.RCLONE}} sync {{.RCLONE_REMOTE}}:{{.BUCKET}}/{{.REMOTE_PATH}} {{.LOCAL_PATH}} {{.DRY_RUN_FLAG}}'
     vars:
       REMOTE_PATH: "docs"  # 指定远程路径
+      BUCKET: ''
+      DRY_RUN_FLAG: ''
+      LOCAL_PATH: ''
+    requires:
+      vars: [BUCKET, LOCAL_PATH]
 
 
   delete:
@@ -104,12 +132,22 @@ tasks:
       - '{{.RCLONE}} delete {{.RCLONE_REMOTE}}:{{.BUCKET}}/{{.TARGET_PATH}} {{.DRY_RUN_FLAG}}'
     vars:
       TARGET_PATH: "x"  # 需删除的路径
+      BUCKET: ''
+      DRY_RUN_FLAG: ''
+    requires:
+      vars: [BUCKET, TARGET_PATH]
 
   purge:
     internal: true
     desc: "🔥 彻底删除远程文件夹（包括目录本身）"
     cmds:
       - '{{.RCLONE}} purge {{.RCLONE_REMOTE}}:{{.BUCKET}}/{{.TARGET_PATH}} {{.DRY_RUN_FLAG}}'
+    vars:
+      BUCKET: ''
+      DRY_RUN_FLAG: ''
+      TARGET_PATH: ''
+    requires:
+      vars: [BUCKET, TARGET_PATH]
 
 
   rmdirs:
@@ -117,3 +155,8 @@ tasks:
     desc: 删除所有空目录
     cmds:
       - '{{.RCLONE}} rmdirs {{.RCLONE_REMOTE}}:{{.BUCKET}}/{{.BASE_PATH}} -v'
+    vars:
+      BASE_PATH: ''
+      BUCKET: ''
+    requires:
+      vars: [BUCKET]
