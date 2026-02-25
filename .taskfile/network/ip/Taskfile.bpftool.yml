@@ -4,7 +4,7 @@ version: '3'
 tasks:
   prog:
     desc: bpftool prog show
-    summary: "task -g bpftool:prog"
+    summary: "task -g prog"
     platforms: [linux]
     preconditions:
       - sh: command -v bpftool
@@ -14,7 +14,7 @@ tasks:
 
   map:
     desc: bpftool map show
-    summary: "task -g bpftool:map"
+    summary: "task -g map"
     platforms: [linux]
     preconditions:
       - sh: command -v bpftool
@@ -24,7 +24,7 @@ tasks:
 
   net:
     desc: bpftool net list
-    summary: "task -g bpftool:net"
+    summary: "task -g net"
     platforms: [linux]
     preconditions:
       - sh: command -v bpftool

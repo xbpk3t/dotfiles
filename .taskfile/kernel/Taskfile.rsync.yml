@@ -142,4 +142,6 @@ version: '3'
 
 tasks:
   default:
+    desc: "default 任务"
+    summary: "task -g default"
     cmd: rsync -avz --delete --progress -e

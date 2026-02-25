@@ -6,6 +6,8 @@ vars:
 
 tasks:
   _call:
+    vars:
+      FUNC: ''
     internal: true
     platforms: [linux]
     requires:
@@ -18,8 +20,8 @@ tasks:
 
   create:
     desc: 创建普通用户（交互）
-    summary: |
-      task -g user:create
+    summary: "task -g create"
+    # example: task -g user:create
     platforms: [linux]
     interactive: true
     cmds:
@@ -28,8 +30,8 @@ tasks:
 
   create-admin:
     desc: 创建管理员用户（交互）
-    summary: |
-      task -g user:create-admin
+    summary: "task -g create-admin"
+    # example: task -g user:create-admin
     platforms: [linux]
     interactive: true
     cmds:
@@ -38,8 +40,8 @@ tasks:
 
   passwd:
     desc: 修改用户密码（交互）
-    summary: |
-      task -g user:passwd
+    summary: "task -g passwd"
+    # example: task -g user:passwd
     platforms: [linux]
     interactive: true
     cmds:
@@ -48,8 +50,8 @@ tasks:
 
   list:
     desc: 列出普通用户（UID >= 1000）
-    summary: |
-      task -g user:list
+    summary: "task -g list"
+    # example: task -g user:list
     platforms: [linux]
     cmds:
       - task: _call
@@ -57,8 +59,8 @@ tasks:
 
   delete:
     desc: 删除用户（交互）
-    summary: |
-      task -g user:delete
+    summary: "task -g delete"
+    # example: task -g user:delete
     platforms: [linux]
     interactive: true
     cmds:

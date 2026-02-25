@@ -4,7 +4,9 @@ version: '3'
 tasks:
   default:
     desc: tracepath (IPv4, no DNS)
-    summary: "task -g tracepath HOST=1.1.1.1"
+    summary: "task -g default HOST=<host>"
+    vars:
+      HOST: ''
     platforms: [linux]
     requires:
       vars: [HOST]
@@ -14,7 +16,9 @@ tasks:
 
   v6:
     desc: tracepath (IPv6, no DNS)
-    summary: "task -g tracepath:v6 HOST=ipv6.google.com"
+    summary: "task -g v6 HOST=<host>"
+    vars:
+      HOST: ''
     platforms: [linux]
     requires:
       vars: [HOST]

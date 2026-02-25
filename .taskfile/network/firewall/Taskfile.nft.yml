@@ -4,7 +4,7 @@ version: '3'
 tasks:
   list:
     desc: nft list ruleset
-    summary: "task -g nft:list"
+    summary: "task -g list"
     platforms: [linux]
     preconditions:
       - sh: command -v nft
@@ -14,7 +14,7 @@ tasks:
 
   trace:
     desc: nft monitor trace
-    summary: "task -g nft:trace"
+    summary: "task -g trace"
     platforms: [linux]
     preconditions:
       - sh: command -v nft

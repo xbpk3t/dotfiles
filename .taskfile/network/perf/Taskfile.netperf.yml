@@ -4,13 +4,14 @@ version: '3'
 tasks:
   tcp:
     desc: netperf TCP_STREAM
-    summary: "task -g netperf:tcp HOST=1.1.1.1 [DURATION=10]"
+    summary: "task -g tcp HOST=<host> [DURATION=10]"
     platforms: [linux]
     requires:
       vars: [HOST]
     vars:
       # DURATION 单位为秒（seconds）
       DURATION: '{{.DURATION | default "10"}}'
+      HOST: ''
     preconditions:
       - sh: command -v netperf
         msg: netperf not found
@@ -19,13 +20,14 @@ tasks:
 
   udp:
     desc: netperf UDP_STREAM
-    summary: "task -g netperf:udp HOST=1.1.1.1 [DURATION=10]"
+    summary: "task -g udp HOST=<host> [DURATION=10]"
     platforms: [linux]
     requires:
       vars: [HOST]
     vars:
       # DURATION 单位为秒（seconds）
       DURATION: '{{.DURATION | default "10"}}'
+      HOST: ''
     preconditions:
       - sh: command -v netperf
         msg: netperf not found

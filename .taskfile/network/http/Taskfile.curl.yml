@@ -4,7 +4,9 @@ version: '3'
 tasks:
   default:
     desc: curl GET/HEAD
-    summary: "task -g curl URL=https://example.com"
+    summary: "task -g default URL=<url>"
+    vars:
+      URL: ''
     platforms: [linux, darwin]
     requires:
       vars: [URL]

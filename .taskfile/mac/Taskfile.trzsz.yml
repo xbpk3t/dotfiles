@@ -15,6 +15,7 @@ tasks:
   # Commented out to prevent auto-execution when included
   default:
     desc: 默认上传操作（支持文件夹）
+    summary: "task -g default"
     cmds:
       - task: upload
     preconditions:
@@ -24,12 +25,14 @@ tasks:
 
   install:
     desc: 安装trzsz-go（通过Homebrew）
+    summary: "task -g install"
     cmds:
       - brew install trzsz-go
     silent: true
 
   upload:
     desc: 执行文件/文件夹上传
+    summary: "task -g upload"
     cmds:
       - |
         if command -v trzsz >/dev/null; then
@@ -43,6 +46,7 @@ tasks:
 
   download:
     desc: 下载文件/文件夹
+    summary: "task -g download"
     cmds:
       - |
         if ! command -v trzsz >/dev/null; then
@@ -52,6 +56,12 @@ tasks:
 
   connect:
     desc: 连接到远程服务器（支持拖拽上传）
+    summary: "task -g connect HOST=<host> [USER=root]"
+    vars:
+      USER: '{{.USER | default "root"}}'
+      HOST: '{{.HOST | default ""}}'
+    requires:
+      vars: [HOST]
     cmds:
       - trzsz --dragfile ssh {{.USER}}@{{.HOST}}
     env:
@@ -60,6 +70,7 @@ tasks:
 
   config:
     desc: 生成配置文件
+    summary: "task -g config"
     cmds:
       - |
         cat <<EOL > ~/.trzsz.conf

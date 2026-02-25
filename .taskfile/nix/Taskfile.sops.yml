@@ -13,22 +13,26 @@ tasks:
   # 编辑 secrets 文件
   edit:
     desc: "编辑加密的 secrets 文件"
+    summary: "task -g edit"
     cmd: 'sops {{.SOPS_FILE}}'
 
   # 查看 secrets 文件内容
   view:
     desc: "查看解密后的 secrets 文件内容"
+    summary: "task -g view"
     interactive: true
     cmd: 'sops -d {{.SOPS_FILE}}'
 
   # 加密 secrets 文件
   encrypt:
     desc: "加密 secrets 文件"
+    summary: "task -g encrypt"
     cmd: 'sops -e {{.SOPS_FILE}}'
 
   # 解密 secrets 文件
   decrypt:
     desc: "解密 secrets 文件到临时文件"
+    summary: "task -g decrypt"
     cmds:
       - 'sops -d {{.SOPS_FILE}} > secrets_decrypted.yaml'
       - 'echo "解密文件已保存为: secrets_decrypted.yaml"'
@@ -36,6 +40,7 @@ tasks:
   # 验证 secrets 文件
   verify:
     desc: "验证 secrets 文件格式和内容"
+    summary: "task -g verify"
     cmds:
       - 'echo "验证 secrets 文件格式..."'
       - 'sops -d {{.SOPS_FILE}} | yq eval . -'
@@ -44,6 +49,11 @@ tasks:
   # 更新 .sops.yaml 中的 age 公钥
   update-key:
     desc: "更新 .sops.yaml 中的 age 公钥"
+    summary: "task -g update-key AGE_KEY=<path>"
+    vars:
+      AGE_KEY: ''
+    requires:
+      vars: [AGE_KEY]
     cmds:
       - |
         NEW_KEY=$(age-keygen -y {{.AGE_KEY}})
@@ -53,12 +63,14 @@ tasks:
   # 重新加密所有 secrets
   reencrypt:
     desc: "重新加密所有 secrets"
+    summary: "task -g reencrypt"
     cmds:
       - 'sops updatekeys {{.SOPS_FILE}}'
 
   # 列出所有加密的键
   list-keys:
     desc: "列出所有加密的键"
+    summary: "task -g list-keys"
     interactive: true
     cmds:
       - 'sops -d {{.SOPS_FILE}} | yq eval "keys" -'

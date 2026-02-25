@@ -25,8 +25,9 @@ version: "3"
 # - 快速体检（NetQuality 用延迟模式+低数据模式）
 # ./vps-check.sh --quick
 #
-# curl -fsSL <URL>/vps-check.sh | bash
-# curl -fsSL <URL>/vps-check.sh | bash -s -- --quick
+# - 远程调用
+## curl -fsSL <URL>/vps-check.sh | bash
+## curl -fsSL <URL>/vps-check.sh | bash -s -- --quick
 #
 #
 # Q: 为啥这3个工具都要跑？
@@ -43,16 +44,20 @@ version: "3"
 tasks:
   default:
     desc: "Full VPS check (ecs + NetQuality + IPQuality)"
+    summary: "task -g default"
     cmd: ./vps-check.sh --full
 
   quick:
     desc: "Quick VPS check (NetQuality latency+low-data)"
+    summary: "task -g quick"
     cmd: ./vps-check.sh --quick
 
   no-deps:
     desc: "Run checks without trying to install deps (-n / -En)"
+    summary: "task -g no-deps"
     cmd: ./vps-check.sh --no-deps
 
   out-local:
     desc: "Write reports to local ./.reports"
+    summary: "task -g out-local"
     cmd: ./vps-check.sh --out ./.reports

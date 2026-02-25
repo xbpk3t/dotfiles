@@ -6,6 +6,7 @@ version: '3'
 tasks:
   repair-store:
     desc: "修复 Nix Store 对象"
+    summary: "task -g repair-store"
     vars:
       paths: '{{.paths}}'
     cmds:
@@ -14,6 +15,7 @@ tasks:
 
   verify-store:
     desc: "验证 Nix Store 完整性，检查损坏的 store 对象"
+    summary: "task -g verify-store"
     cmds:
       - echo "🔍 正在验证 Nix Store 完整性..."
       - nix store verify --all
@@ -21,6 +23,7 @@ tasks:
 
   gcroot:
     desc: "显示所有自动 GC 根目录"
+    summary: "task -g gcroot"
     cmds:
       - echo "📂 Nix Store 自动 GC 根目录："
       - ls -al /nix/var/nix/gcroots/auto/

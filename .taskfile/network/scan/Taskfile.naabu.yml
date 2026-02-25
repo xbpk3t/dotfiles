@@ -4,7 +4,7 @@ version: '3'
 tasks:
   default:
     desc: naabu port scan
-    summary: "task -g naabu HOSTS=example.com [PORTS=1-65535] [RATE=1000]"
+    summary: "task -g default HOSTS=<hosts> [PORTS=1-65535] [RATE=1000]"
     platforms: [linux, darwin]
     requires:
       vars: [HOSTS]
@@ -12,6 +12,7 @@ tasks:
       PORTS: '{{.PORTS | default "1-65535"}}'
       # RATE 为每秒发送包数（packets per second）
       RATE: '{{.RATE | default "1000"}}'
+      HOSTS: ''
     preconditions:
       - sh: command -v naabu
         msg: naabu not found
@@ -20,7 +21,7 @@ tasks:
 
   list:
     desc: naabu list network interfaces
-    summary: "task -g naabu:list"
+    summary: "task -g list"
     platforms: [linux, darwin]
     preconditions:
       - sh: command -v naabu

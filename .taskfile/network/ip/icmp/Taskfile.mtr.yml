@@ -44,12 +44,13 @@ version: '3'
 tasks:
   default:
     desc: mtr report (IPv4)
-    summary: "task -g mtr HOST=1.1.1.1 [COUNT=50]"
+    summary: "task -g default HOST=<host> [COUNT=50]"
     platforms: [linux]
     requires:
       vars: [HOST]
     vars:
       COUNT: '{{.COUNT | default "50"}}'
+      HOST: ''
     preconditions:
       - sh: command -v mtr
         msg: mtr not found
@@ -62,12 +63,13 @@ tasks:
 
   v6:
     desc: mtr report (IPv6)
-    summary: "task -g mtr:v6 HOST=ipv6.google.com [COUNT=50]"
+    summary: "task -g v6 HOST=<host> [COUNT=50]"
     platforms: [linux]
     requires:
       vars: [HOST]
     vars:
       COUNT: '{{.COUNT | default "50"}}'
+      HOST: ''
     preconditions:
       - sh: command -v mtr
         msg: mtr not found
