@@ -4,7 +4,9 @@ version: '3'
 tasks:
   qdisc:
     desc: tc qdisc show
-    summary: "task -g tc:qdisc IFACE=eth0"
+    summary: "task -g qdisc IFACE=<iface>"
+    vars:
+      IFACE: ''
     platforms: [linux]
     requires:
       vars: [IFACE]
@@ -17,7 +19,9 @@ tasks:
 
   class:
     desc: tc class show
-    summary: "task -g tc:class IFACE=eth0"
+    summary: "task -g class IFACE=<iface>"
+    vars:
+      IFACE: ''
     platforms: [linux]
     requires:
       vars: [IFACE]
@@ -29,7 +33,9 @@ tasks:
 
   filter:
     desc: tc filter show
-    summary: "task -g tc:filter IFACE=eth0"
+    summary: "task -g filter IFACE=<iface>"
+    vars:
+      IFACE: ''
     platforms: [linux]
     requires:
       vars: [IFACE]

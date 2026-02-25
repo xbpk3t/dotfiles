@@ -4,7 +4,7 @@ version: '3'
 tasks:
   link:
     desc: ip link show (list links)
-    summary: "task -g ip:link"
+    summary: "task -g link"
     platforms: [linux]
     preconditions:
       - sh: command -v ip
@@ -14,7 +14,7 @@ tasks:
 
   addr:
     desc: ip addr show (list addresses)
-    summary: "task -g ip:addr"
+    summary: "task -g addr"
     platforms: [linux]
     preconditions:
       - sh: command -v ip
@@ -24,7 +24,7 @@ tasks:
 
   route:
     desc: ip route show (IPv4 routes)
-    summary: "task -g ip:route"
+    summary: "task -g route"
     platforms: [linux]
     preconditions:
       - sh: command -v ip
@@ -34,7 +34,7 @@ tasks:
 
   route6:
     desc: ip -6 route show (IPv6 routes)
-    summary: "task -g ip:route6"
+    summary: "task -g route6"
     platforms: [linux]
     preconditions:
       - sh: command -v ip
@@ -44,7 +44,7 @@ tasks:
 
   rule:
     desc: ip rule show (policy routing)
-    summary: "task -g ip:rule"
+    summary: "task -g rule"
     platforms: [linux]
     preconditions:
       - sh: command -v ip
@@ -54,7 +54,7 @@ tasks:
 
   neigh:
     desc: ip neigh show (ARP/NDP)
-    summary: "task -g ip:neigh"
+    summary: "task -g neigh"
     platforms: [linux]
     preconditions:
       - sh: command -v ip
@@ -64,7 +64,7 @@ tasks:
 
   monitor:
     desc: ip monitor (addr/route/neigh changes)
-    summary: "task -g ip:monitor"
+    summary: "task -g monitor"
     platforms: [linux]
     preconditions:
       - sh: command -v ip
@@ -75,7 +75,9 @@ tasks:
 
   route:get:
     desc: ip route get (path to destination)
-    summary: "task -g ip:route:get DST=1.1.1.1"
+    summary: "task -g route:get DST=<ip|host>"
+    vars:
+      DST: ''
     platforms: [linux]
     requires:
       vars: [DST]

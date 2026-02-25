@@ -4,7 +4,7 @@ version: '3'
 tasks:
   list:
     desc: bpftrace list probes
-    summary: "task -g bpftrace:list"
+    summary: "task -g list"
     platforms: [linux]
     preconditions:
       - sh: command -v bpftrace
@@ -14,7 +14,9 @@ tasks:
 
   run:
     desc: bpftrace run one-liner
-    summary: "task -g bpftrace:run PROG='kprobe:tcp_v4_connect { @[comm] = count(); }'"
+    summary: "task -g run PROG=<script>"
+    vars:
+      PROG: ''
     platforms: [linux]
     requires:
       vars: [PROG]

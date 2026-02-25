@@ -31,6 +31,7 @@ tasks:
 
   dc-up:
     desc: 构建镜像并启动所有服务
+    summary: "task -g dc-up"
     dir: devenv
     cmds:
       - "{{.COMPOSE_CMD}} --profile full up -d --build"
@@ -39,6 +40,7 @@ tasks:
 
   dc-down:
     desc: 停止并删除所有容器
+    summary: "task -g dc-down"
     dir: devenv
     cmds:
       - "{{.COMPOSE_CMD}} down"
@@ -47,22 +49,28 @@ tasks:
 
   dc-logs:
     desc: 查看服务日志（实时跟踪）
+    summary: "task -g dc-logs"
     dir: devenv
     cmds:
       - "{{.COMPOSE_CMD}} logs -tf --tail {{.LINES | default 50}} {{.SERVICE}}"
     vars:
       COMPOSE_CMD: '{{.COMPOSE_CMD | default "podman-compose"}}'
+      SERVICE: ''
+      LINES: '{{.LINES | default "50"}}'
 
   dc-exec:
     desc: 进入容器终端
+    summary: "task -g dc-exec"
     dir: devenv
     cmds:
       - "{{.COMPOSE_CMD}} exec {{.SERVICE}} {{.SHELL | default \"/bin/bash\"}}"
     vars:
       COMPOSE_CMD: '{{.COMPOSE_CMD | default "podman-compose"}}'
+      SERVICE: ''
 
   dc-ps:
     desc: 查看运行中的容器状态
+    summary: "task -g dc-ps"
     dir: devenv
     cmds:
       - "{{.COMPOSE_CMD}} ps"
@@ -71,11 +79,13 @@ tasks:
 
   dc-restart:
     desc: 重启指定服务
+    summary: "task -g dc-restart"
     dir: devenv
     cmds:
       - "{{.COMPOSE_CMD}} restart {{.SERVICE}}"
     vars:
       COMPOSE_CMD: '{{.COMPOSE_CMD | default "podman-compose"}}'
+      SERVICE: ''
 
   # ===========================================
   # Profile 基础服务组合
@@ -83,6 +93,7 @@ tasks:
 
   dev:
     desc: 启动开发环境 (golang + 基础数据库)
+    summary: "task -g dev"
     dir: devenv
     cmds:
       - "{{.COMPOSE_CMD}} --profile dev --profile db up -d"
@@ -91,6 +102,7 @@ tasks:
 
   db:
     desc: 启动数据库服务 (mysql, redis, etcd)
+    summary: "task -g db"
     dir: devenv
     cmds:
       - "{{.COMPOSE_CMD}} --profile db up -d"
@@ -99,6 +111,7 @@ tasks:
 
   cache:
     desc: 启动缓存服务 (redis)
+    summary: "task -g cache"
     dir: devenv
     cmds:
       - "{{.COMPOSE_CMD}} --profile cache up -d"
@@ -107,6 +120,7 @@ tasks:
 
   monitor:
     desc: 启动监控服务 (prometheus, grafana)
+    summary: "task -g monitor"
     cmds:
       - "{{.COMPOSE_CMD}} --profile monitor up -d"
     vars:
@@ -114,6 +128,7 @@ tasks:
 
   trace:
     desc: 启动链路追踪 (jaeger)
+    summary: "task -g trace"
     cmds:
       - "{{.COMPOSE_CMD}} --profile trace up -d"
     vars:
@@ -121,6 +136,7 @@ tasks:
 
   ms:
     desc: 启动微服务组件 (etcd, dtm)
+    summary: "task -g ms"
     cmds:
       - "{{.COMPOSE_CMD}} --profile ms up -d"
     vars:
@@ -128,6 +144,7 @@ tasks:
 
   analytics:
     desc: 启动分析数据库 (clickhouse)
+    summary: "task -g analytics"
     cmds:
       - "{{.COMPOSE_CMD}} --profile analytics up -d"
     vars:
@@ -135,6 +152,7 @@ tasks:
 
   full:
     desc: 启动所有服务
+    summary: "task -g full"
     cmds:
       - "{{.COMPOSE_CMD}} --profile full up -d"
     vars:
@@ -146,13 +164,16 @@ tasks:
 
   dc-build:
     desc: 重新构建指定服务镜像
+    summary: "task -g dc-build"
     cmds:
       - "{{.COMPOSE_CMD}} build {{.SERVICE}}"
     vars:
       COMPOSE_CMD: '{{.COMPOSE_CMD | default "podman-compose"}}'
+      SERVICE: ''
 
   dc-pull:
     desc: 拉取最新镜像
+    summary: "task -g dc-pull"
     cmds:
       - "{{.COMPOSE_CMD}} pull"
     vars:
@@ -160,6 +181,7 @@ tasks:
 
   dc-config:
     desc: 验证并查看 compose 配置
+    summary: "task -g dc-config"
     cmds:
       - "{{.COMPOSE_CMD}} config"
     vars:
@@ -167,13 +189,16 @@ tasks:
 
   dc-top:
     desc: 显示容器内运行的进程
+    summary: "task -g dc-top"
     cmds:
       - "{{.COMPOSE_CMD}} top {{.SERVICE}}"
     vars:
       COMPOSE_CMD: '{{.COMPOSE_CMD | default "podman-compose"}}'
+      SERVICE: ''
 
   dc-events:
     desc: 实时显示容器事件
+    summary: "task -g dc-events"
     cmds:
       - "{{.COMPOSE_CMD}} events"
     vars:
@@ -185,6 +210,7 @@ tasks:
 
   web-dev:
     desc: Web开发环境 (dev + db + manage)
+    summary: "task -g web-dev"
     cmds:
       - "{{.COMPOSE_CMD}} --profile dev --profile db --profile manage up -d"
     vars:
@@ -192,6 +218,7 @@ tasks:
 
   api-dev:
     desc: API开发环境 (dev + db + trace)
+    summary: "task -g api-dev"
     cmds:
       - "{{.COMPOSE_CMD}} --profile dev --profile db --profile trace up -d"
     vars:
@@ -199,6 +226,7 @@ tasks:
 
   micro-dev:
     desc: 微服务开发环境 (dev + ms + trace + monitor)
+    summary: "task -g micro-dev"
     cmds:
       - "{{.COMPOSE_CMD}} --profile dev --profile ms --profile trace --profile monitor up -d"
     vars:
@@ -206,6 +234,7 @@ tasks:
 
   data-dev:
     desc: 数据开发环境 (db + analytics + manage)
+    summary: "task -g data-dev"
     cmds:
       - "{{.COMPOSE_CMD}} --profile db --profile analytics --profile manage up -d"
     vars:
@@ -217,12 +246,14 @@ tasks:
 
   init:
     desc: 初始化开发环境 (创建 .env 文件)
+    summary: "task -g init"
     cmds:
       - cp devenv/.env.example devenv/.env
       - echo "请编辑 devenv/.env 文件来配置你的环境变量"
 
   clean:
     desc: 清理所有容器、网络和卷
+    summary: "task -g clean"
     cmds:
       - "{{.COMPOSE_CMD}} down -v --remove-orphans"
       - "{{.COMPOSE_CMD}} system prune -f"
@@ -231,6 +262,7 @@ tasks:
 
   reset:
     desc: 重置环境 (停止所有服务并清理数据)
+    summary: "task -g reset"
     cmds:
       - "{{.COMPOSE_CMD}} down -v --remove-orphans"
       - "{{.COMPOSE_CMD}} --profile full up -d --build"
@@ -239,6 +271,7 @@ tasks:
 
   health:
     desc: 检查所有服务健康状态
+    summary: "task -g health"
     cmds:
       - "{{.COMPOSE_CMD}} ps --format table"
     vars:
@@ -253,6 +286,7 @@ tasks:
   # [etolbakov/excalidocker-rs: Convert your docker-compose into excalidraw](https://github.com/etolbakov/excalidocker-rs)
   dc2exd:
     desc: 将 docker-compose 转换为 excalidraw 图表
+    summary: "task -g dc2exd"
     status:
       - command -v excalidocker
     preconditions:
@@ -264,6 +298,7 @@ tasks:
   # [kubernetes/kompose：将 Compose 转换为 Kubernetes](https://github.com/kubernetes/kompose)
   kompose:
     desc: 将 docker-compose 转换为 k8s 配置
+    summary: "task -g kompose"
     status:
       - command -v kompose
     preconditions:

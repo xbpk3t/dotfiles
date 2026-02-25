@@ -8,6 +8,7 @@ vars:
 tasks:
   setup:
     desc: Initialize and apply rules for a new setup (global or project)
+    summary: "task -g setup"
     cmds:
       - '{{.RULER_BIN}} init --global'
       - task: apply
@@ -16,6 +17,7 @@ tasks:
 
   apply:
     desc: Apply and sync rules to agents with validation
+    summary: "task -g apply"
     cmds:
       - '{{.RULER_BIN}} apply --agents {{.DEFAULT_AGENTS}} --global'
       - '{{.RULER_BIN}} sync --global'
@@ -23,6 +25,7 @@ tasks:
 
   mcp:
     desc: Start MCP server with health check
+    summary: "task -g mcp"
     cmds:
       - '{{.RULER_BIN}} mcp start --port {{.MCP_PORT}}'
       - '{{.RULER_BIN}} mcp status'
@@ -30,6 +33,7 @@ tasks:
 
   stop:
     desc: Stop MCP and revert changes
+    summary: "task -g stop"
     cmds:
       - '{{.RULER_BIN}} mcp stop'
       - '{{.RULER_BIN}} revert --global'
@@ -37,5 +41,6 @@ tasks:
 
   clean:
     desc: Full cleanup including revert and validation
+    summary: "task -g clean"
     deps: [stop]
     cmds:

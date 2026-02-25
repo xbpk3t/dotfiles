@@ -4,7 +4,9 @@ version: '3'
 tasks:
   show:
     desc: macchanger show current MAC
-    summary: "task -g macchanger:show IFACE=eth0"
+    summary: "task -g show IFACE=<iface>"
+    vars:
+      IFACE: ''
     platforms: [linux]
     requires:
       vars: [IFACE]
@@ -16,7 +18,9 @@ tasks:
 
   random:
     desc: macchanger random MAC
-    summary: "task -g macchanger:random IFACE=eth0"
+    summary: "task -g random IFACE=<iface>"
+    vars:
+      IFACE: ''
     platforms: [linux]
     requires:
       vars: [IFACE]
@@ -29,7 +33,9 @@ tasks:
 
   permanent:
     desc: macchanger reset permanent MAC
-    summary: "task -g macchanger:permanent IFACE=eth0"
+    summary: "task -g permanent IFACE=<iface>"
+    vars:
+      IFACE: ''
     platforms: [linux]
     requires:
       vars: [IFACE]

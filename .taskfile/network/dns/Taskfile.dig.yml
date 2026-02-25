@@ -13,6 +13,11 @@ tasks:
   _dig:
     internal: true
     desc: "Template: dig query"
+    vars:
+      HOST: ''
+      MODE: ''
+      RESOLVER: ''
+      TYPE: ''
     platforms: [linux, darwin]
     preconditions:
       - sh: command -v dig
@@ -30,13 +35,14 @@ tasks:
 
   q:*:
     desc: dig record by type (answer). e.g. q:A / q:TXT
-    summary: "task -g dig:q:A HOST=example.com"
+    summary: "task -g q:<TYPE> HOST=<host>"
     platforms: [linux, darwin]
     requires:
       vars: [HOST]
     vars:
       TYPE: '{{index .MATCH 0}}'
       MODE: answer
+      HOST: '{{.HOST | default ""}}'
     cmds:
       - task: _dig
         vars:
@@ -46,13 +52,14 @@ tasks:
 
   s:*:
     desc: dig record by type (+short)
-    summary: "task -g dig:s:A HOST=example.com"
+    summary: "task -g s:<TYPE> HOST=<host>"
     platforms: [linux, darwin]
     requires:
       vars: [HOST]
     vars:
       TYPE: '{{index .MATCH 0}}'
       MODE: short
+      HOST: '{{.HOST | default ""}}'
     cmds:
       - task: _dig
         vars:
@@ -62,12 +69,15 @@ tasks:
 
   at:
     desc: dig via specific DNS server
-    summary: "task -g dig:at HOST=example.com TYPE=A RESOLVER=1.1.1.1"
+    summary: "task -g at HOST=<host> TYPE=<type> RESOLVER=<ip>"
     platforms: [linux, darwin]
     requires:
       vars: [HOST, TYPE, RESOLVER]
     vars:
       MODE: answer
+      HOST: '{{.HOST | default ""}}'
+      TYPE: '{{.TYPE | default ""}}'
+      RESOLVER: '{{.RESOLVER | default ""}}'
     cmds:
       # @server: 指定 DNS server
       - task: _dig
@@ -79,7 +89,10 @@ tasks:
 
   trace:
     desc: dig with +trace
-    summary: "task -g dig:trace HOST=example.com TYPE=A"
+    summary: "task -g trace HOST=<host> TYPE=<type>"
+    vars:
+      HOST: ''
+      TYPE: ''
     platforms: [linux, darwin]
     requires:
       vars: [HOST, TYPE]
@@ -94,7 +107,9 @@ tasks:
 
   reverse:
     desc: dig reverse lookup (-x)
-    summary: "task -g dig:reverse IP=1.1.1.1"
+    summary: "task -g reverse IP=<ip>"
+    vars:
+      IP: ''
     platforms: [linux, darwin]
     requires:
       vars: [IP]

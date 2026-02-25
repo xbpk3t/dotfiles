@@ -20,6 +20,7 @@ vars:
 tasks:
   default:
     desc: Build And Pack.
+    summary: "task -g default"
     cmds:
       - task: release
         vars:
@@ -43,15 +44,20 @@ tasks:
 
 
   release:
+    desc: "release 任务"
+    summary: "task -g release"
     cmds:
       - GOOS=darwin GOARCH={{.ARCH}} CGO_ENABLED=1 go build -ldflags "-s -w {{.FLAGS}}" -o exe_{{.ARCH}}
 
   build:
     desc: "build the binary"
+    summary: "task -g build"
     cmds:
       - ak alfred build -l "{{.FLAGS}}"
 
   run:*:
+    desc: "run 通配任务"
+    summary: "task -g run:<SERVICE>"
     vars:
       SERVICE: '{{index .MATCH 0}}'
     requires:
@@ -63,4 +69,6 @@ tasks:
       - ak alfred {{.SERVICE}}
 
   tag:
+    desc: "tag 任务"
+    summary: "task -g tag"
     cmd: echo "tag=$(jq -r '.release.tag_name' "${GITHUB_EVENT_PATH}" | sed s/^v//)" >> $GITHUB_ENV

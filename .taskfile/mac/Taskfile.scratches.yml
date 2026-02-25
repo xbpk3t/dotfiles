@@ -26,6 +26,7 @@ tasks:
 
   new:
     desc: "Create a scratch file and open in Zed"
+    summary: "task -g new SCRATCH_NOTEBOOK=[scratch]"
     silent: true
     interactive: true
     requires:
@@ -38,6 +39,7 @@ tasks:
 
   list:
     desc: "List scratch files and open selection in Zed"
+    summary: "task -g list SCRATCH_NOTEBOOK=[scratch]"
     silent: true
     interactive: true
     requires:
@@ -50,6 +52,7 @@ tasks:
 
   search:
     desc: "Search scratch files and open selection in Zed"
+    summary: "task -g search SCRATCH_NOTEBOOK=[scratch]"
     silent: true
     interactive: true
     requires:
@@ -62,6 +65,7 @@ tasks:
 
   rename:
     desc: "Rename a scratch file"
+    summary: "task -g rename SCRATCH_NOTEBOOK=[scratch]"
     silent: true
     interactive: true
     requires:
@@ -74,6 +78,7 @@ tasks:
 
   delete:
     desc: "Delete a scratch file"
+    summary: "task -g delete SCRATCH_NOTEBOOK=[scratch]"
     silent: true
     interactive: true
     requires:

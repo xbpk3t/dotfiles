@@ -99,6 +99,8 @@ vars:
 tasks:
 
   run:*:
+    desc: "run 通配任务"
+    summary: "task -g run:<SERVICE>"
     silent: true
     vars:
       SERVICE: '{{index .MATCH 0}}'

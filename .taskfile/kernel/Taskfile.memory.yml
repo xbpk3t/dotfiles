@@ -1,0 +1,45 @@
+---
+version: '3'
+
+tasks:
+  # 内存/Swap 模块化任务（可被 sysinfo/monitor 复用）
+  # 注意：这类任务仅查询，不做写操作
+  summary:
+    desc: "memory summary"
+    summary: "task -g summary"
+    platforms: [linux]
+    cmds:
+      # 物理内存总览（bytes）
+      - free -b
+      # 物理内存 + swap 总览（MB）
+      - free -m
+
+  detail:
+    desc: "memory detail"
+    summary: "task -g detail"
+    platforms: [linux]
+    cmds:
+      # /proc/meminfo 关键字段（更详细）
+      - cat /proc/meminfo | grep -E 'MemTotal|MemFree|MemAvailable|Buffers|Cached|SwapTotal|SwapFree|SwapCached'
+
+  swap:
+    desc: "swap detail"
+    summary: "task -g swap"
+    platforms: [linux]
+    cmds:
+      - echo -e "\n===== Swap Devices ====="
+      # swapon 是用户态视角（推荐）
+      - swapon --show
+      # /proc/swaps 是内核视角（更底层）
+      - cat /proc/swaps
+      - echo -e "\n===== Swap In/Out (vmstat) ====="
+      # si/so: swap in/out（单位：KB/s），快速判断是否发生 swap 抖动
+      - vmstat 1 5
+
+  default:
+    desc: "memory default"
+    summary: "task -g default"
+    platforms: [linux]
+    cmds:
+      - task: summary
+      - task: swap

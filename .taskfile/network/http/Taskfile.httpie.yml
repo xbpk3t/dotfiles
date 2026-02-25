@@ -4,7 +4,9 @@ version: '3'
 tasks:
   get:
     desc: httpie GET
-    summary: "task -g http:get URL=https://example.com"
+    summary: "task -g get URL=<url>"
+    vars:
+      URL: ''
     platforms: [linux, darwin]
     requires:
       vars: [URL]
@@ -16,7 +18,10 @@ tasks:
 
   post-json:
     desc: httpie POST JSON
-    summary: 'task -g http:post-json URL=https://example.com DATA:={"key":"value"}'
+    summary: "task -g post-json URL=<url> DATA=<json>"
+    vars:
+      DATA: ''
+      URL: ''
     platforms: [linux, darwin]
     requires:
       vars: [URL, DATA]

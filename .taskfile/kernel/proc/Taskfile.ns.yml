@@ -1,0 +1,55 @@
+---
+version: "3"
+
+vars:
+  # PID: 目标进程 PID
+  PID: '{{.PID | default "1"}}'
+  # SHELL: 进入 namespace 后使用的 shell
+  SHELL: '{{.SHELL | default "bash"}}'
+
+tasks:
+  proc:ns:summary:
+    desc: Namespace summary (lsns by PID + types)
+    summary: "task -g proc:ns:summary [PID=1]"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v lsns >/dev/null 2>&1
+        msg: "lsns not found (install: util-linux)"
+    cmds:
+      - lsns -t pid,net,uts,ipc,mnt,user,cgroup
+      - lsns -p {{.PID}}
+
+  proc:ns:proc:
+    desc: Namespace links under /proc/<PID>/ns
+    summary: "task -g proc:ns:proc [PID=1]"
+    platforms: [linux]
+    preconditions:
+      - sh: test -r /proc/{{.PID}}/ns
+        msg: "/proc/{{.PID}}/ns not readable"
+    cmds:
+      - ls -l /proc/{{.PID}}/ns
+      - readlink /proc/{{.PID}}/ns/net
+
+  proc:ns:enter:
+    desc: Enter target namespaces (nsenter)
+    summary: "task -g proc:ns:enter PID=1 [SHELL=bash]"
+    platforms: [linux]
+    interactive: true
+    requires:
+      vars: [PID]
+    preconditions:
+      - sh: command -v nsenter >/dev/null 2>&1
+        msg: "nsenter not found (install: util-linux)"
+    cmds:
+      - nsenter -t {{.PID}} -m -u -i -n -p -- {{.SHELL}}
+
+  proc:ns:unshare:
+    desc: Create new namespaces (unshare + mount /proc)
+    summary: "task -g proc:ns:unshare [SHELL=bash]"
+    platforms: [linux]
+    interactive: true
+    preconditions:
+      - sh: command -v unshare >/dev/null 2>&1
+        msg: "unshare not found (install: util-linux)"
+    cmds:
+      - unshare -p -f --mount-proc {{.SHELL}}

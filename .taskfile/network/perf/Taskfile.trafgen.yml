@@ -4,7 +4,7 @@ version: '3'
 tasks:
   list:
     desc: trafgen list examples
-    summary: "task -g trafgen:list"
+    summary: "task -g list"
     platforms: [linux]
     preconditions:
       - sh: command -v trafgen
@@ -14,7 +14,10 @@ tasks:
 
   run:
     desc: trafgen run config
-    summary: "task -g trafgen:run CONF=trafgen.cfg IFACE=eth0"
+    summary: "task -g run CONF=<file> IFACE=<iface>"
+    vars:
+      CONF: ''
+      IFACE: ''
     platforms: [linux]
     requires:
       vars: [CONF, IFACE]

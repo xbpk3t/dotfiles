@@ -4,7 +4,7 @@ version: '3'
 tasks:
   icmp:
     desc: Show ICMP/IP fragment counters
-    summary: "task -g nstat:icmp"
+    summary: "task -g icmp"
     platforms: [linux]
     preconditions:
       - sh: command -v nstat

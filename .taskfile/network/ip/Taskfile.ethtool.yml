@@ -4,7 +4,9 @@ version: '3'
 tasks:
   stats:
     desc: ethtool stats
-    summary: "task -g ethtool:stats IFACE=eth0"
+    summary: "task -g stats IFACE=<iface>"
+    vars:
+      IFACE: ''
     platforms: [linux]
     requires:
       vars: [IFACE]
@@ -17,7 +19,9 @@ tasks:
 
   info:
     desc: ethtool info
-    summary: "task -g ethtool:info IFACE=eth0"
+    summary: "task -g info IFACE=<iface>"
+    vars:
+      IFACE: ''
     platforms: [linux]
     requires:
       vars: [IFACE]

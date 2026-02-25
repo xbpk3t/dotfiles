@@ -3,4 +3,277 @@ version: '3'
 
 # DNS playbook layer (placeholder)
 
+# TODO: 增加“权威直查”相关任务（从 NS 记录自动发现权威服务器，并用 @NS 直查 A/AAAA/MX/TXT/NS/CAA/SOA 等，避免递归/缓存/劫持影响）
+# TODO: 增加“多 resolver 对比”任务（1.1.1.1/8.8.8.8/9.9.9.9 等对比，支持 answer 与 +short 两种输出模式）
+# TODO: 增加“解析链路诊断”一键任务（公共递归对比 + 权威直查 + dig +trace + root sanity check，例如 j.root-servers.net A）
+# TODO: 增加“nslookup”相关任务（按 TYPE 查询、指定 resolver、交互模式入口）
+# TODO: 增加“nmcli 本机 DNS 配置”任务（查看当前生效 DNS、查看连接级 DNS、设置/忽略自动 DNS）
+# TODO: 增加“nsupdate DDNS”任务（动态更新 add/delete，支持 TSIG keyfile；注意密钥路径不要入库）
+# TODO: 增加“systemd-resolve 兼容”任务（旧版 systemd 的 --status / --flush-caches）
+# TODO: 增加“抓包证据链”任务（tcpdump 监听 port 53/853；如需 DoH 仅给提示，无法仅靠端口准确区分）
+# TODO: 增加“whois apex 提示/辅助”任务（对子域自动提醒应查 apex，并提供 NS/注册信息字段定位）
+
+
+# 缺口清单（按主题归类）
+#
+# 1. 查询/对比类（组合操作）
+#
+# - 权威直查（直接对 NS 询问，避免递归/缓存/劫持）
+# - 多 resolver 对比（1.1.1.1/8.8.8.8/9.9.9.9 对比）
+# - 诊断一键（公共递归 + 权威 + trace + root sanity）
+# - dig +trace +dnssec / +noall +answer 的精简输出组合
+#
+# 2. 工具覆盖不全
+#
+# - nslookup（类型查询 / 指定 resolver / 交互模式）
+# - nmcli（查看/设置本机 DNS 配置）
+# - nsupdate（DDNS 动态更新）
+# - systemd-resolve 兼容命令（旧版 systemd）
+#
+# 3. 解析全过程观察（证据链）
+#
+# - tcpdump 抓 53/853（DNS / DoT）
+# - DoH 识别（只能通过目的 IP/SNI/进程，做有限提示）
+# - root sanity check（j.root-servers.net A）
+#
+# 4. 解析链路异常场景
+#
+# - “权威与递归不一致”对比
+# - whois apex 域提醒（子域 whois 无记录）
+
+
+
 tasks:
+  dns:resolved:status:
+    desc: systemd-resolved status (per-link DNS + DNSSEC/DoT)
+    summary: "task -g dns:resolved:status"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v resolvectl >/dev/null 2>&1
+        msg: "resolvectl not found (systemd-resolved required)"
+    cmds:
+      # status: show per-link DNS config and global resolver state
+      - resolvectl status
+
+  dns:resolved:flush:
+    desc: Flush systemd-resolved DNS cache
+    summary: "task -g dns:resolved:flush"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v resolvectl >/dev/null 2>&1
+        msg: "resolvectl not found (systemd-resolved required)"
+    cmds:
+      # flush-caches: clear local DNS cache
+      - sudo resolvectl flush-caches
+
+  dns:resolved:stats:
+    desc: systemd-resolved cache statistics
+    summary: "task -g dns:resolved:stats"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v resolvectl >/dev/null 2>&1
+        msg: "resolvectl not found (systemd-resolved required)"
+    cmds:
+      # statistics: show cache size/hits/misses
+      - resolvectl statistics
+
+  dns:resolved:cache:
+    desc: systemd-resolved cache dump (may be large)
+    summary: "task -g dns:resolved:cache"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v resolvectl >/dev/null 2>&1
+        msg: "resolvectl not found (systemd-resolved required)"
+    cmds:
+      # show-cache: list cached RR entries
+      - sudo resolvectl show-cache
+
+  dns:resolved:query:
+    desc: Query via systemd-resolved (local view)
+    summary: "task -g dns:resolved:query HOST=example.com"
+    vars:
+      HOST: ''
+    platforms: [linux]
+    requires:
+      vars: [HOST]
+    preconditions:
+      - sh: command -v resolvectl >/dev/null 2>&1
+        msg: "resolvectl not found (systemd-resolved required)"
+    cmds:
+      # query: resolve using systemd-resolved
+      - resolvectl query {{.HOST}}
+
+  dns:resolved:dump:
+    desc: Dump systemd-resolved cache to journal (USR1)
+    summary: "task -g dns:resolved:dump [LOG_LINES=200]"
+    platforms: [linux]
+    vars:
+      # LOG_LINES: journal tail lines after dump
+      LOG_LINES: '{{.LOG_LINES | default "200"}}'
+    preconditions:
+      - sh: command -v pkill >/dev/null 2>&1
+        msg: "pkill not found"
+      - sh: command -v journalctl >/dev/null 2>&1
+        msg: "journalctl not found (systemd required)"
+    cmds:
+      # USR1: ask systemd-resolved to dump cache to journal
+      - sudo pkill -USR1 systemd-resolved
+      - journalctl -u systemd-resolved --no-pager -n {{.LOG_LINES}}
+
+  dns:nscd:invalidate:
+    desc: Invalidate nscd hosts cache
+    summary: "task -g dns:nscd:invalidate"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v nscd >/dev/null 2>&1
+        msg: "nscd not found"
+    cmds:
+      # -i hosts: invalidate hosts cache
+      - sudo nscd -i hosts
+
+  dns:nscd:stats:
+    desc: nscd statistics
+    summary: "task -g dns:nscd:stats"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v nscd >/dev/null 2>&1
+        msg: "nscd not found"
+    cmds:
+      # -g: show cache statistics
+      - nscd -g
+
+  dns:dnsmasq:restart:
+    desc: Restart dnsmasq (flush cache)
+    summary: "task -g dns:dnsmasq:restart"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v systemctl >/dev/null 2>&1
+        msg: "systemctl not found (systemd required)"
+    cmds:
+      # restart: clear dnsmasq cache by service restart
+      - sudo systemctl restart dnsmasq
+
+  dns:dnsmasq:reload:
+    desc: Reload dnsmasq (HUP)
+    summary: "task -g dns:dnsmasq:reload"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v pkill >/dev/null 2>&1
+        msg: "pkill not found"
+    cmds:
+      # HUP: reload config (cache clear depends on clear-on-reload)
+      - sudo pkill -HUP dnsmasq
+
+  dns:dnsmasq:stats:
+    desc: dnsmasq stats via USR1 + journal
+    summary: "task -g dns:dnsmasq:stats [LOG_LINES=200]"
+    platforms: [linux]
+    vars:
+      # LOG_LINES: journal tail lines after USR1
+      LOG_LINES: '{{.LOG_LINES | default "200"}}'
+    preconditions:
+      - sh: command -v pkill >/dev/null 2>&1
+        msg: "pkill not found"
+      - sh: command -v journalctl >/dev/null 2>&1
+        msg: "journalctl not found (systemd required)"
+    cmds:
+      # USR1: ask dnsmasq to dump stats to journal/syslog
+      - sudo pkill -USR1 dnsmasq
+      - journalctl -u dnsmasq --no-pager -n {{.LOG_LINES}}
+
+  dns:unbound:flush:
+    desc: Unbound flush zone cache
+    summary: "task -g dns:unbound:flush ZONE=example.com"
+    vars:
+      ZONE: ''
+    platforms: [linux]
+    requires:
+      vars: [ZONE]
+    preconditions:
+      - sh: command -v unbound-control >/dev/null 2>&1
+        msg: "unbound-control not found"
+    cmds:
+      # flush_zone: clear cached data for a zone
+      - sudo unbound-control flush_zone {{.ZONE}}
+
+  dns:unbound:stats:
+    desc: Unbound statistics
+    summary: "task -g dns:unbound:stats"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v unbound-control >/dev/null 2>&1
+        msg: "unbound-control not found"
+    cmds:
+      # stats: show cache and resolver stats
+      - sudo unbound-control stats
+
+  dns:bind:flush:
+    desc: BIND/named flush cache
+    summary: "task -g dns:bind:flush"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v rndc >/dev/null 2>&1
+        msg: "rndc not found"
+    cmds:
+      # flush: clear entire cache
+      - sudo rndc flush
+
+  dns:bind:flushname:
+    desc: BIND/named flush cache for a name
+    summary: "task -g dns:bind:flushname NAME=example.com"
+    vars:
+      NAME: ''
+    platforms: [linux]
+    requires:
+      vars: [NAME]
+    preconditions:
+      - sh: command -v rndc >/dev/null 2>&1
+        msg: "rndc not found"
+    cmds:
+      # flushname: clear cached RR for a name
+      - sudo rndc flushname {{.NAME}}
+
+  dns:bind:flushtree:
+    desc: BIND/named flush cache for a domain subtree
+    summary: "task -g dns:bind:flushtree NAME=example.com"
+    vars:
+      NAME: ''
+    platforms: [linux]
+    requires:
+      vars: [NAME]
+    preconditions:
+      - sh: command -v rndc >/dev/null 2>&1
+        msg: "rndc not found"
+    cmds:
+      # flushtree: clear cached subtree
+      - sudo rndc flushtree {{.NAME}}
+
+  dns:getent:hosts:
+    desc: getent hosts (NSS resolution view)
+    summary: "task -g dns:getent:hosts HOST=example.com"
+    vars:
+      HOST: ''
+    platforms: [linux, darwin]
+    requires:
+      vars: [HOST]
+    preconditions:
+      - sh: command -v getent >/dev/null 2>&1
+        msg: "getent not found"
+    cmds:
+      # hosts: show addresses resolved by NSS
+      - getent hosts {{.HOST}}
+
+  dns:getent:ahosts:
+    desc: getent ahosts (all address families)
+    summary: "task -g dns:getent:ahosts HOST=example.com"
+    vars:
+      HOST: ''
+    platforms: [linux, darwin]
+    requires:
+      vars: [HOST]
+    preconditions:
+      - sh: command -v getent >/dev/null 2>&1
+        msg: "getent not found"
+    cmds:
+      # ahosts: show A/AAAA entries via NSS
+      - getent ahosts {{.HOST}}

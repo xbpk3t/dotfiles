@@ -4,7 +4,9 @@ version: '3'
 tasks:
   default:
     desc: traceroute (IPv4)
-    summary: "task -g traceroute HOST=1.1.1.1"
+    summary: "task -g default HOST=<host>"
+    vars:
+      HOST: ''
     platforms: [linux]
     requires:
       vars: [HOST]
@@ -13,7 +15,9 @@ tasks:
 
   icmp:
     desc: traceroute (ICMP mode)
-    summary: "task -g traceroute:icmp HOST=1.1.1.1"
+    summary: "task -g icmp HOST=<host>"
+    vars:
+      HOST: ''
     platforms: [linux]
     requires:
       vars: [HOST]
@@ -23,19 +27,22 @@ tasks:
 
   tcp:
     desc: traceroute (TCP SYN)
-    summary: "task -g traceroute:tcp HOST=1.1.1.1 [PORT=443]"
+    summary: "task -g tcp HOST=<host> [PORT=443]"
     platforms: [linux]
     requires:
       vars: [HOST]
     vars:
       # PORT 为目的端口（TCP SYN）
       PORT: '{{.PORT | default "443"}}'
+      HOST: ''
     cmds:
       - traceroute -T -p {{.PORT}} -n {{.HOST}}
 
   darwin:
     desc: traceroute (IPv4, darwin)
-    summary: "task -g traceroute:darwin HOST=1.1.1.1"
+    summary: "task -g darwin HOST=<host>"
+    vars:
+      HOST: ''
     platforms: [darwin]
     requires:
       vars: [HOST]
@@ -45,7 +52,9 @@ tasks:
 
   icmp:darwin:
     desc: traceroute (ICMP mode, darwin)
-    summary: "task -g traceroute:icmp:darwin HOST=1.1.1.1"
+    summary: "task -g icmp:darwin HOST=<host>"
+    vars:
+      HOST: ''
     platforms: [darwin]
     requires:
       vars: [HOST]

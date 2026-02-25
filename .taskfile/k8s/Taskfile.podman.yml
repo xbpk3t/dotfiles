@@ -7,18 +7,28 @@ vars:
 
 tasks:
   rmc:
+    desc: "rmc 任务"
+    summary: "task -g rmc"
     cmd: '{{.PODMAN}} rm -r -a'
   rmi:
+    desc: "rmi 任务"
+    summary: "task -g rmi"
     cmd: '{{.PODMAN}} rmi --all'
 
   k8s:
+    desc: "k8s 任务"
+    summary: "task -g k8s"
     cmd: '{{.PODMAN}} generate kube'
 
   play:
+    desc: "play 任务"
+    summary: "task -g play"
     cmd: '{{.PODMAN}} play kube'
 
 
   machine:
+    desc: "machine 任务"
+    summary: "task -g machine"
     cmds:
       - '{{.PODMAN}} machine list'
       - '{{.PODMAN}} system connection list'
