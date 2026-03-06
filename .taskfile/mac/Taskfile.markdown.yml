@@ -1,0 +1,16 @@
+---
+
+version: '3'
+
+
+
+tasks:
+
+  # https://github.com/kpym/gm
+  md2html:
+    desc: markdown -> html using goldmark cli tool
+    summary: "task -g md:md2html -- <filename>"
+    cmd: gm {{.CLI_ARGS}}
+    preconditions:
+      - sh: command -v gm
+        msg: Pls install gm (using go install github.com/kpym/gm@latest)
