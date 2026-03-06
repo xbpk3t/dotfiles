@@ -1,0 +1,17 @@
+---
+best_practices:
+  - category: <id>
+    title: <中文分类名>
+    qs: <该分类的引导问题>
+    items:
+      - id: <rule_id>
+        title: <规则名对应中文>
+        level: MUST|MUST_NOT|SHOULD
+        text: <规则描述与执行要点>
+        rationale: <为什么需要这条规则>
+        examples:
+          - <example_1>
+        anti_examples:
+          - <anti_example_1>
+        links:
+          - <url_1>
