@@ -1,0 +1,25 @@
+---
+version: '3'
+
+tasks:
+  diag:
+    desc: NAT diagnose playbook (read-only)
+    summary: "task -g nat:diag"
+    vars:
+      OUT: '{{.OUT | default ""}}'
+      LAN_CIDR: '{{.LAN_CIDR | default ""}}'
+      PORT: '{{.PORT | default "18888"}}'
+      PUB_IP: '{{.PUB_IP | default ""}}'
+      CAPTURE: '{{.CAPTURE | default "0"}}'
+      IFACE: '{{.IFACE | default ""}}'
+      OEA_IP: '{{.OEA_IP | default ""}}'
+    cmds:
+      - |
+        OUT='{{.OUT}}' \
+        LAN_CIDR='{{.LAN_CIDR}}' \
+        PORT='{{.PORT}}' \
+        PUB_IP='{{.PUB_IP}}' \
+        CAPTURE='{{.CAPTURE}}' \
+        IFACE='{{.IFACE}}' \
+        OEA_IP='{{.OEA_IP}}' \
+        bash .taskfile/network/nat/diag.sh

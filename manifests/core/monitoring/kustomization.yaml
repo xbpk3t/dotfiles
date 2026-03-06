@@ -1,0 +1,7 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - metrics-server/ks.yaml
+  # What：启用 kube-prometheus-stack（Prometheus/Alertmanager/Grafana）。
+  # Why：已补齐域名与告警配置，允许监控栈上线。
+  - prometheus-stack/ks.yaml

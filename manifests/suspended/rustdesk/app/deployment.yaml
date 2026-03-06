@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rustdesk-hbbr
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rustdesk-hbbr
+  template:
+    metadata:
+      labels:
+        app: rustdesk-hbbr
+    spec:
+      hostNetwork: true
+      containers:
+        - name: rustdesk-hbbr
+          image: rustdesk/rustdesk-server:latest
+          command: ["hbbr"]
+          volumeMounts:
+            - name: rustdesk-data
+              mountPath: /root
+      volumes:
+        - name: rustdesk-data
+          hostPath:
+            # 重要：保持与原 compose 一致的宿主机路径
+            path: /opt/rustdesk/data
+            type: DirectoryOrCreate
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rustdesk-hbbs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rustdesk-hbbs
+  template:
+    metadata:
+      labels:
+        app: rustdesk-hbbs
+    spec:
+      hostNetwork: true
+      containers:
+        - name: rustdesk-hbbs
+          image: rustdesk/rustdesk-server:latest
+          # 注意：:21117 为 relay 端口
+          command: ["hbbs", "-r", "rd.lucc.dev:21117"]
+          volumeMounts:
+            - name: rustdesk-data
+              mountPath: /root
+      volumes:
+        - name: rustdesk-data
+          hostPath:
+            path: /opt/rustdesk/data
+            type: DirectoryOrCreate

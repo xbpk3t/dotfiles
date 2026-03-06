@@ -1,0 +1,126 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: traefik
+  namespace: networking
+  annotations:
+    meta.helm.sh/release-namespace: "networking"
+spec:
+  interval: 10m
+  # What：关闭 HelmRelease 的等待逻辑（安装/升级）。
+  # Why：控制器在网络抖动或 CRD 尚未就绪时容易超时，导致反复回滚；实际资源会由后续 reconcile 纠正。
+  install:
+    disableWait: true
+    disableWaitForJobs: true
+  upgrade:
+    disableWait: true
+    disableWaitForJobs: true
+  chart:
+    spec:
+      chart: traefik
+      version: 37.2.0
+      sourceRef:
+        kind: HelmRepository
+        name: traefik-charts
+        namespace: flux-system
+
+  values:
+    deployment:
+      replicas: 1
+    # 固定调度到 dev 节点（142 入口所在机器），确保 80/443 监听在正确节点
+    nodeSelector:
+      node.kubernetes.io/role-dev: "true"
+
+    service:
+      # What：为 Traefik 绑定公网入口 IP。
+      # Why：ACME HTTP-01 与域名访问需要稳定入口，避免 LoadBalancer 一直 pending。
+      externalIPs:
+        # 注意：需与 DNS A 记录指向的公网 IP 保持一致
+        - "142.171.154.61"
+
+    logs:
+      general:
+        level: INFO
+
+      access:
+        enabled: true
+
+    ingressClass:
+      enabled: true
+      isDefaultClass: true
+
+    ingressRoute:
+      dashboard:
+        # helm chart use PathPrefix(`/dashboard`) || PathPrefix(`/api`), i want to use a subdomain
+        # => use an IngressRoute object for the dashboard
+        enabled: false
+
+    metrics:
+      prometheus:
+        entryPoint: metrics
+
+    additionalArguments:
+      - "--serverstransport.insecureskipverify=true"
+      - "--providers.kubernetescrd.allowCrossNamespace=true"
+      - "--entryPoints.websecure.forwardedHeaders.trustedIPs=10.0.0.0/8,192.168.0.0/16,172.16.0.0/12,127.0.0.1/32"
+      - "--entrypoints.websecure.transport.respondingTimeouts.readTimeout=60000s"
+      - "--entrypoints.websecure.transport.respondingTimeouts.idleTimeout=60000s"
+      - "--entrypoints.websecure.transport.respondingTimeouts.writeTimeout=60000s"
+      # What：不强制指定 ingressendpoint.ip。
+      # Why：tailnet/多出口环境下该值易与实际入口不一致，导致错误宣告/调度。
+      # 需要时再显式指定：--providers.kubernetesingress.ingressendpoint.ip=${CONFIG_KUBE_VIP_IP}
+
+    providers:
+      kubernetesCRD:
+        enabled: true
+        allowCrossNamespace: true
+        allowExternalNameServices: true
+      kubernetesIngress:
+        enabled: true
+        allowExternalNameServices: true
+        ingressClass: "traefik"
+        publishedService:
+          enabled: false
+
+    ports:
+      web:
+        redirections:
+          entryPoint:
+            to: websecure
+            scheme: https
+            permanent: true
+            priority: 10
+      websecure:
+        tls:
+          enabled: true
+          options: default
+
+  # NOTE: Add out self signed root ca cert to traefik to get working setup with our self signed cert from oidc auth provider
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              kind: Deployment
+              name: traefik
+            patch: |-
+              - op: add
+                path: /spec/template/spec/volumes/-
+                value:
+                  name: certs
+                  secret:
+                   # What：允许 internal-ca 缺失时继续启动。
+                   # Why：internal-ca 为可选自建根证书，不应阻断 Traefik 启动。
+                   optional: true
+                   defaultMode: 420
+                   secretName: internal-ca
+          - target:
+              kind: Deployment
+              name: traefik
+            patch: |-
+              - op: add
+                path: /spec/template/spec/containers/0/volumeMounts/-
+                value:
+                  mountPath: /etc/ssl/certs/internal-ca.pem
+                  name: certs
+                  subPath: tls.crt

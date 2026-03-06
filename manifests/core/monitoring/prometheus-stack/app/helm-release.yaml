@@ -1,0 +1,286 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kube-prometheus-stack
+  namespace: monitoring
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: kube-prometheus-stack
+      # What：Pin 到指定稳定版本。
+      # Why：与 CRD 版本对齐，避免兼容性问题。
+      version: 80.11.0
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus-community-charts
+        namespace: flux-system
+
+  values:
+    crds:
+      # What：由 HelmRelease 安装 CRD。
+      # Why：替代单独 GitRepository 拉取，避免超时。
+      enabled: true
+
+    cleanPrometheusOperatorObjectNames: true
+
+    prometheusOperator:
+      # What：显式覆盖 Prometheus 默认镜像来源（registry + base image）。
+      # Why：避免 quay.io 拉取 401/超时导致 ImagePullBackOff。
+      # Note：仅设置 global.imageRegistry 不一定对 Prometheus 生效。
+      # 参考：Prometheus Operator 默认镜像参数 & 社区 issue 反馈。
+      prometheusDefaultBaseImageRegistry: docker.io
+      prometheusDefaultBaseImage: prom/prometheus
+
+    defaultRules:
+      # What：仅保留核心告警规则，减少噪声与资源消耗。
+      # Why：小规模集群以节点/系统级监控为主。
+      create: true
+      rules:
+        alertmanager: true
+        etcd: false
+        kubeApiserver: true
+        kubeControllerManager: false
+        kubeProxy: false
+        kubeScheduler: false
+        kubelet: true
+        kubeStateMetrics: true
+        kubernetesApps: false
+        kubernetesResources: false
+        kubernetesStorage: false
+        kubernetesSystem: true
+        network: false
+        node: true
+        prometheus: true
+        windows: false
+
+    kubeApiServer:
+      enabled: true
+      serviceMonitor:
+        metricRelabelings:
+          # Drop high cardinality labels
+          - action: drop
+            sourceLabels: ["__name__"]
+            regex: (apiserver|etcd|rest_client)_request(|_sli|_slo)_duration_seconds_bucket
+          - action: drop
+            sourceLabels: ["__name__"]
+            regex: (apiserver_response_sizes_bucket|apiserver_watch_events_sizes_bucket)
+
+    kubeControllerManager:
+      enabled: false
+
+    kubeEtcd:
+      enabled: false
+
+    kubelet:
+      enabled: true
+      serviceMonitor:
+        metricRelabelings:
+          # Drop high cardinality labels
+          - action: labeldrop
+            regex: (uid)
+          - action: labeldrop
+            regex: (id|name)
+          - action: drop
+            sourceLabels: ["__name__"]
+            regex: (rest_client_request_duration_seconds_bucket|rest_client_request_duration_seconds_sum|rest_client_request_duration_seconds_count)
+
+    kubeProxy:
+      enabled: false
+
+    kubeScheduler:
+      enabled: false
+
+    alertmanager:
+      enabled: true
+      config:
+        global:
+          resolve_timeout: 5m
+          # What：使用 Resend SMTP 发送告警邮件。
+          # Why：不自建邮局，优先外部 SMTP 服务。
+          smtp_smarthost: "smtp.resend.com:587"
+          smtp_from: "${CONFIG_ALERT_EMAIL_FROM}"
+          smtp_auth_username: "resend"
+          smtp_auth_password: "${RESEND_PWD}"
+          smtp_require_tls: true
+        receivers:
+          - name: "ignore"
+          - name: "email"
+            email_configs:
+              - to: ${CONFIG_ALERT_EMAIL_TO}
+                send_resolved: true
+        route:
+          group_by: ["alertname", "job"]
+          group_wait: 1m
+          group_interval: 1m
+          repeat_interval: 24h
+          receiver: email
+          routes:
+            - receiver: "ignore"
+              matchers:
+                - alertname =~ "InfoInhibitor|Watchdog"
+            - receiver: email
+              matchers:
+                - severity = "critical"
+              continue: true
+        inhibit_rules:
+          - source_matchers:
+              - severity = "critical"
+            target_matchers:
+              - severity = "warning"
+            equal: ["alertname", "namespace"]
+
+      ingress:
+        # What：Alertmanager 仅集群内访问，不对外暴露。
+        # Why：避免公网暴露管理入口。
+        enabled: false
+
+      alertmanagerSpec:
+        replicas: 1
+        storage:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: local-hostpath
+              # What：使用 local-hostpath 存储。
+              # Why：当前 openebs-zfspv 可用容量为 0，PVC 无法绑定。
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: 1Gi
+        resources:
+          # What：低资源配额，适配小型集群。
+          # Why：Alertmanager 负载较轻。
+          requests:
+            cpu: 25m
+            memory: 64Mi
+          limits:
+            memory: 128Mi
+
+    grafana:
+      enabled: true
+      defaultDashboardsTimezone: "${CONFIG_TIMEZONE}"
+      # What：强制部署内置数据源（Prometheus）。
+      # Why：保证 Grafana 开箱可用。
+      forceDeployDatasources: true
+      forceDeployDashboards: false
+      # What：启用默认 Dashboard。
+      # Why：提供节点/集群的基础可视化视图。
+      defaultDashboardsEnabled: true
+      adminPassword: "${GRAFANA_PWD}"
+      ingress:
+        enabled: true
+        ingressClassName: traefik
+        annotations:
+          # What：证书由 cert-manager 自动签发。
+          # Why：避免手工维护证书。
+          cert-manager.io/cluster-issuer: letsencrypt-http
+          # What：仅暴露 HTTPS 入口。
+          # Why：公网访问统一走 TLS。
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        hosts:
+          - "g.lucc.dev"
+        tls:
+          - secretName: grafana-tls
+            hosts:
+              - "g.lucc.dev"
+      persistence:
+        # What：持久化 Grafana 数据（用户/仪表盘）。
+        # Why：避免重启丢失配置。
+        enabled: true
+        type: pvc
+        storageClassName: local-hostpath
+        # What：使用 local-hostpath 存储。
+        # Why：当前 openebs-zfspv 可用容量为 0，PVC 无法绑定。
+        accessModes: ["ReadWriteOnce"]
+        size: 2Gi
+      sidecar:
+        dashboards:
+          # What：自动加载带 grafana_dashboard 标签的 Dashboard。
+          # Why：与现有清单兼容。
+          enabled: true
+          label: grafana_dashboard
+        datasources:
+          # What：自动加载内置 Prometheus 数据源。
+          # Why：Grafana 启动即可查询指标。
+          enabled: true
+      resources:
+        # What：低资源配额，适配小型集群。
+        # Why：Grafana 主要是查询与渲染。
+        requests:
+          cpu: 50m
+          memory: 128Mi
+        limits:
+          memory: 256Mi
+
+    nodeExporter:
+      # What：启用 chart 自带 node-exporter。
+      # Why：需要覆盖所有 k3s 节点的宿主机指标。
+      enabled: true
+      resources:
+        requests:
+          cpu: 25m
+          memory: 64Mi
+        limits:
+          memory: 128Mi
+
+    prometheus:
+      ingress:
+        # What：Prometheus 仅集群内访问，不对外暴露。
+        # Why：避免公网暴露管理入口。
+        enabled: false
+
+      prometheusSpec:
+        # What：Prometheus 镜像走 Docker Hub（prom/prometheus）。
+        # Why：避免 quay.io 拉取 401/超时导致 ImagePullBackOff。
+        # Note：该字段最终会写入 Prometheus CR spec.image（字符串）。
+        image:
+          registry: docker.io
+          repository: prom/prometheus
+          tag: v2.55.1
+        replicas: 1
+        replicaExternalLabelName: "__replica__"
+        # What：仅选择带 release 标签的监控对象。
+        # Why：避免自动抓取业务应用指标。
+        ruleSelectorNilUsesHelmValues: true
+        serviceMonitorSelectorNilUsesHelmValues: true
+        podMonitorSelectorNilUsesHelmValues: true
+        probeSelectorNilUsesHelmValues: true
+        ruleSelector:
+          matchLabels:
+            release: kube-prometheus-stack
+        serviceMonitorSelector:
+          matchLabels:
+            release: kube-prometheus-stack
+        podMonitorSelector:
+          matchLabels:
+            release: kube-prometheus-stack
+        probeSelector:
+          matchLabels:
+            release: kube-prometheus-stack
+        # What：保留 30 天数据。
+        # Why：满足趋势分析，同时控制资源消耗。
+        retention: 30d
+        enableAdminAPI: true
+        walCompression: true
+        enableFeatures:
+          - auto-gomaxprocs
+          - memory-snapshot-on-shutdown
+          - new-service-discovery-manager
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: local-hostpath
+              # What：使用 local-hostpath 存储。
+              # Why：当前 openebs-zfspv 可用容量为 0，PVC 无法绑定。
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: 10Gi
+
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            memory: 512Mi

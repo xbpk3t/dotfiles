@@ -1,0 +1,9 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: metrics-server
+  namespace: flux-system
+spec:
+  path: "./manifests/core/monitoring/metrics-server/app"
+  # What：移除对 prometheus-crds 的依赖。
+  # Why：metrics-server 可独立运行，避免因未部署 Prometheus 阻塞核心链路。

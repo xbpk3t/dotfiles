@@ -46,12 +46,14 @@ tasks:
   create:
     prefix: ⚙️ > create
     desc: create k3d cluster
+    summary: "task -g create"
     cmds:
       - k3d cluster create --config=cluster/config.yaml
 
   create:dev:
     prefix: ⚙️ > create
     desc: create k3d cluster (devcontainers)
+    summary: "task -g create:dev"
     deps:
       - k3d:create
     cmds:
@@ -60,23 +62,27 @@ tasks:
   destroy:
     prefix: ⚙️ > destroy
     desc: destroy k3d cluster
+    summary: "task -g destroy"
     cmds:
       - "k3d cluster delete {{.CLUSTER_NAME}}"
 
   start:
     prefix: ⚙️ > start
     desc: starts knative environment
+    summary: "task -g start"
     cmds:
       - "k3d cluster start {{.CLUSTER_NAME}}"
 
   stop:
     prefix: ⚙️ > stop
     desc: stop knative environment
+    summary: "task -g stop"
     cmds:
       - "k3d cluster stop {{.CLUSTER_NAME}}"
 
   test:
     prefix: ⚙️ > test
     desc: test argo cd
+    summary: "task -g test"
     cmds:
       - "cd test && go mod tidy && go test -v"

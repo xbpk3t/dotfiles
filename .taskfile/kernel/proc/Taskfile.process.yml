@@ -1,0 +1,115 @@
+---
+version: "3"
+
+vars:
+  # LIMIT: 输出行数上限
+  LIMIT: '{{.LIMIT | default "200"}}'
+  # PID: 目标进程 PID
+  PID: '{{.PID | default "1"}}'
+
+tasks:
+  proc:ps:zombie:
+    desc: List zombie processes (state=Z)
+    summary: "task -g proc:ps:zombie"
+    platforms: [linux]
+    set: [pipefail]
+    preconditions:
+      - sh: command -v ps >/dev/null 2>&1
+        msg: "ps not found"
+      - sh: command -v awk >/dev/null 2>&1
+        msg: "awk not found"
+    cmds:
+      # -e: all processes; -o: custom columns (pid,ppid,state,stat,cmd)
+      - ps -eo pid,ppid,state,stat,cmd | awk '$3 ~ /Z/ || $4 ~ /Z/ {print}'
+      # -l: long format (includes state); filter Z in S column
+      - ps -el | awk '$2 ~ /Z/ {print}'
+
+  proc:ps:orphan:
+    desc: List processes with PPID=1 (possible orphans)
+    summary: "task -g proc:ps:orphan [LIMIT=200]"
+    platforms: [linux]
+    set: [pipefail]
+    preconditions:
+      - sh: command -v ps >/dev/null 2>&1
+        msg: "ps not found"
+      - sh: command -v awk >/dev/null 2>&1
+        msg: "awk not found"
+    cmds:
+      # -e: all processes; -o: custom columns (pid,ppid,cmd)
+      - ps -eo pid,ppid,cmd | awk '$2==1 {print}'
+      # --forest: show process tree; LIMIT limits output size
+      - ps -eo pid,ppid,cmd --forest | head -n {{.LIMIT}}
+
+  proc:ps:tree:
+    desc: Process tree (ps forest + pstree)
+    summary: "task -g proc:ps:tree [LIMIT=200]"
+    platforms: [linux]
+    set: [pipefail]
+    preconditions:
+      - sh: command -v ps >/dev/null 2>&1
+        msg: "ps not found"
+      - sh: command -v pstree >/dev/null 2>&1
+        msg: "pstree not found (install: psmisc)"
+    cmds:
+      # --forest: show process tree; LIMIT limits output size
+      - ps -eo pid,ppid,cmd --forest | head -n {{.LIMIT}}
+      # -p: show PIDs in the tree
+      - pstree -p
+
+  proc:ps:parent:
+    desc: Show parent process for PID
+    summary: "task -g proc:ps:parent PID=1"
+    platforms: [linux]
+    requires:
+      vars: [PID]
+    preconditions:
+      - sh: command -v ps >/dev/null 2>&1
+        msg: "ps not found"
+    cmds:
+      # -p: select PID; -o: custom columns (pid,ppid,state,stat,cmd)
+      - ps -o pid,ppid,state,stat,cmd -p {{.PID}}
+      # get PPID of PID, then show parent process details
+      - ps -o pid,ppid,state,stat,cmd -p $(ps -o ppid= -p {{.PID}} | tr -d ' ')
+
+  proc:ps:state:sort:
+    desc: List processes sorted by state
+    summary: "task -g proc:ps:state:sort"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v ps >/dev/null 2>&1
+        msg: "ps not found"
+    cmds:
+      # -e: all processes; -o: custom columns (state,pid,comm); --sort=state groups by state
+      - ps -e -o state,pid,comm --sort=state
+      # stat includes flags (e.g., R+, Ss); --sort=stat groups by full STAT
+      - ps -e -o stat,pid,comm --sort=stat
+
+  proc:ps:state:group:
+    desc: Group processes by state (sectioned output)
+    summary: "task -g proc:ps:state:group"
+    platforms: [linux]
+    set: [pipefail]
+    preconditions:
+      - sh: command -v ps >/dev/null 2>&1
+        msg: "ps not found"
+      - sh: command -v awk >/dev/null 2>&1
+        msg: "awk not found"
+    cmds:
+      # -o state=,pid=,comm=: omit headers; awk groups by state
+      - ps -e -o state=,pid=,comm= | awk '{s=$1; pid=$2; $1=$2=""; sub(/^  */,""); bucket[s]=bucket[s] sprintf("  %-7s %s\n", pid, $0)} END{n=split("R S D T Z X I", order, " "); for(i=1;i<=n;i++){s=order[i]; if(bucket[s]!=""){print "== " s " =="; printf "%s", bucket[s]; print ""}} for(s in bucket){found=0; for(i=1;i<=n;i++) if(s==order[i]) found=1; if(!found){print "== " s " =="; printf "%s\n", bucket[s]}}}'
+
+  proc:ps:state:count:
+    desc: Count processes by state
+    summary: "task -g proc:ps:state:count"
+    platforms: [linux]
+    set: [pipefail]
+    preconditions:
+      - sh: command -v ps >/dev/null 2>&1
+        msg: "ps not found"
+      - sh: command -v sort >/dev/null 2>&1
+        msg: "sort not found"
+      - sh: command -v uniq >/dev/null 2>&1
+        msg: "uniq not found"
+    cmds:
+      # state= removes header; sort|uniq -c counts; sort -nr shows top states first
+      - ps -e -o state= | sort | uniq -c | sort -nr

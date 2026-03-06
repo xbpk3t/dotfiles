@@ -1,5 +1,12 @@
 {pkgs, ...}: {
+  #
+  # https://github.com/max-baz/dotfiles/blob/main/modules/common/helix.nix
+  #
+  # https://github.com/TheMaxMur/NixOS-Configuration/blob/master/home/modules/helix/default.nix
+  #
+  #
   # https://github.com/usagi-flow/evil-helix
+  #
   # https://mynixos.com/nixpkgs/package/evil-helix
 
   # https://mynixos.com/home-manager/options/programs.helix
@@ -10,6 +17,9 @@
     extraPackages = [pkgs.marksman];
 
     settings = {
+      # https://docs.helix-editor.com/master/themes.html
+      theme = "monokai";
+
       # https://docs.helix-editor.com/master/editor.html
       editor = {
         color-modes = true;

@@ -1,0 +1,18 @@
+---
+# 测试/验证相关任务（跨平台）
+
+version: '3'
+
+tasks:
+  # 从 Justfile 移植的通用 Nix 任务
+  test:
+    desc: "运行 eval 测试"
+    summary: "task -g test"
+    cmds:
+      - echo "🧪 正在运行 eval 测试..."
+      - nix eval .#evalTests --show-trace --print-build-logs --verbose
+
+  syntax-verify:
+    desc: 判断nix语法是否正确 # nix-instantiate --parse /Users/luck/Desktop/dotfiles/nix/home/bash.nix > /dev/null && echo "Bash.nix syntax is valid
+    summary: "task -g syntax-verify"
+    cmd: nix-instantiate --parse {{.CLI_ARGS}} > /dev/null && echo "Bash.nix syntax is valid

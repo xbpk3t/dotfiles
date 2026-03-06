@@ -32,6 +32,10 @@
     # terraform-mcp-server
 
     # https://mynixos.com/nixpkgs/package/mcp-k8s-go
+    #
+    # https://github.com/strowk/mcp-k8s-go
+    # https://github.com/containers/kubernetes-mcp-server
+    #
     # mcp-k8s-go
 
     # https://mynixos.com/nixpkgs/package/aks-mcp-server

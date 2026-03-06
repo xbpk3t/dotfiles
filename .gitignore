@@ -10,7 +10,6 @@ secrets/age.key
 *.age.key
 secrets/secrets_temp.yaml
 
-manifests/
 .cache/
 
 .codex/
@@ -23,3 +22,16 @@ specs/
 result
 result-*
 /.cntr/
+
+/PaaS
+/nixos-k3s
+/k3s-nix
+
+# Local scratch files
+/z/
+/zzzzz.md
+
+# For Taskfile checksum etc...
+/.task
+mac-*.md
+wake-*.sh
