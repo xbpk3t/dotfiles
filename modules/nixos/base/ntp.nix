@@ -8,6 +8,8 @@
     "ntp.tencent.com" # Tencent NTP Server
   ];
 
+  # TODO: 用 chrony 代替 ntp
+
   # NixOS 默认启用的是 systemd-timesyncd，这是 systemd 自带的一个轻量 SNTP（简化版 NTP）客户端，用来自动同步时间。NixOS 的 NTP 文档里明确说默认 NTP 实现是 systemd-timesyncd。
   # https://mynixos.com/nixpkgs/options/services.chrony
 

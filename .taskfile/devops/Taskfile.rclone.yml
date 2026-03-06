@@ -21,23 +21,15 @@ tasks:
   sync:
     internal: true
     desc: rclone sync 操作
-    vars:
-      BUCKET: ''
-      DRY_RUN_FLAG: ''
-      LOCAL_PATH: ''
     requires:
       vars: [BUCKET, LOCAL_PATH]
     cmds:
-#      - '{{.RCLONE}} sync --update --checksum --fast-list --transfers 30 --s3-upload-concurrency 30 "{{.LOCAL_PATH}}" "{{.RCLONE_REMOTE}}:{{.BUCKET}}" --stats=10s --progress {{.DRY_RUN_FLAG}}'
-      - '{{.RCLONE}} sync --update --checksum --fast-list --transfers 30 --s3-upload-concurrency 30 "{{.LOCAL_PATH}}" "{{.RCLONE_REMOTE}}:{{.BUCKET}}" --stats-one-line -v {{.DRY_RUN_FLAG}}'
+      #      - '{{.RCLONE}} sync --update --checksum --fast-list --transfers 30 --s3-upload-concurrency 30 "{{.LOCAL_PATH}}" "{{.RCLONE_REMOTE}}:{{.BUCKET}}" --stats=10s --progress {{.DRY_RUN_FLAG}}'
+      - '{{.RCLONE}} sync --update --checksum --fast-list --transfers 30 --s3-upload-concurrency 30 "{{.LOCAL_PATH}}" "{{.RCLONE_REMOTE}}:{{.BUCKET}}" --stats-one-line -v {{.EXCLUDE_FLAGS}} {{.DRY_RUN_FLAG}}'
 
   bisync:
     internal: true
     desc: rclone bisync 操作
-    vars:
-      BUCKET: ''
-      DRY_RUN_FLAG: ''
-      LOCAL_PATH: ''
     cmds:
       - '{{.RCLONE}} bisync "{{.LOCAL_PATH}}" "{{.RCLONE_REMOTE}}:{{.BUCKET}}" --create-empty-src-dirs --resync --stats-one-line -v {{.DRY_RUN_FLAG}}'
     requires:
@@ -47,10 +39,6 @@ tasks:
   check:
     internal: true
     desc: rclone check 操作
-    vars:
-      BUCKET: ''
-      DRY_RUN_FLAG: ''
-      LOCAL_PATH: ''
     cmds:
       - '{{.RCLONE}} check "{{.LOCAL_PATH}}" "{{.RCLONE_REMOTE}}:{{.BUCKET}}" --size-only --one-way {{.DRY_RUN_FLAG}}'
     requires:
@@ -60,16 +48,20 @@ tasks:
   sync-docs-images:
     desc: 同步 docs-images 到远程（用于 systemd）
     summary: "task -g rclone:sync-docs-images"
+    interactive: true # 交互任务：需要 gum confirm
     cmds:
       - task: sync
         vars:
           DRY_RUN_FLAG: ""
+          EXCLUDE_FLAGS: '--exclude ".git/**" --exclude ".idea/**" --exclude ".cache/**"' # 重要参数：排除 .git，避免同步 Git metadata
           BUCKET: "docs"
-          LOCAL_PATH: "$HOME/Desktop/docs-images"
+          LOCAL_PATH: "$HOME/Desktop/docs/docs-images"
       - echo "Execute sync-docs task success"
     preconditions:
-      - sh: test -d "$HOME/Desktop/docs-images/"
-        msg: "Directory $HOME/Desktop/docs-images does not exist"
+      - sh: command -v gum >/dev/null
+        msg: "gum not found: install gum"
+      - sh: test -d "$HOME/Desktop/docs/docs-images/"
+        msg: "Directory $HOME/Desktop/docs/docs-images does not exist"
 
 
   bisync-scratches:
