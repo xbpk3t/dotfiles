@@ -10,18 +10,23 @@ vars:
 tasks:
   default:
     desc: Run all Terraform generation tasks
+    summary: "task -g default"
     deps:
       - init
       - generate
 
   init:
     desc: Initialize the Terraform directory
+    summary: "task -g init"
     cmds:
       - mkdir -p {{.OUTPUT_DIR}}
       - terraform init {{.OUTPUT_DIR}}
 
   generate:
     desc: Generate Terraform configurations for specified Cloudflare resources
+    summary: "task -g generate"
+    vars:
+      ITEM: ''
     dir: '{{.USER_WORKING_DIR}}'
 #    silent: true
     cmds:
@@ -59,6 +64,7 @@ tasks:
 
   clean:
     desc: Clean up generated Terraform files
+    summary: "task -g tf:clean"
     cmds:
       - rm -rf {{.OUTPUT_DIR}}/*.tf
 
@@ -69,4 +75,6 @@ tasks:
   #      - terraform validate
 
   apply:
+    desc: Apply Terraform configuration with tofu
+    summary: "task -g tf:apply"
     cmd: tofu apply -auto-approve

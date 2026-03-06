@@ -1,0 +1,83 @@
+version: 1
+
+# Tool capabilities (manual source of truth)
+
+tools:
+  mermaid:
+    extension: mmd
+    diagrams:
+      - flowchart
+      - sequence
+      - class
+      - state
+      - er
+      - journey
+      - gantt
+      - pie
+      - quadrant
+      - requirement
+      - gitgraph
+      - c4
+      - mindmap
+      - timeline
+      - zenuml
+      - sankey
+      - xy-chart
+      - block
+      - packet
+      - kanban
+      - architecture
+      - radar
+      - treemap
+
+  plantuml:
+    extension: puml
+    diagrams:
+      - sequence
+      - usecase
+      - class
+      - object
+      - activity
+      - component
+      - state
+      - timing
+      - gantt
+      - mindmap
+      - deployment
+      - wbs
+      - network
+      - archimate
+      - chronology
+      - er
+      - json
+      - yaml
+      - ebnf
+      - regex
+      - sdl
+      - ditaa
+      - ui-mockup
+
+  d2:
+    extension: d2
+    diagrams:
+      - flowchart
+      - class
+      - sequence
+      - grid
+      - table
+      - architecture
+
+  pikchr:
+    extension: pikchr
+    diagrams:
+      - diagram
+
+  typst:
+    extension: typ
+    diagrams:
+      - gantt
+      - arrow-diagram
+      - chart
+      - plot
+      - table
+      - timeline # https://typst.app/universe/package/herodot/

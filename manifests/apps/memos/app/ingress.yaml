@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: memos
+  annotations:
+    # 证书由 cert-manager 颁发，按需替换 issuer 名称
+    cert-manager.io/cluster-issuer: letsencrypt-http
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: mm.lucc.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: memos
+                port:
+                  number: 5230
+  tls:
+    - hosts:
+        - mm.lucc.dev
+      # TLS Secret 名称可自定义，但需要与 cert-manager 配置一致
+      secretName: memos-tls

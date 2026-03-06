@@ -1,0 +1,25 @@
+version: 1
+
+# Default render commands (fallbacks when no tool-specific skill is available).
+# Variables: $in = source file path, $out = svg path, $outdir = output directory.
+
+renderers:
+  mermaid:
+    command: "mmdc -i $in -o $out"
+    note: "Requires mermaid-cli (mmdc)."
+
+  plantuml:
+    command: "plantuml -tsvg -o $outdir $in"
+    note: "PlantUML writes SVG into $outdir with the same stem."
+
+  d2:
+    command: "d2 $in $out"
+    note: "Use d2 built-in renderer for SVG output."
+
+  pikchr:
+    command: "pikchr $in > $out"
+    note: "pikchr outputs SVG to stdout by default."
+
+  typst:
+    command: "typst compile $in $out"
+    note: "Requires typst compiler."

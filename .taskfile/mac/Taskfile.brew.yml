@@ -27,51 +27,43 @@ version: "3"
 #- des: brew graph提供的依赖关系不是可视化的，怎么可视化查看homebrew的formulae之间的依赖关系?
 #  url: https://github.com/martido/homebrew-graph
 
+
+# [2026-02-04]
+# - 注释掉 brew bundle 相关的两个task，以及 cask-upgrade相关task
+# - 仅保留default作为public task，其他都作为internal task
+
+
 vars:
-  BREWFILE: $HOME/Desktop/dotfiles/Brewfile
+#  BREWFILE: $HOME/Desktop/dotfiles/Brewfile
 
 
 tasks:
   default:
-    desc: x
+    desc: upgrade, cleanup, info for homebrew
+    summary: "task -g default"
     cmds:
-      - task: upgrade
-      - task: cleanup
-      - task: info
-      - brew doctor
+      - task: _upgrade
+      - task: _cleanup
+      - task: _info
+#      - brew doctor
 
-  check-size:
-    cmds:
-      - git count-objects -v
-      - du -sh * | sort -h
-      - du -sh docs/* | sort -h
 
-  upgrade:
-    desc: ddd
+  _upgrade:
+    internal: true
     cmds:
       - brew update -vvv
       - brew upgrade
       - brew outdated # 更新homebrew
-      - task: cask-upgrade
+#      - task: cask-upgrade
 
-  info:
+  _info:
+    internal: true
     cmds:
       - brew config
       - brew --prefix # 用来查看bin path和cask path
 
-
-  bundle-backup:
+  _cleanup:
     internal: true
-    cmd: brew bundle dump --describe --force --file={{.BREWFILE}}
-    desc: backup brew formulae and cask to Brewfile
-
-  bundle-restore:
-    # internal: true
-    cmd: brew bundle install --file="{{.BREWFILE}}"
-    desc: install
-
-
-  cleanup:
     desc: 清除所有brew本地缓存
     cmds:
       - brew cleanup -n
@@ -79,9 +71,29 @@ tasks:
       - brew services cleanup
       - brew autoremove
 
-  cask-upgrade:
-    desc: 更新cask（也就是所有app）
-    cmds:
-      - brew cu -facy
-    preconditions:
-      - brew tap buo/cask-upgrade
+
+#  check-size:
+#    cmds:
+#      - git count-objects -v
+#      - du -sh * | sort -h
+#      - du -sh docs/* | sort -h
+
+
+#  bundle-backup:
+#    internal: true
+#    cmd: brew bundle dump --describe --force --file={{.BREWFILE}}
+#    desc: backup brew formulae and cask to Brewfile
+#
+#  bundle-restore:
+#    # internal: true
+#    cmd: brew bundle install --file="{{.BREWFILE}}"
+#    desc: install
+
+
+
+#  cask-upgrade:
+#    desc: 更新cask（也就是所有app）
+#    cmds:
+#      - brew cu -facy
+#    preconditions:
+#      - brew tap buo/cask-upgrade

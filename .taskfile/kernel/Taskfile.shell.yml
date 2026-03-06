@@ -13,11 +13,13 @@ vars:
 tasks:
   default-shell:
     desc: 显示用户的默认shell
+    summary: "task -g default-shell"
     cmds:
       - echo "用户默认的Shell {{.DEFAULT_SHELL_PATH}}"
 
   list:
     desc: 列出系统所有可用的合法shell
+    summary: "task -g list"
     interactive: true
     cmds:
       - for:
@@ -31,40 +33,52 @@ tasks:
 
   shell-env:
     desc: 查看与shell相关的环境变量
+    summary: "task -g shell-env"
     cmds:
       - echo "与Shell相关的环境变量:"
       - env | grep -i shell
 
   switch:
     desc: 临时切换当前会话的 Shell。退出（exit）后恢复原 Shell，不影响默认设置
+    summary: "task -g switch"
     cmd: exec zsh
 
   change:
     desc: 永久修改默认shell（需要重新登录生效）
+    summary: "task -g change"
+    interactive: true
     cmds:
       - chsh -s {{.SELECTED}}
     vars:
       SELECTED:
         sh: gum choose {{.SHELLS | splitLines | join " "}} # {{.SHELLS | catLines | trim}} 这里需要注意因为SHELLS返回的并非数组，而是一个多行字符串，所以需要splitLines处理为数组
         msg: 选择指定shell
-    requires:
-      vars: [SHELLS]
+    preconditions:
+      - sh: command -v gum
+        msg: gum not found
+      - sh: command -v chsh
+        msg: chsh not found
 
 
   test:
     desc: 测试bash启动时间
+    summary: "task -g test"
     interactive: true
     cmds:
       - time bash -i -c exit
       - time zsh -i -c exit
 
   start:*:*:
+    desc: "start 通配任务"
+    summary: "task -g start:<name>:<name>"
     vars:
       SERVICE: '{{index .MATCH 0}}'
       REPLICAS: '{{index .MATCH 1}}'
     cmds:
       - echo "Starting {{.SERVICE}} with {{.REPLICAS}} replicas"
   start:*:
+    desc: "start 通配任务"
+    summary: "task -g start:<name>"
     vars:
       SERVICE: '{{index .MATCH 0}}'
     cmds:

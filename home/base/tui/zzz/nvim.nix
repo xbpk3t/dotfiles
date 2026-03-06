@@ -191,6 +191,33 @@ in {
     enable = lib.mkEnableOption "Enable NVF (for Vim)";
   };
 
+  # [nvim plugins]
+  #
+  #
+  # - url: https://github.com/akinsho/toggleterm.nvim
+  # # https://mynixos.com/nixpkgs/package/vimPlugins.auto-save-nvim
+  # - url: https://github.com/okuuva/auto-save.nvim/
+
+  # - url: https://github.com/ahmedkhalf/project.nvim
+  # - url: https://github.com/mistweaverco/kulala.nvim # [7 Amazing Terminal API Tools You Need To Try](https://www.youtube.com/watch?v=eyXxEBZMVQI)
+  # - url: https://github.com/jellydn/hurl.nvim/
+  # - url: https://github.com/mfussenegger/nvim-dap
+  # - url: https://github.com/loctvl842/monokai-pro.nvim
+  # - url: https://github.com/yetone/avante.nvim
+  # - url: https://github.com/dstein64/nvim-scrollview
+  # - url: https://github.com/folke/flash.nvim
+  # - url: https://github.com/kylechui/nvim-surround
+  # - url: https://github.com/folke/zen-mode.nvim
+  # - url: https://github.com/nvim-lualine/lualine.nvim
+  #   score: 5
+  # - url: https://github.com/ThePrimeagen/harpoon
+  # - url: https://github.com/nvim-neo-tree/neo-tree.nvim
+  #   score: 5
+  # - url: https://github.com/nvim-pack/nvim-spectre
+  # - url: https://github.com/nvim-telescope/telescope.nvim
+  #   score: 5
+  # - url: https://github.com/ibhagwan/fzf-lua
+
   # MAYBE: [2025-11-13] 研究一下 Telescope 的 advanced usage 以及相关插件
   # PLAN: 把yazi.nvim 直接做到 toggleterm　里面
   config = mkIf cfg.enable {
@@ -1066,12 +1093,20 @@ in {
               "vim-dadbod" = {
                 package = vim-dadbod;
                 lazy = true;
-                cmd = ["DB" "DBUI" "DBUIToggle" "DBUIAddConnection"];
+                cmd = [
+                  "DB"
+                  "DBUI"
+                  "DBUIToggle"
+                  "DBUIAddConnection"
+                ];
               };
 
               "vim-dadbod-ui" = {
                 package = vim-dadbod-ui;
-                cmd = ["DBUI" "DBUIToggle"];
+                cmd = [
+                  "DBUI"
+                  "DBUIToggle"
+                ];
                 keys = [
                   {
                     key = "<leader>D";

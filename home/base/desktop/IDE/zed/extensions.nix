@@ -73,7 +73,13 @@
   #
   # 用于 JS/TS 的 lint 与格式化
   # 相较 ESLint 快很多（50–100x 这个量级）
-  # "oxc" = true;
+  "oxc" = true;
+
+  # https://github.com/gabeins/zed-mermaid
+  "mermaid" = true;
+
+  # https://github.com/gabeins/zed-plantuml
+  "plantuml" = true;
 
   # "catppuccin"
   # "material-icon-theme"

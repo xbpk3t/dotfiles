@@ -1,0 +1,15 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: grafana-tls
+  namespace: monitoring
+spec:
+  # What：Grafana 公网证书。
+  # Why：解决 Cloudflare 526（源站证书无效）。
+  secretName: grafana-tls
+  commonName: g.lucc.dev
+  dnsNames:
+    - g.lucc.dev
+  issuerRef:
+    name: letsencrypt-http
+    kind: ClusterIssuer

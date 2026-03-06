@@ -5,13 +5,15 @@ vars:
   SCRATCH_NOTEBOOK: scratch
 
 
+# FIXME[2026-01-26](fzf): 用 fzf 代替 gum filter. 现在这个gum也能用，但是无法直接preview里面的内容。目前是title和content都堆在一起了。但是fzf现在有问题，fzf会有两层，需要退出两次才能回到terminal，不确定怎没处理
+
 tasks:
   _nb:ensure:
     internal: true
     silent: true
     interactive: true
     preconditions:
-      - sh: command -v nb >/dev/null 2>&1
+      - sh: command -v nb
         msg: "nb not found"
 
   _nb:ensure_picker:
@@ -19,11 +21,12 @@ tasks:
     silent: true
     interactive: true
     preconditions:
-      - sh: command -v gum >/dev/null 2>&1
+      - sh: command -v gum
         msg: "gum is required"
 
   new:
     desc: "Create a scratch file and open in Zed"
+    summary: "task -g new SCRATCH_NOTEBOOK=[scratch]"
     silent: true
     interactive: true
     requires:
@@ -36,6 +39,7 @@ tasks:
 
   list:
     desc: "List scratch files and open selection in Zed"
+    summary: "task -g list SCRATCH_NOTEBOOK=[scratch]"
     silent: true
     interactive: true
     requires:
@@ -48,6 +52,7 @@ tasks:
 
   search:
     desc: "Search scratch files and open selection in Zed"
+    summary: "task -g search SCRATCH_NOTEBOOK=[scratch]"
     silent: true
     interactive: true
     requires:
@@ -60,6 +65,7 @@ tasks:
 
   rename:
     desc: "Rename a scratch file"
+    summary: "task -g rename SCRATCH_NOTEBOOK=[scratch]"
     silent: true
     interactive: true
     requires:
@@ -72,6 +78,7 @@ tasks:
 
   delete:
     desc: "Delete a scratch file"
+    summary: "task -g delete SCRATCH_NOTEBOOK=[scratch]"
     silent: true
     interactive: true
     requires:

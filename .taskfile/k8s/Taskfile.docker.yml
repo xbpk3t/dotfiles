@@ -58,16 +58,33 @@ tasks:
   # ========================
   run-container:
     desc: 启动容器（后台模式）
+    summary: "task -g run-container APP_NAME=<name> IMAGE=<image> PORT=<port>"
+    vars:
+      APP_NAME: ''
+      IMAGE: ''
+      PORT: ''
+    requires:
+      vars: [APP_NAME, IMAGE, PORT]
     cmds:
       - docker run -d --name {{.APP_NAME}} -p {{.PORT}}:80 {{.IMAGE}}
 
   stop-container:
     desc: 停止指定容器
+    summary: "task -g stop-container CONTAINER=<name>"
+    vars:
+      CONTAINER: ''
+    requires:
+      vars: [CONTAINER]
     cmds:
       - docker stop {{.CONTAINER}}
 
   rm-container:
     desc: 删除容器（强制删除运行中容器）
+    summary: "task -g rm-container CONTAINER=<name>"
+    vars:
+      CONTAINER: ''
+    requires:
+      vars: [CONTAINER]
     cmds:
       - docker rm -f {{.CONTAINER}}
 
@@ -76,29 +93,51 @@ tasks:
   # ========================
   container-stats:
     desc: 查看容器资源占用（格式化输出）
+    summary: "task -g container-stats"
+    vars:
+      CONTAINER: '{{.CONTAINER | default ""}}'
+      CPUPerc: '{{"{{.CPUPerc}}"}}'
+      MemUsage: '{{"{{.MemUsage}}"}}'
+      Name: '{{"{{.Name}}"}}'
     cmds:
       - docker stats --no-stream --format 'table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}' {{.CONTAINER}}
 
   container-logs:
     desc: 实时跟踪容器日志
+    summary: "task -g container-logs CONTAINER=<name>"
+    vars:
+      CONTAINER: ''
+    requires:
+      vars: [CONTAINER]
     cmds:
       - docker logs -f {{.CONTAINER}}
 
   inspect-ip:
     desc: 查看所有容器IP地址
+    summary: "task -g inspect-ip"
+    vars:
+      IPAddress: '{{"{{.IPAddress}}"}}'
+      Name: '{{"{{.Name}}"}}'
     cmds:
       - docker inspect --format='{{.Name}} - {{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(docker ps -aq)
 
   exit-code:
     desc: 检查容器退出码
+    summary: "task -g exit-code CONTAINER=<name>"
+    vars:
+      CONTAINER: ''
+      ExitCode: '{{"{{.State.ExitCode}}"}}'
+    requires:
+      vars: [CONTAINER]
     cmds:
-      - docker inspect --format='{{.State.ExitCode}}' {{.CONTAINER}}
+      - docker inspect --format='{{.ExitCode}}' {{.CONTAINER}}
 
   # ========================
   # 系统清理与优化
   # ========================
   system-clean:
     desc: 综合清理（容器/镜像/卷/网络）
+    summary: "task -g system-clean"
     cmds:
       - docker system prune -af
       - docker volume prune -f
@@ -106,12 +145,23 @@ tasks:
 
   image-clean:
     desc: 删除悬空镜像和指定镜像
+    summary: "task -g image-clean IMAGE=<name>"
+    vars:
+      IMAGE: ''
+    requires:
+      vars: [IMAGE]
     cmds:
       - docker image prune -a -f
       - docker rmi $(docker images -q {{.IMAGE}})
 
   log-clean:
     desc: 清理容器日志（需重启容器生效）
+    summary: "task -g log-clean CONTAINER=<name>"
+    vars:
+      CONTAINER: ''
+      LogPath: '{{"{{.LogPath}}"}}'
+    requires:
+      vars: [CONTAINER]
     cmds:
       - truncate -s 0 $(docker inspect --format='{{.LogPath}}' {{.CONTAINER}})
 
@@ -120,11 +170,21 @@ tasks:
   # ========================
   image-backup:
     desc: 备份具名卷数据
+    summary: "task -g image-backup VOLUME=<name>"
+    vars:
+      VOLUME: ''
+    requires:
+      vars: [VOLUME]
     cmds:
       - docker run --rm -v {{.VOLUME}}:/data -v $(pwd):/backup alpine tar cvf /backup/backup.tar /data
 
   image-history:
     desc: 查看镜像构建历史
+    summary: "task -g image-history IMAGE=<name>"
+    vars:
+      IMAGE: ''
+    requires:
+      vars: [IMAGE]
     cmds:
       - docker history {{.IMAGE}}
 
@@ -134,6 +194,8 @@ tasks:
   #- url: https://github.com/bcicen/ctop
   #  des: top in containers
   ctop:
+    desc: "ctop 任务"
+    summary: "task -g ctop"
     cmds:
 
 
@@ -146,38 +208,44 @@ tasks:
   #  des: image layer. 镜像分析工具，查看各层信息
   zzz:
     desc: "完整镜像优化流程"
+    summary: "task -g zzz"
     cmds:
       - task: lint
       - task: build
       - task: scan
       - task: analyze
       - task: optimize
-        if: {{eq .OPTIMIZE "true"}}
+#        if: {{eq .OPTIMIZE "true"}}
       - task: verify
 
   lint:
     desc: "检查 Dockerfile 规范"
+    summary: "task -g lint"
     cmds:
       - hadolint {{.DOCKERFILE}}
     silent: true
 
   build:
     desc: "构建 Docker 镜像"
+    summary: "task -g build"
     cmds:
       - docker build -t {{.IMAGE_NAME}}:{{.IMAGE_TAG}} -f {{.DOCKERFILE}} .
 
   scan:
     desc: "安全漏洞扫描"
+    summary: "task -g scan"
     cmds:
       - trivy image --ignore-unfixed --severity CRITICAL {{.IMAGE_NAME}}:{{.IMAGE_TAG}}
 
   analyze:
     desc: "分析镜像层结构"
+    summary: "task -g analyze"
     cmds:
       - dive {{.IMAGE_NAME}}:{{.IMAGE_TAG}}
 
   optimize:
     desc: "优化镜像大小"
+    summary: "task -g optimize"
     cmds:
       - slim build --target {{.IMAGE_NAME}}:{{.IMAGE_TAG}} --tag {{.IMAGE_NAME}}:slim-{{.IMAGE_TAG}}
     postcmds:
@@ -186,10 +254,14 @@ tasks:
   # [goldmann/docker-squash：Docker 镜像压缩工具 --- goldmann/docker-squash: Docker image squashing tool](https://github.com/goldmann/docker-squash)
   squash:
     desc: 【合并层】减少层数，去除层之间的冗余文件
+    summary: "task -g squash"
 
 
   verify:
     desc: "验证最终镜像"
+    summary: "task -g verify"
+    vars:
+      Size: '{{"{{.Size}}"}}'
     cmds:
       - docker images {{.IMAGE_NAME}}
       - echo "优化后镜像大小:"
@@ -198,6 +270,7 @@ tasks:
   # [composerize/composerize：🏃→ 🎼 docker 运行 asdlksjfksdf > docker-composerize up --- composerize/composerize: 🏃→🎼 docker run asdlksjfksdf > docker-composerize up](https://github.com/composerize/composerize)
   composerize:
     desc: 把 Dockerfile 转为 dc
+    summary: "task -g composerize"
 
 
 
@@ -207,6 +280,9 @@ tasks:
   check-mem:
     silent: true
     desc: 查看指定容器的内存占用详情
+    summary: "task -g check-mem"
+    vars:
+      Id: '{{"{{.Id}}"}}'
     cmd: |
       CONTAINER_NAME={{.CLI_ARGS}}
       if [ -z "$CONTAINER_NAME" ]; then
@@ -245,6 +321,9 @@ tasks:
   check-cpu:
     silent: true
     desc: 计算容器CPU利用率（采样1秒）
+    summary: "task -g check-cpu"
+    vars:
+      Id: '{{"{{.Id}}"}}'
     cmd: |
       CONTAINER_NAME={{.CLI_ARGS}}
       if [ -z "$CONTAINER_NAME" ]; then
@@ -281,6 +360,13 @@ tasks:
   # docker 里怎么抓包？ # 三条命令，先docker inspect获取容器id，然后 nsenter进入容器空间，最后用tcpdump抓包指定网卡
   capture:
     desc: 在Docker容器网络命名空间中抓包
+    summary: "task -g capture CONTAINER=<name> [TCPDUMP_ARGS=<args>]"
+    vars:
+      CONTAINER: ''
+      TCPDUMP_ARGS: '{{.TCPDUMP_ARGS | default "-i eth0 -w capture.pcap"}}'
+      STATE_PID: '{{"{{.State.Pid}}"}}'
+    requires:
+      vars: [CONTAINER]
     env:
       # 默认抓包参数，可被覆盖
       TCPDUMP_ARGS: '-i eth0 -w capture.pcap'
@@ -292,7 +378,7 @@ tasks:
           echo "错误：容器 '{{.CONTAINER}}' 不存在或未运行"
           exit 1
         fi
-        export PID=$(docker inspect -f '{{.State.Pid}}' "{{.CONTAINER}}")
+        export PID=$(docker inspect -f '{{.STATE_PID}}' "{{.CONTAINER}}")
 
       # 执行抓包
       - |

@@ -1,0 +1,27 @@
+---
+version: '3'
+
+tasks:
+  default:
+    desc: tracepath (IPv4, no DNS)
+    summary: "task -g default HOST=<host>"
+    vars:
+      HOST: ''
+    platforms: [linux]
+    requires:
+      vars: [HOST]
+    cmds:
+      # -n: 不做 DNS 解析，输出更稳定
+      - tracepath -n {{.HOST}}
+
+  v6:
+    desc: tracepath (IPv6, no DNS)
+    summary: "task -g v6 HOST=<host>"
+    vars:
+      HOST: ''
+    platforms: [linux]
+    requires:
+      vars: [HOST]
+    cmds:
+      # -n: 不做 DNS 解析，输出更稳定
+      - tracepath6 -n {{.HOST}}
