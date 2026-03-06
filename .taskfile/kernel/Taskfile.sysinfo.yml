@@ -1,0 +1,44 @@
+---
+version: "3"
+
+includes:
+  memory: Taskfile.memory.yml
+
+tasks:
+
+  # TODO: 感觉应该直接通过import其他task，然后这里直接加载相应的task
+  sysinfo:
+    desc: "sysinfo 任务"
+    summary: "task -g sysinfo"
+    platforms: [linux]
+    cmds:
+      - uname -a
+      - cat /etc/os-release
+      # CPU型号
+      - lscpu
+      # CPU核心数
+      - nproc
+      - cat /proc/cpuinfo
+      - cat /proc/stat
+      - grep 'cpu ' /proc/stat
+      - uptime
+      # 物理内存 + swap（统一复用 memory 模块）
+      - task: memory:summary
+      - df -h
+
+      # TCP连接数
+      - ss -t | wc -l
+      # UDP连接数
+      - ss -u | wc -l
+
+
+      # 默认队列算法
+      - sysctl -n net.core.default_qdisc
+
+      - curl -s --max-time 5 ipinfo.io
+
+      # DNS（nameserver 列表）
+      - cat /etc/resolv.conf
+
+      # 时区
+      - timedatectl show -p Timezone --value

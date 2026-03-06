@@ -1,0 +1,65 @@
+---
+version: "3"
+
+vars:
+  # PID: 目标进程 PID
+  PID: '{{.PID | default "1"}}'
+  # CGROUP_PATH: cgroup v2 在 /sys/fs/cgroup 下的相对路径
+  CGROUP_PATH: '{{.CGROUP_PATH | default "system.slice"}}'
+
+tasks:
+  proc:cgroup:detect:
+    desc: Detect cgroup version (v1/v2)
+    summary: "task -g proc:cgroup:detect"
+    platforms: [linux]
+    set: [pipefail]
+    preconditions:
+      - sh: command -v stat >/dev/null 2>&1
+        msg: "stat not found"
+      - sh: command -v mount >/dev/null 2>&1
+        msg: "mount not found"
+    cmds:
+      - stat -fc %T /sys/fs/cgroup
+      - mount | grep -E 'cgroup2?|/sys/fs/cgroup'
+
+  proc:cgroup:proc:
+    desc: Show cgroup membership for PID
+    summary: "task -g proc:cgroup:proc [PID=1]"
+    platforms: [linux]
+    preconditions:
+      - sh: test -r /proc/{{.PID}}/cgroup
+        msg: "/proc/{{.PID}}/cgroup not readable"
+      - sh: command -v systemd-cgls >/dev/null 2>&1
+        msg: "systemd-cgls not found (systemd required)"
+    cmds:
+      - cat /proc/{{.PID}}/cgroup
+      - systemd-cgls
+
+  proc:cgroup:v2:controllers:
+    desc: Show cgroup v2 controllers
+    summary: "task -g proc:cgroup:v2:controllers"
+    platforms: [linux]
+    preconditions:
+      - sh: test -r /sys/fs/cgroup/cgroup.controllers
+        msg: "/sys/fs/cgroup/cgroup.controllers not readable"
+    cmds:
+      - cat /sys/fs/cgroup/cgroup.controllers
+      - cat /sys/fs/cgroup/cgroup.subtree_control
+
+  proc:cgroup:v2:stats:
+    desc: Show cgroup v2 limits for CGROUP_PATH
+    summary: "task -g proc:cgroup:v2:stats [CGROUP_PATH=system.slice]"
+    platforms: [linux]
+    requires:
+      vars: [CGROUP_PATH]
+    preconditions:
+      - sh: test -r /sys/fs/cgroup/{{.CGROUP_PATH}}/cpu.max
+        msg: "/sys/fs/cgroup/{{.CGROUP_PATH}}/cpu.max not readable"
+      - sh: test -r /sys/fs/cgroup/{{.CGROUP_PATH}}/memory.max
+        msg: "/sys/fs/cgroup/{{.CGROUP_PATH}}/memory.max not readable"
+      - sh: test -r /sys/fs/cgroup/{{.CGROUP_PATH}}/io.max
+        msg: "/sys/fs/cgroup/{{.CGROUP_PATH}}/io.max not readable"
+    cmds:
+      - cat /sys/fs/cgroup/{{.CGROUP_PATH}}/cpu.max
+      - cat /sys/fs/cgroup/{{.CGROUP_PATH}}/memory.max
+      - cat /sys/fs/cgroup/{{.CGROUP_PATH}}/io.max

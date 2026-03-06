@@ -1,0 +1,67 @@
+# see https://kube-vip.io/docs/usage/cloud-provider/
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kubevip
+  namespace: kube-system
+data:
+  cidr-global: "${CONFIG_KUBE_VIP_IP}/32"
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kube-vip
+  namespace: networking
+  annotations:
+    meta.helm.sh/release-namespace: "networking"
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: kube-vip
+      version: 0.9.1
+      sourceRef:
+        kind: HelmRepository
+        name: kube-vip-charts
+        namespace: flux-system
+
+  values:
+    config:
+      address: &address "${CONFIG_KUBE_VIP_IP}"
+    env:
+      # vip_interface: "${CONFIG_KUBE_VIP_INTERFACE}" # auto detect
+      vip_leaderelection: "false" # control plane
+      cp_enable: "false" # control plane
+      svc_election: "true"
+      address: *address
+      vip_loglevel: "4"
+      vip_leaseduration: "300"
+      vip_renewdeadline: "60"
+      vip_retryperiod: "5"
+    resources:
+      limits:
+        cpu: 200m
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kube-vip-cloud-provider
+  namespace: networking
+  annotations:
+    meta.helm.sh/release-namespace: "networking"
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: kube-vip-cloud-provider
+      version: 0.2.9
+      sourceRef:
+        kind: HelmRepository
+        name: kube-vip-charts
+        namespace: flux-system

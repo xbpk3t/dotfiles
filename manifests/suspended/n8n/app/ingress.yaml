@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: n8n
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-http
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: n8n.lucc.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: n8n
+                port:
+                  number: 5678
+  tls:
+    - hosts:
+        - n8n.lucc.dev
+      secretName: n8n-tls

@@ -249,6 +249,7 @@ tasks:
   default:
     silent: true
     desc: "Run cleanup for all services"
+    summary: "task -g default"
     vars:
       SERVICES: *SERVICES
     cmds:
@@ -269,6 +270,7 @@ tasks:
     silent: true
     interactive: true
     desc: "Execute cleanup for a specific task"
+    summary: "task -g files"
     preconditions:
       - sh: 'test -n "{{.SERVICES | has .SERVICE}}"'
         msg: "Error: SERVICE is required"
@@ -291,6 +293,7 @@ tasks:
 
   cron-task:
     desc: "Run scheduled system cleanup"
+    summary: "task -g cron-task"
     vars:
       TIMESTAMP:
         sh: date +"%Y-%m-%d %H:%M:%S"

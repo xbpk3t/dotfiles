@@ -1,0 +1,15 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: tinyauth
+  namespace: flux-system
+spec:
+  path: "./manifests/core/authentication/tinyauth/app"
+  dependsOn:
+    - name: traefik
+    - name: volsync
+  postBuild:
+    substitute:
+      APP_NAME: tinyauth
+      APP_NAMESPACE: authentication
+      PVC_CAPACITY: "1Gi"

@@ -1,7 +1,7 @@
 ---
 title: colmena
 status: deprecated # active | deprecated | archived
-owner: "@lucas"
+author: lucas
 last_reviewed: 2026-01-21
 deprecated_since: 2026-01-21
 adr: deploy-rs-migration.md # 只要是 status != active 的文档 必须有 reason + replacement 或 adr

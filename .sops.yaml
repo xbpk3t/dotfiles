@@ -15,3 +15,10 @@ creation_rules:
           - *age_key
     # Don't encrypt the entire file, only specific keys
     unencrypted_suffix: _unencrypted
+  # Rule for SOPS secrets under manifests
+  - path_regex: manifests/.*\.sops\.yaml$
+    key_groups:
+      - age:
+          - *age_key
+    # 仅加密 data/stringData，保留结构可读
+    encrypted_regex: '^(data|stringData)$'

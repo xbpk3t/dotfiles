@@ -17,6 +17,7 @@ resources:
   - charts/fairwinds-charts.yaml
   - charts/gitea-charts.yaml
   - charts/grafana-charts.yaml
+  - charts/headlamp-charts.yaml
   - charts/harbor-charts.yaml
   - charts/harbor-container-webhook-charts.yaml
   - charts/hashicorp-charts.yaml

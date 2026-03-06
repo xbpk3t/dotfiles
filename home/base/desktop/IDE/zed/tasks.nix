@@ -6,10 +6,10 @@
     "args" = [
       "--vimgrep" # 输出包含 行/列 的格式，便于跳转
       "--hyperlink-format=file://{path}:{line}:{column}" # 生成带行列的超链接
-      "-e TODO:" # 仅匹配带冒号的 TODO:
-      "-e FIXME:" # 仅匹配带冒号的 FIXME:
-      "-e PLAN:" # 仅匹配带冒号的 PLAN:
-      "-e MAYBE:" # 仅匹配带冒号的 MAYBE:
+      "-e TODO:"
+      "-e FIXME:"
+      "-e PLAN:"
+      "-e MAYBE:"
       "." # 搜索起点（当前工作区根目录）
     ];
     "cwd" = "\${ZED_WORKTREE_ROOT}"; # 在当前工作区根目录执行

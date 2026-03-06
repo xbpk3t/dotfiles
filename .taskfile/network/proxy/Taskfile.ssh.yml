@@ -1,0 +1,101 @@
+---
+version: '3'
+
+
+# sshpass -p '<pass>' ssh -t -o StrictHostKeyChecking=no luck@192.168.71.7 'cd /home/luck/nix-config && echo "<pass>" | sudo -S nixos-rebuild switch --flake .#nixos-ws 2>&1 | tail -100'
+
+# TODO: 需要判断本地是否已经有 id_ed25519 这套东西了，如果已经有了就没必要再生成了，可以直接使用。讲道理，这个东西应该是跟机器本身绑定的。
+
+env:
+  SSH_KEY_TYPE: ed25519
+  SSH_KEY_DIR: ~/.ssh
+
+
+tasks:
+
+  setup-ssh:
+    desc: Setup SSH for a new host
+    summary: "task -g setup-ssh"
+    cmds:
+      - task: ssh:generate-key
+      - task: ssh:copy-key
+      - task: ssh:set-permissions
+
+  # 默认使用 rsa 算法生成key，但是建议使用 ed25519算法，更安全更快。使用 -C 来标识，比如说github就标识gh，我通常直接把 identifier 和 passphrase密码 设置为相同的，防止忘掉。产生公钥与私钥对，其中id_rsa 私钥，保留不动即可，后续 ssh 命令会自动读取此文件。id_rsa.pub 公钥，此文件需要被保存至目标服务器，用作验证。
+  generate-key:
+    desc: 生成 SSH 密钥对（task -g ssh:generate-key HOST_ALIAS=github）
+    summary: "task -g generate-key HOST_ALIAS=<name>"
+    vars:
+      HOST_ALIAS: '{{.HOST_ALIAS | default ""}}'
+      SSH_KEY_DIR: '{{.SSH_KEY_DIR | default "~/.ssh"}}'
+      SSH_KEY_TYPE: '{{.SSH_KEY_TYPE | default "ed25519"}}'
+    requires:
+      vars: [HOST_ALIAS]
+    cmds:
+      - ssh-keygen -t {{.SSH_KEY_TYPE}} -C "{{.HOST_ALIAS}}" -f {{.SSH_KEY_DIR}}/id_{{.HOST_ALIAS}}
+  # ssh-keygen -t ed25519 -f my_github_ed25519  -C "me@github"
+  # ssh-keygen -t ed25519 -f my_gitee_ed25519   -C "me@gitee" # 我在 Gitee
+  # ssh-keygen -t ed25519 -f my_gitlab_ed25519  -C "me@gitlab" # 我在 GitLab
+  # ssh-keygen -t ed25519 -f my_company_ed25519 -C "email@example.com" # 我在企业
+  # 产生公钥与私钥对
+  # id_rsa 私钥，保留不动即可，后续 ssh 命令会自动读取此文件。
+  # id_rsa.pub 公钥，此文件需要被保存至目标服务器，用作验证。
+
+
+
+  # 上传公钥到目标服务器（将本机的公钥复制到远程机器的authorized_keys文件中）
+  # 相当于 pbcopy命令。
+  # ⚠️ 复制之后最好在服务端验证一下。
+  copy-key:
+    desc: 上传公钥到目标服务器（task -g ssh:copy-key ）
+    summary: "task -g copy-key HOST=<host> HOST_ALIAS=<name>"
+    vars:
+      HOST: '{{.HOST | default ""}}'
+      HOST_ALIAS: '{{.HOST_ALIAS | default ""}}'
+      SSH_KEY_DIR: '{{.SSH_KEY_DIR | default "~/.ssh"}}'
+    requires:
+      vars: [HOST, HOST_ALIAS]
+    cmds:
+      - ssh-copy-id -i {{.SSH_KEY_DIR}}/id_{{.HOST_ALIAS}}.pub {{.USER}}@{{.HOST}}
+  #  ssh-copy-id <user>@<ip>
+  #  # 指定 pub
+  #  ssh-copy-id -i <~/.ssh/id_rsa.pub> <user>@<ip>
+
+
+
+  # 在 客户端 设置权限
+  # 修改 known_hosts文件 的权限
+  # 修改 私钥和公钥 的权限
+  set-permissions:
+    desc: Set SSH file permissions
+    summary: "task -g set-permissions HOST_ALIAS=<name>"
+    vars:
+      HOST_ALIAS: '{{.HOST_ALIAS | default ""}}'
+      SSH_KEY_DIR: '{{.SSH_KEY_DIR | default "~/.ssh"}}'
+    requires:
+      vars: [HOST_ALIAS]
+    cmds:
+      - chmod 755 {{.SSH_KEY_DIR}}
+      - chmod 600 {{.SSH_KEY_DIR}}/id_{{.HOST_ALIAS}}
+      - chmod 600 {{.SSH_KEY_DIR}}/id_{{.HOST_ALIAS}}.pub
+      - chmod 644 {{.SSH_KEY_DIR}}/known_hosts
+
+
+  verify:
+    desc: "task -g ssh:verify PPK_PATH=/etc/ssh/github/private_key"
+    summary: "task -g verify PPK_PATH=<path>"
+    vars:
+      PPK_PATH: '{{.PPK_PATH | default ""}}'
+    requires:
+      vars: [PPK_PATH]
+    cmd: ssh-keygen -y -e -f {{.PPK_PATH}} >/dev/null && echo "格式合法" || echo "仍不合法"
+
+
+  clear:
+    desc: 从 $HOME/.ssh/known_hosts 里删除旧记录 # 之前一直是直接删除掉整个文件的，实际上可以通过该命令只删除指定host，不影响其他host
+    summary: "task -g clear HOST=<host>"
+    vars:
+      HOST: '{{.HOST | default ""}}'
+    requires:
+      vars: [HOST]
+    cmd: ssh-keygen -R {{.HOST}}

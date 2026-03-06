@@ -98,6 +98,7 @@ tasks:
 
   clean:
     desc: "Clean the go binary"
+    summary: "task -g clean"
     cmds:
       - echo "Cleaning..."
       - rm -f coverage.*
@@ -106,6 +107,7 @@ tasks:
 
   generate:
     desc: "Generate the go code"
+    summary: "task -g generate"
     cmds:
       - echo "Generating..."
       - go generate ./...
@@ -114,6 +116,7 @@ tasks:
 
   vet:
     desc: "Vet the go code"
+    summary: "task -g vet"
     cmds:
       - echo "Vetting..."
       - go vet ./...
@@ -122,6 +125,7 @@ tasks:
 
   fmt:
     desc: "Format the go code"
+    summary: "task -g fmt"
     cmds:
       - echo "Formatting..."
       - go fmt ./...
@@ -130,6 +134,7 @@ tasks:
 
   lint:
     desc: "Lint the go code"
+    summary: "task -g lint"
     cmds:
       - echo "Linting..."
       - golangci-lint run ./...
@@ -139,6 +144,7 @@ tasks:
 
   test:
     desc: "Test the go code"
+    summary: "task -g test"
     cmds:
       - echo "Testing..."
       - go test ./...
@@ -149,6 +155,7 @@ tasks:
   # [qiniu/goc: A Comprehensive Coverage Testing System for The Go Programming Language](https://github.com/qiniu/goc) [系统测试中的Go代码覆盖率统计](https://tech.qimao.com/test/)
   test-coverage:
     desc: "Test the go code with coverage"
+    summary: "task -g test-coverage"
     cmds:
       - echo "Generating test coverage..."
       - set -o pipefail # 同时使用 tparse 和覆盖率检测
@@ -161,6 +168,7 @@ tasks:
 
   tidy:
     desc: "Tidy the go code"
+    summary: "task -g tidy"
     cmds:
       - echo "Tidying..."
       - go mod tidy
@@ -169,6 +177,7 @@ tasks:
 
   gosec:
     desc: "Run gosec on the go code"
+    summary: "task -g gosec"
     cmds:
       - echo "Running gosec..."
       - gosec ./...
@@ -177,6 +186,7 @@ tasks:
 
   update:
     desc: "Update the go dependencies"
+    summary: "task -g update"
     cmds:
       - echo "Updating dependencies..."
       - go get -u ./...
@@ -185,6 +195,8 @@ tasks:
 
 
   pre-install:
+    desc: "pre install 任务"
+    summary: "task -g pre-install"
     cmds:
       - go install github.com/dkorunic/betteralign/cmd/@latest
     preconditions:
@@ -193,6 +205,7 @@ tasks:
 
   pprof:
     desc: "执行多步骤性能分析"
+    summary: "task -g pprof"
     cmds:
       # 1. 全局瓶颈定位
       - task: analyze-top
@@ -202,16 +215,26 @@ tasks:
       - task: analyze-focus func=FindLoops
 
   analyze-top: # 输出 **`top10 -cum` 结果**，识别累积耗时最高的函数
+    desc: 输出 CPU pprof 累积耗时 Top10 函数
+    summary: "task -g go:analyze-top"
     cmds:
       - echo "==== 累积耗时 Top10 函数 ===="
       - go tool pprof -top -cum cpu.pprof | head -20
 
   analyze-web: # 打开**全局调用图**，可视化函数依赖关系
+    desc: 生成并打开 CPU pprof 全局调用图
+    summary: "task -g go:analyze-web"
     cmds:
       - echo "==== 生成全局调用图 (web) ===="
       - go tool pprof -web cpu.pprof
 
   analyze-focus: # **组合使用 `list` 和 `web`**，聚焦分析特定函数（如 `FindLoops`）的代码行和子图
+    desc: 聚焦分析指定函数的 CPU pprof 调用子图
+    summary: "task -g go:analyze-focus func=FindLoops"
+    vars:
+      func: '{{.func}}'
+    requires:
+      vars: [func]
     cmds:
       - echo "==== 分析特定函数 {{.func}} ===="
       # 代码行级分析
@@ -221,18 +244,21 @@ tasks:
 
   swagger:
     desc: Generate code of Swagger 2.0 documentation
+    summary: "task -g swagger"
     silent: true
     cmds:
       - swag init
 
   swagger-format:
     desc: Format Swagger comments in Go code
+    summary: "task -g swagger-format"
     silent: true
     cmds:
       - swag fmt
 
   swagger-open:
     desc: Open Swagger documentation in a browser
+    summary: "task -g swagger-open"
     silent: true
     cmds:
       - cmd: open http://{{.SITE}}/swagger/index.html
@@ -245,15 +271,19 @@ tasks:
   #  des: 专门用来打包golang应用容器的image的工具，被很多k8s生态下的主流OSS使用
   ko:
     desc: 打包golang应用的image
+    summary: "task -g ko"
 
   # [PaulXu-cn/go-mod-graph-chart: Draw graphs through GO MOD GRAPH output](https://github.com/PaulXu-cn/go-mod-graph-chart) 怎么快速定位 pkg冲突问题? gmchart非常实用，每次遇到pkg conflict的时候，就很抓狂，你根本不知道到底是哪个indirect的pkg冲突了。用gmchart就可以快速定位具体是哪个pkg的version问题。
   modChart:
+    desc: "modChart 任务"
+    summary: "task -g modChart"
     cmd: go mod graph | gmchart
 
 
   # [icholy/gomajor: Go tool for major version upgrades](https://github.com/icholy/gomajor) go get -u 主要负责升级到最新的 minor 或 patch 版本，而 gomajor 专门设计用来处理 major 版本升级的独特挑战。
   gomajor:
     desc: 用来升级golang应用的 Major Version
+    summary: "task -g gomajor"
     cmds:
       - gomajor list
       - gomajor get all
@@ -263,10 +293,14 @@ tasks:
 
   # 【gopls/modernize】 # [11个现代Go特性：用gopls/modernize让你的代码焕然一新 | Tony Bai](https://tonybai.com/2025/04/15/embrace-modern-go-style-with-gopls-modernize/)
   modernize:
+    desc: "modernize 任务"
+    summary: "task -g modernize"
     dir: '{{.USER_WORKING_DIR}}'
     cmds:
       - modernize -fix ./...
 
   # [quasilyte/qbenchstat: My personal, slightly improved version of benchstat utility](https://github.com/quasilyte/qbenchstat) Better benchstat. Support "Colored output" and "significance test". 单次的基准测试，往往没有统计意义，所以我们需要使用 benchstat 工具进行一组基准测试，用来查看基准值的稳定程度
   benchstat:
+    desc: "benchstat 任务"
+    summary: "task -g benchstat"
     cmd:
