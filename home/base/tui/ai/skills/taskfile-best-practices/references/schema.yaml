@@ -7,14 +7,16 @@ schema:
 
   - name: alias
 
+
   - name: deps
     desc: 任务执行前的依赖
     notes:
+      - "看起来跟 task: xxx 跟类似，无非是显式执行还是隐式执行，二者也都需要includes才能执行task，但是二者的核心区别在于【内外】，或者说 是执行顺序不同。cmds是任务执行本身，而deps则是任务执行之前需要做的，否则无法执行该task"
       - deps 与 cmds 的核心区别在于执行顺序
       - deps 是前置执行，cmds 是任务本身
 
   - name: desc
-    desc: 控制是否展示在 help 里
+    desc: 用来控制是否展示在 help 里（如果想要在help里展示，则是required字段）
 
   - name: if
     desc: 判断是否执行该 task
@@ -28,7 +30,7 @@ schema:
 
   - name: preconditions
     score: 5
-    desc: 输入验证、参数校验、环境依赖检查
+    desc: 【输入验证】任务能否执行 参数校验、环境依赖检查（比如k8s版本是否符合task执行要求）、文件是否存在
     notes:
       - 适合复杂校验：命令可用、文件存在、版本满足等
       - 用于运行任意 shell 命令或表达式来检查前置条件，适合更复杂的验证场景（如检查文件是否存在、命令是否可用等）。
@@ -36,14 +38,14 @@ schema:
 
   - name: status
     score: 5
-    desc: 输出验证，决定任务是否需要执行
+    desc: 【输出验证】任务是否需要执行  缓存控制、文件更新检测，避免重复执行
     notes:
       - 用于缓存控制、文件更新检测
 
   - name: interactive
     desc: 交互式任务开关
     notes:
-      - 可配合 gum 增强交互体验
+      - 搭配gum增强交互体验（比如直接select之后，继续执行）
 
   - name: silent
 
