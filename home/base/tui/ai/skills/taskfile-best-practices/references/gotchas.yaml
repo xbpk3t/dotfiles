@@ -1,0 +1,35 @@
+---
+gotchas:
+  - id: deps_as_reuse
+    title: deps 当复用代码
+    desc: 通过 deps 复用命令会改变执行顺序和副作用边界
+    fix: 将可复用逻辑提取为模板 task 或公共 task，由 cmds 显式调用
+
+  - id: status_only_exists
+    title: status 只检查文件存在
+    desc: 只检查存在性可能导致任务永远跳过
+    fix: status 需要验证输出正确性或版本一致性，而不是仅验证存在
+
+  - id: silent_output_change
+    title: 修改 silent 或输出文本
+    desc: 可能导致脚本或 alias 解析失败
+    fix: 保持输出稳定，变更输出前先确认是否被脚本或 alias 依赖
+
+  - id: vars_sh_complex
+    title: "vars: sh 里塞复杂逻辑"
+    desc: 不可维护且难诊断
+    fix: 将复杂流程移到 cmds，并保证错误可诊断
+
+  - id: verify_only_task_t
+    title: 只验证 task -t
+    desc: 只跑 task -t 通过并不代表全局可用
+    fix: 同步验证 task -g，必要时幂等任务跑两次
+
+  - id: hidden_dependency_order
+    title: 隐式依赖导致顺序错误
+    desc: 依赖通过 deps 隐式触发时，容易产生顺序错误或隐式副作用
+    fix: 明确 deps 的前置边界，复用逻辑用显式 task 或模板 task
+    links:
+      - https://github.com/go-task/task/issues/860
+
+...
