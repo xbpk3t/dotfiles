@@ -1,0 +1,57 @@
+---
+
+schema:
+  - name: includes
+
+  - name: dir
+
+  - name: alias
+
+  - name: deps
+    desc: 任务执行前的依赖
+    notes:
+      - deps 与 cmds 的核心区别在于执行顺序
+      - deps 是前置执行，cmds 是任务本身
+
+  - name: desc
+    desc: 控制是否展示在 help 里
+
+  - name: if
+    desc: 判断是否执行该 task
+    notes:
+      - 执行先后顺序与 preconditions 不同
+
+  - name: platforms
+    desc: 基于 OS 判断是否执行
+    notes:
+      - 示例: [linux, darwin, windows]
+
+  - name: preconditions
+    score: 5
+    desc: 输入验证、参数校验、环境依赖检查
+    notes:
+      - 适合复杂校验：命令可用、文件存在、版本满足等
+      - 用于运行任意 shell 命令或表达式来检查前置条件，适合更复杂的验证场景（如检查文件是否存在、命令是否可用等）。
+
+
+  - name: status
+    score: 5
+    desc: 输出验证，决定任务是否需要执行
+    notes:
+      - 用于缓存控制、文件更新检测
+
+  - name: interactive
+    desc: 交互式任务开关
+    notes:
+      - 可配合 gum 增强交互体验
+
+  - name: silent
+
+  - name: internal
+    desc: 内部命令
+
+  - name: defer
+    desc: task 结束后清理
+
+  - name: requires
+    desc: 专门用于检查变量是否定义。它只验证变量是否存在，不对变量的值做复杂逻辑判断。
