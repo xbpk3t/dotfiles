@@ -5,6 +5,10 @@
   # https://mynixos.com/home-manager/option/programs.mcp.servers
   # https://github.com/zhongjis/nix-config/blob/935ac824ed0c27868b9ae4e75753c8ad94508dd0/modules/home-manager/features/mcp.nix#L15
 
+  # MAYBE: [2026-03-04] 等别人发 neo4j-mcp 了。官方3个方案：binary install, docker, 自己打包nixpkg. 前两种我不选，第三种嫌麻烦。当然mac上可以直接brew安装，但是不通用所以我也不选。
+  # https://github.com/neo4j/mcp
+  # https://neo4j.com/docs/mcp/current/
+
   filesystem = {
     type = "stdio";
     command = "npx";

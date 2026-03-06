@@ -1,9 +1,3 @@
----
-name: intelligent-tools-strategy
-description: Strategic decision framework for Codex tool usage
-type: strategic-guideline
----
-
 # Intelligent Tools Selection Strategy
 
 ## 📋 Table of Contents
