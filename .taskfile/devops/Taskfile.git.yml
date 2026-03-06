@@ -235,7 +235,7 @@ tasks:
   #done
   search:
     desc: 从所有历史commit中查找指定字符串
-    summary: "task -g search"
+    summary: "task -g search str="
     cmd: git rev-list --all | xargs git grep {{.str}}
     vars:
       str: '{{.str}}'
@@ -272,3 +272,11 @@ tasks:
 
   # 怎么合并多个 commit? rebase、merge、cherry pick都可以合并多个 commit，有啥区别? Why we'd better use merge?***" # rebase 操作和 cherry-pick 操作都会修改 commit-id，导致无法追溯问题。所以通常禁止使用，只允许 merge 操作公共分支（merge将两个分支上的所有提交记录合并成一个新的提交记录，并且保留原来的提交记录。这个操作不会修改提交记录的 SHA 值），方便 debug。
   # merge-commit:
+
+
+
+  # case: 类似docs-images这种项目，我需要用git来检查已修改文件，但因为全都是大文件，所以必然会导致.git的size很大，所以怎么解决这个问题？
+  # 首先，基于这个需求，不需要考虑其他方案，git仍然是最优方案。所以我们需要基于git去对问题做出优化。
+  # - 初始 commit 后，每次变更用 git commit --amend --no-edit
+  #- 偶尔 git gc --prune=now 清理旧对象
+  #  这样 .git 会稳定在一个相对可控的体积。

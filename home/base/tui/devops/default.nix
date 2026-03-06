@@ -4,7 +4,8 @@
   ...
 }: {
   home.packages = with pkgs; [
-    # dotbot # 用nix的mkOutOfStoreSymlink代替了
+    # 用nix的mkOutOfStoreSymlink代替了
+    # dotbot
 
     # https://mynixos.com/nixpkgs/package/pre-commit
     pre-commit

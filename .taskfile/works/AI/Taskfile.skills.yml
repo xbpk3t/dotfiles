@@ -20,7 +20,7 @@ vars:
   SKILLS_CMD: "npx -y skills"
   CTX7_CMD: "npx -y ctx7"
   DEFAULT_AGENT: "codex"
-  # DEFAULT_SCOPE 影响是否追加 -g（global 安装到 ~/.agents/skills）
+  # DEFAULT_SCOPE 影响是否追加 -g（global 安装到 ~/.codex/skills）
   DEFAULT_SCOPE: "global"
   # DEFAULT_MODE 使用 copy 可避免 symlink 失效
   DEFAULT_MODE: "copy"
@@ -503,7 +503,8 @@ vars:
       skills:
         # what: 用于 Code Review 专家 相关任务
         # why: 领域偏量化/交易
-        # - code-review-expert
+        - code-review-expert
+
     # https://github.com/anthropics/skills
     - repo: anthropics/skills
       skills:
@@ -562,7 +563,30 @@ vars:
 
     # https://skills.sh/paulirish/dotfiles/modern-css
 
+    # https://skills.sh/lucifer1004/claude-skill-typst/typst
+    - repo: lucifer1004/claude-skill-typst
+      skills:
+        - typst
 
+    # https://skills.sh/ypares/agent-skills
+    - repo: ypares/agent-skills
+      skills:
+        - typst-writer
+
+    - repo: github/awesome-copilot
+      skills:
+        # https://skills.sh/github/awesome-copilot/plantuml-ascii
+        - plantuml-ascii
+
+    - repo: softaworks/agent-toolkit
+      skills:
+        # https://skills.sh/softaworks/agent-toolkit/mermaid-diagrams
+        - mermaid-diagrams
+
+    # https://skills.sh/404kidwiz/claude-supercode-skills
+    - repo: 404kidwiz/claude-supercode-skills
+      skills:
+        - quant-analyst
 tasks:
   default:
     desc: "按 Taskfile 内的 metadata 安装/同步 skills"
