@@ -1,0 +1,11 @@
+---
+gotchas:
+  - id: <gotcha_id>
+    title: <问题名>
+    desc: <问题描述>
+    impact: <影响范围/风险>
+    signals:
+      - <常见信号或症状>
+    fix: <修复建议>
+    links:
+      - <url>
