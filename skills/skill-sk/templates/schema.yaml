@@ -1,0 +1,10 @@
+---
+
+schema:
+  - name: <field_name>
+    desc: <字段说明>
+    required: true|false
+    type: <string|array|object>
+    example: <example_value>
+    notes:
+      - <注意事项>
