@@ -587,6 +587,12 @@ vars:
     - repo: 404kidwiz/claude-supercode-skills
       skills:
         - quant-analyst
+
+    # https://skills.sh/slidevjs/slidev
+    - repo: slidevjs/slidev
+      skills:
+        - slidev
+
 tasks:
   default:
     desc: "按 Taskfile 内的 metadata 安装/同步 skills"

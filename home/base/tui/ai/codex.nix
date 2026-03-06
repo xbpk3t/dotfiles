@@ -1,13 +1,11 @@
 {
   config,
   lib,
-  mylib,
   pkgs,
   ...
 }: let
   cfg = config.modules.AI.codex;
   mcpServers = import ./mcp-servers.nix {inherit config;};
-  skillsDir = toString (mylib.relativeToRoot "home/base/tui/ai/skills");
 in {
   # codex resume   打开可恢复的会话列表
   # codex resume --last 直接恢复当前工作目录下最近一次会话
@@ -71,20 +69,5 @@ in {
       recursive = true;
       force = true;
     };
-
-    # 重要：不要把 ~/.codex/skills 设为 symlink（Codex 扫描可能失败）。
-    # 使用 activation 将本地 skills 复制为真实文件，同时保留第三方 skills。
-    home.activation.codexSkills = lib.hm.dag.entryAfter ["writeBoundary"] ''
-      target="$HOME/.codex/skills"
-      src="${skillsDir}"
-
-      mkdir -p "$target"
-      # Merge local skills into ~/.codex/skills without deleting third-party skills.
-      if command -v rsync >/dev/null 2>&1; then
-        rsync -a "$src"/ "$target"/
-      else
-        cp -R "$src"/. "$target"/
-      fi
-    '';
   };
 }
