@@ -1,0 +1,141 @@
+---
+version: "3"
+
+vars:
+  # MEM_SLEEP: kernel mem_sleep policy (s2idle|deep)
+  MEM_SLEEP: '{{.MEM_SLEEP | default "deep"}}'
+  # WAKE_SECONDS: RTC wakealarm offset (seconds)
+  WAKE_SECONDS: '{{.WAKE_SECONDS | default "600"}}'
+  # TAIL_LINES: journalctl lines to show
+  TAIL_LINES: '{{.TAIL_LINES | default "200"}}'
+  # GREP_PM: log keywords for power management
+  GREP_PM: '{{.GREP_PM | default "PM:|suspend|hibernate|sleep|wakeup|Freeze|resume"}}'
+
+tasks:
+  _check:systemd:
+    internal: true
+    platforms: [linux]
+    preconditions:
+      - sh: command -v systemctl >/dev/null 2>&1
+        msg: "systemctl not found (systemd required)"
+      - sh: command -v journalctl >/dev/null 2>&1
+        msg: "journalctl not found (systemd required)"
+
+  power:info:
+    desc: Power info summary (kernel + mem_sleep + inhibitors)
+    summary: "task -g power:info"
+    platforms: [linux]
+    cmds:
+      - uname -a
+      - cat /sys/power/state
+      - cat /sys/power/mem_sleep
+      - task: power:inhibitors
+
+  power:inhibitors:
+    desc: List sleep inhibitors (systemd-inhibit + loginctl)
+    summary: "task -g power:inhibitors"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v systemd-inhibit >/dev/null 2>&1
+        msg: "systemd-inhibit not found"
+      - sh: command -v loginctl >/dev/null 2>&1
+        msg: "loginctl not found"
+    cmds:
+      - systemd-inhibit --list
+      - loginctl inhibit --list
+
+  power:memsleep:get:
+    desc: Show current mem_sleep (s2idle/deep)
+    summary: "task -g power:memsleep:get"
+    platforms: [linux]
+    preconditions:
+      - sh: test -r /sys/power/mem_sleep
+        msg: "/sys/power/mem_sleep not readable"
+    cmds:
+      - cat /sys/power/mem_sleep
+      - cat /sys/power/state
+
+  power:memsleep:set:
+    desc: Set mem_sleep (MEM_SLEEP=s2idle|deep)
+    summary: "task -g power:memsleep:set"
+    platforms: [linux]
+    preconditions:
+      - sh: test -w /sys/power/mem_sleep
+        msg: "need root or writable /sys/power/mem_sleep"
+    cmds:
+      - echo "{{.MEM_SLEEP}}" | sudo tee /sys/power/mem_sleep >/dev/null
+      - cat /sys/power/mem_sleep
+
+  power:suspend:
+    desc: Trigger suspend (Sleep / STR)
+    summary: "task -g power:suspend"
+    deps:
+      - '_check:systemd'
+    platforms: [linux]
+    cmds:
+      - systemctl suspend
+      - task: power:logs
+
+  power:hibernate:
+    desc: Trigger hibernate (Hibernate / STD)
+    summary: "task -g power:hibernate"
+    deps:
+      - '_check:systemd'
+    platforms: [linux]
+    cmds:
+      - systemctl hibernate
+      - task: power:logs
+
+  power:hybrid:
+    desc: Trigger hybrid-sleep (Sleep + Hibernate)
+    summary: "task -g power:hybrid"
+    deps:
+      - '_check:systemd'
+    platforms: [linux]
+    cmds:
+      - systemctl hybrid-sleep
+      - task: power:logs
+
+  power:sth:
+    desc: Trigger suspend-then-hibernate (Standby)
+    summary: "task -g power:sth"
+    deps:
+      - '_check:systemd'
+    platforms: [linux]
+    cmds:
+      - systemctl suspend-then-hibernate
+      - task: power:logs
+
+  power:wake:rtc:set:
+    desc: Set RTC wakealarm (WAKE_SECONDS)
+    summary: "task -g power:wake:rtc:set"
+    platforms: [linux]
+    preconditions:
+      - sh: test -w /sys/class/rtc/rtc0/wakealarm
+        msg: "need root or writable /sys/class/rtc/rtc0/wakealarm"
+    cmds:
+      - echo 0 | sudo tee /sys/class/rtc/rtc0/wakealarm >/dev/null
+      - echo +{{.WAKE_SECONDS}} | sudo tee /sys/class/rtc/rtc0/wakealarm >/dev/null
+
+  power:wake:rtc:clear:
+    desc: Clear RTC wakealarm
+    summary: "task -g power:wake:rtc:clear"
+    platforms: [linux]
+    preconditions:
+      - sh: test -w /sys/class/rtc/rtc0/wakealarm
+        msg: "need root or writable /sys/class/rtc/rtc0/wakealarm"
+    cmds:
+      - echo 0 | sudo tee /sys/class/rtc/rtc0/wakealarm >/dev/null
+      - cat /sys/class/rtc/rtc0/wakealarm
+
+  power:logs:
+    desc: Power-related logs (journalctl + dmesg)
+    summary: "task -g power:logs"
+    deps:
+      - '_check:systemd'
+    platforms: [linux]
+    set: [pipefail]
+    cmds:
+      - journalctl -b --no-pager -n {{.TAIL_LINES}} | grep -iE "{{.GREP_PM}}"
+      - journalctl -b -u systemd-logind --no-pager -n {{.TAIL_LINES}}
+      - dmesg -T | grep -iE "{{.GREP_PM}}"

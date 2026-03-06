@@ -1,0 +1,91 @@
+version: "3"
+
+vars:
+  # WAIT_SECS: chronyc waitsync timeout (seconds)
+  WAIT_SECS: '{{.WAIT_SECS | default "10"}}'
+  # TAIL_LINES: journalctl lines for chronyd logs
+  TAIL_LINES: '{{.TAIL_LINES | default "200"}}'
+  # NTP_SERVER: upstream for ntpdate -q compare
+  NTP_SERVER: '{{.NTP_SERVER | default "ntp.aliyun.com"}}'
+
+tasks:
+  _check:
+    internal: true
+    platforms: [linux]
+    preconditions:
+      - sh: command -v chronyc >/dev/null 2>&1
+        msg: "chronyc not found (install: chrony)"
+      - sh: systemctl is-active --quiet chronyd
+        msg: "chronyd is not active (try: sudo systemctl enable --now chronyd)"
+
+  status:
+    desc: Chrony quick status (tracking + sources + sourcestats)
+    summary: "task -g chrony:status"
+    deps: [_check]
+    platforms: [linux]
+    cmds:
+      - chronyc tracking
+      - chronyc -n sources -v
+      - chronyc -n sourcestats -v
+
+  health:
+    desc: Chrony service health (systemd + timedatectl)
+    summary: "task -g chrony:health"
+    deps: [_check]
+    platforms: [linux]
+    cmds:
+      - systemctl is-active chronyd
+      - timedatectl status
+
+  sources:detail:
+    desc: Chrony source details (selectdata + ntpdata)
+    summary: "task -g chrony:sources:detail"
+    deps: [_check]
+    platforms: [linux]
+    cmds:
+      - chronyc -n sources -v
+      - chronyc selectdata
+      - chronyc ntpdata
+
+  activity:
+    desc: Chrony activity + tracking (quick sanity)
+    summary: "task -g chrony:activity"
+    deps: [_check]
+    platforms: [linux]
+    cmds:
+      - chronyc activity
+      - chronyc tracking
+
+  accelerate:
+    desc: Speed up sync (makestep + burst + waitsync + status)
+    summary: "task -g chrony:accelerate [WAIT_SECS=10]"
+    deps: [_check]
+    platforms: [linux]
+    cmds:
+      - sudo chronyc makestep
+      - sudo chronyc burst 4/4
+      - chronyc waitsync {{.WAIT_SECS}}
+      - task: status
+
+  logs:
+    desc: Chronyd logs (recent + warnings)
+    summary: "task -g chrony:logs [TAIL_LINES=200]"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v journalctl >/dev/null 2>&1
+        msg: "journalctl not found (systemd required)"
+    cmds:
+      - journalctl -u chronyd --no-pager -n {{.TAIL_LINES}}
+      - journalctl -u chronyd --no-pager -n {{.TAIL_LINES}} -p warning..alert
+
+  compare:
+    desc: Compare upstream offset (ntpdate -q) + status
+    summary: "task -g chrony:compare [NTP_SERVER=ntp.aliyun.com]"
+    deps: [_check]
+    platforms: [linux]
+    preconditions:
+      - sh: command -v ntpdate >/dev/null 2>&1
+        msg: "ntpdate not found (on NixOS: nix shell nixpkgs#ntp)"
+    cmds:
+      - ntpdate -q {{.NTP_SERVER}}
+      - task: status

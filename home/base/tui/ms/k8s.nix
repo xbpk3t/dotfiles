@@ -11,13 +11,18 @@
     # minikube
 
     kompose
-    kube-linter # https://github.com/stackrox/kube-linter
+    # https://github.com/stackrox/kube-linter
+    kube-linter
 
-    kubectx # https://github.com/ahmetb/kubectx 用来快速切换context
-    kubie # https://github.com/sbstp/kubie
+    # https://github.com/ahmetb/kubectx 用来快速切换context
+    kubectx
+    # https://github.com/sbstp/kubie
+    kubie
     kubectl
-    kubefwd # https://github.com/txn2/kubefwd
-    kube-capacity # https://github.com/robscott/kube-capacity 颇为实用的工具。k8s的命令行工具kubectl用来查看集群的整体资源情况往往操作会比较复杂，可能需要多条命令配合在一起才能拿得到想要的结果。kube-capacity命令行工具用来快速查看集群中的资源使用情况，包括node、pod维度。
+    # https://github.com/txn2/kubefwd
+    kubefwd
+    # https://github.com/robscott/kube-capacity 颇为实用的工具。k8s的命令行工具kubectl用来查看集群的整体资源情况往往操作会比较复杂，可能需要多条命令配合在一起才能拿得到想要的结果。kube-capacity命令行工具用来快速查看集群中的资源使用情况，包括node、pod维度。
+    kube-capacity
 
     kubernetes-polaris
     conftest
@@ -26,16 +31,19 @@
     # https://github.com/grampelberg/kty
     # kty
 
-    kubectl-graph # https://github.com/steveteuber/kubectl-graph  最近接手了一个规模比较大的集群，光是整理集群中的资源就使人头昏眼花，虽然我自认 kubectl 使用的已经十分熟练，但是上千个 k8s Resource 看下来还是不堪重负。在不能为集群安装任何其他工具的情况下，可以改造的就只有我自己的 Client 端，也就是 kubectl 了。本文就介绍一个有趣的 kubectl 插件：kubectl-graph。
+    # https://github.com/steveteuber/kubectl-graph  最近接手了一个规模比较大的集群，光是整理集群中的资源就使人头昏眼花，虽然我自认 kubectl 使用的已经十分熟练，但是上千个 k8s Resource 看下来还是不堪重负。在不能为集群安装任何其他工具的情况下，可以改造的就只有我自己的 Client 端，也就是 kubectl 了。本文就介绍一个有趣的 kubectl 插件：kubectl-graph。
+    kubectl-graph
 
-    cilium-cli # https://github.com/cilium/cilium-cli
+    # https://github.com/cilium/cilium-cli
     #  一键安装 Cilium：自动检测集群类型（如 minikube、GKE、EKS）并适配配置。
     #  集群诊断：运行连接性测试（cilium connectivity test）、查看状态（cilium status）。
     #  高级功能管理：启用 Hubble（网络流量可视化）、ClusterM esh（多集群互联）、IPsec 加密等。
     #  版本管理：支持安装/升级到指定 Cilium 版本。
+    cilium-cli
 
     kubebuilder
-    kubecm # 该项目脱胎于 mergeKubeConfig 项目，最早写该项目的目的是在一堆杂乱无章的 kubeconfig 中自由的切换。随着需要操作的 k8s 集群越来越多，在不同的集群之间切换也越来越麻烦，而操作 k8s 集群的本质不过是通过 kubeconfig 访问 k8s 集群的 API Server，以操作 k8s 的各种资源，而 kubeconfig 不过是一个 YAML 文件，用来保存访问集群的密钥，最早的 mergeKubeConfig 不过是一个操作 YAML 文件的 Python 脚本。而随着 Go 学习的深入，也就动了重写这个项目的念头，就这样 kubecm 诞生了。
+    # 该项目脱胎于 mergeKubeConfig 项目，最早写该项目的目的是在一堆杂乱无章的 kubeconfig 中自由的切换。随着需要操作的 k8s 集群越来越多，在不同的集群之间切换也越来越麻烦，而操作 k8s 集群的本质不过是通过 kubeconfig 访问 k8s 集群的 API Server，以操作 k8s 的各种资源，而 kubeconfig 不过是一个 YAML 文件，用来保存访问集群的密钥，最早的 mergeKubeConfig 不过是一个操作 YAML 文件的 Python 脚本。而随着 Go 学习的深入，也就动了重写这个项目的念头，就这样 kubecm 诞生了。
+    kubecm
 
     # [Kubernetes 基础环境要求 – 陈少文的网站](https://www.chenshaowen.com/blog/kubernetes-base-environment-requirements.html)
     # socat # 网络工具，用于在两个数据通道之间建立连接并传输数据。这些通道可以是文件、管道、设备、套接字（IPv4/IPv6, TCP, UDP, SSL）、SOCKS代理等等。它功能类似增强版的 `netcat`。
@@ -62,72 +70,106 @@
     # **使用 IPVS 模式的前提：** 如果计划或正在使用 `kube-proxy` 的 `ipvs` 模式，那么 `ipvsadm` 是必需的，因为 `kube-proxy` 需要用它来配置内核中的 IPVS 规则。同时，`ipvs` 模式本身通常也需要依赖 `ipset` 来实现某些功能。
     # **结论：** 如果你使用 `kube-proxy` 的默认 `iptables` 模式，`ipvsadm` 不是必需的。但如果你计划使用或正在使用性能更优的 `ipvs` 模式，那么 `ipvsadm` 是**必须安装**的。即使现在不用 IPVS 模式，预先安装它为将来可能的模式切换或性能优化做准备也是明智的，因此通常是**可选，但推荐安装**。
 
-    helm-dashboard # https://github.com/komodorio/helm-dashboard/
+    # https://github.com/komodorio/helm-dashboard/
+    helm-dashboard
 
-    #    # Kubernetes 相关工具
+    # Kubernetes 相关工具
     kubectl
     kubernetes-helm
-    #    kustomize
-    #    kind
-    #    minikube
-    #
-    #    # 可选的其他工具
-    k9s # K8s 终端 UI
-    #    stern        # 多 Pod 日志查看
-    #    kubectx      # 上下文切换
-    #    kubens       # 命名空间切换
-    #
-    #    # 数据库客户端
-    #    mysql-client
-    #    postgresql
-    #
-    #    # 网络工具
-    #    curl
-    #    wget
-    #    httpie
-    #
-    #    # 监控相关
-    #    prometheus-cli
-    #    grafana-loki
 
-    #    podman-compose
-    #    dive # explore docker layers
-    #    lazydocker # Docker terminal UI.
-    #    skopeo # copy/sync images between registries and local storage
-    #    go-containerregistry # provides `crane` & `gcrane`, it's similar to skopeo
+    # https://mynixos.com/packages/kubernetes-helmPlugins
+
+    # https://github.com/nix-community/nixhelm
     #
-    #    kubectl
-    #    kubectx # kubectx & kubens
-    #    kubie # same as kubectl-ctx, but per-shell (won’t touch kubeconfig).
-    #    kubectl-view-secret # kubectl view-secret
-    #    kubectl-tree # kubectl tree
-    #    kubectl-node-shell # exec into node
-    #    kubepug # kubernetes pre upgrade checker
-    #    kubectl-cnpg # cloudnative-pg's cli tool
     #
-    #    kubebuilder
-    #    istioctl
-    #    clusterctl # for kubernetes cluster-api
+    # https://nixos.wiki/wiki/Helm_and_Helmfile
+    #
+    #
+    # https://github.com/redpanda-data/helm-charts
+
+    # https://mynixos.com/nixpkgs/package/kustomize
+    #
+    # https://mynixos.com/nixpkgs/package/kustomize-sops
+    #
+    #
+    kustomize
+    # kind
+    # minikube
+
+    # K8s TUI
+    k9s
+    # 多 Pod 日志查看
+    stern
+    # 上下文切换
+    kubectx
+    # 命名空间切换：kubens 由 kubectx 包提供（二进制同包）
+
+    # # 网络工具
+    # curl
+    # wget
+    # httpie
+
+    # # 监控相关
+    # prometheus-cli
+    # grafana-loki
+
+    # podman-compose
+    # dive # explore docker layers
+    # lazydocker # Docker terminal UI.
+    # skopeo # copy/sync images between registries and local storage
+    # go-containerregistry # provides `crane` & `gcrane`, it's similar to skopeo
+
+    # kubectl
+    # kubectx # kubectx & kubens
+    # kubie # same as kubectl-ctx, but per-shell (won’t touch kubeconfig).
+    # kubectl-view-secret # kubectl view-secret
+    # kubectl-tree # kubectl tree
+    # kubectl-node-shell # exec into node
+    # kubepug # kubernetes pre upgrade checker
+    # kubectl-cnpg # cloudnative-pg's cli tool
+
+    # kubebuilder
+    # istioctl
+    # clusterctl # for kubernetes cluster-api
 
     # https://mynixos.com/nixpkgs/package/kubevirt
-    kubevirt # virtctl
-
-    #    pkgs-stable.kubernetes-helm
-    #    fluxcd
-    #    argocd
     #
-    #    ko # build go project to container image
+    # virtctl
+    kubevirt
+
+    # pkgs-stable.kubernetes-helm
+
+    # build go project to container image
+    # ko
   ];
 
   programs = {
     # https://mynixos.com/home-manager/options/programs.k9s
+    #
+    #
     k9s = {
       enable = true;
-      skins = {default = {k9s = {body = {fgColor = "dodgerblue";};};};};
+      skins = {
+        default = {
+          k9s = {
+            body = {
+              fgColor = "dodgerblue";
+            };
+          };
+        };
+      };
       views = {
         # Move all nested views directly under programs.k9s.views
         "v1/pods" = {
-          columns = ["AGE" "NAMESPACE" "NAME" "IP" "NODE" "STATUS" "READY"];
+          columns = [
+            "AGE"
+            "NAMESPACE"
+            "NAME"
+            "IP"
+            "NODE"
+            "STATUS"
+            "READY"
+          ];
         };
       };
 
@@ -201,7 +243,15 @@
             scopes = ["po"];
             command = "kubectl";
             background = false;
-            args = ["logs" "-f" "$NAME" "-n" "$NAMESPACE" "--context" "$CLUSTER"];
+            args = [
+              "logs"
+              "-f"
+              "$NAME"
+              "-n"
+              "$NAMESPACE"
+              "--context"
+              "$CLUSTER"
+            ];
           };
 
           settings = {

@@ -4,9 +4,10 @@
   nixosSystem = import ./nixos.nix;
   # 提供统一的节点 ID / host meta 生成器
   node = import ./node-id.nix {inherit lib;};
-  inventory = import ./inventory.nix {inherit lib;};
+  inventory = import ./inventory {inherit lib;};
   attrs = import ./attrs.nix {inherit lib;};
   langs = import ./langs.nix;
+  vpsSysctl = import ./vps-sysctl.nix {inherit lib;};
 
   # use path relative to the root of the project
   relativeToRoot = lib.path.append ../.;
@@ -32,6 +33,7 @@ in {
     inventory
     attrs
     langs
+    vpsSysctl
     scanPaths
     relativeToRoot
     ;

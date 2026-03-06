@@ -1,0 +1,20 @@
+---
+version: '3'
+
+tasks:
+  default:
+    desc: arping (L2 reachability)
+    summary: "task -g default HOST=<host> [COUNT=5] [IFACE=<iface>]"
+    platforms: [linux]
+    requires:
+      vars: [HOST]
+    vars:
+      COUNT: '{{.COUNT | default "5"}}'
+      HOST: ''
+      IFACE: ''
+    preconditions:
+      - sh: command -v arping
+        msg: arping not found
+    cmds:
+      # -I: 指定 interface
+      - arping -c {{.COUNT}} {{ if .IFACE }}-I {{.IFACE}} {{ end }}{{.HOST}}

@@ -71,6 +71,7 @@ vars:
 tasks:
   default:
     desc: 应用dotfiles的linter配置到当前项目
+    summary: "task -g default"
     silent: true
     interactive: true
     cmds:
@@ -143,6 +144,7 @@ tasks:
     vars:
       DOTFILES_CONFIG: "{{.DOTFILES_LINTERS}}/{{.LINTER_FILE}}"
       PROJECT_CONFIG: "{{.PROJECT_DIR}}/.github/linters/{{.LINTER_FILE}}"
+      LINTER_FILE: ''
     cmds:
       - echo "📄 处理 {{.LINTER_FILE}}..."
       - |
@@ -203,6 +205,7 @@ tasks:
     vars:
       DOTFILES_CONFIG: "{{.DOTFILES_LINTERS}}/{{.LINTER_FILE}}"
       PROJECT_CONFIG: "{{.PROJECT_DIR}}/.github/linters/{{.LINTER_FILE}}"
+      LINTER_FILE: ''
     cmds:
       - echo "📄 处理 {{.LINTER_FILE}}..."
       - |
@@ -225,6 +228,7 @@ tasks:
   handle-conflict:
     interactive: true
     desc: 处理配置文件冲突
+    summary: "task -g handle-conflict"
     preconditions:
       - sh: test -n "{{.LINTER_FILE}}"
         msg: "❌ LINTER_FILE 参数为空"
@@ -235,6 +239,7 @@ tasks:
     vars:
       DOTFILES_CONFIG: "{{.DOTFILES_LINTERS}}/{{.LINTER_FILE}}"
       PROJECT_CONFIG: "{{.PROJECT_DIR}}/.github/linters/{{.LINTER_FILE}}"
+      LINTER_FILE: ''
     cmds:
       - echo "🔄 {{.LINTER_FILE}} 存在冲突，请选择操作:"
       - |
@@ -297,6 +302,7 @@ tasks:
     silent: true
     interactive: true
     desc: 验证linter配置文件
+    summary: "task -g validate"
     cmds:
       - echo "🔍 验证配置文件..."
       - task: validate-dotfiles
@@ -314,6 +320,7 @@ tasks:
     vars:
       DOTFILES_FILES:
         sh: ls -A "{{.DOTFILES_LINTERS}}" 2>/dev/null | grep -v '^\.\.$' | grep -v '^\.$' | tr '\n' ' ' | sed 's/[[:space:]]*$//' || echo ""
+      LINTER_FILE: ''
     cmds:
       - echo "📋 验证dotfiles配置..."
       - |
@@ -344,6 +351,7 @@ tasks:
           else
             echo ""
           fi
+      LINTER_FILE: ''
     cmds:
       - echo "📋 验证项目配置..."
       - |
@@ -396,6 +404,7 @@ tasks:
     vars:
       DOTFILES_CONFIG: "{{.DOTFILES_ROOT}}/{{.SINGLE_FILE}}"
       PROJECT_CONFIG: "{{.PROJECT_DIR}}/{{.SINGLE_FILE}}"
+      SINGLE_FILE: ''
     cmds:
       - echo "📄 处理 {{.SINGLE_FILE}}..."
       - |
@@ -451,6 +460,7 @@ tasks:
     vars:
       SINGLE_FILES_LIST:
         sh: echo "{{.SINGLE_FILES_TO_PROCESS}}"
+      SINGLE_FILE: ''
     cmds:
       - echo "📋 验证单文件配置..."
       - |

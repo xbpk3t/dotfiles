@@ -1,0 +1,11 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: rustdesk
+  namespace: flux-system
+spec:
+  path: "./manifests/apps/rustdesk/app"
+  postBuild:
+    substitute:
+      APP_NAME: rustdesk
+      APP_NAMESPACE: apps

@@ -1,0 +1,76 @@
+---
+version: '3'
+
+vars:
+  # 配置：SOPS 源文件路径（可通过调用时传入 SOPS_FILE 覆盖，默认指向本项目 secrets 目录）
+  SOPS_FILE: '{{.SOPS_FILE | default (printf "%s/secrets/secrets.yaml" .USER_WORKING_DIR)}}'
+
+includes:
+  # 引入 k8s 相关任务
+  k8s: ./Taskfile.sops.k8s.yml
+
+tasks:
+  # 编辑 secrets 文件
+  edit:
+    desc: "编辑加密的 secrets 文件"
+    summary: "task -g edit"
+    cmd: 'sops {{.SOPS_FILE}}'
+
+  # 查看 secrets 文件内容
+  view:
+    desc: "查看解密后的 secrets 文件内容"
+    summary: "task -g view"
+    interactive: true
+    cmd: 'sops -d {{.SOPS_FILE}}'
+
+  # 加密 secrets 文件
+  encrypt:
+    desc: "加密 secrets 文件"
+    summary: "task -g encrypt"
+    cmd: 'sops -e {{.SOPS_FILE}}'
+
+  # 解密 secrets 文件
+  decrypt:
+    desc: "解密 secrets 文件到临时文件"
+    summary: "task -g decrypt"
+    cmds:
+      - 'sops -d {{.SOPS_FILE}} > secrets_decrypted.yaml'
+      - 'echo "解密文件已保存为: secrets_decrypted.yaml"'
+
+  # 验证 secrets 文件
+  verify:
+    desc: "验证 secrets 文件格式和内容"
+    summary: "task -g verify"
+    cmds:
+      - 'echo "验证 secrets 文件格式..."'
+      - 'sops -d {{.SOPS_FILE}} | yq eval . -'
+      - 'echo "✅ secrets 文件格式正确"'
+
+  # 更新 .sops.yaml 中的 age 公钥
+  update-key:
+    desc: "更新 .sops.yaml 中的 age 公钥"
+    summary: "task -g update-key AGE_KEY=<path>"
+    vars:
+      AGE_KEY: ''
+    requires:
+      vars: [AGE_KEY]
+    cmds:
+      - |
+        NEW_KEY=$(age-keygen -y {{.AGE_KEY}})
+        echo "新的 age 公钥: $NEW_KEY"
+        echo "请手动更新 .sops.yaml 文件中的 age_key 字段"
+
+  # 重新加密所有 secrets
+  reencrypt:
+    desc: "重新加密所有 secrets"
+    summary: "task -g reencrypt"
+    cmds:
+      - 'sops updatekeys {{.SOPS_FILE}}'
+
+  # 列出所有加密的键
+  list-keys:
+    desc: "列出所有加密的键"
+    summary: "task -g list-keys"
+    interactive: true
+    cmds:
+      - 'sops -d {{.SOPS_FILE}} | yq eval "keys" -'

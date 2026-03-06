@@ -7,12 +7,18 @@
   cfg = config.modules.AI.codex;
   mcpServers = import ./mcp-servers.nix {inherit config;};
 in {
+  # codex resume   打开可恢复的会话列表
+  # codex resume --last 直接恢复当前工作目录下最近一次会话
+  # codex resume --all 把当前目录之外的会话也列出来
+  # codex resume <SESSION_ID>
+
   options.modules.AI.codex = with lib; {
     enable = mkEnableOption "Enable Codex";
   };
 
   config = lib.mkIf cfg.enable {
     # https://mynixos.com/home-manager/options/programs.codex
+    # https://github.com/openai/codex
     programs.codex = {
       enable = true;
       package = pkgs.codex;

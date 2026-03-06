@@ -62,7 +62,7 @@ in {
   # - 🔀 [git commit history]
   # 用 tig, serie 可以替代实现该需求
   #
-  #
+  # TODO: dddd
   #
   # https://www.reddit.com/r/ZedEditor/comments/1mvqlph/zed_is_awesome_but_it_lacks_some_crucial/
   # 这篇文章的吐槽挺到位的
@@ -108,6 +108,9 @@ in {
   # [Single-File Git Diff from Git Panel · zed-industries/zed · Discussion #38420](https://github.com/zed-industries/zed/discussions/38420)
   #
   #
+  #
+  # [2026-02-03]
+  # zed不支持 Local history，真的太蠢了。最近一周连续两次误操作导致本地未commit代码被冲掉（一次是将近两天的修改，这次是最近几天修改的taskfile，改了三四天了，想要一次commit上去），我知道都TM怪我没stash，怪我蠢。但是如果有Local history是不是能好点？用回goland了。
 
   # 可供参考的zed配置
   # https://github.com/linkfrg/dotfiles/blob/main/modules/home-manager/software/zed/settings.nix
@@ -298,7 +301,11 @@ in {
     };
     env = {
       # 终端中调用编辑器时等待 Zed 关闭
-      EDITOR = "zed --wait";
+      # [2026-01-23] 注意是 zeditor 而非 zed
+      # 这里指的是，在zed terminal里，EDITOR就被zed覆盖了
+      #
+      # [2026-01-23]
+      # EDITOR = "zeditor --wait";
     };
     font_family = ".ZedMono";
     font_features = fontFeatures;

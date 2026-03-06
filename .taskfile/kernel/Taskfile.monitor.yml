@@ -1,6 +1,9 @@
 ---
 version: '3'
 
+includes:
+  memory: Taskfile.memory.yml
+
 # - sar <type> <type-param> <interval> <count> # Only type parameter is required, others are optional. Types: e.g. CPU, memory, network. Type parameters: some types have parameters, some don't. DEV here represents monitoring network card information. Time interval represents how many seconds to sample data, 1 here means 1 second. Count represents the number of samples. For example, if time interval is 3 and sample count is 4, the sar command will block for 12 seconds
 # - sar -q # CPU load
 # - sar -I # CPU interrupts
@@ -63,6 +66,8 @@ tasks:
 
   # 基础系统状态检查
   basic:
+    desc: "basic 任务"
+    summary: "task -g basic"
     cmds:
       - echo "===== 基础系统状态 ====="
       - uptime
@@ -71,6 +76,8 @@ tasks:
 
   # CPU和进程分析
   cpu:
+    desc: "cpu 任务"
+    summary: "task -g cpu"
     cmds:
       - echo -e "\n===== CPU统计 (每1秒刷新，共5次) ====="
       - vmstat 1 5
@@ -81,20 +88,23 @@ tasks:
 
   # 磁盘I/O分析
   disk:
+    desc: "disk 任务"
+    summary: "task -g disk"
     cmds:
       - echo -e "\n===== 磁盘I/O统计 ====="
       - iostat -xz 1 5
 
   # 内存分析
   memory:
+    desc: "memory 任务"
+    summary: "task -g memory"
     cmds:
-      - echo -e "\n===== 内存使用 ====="
-      - free -m
-      - echo -e "\n===== 内存详细统计 ====="
-      - cat /proc/meminfo | grep -E 'MemTotal|MemFree|Buffers|Cached'
+      - task: memory:default
 
   # 网络分析
   network:
+    desc: "network 任务"
+    summary: "task -g network"
     cmds:
       - echo -e "\n===== 网络设备统计 ====="
       - sar -n DEV 1 5
@@ -103,6 +113,8 @@ tasks:
 
   # 综合监控
   top:
+    desc: "top 任务"
+    summary: "task -g top"
     cmds:
       - echo -e "\n===== 实时进程监控 ====="
       - top -b -n 1 -o %CPU | head -20
@@ -110,6 +122,7 @@ tasks:
   # 完整诊断套件 (默认任务)
   default:
     desc: 执行完整的60秒快速诊断
+    summary: "task -g default"
     interactive: true
     silent: true
     cmds:

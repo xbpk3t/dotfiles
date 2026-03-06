@@ -10,24 +10,29 @@ in {
     ./hardware.nix
   ];
 
-  # 角色标记：走服务器基线，不启用桌面推导
-  modules.roles = {
-    isDesktop = false;
-    isServer = true;
-  };
-
   networking = {
     inherit hostName;
     useNetworkd = true; # 改用 systemd-networkd，更轻量
     networkmanager.enable = false;
     useDHCP = true; # 由 hardware.nix 的接口/或 networkd profiles 提供 DHCP
+    # 重要：避免 /etc/resolv.conf 指向 127.0.0.53（stub）
+    # k3s 的 CoreDNS 默认 forward 到 /etc/resolv.conf；若是 stub 会在 Pod 内超时
+    useHostResolvConf = lib.mkForce false;
     inherit nameservers;
   };
 
   services.resolved = {
     enable = true;
     fallbackDns = nameservers;
+    # 重要：关闭本地 stub（127.0.0.53），避免集群 DNS 走到不可达的本地回环
+    # settings = {
+    #   DNSStubListener = "no";
+    # };
   };
+
+  # 重要：显式使用 systemd-resolved 的真实上游解析结果
+  # Why：避免 /etc/resolv.conf 指向 stub-resolv.conf，导致 CoreDNS 解析超时
+  environment.etc."resolv.conf".source = lib.mkForce "/run/systemd/resolve/resolv.conf";
 
   # 启动与电源
   boot.loader = {
@@ -39,12 +44,17 @@ in {
   };
 
   # 禁止挂起/休眠，保证远程任务不中断
-  systemd.sleep.extraConfig = ''
-    AllowSuspend=no
-    AllowHibernation=no
-    AllowSuspendThenHibernate=no
-    AllowHybridSleep=no
-  '';
+  # 说明：改用 systemd.sleep.settings.Sleep（NixOS 选项已移除 extraConfig）
+  systemd.sleep.settings.Sleep = {
+    # 关键：禁止 Suspend（避免远程任务被挂起中断）
+    AllowSuspend = "no";
+    # 关键：禁止 Hibernation（避免电源切换导致服务退出）
+    AllowHibernation = "no";
+    # 关键：禁止 Suspend-then-Hibernate（避免二阶段动作导致服务退出）
+    AllowSuspendThenHibernate = "no";
+    # 关键：禁止 HybridSleep（混合睡眠）
+    AllowHybridSleep = "no";
+  };
 
   services.logind = {
     lidSwitch = "ignore";
@@ -61,7 +71,7 @@ in {
     };
 
     homelab = {
-      dokploy.enable = true;
+      dokploy.enable = false;
       samba = {
         enable = true;
         shareName = "luck";
@@ -83,8 +93,18 @@ in {
     # 私网 homelab：显式关闭内置防火墙
     security.enableFirewall = false;
 
-    # 需要远程开发再开启；默认保持关闭即可在 host 覆写
-    extra.vscode-remote.enable = lib.mkDefault true;
+    extra = {
+      # 需要远程开发再开启；默认保持关闭即可在 host 覆写
+      vscode-remote.enable = lib.mkDefault true;
+
+      # k3s 控制面：只设置 enable/role，其它配置在模块内固化
+      k3s = {
+        enable = true;
+        role = "server";
+        # serverIP 由 inventory 注入，避免多处重复维护
+        serverPort = 6443;
+      };
+    };
   };
 
   # system.stateVersion 保持当前主版本

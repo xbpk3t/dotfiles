@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: beszel
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: beszel
+  template:
+    metadata:
+      labels:
+        app: beszel
+    spec:
+      containers:
+        - name: beszel
+          image: henrygd/beszel:latest
+          ports:
+            - containerPort: 8090
+          volumeMounts:
+            - name: beszel-data
+              mountPath: /beszel_data
+            - name: beszel-socket
+              mountPath: /beszel_socket
+      volumes:
+        - name: beszel-data
+          persistentVolumeClaim:
+            claimName: beszel-data
+        - name: beszel-socket
+          hostPath:
+            # 重要：使用 hostPath 才能让 hub 与 agent 共享 socket
+            path: /var/lib/beszel_socket
+            type: DirectoryOrCreate
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: beszel-agent
+spec:
+  selector:
+    matchLabels:
+      app: beszel-agent
+  template:
+    metadata:
+      labels:
+        app: beszel-agent
+    spec:
+      hostNetwork: true
+      containers:
+        - name: beszel-agent
+          image: henrygd/beszel-agent:latest
+          env:
+            - name: LISTEN
+              value: "45876"
+            - name: KEY
+              valueFrom:
+                secretKeyRef:
+                  name: beszel-agent-secrets
+                  key: KEY
+            - name: TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: beszel-agent-secrets
+                  key: TOKEN
+            - name: HUB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: beszel-agent-secrets
+                  key: HUB_URL
+          volumeMounts:
+            - name: beszel-agent
+              mountPath: /var/lib/beszel-agent
+            - name: beszel-socket
+              mountPath: /beszel_socket
+            - name: docker-sock
+              mountPath: /var/run/docker.sock
+              readOnly: true
+            # 监控其他磁盘时需要挂载到 /extra-filesystems
+            - name: extra-filesystems
+              mountPath: /extra-filesystems/sda1
+              readOnly: true
+      volumes:
+        - name: beszel-agent
+          hostPath:
+            path: /var/lib/beszel-agent
+            type: DirectoryOrCreate
+        - name: beszel-socket
+          hostPath:
+            path: /var/lib/beszel_socket
+            type: DirectoryOrCreate
+        - name: docker-sock
+          hostPath:
+            path: /var/run/docker.sock
+            type: Socket
+        - name: extra-filesystems
+          hostPath:
+            path: /mnt/disk/.beszel
+            type: DirectoryOrCreate

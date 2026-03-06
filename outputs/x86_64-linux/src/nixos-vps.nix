@@ -8,7 +8,7 @@
   myvars,
   ...
 } @ args: let
-  roleName = "nixos-vps";
+  name = "nixos-vps";
   ssh-user = "root";
   customPkgsOverlay = import (mylib.relativeToRoot "pkgs/overlay.nix");
 
@@ -22,20 +22,23 @@
         inputs.disko.nixosModules.disko
       ]
       ++ map mylib.relativeToRoot [
-        "hosts/${roleName}/default.nix"
+        "hosts/${name}/default.nix"
         "secrets/default.nix"
         "modules/nixos/base"
         "modules/nixos/vps"
+        "modules/nixos/extra/k3s.nix"
       ];
     home-modules = map mylib.relativeToRoot [
+      "hosts/${name}/home.nix"
       "secrets/default.nix"
       "home/base/core"
+      "home/extra/zed-remote.nix"
     ];
   };
 
   # inventory（可变）：节点差异
-  inventory = import (mylib.relativeToRoot "inventory/nixos-vps.nix");
-  nodes = inventory.nodes;
+  inventory = mylib.inventory."nixos-vps";
+  nodes = inventory;
 
   genSpecialArgs = system: let
     pkgs = import inputs.nixpkgs {
@@ -44,7 +47,12 @@
       overlays = [customPkgsOverlay];
     };
   in {
-    inherit inputs mylib myvars pkgs;
+    inherit
+      inputs
+      mylib
+      myvars
+      pkgs
+      ;
 
     pkgs-unstable = import inputs.nixpkgs-unstable or inputs.nixpkgs {
       inherit system;
@@ -53,16 +61,20 @@
     };
   };
 
-  mkNodeModule = name: node: {
-    # 变更项都放到 inventory，避免散落在各个 hosts
-    networking.hostName = node.hostName or name;
+  mkNodeModule = name: node:
+    {
+      # 变更项都放到 inventory，避免散落在各个 hosts
+      networking.hostName = node.hostName or name;
 
-    modules.networking.tailscale.derper = {
-      enable = true;
-      domain = node.tailscale.derpDomain;
-      acmeEmail = myvars.mail;
+      modules.networking.tailscale.derper = {
+        enable = true;
+        domain = node.tailscale.derpDomain;
+        acmeEmail = myvars.mail;
+      };
+    }
+    // lib.optionalAttrs (node ? k3s) {
+      modules.extra.k3s = node.k3s;
     };
-  };
 
   mkNodeRole = name: node: let
     nodeModule = mkNodeModule name node;
@@ -72,16 +84,18 @@
         nixos-modules = baseModules.nixos-modules ++ [nodeModule];
       };
     systemArgs = modules // args;
-    nixosConfig = mylib.nixosSystem (systemArgs
+    nixosConfig = mylib.nixosSystem (
+      systemArgs
       // {
         inherit genSpecialArgs;
-      });
+      }
+    );
     deployNode = mylib.inventory.deployRsNode {
       inherit name node;
       nixosConfiguration = nixosConfig;
       deployLib = inputs."deploy-rs".lib.${baseModules.system};
       defaultSshUser = ssh-user;
-      remoteBuild = false;
+      remoteBuild = true;
     };
   in {
     nixosConfigurations.${name} = nixosConfig;

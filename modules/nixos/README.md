@@ -174,3 +174,30 @@ https://mynixos.com/nixpkgs/options/systemd.coredump
 
 
 ## modules/nixos/extra
+
+
+
+
+
+
+## changelog [2026-01-26]
+
+移除了之前 nixos/base 的 isServer/isDesktop 的roles逻辑
+
+之前这个 isServer/isDesktop 的相关文件有：
+
+- openssh.nix
+- security.nix
+- vm.nix
+- networking.nix
+
+其中部分挪到了 nixos/vps, nixos/desktop 里面（比如 openssh.nix, security.nix），部分配置直接挪到了 hosts里
+
+
+:::tip
+
+之前做这个 isServer/isDesktop 的拆分，真的很蠢，徒增心智负担
+
+明明folder本身就做了roles的拆分
+
+:::

@@ -1,0 +1,37 @@
+---
+version: '3'
+
+tasks:
+  icmp:
+    desc: hping3 ICMP ping
+    summary: "task -g icmp HOST=<host> [SIZE=56] [COUNT=5]"
+    platforms: [linux]
+    requires:
+      vars: [HOST]
+    vars:
+      SIZE: '{{.SIZE | default "56"}}'
+      COUNT: '{{.COUNT | default "5"}}'
+      HOST: ''
+    preconditions:
+      - sh: command -v hping3
+        msg: hping3 not found
+    cmds:
+      # -1: ICMP, --data: payload bytes, -c: count
+      - sudo hping3 -1 {{.HOST}} --data {{.SIZE}} -c {{.COUNT}}
+
+  pmtu:
+    desc: hping3 ICMP with DF for PMTU
+    summary: "task -g pmtu HOST=<host> [SIZE=1472]"
+    platforms: [linux]
+    requires:
+      vars: [HOST]
+    vars:
+      # SIZE 是 payload，1472 = 1500 - 20(IPv4) - 8(ICMP)
+      SIZE: '{{.SIZE | default "1472"}}'
+      HOST: ''
+    preconditions:
+      - sh: command -v hping3
+        msg: hping3 not found
+    cmds:
+      # --df: Don't Fragment
+      - sudo hping3 -1 {{.HOST}} --data {{.SIZE}} --df

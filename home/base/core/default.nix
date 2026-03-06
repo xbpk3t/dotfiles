@@ -46,6 +46,8 @@
       openssh
 
       # 证书和密钥管理
+
+      # https://mynixos.com/nixpkgs/package/openssl_3
       # [2026-01-15] 需要在目标host上检查证书问题
       openssl
     ]
