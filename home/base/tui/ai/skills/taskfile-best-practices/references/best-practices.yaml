@@ -1,0 +1,97 @@
+---
+best_practices:
+  - category: idempotency
+    title: 幂等性
+    qs: 怎么保证 task 的幂等性？
+    items:
+      - id: status_for_side_effects
+        title: 状态控制副作用任务
+        level: SHOULD
+        text: 有副作用的任务尽量提供 status（只决定是否执行，不掩盖错误）
+      - id: status_validate_correctness
+        title: status 校验正确性
+        level: MUST
+        text: status 需要验证正确性，不要只检查文件存在
+      - id: preconditions_for_inputs
+        title: preconditions 校验输入
+        level: MUST
+        text: 必要输入使用 preconditions 进行校验（参数校验、环境依赖、文件存在）
+      - id: vars_sh_safe
+        title: "vars: sh 稳定无副作用"
+        level: MUST
+        text: "vars: sh 只用于稳定、可预测、无副作用的动态值"
+      - id: vars_sh_no_side_effect
+        title: "禁止 vars: sh 副作用"
+        level: MUST_NOT
+        text: "避免在 vars: sh 中做复杂流程或副作用（写文件/改系统状态）"
+      - id: keep_complex_in_cmds
+        title: 复杂流程留在 cmds
+        level: SHOULD
+        text: 复杂流程应留在 cmds 中，保证错误可诊断
+      - id: limit_task_execution
+        title: 限制 task 执行
+        level: SHOULD
+        text: 用 platform + if + preconditions 来做限制执行，保证幂等性
+      - id: requires_verify_vars
+        title: requires 校验 vars 存在
+        level: SHOULD
+        text: 用 requires 验证 vars 是否存在
+
+  - category: reusability
+    title: 可复用性
+    qs: 怎么提升 task 的复用性？
+    items:
+      - id: reuse_template_task
+        title: 模板 task 复用
+        level: SHOULD
+        text: 对于复杂 task，优先复用既有模板 task（如需则新建），再补充差异化变量
+      - id: prefer_vars
+        title: 复用变量抽到 vars
+        level: MUST
+        text: 多处复用的值定义为 vars，能用 Taskfile 级别 vars 的不要放到 task 内
+      - id: wildcard_arguments
+        title: wildcard 参数收敛
+        level: SHOULD
+        text: 使用 wildcard 参数收敛同构任务（如 svc:* / systemctl <ACTION> <UNIT>） # 比如说 systemctl <ACTION> <UNIT> 其中 ACTION都是同构的，就没必要写到多个task里面，可以用通配符都收束到一个task里 # https://taskfile.dev/docs/guide#wildcard-arguments
+      - id: deps_not_reuse
+        title: deps 不是复用
+        level: MUST_NOT
+        text: deps 只能表达前置依赖，不要当成复用代码
+
+  - category: maintainability
+    title: 可维护性
+    qs: 怎么保证 task 的可维护性？
+    items:
+      - id: split_taskfiles
+        title: 拆分多个 Taskfile.yml
+        level: SHOULD
+        text: 多入口项目拆分多个 Taskfile.yml，在根 Taskfile 统一 includes  # 如果有多入口的项目，应该给每个入口各自一个Taskfile.yml（具体来说就是，在该pkg内是主Taskfile，再统一includes到项目根目录，统一调用）
+      - id: cli_args_passthrough
+        title: CLI_ARGS 单参数透传
+        level: MUST
+        text: 用 {{.CLI_ARGS}} 透传命令行参数，仅限单参数场景；多参数用 vars 传递
+      - id: keep_structure
+        title: 保留原有结构
+        level: MUST
+        text: MUST 保留原有注释、空行分组、任务顺序、key 顺序（除非变更需要）
+      - id: no_reformat
+        title: 禁止批量格式化
+        level: MUST_NOT
+        text: MUST NOT 批量格式化 YAML、排序字段、重排任务（仅为统一风格）
+      - id: desc_and_summary
+        title: 入口 desc 与 summary
+        level: MUST
+        text: 用户入口任务必须有 desc 与 summary，且 summary 同步 requires
+      - id: interactive_flag
+        title: 交互标记
+        level: SHOULD
+        text: "交互任务应明确标记 interactive: true（如仓库已有惯例）"
+      - id: silent_stability
+        title: 禁止改 silent
+        level: MUST_NOT
+        text: MUST NOT 随意改 silent 导致日志/解析变更
+      - id: pipefail
+        title: set pipefail 约束
+        level: MUST_NOT
+        text: "在 task 里使用 set: [pipefail]，不要在 cmd 中手写 set -euo pipefail"
+...
