@@ -44,12 +44,17 @@ in {
   };
 
   # 禁止挂起/休眠，保证远程任务不中断
-  systemd.sleep.extraConfig = ''
-    AllowSuspend=no
-    AllowHibernation=no
-    AllowSuspendThenHibernate=no
-    AllowHybridSleep=no
-  '';
+  # 说明：改用 systemd.sleep.settings.Sleep（NixOS 选项已移除 extraConfig）
+  systemd.sleep.settings.Sleep = {
+    # 关键：禁止 Suspend（避免远程任务被挂起中断）
+    AllowSuspend = "no";
+    # 关键：禁止 Hibernation（避免电源切换导致服务退出）
+    AllowHibernation = "no";
+    # 关键：禁止 Suspend-then-Hibernate（避免二阶段动作导致服务退出）
+    AllowSuspendThenHibernate = "no";
+    # 关键：禁止 HybridSleep（混合睡眠）
+    AllowHybridSleep = "no";
+  };
 
   services.logind = {
     lidSwitch = "ignore";
