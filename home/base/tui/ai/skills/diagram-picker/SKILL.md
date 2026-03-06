@@ -1,7 +1,6 @@
 ---
 name: diagram-picker
 description: Pick diagram type -> tool, then generate source + SVG in .diagram with fixed naming rules
-generated-from: skilldoc
 tool-id: diagram-picker
 tool-binary: mermaid,plantuml,d2,pikchr,typst
 tool-version: unknown
