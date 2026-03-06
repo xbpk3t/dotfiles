@@ -60,7 +60,7 @@ best_practices:
 
   - category: maintainability
     title: 可维护性
-    qs: 怎么保证 task 的可维护性？
+    qs: 怎么保证 task 的可维护性（减少重复代码，提高可维护性）？
     items:
       - id: split_taskfiles
         title: 拆分多个 Taskfile.yml
