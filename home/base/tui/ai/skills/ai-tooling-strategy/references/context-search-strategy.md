@@ -1,9 +1,3 @@
----
-name: context-search-strategy
-description: Strategic guidelines for context search commands
-type: search-guideline
----
-
 # Context Search Strategy
 
 ## ⚡ Execution Environment
