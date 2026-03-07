@@ -5,6 +5,7 @@
 
   modules.AI = {
     codex.enable = true;
+    skills.enable = true;
   };
 
   modules.ssh = {

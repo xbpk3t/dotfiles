@@ -1,0 +1,18 @@
+---
+playbook:
+  topic: slidev
+  note: "仅为官方 slidev skill 的补充"
+  why:
+    - "【技术选型】为啥选择 slidev 而非其他工具（reveal.js 之类的）？"
+  htu:
+    - "【Metadata】slidev 的 front matter 有哪些 metadata（theme, layout, background）？"
+    - "【codeblock 语法高亮】slidev 的 codeblock 使用 prism 和 shiki，那实现语法高亮呢？"
+    - "【备注】slidev 怎么写备注（展示在演讲者模式，以供在演示时进行参考）？"
+    - "【具名插槽】语法糖 # ::name::, ::right::, ::default::"
+    - "【Tailwind】slidev 中怎么使用 Tailwind？"
+    - "【Theme】slidev 有哪些好用的 theme？# [tboerger/slidev-theme-meetup: Meetup theme for Slidev](https://github.com/tboerger/slidev-theme-meetup)"
+    - "【Monaco 编辑器】Monaco 只能跑 JS 代码，其他语言最多也就是语法高亮之类的。但是语法高亮这些功能，我用 prism, shiki 之类的不是一样能实现吗？没有必须选择用这个的理由"
+  hto:
+    - "【slidev 部署】多个 PPT 怎么搞？怎么部署到一个静态网站里？slidev 导出的 PPT 应该怎么管理？slidev 怎么管理多个 slide？# [Building and Hosting | Slidev](https://sli.dev/guide/hosting#multiple-builds) # 如果使用 yarn build *.md 会把所有 slides 都分别打包成 dist，"
+    - "slidev 直接导出 PDF 管理也 ok，从文件大小来说，PDF 比 PPT 小很多，直接导出就 ok 了"
+    - "【页面复用】也就是怎么直接把其他 md 文档引入 slides.md # src"
