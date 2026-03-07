@@ -60,6 +60,7 @@ tasks:
   k8s:generate:
     desc: "渲染并加密集群 Secret"
     summary: "task -g k8s:generate"
+    set: [pipefail]
     deps:
       - k8s:check
       - k8s:ensure-output-dir
@@ -74,8 +75,6 @@ tasks:
       - '{{.OUTPUT_FILE}}'
     cmds:
       - |
-          set -euo pipefail
-
           SOPS_AGE_KEY_FILE="{{.AGE_KEY_FILE}}" sops -d "{{.SOPS_FILE}}" | \
             yq eval -o=json '.' - | \
             jq -c '
