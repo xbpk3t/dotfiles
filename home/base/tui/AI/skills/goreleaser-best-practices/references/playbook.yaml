@@ -1,0 +1,55 @@
+what:
+  - id: archives
+    title: 打包支持
+    desc: 归档与产物输出能力，使用 archives/source 相关配置
+    links:
+      - https://goreleaser.com/customization/archive/
+
+  - id: release
+    title: 发布平台支持
+    desc: Release 发布能力与平台支持（以官方文档为准）
+    links:
+      - https://goreleaser.com/customization/release/
+
+  - id: changelog
+    title: 日志生成
+    desc: changelog 配置与生成策略
+
+  - id: packages
+    title: 安装包发布
+    desc: CLI 发行包与系统包（homebrew/scoop/winget/choco/nfpm/snap/aur）
+
+  - id: krew
+    title: k8s 插件发布
+    desc: krew 插件发布支持
+
+  - id: storage
+    title: 产物存储
+    desc: s3 及兼容存储上传
+
+  - id: metadata
+    title: Metadata
+    desc: metadata 用于注入构建期/发布期元信息
+
+  - id: hooks
+    title: Hooks
+    desc: before/after hooks 的使用边界与风险
+
+htu:
+  - step: 识别目标
+    detail: 明确产物类型与发布平台，确定 top-level keys
+
+  - step: 配置 keys
+    detail: 先从 schema.yaml 找功能 → keys，再落到 .goreleaser.yml
+
+  - step: 配置触发链路
+    detail: 在 CI workflow 中安装 goreleaser，配置必要 secrets
+
+  - step: tag 触发发布
+    detail: 通常通过 tag 触发 CI workflow 进行发布
+
+  - step: metadata 使用
+    detail: 在 metadata 中配置版本/构建信息，并在模板或脚本中引用
+
+  - step: hooks 使用
+    detail: hooks 只做可重复、幂等操作，避免引入不可控副作用

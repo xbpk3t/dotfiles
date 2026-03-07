@@ -1,0 +1,56 @@
+items:
+  - name: homebrew (tap)
+    oss: true
+    notes: OSS 支持
+
+  - name: release (GitHub/Gitea/GitLab)
+    oss: true
+    notes: OSS 支持
+
+  - name: changelog
+    oss: true
+    notes: OSS 支持
+    alternatives:
+      - changelogithub
+
+  - name: snapshots
+    oss: true
+    notes: OSS 支持
+
+  - name: github packages
+    oss: true
+    notes: OSS 支持
+
+  - name: Linux packages (AUR/snapcraft/deb/rpm)
+    oss: true
+    notes: OSS 支持
+
+  - name: s3 (and compatible storage)
+    oss: true
+    notes: OSS 支持
+    alternatives:
+      - uptoc
+
+  - name: CI integrations (GitHub Actions/GitLab/Drone/Jenkins)
+    oss: true
+    notes: OSS 支持
+
+  - name: docker images (container registries)
+    oss: false
+    notes: 当前按 OSS 不支持处理，发布需用替代方案
+    alternatives:
+      - docker/build-push-action
+      - aliyun/acr-login
+      - hhyasdf/image-sync-action
+
+  - name: announce (twitter/slack/discord/webhook)
+    oss: false
+    notes: 当前按 OSS 不支持处理，发布通知建议用 CI actions
+    alternatives:
+      - dawidd6/action-send-mail
+      - slackapi/slack-github-action
+      - actions-cool/release-helper
+
+  - name: nightlies
+    oss: false
+    notes: 当前按 OSS 不支持处理
