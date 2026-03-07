@@ -19,7 +19,7 @@ description: Taskfile(go-task) 最佳实践与模式，适用于新增/修改 Ta
 
 ## 修改前必做的定位步骤（MUST）
 
-1) 找到入口任务（用户会调用的 task 名或 alias）
+1) 找到入口任务（用户会调用的 task 名或 alias；root + includes 中**非 internal** 的任务）
 2) 找到真实定义位置（root 或 includes 的子 Taskfile）
 3) 识别任务类型（交互 / 有副作用 / 只读）
 
@@ -27,19 +27,19 @@ description: Taskfile(go-task) 最佳实践与模式，适用于新增/修改 Ta
 
 - 单一事实源：`references/best-practices.yaml`
 - 使用方式：
-  - 先按三大核心分类（幂等性 / 可复用性 / 可维护性）定位规范
-  - 每条规则包含 `level`（MUST / MUST_NOT / SHOULD），用于区分强约束与建议
-  - 修改/评审任务时，以 MUST/MUST_NOT 为硬约束，SHOULD 为优化建议
+    - 先按三大核心分类（幂等性 / 可复用性 / 可维护性）定位规范
+    - 每条规则包含 `level`（MUST / MUST_NOT / SHOULD），用于区分强约束与建议
+    - 修改/评审任务时，以 MUST/MUST_NOT 为硬约束，SHOULD 为优化建议
 - YAML schema 说明：
-  - `best_practices[]`：最佳实践分类列表
-  - `category`：英文分类标识（idempotency / reusability / maintainability）
-  - `title`：中文分类名
-  - `qs`：该分类的引导问题
-  - `items[]`：规则列表
-  - `items[].id`：英文规则标识
-  - `items[].name`：中文规则名
-  - `items[].level`：规则级别（MUST / MUST_NOT / SHOULD）
-  - `items[].text`：规则描述与执行要点
+    - `best_practices[]`：最佳实践分类列表
+    - `category`：英文分类标识（idempotency / reusability / maintainability）
+    - `title`：中文分类名
+    - `qs`：该分类的引导问题
+    - `items[]`：规则列表
+    - `items[].id`：英文规则标识
+    - `items[].name`：中文规则名
+    - `items[].level`：规则级别（MUST / MUST_NOT / SHOULD）
+    - `items[].text`：规则描述与执行要点
 
 ## 修改流程（MUST，按顺序执行）
 
@@ -52,11 +52,11 @@ description: Taskfile(go-task) 最佳实践与模式，适用于新增/修改 Ta
 
 - 单一事实源：`references/gotchas.yaml`
 - 使用方式：
-  - 变更前先对照 gotchas 列表，避免引入已知误区
-  - 如出现问题，优先匹配 desc + fix 的修复建议
+    - 变更前先对照 gotchas 列表，避免引入已知误区
+    - 如出现问题，优先匹配 desc + fix 的修复建议
 - YAML schema 说明：
-  - `gotchas[]`：问题清单
-  - `id`：英文问题标识
-  - `title`：中文问题名
-  - `desc`：问题描述
-  - `fix`：修复建议
+    - `gotchas[]`：问题清单
+    - `id`：英文问题标识
+    - `title`：中文问题名
+    - `desc`：问题描述
+    - `fix`：修复建议

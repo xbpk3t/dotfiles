@@ -1,0 +1,78 @@
+---
+
+- name: 基础功能
+  feature: ...
+  keys: |
+    - before
+    - after
+    - env
+    - metadata
+
+- feature: 发布支持
+  keys: release
+- feature: 日志生成
+  keys: changelog
+- feature: 构建支持
+  keys: builds
+- feature: 校验和生成
+  keys: checksums
+- feature: 签名支持
+  keys: binary_signs
+
+- feature: 快照支持
+  keys: None (--snapshot flag)
+- feature: 归档支持
+  keys: |
+    - archives
+    - source
+
+
+- name: CLI项目
+  feature: Win包支持
+  keys: |
+    - scoops
+    - wingets
+    - chocolateys
+- feature: Linux包支持
+  keys: |
+    - aurs
+    - snapcrafts
+    - nfpms
+- feature: Homebrew
+  keys: homebrew_casks
+
+- name: Docker项目
+  feature: 容器支持
+  keys: |
+    - dockers
+    - kos
+- name: 库项目
+  feature: 库支持
+  keys: github_packages
+- name: 存储
+  feature: 存储支持
+  keys: s3
+- name: k8s项目
+  feature: k8s支持
+  keys: krews
+- name: CI/CD集成
+  feature: CI/CD集成
+  keys: None (CI workflow files)
+- name: 发布管理
+  feature: 发布管理
+  keys: wingets
+- name: 安全与验证
+  feature: 安全与验证
+  keys: sboms
+- name: 通知 (Pro)
+  feature: 通知支持
+  keys: announce
+- name: 高级工作流 (Pro)
+  feature: 高级工作流
+  keys: |
+    - nightlies
+    - publishes
+    - includes
+    - git
+    - prebuilt
+    - uploads

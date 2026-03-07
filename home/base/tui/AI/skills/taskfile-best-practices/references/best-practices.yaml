@@ -19,15 +19,24 @@ best_practices:
       - id: vars_sh_safe
         title: "vars: sh 稳定无副作用"
         level: MUST
-        text: "vars: sh 只用于稳定、可预测、无副作用的动态值"
+        text: "vars: sh 只用于稳定、可预测、无副作用的动态值（尽量单行或简单管道）"
+        notes:
+          - 允许交互式命令（例如 gum、fzf、peco），但需确保不产生副作用
+          - 交互式命令的定义：需要用户输入/选择才能继续执行
       - id: vars_sh_no_side_effect
         title: "禁止 vars: sh 副作用"
         level: MUST_NOT
         text: "避免在 vars: sh 中做复杂流程或副作用（写文件/改系统状态）"
+        notes:
+          - 副作用示例：写文件/改权限/修改系统配置/执行安装卸载
+          - 读取系统信息（如 git rev-parse、uname、id）不视为副作用
       - id: keep_complex_in_cmds
         title: 复杂流程留在 cmds
         level: SHOULD
-        text: 复杂流程应留在 cmds 中，保证错误可诊断
+        text: 复杂流程（多行脚本/分支/依赖外部状态）应留在 cmds 中，保证错误可诊断
+        notes:
+          - 复杂流程示例：多行脚本、if/for/case、复杂管道、多步状态变更
+          - 交互式选择本身不算复杂流程
       - id: limit_task_execution
         title: 限制 task 执行
         level: SHOULD
@@ -60,7 +69,7 @@ best_practices:
 
   - category: maintainability
     title: 可维护性
-    qs: 怎么保证 task 的可维护性（减少重复代码，提高可维护性）？
+    qs: 怎么保证 task 的可维护性？
     items:
       - id: split_taskfiles
         title: 拆分多个 Taskfile.yml
@@ -69,7 +78,10 @@ best_practices:
       - id: cli_args_passthrough
         title: CLI_ARGS 单参数透传
         level: MUST
-        text: 用 {{.CLI_ARGS}} 透传命令行参数，仅限单参数场景；多参数用 vars 传递
+        text: 用 {{.CLI_ARGS}} 透传命令行参数，仅限“单一位置参数”场景；涉及多个参数/flags/组合选项时用 vars 传递
+        notes:
+          - 单一位置参数示例：单个路径、单个仓库名、单个容器名
+          - 多参数示例：目标+端口、多个 flags/选项组合、多个位置参数
       - id: keep_structure
         title: 保留原有结构
         level: MUST
@@ -81,7 +93,9 @@ best_practices:
       - id: desc_and_summary
         title: 入口 desc 与 summary
         level: MUST
-        text: 用户入口任务必须有 desc 与 summary，且 summary 同步 requires
+        text: 用户入口任务必须有 desc 与 summary（root + includes 中非 internal 任务），且 summary 同步 requires
+        notes:
+          - internal: true 的任务不视为入口任务
       - id: interactive_flag
         title: 交互标记
         level: SHOULD

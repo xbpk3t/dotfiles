@@ -96,6 +96,8 @@
     utils.url = "github:numtide/flake-utils";
     nixos-hardware.url = "github:nixos/nixos-hardware";
 
+    agent-skills.url = "github:Kyure-A/agent-skills-nix";
+
     # nixos-cli - Modern NixOS management CLI
     # https://github.com/nix-community/nixos-cli
     nixos-cli = {
@@ -120,6 +122,28 @@
 
     # Declarative Dokploy stack for NixOS
     nix-dokploy.url = "github:el-kurto/nix-dokploy";
+
+    anthropic-skills = {
+      url = "github:anthropics/skills";
+      flake = false;
+    };
+    agent-browser = {
+      url = "github:vercel-labs/agent-browser";
+      flake = false;
+    };
+    vercel-skills = {
+      url = "github:vercel-labs/skills";
+      flake = false;
+    };
+    antfu-skills = {
+      url = "github:antfu/skills";
+      flake = false;
+    };
+    # https://github.com/obra/superpowers
+    obra-superpowers = {
+      url = "github:obra/superpowers";
+      flake = false;
+    };
   };
 
   outputs = inputs: import ./outputs inputs;

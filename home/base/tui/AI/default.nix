@@ -3,6 +3,7 @@
     ./codex.nix
     ./claude.nix
     ./opencode.nix
+    ./skills.nix
   ];
 
   home.packages = with pkgs; [
