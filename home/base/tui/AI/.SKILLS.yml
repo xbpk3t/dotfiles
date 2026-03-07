@@ -61,6 +61,8 @@ vars:
     # https://github.com/ast-grep/agent-skill
     # https://skills.sh/ast-grep/agent-skill
     - repo: ast-grep/agent-skill
+      skills:
+        - ast-grep
 
     # https://github.com/vercel-labs/agent-skills
     - repo: vercel-labs/agent-skills
@@ -545,6 +547,8 @@ vars:
 
     # https://skills.sh/lucifer1004/claude-skill-typst
     - repo: lucifer1004/claude-skill-typst
+      skills:
+        - typst
 
 
     # https://skills.sh/ypares/agent-skills
@@ -569,6 +573,8 @@ vars:
 
     # https://skills.sh/slidevjs/slidev
     - repo: slidevjs/slidev
+      skills:
+        - slidev
 
     # https://skills.sh/silvainfm/claude-skills
     - repo: silvainfm/claude-skills
@@ -589,5 +595,11 @@ vars:
 
     # https://skills.sh/hustcer/nushell-pro
     - repo: hustcer/nushell-pro
+      skills:
+        - nushell-pro
+
     # https://skills.sh/hustcer/nushell-craft
+    # TODO: [2026-03-06] 注意这两个重复了，持续关注之后author怎么处理。这两个repo只需要保留一个即可。
     - repo: hustcer/nushell-craft
+      skills:
+        - nushell-craft

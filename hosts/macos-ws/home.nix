@@ -22,6 +22,7 @@
   modules.AI = {
     codex.enable = true;
     opencode.enable = true;
+    skills.enable = true;
   };
 
   modules.tui = {
