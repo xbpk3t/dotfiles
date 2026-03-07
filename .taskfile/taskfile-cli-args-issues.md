@@ -1,0 +1,37 @@
+# CLI_ARGS 复核清单（待逐项处理）
+
+- 说明：以下任务使用 {{.CLI_ARGS}}，但实际属于多参数或多语义场景，建议后续逐项改为显式 vars。
+
+- `.taskfile/devops/Taskfile.pre-commit.yml` / `init-template`: pc:init-template 使用 CLI_ARGS，实际可能是多参数（建议改为显式 vars）
+- `.taskfile/devops/Taskfile.pre-commit.yml` / `try-repo`: pc:try-repo 使用 CLI_ARGS，实际可能是多参数（建议改为显式 vars）
+- `.taskfile/devops/Taskfile.ansible.yml` / `ping`: ansible 命令组合多参数（host/flags/args），不符合单参数
+- `.taskfile/kernel/Taskfile.linux.yml` / `rename`: 含 --recursive + old + new，多参数
+- `.taskfile/kernel/Taskfile.pkg.yml` / `run:*`: ARGS 透传多参数，目前来自 CLI_ARGS
+- `.taskfile/mac/Taskfile.markdown.yml` / `md2html`: gm 常见多参数（flags + file）
+- `.taskfile/mac/Taskfile.trzsz.yml` / `upload`: trz 选项组合，多参数
+- `.taskfile/mac/Taskfile.trzsz.yml` / `download`: tsz 选项组合，多参数
+- `.taskfile/mac/Taskfile.me.yml` / `cv`: rendercv render 常见多参数
+- `.taskfile/network/z.yml` / `global-ping`: globalping ping 多参数（目标/flags）
+- `.taskfile/network/z.yml` / `doggo`: doggo 多参数（域名/flags）
+- `.taskfile/nix/Taskfile.test.yml` / `syntax-verify`: nix-instantiate 可带多参数/多文件
+- `.taskfile/network/scan/Taskfile.nmap.yml` / `ping-scan`: nmap 目标+参数组合
+- `.taskfile/network/scan/Taskfile.nmap.yml` / `arp-scan`: nmap 目标+参数组合
+- `.taskfile/network/scan/Taskfile.nmap.yml` / `no-ping`: nmap 目标+参数组合
+- `.taskfile/network/scan/Taskfile.nmap.yml` / `syn-scan`: nmap 目标+参数组合
+- `.taskfile/network/scan/Taskfile.nmap.yml` / `tcp-scan`: nmap 目标+参数组合
+- `.taskfile/network/scan/Taskfile.nmap.yml` / `udp-scan`: nmap 目标+参数组合
+- `.taskfile/network/scan/Taskfile.nmap.yml` / `port-range`: nmap 端口范围+目标
+- `.taskfile/network/scan/Taskfile.nmap.yml` / `version-detect`: nmap 目标+参数组合
+- `.taskfile/network/scan/Taskfile.nmap.yml` / `os-detect`: nmap 目标+参数组合
+- `.taskfile/network/scan/Taskfile.nmap.yml` / `aggressive`: nmap 目标+参数组合
+- `.taskfile/network/scan/Taskfile.nmap.yml` / `default-script`: nmap 目标+参数组合
+- `.taskfile/network/scan/Taskfile.nmap.yml` / `vuln-scan`: nmap 目标+参数组合
+- `.taskfile/network/scan/Taskfile.nmap.yml` / `ssl-cert`: nmap 目标+参数组合
+- `.taskfile/network/scan/Taskfile.nmap.yml` / `output-normal`: nmap 输出选项+目标
+- `.taskfile/network/scan/Taskfile.nmap.yml` / `output-xml`: nmap 输出选项+目标
+- `.taskfile/network/scan/Taskfile.nmap.yml` / `fast-scan`: nmap 目标+参数组合
+- `.taskfile/network/scan/Taskfile.nmap.yml` / `fragment`: nmap 目标+参数组合
+- `.taskfile/network/scan/Taskfile.nmap.yml` / `decoy`: nmap 目标+参数组合
+- `.taskfile/network/scan/Taskfile.nmap.yml` / `source-port`: nmap 端口+目标
+- `.taskfile/network/scan/Taskfile.nmap.yml` / `quick-web-scan`: nmap 目标+多命令组合
+- `.taskfile/k8s/Taskfile.helm.yml` / `<vars>`: RELEASE_NAME/CHART_NAME/REPO_NAME/REPO_URL 绑定 CLI_ARGS，语义冲突

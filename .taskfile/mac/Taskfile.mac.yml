@@ -56,6 +56,7 @@ tasks:
   svc:*:
     desc: "svc 通配任务"
     summary: "task -g svc:<ACTION> LABEL=<label> [DOMAIN=system] [PLIST=<path>]"
+    set: [pipefail]
     vars:
       ACTION: '{{index .MATCH 0}}'
       LABEL: '{{.LABEL | default ""}}'
@@ -68,7 +69,6 @@ tasks:
         - name: LABEL
     cmds:
       - |
-        set -euo pipefail
         ACTION='{{.ACTION}}'
         LABEL='{{.LABEL}}'
         DOMAIN='{{.DOMAIN}}'
@@ -98,6 +98,7 @@ tasks:
   status:*:
     desc: "status 通配任务"
     summary: "task -g status:<ACTION> [LABEL=<label>] [DOMAIN=system]"
+    set: [pipefail]
     vars:
       ACTION: '{{index .MATCH 0}}'
       LABEL: '{{.LABEL | default ""}}'
@@ -108,7 +109,6 @@ tasks:
           enum: [list, list-all, print]
     cmds:
       - |
-        set -euo pipefail
         ACTION='{{.ACTION}}'
         LABEL='{{.LABEL}}'
         DOMAIN='{{.DOMAIN}}'
@@ -133,6 +133,7 @@ tasks:
   logs:*:
     desc: "logs 通配任务"
     summary: "task -g logs:<ACTION> LABEL=<label> [LAST=1h]"
+    set: [pipefail]
     vars:
       ACTION: '{{index .MATCH 0}}'
       LABEL: '{{.LABEL | default ""}}'
@@ -144,7 +145,6 @@ tasks:
         - name: LABEL
     cmds:
       - |
-        set -euo pipefail
         ACTION='{{.ACTION}}'
         LABEL='{{.LABEL}}'
         LAST='{{.LAST}}'
@@ -171,6 +171,7 @@ tasks:
   reload:
     desc: 向服务发送 HUP（需要守护支持）
     summary: "task -g reload LABEL=<label> [DOMAIN=system]"
+    set: [pipefail]
     vars:
       LABEL: '{{.LABEL | default ""}}'
       DOMAIN: '{{.DOMAIN | default "system"}}'
@@ -179,7 +180,6 @@ tasks:
         - LABEL
     cmds:
       - |
-        set -euo pipefail
         DOMAIN='{{.DOMAIN}}'
         LABEL='{{.LABEL}}'
         SUDO="${DOMAIN/system/sudo}"
