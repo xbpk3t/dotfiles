@@ -1,6 +1,7 @@
 ---
 version: "3"
 
+
 vars:
   SKILLS:
     # skills 为空时会安装该 repo 的全部 skills（依赖 skills CLI 默认行为）
@@ -213,6 +214,7 @@ vars:
         - git-advanced-workflows
         # what: 用于 GitHub Actions 模板 相关任务
         # https://skills.sh/wshobson/agents/github-actions-templates
+        # 这个很有用
         - github-actions-templates
         # what: 用于 GitLab CI 模式 相关任务
         - gitlab-ci-patterns
@@ -593,13 +595,90 @@ vars:
         - terraform-style-guide
         - terraform-test
 
-    # https://skills.sh/hustcer/nushell-pro
-    - repo: hustcer/nushell-pro
-      skills:
-        - nushell-pro
-
     # https://skills.sh/hustcer/nushell-craft
-    # TODO: [2026-03-06] 注意这两个重复了，持续关注之后author怎么处理。这两个repo只需要保留一个即可。
     - repo: hustcer/nushell-craft
       skills:
         - nushell-craft
+        - nushell-pro
+
+
+    # https://github.com/supercent-io/skills-template
+    - repo: supercent-io/skills-template
+      skills:
+        - agent-configuration
+        - agent-evaluation
+        - agentation
+        - agentic-development-principles
+        - agentic-workflow
+        - ai-tool-compliance
+        - api-design
+        - api-documentation
+        - authentication-setup
+        - backend-testing
+        - bmad-gds
+        - bmad-idea
+        - bmad-orchestrator
+        - changelog-maintenance
+        - code-refactoring
+        - code-review
+        - codebase-search
+        - copilot-coding-agent
+        - data-analysis
+        - database-schema-design
+        - debugging
+        - deployment-automation
+        - design-system
+        - environment-setup
+        - file-organization
+        - firebase-ai-logic
+        - genkit
+        - git-submodule
+        - git-workflow
+        - image-generation
+        - jeo
+        - llm-monitoring-dashboard
+        - log-analysis
+        - looker-studio-bigquery
+        - marketing-automation
+        - monitoring-observability
+        - npm-git-install
+        - oh-my-codex
+        - ohmg
+        - omc
+        - opencontext
+        - pattern-detection
+        - performance-optimization
+        - plannotator
+        - pollinations-ai
+        - presentation-builder
+        - prompt-repetition
+        - ralph
+        - ralphmode
+        - react-best-practices
+        - responsive-design
+        - security-best-practices
+        - skill-standardization
+        - sprint-retrospective
+        - standup-meeting
+        - state-management
+        - system-environment-setup
+        - task-estimation
+        - task-planning
+        - technical-writing
+        - testing-strategies
+        - ui-component-patterns
+        - user-guide-writing
+        - vercel-deploy
+        - vibe-kanban
+        - video-production
+        - web-accessibility
+        - web-design-guidelines
+        - workflow-automation
+
+    - repo: affaan-m/everything-claude-code
+      skills:
+        - golang-patterns
+        - golang-testing
+
+
+  NEED_TO_ADD:
