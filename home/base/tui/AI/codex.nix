@@ -1,5 +1,6 @@
 {
   config,
+  inputs,
   lib,
   pkgs,
   ...
@@ -21,7 +22,8 @@ in {
     # https://github.com/openai/codex
     programs.codex = {
       enable = true;
-      package = pkgs.codex;
+      # package = pkgs.codex;
+      package = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.codex;
 
       # https://github.com/openai/codex/blob/main/docs/config.md
       settings = {
