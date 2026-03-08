@@ -35,6 +35,9 @@
 
       # 禁止 git dirty 输出（这个warn没意义）
       warn-dirty = false;
+
+      # 允许信任 flake.nix 的 nixConfig（如 extra-substituters / extra-trusted-public-keys）
+      accept-flake-config = true;
     };
     extraOptions = ''
       experimental-features = nix-command flakes

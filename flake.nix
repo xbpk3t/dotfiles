@@ -8,8 +8,9 @@
       "https://cache.garnix.io"
       "https://nix-community.cachix.org"
       "https://loneros.cachix.org"
-      "https://numtide.cachix.org"
       "https://watersucks.cachix.org"
+
+      "https://cache.numtide.com"
     ];
 
     trusted-public-keys = [
@@ -20,6 +21,8 @@
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
 
       "watersucks.cachix.org-1:6gadPC5R8iLWQ3EUtfu3GFrVY7X6I4Fwz/ihW25Jbv8="
+
+      "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
     ];
 
     # 防止关键包被垃圾回收清理
@@ -97,6 +100,7 @@
     nixos-hardware.url = "github:nixos/nixos-hardware";
 
     agent-skills.url = "github:Kyure-A/agent-skills-nix";
+    llm-agents.url = "github:numtide/llm-agents.nix";
 
     # nixos-cli - Modern NixOS management CLI
     # https://github.com/nix-community/nixos-cli
@@ -139,7 +143,6 @@
       url = "github:antfu/skills";
       flake = false;
     };
-    # https://github.com/obra/superpowers
     obra-superpowers = {
       url = "github:obra/superpowers";
       flake = false;

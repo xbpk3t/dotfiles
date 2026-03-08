@@ -1,6 +1,11 @@
 ---
 version: "3"
 
+includes:
+  skills-data:
+    taskfile: .SKILLS.yml
+    internal: true
+
 dir: "{{.USER_WORKING_DIR}}"
 
 # https://skills.sh/
@@ -16,103 +21,100 @@ dir: "{{.USER_WORKING_DIR}}"
 
 # pnpm install -g ctx7
 
-#vars:
-#  SKILLS_CMD: "npx -y skills"
-#  CTX7_CMD: "npx -y ctx7"
-#  DEFAULT_AGENT: "codex"
-#  # skills 安装状态的事实源（skill-lock）
-#  SKILL_LOCK: "/Users/luck/.codex/skills/.skill-lock.json"
-#  # 本地维护的 skills 清单（source of truth）
-#  SKILLS_DATA: "{{.TASKFILE_DIR}}/.SKILLS.yml"
-#  # DEFAULT_SCOPE 影响是否追加 -g（global 安装到 ~/.codex/skills）
-#  DEFAULT_SCOPE: "global"
-#  # DEFAULT_MODE 使用 copy 可避免 symlink 失效
-#  DEFAULT_MODE: "copy"
-#  SCOPE_FLAG: "{{if eq .DEFAULT_SCOPE \"global\"}}-g{{end}}"
-#tasks:
-#  default:
-#    desc: "按 Taskfile 内的 metadata 安装/同步 skills"
-#    silent: true
-#    interactive: true
-#    vars:
-#      # 只安装新增 skills（基于 skill-lock + .SKILLS.yml 的 diff）
-#      NEW_SKILLS:
-#        sh: >-
-#          yq -o=json '.vars.SKILLS' "{{.SKILLS_DATA}}"
-#          | jq -r --slurpfile lock "{{.SKILL_LOCK}}" '
-#              $lock[0].skills | keys as $installed
-#              | .[]
-#              | {repo, skills: ([(.skills // [])[] | select($installed | index(.) | not)])}
-#              | select(.skills | length > 0)
-#              | [ .repo, (.skills | join(",")) ] | @tsv
-#            '
-#    summary: |
-#      task -g skills
-#      task -t ~/Desktop/dotfiles/.taskfile/Taskfile.yml skills
-#    aliases:
-#      - apply
-#    preconditions:
-#      - sh: command -v jq
-#        msg: jq not found
-#      - sh: command -v yq
-#        msg: yq not found
-#      - sh: command -v npx
-#      - sh: 'test -n "{{range .SKILLS}}{{.repo}}{{end}}"'
-#        msg: skills repo metadata is empty
-#    cmds:
-#      - for:
-#          var: NEW_SKILLS
-#          as: SKILL_LINE
-#        cmd: '{{ $parts := splitList "\t" .SKILL_LINE }}{{ $repo := index $parts 0 }}{{ $skills := index $parts 1 }}{{.SKILLS_CMD}} add {{ $repo }} --agent {{.DEFAULT_AGENT}} {{.SCOPE_FLAG}}{{if eq .DEFAULT_MODE "copy"}} --copy{{end}}{{range (splitList "," $skills)}} --skill {{.}}{{end}}'
-#
-#  # https://context7.com/docs/skills
-#  suggest:
-#    desc: 根据项目依赖自动推荐 skills
-#    summary: "task -g skills:suggest"
-#    cmd: ctx7 skills suggest
-#    preconditions:
-#      - sh: command -v ctx7
-#
-#
-#  list:
-#    silent: true
-#    interactive: true
-#    desc: "列出已安装的 skills"
-#    summary: "task -g skills:list"
-#    preconditions:
-#      - sh: command -v npx
-#    cmd: "{{.SKILLS_CMD}} list --agent {{.DEFAULT_AGENT}} {{.SCOPE_FLAG}}"
-#
-#  check:
-#    silent: true
-#    interactive: true
-#    desc: "检查 skills 是否有可更新版本"
-#    summary: task -g skills:check
-#    preconditions:
-#      - sh: command -v npx
-#    cmd: "{{.SKILLS_CMD}} check --agent {{.DEFAULT_AGENT}} {{.SCOPE_FLAG}}"
-#
-#  update:
-#    silent: true
-#    interactive: true
-#    desc: "更新已安装 skills"
-#    summary: "task -g skills:update"
-#    preconditions:
-#      - sh: command -v npx
-#    cmd: "{{.SKILLS_CMD}} update --agent {{.DEFAULT_AGENT}} {{.SCOPE_FLAG}}"
-#
-#  info:
-#    desc: "查看 ctx7 skills 信息（gum 选择 repo）"
-#    summary: "task -g skills:info"
-#    silent: true
-#    interactive: true
-#    vars:
-#      REPO:
-#        sh: 'repos="{{range .SKILLS}}{{.repo}}\n{{end}}"; if [ -z "$repos" ]; then exit 0; fi; printf "%b" "$repos" | gum choose --header "选择 skills repo"'
-#    preconditions:
-#      - sh: command -v npx
-#      - sh: command -v gum
-#      - sh: 'test -n "{{range .SKILLS}}{{.repo}}{{end}}"'
-#      - sh: 'test -n "{{.REPO}}"'
-#        msg: No repo selected
-#    cmd: '{{.CTX7_CMD}} skills info "/{{.REPO}}"'
+vars:
+  SKILLS_CMD: "pnpx skills"
+  CTX7_CMD: "pnpx -y ctx7"
+  DEFAULT_AGENT: "codex"
+  # DEFAULT_SCOPE 影响是否追加 -g（global 安装到 ~/.codex/skills）
+  DEFAULT_SCOPE: "global"
+  # DEFAULT_MODE 使用 copy 可避免 symlink 失效
+  DEFAULT_MODE: "copy"
+  SCOPE_FLAG: "{{if eq .DEFAULT_SCOPE \"global\"}}-g{{end}}"
+tasks:
+  default:
+    desc: "安装 NEED_TO_ADD 中定义的 skills"
+    summary: "task -g skills"
+    cmds:
+      - task: _install
+        vars:
+          SKILLS:
+            ref: .NEED_TO_ADD
+  full-install:
+    desc: "安装 SKILLS 中定义的全部 skills"
+    summary: "task -g skills:full-install"
+    cmds:
+      - task: _install
+        vars:
+          SKILLS:
+            ref: .SKILLS
+
+  _install:
+    desc: "按 Taskfile 内的 metadata 安装/同步 skills"
+    silent: true
+    interactive: true
+    internal: true
+    aliases:
+      - apply
+    preconditions:
+      - sh: command -v pnpx
+      - sh: 'test -n "{{range .SKILLS}}{{.repo}}{{end}}"'
+        msg: skills repo metadata is empty
+    cmds:
+      # 如果未指定 skills 列表，则不传 --skill，交给 skills CLI 安装该 repo 全量技能
+      - for:
+          var: SKILLS
+          as: SKILL_ITEM
+        cmd: '{{.SKILLS_CMD}} add {{.SKILL_ITEM.repo}} --agent {{.DEFAULT_AGENT}} {{.SCOPE_FLAG}} --yes{{if eq .DEFAULT_MODE "copy"}} --copy{{end}}{{if .SKILL_ITEM.skills}}{{range .SKILL_ITEM.skills}} --skill {{.}}{{end}}{{end}}'
+
+
+
+  # https://context7.com/docs/skills
+  suggest:
+    desc: 根据项目依赖自动推荐 skills
+    cmd: ctx7 skills suggest
+    preconditions:
+      - sh: command -v ctx7
+
+
+  list:
+    silent: true
+    interactive: true
+    desc: "列出已安装的 skills"
+    summary: "task -g skills:list"
+    preconditions:
+      - sh: command -v pnpx
+    cmd: "{{.SKILLS_CMD}} list --agent {{.DEFAULT_AGENT}} {{.SCOPE_FLAG}}"
+
+  check:
+    silent: true
+    interactive: true
+    desc: "检查 skills 是否有可更新版本"
+    summary: task -g skills:check
+    preconditions:
+      - sh: command -v pnpx
+    cmd: "{{.SKILLS_CMD}} check --agent {{.DEFAULT_AGENT}} {{.SCOPE_FLAG}}"
+
+  update:
+    silent: true
+    interactive: true
+    desc: "更新已安装 skills"
+    summary: "task -g skills:update"
+    preconditions:
+      - sh: command -v pnpx
+    cmd: "{{.SKILLS_CMD}} update --agent {{.DEFAULT_AGENT}} {{.SCOPE_FLAG}}"
+
+  info:
+    desc: "查看 ctx7 skills 信息（gum 选择 repo）"
+    summary: "task -g skills:info"
+    silent: true
+    interactive: true
+    vars:
+      REPO:
+        sh: 'repos="{{range .SKILLS}}{{.repo}}\n{{end}}"; if [ -z "$repos" ]; then exit 0; fi; printf "%b" "$repos" | gum choose --header "选择 skills repo"'
+    preconditions:
+      - sh: command -v pnpx
+      - sh: command -v gum
+      - sh: 'test -n "{{range .SKILLS}}{{.repo}}{{end}}"'
+      - sh: 'test -n "{{.REPO}}"'
+        msg: No repo selected
+    cmd: '{{.CTX7_CMD}} skills info "/{{.REPO}}"'
