@@ -1,4 +1,5 @@
-_: let
+_:
+let
   # OpenType Feature tags
   # 连字符相关配置
   # https://learn.microsoft.com/en-us/typography/opentype/spec/featurelist
@@ -18,7 +19,8 @@ _: let
   };
 
   exts = import ./extensions.nix;
-in {
+in
+{
   # https://zed.dev/blog/hidden-gems-part-2
 
   # 可供参考的zed配置
@@ -48,7 +50,7 @@ in {
   #
   # https://zed.dev/docs/vim
   #
-  vim_mode = true;
+  vim_mode = false;
 
   # 自动保存（默认off，所以需要自己手动设置）
   autosave = {
@@ -548,6 +550,46 @@ in {
       #   同时你已经把 format_on_save 关掉了，所以这不会影响“保存吞空行”的问题；
       #   它只决定你手动触发 Format 时使用谁来格式化。
       formatter = "language_server";
+    };
+
+    JSON = {
+      # WHAT: 保留 JSON 的保存时自动格式化（Format on Save）。
+      # WHY:
+      #   你希望继续享受 auto format，但必须保证输出是严格 JSON，
+      #   不能因为 formatter 风格引入 trailing comma，导致 pre-commit check-json 失败。
+      format_on_save = "on";
+      use_on_type_format = true;
+      formatter = {
+        external = {
+          command = "prettier";
+          arguments = [
+            "--stdin-filepath"
+            "{buffer_path}"
+            # 强制关闭 trailing comma，避免生成不被 strict JSON 接受的尾逗号。
+            "--trailing-comma"
+            "none"
+          ];
+        };
+      };
+    };
+
+    JSONC = {
+      # WHY:
+      #   Zed 的一些配置文件（例如 .zed/settings.json）实际会按 JSONC 语义处理。
+      #   这里同步对 JSONC 关闭 trailing comma，防止 autosave 后再次写入尾逗号。
+      format_on_save = "on";
+      use_on_type_format = true;
+      formatter = {
+        external = {
+          command = "prettier";
+          arguments = [
+            "--stdin-filepath"
+            "{buffer_path}"
+            "--trailing-comma"
+            "none"
+          ];
+        };
+      };
     };
 
     Go = {

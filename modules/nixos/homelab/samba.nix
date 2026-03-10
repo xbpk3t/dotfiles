@@ -57,11 +57,12 @@ in {
     # https://mynixos.com/nixpkgs/options/services.samba
     services.samba = {
       enable = true;
-      # 用用户级认证，避免匿名访问导致权限失控
-      securityType = "user";
 
       settings = {
         global = {
+          # NOTE: securityType 已迁移到 settings.global.security
+          # 用用户级认证，避免匿名访问导致权限失控
+          security = "user";
           # 兼容老客户端的默认工作组名，减少发现障碍
           workgroup = "WORKGROUP";
           # 提示性名称，方便在网络浏览里识别服务器
