@@ -680,5 +680,9 @@ vars:
         - golang-patterns
         - golang-testing
 
+    # https://x.com/axiaisacat/status/2030297324962857044
+    # https://github.com/pbakaus/impeccable
+    - repo: pbakaus/impeccable
 
   NEED_TO_ADD:
+    - repo:

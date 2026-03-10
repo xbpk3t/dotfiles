@@ -37,7 +37,8 @@ in {
           auto_mount_repo = true;
         };
         features = {
-          web_search_request = true;
+          # [features].web_search_request` is deprecated because web search is enabled by default.
+          # web_search_request = true;
           streamable_shell = true;
 
           rmcp_client = true;

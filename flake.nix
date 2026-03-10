@@ -1,34 +1,5 @@
-{
+rec {
   description = "NixOS for Me";
-
-  # nixConfig affects the flake itself, not the system configuration
-  nixConfig = {
-    substituters = [
-      "https://cache.nixos.org"
-      "https://cache.garnix.io"
-      "https://nix-community.cachix.org"
-      "https://loneros.cachix.org"
-      "https://watersucks.cachix.org"
-
-      "https://cache.numtide.com"
-    ];
-
-    trusted-public-keys = [
-      "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-
-      "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
-
-      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-
-      "watersucks.cachix.org-1:6gadPC5R8iLWQ3EUtfu3GFrVY7X6I4Fwz/ihW25Jbv8="
-
-      "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
-    ];
-
-    # 防止关键包被垃圾回收清理
-    keep-outputs = true;
-    keep-derivations = true;
-  };
 
   inputs = {
     # Use existing nixpkgs inputs
@@ -54,6 +25,10 @@
 
     darwin = {
       url = "github:lnl7/nix-darwin/master";
+      inputs.nixpkgs.follows = "nixpkgs-darwin";
+    };
+    determinate = {
+      url = "https://flakehub.com/f/DeterminateSystems/determinate/*";
       inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
 
@@ -126,27 +101,6 @@
 
     # Declarative Dokploy stack for NixOS
     nix-dokploy.url = "github:el-kurto/nix-dokploy";
-
-    anthropic-skills = {
-      url = "github:anthropics/skills";
-      flake = false;
-    };
-    agent-browser = {
-      url = "github:vercel-labs/agent-browser";
-      flake = false;
-    };
-    vercel-skills = {
-      url = "github:vercel-labs/skills";
-      flake = false;
-    };
-    antfu-skills = {
-      url = "github:antfu/skills";
-      flake = false;
-    };
-    obra-superpowers = {
-      url = "github:obra/superpowers";
-      flake = false;
-    };
   };
 
   outputs = inputs: import ./outputs inputs;

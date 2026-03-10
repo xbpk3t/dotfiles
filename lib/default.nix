@@ -8,6 +8,7 @@
   attrs = import ./attrs.nix {inherit lib;};
   langs = import ./langs.nix;
   vpsSysctl = import ./vps-sysctl.nix {inherit lib;};
+  nixCacheSettings = import ./nix-cache-settings.nix;
 
   # use path relative to the root of the project
   relativeToRoot = lib.path.append ../.;
@@ -34,6 +35,7 @@ in {
     attrs
     langs
     vpsSysctl
+    nixCacheSettings
     scanPaths
     relativeToRoot
     ;
