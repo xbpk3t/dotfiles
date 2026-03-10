@@ -19,6 +19,12 @@
       config.nvidia.acceptLicense = true;
       # 允许安装 broken 包（如 zig）
       config.allowBroken = true;
+      # 全局构建行为（原先在 nixpkgs.config 模块层声明）。
+      # NOTE: 在 HM useGlobalPkgs 场景下，把这些配置收敛到 pkgs 构造阶段，
+      # 可避免 "nixpkgs.config/overlays will be ignored" 的评估警告。
+      config.enableParallelBuilding = true;
+      config.buildManPages = false;
+      config.buildDocs = false;
       overlays = [
         customPkgsOverlay
       ];
@@ -37,6 +43,9 @@
       # To use chrome, we need to allow the installation of non-free software
       config.allowUnfree = true;
       config.allowBroken = true;
+      config.enableParallelBuilding = true;
+      config.buildManPages = false;
+      config.buildDocs = false;
       overlays = [
         customPkgsOverlay
       ];

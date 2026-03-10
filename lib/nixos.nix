@@ -10,14 +10,15 @@
   ...
 }: let
   inherit (inputs) nixpkgs home-manager nixos-generators;
+  # NOTE:
+  # nixos/lib/eval-config.nix 会在 specialArgs.pkgs 存在时直接给出 warning。
+  # 正确做法是通过 nixosSystem 的 pkgs 参数传入，并从 specialArgs 中移除 pkgs。
+  nixosSpecialArgs = builtins.removeAttrs specialArgs ["pkgs"];
 in
   nixpkgs.lib.nixosSystem {
-    inherit system specialArgs;
-    # NOTE: We pass pkgs through specialArgs, which causes evaluation warnings about
-    # nixpkgs.config and nixpkgs.overlays being ignored. This is intentional and expected.
-    # The pkgs instance is already configured in genSpecialArgs (outputs/default.nix) with
-    # allowUnfree, allowBroken, and nvidia.acceptLicense settings.
-    # These warnings can be safely ignored as they don't affect functionality.
+    inherit system;
+    pkgs = specialArgs.pkgs;
+    specialArgs = nixosSpecialArgs;
     modules =
       nixos-modules
       ++ [

@@ -30,7 +30,8 @@ tasks:
           echo "No node selected"
           exit 1
         fi
-        printf "%s\n" "{{.HOSTS}}" | xargs -n1 -P "{{.CONCURRENCY_RESOLVED}}" -I{} \
+        # NOTE: xargs 在 -I 模式下会按行逐个替换，-n1 与其冲突且会触发 warning。
+        printf "%s\n" "{{.HOSTS}}" | xargs -P "{{.CONCURRENCY_RESOLVED}}" -I{} \
           nix run github:serokell/deploy-rs -- ".#{}"
 
   profile:
