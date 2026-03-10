@@ -23,7 +23,8 @@ in {
 
   services.resolved = {
     enable = true;
-    fallbackDns = nameservers;
+    # NOTE: fallbackDns 已迁移到 settings.Resolve.FallbackDNS
+    settings.Resolve.FallbackDNS = nameservers;
     # 重要：关闭本地 stub（127.0.0.53），避免集群 DNS 走到不可达的本地回环
     # settings = {
     #   DNSStubListener = "no";
@@ -57,9 +58,10 @@ in {
   };
 
   services.logind = {
-    lidSwitch = "ignore";
-    lidSwitchDocked = "ignore";
-    powerKey = "ignore";
+    # NOTE: 旧字段已迁移到 settings.Login.*
+    settings.Login.HandleLidSwitch = "ignore";
+    settings.Login.HandleLidSwitchDocked = "ignore";
+    settings.Login.HandlePowerKey = "ignore";
   };
 
   modules = {

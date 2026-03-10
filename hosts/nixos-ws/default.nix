@@ -43,7 +43,8 @@ in {
   # 确保 systemd-resolved 正确启用
   services.resolved = {
     enable = true;
-    fallbackDns = nameservers;
+    # NOTE: fallbackDns 已迁移到 settings.Resolve.FallbackDNS
+    settings.Resolve.FallbackDNS = nameservers;
   };
 
   # 禁用挂起/休眠/混合睡眠，仅阻断这些 target，不影响 systemctl poweroff 或桌面关机。
@@ -68,11 +69,12 @@ in {
   # logind 也屏蔽合盖/闲置触发挂起，避免出现“尝试挂起但被上面拒绝”的黑屏/提示；关机/重启仍正常
   # 忽略合盖、闲置和电源键触发的挂起，避免出现“尝试挂起但被拒绝”的黑屏/提示；若想让电源键关机，可把powerKey 改成 "poweroff"。
   services.logind = {
-    lidSwitch = "ignore";
-    lidSwitchDocked = "ignore";
+    # NOTE: 旧字段已迁移到 settings.Login.*
+    settings.Login.HandleLidSwitch = "ignore";
+    settings.Login.HandleLidSwitchDocked = "ignore";
     # idleAction = "ignore";
     # 若希望电源键关机可改为 "poweroff"；为防误触挂起这里默认忽略
-    powerKey = "ignore";
+    settings.Login.HandlePowerKey = "ignore";
   };
 
   # Boot configuration - Enable systemd-boot and disable GRUB
