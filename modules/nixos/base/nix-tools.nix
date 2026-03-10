@@ -1,9 +1,12 @@
 {
   lib,
   inputs,
+  mylib,
   pkgs,
   ...
-}: {
+}: let
+  cacheSettings = mylib.nixCacheSettings;
+in {
   imports = [inputs.nixos-cli.nixosModules.nixos-cli];
 
   # MAYBE: https://github.com/triton/triton/blob/master/pkgs/all-pkgs/s/systemd/default.nix 这个配置太牛逼了，之后学着搞下
@@ -25,6 +28,10 @@
       min-free = 128000000;
       max-free = 1000000000;
       trusted-users = ["@wheel"];
+      substituters = cacheSettings.substituters;
+      trusted-public-keys = cacheSettings.trustedPublicKeys;
+      # 允许非 trusted user 也可使用这些 cache（减少 untrusted substituter 警告）
+      trusted-substituters = cacheSettings.substituters;
       # https://github.com/NixOS/nix/issues/11728
       download-buffer-size = 524288000;
 
