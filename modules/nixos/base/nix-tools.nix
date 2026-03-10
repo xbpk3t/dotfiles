@@ -13,7 +13,8 @@ in {
 
   # Additional Nix management tools
   environment.systemPackages = with pkgs; [
-    inputs.nixos-cli.packages.${pkgs.system}.default
+    # NOTE: `pkgs.system` 是别名，已被上游标记弃用；改为 hostPlatform.system。
+    inputs.nixos-cli.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 
   nix = {
@@ -66,12 +67,14 @@ in {
     channel.enable = false;
   };
 
-  nixpkgs.config = {
-    allowUnfree = true;
-    enableParallelBuilding = true;
-    buildManPages = false;
-    buildDocs = false;
-  };
+  # NOTE:
+  # nixpkgs.config 已上移到 outputs/default.nix 的 pkgs 构造阶段，
+  # 以兼容 home-manager.useGlobalPkgs + readOnlyPkgs 模式并消除评估警告。
+
+  documentation.nixos.enable = lib.mkDefault false;
+  # NOTE:
+  # 关闭 NixOS options 文档生成（options.json）。
+  # 这会规避当前 Nix 对 make-options-doc 派生出的 builtins.derivation context 警告。
 
   # nixos-cli - Modern NixOS management CLI
   # https://github.com/nix-community/nixos-cli
@@ -162,6 +165,14 @@ in {
         # 使用 nom 来优化output
         use_nom = true;
       };
+    };
+
+    option-cache = {
+      # NOTE:
+      # nixos-cli 当前通过 unsafeDiscardStringContext 生成 options cache，
+      # 在新版本 Nix 下会触发 builtins.derivation/options.json 的 context warning。
+      # 先关闭该缓存以消除 warning（不影响 nixos-cli 的核心 apply/build 能力）。
+      enable = false;
     };
   };
 
