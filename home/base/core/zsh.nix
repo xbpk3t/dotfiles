@@ -62,6 +62,9 @@
     # https://mynixos.com/home-manager/options/programs.zsh
     zsh = {
       enable = true;
+      # NOTE: 固定 legacy 行为，避免 HM 将来默认切到 XDG 路径导致行为变化。
+      # 如后续要迁移，可改成 "${config.xdg.configHome}/zsh" 并同步迁移历史/插件文件。
+      dotDir = config.home.homeDirectory;
       # 自动纠错
       autocd = true;
 

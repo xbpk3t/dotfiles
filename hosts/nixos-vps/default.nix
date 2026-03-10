@@ -18,7 +18,6 @@ in {
     efi.efiSysMountPoint = lib.mkForce "/boot/efi";
     grub = {
       enable = true;
-      version = 2;
       device = diskDevice;
       efiSupport = true;
       efiInstallAsRemovable = true;
@@ -35,7 +34,8 @@ in {
 
   services.resolved = {
     enable = true;
-    fallbackDns = nameservers;
+    # NOTE: fallbackDns 已迁移到 settings.Resolve.FallbackDNS
+    settings.Resolve.FallbackDNS = nameservers;
   };
 
   modules.networking = {

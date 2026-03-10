@@ -80,9 +80,12 @@ in {
   # It provides commands like: nixos build, nixos switch, nixos test, etc.
   # Configuration is done via environment variables and config files
   # NIXOS_CONFIG="$HOME/Desktop/dotfiles" nixos apply
-  services.nixos-cli = {
+  # NOTE: 新版 nixos-cli 模块已从 services.* 迁移到 programs.*
+  # 保持同样语义，仅更新 option path 以消除 deprecation warning。
+  programs.nixos-cli = {
     enable = true;
-    config = {
+    # NOTE: config 已重命名为 settings（上游兼容性调整）
+    settings = {
       use_nvd = true;
       ignore_dirty_tree = true;
 

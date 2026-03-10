@@ -96,7 +96,9 @@
       enable = true;
       createDirectories = true;
       extraConfig = {
-        XDG_SCREENSHOTS_DIR = "${config.xdg.userDirs.pictures}/Screenshots";
+        # NOTE: HM/NixOS 新版本推荐使用简写 key（SCREENSHOTS），
+        # 旧写法 XDG_SCREENSHOTS_DIR 已弃用。
+        SCREENSHOTS = "${config.xdg.userDirs.pictures}/Screenshots";
       };
     };
   };
