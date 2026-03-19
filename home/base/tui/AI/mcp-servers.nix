@@ -9,6 +9,8 @@
   # https://github.com/neo4j/mcp
   # https://neo4j.com/docs/mcp/current/
 
+  # filesystem MCP: 授权范围是整个 Home 目录，AI tool 可读写此目录下文件。
+  # 如需最小权限，建议改成项目目录而不是 config.home.homeDirectory。
   filesystem = {
     type = "stdio";
     command = "npx";
@@ -43,6 +45,7 @@
     ];
   };
 
+  # startup_timeout_sec: 某些 Python/uvx MCP 首次 cold start 较慢，需要放宽超时。
   "nixos-mcp" = {
     type = "stdio";
     command = "uvx";
@@ -74,12 +77,21 @@
     args = ["code-index-mcp"];
     startup_timeout_sec = 30;
   };
+  # Chrome 146+ 推荐使用 --autoConnect 附着当前浏览器实例。
+  # 前置条件: chrome://inspect/#remote-debugging 已开启 Remote debugging。
   "chrome-devtools" = {
     type = "stdio";
     command = "npx";
-    args = ["-y" "chrome-devtools-mcp@latest"];
+    args = [
+      "-y"
+      "chrome-devtools-mcp@latest"
+      "--autoConnect"
+      "--channel"
+      "stable"
+    ];
   };
 
+  # mcp-remote 代理模式: 本地 stdio <-> 远端 MCP over HTTP。
   deepwiki = {
     type = "stdio";
     command = "npx";
@@ -92,6 +104,8 @@
   #    url = "https://api.githubcopilot.com/mcp/";
   #    bearer_token_env_var = "CODEX_GITHUB_PERSONAL_ACCESS_TOKEN";
   #  };
+  # 注意: Authorization header 里是占位符，真实 token 由 shell alias 在运行时注入。
+  # 不要把真实 PAT 写死到仓库配置中。
   github = {
     type = "stdio";
     command = "npx";
