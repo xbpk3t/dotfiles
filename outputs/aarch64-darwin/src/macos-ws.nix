@@ -82,6 +82,10 @@
     # What：是否在远端构建。
     # Why：darwin 的 system closure 必须在 darwin 端构建/激活。
     remoteBuild = true;
+    # What：关闭 deploy-rs 的 magic rollback。
+    # Why：本机 localhost 上的 nix-darwin 激活已成功，但 confirmation waiter 偶发超时，
+    # 会导致 deploy-rs 误判失败并回滚；对本机部署保留这层保护收益不高。
+    magicRollback = false;
     profiles.system = {
       # What：远端激活该 profile 的用户。
       # Why：需要 root 权限写入系统级配置。
