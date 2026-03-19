@@ -1,7 +1,7 @@
---- === Base Notifications ===
+--- === Shared Base Notifications ===
 ---
---- 底层通知系统处理模块
---- 提供基础的通知发送功能，所有 Spoon 都应通过各自的通知包装器调用此模块
+--- 全局底层通知系统处理模块
+--- 提供基础的通知发送功能，供各个 Spoon 的通知包装器复用
 ---
 
 local notifs = {}
@@ -31,7 +31,6 @@ local function _sendNotification(title, text, withdrawAfter, soundName)
 
     if not success then
         print("通知发送失败: " .. title .. " - " .. text)
-        -- 如果通知失败，至少在控制台输出
         print("📢 " .. title .. ": " .. text)
     end
 
