@@ -32,19 +32,6 @@ if not success2 then
     print("ChromeTabLimit 错误:", err2)
 end
 
-
--- 任务列表 Spoon
-local success3, err3 = pcall(function()
-    hs.loadSpoon("TaskList")
-    hs.alert.show("TaskList 加载成功")
-    spoon.TaskList:start()
-end)
-if not success3 then
-    hs.alert.show("TaskList 加载失败")
-    print("TaskList 错误:", err3)
-end
-
-
 -- ========================================
 -- 系统功能
 -- ========================================
