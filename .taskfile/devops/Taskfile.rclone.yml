@@ -4,6 +4,8 @@ version: '3'
 vars:
   RCLONE: "rclone"
   RCLONE_REMOTE: "r2"                     # rclone.conf 中的存储配置名
+  TREE_SIG_SCRIPT: '{{.TASKFILE_DIR}}/scripts/tree-sig.nu' # 重要：tree signature 逻辑统一收敛到 nushell script，Taskfile 只负责 orchestration
+
 
 
 
@@ -48,20 +50,36 @@ tasks:
   sync-docs-images:
     desc: 同步 docs-images 到远程（用于 systemd）
     summary: "task -g rclone:sync-docs-images"
-    interactive: true # 交互任务：需要 gum confirm
+    vars:
+      DOCS_IMAGES_LOCAL_PATH: "$HOME/Desktop/docs/docs-images"
+      DOCS_IMAGES_SYNC_STAMP: "docs-images-sync.stamp" # 重要：这里只传 stamp 文件名；最终路径由 tree-sig.nu 基于 folder 解析到父目录 `.task/`
+      DOCS_IMAGES_EXCLUDE_FLAGS: '--exclude ".git/**" --exclude ".idea/**" --exclude ".cache/**"' # 重要参数：排除 Git metadata 与本地 IDE/cache 噪音
+    status:
+      # 重要：status 调用 nushell script 做布尔判断。
+      # 这样 status 仍然符合 Task 的 shell contract，同时把复杂逻辑留在 script 层维护。
+      - |
+        nu "{{.TREE_SIG_SCRIPT}}" check \
+          --folder "{{.DOCS_IMAGES_LOCAL_PATH}}" \
+          --stamp "{{.DOCS_IMAGES_SYNC_STAMP}}"
     cmds:
       - task: sync
         vars:
           DRY_RUN_FLAG: ""
-          EXCLUDE_FLAGS: '--exclude ".git/**" --exclude ".idea/**" --exclude ".cache/**"' # 重要参数：排除 .git，避免同步 Git metadata
+          EXCLUDE_FLAGS: "{{.DOCS_IMAGES_EXCLUDE_FLAGS}}"
           BUCKET: "docs"
-          LOCAL_PATH: "$HOME/Desktop/docs/docs-images"
+          LOCAL_PATH: "{{.DOCS_IMAGES_LOCAL_PATH}}"
+      - |
+        nu "{{.TREE_SIG_SCRIPT}}" write \
+          --folder "{{.DOCS_IMAGES_LOCAL_PATH}}" \
+          --stamp "{{.DOCS_IMAGES_SYNC_STAMP}}"
       - echo "Execute sync-docs task success"
     preconditions:
-      - sh: command -v gum >/dev/null
-        msg: "gum not found: install gum"
-      - sh: test -d "$HOME/Desktop/docs/docs-images/"
-        msg: "Directory $HOME/Desktop/docs/docs-images does not exist"
+      - sh: command -v "{{.RCLONE}}" >/dev/null
+        msg: "rclone not found: install rclone"
+      - sh: command -v nu >/dev/null
+        msg: "nu not found"
+      - sh: test -d "{{.DOCS_IMAGES_LOCAL_PATH}}/"
+        msg: "Directory {{.DOCS_IMAGES_LOCAL_PATH}} does not exist"
 
 
   bisync-scratches:
