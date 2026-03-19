@@ -2,8 +2,11 @@
 version: "3"
 
 
+# PLAN: [2026-03-18] 在今年7、8月时，等  design skills 主流方案确认下来之后，做个处理
+# https://x.com/dingyi/status/2033679210766843928
+
 vars:
-  SKILLS:
+  NEED_TO_ADD:
     # skills 为空时会安装该 repo 的全部 skills（依赖 skills CLI 默认行为）
     # https://github.com/Leonxlnx/taste-skill
     # https://x.com/vikingmute/status/2025842815721497009
@@ -561,7 +564,7 @@ vars:
     - repo: github/awesome-copilot
       skills:
         # https://skills.sh/github/awesome-copilot/plantuml-ascii
-        - plantuml-ascii
+        # - plantuml-ascii
 
     - repo: softaworks/agent-toolkit
       skills:
@@ -682,7 +685,10 @@ vars:
 
     # https://x.com/axiaisacat/status/2030297324962857044
     # https://github.com/pbakaus/impeccable
+    #
+    #
+    # how to use: https://impeccable.style/cheatsheet
     - repo: pbakaus/impeccable
 
-  NEED_TO_ADD:
-    - repo:
+#  NEED_TO_ADD:
+#    - repo:
