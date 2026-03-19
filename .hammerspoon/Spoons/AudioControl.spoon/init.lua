@@ -19,8 +19,8 @@ obj.logger = hs.logger.new('AudioControl')
 
 --- AudioControl.trustedSSIDs
 --- Variable
---- 受信任的 WiFi 网络列表（白名单）
---- 连接到这些网络时保持正常音量，其他网络时静音
+--- 受信任的 WiFi SSID 白名单（精确匹配，区分大小写）
+--- 连接到这些 SSID 时保持 trustedVolume，其他网络使用 untrustedVolume
 obj.trustedSSIDs = {
   "212",
 }
@@ -32,28 +32,73 @@ obj.trustedVolume = 25
 
 --- AudioControl.untrustedVolume
 --- Variable
---- 不受信任网络的音量 (静音)
+--- 不受信任网络音量（通常设为 0，实现静音策略）
 obj.untrustedVolume = 0
 
 --- AudioControl.enableHeadphoneDetection
 --- Variable
---- 是否启用耳机检测
+--- 是否启用 headphone detection（连接耳机后暂停 WiFi 音量管控）
 obj.enableHeadphoneDetection = true
+
+--- AudioControl.muteWhenSSIDUnknown
+--- Variable
+--- 当 SSID 不可读取时是否按不受信任网络处理
+--- false: 保持当前音量（推荐，避免误静音）
+--- true: 强制应用 untrustedVolume
+obj.muteWhenSSIDUnknown = false
+
+--- AudioControl.alertOnSSIDUnavailable
+--- Variable
+--- 当 SSID 不可读取时，是否显示告警 alert
+obj.alertOnSSIDUnavailable = true
+
+--- AudioControl.ssidUnavailableNotifyCooldownSeconds
+--- Variable
+--- SSID 不可读取告警的冷却时间（秒），避免重复 alert
+obj.ssidUnavailableNotifyCooldownSeconds = 600
 
 -- 内部状态
 obj.lastSSID = nil
 obj.lastHeadphoneState = nil
 obj.wifiWatcher = nil
 obj.caffeinateWatcher = nil
+obj.wifiInterface = nil
+obj.lastSSIDUnavailableNotifyAt = nil
+obj.isSSIDCurrentlyUnavailable = false
 
 local notifs = dofile(hs.configdir .. "/Spoons/AudioControl.spoon/notifs.lua")
+local wifi = dofile(hs.configdir .. "/Spoons/shared_wifi.lua")
+
+local function shouldNotifySSIDUnavailable(details, force)
+  if force then return true end
+  if not obj.alertOnSSIDUnavailable then return false end
+  local now = os.time()
+  if obj.lastSSIDUnavailableNotifyAt and
+     (now - obj.lastSSIDUnavailableNotifyAt) < obj.ssidUnavailableNotifyCooldownSeconds then
+    return false
+  end
+  -- 仅在 WiFi interface 已启用时提示，避免离线场景误报
+  return details and details.active and details.power
+end
+
+local function notifySSIDUnavailable(details, force)
+  if not shouldNotifySSIDUnavailable(details, force) then return end
+  obj.lastSSIDUnavailableNotifyAt = os.time()
+  hs.alert.show(
+    "AudioControl: Unable to read WiFi SSID.\nEnable Location Services for Hammerspoon in:\n" ..
+    wifi.locationServicesHint(),
+    4
+  )
+  obj.logger.w("SSID unavailable alert sent; check Hammerspoon Location Services permission")
+end
 
 -- 检查当前 SSID 是否在受信任列表中
 local function isSSIDTrusted(ssid)
+  ssid = wifi.normalizeSSID(ssid)
   if not ssid then return false end
 
   for _, trustedSSID in ipairs(obj.trustedSSIDs) do
-    if ssid == trustedSSID then
+    if ssid == wifi.normalizeSSID(trustedSSID) then
       return true
     end
   end
@@ -109,7 +154,8 @@ end
 
 -- 主要逻辑处理函数
 local function handleAudioControl()
-  local currentSSID = hs.wifi.currentNetwork()
+  local currentSSID, interface, details = wifi.getCurrentSSID(obj.wifiInterface)
+  obj.wifiInterface = interface or obj.wifiInterface
   local headphoneConnected = isHeadphoneConnected()
 
   -- 检查状态是否发生变化
@@ -139,6 +185,22 @@ local function handleAudioControl()
           obj.logger.i("Headphone disconnected, muted for untrusted network")
         end
       end
+    end
+
+    if currentSSID then
+      obj.isSSIDCurrentlyUnavailable = false
+    end
+
+    -- SSID 无法识别时的处理（仅在未连接耳机时）
+    if not currentSSID and not headphoneConnected and not obj.muteWhenSSIDUnknown then
+      if not obj.isSSIDCurrentlyUnavailable then
+        notifySSIDUnavailable(details, false)
+      end
+      obj.isSSIDCurrentlyUnavailable = true
+      obj.logger.w("Unable to detect current SSID, keep current volume")
+      obj.lastSSID = currentSSID
+      obj.lastHeadphoneState = headphoneConnected
+      return
     end
 
     -- 处理 WiFi 网络变化（仅在未连接耳机时）
@@ -214,6 +276,21 @@ end
 --- Returns:
 ---  * The AudioControl object
 function obj:start()
+  self.wifiInterface = wifi.getWiFiInterface(self.wifiInterface)
+  if self.wifiInterface then
+    self.logger.i("Using WiFi interface: " .. self.wifiInterface)
+  else
+    self.logger.w("No WiFi interface found")
+  end
+
+  local initialSSID, _, initialDetails = wifi.getCurrentSSID(self.wifiInterface)
+  if not initialSSID then
+    notifySSIDUnavailable(initialDetails, true)
+    self.isSSIDCurrentlyUnavailable = true
+  else
+    self.isSSIDCurrentlyUnavailable = false
+  end
+
   -- 创建 WiFi 监听器
   self.wifiWatcher = hs.wifi.watcher.new(handleAudioControl)
   self.wifiWatcher:start()
@@ -283,9 +360,10 @@ function obj:bindHotkeys(mapping)
       showVolumeIndicator()
     end,
             show_status = function()
-      local currentSSID = hs.wifi.currentNetwork()
+      local currentSSID = (wifi.getCurrentSSID(obj.wifiInterface))
       local headphoneConnected = isHeadphoneConnected()
-      local status = string.format("WiFi: %s | Headphone: %s",
+      local status = string.format("WiFi(%s): %s | Headphone: %s",
+        obj.wifiInterface or "?",
         currentSSID or "None",
         headphoneConnected and "Connected" or "Disconnected")
       notifs.statusInfo(status)
