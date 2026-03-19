@@ -1,6 +1,6 @@
 # Hammerspoon 配置
 
-这是一个完整的 Hammerspoon 配置，包含多个实用的 Spoons，提供音频控制、蓝牙管理、任务管理等功能。
+这是一个完整的 Hammerspoon 配置，包含多个实用的 Spoons，提供音频控制、蓝牙管理等功能。
 
 ## 📁 目录结构
 
@@ -12,10 +12,7 @@
 │   ├── AudioControl.spoon/    # 音频控制 Spoon
 │   │   ├── init.lua
 │   │   └── README.md
-│   ├── BluetoothManager.spoon/ # 蓝牙管理 Spoon
-│   │   ├── init.lua
-│   │   └── README.md
-│   └── TaskList.spoon/        # 任务管理 Spoon
+│   └── BluetoothManager.spoon/ # 蓝牙管理 Spoon
 │       ├── init.lua
 │       └── README.md
 └── README.md                  # 本文件
@@ -70,20 +67,6 @@ brew install blueutil
 - `Cmd+Alt+Shift+B` - 连接默认设备
 - `Cmd+Alt+I` - 显示蓝牙状态
 
-### 📋 TaskList
-多任务管理器，支持倒计时、数据持久化等功能。
-
-**功能特性**：
-- 任务创建和管理
-- 倒计时功能
-- 数据持久化
-- 菜单栏显示
-
-**热键**：
-- `Cmd+Alt+P` - 暂停/继续倒计时
-- `Cmd+Alt+T` - 添加新任务
-- `Cmd+Alt+L` - 显示任务列表
-
 ## ⚙️ 配置说明
 
 ### 音频控制配置
@@ -111,16 +94,6 @@ spoon.BluetoothManager.defaultDeviceID = "your-device-id"
 spoon.BluetoothManager.blueutil_path = "/opt/homebrew/bin/blueutil"
 ```
 
-### 任务管理配置
-
-```lua
--- 最大任务数量
-spoon.TaskList.maxTasks = 20
-
--- 数据文件路径
-spoon.TaskList.dataFile = hs.configdir .. "/tasks_data.json"
-```
-
 ## 🔧 自定义热键
 
 你可以在 `init.lua` 中修改热键绑定：
@@ -139,12 +112,6 @@ spoon.BluetoothManager:bindHotkeys({
     show_status = {{"cmd", "alt"}, "i"}
 })
 
--- 任务列表热键
-spoon.TaskList:bindHotkeys({
-    toggle_pause = {{"cmd", "alt"}, "p"},
-    add_task = {{"cmd", "alt"}, "t"},
-    show_tasks = {{"cmd", "alt"}, "l"}
-})
 ```
 
 ## 🛠️ 系统功能

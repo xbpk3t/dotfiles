@@ -6,8 +6,7 @@
 
 local notifs = {}
 
--- 导入底层通知模块
-local baseNotifs = dofile(hs.configdir .. "/Spoons/TaskList.spoon/notifs.lua")
+local baseNotifs = dofile(hs.configdir .. "/Spoons/shared_notifs.lua")
 
 -- ChromeTabLimit 的默认标题
 local SPOON_NAME = "ChromeTabLimit"
