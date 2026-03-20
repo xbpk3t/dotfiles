@@ -4,7 +4,9 @@
   # 开启后会让每个 DNS 服务器缓存独立，但会轻微降低性能。
   independent_cache = true;
   reverse_mapping = true;
-  final = "local";
+  # 兜底解析器改为 remote，避免未命中规则时回落到本地 upstream。
+  # 这里的 remote 仍然会通过 detour=select 出站，保持 anti-poisoning。
+  final = "remote";
 
   strategy = "prefer_ipv4";
 
@@ -48,24 +50,43 @@
       server = "local";
       disable_cache = true;
     }
-    # 匹配任意出站的 DNS 请求都走本地 DNS（兜底规则，通常优先级较低）
-    # any 指代的其实就是订阅中会鉴权的时候 一般提供的都是域名，而进行鉴权认证的时候，肯定要走国内的dns，不然也连接不到google的dns，所以需要有个 any
-    # 旧写法（outbound DNS rule item）已废弃，将在 1.14 移除
-    # {
-    #   outbound = ["any"];
-    #   server = "local";
-    # }
-    # 新写法在 route.default_domain_resolver 中设置（见 route）
-    # 命中广告/DoH 规则集的域名直接返回成功码（等价于阻断解析）
-    #      {
-    #        disable_cache = true;
-    #        rule_set = [
-    #          "AdGuardSDNSFilter"
-    #          "chrome-doh"
-    #        ];
-    #        server = "block";
-    #      }
-    # A/AAAA 查询返回 FakeIP，用于配合 TUN 劫持和透明代理
+    # Clash 模式优先于 FakeIP 兜底：
+    # - direct 模式返回 real IP（local）
+    # - global 模式走 remote 解析
+    # 这样可以避免模式切换后依旧拿到 stale FakeIP。
+    {
+      clash_mode = "direct";
+      query_type = [
+        "A"
+        "AAAA"
+      ];
+      server = "local";
+      disable_cache = true;
+    }
+    {
+      clash_mode = "global";
+      query_type = [
+        "A"
+        "AAAA"
+      ];
+      server = "remote";
+      disable_cache = true;
+    }
+
+    # CN 域名优先返回 real IP（local），避免全部落入 FakeIP 池。
+    # 这条规则必须放在 FakeIP 前面，否则会被 query_type=A/AAAA 先匹配。
+    {
+      rule_set = "geosite-geolocation-cn";
+      query_type = [
+        "A"
+        "AAAA"
+      ];
+      server = "local";
+      disable_cache = true;
+    }
+
+    # A/AAAA 的最终兜底：走 FakeIP（仅处理未被上面规则命中的域名）。
+    # 重点：保持这条在规则靠后位置，避免“全量域名都 FakeIP”。
     {
       query_type = [
         "A"
@@ -73,21 +94,6 @@
       ];
       rewrite_ttl = 1;
       server = "fakeip";
-    }
-    # Clash 模式为 global 时，DNS 走远端解析（适合全局代理）
-    {
-      clash_mode = "global";
-      server = "remote";
-    }
-    # Clash 模式为 direct 时，DNS 走本地解析（直连模式）
-    {
-      clash_mode = "direct";
-      server = "local";
-    }
-    # 命中 geosite（CN）规则的域名走本地 DNS（此处对应 geosite-geolocation-cn）
-    {
-      rule_set = "geosite-geolocation-cn";
-      server = "local";
     }
   ];
 
@@ -163,12 +169,13 @@
       server = "223.5.5.5";
       path = "/dns-query";
     }
-    # "remote" DNS tag: for global mode / foreign domains.
-    # IMPORTANT: detour must point to a proxy outbound to avoid DNS poisoning.
+    # "remote" DNS tag: 用于 foreign domains / global mode。
+    # 这里改为 Cloudflare DoH + detour=select，和 local(223.5.5.5)彻底解耦，
+    # 避免 local/remote 同 upstream 带来的语义混乱与故障联动。
     {
       type = "https";
       tag = "remote";
-      server = "223.5.5.5";
+      server = "1.1.1.1";
       path = "/dns-query";
       detour = "select";
     }
