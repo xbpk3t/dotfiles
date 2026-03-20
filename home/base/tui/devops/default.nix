@@ -67,6 +67,11 @@
 
     # 图像处理
     imagemagick
+
+    # cwebp. WebP官方工具
+    # https://mynixos.com/nixpkgs/package/libwebp
+    libwebp
+
     exiftool
     graphviz
 
