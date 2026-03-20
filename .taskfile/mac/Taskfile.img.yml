@@ -10,8 +10,36 @@ version: "3"
 
 
 tasks:
-  j2p:
+  jpg2png:
     desc: jpg-to-png
-    summary: "task -g j2p"
+    summary: "task -g jpg2png"
     dir: '{{.USER_WORKING_DIR}}'
+    preconditions:
+      - sh: command -v magick
+        msg: magick not found
     cmd: find . -type f \( -name "*.jpg" -o -name "*.JPG" -o -name "*.jpeg" \) -exec sh -c 'magick mogrify -format png "{}" && rm "{}"' \;
+
+
+  png2webp:
+    desc: png-to-webp
+    summary: "task -g img:png2webp"
+    dir: '{{.USER_WORKING_DIR}}'
+    preconditions:
+      - sh: command -v cwebp
+        msg: cwebp not found
+    cmds:
+      - |
+        # 默认使用 lossless；只有生成 webp 成功后才删除原始 PNG。
+        find . -type f \( -name "*.png" -o -name "*.PNG" \) -exec sh -c '
+          for file do
+            out="${file%.*}.webp"
+
+            # 已存在同名 webp 时直接跳过，保证重复执行时更稳。
+            if [ -e "$out" ]; then
+              printf "skip: %s\n" "$out"
+              continue
+            fi
+
+            cwebp -lossless "$file" -o "$out" && rm "$file"
+          done
+        ' sh {} +
