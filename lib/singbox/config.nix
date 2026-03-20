@@ -3,7 +3,9 @@
   ruleSets,
   pkgs,
   clashSecret,
-}: {
+}: let
+  isDarwin = pkgs.stdenv.isDarwin;
+in {
   # [Sing-box realip配置方案 - 开发调优 - LINUX DO](https://linux.do/t/topic/175470)
   # https://github.com/MetaCubeX/meta-rules-dat
   # [最好用的 sing-box 一键安装脚本 - 233Boy](https://233boy.com/sing-box/sing-box-script/)
@@ -75,17 +77,26 @@
 
   # https://sing-box.sagernet.org/configuration/experimental/
   experimental = {
-    # 运行时持久化/缓存。可减轻 DNS/路由重建开销
-    # 可缓存 rule-set 与 fakeip，重启更稳定（比如说如果设置为false，那么每次启动singbox，都会重新拉取rule-set，如果拉取失败，服务本身就起不来）
-    cache_file = {
-      enabled = true;
-      store_fakeip = true;
-      store_rdrc = true;
+    # cache_file 在 Darwin 上禁用：
+    # - 你当前日志已出现 "initialize cache-file: timeout"
+    # - 唤醒后若旧锁/IO 状态异常，会导致服务拉起失败但路由残留，表现为“网络全挂”
+    # NixOS 保持持久化缓存，继续使用 /var/lib/sing-box/cache.db。
+    cache_file =
+      if isDarwin
+      then {
+        enabled = false;
+      }
+      else {
+        # 运行时持久化/缓存。可减轻 DNS/路由重建开销
+        # 可缓存 rule-set 与 fakeip，重启更稳定（比如说如果设置为false，那么每次启动singbox，都会重新拉取rule-set，如果拉取失败，服务本身就起不来）
+        enabled = true;
+        store_fakeip = true;
+        store_rdrc = true;
 
-      # [2026-01-09] 注意为了兼容NixOS，要写 /var/lib/sing-box/cache.db，因为services.sing-box 只保证创建了 /var/lib/sing-box（StateDirectory/WorkingDirectory）。所以如果写其他path，如果我们不去patch这个services，这个自定义path的 cache.db 是无法创建的，所以无法启动
-      # path = "/var/cache/sing-box/cache.db";
-      path = "/var/lib/sing-box/cache.db";
-    };
+        # [2026-01-09] 注意为了兼容NixOS，要写 /var/lib/sing-box/cache.db，因为services.sing-box 只保证创建了 /var/lib/sing-box（StateDirectory/WorkingDirectory）。所以如果写其他path，如果我们不去patch这个services，这个自定义path的 cache.db 是无法创建的，所以无法启动
+        # path = "/var/cache/sing-box/cache.db";
+        path = "/var/lib/sing-box/cache.db";
+      };
     clash_api = {
       external_controller = "0.0.0.0:9090";
       # Clash API 若监听在 0.0.0.0，官方强烈要求设置 secret
