@@ -6,7 +6,7 @@ version: "3"
 # https://x.com/dingyi/status/2033679210766843928
 
 vars:
-  NEED_TO_ADD:
+  SKILLS:
     # skills 为空时会安装该 repo 的全部 skills（依赖 skills CLI 默认行为）
     # https://github.com/Leonxlnx/taste-skill
     # https://x.com/vikingmute/status/2025842815721497009
@@ -548,7 +548,6 @@ vars:
         # why: 领域偏视频/动画
         # - remotion-best-practices
 
-    # https://skills.sh/paulirish/dotfiles/modern-css
 
     # https://skills.sh/lucifer1004/claude-skill-typst
     - repo: lucifer1004/claude-skill-typst
@@ -690,5 +689,20 @@ vars:
     # how to use: https://impeccable.style/cheatsheet
     - repo: pbakaus/impeccable
 
-#  NEED_TO_ADD:
-#    - repo:
+  NEED_TO_ADD:
+
+    # https://skills.sh/paulirish/dotfiles/modern-css
+    - repo: paulirish/dotfiles
+      skills:
+        # 目前AI生成的css代码会出现已废弃css语法，该skill用来要求使用 modern-css
+        - modern-css
+
+    - repo: giuseppe-trisciuoglio/developer-kit
+      skills:
+        - tailwind-css-patterns
+
+    # https://skills.sh/josiahsiegel/claude-plugin-marketplace
+    - repo: josiahsiegel/claude-plugin-marketplace
+      skills:
+        - tailwindcss-advanced-layouts
+        - docker-best-practices

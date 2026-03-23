@@ -41,7 +41,10 @@ Use this skill when the user wants you to create a diagram from requirements and
 4) **Output location + naming**
    - Output directory: `.diagram` in the working project root.
    - Source filename: `.<tool>.<diagram>.<ext>` where `<ext>` comes from `tools.yaml`.
-   - SVG filename: `.<tool>.<diagram>.svg` (same stem).
+   - SVG filename suffix: `.<tool>.<diagram>.svg` (same stem).
+   - NOTICE: If the image you are converting already has a filename, then directly use that filename. If not, then generate a filename based on the file content. So the final complete filename is `<name>.<tool>.<diagram>.svg`.
+
+
 
 5) **Generate source**
    - Keep syntax minimal and readable; avoid unnecessary styling.

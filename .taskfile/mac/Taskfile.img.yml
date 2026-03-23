@@ -9,37 +9,58 @@ version: "3"
 #- magick in.png -resize 50% out.png # 压缩PNG图片
 
 
+vars:
+  IMG_SCRIPT: '{{.TASKFILE_DIR}}/scripts/img.nu' # 重要：图片转换逻辑统一收敛到 nushell script，Taskfile 只负责 orchestration
+  DEFAULT_WEBP_QUALITY: '85' # 重要：jpg/jpeg -> webp 的默认 quality；png 仍然固定走 lossless
+
+
 tasks:
+  _ensure:nu:
+    internal: true
+    preconditions:
+      - sh: command -v nu >/dev/null
+        msg: nu not found
+      - sh: test -f "{{.IMG_SCRIPT}}"
+        msg: "{{.IMG_SCRIPT}} not found"
+    cmd: true
+
+
+  _ensure:magick:
+    internal: true
+    preconditions:
+      - sh: command -v magick >/dev/null
+        msg: magick not found
+    cmd: true
+
+
+  _ensure:cwebp:
+    internal: true
+    preconditions:
+      - sh: command -v cwebp >/dev/null
+        msg: cwebp not found
+    cmd: true
+
+
   jpg2png:
     desc: jpg-to-png
-    summary: "task -g jpg2png"
+    summary: "task -g img:jpg2png"
     dir: '{{.USER_WORKING_DIR}}'
-    preconditions:
-      - sh: command -v magick
-        msg: magick not found
-    cmd: find . -type f \( -name "*.jpg" -o -name "*.JPG" -o -name "*.jpeg" \) -exec sh -c 'magick mogrify -format png "{}" && rm "{}"' \;
-
-
-  png2webp:
-    desc: png-to-webp
-    summary: "task -g img:png2webp"
-    dir: '{{.USER_WORKING_DIR}}'
-    preconditions:
-      - sh: command -v cwebp
-        msg: cwebp not found
     cmds:
-      - |
-        # 默认使用 lossless；只有生成 webp 成功后才删除原始 PNG。
-        find . -type f \( -name "*.png" -o -name "*.PNG" \) -exec sh -c '
-          for file do
-            out="${file%.*}.webp"
+      - task: _ensure:nu
+      - task: _ensure:magick
+      - 'nu "{{.IMG_SCRIPT}}" jpg2png --root "{{.USER_WORKING_DIR}}"'
 
-            # 已存在同名 webp 时直接跳过，保证重复执行时更稳。
-            if [ -e "$out" ]; then
-              printf "skip: %s\n" "$out"
-              continue
-            fi
 
-            cwebp -lossless "$file" -o "$out" && rm "$file"
-          done
-        ' sh {} +
+  webp:
+    desc: convert jpg/png to webp
+    summary: "task -g img:webp [Q=85]"
+    dir: '{{.USER_WORKING_DIR}}'
+    vars:
+      WEBP_QUALITY: '{{if .Q}}{{.Q}}{{else}}{{.DEFAULT_WEBP_QUALITY}}{{end}}'
+    preconditions:
+      - sh: 'case "{{.WEBP_QUALITY}}" in ""|*[!0-9]*) exit 1 ;; *) [ "{{.WEBP_QUALITY}}" -ge 0 ] && [ "{{.WEBP_QUALITY}}" -le 100 ] ;; esac'
+        msg: Q must be an integer between 0 and 100
+    cmds:
+      - task: _ensure:nu
+      - task: _ensure:cwebp
+      - 'nu "{{.IMG_SCRIPT}}" webp --root "{{.USER_WORKING_DIR}}" --quality "{{.WEBP_QUALITY}}"'
