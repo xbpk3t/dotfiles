@@ -54,7 +54,7 @@ tasks:
       - brew update -vvv
       - brew upgrade
       - brew outdated # 更新homebrew
-#      - task: cask-upgrade
+      - task: _cask-upgrade
 
   _info:
     internal: true
@@ -70,6 +70,14 @@ tasks:
       - brew cleanup -s # 清理
       - brew services cleanup
       - brew autoremove
+
+  _cask-upgrade:
+    internal: true
+    desc: 更新cask（也就是所有app）
+    cmds:
+      - brew cu -facy
+    preconditions:
+      - brew tap buo/cask-upgrade
 
 
 #  check-size:
@@ -88,12 +96,3 @@ tasks:
 #    # internal: true
 #    cmd: brew bundle install --file="{{.BREWFILE}}"
 #    desc: install
-
-
-
-#  cask-upgrade:
-#    desc: 更新cask（也就是所有app）
-#    cmds:
-#      - brew cu -facy
-#    preconditions:
-#      - brew tap buo/cask-upgrade

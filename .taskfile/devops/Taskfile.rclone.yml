@@ -53,7 +53,10 @@ tasks:
     vars:
       DOCS_IMAGES_LOCAL_PATH: "$HOME/Desktop/docs/docs-images"
       DOCS_IMAGES_SYNC_STAMP: "docs-images-sync.stamp" # 重要：这里只传 stamp 文件名；最终路径由 tree-sig.nu 基于 folder 解析到父目录 `.task/`
-      DOCS_IMAGES_EXCLUDE_FLAGS: '--exclude ".git/**" --exclude ".idea/**" --exclude ".cache/**"' # 重要参数：排除 Git metadata 与本地 IDE/cache 噪音
+
+      # 重要参数：排除 Git metadata、本地 IDE/cache 与 macOS Finder 元数据噪音
+      # 注意 --delete-excluded 用来移除掉掉目前已经上传到remote的exclude文件，保证remote跟local完全一致
+      DOCS_IMAGES_EXCLUDE_FLAGS: '--exclude ".git/**" --exclude ".idea/**" --exclude ".cache/**" --exclude ".DS_Store" --exclude "**/.DS_Store" --exclude "._*" --exclude "**/._*" --delete-excluded'
     status:
       # 重要：status 调用 nushell script 做布尔判断。
       # 这样 status 仍然符合 Task 的 shell contract，同时把复杂逻辑留在 script 层维护。
