@@ -99,15 +99,6 @@
       outbound = "direct";
     }
 
-    ############## 兜底规则（默认流量） ##############
-    # 新规则：让 CN 规则先命中，剩余的 TUN 流量再走 select
-    {
-      inbound = [
-        "tun-in"
-      ];
-      outbound = "select";
-    }
-
     ############## 后处理（辅助解析） ##############
     {
       action = "resolve";
