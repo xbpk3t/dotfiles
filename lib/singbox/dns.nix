@@ -3,9 +3,11 @@
 {
   # 开启后会让每个 DNS 服务器缓存独立，但会轻微降低性能。
   independent_cache = true;
-  reverse_mapping = true;
-  # 兜底解析器改为 remote，避免未命中规则时回落到本地 upstream。
-  # 这里的 remote 仍然会通过 detour=select 出站，保持 anti-poisoning。
+  # 关闭 reverse_mapping，尽量贴近机场原始配置，减少 FakeIP 额外状态维护。
+  # Why：sleep/wake 场景下优先保证 DNS bootstrap 简单稳定，而不是追求更多反查能力。
+  reverse_mapping = false;
+  # 兜底解析器仍保持 remote，避免 foreign domains 在未命中规则时回落到本地 upstream。
+  # 这里真正兜底 bootstrap 的是 route.default_domain_resolver = "local"。
   final = "remote";
 
   strategy = "prefer_ipv4";
@@ -72,6 +74,16 @@
       server = "remote";
       disable_cache = true;
     }
+    # 和机场原始配置保持一致：已知的 ad / browser built-in DoH 域名直接返回成功码，
+    # 避免这些查询在 wake recovery 初期继续制造噪音或抢占 DNS 路径。
+    {
+      rule_set = [
+        "AdGuardSDNSFilter"
+        "chrome-doh"
+      ];
+      server = "block";
+      disable_cache = true;
+    }
 
     # CN 域名优先返回 real IP（local），避免全部落入 FakeIP 池。
     # 这条规则必须放在 FakeIP 前面，否则会被 query_type=A/AAAA 先匹配。
@@ -101,6 +113,7 @@
   # - fakeip（TUN 必需）
   # - local（国内解析）
   # - remote（外站解析，且必须走代理 detour）
+  # - block（直接返回 rcode，抑制已知无价值/有害的 DNS 噪音）
   # - tx（给 DoH 解析做 bootstrap / fallback）
   # 其它比如 udp 1.1.1.1、DoT 8.8.8.8、google/cloudflare DoH 都是“备选/冗余”，保留是为了故障转移或调试方便。
   servers = [
@@ -170,12 +183,14 @@
       path = "/dns-query";
     }
     # "remote" DNS tag: 用于 foreign domains / global mode。
-    # 这里改为 Cloudflare DoH + detour=select，和 local(223.5.5.5)彻底解耦，
-    # 避免 local/remote 同 upstream 带来的语义混乱与故障联动。
+    # 这里刻意回到和机场原始配置更接近的模型：
+    # - upstream 仍然是 223.5.5.5
+    # - 但通过 detour=select 出站
+    # 这样 remote/local 的差异只在 route path，不在 upstream 本身，更利于 wake recovery 稳定。
     {
       type = "https";
       tag = "remote";
-      server = "1.1.1.1";
+      server = "223.5.5.5";
       path = "/dns-query";
       detour = "select";
     }
