@@ -74,9 +74,11 @@ rec {
     utils.url = "github:numtide/flake-utils";
     nixos-hardware.url = "github:nixos/nixos-hardware";
 
+    # https://github.com/nix-community/nix-index-database
     # Weekly prebuilt nix-index database.
-    # what: 复用上游预生成索引，避免每台机器各自构建本地 database。
+    # what: 复用上游预生成索引，避免每台机器各自构建本地 database。预生成的 nix-index 数据库（定期更新），并带 NixOS/HM 模块与 wrapper。让 nix-locate / command-not-found 等不用本地跑索引也能快速查“哪个包提供某文件/命令”。
     # why: 对当前多平台仓库来说，这是低成本提升 nix-locate/command-not-found 体验的方式。
+    # htu:
     nix-index-database = {
       url = "github:nix-community/nix-index-database";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -89,6 +91,14 @@ rec {
     # https://github.com/nix-community/nixos-cli
     nixos-cli = {
       url = "github:water-sucks/nixos";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # nixos-facter - Generate machine-readable hardware facts reports.
+    # 注意：消费 report 的 NixOS modules 已经 upstream 到 nixpkgs，
+    # 这里保留上游 flake 主要是为了拿到最新 CLI。
+    nixos-facter = {
+      url = "github:nix-community/nixos-facter";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

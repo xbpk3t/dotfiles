@@ -1,30 +1,15 @@
 {
-  config,
+  pkgs,
   lib,
   modulesPath,
-  inputs,
+  mylib,
   ...
-}: {
+}: let
+  facterReport = mylib.facter.reportPathForHost "nixos-ws";
+in {
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
-    # Lenovo XiaoXinAir-14IIL 2020 is similar to IdeaPad series with Intel 10th gen
-    # Using common laptop optimizations since there's no specific profile
-    inputs.nixos-hardware.nixosModules.common-pc-laptop
-    inputs.nixos-hardware.nixosModules.common-pc-laptop-ssd
-    inputs.nixos-hardware.nixosModules.common-cpu-intel
-    # NOTE: lenovo-ideapad-14imh9 模块包含一个 workaround-reset-xhci-driver 服务
-    # 该服务检查 Chicony 摄像头，但本机使用的是 Syntek 摄像头，导致服务失败
-    # 因此暂时禁用该模块，只使用通用的 laptop 优化
-    # inputs.nixos-hardware.nixosModules.lenovo-ideapad-14imh9
   ];
-
-  boot.initrd.availableKernelModules = ["xhci_pci" "nvme" "usbhid" "usb_storage" "sd_mod" "sdhci_pci" "rtsx_pci_sdmmc"];
-
-  boot.initrd.kernelModules = [];
-
-  boot.kernelModules = ["kvm-intel"];
-
-  boot.extraModulePackages = [];
 
   fileSystems."/" = {
     device = "/dev/disk/by-uuid/e02a3254-7322-4932-a428-b3027575ff02";
@@ -55,6 +40,26 @@
   # networking.interfaces.wlp0s20f3.useDHCP =  true;
 
   nixpkgs.hostPlatform = "x86_64-linux";
+  services.fstrim.enable = true;
 
-  hardware.cpu.intel.updateMicrocode = config.hardware.enableRedistributableFirmware;
+  # What：显式保留 laptop power policy。
+  # Why：之前是通过 common-pc-laptop 隐式开启 TLP；现在改成直写，语义更清楚，也避免继续依赖笼统 profile。
+  services.power-profiles-daemon.enable = false;
+  services.tlp.enable = true;
+
+  # What：显式保留 Intel iGPU 的 user-space runtime。
+  # Why：common-cpu-intel 不只做 microcode；它还会给 Intel iGPU 提供 media/compute runtime。
+  #      这些不完全属于 facter 的覆盖范围，因此这里改成显式声明，避免 hybrid graphics 场景下视频解码能力回退。
+  hardware.graphics.extraPackages = with pkgs; [
+    intel-media-driver
+    intel-compute-runtime
+    vpl-gpu-rt
+  ];
+  hardware.graphics.extraPackages32 = with pkgs.pkgsi686Linux; [
+    intel-media-driver
+  ];
+
+  # What：交给 nixos-facter 的 report 驱动底层硬件事实。
+  # Why：这里不再保留 initrd/kernel/microcode 的手写 fallback，优先保持配置清洁和单一数据源。
+  hardware.facter.reportPath = facterReport;
 }

@@ -1,0 +1,29 @@
+{
+  "version": 2,
+  "system": "x86_64-linux",
+  "virtualisation": "kvm",
+  "hardware": {
+    "cpu": [
+      {
+        "architecture": "x86_64",
+        "vendor_name": "AuthenticAMD",
+        "cores": 2,
+        "siblings": 2
+      }
+    ],
+    "disk": [
+      {
+        "model": "Disk",
+        "driver": "virtio-pci",
+        "driver_module": "virtio_pci"
+      }
+    ],
+    "graphics_card": [
+      {
+        "model": "VGA compatible controller",
+        "driver": "bochs-drm",
+        "driver_module": "bochs"
+      }
+    ]
+  }
+}
