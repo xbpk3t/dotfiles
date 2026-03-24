@@ -1,0 +1,238 @@
+# android debloat manifest
+#
+# 说明：
+# 1. 这里只维护“我希望对预装 package 执行的动作”
+# 2. 当前只保留两类 action：`disable-user` 与 `uninstall-user0`
+# 3. 配置按 action 分组，避免每个 item 重复书写 `act`
+# 4. 对不确定耦合关系的 system package，优先放到 `disable-user`
+#
+# 恢复常用命令：
+# - 查看设备：`adb devices`
+# - 恢复 user 0 安装：`adb shell cmd package install-existing <pkg>`
+# - 重新启用 package：`adb shell pm enable --user 0 <pkg>`
+
+# https://zhuanlan.zhihu.com/p/632050682
+# https://www.bilibili.com/opus/1073374956499238916
+
+# 重要：高风险 package 不要默认放入 active list，例如应用商店 / 小米账号 / 小米云服务 /
+# 小米云备份 / 查找设备 / 手机管家 / SystemUI / 主题壁纸 / HTML 查看器 / 系统更新。
+
+disable-user:
+  # 重要：这个包在部分 Hyper OS / MIUI 机型上，`pm uninstall --user 0` 会直接返回 Failure [-1000]。
+  # 当前更稳妥的做法是使用 `disable-user`，保留 package data 与系统关联，避免 `PackageManager` 拒绝卸载。
+  - pkg: com.miui.gallery
+    des: 相册（用第三方应用替换 Google Photos 等；当前机型更适合 disable-user）
+
+uninstall-user0:
+  # 推荐卸载
+  # 这组偏向广告、快应用、常驻上传，通常是收益最高的一批。
+  - pkg: com.miui.analytics
+    des: Analytics，后台上传数据耗电；删掉后有时会被系统自动装回
+
+  - pkg: com.miui.systemAdSolution
+    des: 小米系统广告，推荐优先处理
+
+  - pkg: com.miui.hybrid
+    des: 快应用服务框架（小米社区）
+
+  - pkg: com.miui.hybrid.accessory
+    des: 智慧生活，通常与快应用体系相关
+
+  # 可替换第三方 app
+  - pkg: com.sohu.inputmethod.sogou.xiaomi
+    des: 小米定制版搜狗输入法（用第三方应用替换 Gboard 等）
+
+  - pkg: com.android.browser
+    des: 浏览器（用第三方应用替换 chrome 等）
+
+  - pkg: com.miui.video
+    des: 小米视频（用第三方应用替换 nplayer 等）
+
+  - pkg: com.miui.player
+    des: 音乐（用第三方应用替换）
+
+  - pkg: com.miui.mishare.connectivity
+    des: 小米互传（用第三方应用替换 vivo 互传等）
+
+  # 可选卸载
+  # 这组通常可删，但更看你自己的使用习惯。
+  - pkg: com.android.quicksearchbox
+    des: 搜索（桌面搜索框）
+
+  - pkg: com.miui.miservice
+    des: 服务与反馈
+
+  - pkg: com.miui.contentextension
+    des: 传送门
+
+  - pkg: com.xiaomi.aiasst.service
+    des: AI 通话 / 小爱通话
+
+  - pkg: com.miui.voiceassist
+    des: 小爱同学 / 超级小爱
+
+  - pkg: com.xiaomi.aiasst.vision
+    des: 小爱翻译
+
+  - pkg: com.miui.bugreport
+    des: 用户反馈
+
+  - pkg: com.miui.translation.kingsoft
+    des: 金山翻译
+
+  - pkg: com.miui.translation.youdao
+    des: 有道翻译
+
+  - pkg: com.miui.translation.xmcloud
+    des: 小米云翻译
+
+  - pkg: com.miui.translationservice
+    des: 翻译服务
+
+  - pkg: com.xiaomi.ab
+    des: 售后支持 / 小米商城系统组件
+
+  - pkg: com.miui.accessibility
+    des: 小米闻声 / 小米无障碍
+
+  - pkg: com.miui.newmidrive
+    des: 小米云盘
+
+  - pkg: com.miui.greenguard
+    des: 家人守护
+
+  - pkg: com.android.email
+    des: 电子邮件
+
+  - pkg: com.miui.touchassistant
+    des: 悬浮球
+
+  # 不建议直接卸载
+  # 这组不是绝对不能删，但删掉后更容易影响系统功能或体验。
+  - pkg: com.miui.personalassistant
+    des: 智能助理 / 负一屏 / 第三方小组件；文章里偏不建议直接卸载
+
+  - pkg: com.miui.yellowpage
+    des: 生活黄页，可能影响号码黑名单 / 骚扰标记等能力
+
+  - pkg: com.miui.securityadd
+    des: 系统服务组件，关联游戏加速 / 儿童空间 / 红包助手等；文章里偏不建议卸载
+
+  # 卸载后影响未知，但可能减少耗电
+  - pkg: com.miui.daemon
+    des: 系统质量服务
+
+  - pkg: com.miui.misightservice
+    des: 系统质量监测，仅部分高版本 Hyper OS 2 预装
+
+  - pkg: com.android.traceur
+    des: 系统跟踪；部分机型或版本有卡米风险，慎重
+
+  - pkg: com.android.healthconnect.controller
+    des: Health Connect
+
+  - pkg: com.xiaomi.gnss.polaris
+    des: GNSS 组件，可能影响 GPS 定位精度
+
+  - pkg: com.xiaomi.security.onetrack
+    des: 疑似与用户数据收集有关
+
+  # 小爱全家桶
+  - pkg: com.xiaomi.aicr
+    des: 小米澎湃 AI 引擎；缺失时某些壁纸能力可能异常
+
+  - pkg: com.miui.voicetrigger
+    des: 语音唤醒
+
+  - pkg: com.mediatek.voicecommand
+    des: 语音控制，仅联发科 SoC 机型常见
+
+  - pkg: com.xiaomi.aireco
+    des: 小爱建议
+
+  # 小米互联全家桶
+  - pkg: com.xiaomi.mirror
+    des: 跨屏协同服务 / MIUI+ Beta 版
+
+  - pkg: com.xiaomi.mi_connect_service
+    des: 小米互联通信服务
+
+  - pkg: com.milink.service
+    des: 互联互通服务 / 小米妙享中心
+
+  - pkg: com.miui.phrase
+    des: 剪贴板与常用语 / 小米云剪贴板
+
+  # 游戏加速相关
+  - pkg: com.xiaomi.gamecenter
+    des: 游戏中心
+
+  - pkg: com.xiaomi.gamecenter.sdk.service
+    des: 游戏服务
+
+  - pkg: com.xiaomi.migameservice
+    des: 游戏高能时刻
+
+  - pkg: com.miui.vpnsdkmanager
+    des: MiuiVpnSdkManager，小米游戏加速的 VPN 服务（不影响安卓系统的 VPN 使用）
+
+  - pkg: com.xiaomi.macro
+    des: 自动连招
+
+  - pkg: com.xiaomi.barrage
+    des: 弹幕通知
+
+  # 下载管理组件
+  - pkg: com.android.providers.downloads.ui
+    des: 下载管理界面；可能影响应用商店 / 系统下载能力
+
+  - pkg: com.android.providers.downloads
+    des: 下载管理程序；可能影响系统更新 / 应用商店下载
+
+  # 小米支付全家桶
+  # - pkg: com.mipay.wallet
+  #   des: 小米钱包；可能影响 NFC 门禁卡等能力
+
+  - pkg: com.miui.nextpay
+    des: 小米支付
+
+  - pkg: org.mipay.android.manager
+    des: Mipayservice
+
+  - pkg: com.xiaomi.payment
+    des: 米币支付
+
+  - pkg: com.miui.tsmclient
+    des: 小米智能卡；可能影响 NFC 门禁卡等能力
+
+  # 小米人车家体系
+  - pkg: com.xiaomi.mis
+    des: 小米汽车互联服务（某些系统预装）
+
+  - pkg: com.miui.carlink
+    des: CarWith
+
+  - pkg: com.xiaomi.digitalkey
+    des: 小米数字钥匙框架
+
+  # 其他已有 active 条目
+  - pkg: com.miui.freeform
+    des: 自由窗口
+
+# 其他不确定可否删除，先不默认启用：
+# - pkg: com.miui.cit
+#   des: CIT 手机测试
+# - pkg: com.miui.contentcatcher
+#   des: 应用程序扩展服务
+# - pkg: com.miui.maintenancemode
+#   des: 维修模式
+# - pkg: com.xiaomi.joyose
+#   des: Joyose；有说法认为删掉会解除性能限制，但也可能增加发热和耗电
+# - pkg: com.xiaomi.mircs
+#   des: RCS 增强短信
+# - pkg: com.xiaomi.otrpbroker
+#   des: OTRP 协议协商程序（物联网）
+# - pkg: com.miui.micloudsync
+#   des: 小米云同步
+# - pkg: com.miui.cloudservice.sysbase
+#   des: 小米云服务系统基础
