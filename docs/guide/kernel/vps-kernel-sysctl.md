@@ -1,9 +1,9 @@
 ---
 title: linux内核参数调优
+type: guide
 date: 2026-01-26
 status: active
-author: lucas
-last_reviewed: 2026-01-26
+updated: 2026-01-26
 related: lib/vps-sysctl.nix
 ---
 
