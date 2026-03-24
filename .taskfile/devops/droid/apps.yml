@@ -1,0 +1,101 @@
+# mobile apps manifest
+#
+# 说明：
+# 1. 这里只维护“我希望手机上存在的 app”
+# 2. fdroid 下的条目会由 fdroidcl 负责安装
+# 3. manual 下的条目只做 check，不会自动安装
+# 4. pkg 必须填写 Android package name
+# 5. name / url / sc / des 都是附属信息，便于人工查看，不参与安装逻辑
+
+
+# F-Droid / 已配置仓库里的 app
+# 重要：fdroidcl 最终能否安装成功，取决于你本机 fdroidcl 的 repo 配置
+fdroid:
+  - pkg: io.heckel.ntfy
+    name: ntfy
+    url: https://f-droid.org/packages/io.heckel.ntfy
+    sc: https://github.com/binwiederhier/ntfy
+    des: 轻量通知订阅客户端，使用 PUT/POST 将推送通知发送到您的手机或桌面
+  # [使用 ntfy 推送通知 | KrDw Publish](https://k1r.in/posts/notify-ntfy/)
+  # ntfy 比 gotify 生态更成熟，gotify 的优势在于多应用、多用户之间用“应用 / 客户端 / 用户”模型严格隔离；
+  # ntfy 的移动端只支持接收消息，不支持发送。
+
+  - pkg: com.termux
+    name: Termux
+    url: https://f-droid.org/packages/com.termux
+    sc: https://github.com/termux/termux-app
+    des: 这个就是传说中的 termux
+
+  - pkg: com.termux.nix
+    name: nix-on-droid
+    url: https://f-droid.org/packages/com.termux.nix/
+    sc: https://github.com/nix-community/nix-on-droid
+    des: 在 Termux 中提供 Nix package manager 环境
+
+  - pkg: io.nekohasekai.sfa
+    name: sing-box for Android
+    url: https://f-droid.org/packages/io.nekohasekai.sfa
+    sc: https://github.com/SagerNet/sing-box-for-android
+    des: sing-box Android client
+
+  - pkg: com.tailscale.ipn
+    name: Tailscale
+    url: https://f-droid.org/packages/com.tailscale.ipn
+    sc: https://github.com/tailscale/tailscale-android
+    des: Tailscale Android client
+
+  - pkg: io.homeassistant.companion.android.minimal
+    name: Home Assistant Minimal
+    url: https://f-droid.org/packages/io.homeassistant.companion.android.minimal
+    sc: https://github.com/home-assistant/android
+    des: Home Assistant companion app 的 minimal 版本
+
+  - pkg: com.github.metacubex.clash.meta
+    name: Clash Meta for Android
+    url: https://f-droid.org/packages/com.github.metacubex.clash.meta
+    des: Clash Meta Android client
+
+  - pkg: tech.lolli.toolbox
+    url: https://f-droid.org/packages/tech.lolli.toolbox
+    sc: https://github.com/lollipopkit/flutter_server_box
+    name: ServerBox
+    des: 类似XShell那样的SSH APP
+
+
+  - url: https://f-droid.org/packages/org.localsend.localsend_app/
+    pkg: org.localsend.localsend_app
+    sc: https://github.com/localsend/localsend
+    name: localsend
+
+  - url: https://f-droid.org/packages/com.carriez.flutter_hbb/
+    pkg: com.carriez.flutter_hbb
+    sc: https://github.com/rustdesk/rustdesk
+    name: RustDesk
+
+# 手动安装的 app
+# 重要：这里适合 Play-only app，或你不想交给 fdroidcl 管理的 app
+manual:
+  # - pkg: com.google.android.apps.maps
+  #   name: Google Maps
+  #   url: https://play.google.com/store/apps/details?id=com.google.android.apps.maps
+  #   des: Google Maps，需要手动安装
+
+
+  - url: https://play.google.com/store/apps/details?id=mark.via.gp
+    name: Via浏览器
+
+  - url: https://play.google.com/store/apps/details?id=com.yf.smart.coros.dist
+    name: 高驰COROS
+
+
+  - url: https://play.google.com/store/apps/details?id=com.taobao.taobao
+  - url: https://play.google.com/store/apps/details?id=com.autonavi.minimap
+  - url: https://play.google.com/store/apps/details?id=com.flomo.app
+  - url: https://play.google.com/store/apps/details?id=com.google.android.googlequicksearchbox
+  - url: https://play.google.com/store/apps/details?id=com.tencent.wework
+  - url: https://play.google.com/store/apps/details?id=com.eg.android.AlipayGphone
+  - url: https://play.google.com/store/apps/details?id=com.tencent.weread
+  - url: https://play.google.com/store/apps/details?id=com.taobao.idlefish
+
+  - url: https://play.google.com/store/apps/details?id=com.xiaomi.smarthome
+    name: 米家
