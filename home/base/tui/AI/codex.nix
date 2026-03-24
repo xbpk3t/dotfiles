@@ -65,21 +65,50 @@ in {
           };
         };
 
-        model_provider = "OpenAI";
+        # 注意这里特意留空，因为我目前主力仍然使用 team的OAuth，这里如果设置provider后，就无法切换到team了
+        model_provider = "";
         model_providers = {
-          #  llde = {
-          #    name = "llde.tech";
-          #    base_url = "https://api.llde.tech/v1"; # 必须加 /v1
-          #    env_key = "OPENAI_API_KEY"; # Codex 会从这个环境变量读 key
-          #    # wire_api = "chat";                     # 大部分中转用这个，如果报错可尝试 "responses"
-          #  };
 
           # https://linux.do/t/topic/1806073
-          OpenAI = {
-            name = "OpenAI";
-            base_url = "https://ice.v.ua"; # 必须加 /v1
-            env_key = "OPENAI_API_KEY_ICE"; # Codex 会从这个环境变量读 key
+          ice = {
+            name = "ice";
+            base_url = "https://ice.v.ua";
+            env_key = "OPENAI_API_KEY_ICE";
             wire_api = "responses";
+          };
+
+          # https://linux.do/t/topic/1806866
+          test = {
+            name = "test";
+            base_url = "http://119.8.113.226:9999/";
+            env_key = "OPENAI_API_KEY_TEST";
+            wire_api = "responses";
+          };
+
+          # https://linux.do/t/topic/1558896
+          # https://ai.qaq.al/dashboard
+          ggboom = {
+            name = "ggboom";
+            base_url = "https://ai.qaq.al";
+            env_key = "OPENAI_API_KEY_GGBoom";
+            wire_api = "responses";
+          };
+        };
+
+        profiles = {
+          ice = {
+            model_provider = "ice";
+            model = "gpt-5.4";
+          };
+
+          test = {
+            model_provider = "test";
+            model = "gpt-5.4";
+          };
+
+          ggboom = {
+            model_provider = "ggboom";
+            model = "gpt-5.4";
           };
         };
       };
@@ -96,11 +125,21 @@ in {
         # For Context7 MCP
         CONTEXT7_API_KEY = "$(cat ${config.sops.secrets.API_context7.path})";
 
-        OPENAI_API_KEY_ICE = config.sops.secrets.LLM_Sub2API_ICE.path;
+        OPENAI_API_KEY_ICE = "$(cat ${config.sops.secrets.LLM_Sub2API_ICE.path})";
+
+        OPENAI_API_KEY_TEST = "$(cat ${config.sops.secrets.LLM_Sub2API_TEST.path})";
+
+        OPENAI_API_KEY_GGBoom = "$(cat ${config.sops.secrets.LLM_Sub2API_GGBoom.path})";
       };
       shellAliases = {
         # 每次启动 codex 时动态注入 GitHub PAT，避免把 token 写入静态配置。
         codex = "CODEX_GITHUB_PERSONAL_ACCESS_TOKEN=$(gh auth token) command codex";
+        # 按需切换第三方 provider；不影响默认的 ChatGPT OAuth 登录态。
+
+        # 用来切换profile
+        codex-ice = "codex --profile ice";
+        codex-test = "codex --profile test";
+        codex-gg = "codex --profile ggboom";
       };
     };
 
