@@ -212,6 +212,13 @@
         # 设置不区分大小写的制表符补全
         zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}' 'r:|=*' 'l:|=* r:|=*'
 
+        # ===== worktrunk shell integration =====
+        # Home Manager 管理的 ~/.zshrc 是只读 symlink，不能依赖 `wt config shell install`
+        # 所以这里显式注入 zsh integration，让 `wt switch <branch>` 能自动切目录。
+        if command -v wt >/dev/null 2>&1; then
+          eval "$(command wt config shell init zsh)"
+        fi
+
         # ===== 文件后缀处理 =====
         # zsh 支持 alias -s 功能
         alias -s {md,go,json,ts,html,yaml,yml,py,sql}=goland

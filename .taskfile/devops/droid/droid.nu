@@ -233,6 +233,255 @@ def ensure-debloat-action [item: record]: nothing -> string {
     $action_name
 }
 
+def get-debloat-package-names [items: list<record>]: nothing -> list<string> {
+    $items
+    | each {|item| ensure-package-field $item }
+    | uniq
+    | sort
+}
+
+def get-diag-log-signals []: nothing -> list<string> {
+    [
+        'PackageManager'
+        'ActivityManager'
+        'ActivityTaskManager'
+        'BroadcastQueue'
+        'JobScheduler'
+        'AlarmManager'
+        'Unable to start service'
+        'NameNotFoundException'
+        'SecurityException'
+        'DeadObjectException'
+        'No such provider'
+        'Unable to resolve Intent'
+        'requires unavailable provider'
+        'not found'
+        'retry'
+        'failed to bind'
+        'unable to find explicit activity'
+    ]
+}
+
+def line-has-pattern [line: string, pattern: string]: nothing -> bool {
+    if ($pattern | str trim) == '' {
+        false
+    } else {
+        $line | str contains --ignore-case $pattern
+    }
+}
+
+def find-line-matches [line: string, patterns: list<string>]: nothing -> list<string> {
+    $patterns
+    | where {|pattern| line-has-pattern $line $pattern }
+    | uniq
+}
+
+def collect-matching-lines [
+    source: string
+    raw_text: string
+    packages: list<string>
+    signals: list<string> = []
+]: nothing -> list<record> {
+    $raw_text
+    | lines
+    | each {|line|
+        let matched_packages = (find-line-matches $line $packages)
+        let matched_signals = (find-line-matches $line $signals)
+
+        {
+            source: $source
+            pkg: ($matched_packages | str join ',')
+            signals: ($matched_signals | str join ',')
+            line: ($line | str trim)
+        }
+    }
+    | where {|row|
+        let has_package = (($row.pkg | str trim) != '')
+        let has_signal = if ($signals | is-empty) {
+            true
+        } else {
+            (($row.signals | str trim) != '')
+        }
+
+        $has_package and $has_signal
+    }
+}
+
+def normalize-logcat-since [since: string] {
+    let raw_value = ($since | str trim)
+
+    if $raw_value == '' {
+        error make { msg: 'since must not be empty' }
+    }
+
+    if (
+        ($raw_value =~ '^\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+$')
+        or ($raw_value =~ '^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+$')
+        or ($raw_value =~ '^\d+\.\d+$')
+    ) {
+        return $raw_value
+    }
+
+    let relative_match = ($raw_value | parse --regex '^(?P<value>\d+)(?P<unit>[smhd])$')
+
+    if ($relative_match | is-empty) {
+        error make {
+            msg: $'Unsupported since format: ($raw_value)'
+            help: 'Use values like 30m, 12h, 2d, or an explicit logcat timestamp.'
+        }
+    }
+
+    let relative = ($relative_match | first)
+    let value = ($relative.value | into int)
+    let unit = $relative.unit
+
+    let gnu_expr = match $unit {
+        's' => $'($value) seconds ago'
+        'm' => $'($value) minutes ago'
+        'h' => $'($value) hours ago'
+        'd' => $'($value) days ago'
+    }
+
+    let gnu_result = (^date -d $gnu_expr '+%m-%d %H:%M:%S.000' | complete)
+    if $gnu_result.exit_code == 0 {
+        return ($gnu_result.stdout | str trim)
+    }
+
+    let bsd_flag = match $unit {
+        's' => $'-($value)S'
+        'm' => $'-($value)M'
+        'h' => $'-($value)H'
+        'd' => $'-($value)d'
+    }
+
+    let bsd_result = (^date -v $bsd_flag '+%m-%d %H:%M:%S.000' | complete)
+    if $bsd_result.exit_code == 0 {
+        return ($bsd_result.stdout | str trim)
+    }
+
+    error make {
+        msg: $'Failed to convert since value for logcat: ($raw_value)'
+        help: 'Neither GNU date nor BSD date conversion succeeded on this host.'
+    }
+}
+
+def get-diag-log-filterspec []: nothing -> list<string> {
+    [
+        'PackageManager:V'
+        'ActivityManager:V'
+        'ActivityTaskManager:V'
+        'BroadcastQueue:V'
+        'JobScheduler:V'
+        'AlarmManager:V'
+        '*:S'
+    ]
+}
+
+def print-diag-section [title: string, rows: list<record>]: nothing -> nothing {
+    print ''
+    print $'=== ($title) ==='
+
+    if ($rows | is-empty) {
+        print 'No matching lines found.'
+    } else {
+        $rows | table -e
+    }
+}
+
+def run-diag-debloat-log-report [
+    config_path: string
+    user_id: string
+    since: string
+]: nothing -> nothing {
+    let checked_user_id = (normalize-user-id $user_id)
+    let packages = (load-debloat-config $config_path)
+    let package_names = (get-debloat-package-names $packages)
+    let logcat_since = (normalize-logcat-since $since)
+
+    if ($package_names | is-empty) {
+        print 'debloat.yml is empty'
+        return
+    }
+
+    ensure-adb-device
+
+    let log_output = (run-adb (['logcat' '-d' '-b' 'all' '-T' $logcat_since] | append (get-diag-log-filterspec)) | get stdout)
+    let log_matches = (collect-matching-lines 'logcat' $log_output $package_names (get-diag-log-signals))
+
+    print $"Scanning logcat since ($since) for debloat package regressions..."
+    print $"Config user: ($checked_user_id); scope: device-wide logs; logcat since: ($logcat_since)"
+    print $"Filterspec: ((get-diag-log-filterspec) | str join ' ')"
+    print-diag-section 'logcat suspicious matches' $log_matches
+}
+
+def run-diag-debloat-jobs-report [
+    config_path: string
+    user_id: string
+]: nothing -> nothing {
+    let checked_user_id = (normalize-user-id $user_id)
+    let packages = (load-debloat-config $config_path)
+    let package_names = (get-debloat-package-names $packages)
+
+    if ($package_names | is-empty) {
+        print 'debloat.yml is empty'
+        return
+    }
+
+    ensure-adb-device
+
+    let activity_services = (
+        collect-matching-lines
+            'activity-services'
+            (run-adb ['shell' 'dumpsys' 'activity' 'services'] | get stdout)
+            $package_names
+    )
+    let alarms = (
+        collect-matching-lines
+            'alarm'
+            (run-adb ['shell' 'dumpsys' 'alarm'] | get stdout)
+            $package_names
+    )
+    let jobs = (
+        collect-matching-lines
+            'jobscheduler'
+            (run-adb ['shell' 'dumpsys' 'jobscheduler'] | get stdout)
+            $package_names
+    )
+
+    print 'Inspecting service/alarm/job scheduler state for debloat packages...'
+    print $"Config user: ($checked_user_id); scope: device-wide dumpsys"
+    print-diag-section 'activity services' $activity_services
+    print-diag-section 'alarm' $alarms
+    print-diag-section 'jobscheduler' $jobs
+}
+
+def run-diag-debloat-battery-report [
+    config_path: string
+    user_id: string
+]: nothing -> nothing {
+    let checked_user_id = (normalize-user-id $user_id)
+    let packages = (load-debloat-config $config_path)
+    let package_names = (get-debloat-package-names $packages)
+
+    if ($package_names | is-empty) {
+        print 'debloat.yml is empty'
+        return
+    }
+
+    ensure-adb-device
+
+    let batterystats_matches = (
+        collect-matching-lines
+            'batterystats'
+            (run-adb ['shell' 'dumpsys' 'batterystats'] | get stdout)
+            $package_names
+    )
+
+    print 'Inspecting batterystats for debloat package references...'
+    print $"Config user: ($checked_user_id); scope: device-wide stats"
+    print-diag-section 'batterystats' $batterystats_matches
+}
+
 def apply-disable-user [package_name: string, user_id: string]: nothing -> string {
     run-adb ['shell' 'pm' 'disable-user' '--user' $user_id $package_name] | ignore
     'applied'
@@ -377,6 +626,38 @@ def "main debloat-apply" [
     } | ignore
 }
 
+def "main diag-debloat-log" [
+    --config (-c): string
+    --user-id (-u): string = '0'
+    --since (-s): string = '12h'
+] {
+    run-diag-debloat-log-report $config $user_id $since
+}
+
+def "main diag-debloat-jobs" [
+    --config (-c): string
+    --user-id (-u): string = '0'
+] {
+    run-diag-debloat-jobs-report $config $user_id
+}
+
+def "main diag-debloat-battery" [
+    --config (-c): string
+    --user-id (-u): string = '0'
+] {
+    run-diag-debloat-battery-report $config $user_id
+}
+
+def "main diag-debloat-full" [
+    --config (-c): string
+    --user-id (-u): string = '0'
+    --since (-s): string = '12h'
+] {
+    run-diag-debloat-log-report $config $user_id $since
+    run-diag-debloat-jobs-report $config $user_id
+    run-diag-debloat-battery-report $config $user_id
+}
+
 def main [] {
-    print 'Usage: droid.nu <apps-check|apps-install|debloat-check|debloat-apply> [flags]'
+    print 'Usage: droid.nu <apps-check|apps-install|debloat-check|debloat-apply|diag-debloat-log|diag-debloat-jobs|diag-debloat-battery|diag-debloat-full> [flags]'
 }
