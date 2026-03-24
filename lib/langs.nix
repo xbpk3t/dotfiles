@@ -2,8 +2,10 @@
   lspPkgs = pkgs:
     with pkgs; [
       # https://mynixos.com/nixpkgs/package/nixd
+      # https://github.com/nix-community/nixd
       nixd
       # https://mynixos.com/nixpkgs/package/nil
+      # https://github.com/oxalica/nil
       nil
 
       # https://mynixos.com/nixpkgs/package/rust-analyzer
