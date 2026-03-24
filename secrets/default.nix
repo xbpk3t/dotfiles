@@ -88,6 +88,7 @@ in {
       # LLM
       LLM_GLM = mkUserSecret "LLM/GLM";
       LLM_deepseek = mkUserSecret "LLM/deepseek";
+      LLM_Sub2API_ICE = mkUserSecret "LLM/Sub2API-ICE";
 
       # singbox
       singbox_UUID = mkRootSecret "singbox/UUID";
