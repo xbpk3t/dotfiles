@@ -96,6 +96,12 @@ rec {
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # NixOS profile for Android Terminal / AVF
+    nixos-avf = {
+      url = "github:nix-community/nixos-avf";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # https://github.com/tak-bro/aicommit2
     # aicommit2.url = "github:tak-bro/aicommit2";
 
