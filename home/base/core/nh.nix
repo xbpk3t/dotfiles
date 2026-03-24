@@ -20,6 +20,15 @@
       enable = true;
     };
 
+    nix-index-database = {
+      comma = {
+        # what: 让 `comma` 也复用 nix-index-database 提供的 wrapper。
+        # why: 既然当前已经引入预生成 database，就顺手把 ad-hoc command lookup 统一到同一条索引链路，
+        #      避免后面排查 `nix-locate` 和 `comma` 行为时出现两套数据来源。
+        enable = true;
+      };
+    };
+
     # Nix Helper (nh) configuration
     # https://github.com/viperML/nh
     # https://mynixos.com/home-manager/options/programs.nh
