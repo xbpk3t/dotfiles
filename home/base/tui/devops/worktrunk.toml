@@ -1,0 +1,32 @@
+# Worktree 存放到 repo 内部，避免散落到同级目录
+# 注意：{{ branch | sanitize }} 会把 "/" 转成 "-"，防止路径非法
+worktree-path = "{{ repo_path }}/.worktrees/{{ branch | sanitize }}"
+
+[post-create]
+# 每次创建新 worktree 后执行自定义 step
+# 注意：依赖你本地已定义 `wt step copy-ignored`
+copy = "wt step copy-ignored"
+
+[commit]
+# stage = "all" 会在 merge/squash 流程里自动 add 所有改动
+# 如果你希望更保守，可改为 "tracked" 或 "none"
+stage = "all"
+
+[commit.generation]
+# LLM commit message 生成命令（使用 Codex CLI）
+# 关键点：必须从 stdin 读取 prompt（结尾 `-`），否则 wt 传入内容不会生效
+# 关键点：`--json | jq` 只提取最终 agent_message，避免事件流污染 commit message
+# 关键点：`--sandbox read-only` 只生成文本，不执行写操作，更安全
+command = "codex exec --json --sandbox read-only --skip-git-repo-check -m gpt-5.4-mini -c model_reasoning_effort='low' - | jq -sr '[.[] | select(.type == \"item.completed\" and .item.type == \"agent_message\")] | last.item.text'"
+
+[list]
+# 在 `wt list` 中显示 summary（会触发 commit.generation）
+summary = true
+
+[merge]
+# 推荐默认安全合并策略：先 rebase、合并后自动 remove worktree、执行 hooks
+squash = true
+commit = true
+rebase = true
+remove = true
+verify = true
