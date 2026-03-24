@@ -134,14 +134,28 @@ in {
   packages = forAllSystems (system: allSystems.${system}.packages or {});
 
   # Apps
-  apps = forAllSystems (system: {
-    # Why：把 deploy-rs CLI 挂到当前仓库 flake 输出上，避免 task 直接
-    #      `nix run github:serokell/deploy-rs` 时绕开本仓库的 flake.lock。
-    # What：透传已 pin 的 deploy-rs app；后续统一用 `nix run .#deploy-rs`。
-    deploy-rs = inputs."deploy-rs".apps.${system}.deploy-rs;
-    # Why：保留 default app 作为兼容入口，便于手动 `nix run .` 或外部复用。
-    default = inputs."deploy-rs".apps.${system}.default;
-  });
+  apps = forAllSystems (system:
+    {
+      # Why：把 deploy-rs CLI 挂到当前仓库 flake 输出上，避免 task 直接
+      #      `nix run github:serokell/deploy-rs` 时绕开本仓库的 flake.lock。
+      # What：透传已 pin 的 deploy-rs app；后续统一用 `nix run .#deploy-rs`。
+      deploy-rs = inputs."deploy-rs".apps.${system}.deploy-rs;
+      # Why：保留 default app 作为兼容入口，便于手动 `nix run .` 或外部复用。
+      default = inputs."deploy-rs".apps.${system}.default;
+    }
+    // lib.optionalAttrs (
+      builtins.hasAttr "packages" inputs.nixos-facter
+      && builtins.hasAttr system inputs.nixos-facter.packages
+      && builtins.hasAttr "default" inputs.nixos-facter.packages.${system}
+    ) {
+      # What：暴露 nixos-facter CLI。
+      # Why：后续在目标 NixOS 主机上可以直接 `nix run .#nixos-facter -- -o facter.json`
+      #      生成 report，再提交到 hosts/<host>/facter.json 启用自动硬件事实。
+      nixos-facter = {
+        type = "app";
+        program = "${inputs.nixos-facter.packages.${system}.default}/bin/nixos-facter";
+      };
+    });
 
   # Eval Tests for all systems.
   evalTests = lib.lists.all (it: it.evalTests == {}) allSystemValues;
