@@ -64,6 +64,24 @@ in {
             trust_level = "trusted";
           };
         };
+
+        model_provider = "OpenAI";
+        model_providers = {
+          #  llde = {
+          #    name = "llde.tech";
+          #    base_url = "https://api.llde.tech/v1"; # 必须加 /v1
+          #    env_key = "OPENAI_API_KEY"; # Codex 会从这个环境变量读 key
+          #    # wire_api = "chat";                     # 大部分中转用这个，如果报错可尝试 "responses"
+          #  };
+
+          # https://linux.do/t/topic/1806073
+          OpenAI = {
+            name = "OpenAI";
+            base_url = "https://ice.v.ua"; # 必须加 /v1
+            env_key = "OPENAI_API_KEY_ICE"; # Codex 会从这个环境变量读 key
+            wire_api = "responses";
+          };
+        };
       };
       custom-instructions = ''
       '';
@@ -77,6 +95,8 @@ in {
 
         # For Context7 MCP
         CONTEXT7_API_KEY = "$(cat ${config.sops.secrets.API_context7.path})";
+
+        OPENAI_API_KEY_ICE = config.sops.secrets.LLM_Sub2API_ICE.path;
       };
       shellAliases = {
         # 每次启动 codex 时动态注入 GitHub PAT，避免把 token 写入静态配置。
