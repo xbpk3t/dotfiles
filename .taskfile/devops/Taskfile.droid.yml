@@ -1,0 +1,96 @@
+---
+version: "3"
+
+vars:
+  DROID_SCRIPT: "{{.TASKFILE_DIR}}/droid/droid.nu"
+  DROID_APPS_FILE: "{{.TASKFILE_DIR}}/droid/apps.yml"
+  DROID_DEBLOAT_FILE: "{{.TASKFILE_DIR}}/droid/debloat.yml"
+  DROID_USER: '{{if .USER_ID}}{{.USER_ID}}{{else}}0{{end}}' # 重要：默认只处理主用户 user 0
+
+
+tasks:
+  _ensure:nu:
+    internal: true
+    preconditions:
+      - sh: command -v nu >/dev/null
+        msg: nu not found
+      - sh: test -f "{{.DROID_SCRIPT}}"
+        msg: "{{.DROID_SCRIPT}} not found"
+    cmd: true
+
+  _ensure:adb:
+    internal: true
+    preconditions:
+      - sh: command -v adb >/dev/null
+        msg: adb not found
+    cmd: true
+
+  _ensure:fdroidcl:
+    internal: true
+    preconditions:
+      - sh: command -v fdroidcl >/dev/null
+        msg: fdroidcl not found
+    cmd: true
+
+  _ensure:apps-file:
+    internal: true
+    preconditions:
+      - sh: test -f "{{.DROID_APPS_FILE}}"
+        msg: "{{.DROID_APPS_FILE}} not found"
+    cmd: true
+
+  _ensure:debloat-file:
+    internal: true
+    preconditions:
+      - sh: test -f "{{.DROID_DEBLOAT_FILE}}"
+        msg: "{{.DROID_DEBLOAT_FILE}} not found"
+    cmd: true
+
+  default:
+    desc: droid 任务入口
+    summary: "task -g droid"
+    silent: true
+    interactive: true
+    cmds:
+      - task: '{{.TASK}}'
+    vars:
+      TASK:
+        sh: gum choose apps:check apps:install debloat:check debloat:apply
+        msg: 选择 mobile 任务
+
+  apps:check:
+    desc: 检查 apps.yml 中声明的 app 是否已安装
+    summary: "task -g droid:apps:check [USER_ID=0]"
+    cmds:
+      - task: _ensure:nu
+      - task: _ensure:adb
+      - task: _ensure:apps-file
+      - 'nu "{{.DROID_SCRIPT}}" apps-check --config "{{.DROID_APPS_FILE}}" --user-id "{{.DROID_USER}}"'
+
+  apps:install:
+    desc: 安装 apps.yml 中 source=fdroid 的缺失 app
+    summary: "task -g droid:apps:install [USER_ID=0]"
+    cmds:
+      - task: _ensure:nu
+      - task: _ensure:adb
+      - task: _ensure:fdroidcl
+      - task: _ensure:apps-file
+      - 'nu "{{.DROID_SCRIPT}}" apps-install --config "{{.DROID_APPS_FILE}}" --user-id "{{.DROID_USER}}"'
+
+  debloat:check:
+    desc: 检查 debloat.yml 中声明的预装包当前状态
+    summary: "task -g droid:debloat:check [USER_ID=0]"
+    cmds:
+      - task: _ensure:nu
+      - task: _ensure:adb
+      - task: _ensure:debloat-file
+      - 'nu "{{.DROID_SCRIPT}}" debloat-check --config "{{.DROID_DEBLOAT_FILE}}" --user-id "{{.DROID_USER}}"'
+
+  debloat:apply:
+    desc: 执行 debloat.yml 中声明的 debloat 动作
+    summary: "task -g droid:debloat:apply [USER_ID=0]"
+    cmds:
+      - task: _ensure:nu
+      - task: _ensure:adb
+      - task: _ensure:debloat-file
+      - 'nu "{{.DROID_SCRIPT}}" debloat-apply --config "{{.DROID_DEBLOAT_FILE}}" --user-id "{{.DROID_USER}}"'
