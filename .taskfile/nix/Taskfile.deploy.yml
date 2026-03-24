@@ -6,7 +6,16 @@ version: '3'
 
 vars:
   # 统一获取 deploy-rs 节点列表，使用换行分隔，供交互选择/批量执行复用
-  NODES_CMD: "nix eval --raw .#deploy.nodes --apply 'x: builtins.concatStringsSep \"\\n\" (builtins.attrNames x)'"
+  # Why：deploy 依赖当前工作树里的本地 flake；仓库里存在未 track 的源码目录时，
+  #      pure flake 评估会直接失败。
+  # What：这里显式加 `--impure`，让 deploy 入口按 working tree 评估。
+  NODES_CMD: "nix eval --impure --raw .#deploy.nodes --apply 'x: builtins.concatStringsSep \"\\n\" (builtins.attrNames x)'"
+  # Why：deploy-rs 自带的 pre-build checks 会再次以 pure flake 方式检查目标，
+  #      在存在未 track 源码目录时会提前失败。
+  # What：这里统一跳过它的内建 checks，并把 `--impure` 继续透传给后续 Nix
+  #       评估/构建阶段；这样 deploy 入口仍绑定本仓库 flake.lock，同时兼容当前
+  #       working tree。
+  DEPLOY_RS_CMD: "nix run --impure .#deploy-rs -- --skip-checks"
   # 并发执行上限（可通过环境变量 CONCURRENCY 覆盖）
   CONCURRENCY_DEFAULT: "4"
   CONCURRENCY_RESOLVED: '{{.CONCURRENCY | default .CONCURRENCY_DEFAULT}}'
@@ -32,7 +41,7 @@ tasks:
         fi
         # NOTE: xargs 在 -I 模式下会按行逐个替换，-n1 与其冲突且会触发 warning。
         printf "%s\n" "{{.HOSTS}}" | xargs -P "{{.CONCURRENCY_RESOLVED}}" -I{} \
-          nix run github:serokell/deploy-rs -- ".#{}"
+          {{.DEPLOY_RS_CMD}} ".#{}" -- --impure
 
   profile:
     desc: "deploy-rs 部署指定 profile"
@@ -46,7 +55,7 @@ tasks:
       - |
         profile="{{.PROFILE}}"
         if [[ -z "$profile" ]]; then
-          nix run github:serokell/deploy-rs -- .#{{.HOST}}
+          {{.DEPLOY_RS_CMD}} .#{{.HOST}} -- --impure
         else
-          nix run github:serokell/deploy-rs -- .#{{.HOST}}."$profile"
+          {{.DEPLOY_RS_CMD}} .#{{.HOST}}."$profile" -- --impure
         fi
