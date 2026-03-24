@@ -30,9 +30,11 @@
       "--prompt='/ '"
       "-i"
       "--no-bold"
-      "--bind='enter:execute(nvim {})'"
-      "--preview='bat --style=numbers --color=always --line-range :500 {}'"
-      "--preview-window=right:60%:wrap"
+
+      # [2026-03-24] 注释掉以下 fzf参数。因为调用ugit时总是报 bat error 的问题（冲突原因是ugit等工具本身也调用了这些参数，所以跟fzf冲突了）
+      # "--bind='enter:execute(nvim {})'"
+      # "--preview='bat --style=numbers --color=always --line-range :500 {}'"
+      # "--preview-window=right:60%:wrap"
     ];
 
     # File widget (CTRL-T) configuration
