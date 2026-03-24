@@ -10,9 +10,6 @@ summary: 汇总常用 Nix 生态工具与用途说明。
 ---
 
 ```yaml
-- url: https://github.com/nix-community/nix-index-database
-  des: 预生成的 nix-index 数据库（定期更新），并带 NixOS/HM 模块与 wrapper。让 nix-locate / command-not-found 等不用本地跑索引也能快速查“哪个包提供某文件/命令”。
-
 - url: https://github.com/MatthewCroughan/NixThePlanet
 - url: https://github.com/musnix/musnix
 
@@ -199,17 +196,6 @@ summary: 汇总常用 Nix 生态工具与用途说明。
 - `0/5`：基本无关，或对当前仓库几乎没有现实价值。
 
 ## 排序结果
-
-## nix-community/nix-index-database (5/5)
-
-URL: <https://github.com/nix-community/nix-index-database>
-
-具体原因：
-
-- 你已经在 [`home/base/core/nh.nix`](/Users/luck/Desktop/dotfiles/home/base/core/nh.nix) 开了 `programs.nix-index.enable = true`，说明“按文件/命令反查包”本来就是你的现有工作流一部分。
-- 但你现在没有接入预生成数据库，这意味着索引体验还没做到最优；这个 repo 几乎是**在你现有方案上做低成本增强**，不是另起炉灶。
-- 你的仓库同时跑在 `darwin` 和 `NixOS`，而 `nix-index-database` 正好适合这种多端复用场景。
-- 这是少数能明确判断为“**直接补当前短板**”的 repo。
 
 ## zhaofengli/attic (4/5)
 

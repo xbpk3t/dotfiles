@@ -1,30 +1,18 @@
 {
-  config,
   modulesPath,
+  mylib,
   ...
-}: {
+}: let
+  facterReport = mylib.facter.reportPathForHost "nixos-vps";
+in {
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
   ];
 
-  boot.initrd.availableKernelModules = [
-    "virtio_pci"
-    "virtio_blk"
-    "virtio_scsi"
-    "ahci"
-    "xhci_pci"
-    "sd_mod"
-  ];
-
-  boot.initrd.kernelModules = ["virtio_net"];
-  boot.kernelModules = [];
-  boot.extraModulePackages = [];
-
   networking.useDHCP = true;
-
   nixpkgs.hostPlatform = "x86_64-linux";
 
-  # 通用微码更新策略：仅在允许可再分发固件时启用
-  hardware.cpu.intel.updateMicrocode = config.hardware.enableRedistributableFirmware;
-  hardware.cpu.amd.updateMicrocode = config.hardware.enableRedistributableFirmware;
+  # What：交给 nixos-facter 的 report 驱动底层硬件事实。
+  # Why：这里不再保留 initrd/kernel/microcode 的手写 fallback，避免“接了 facter 但旧样板还在”。
+  hardware.facter.reportPath = facterReport;
 }
