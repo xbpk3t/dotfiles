@@ -26,9 +26,20 @@ disable-user:
 uninstall-user0:
   # 推荐卸载
   # 这组偏向广告、快应用、常驻上传，通常是收益最高的一批。
-  - pkg: com.miui.analytics
-    des: Analytics，后台上传数据耗电；删掉后有时会被系统自动装回
+  # 观察说明：
+  # - 2026-03-24 实机日志看到 `ActivityManager: Unable to start service ... com.miui.analytics ... not found`
+  # - 30 分钟窗口里约 139 次，属于明确的高频失败重试
+  # - 这说明它虽然本质上是埋点/上传组件，但当前机型上“删掉后的重试成本”已经可见
+  # - 建议：如果继续卸载，至少要配套持续观察；当前更偏向先恢复，再评估是否用 DNS / host 侧阻断上传
+#  - pkg: com.miui.analytics
+#    des: Analytics，后台上传数据耗电；删掉后有时会被系统自动装回
 
+
+
+  # 观察说明：
+  # - 2026-03-24 实机日志看到 `SplashScreenService ... not found`
+  # - 30 分钟窗口里约 4 次，说明确实存在调用链，但频率远低于 com.miui.analytics
+  # - 建议：暂时不作为第一优先级恢复项，先观察即可
   - pkg: com.miui.systemAdSolution
     des: 小米系统广告，推荐优先处理
 
@@ -109,6 +120,10 @@ uninstall-user0:
 
   # 不建议直接卸载
   # 这组不是绝对不能删，但删掉后更容易影响系统功能或体验。
+  # 观察说明：
+  # - 2026-03-24 实机日志看到 `com.miui.launcher.WINDOW_OVERLAY ... pkg=com.miui.personalassistant ... not found`
+  # - 30 分钟窗口里约 3 次，更像是桌面 / 负一屏相关调用缺失
+  # - 建议：如果你不用负一屏/智能助理，可以先容忍；不是第一优先级恢复项
   - pkg: com.miui.personalassistant
     des: 智能助理 / 负一屏 / 第三方小组件；文章里偏不建议直接卸载
 
@@ -236,3 +251,72 @@ uninstall-user0:
 #   des: 小米云同步
 # - pkg: com.miui.cloudservice.sysbase
 #   des: 小米云服务系统基础
+
+# 参考 https://gist.github.com/mcxiaoke/ade05718f590bcd574b807c4706a00b1 的补充缺失项：
+# 1. gist 总体倾向于“优先 disable-user，不直接 uninstall-user0”
+# 2. 以下条目先只记录为候选，不默认加入 active list；尤其是云服务 / 推送 / 性能 / 壁纸 / 位置相关组件
+# 3. 其中部分条目在 gist 中还被标记为“不建议禁用”或“禁用后会自动启用”，更不适合直接启用
+
+# gist safe list 中当前未记录的候选：
+# - pkg: com.miui.audioeffect
+#   des: 音效组件
+# - pkg: com.miui.audiomonitor
+#   des: 音频监控；gist 同时标注“disable not working”
+# - pkg: com.miui.cit
+#   des: CIT 手机测试
+# - pkg: com.miui.cloudbackup
+#   des: 小米云备份
+# - pkg: com.miui.cloudservice
+#   des: 小米云服务
+# - pkg: com.miui.contentcatcher
+#   des: 应用程序扩展服务；gist 同时标注“disable not working”
+# - pkg: com.miui.maintenancemode
+#   des: 维修模式
+# - pkg: com.miui.micloudsync
+#   des: 小米云同步
+# - pkg: com.miui.misound
+#   des: 小米音效
+# - pkg: com.miui.smsextra
+#   des: 短信增强服务
+# - pkg: com.miui.vsimcore
+#   des: 虚拟 SIM 相关
+# - pkg: com.miui.wmsvc
+#   des: 窗口管理相关服务
+# - pkg: com.mobiletools.systemhelper
+#   des: SystemHelper
+# - pkg: com.xiaomi.bluetooth
+#   des: 小米蓝牙扩展
+# - pkg: com.xiaomi.joyose
+#   des: Joyose；社区常见，但风险与收益都不稳定
+# - pkg: com.xiaomi.micloud.sdk
+#   des: 小米云 SDK
+# - pkg: com.xiaomi.miplay_client
+#   des: 小米妙播 / 投播相关
+# - pkg: com.xiaomi.mircs
+#   des: RCS 增强短信；gist 同时标注“disable not working”
+# - pkg: com.xiaomi.powerchecker
+#   des: 电量检查相关
+# - pkg: com.xiaomi.simactivate.service
+#   des: SIM 激活服务
+# - pkg: com.xiaomi.xmsf
+#   des: 小米推送框架
+# - pkg: com.xiaomi.xmsfkeeper
+#   des: 小米推送保活；gist 同时标注“disable not working”
+
+# gist 中标为“不建议禁用/删除”，当前未记录的高风险项：
+# - pkg: com.miui.powerkeeper
+#   des: 电量和性能
+# - pkg: com.xiaomi.metoknlp
+#   des: 网络位置服务
+# - pkg: com.miui.backup
+#   des: 备份与恢复
+# - pkg: com.miui.face
+#   des: 人脸识别
+# - pkg: com.miui.miwallpaper
+#   des: 桌面壁纸
+# - pkg: com.miui.aod
+#   des: 息屏显示
+
+# gist 中标为“disable not working”，当前未记录的条目：
+# - pkg: com.android.printspooler
+#   des: 打印后台处理；gist 明确提示禁用后会自动启用
