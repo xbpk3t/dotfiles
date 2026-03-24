@@ -74,6 +74,14 @@ rec {
     utils.url = "github:numtide/flake-utils";
     nixos-hardware.url = "github:nixos/nixos-hardware";
 
+    # Weekly prebuilt nix-index database.
+    # what: 复用上游预生成索引，避免每台机器各自构建本地 database。
+    # why: 对当前多平台仓库来说，这是低成本提升 nix-locate/command-not-found 体验的方式。
+    nix-index-database = {
+      url = "github:nix-community/nix-index-database";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     agent-skills.url = "github:Kyure-A/agent-skills-nix";
     llm-agents.url = "github:numtide/llm-agents.nix";
 
