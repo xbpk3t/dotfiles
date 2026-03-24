@@ -5,6 +5,12 @@ version: "3"
 # PLAN: [2026-03-18] 在今年7、8月时，等  design skills 主流方案确认下来之后，做个处理
 # https://x.com/dingyi/status/2033679210766843928
 
+
+
+# https://linux.do/t/topic/1802808
+
+
+
 vars:
   SKILLS:
     # skills 为空时会安装该 repo 的全部 skills（依赖 skills CLI 默认行为）
@@ -689,8 +695,6 @@ vars:
     # how to use: https://impeccable.style/cheatsheet
     - repo: pbakaus/impeccable
 
-  NEED_TO_ADD:
-
     # https://skills.sh/paulirish/dotfiles/modern-css
     - repo: paulirish/dotfiles
       skills:
@@ -706,3 +710,43 @@ vars:
       skills:
         - tailwindcss-advanced-layouts
         - docker-best-practices
+
+    # https://x.com/vikingmute/status/2036043855594975485
+    # https://github.com/obra/superpowers
+#  - 需求不清/做功能/要方案 -> brainstorming
+#  - 要拆计划 -> writing-plans
+#  - 开始实现 -> executing-plans
+#  - 并行子任务 -> subagent-driven-development 或 dispatching-parallel-agents
+#  - 写代码或修 bug 前 -> test-driven-development
+#  - 遇到异常/测试失败 -> systematic-debugging
+#  - 完成一个任务 -> requesting-code-review
+#  - 收到 review -> receiving-code-review
+#  - 准备宣称完成 -> verification-before-completion
+#  - 准备合并或结束分支 -> finishing-a-development-branch
+    - repo: obra/superpowers
+
+    # https://github.com/lijigang/ljg-skills
+    - repo: lijigang/ljg-skills
+      skills:
+        - ljg-paper
+        - ljg-card
+        - ljg-writes
+
+    # https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering
+    # https://skills.sh/muratcankoylan/agent-skills-for-context-engineering
+    - repo: muratcankoylan/agent-skills-for-context-engineering
+
+
+    # https://github.com/OthmanAdi/planning-with-files
+    # https://skills.sh/othmanadi/planning-with-files
+    - repo: othmanadi/planning-with-files
+
+    # https://github.com/MiniMax-AI/skills
+    # https://skills.sh/minimax-ai/skills
+    - repo: minimax-ai/skills
+
+    # https://github.com/SuperClaude-Org/SuperClaude_Framework
+    # https://skills.sh/superclaude-org/superclaude_framework
+    - repo: superclaude-org/superclaude_framework
+
+  NEED_TO_ADD:

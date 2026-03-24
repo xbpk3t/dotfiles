@@ -11,6 +11,7 @@ secrets/age.key
 secrets/secrets_temp.yaml
 
 .cache/
+/.worktrees/
 
 .codex/
 .claude/
