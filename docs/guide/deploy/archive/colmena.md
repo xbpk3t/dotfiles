@@ -1,11 +1,11 @@
 ---
 title: colmena
-status: deprecated # active | deprecated | archived
-author: lucas
-last_reviewed: 2026-01-21
-deprecated_since: 2026-01-21
-adr: deploy-rs-migration.md # 只要是 status != active 的文档 必须有 reason + replacement 或 adr
-replacement: deploy-rs.md
+type: guide
+status: archived
+date: 2026-01-21
+updated: 2026-01-21
+adr: ../deploy-rs-migration.md
+replacement: ../deploy-rs-migration.md
 reason: 用 deploy-rs 替代 colmena
 ---
 

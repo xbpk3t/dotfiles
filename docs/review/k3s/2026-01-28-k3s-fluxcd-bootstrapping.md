@@ -1,7 +1,9 @@
 ---
 title: k3s+fluxcd初探
-status: archive
+type: review
+status: archived
 date: 2026-01-28
+updated: 2026-01-28
 ---
 
 # k3s + FluxCD 排障与落地记录（2026-01-28）
