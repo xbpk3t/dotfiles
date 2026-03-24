@@ -37,6 +37,9 @@ in
           home-manager.users."${myvars.username}".imports =
             home-modules
             ++ [
+              # what: 将 nix-index wrapper 和预生成 database 接入共享 Home Manager 主线。
+              # why: 这样 Darwin/NixOS 都走同一个模块入口，后续维护成本更低。
+              inputs.nix-index-database.homeModules.default
               inputs.nvf.homeManagerModules.default
               inputs.sops-nix.homeManagerModules.sops
             ];
