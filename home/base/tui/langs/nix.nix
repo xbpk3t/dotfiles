@@ -1,4 +1,9 @@
-{pkgs, ...}: {
+{
+  inputs,
+  pkgs,
+  ...
+}: {
+  # Nix/NixOS 开发与调试常用 CLI
   home.packages = with pkgs; [
     # https://github.com/nix-community/noogle
     # https://noogle.dev/
@@ -10,6 +15,31 @@
     ###### nixpkgs 打包相关 ##########
     # https://mynixos.com/nixpkgs/package/nurl
     nurl
+
+    # === 代码检查与格式化 ===
+    # 发现 nix 里未使用的变量/绑定
+    nixfmt
+    deadnix
+    statix # nix 风格与常见陷阱检查
+    alejandra # nix 代码格式化
+
+    # === nixpkgs开发 ===
+    # 两套 Nix 单元测试工具都保留，便于分别试用/迁移。
+    inputs.nixt.packages.${pkgs.stdenv.hostPlatform.system}.default
+    inputs.nix-unit.packages.${pkgs.stdenv.hostPlatform.system}.default
+
+    # 交互式生成 nix 包模板
+    # nix-init
+
+    # === 依赖/构建分析 ===
+    # 从 derivation 提取源码/补丁等
+    nixtract
+    # 检查 hydra 依赖/评估情况
+    hydra-check
+    # 解析 store path 依赖树
+    nix-melt
+    # 树状查看依赖（替代 nix-store --query --requisites）
+    nix-tree
   ];
 
   # https://mynixos.com/home-manager/options/programs.nix-init
