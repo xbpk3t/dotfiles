@@ -1,46 +1,27 @@
 {
   lib,
-  stdenv,
-  fetchFromGitHub,
-  fetchPnpmDeps,
-  nodejs,
-  pnpm_10,
-  pnpmConfigHook,
+  stdenvNoCC,
+  fetchzip,
 }:
-stdenv.mkDerivation (finalAttrs: {
+stdenvNoCC.mkDerivation rec {
   pname = "zashboard";
   version = "2.8.0";
 
-  src = fetchFromGitHub {
-    owner = "Zephyruso";
-    repo = "zashboard";
-    rev = "v${finalAttrs.version}";
-    hash = lib.fakeHash;
+  # Generated from:
+  #   nurl https://github.com/Zephyruso/zashboard/releases/download/v2.8.0/dist.zip
+  #
+  # We package the published static assets instead of rebuilding the Vue app.
+  # This keeps the derivation tiny and avoids maintaining pnpm-specific plumbing.
+  src = fetchzip {
+    url = "https://github.com/Zephyruso/zashboard/releases/download/v${version}/dist.zip";
+    hash = "sha256-uI1BZEADLiTO/efl8OPM1s+dLotZTawdVPO5QcfzzOU=";
+    stripRoot = false;
   };
-
-  nativeBuildInputs = [
-    nodejs
-    pnpmConfigHook
-    pnpm_10
-  ];
-
-  pnpmDeps = fetchPnpmDeps {
-    inherit (finalAttrs) pname version src;
-    pnpm = pnpm_10;
-    fetcherVersion = 3;
-    hash = lib.fakeHash;
-  };
-
-  buildPhase = ''
-    runHook preBuild
-    pnpm build
-    runHook postBuild
-  '';
 
   installPhase = ''
     runHook preInstall
-    mkdir -p $out/share/zashboard
-    cp -r dist/* $out/share/zashboard/
+    install -dm755 "$out/share/zashboard"
+    cp -r ./* "$out/share/zashboard/"
     runHook postInstall
   '';
 
@@ -50,4 +31,4 @@ stdenv.mkDerivation (finalAttrs: {
     license = licenses.mit;
     platforms = platforms.all;
   };
-})
+}

@@ -7,6 +7,8 @@ buildNpmPackage {
   pname = "ruler";
   version = "0.3.11";
 
+  # Generated from:
+  #   nurl https://github.com/intellectronica/ruler/archive/refs/tags/v0.3.11.tar.gz
   src = fetchFromGitHub {
     owner = "intellectronica";
     repo = "ruler";
