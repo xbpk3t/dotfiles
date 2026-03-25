@@ -1,10 +1,10 @@
 {pkgs, ...}: {
   home.packages = with pkgs; [
-    # TODO[2026-03-25]: 之后评估一下是否要引入 fenix 作为rust工具链的 flake
+    # TODO[2026-03-25](fenix): 之后评估一下是否要引入 fenix 作为rust工具链的 flake
     # https://mynixos.com/fenix
     # https://github.com/nix-community/fenix
 
-    # TODO[2026-03-25]: 评估一下是否需要引入 crane
+    # TODO[2026-03-25](crane): 评估一下是否需要引入 crane
     # https://github.com/ipetkov/crane
     #- `crane` 很适合“用 Nix 构建 Rust 项目”。
     #- 但你当前仓库是系统配置仓库，不是 Rust 项目构建仓库；它没有可以直接发挥价值的主舞台。

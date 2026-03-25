@@ -19,6 +19,7 @@
 
     # 代码质量和分析
     shellcheck
+    typos
     yamllint
     markdownlint-cli
 
