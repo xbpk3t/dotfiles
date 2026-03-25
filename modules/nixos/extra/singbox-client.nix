@@ -2,7 +2,6 @@
   config,
   lib,
   pkgs,
-  myvars,
   mylib,
   ...
 }:
@@ -11,7 +10,6 @@ with lib; let
   client = import ../../../lib/singbox/client-config.nix {
     inherit
       config
-      myvars
       mylib
       lib
       pkgs

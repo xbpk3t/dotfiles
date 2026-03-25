@@ -1,8 +1,10 @@
 {
   pkgs,
-  myvars,
+  userMeta,
   ...
-}: {
+}: let
+  username = userMeta.username;
+in {
   modules.networking = {
     singbox.enable = true;
   };
@@ -21,14 +23,14 @@
       #        "rclone:bisync-scratches"
       #      ];
       #      StartInterval = 1200; # 每20分钟执行一次
-      #      StandardOutPath = "/Users/${myvars.username}/Library/Logs/rclone-bisync-scratches.log";
-      #      StandardErrorPath = "/Users/${myvars.username}/Library/Logs/rclone-bisync-scratches.log";
+      #      StandardOutPath = "/Users/${username}/Library/Logs/rclone-bisync-scratches.log";
+      #      StandardErrorPath = "/Users/${username}/Library/Logs/rclone-bisync-scratches.log";
       #      EnvironmentVariables = {
       #        # Include the full PATH to access all user binaries including gh, rclone, etc.
-      #        PATH = "/etc/profiles/per-user/${myvars.username}/bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
-      #        RCLONE_CONFIG = "/Users/${myvars.username}/.config/rclone/rclone.conf";
+      #        PATH = "/etc/profiles/per-user/${username}/bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
+      #        RCLONE_CONFIG = "/Users/${username}/.config/rclone/rclone.conf";
       #      };
-      #      WorkingDirectory = "/Users/${myvars.username}";
+      #      WorkingDirectory = "/Users/${username}";
       #    };
       #  };
 
@@ -51,14 +53,14 @@
           RunAtLoad = true; # 开机时立即执行一次（plist 加载时触发，防止关机错过 sync）
           ThrottleInterval = 86400; # 24小时防重。若不足24小时 → 跳过（避免重复）
 
-          StandardOutPath = "/Users/${myvars.username}/Library/Logs/rclone-sync-docs-images.log";
-          StandardErrorPath = "/Users/${myvars.username}/Library/Logs/rclone-sync-docs-images.log";
+          StandardOutPath = "/Users/${username}/Library/Logs/rclone-sync-docs-images.log";
+          StandardErrorPath = "/Users/${username}/Library/Logs/rclone-sync-docs-images.log";
           EnvironmentVariables = {
             # Include the full PATH to access all user binaries including gh, rclone, etc.
-            PATH = "/etc/profiles/per-user/${myvars.username}/bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
-            RCLONE_CONFIG = "/Users/${myvars.username}/.config/rclone/rclone.conf";
+            PATH = "/etc/profiles/per-user/${username}/bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
+            RCLONE_CONFIG = "/Users/${username}/.config/rclone/rclone.conf";
           };
-          WorkingDirectory = "/Users/${myvars.username}";
+          WorkingDirectory = "/Users/${username}";
         };
       };
 
@@ -67,7 +69,7 @@
         serviceConfig = {
           Label = "local.nh.clean.all";
           ProgramArguments = [
-            "/etc/profiles/per-user/${myvars.username}/bin/nh"
+            "/etc/profiles/per-user/${username}/bin/nh"
             "clean"
             "all"
             "--keep-since"
@@ -84,13 +86,13 @@
           RunAtLoad = true;
           ThrottleInterval = 86400;
 
-          StandardOutPath = "/Users/${myvars.username}/Library/Logs/nh-clean.log";
-          StandardErrorPath = "/Users/${myvars.username}/Library/Logs/nh-clean.log";
+          StandardOutPath = "/Users/${username}/Library/Logs/nh-clean.log";
+          StandardErrorPath = "/Users/${username}/Library/Logs/nh-clean.log";
           EnvironmentVariables = {
             # Avoid PATH entries with spaces (nh clean all bug).
-            PATH = "/etc/profiles/per-user/${myvars.username}/bin:/run/current-system/sw/bin:/usr/bin:/bin:/usr/sbin:/sbin";
+            PATH = "/etc/profiles/per-user/${username}/bin:/run/current-system/sw/bin:/usr/bin:/bin:/usr/sbin:/sbin";
           };
-          WorkingDirectory = "/Users/${myvars.username}";
+          WorkingDirectory = "/Users/${username}";
         };
       };
     };

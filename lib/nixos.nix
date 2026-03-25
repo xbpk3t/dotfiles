@@ -6,10 +6,10 @@
   nixos-modules,
   home-modules ? [],
   specialArgs ? (genSpecialArgs system),
-  myvars,
   ...
 }: let
   inherit (inputs) nixpkgs home-manager nixos-generators;
+  hmUsername = specialArgs.userMeta.username;
   # NOTE:
   # nixos/lib/eval-config.nix 会在 specialArgs.pkgs 存在时直接给出 warning。
   # 正确做法是通过 nixosSystem 的 pkgs 参数传入，并从 specialArgs 中移除 pkgs。
@@ -33,7 +33,7 @@ in
           home-manager.backupFileExtension = null;
 
           home-manager.extraSpecialArgs = specialArgs;
-          home-manager.users."${myvars.username}".imports =
+          home-manager.users."${hmUsername}".imports =
             home-modules
             ++ [
               # what: 将 nix-index wrapper 和预生成 database 接入共享 Home Manager 主线。
