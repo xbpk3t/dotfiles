@@ -1,10 +1,17 @@
-{myvars, ...}: {
+{
+  userMeta,
+  timeMeta,
+  ...
+}: let
+  username = userMeta.username;
+  timeZone = timeMeta.timeZone;
+in {
   # Shared macOS system preferences with default values
   # Host-specific configurations can override these defaults
   # 不需要去查什么Darwin的SystemPreferences，只需要去查nix-darwin的文档即可。因为并非所有配置项，都提供了nix配置项。
   system = {
     # Set the primary user for this specific machine (can be overridden)
-    primaryUser = myvars.username;
+    primaryUser = username;
 
     defaults = {
       # Dock settings
@@ -195,7 +202,7 @@
       # Login window settings
       loginwindow = {
         # autoLoginUser 会在启用 FileVault 或公司策略时被系统拒绝，并降低安全性。但是个人使用可以开启该配置项。
-        autoLoginUser = myvars.username;
+        autoLoginUser = username;
         GuestEnabled = false;
         DisableConsoleAccess = false;
         SHOWFULLNAME = true;
@@ -232,7 +239,7 @@
         type = "png";
         # 或 "clipboard" / "preview" ...
         target = "file";
-        location = "/Users/${myvars.username}/Downloads";
+        location = "/Users/${username}/Downloads";
         disable-shadow = true;
         include-date = false;
         show-thumbnail = false;
@@ -324,7 +331,7 @@
 
   # Time zone and locale settings
   time = {
-    timeZone = myvars.timeZone;
+    inherit timeZone;
   };
 
   system.stateVersion = 6;

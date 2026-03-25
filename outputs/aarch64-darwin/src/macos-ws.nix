@@ -1,8 +1,8 @@
 {
   inputs,
   mylib,
-  myvars,
   lib,
+  mkSpecialArgs,
   ...
 } @ args: let
   macosSystemArgs =
@@ -12,36 +12,7 @@
     };
 
   name = "macos-ws";
-  # ssh-host = "100.115.38.12";
-  ssh-host = "127.0.0.1";
-
-  genSpecialArgs = system: let
-    customPkgsOverlay = import (mylib.relativeToRoot "pkgs/overlay.nix");
-    pkgs = import inputs.nixpkgs {
-      inherit system;
-      config.allowUnfree = true;
-      config.nvidia.acceptLicense = true;
-      overlays = [
-        customPkgsOverlay
-      ];
-    };
-  in {
-    inherit
-      inputs
-      mylib
-      myvars
-      pkgs
-      ;
-
-    # use unstable branch for some packages to get the latest updates
-    pkgs-unstable = import inputs.nixpkgs-unstable or inputs.nixpkgs {
-      inherit system;
-      config.allowUnfree = true;
-      overlays = [
-        customPkgsOverlay
-      ];
-    };
-  };
+  node = mylib.inventory."macos-ws".${name};
 
   modules = {
     darwin-modules =
@@ -60,22 +31,25 @@
       "home/darwin"
     ];
   };
-  systemArgs = macosSystemArgs // modules;
+  systemArgs =
+    macosSystemArgs
+    // modules
+    // {
+      specialArgs = mkSpecialArgs "aarch64-darwin" node;
+    };
   darwinConfig = mylib.macosSystem (
     systemArgs
     // {
-      genSpecialArgs = genSpecialArgs;
       system = "aarch64-darwin";
     }
   );
   deployNode = let
     deployLib = inputs."deploy-rs".lib."aarch64-darwin";
-    sshUser = myvars.username;
+    sshUser = node.ssh.user;
   in {
     # What：部署目标地址（主机名/SSH alias）。
     # Why：保持与 inventory/主机名一致，便于统一管理。
-    # 注意这里本应是 hostname = name，但是
-    hostname = ssh-host;
+    hostname = node.primaryIp;
     # What：SSH 用户名。
     # Why：darwin 通常使用本地用户名进行远程连接。
     inherit sshUser;

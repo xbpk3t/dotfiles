@@ -3,13 +3,13 @@
   inputs,
   darwin-modules,
   home-modules ? [],
-  myvars,
   system,
   genSpecialArgs,
   specialArgs ? (genSpecialArgs system),
   ...
 }: let
   inherit (inputs) home-manager darwin;
+  hmUsername = specialArgs.userMeta.username;
 in
   darwin.lib.darwinSystem {
     inherit system specialArgs;
@@ -34,7 +34,7 @@ in
           home-manager.backupFileExtension = null;
 
           home-manager.extraSpecialArgs = specialArgs;
-          home-manager.users."${myvars.username}".imports =
+          home-manager.users."${hmUsername}".imports =
             home-modules
             ++ [
               # what: 将 nix-index wrapper 和预生成 database 接入共享 Home Manager 主线。

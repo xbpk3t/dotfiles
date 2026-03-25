@@ -2,13 +2,11 @@
   config,
   lib,
   pkgs,
-  myvars,
   ...
 }: let
   inherit (lib) mkDefault;
   # 高 ulimit 开关（放宽资源限制）
   enableHighLimits = config.modules.security.enableHighLimits;
-  authorizedKeys = myvars.SSHPubKeys or [];
   enableFirewall = config.modules.security.enableFirewall;
 in {
   config = {
@@ -134,8 +132,6 @@ in {
     users = {
       # 让 /etc/passwd 等完全由 Nix 声明管理，禁止用 passwd/useradd 等在机器上临时改用户或密码。
       mutableUsers = mkDefault false;
-      # 为 root 预置救援公钥：禁用密码登录后仍可用该密钥 SSH 登入修复系统
-      users.root.openssh.authorizedKeys.keys = authorizedKeys;
     };
 
     services = {

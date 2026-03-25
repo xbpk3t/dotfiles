@@ -2,11 +2,12 @@
   config,
   lib,
   pkgs,
-  myvars,
+  userMeta,
   ...
 }:
 with lib; let
   cfg = config.modules.networking.netbird;
+  username = userMeta.username;
 in {
   # https://github.com/nukdokplex/ncaa/blob/master/nixos-modules/netbird-client.nix
   options.modules.networking.netbird = {
@@ -51,7 +52,7 @@ in {
     ];
 
     # 添加用户组
-    users.users."${myvars.username}".extraGroups = ["netbird"];
+    users.users."${username}".extraGroups = ["netbird"];
 
     environment.shellAliases = {
       nbs = "netbird";

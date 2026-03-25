@@ -1,10 +1,10 @@
 {
-  myvars,
+  globals,
   lib,
   ...
 }: let
   hostName = "nixos-homelab";
-  inherit (myvars.networking) nameservers;
+  inherit (globals.networking) nameservers;
 in {
   imports = [
     ./hardware.nix
