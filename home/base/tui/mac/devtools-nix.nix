@@ -10,8 +10,6 @@
     # === nixpkgs开发 ===
     # nix-unit     # 运行 nix 单元测试
 
-    # === nix 单元测试框架 ===
-    namaka
     # 交互式生成 nix 包模板
     # nix-init
 

@@ -1,8 +1,10 @@
 {
   config,
-  myvars,
+  userMeta,
   ...
-}: {
+}: let
+  username = userMeta.username;
+in {
   # https://mynixos.com/nixpkgs/options/services.restic
   # 仅在 NixOS 端定时备份 docs-images 到 Cloudflare R2
 
@@ -18,7 +20,7 @@
     passwordFile = config.sops.secrets.pwgenSk.path;
 
     # 备份路径（只关心 docs-images）
-    paths = ["/home/${myvars.username}/Desktop/docs-images"];
+    paths = ["/home/${username}/Desktop/docs-images"];
 
     # 排除规则：如需额外忽略，可在此追加
     exclude = ["**/.cache" "*.tmp" "*.swp" "*.swx"];

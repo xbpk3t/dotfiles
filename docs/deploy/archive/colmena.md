@@ -142,7 +142,7 @@ Colmena 的 `meta.nixpkgs` / `meta.specialArgs` 会自动继承 flake 的 `genSp
 
 ### ryan4yin 的写法
 
-- flake 的 outputs 里用 haumea 把 `outputs/<system>/src/*.nix` 聚合，每个文件产出 `nixosConfigurations`/`colmenaProfiles`；真正的主机配置在 `hosts/<name>/` 目录。
+- flake 的 outputs 里通过目录扫描把 `outputs/<system>/src/*.nix` 聚合，每个文件产出 `nixosConfigurations`/`colmenaProfiles`；真正的主机配置在 `hosts/<name>/` 目录。
 - `hosts/<name>/default.nix` 里通过 `mylib.scanPaths ./.` 把同目录下的模块一次性拉全，这意味着**把额外的覆盖文件放进同一目录会直接影响原主机**。
 
 但是问题在于

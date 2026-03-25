@@ -1,10 +1,11 @@
 {
   config,
   lib,
-  myvars,
+  globals,
+  userMeta,
   ...
 }: let
-  inherit (myvars.networking) nameservers;
+  inherit (globals.networking) nameservers;
   diskDevice = lib.attrByPath ["disko" "devices" "disk" "vda" "device"] "/dev/vda" config;
 in {
   imports = [
@@ -43,7 +44,7 @@ in {
       enable = true;
       derper = {
         enable = true;
-        acmeEmail = myvars.mail;
+        acmeEmail = userMeta.mail;
       };
     };
   };

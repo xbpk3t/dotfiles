@@ -2,9 +2,11 @@
 # macOS-specific network settings and optimizations
 {
   lib,
-  myvars,
+  hostMeta,
   ...
-}: {
+}: let
+  hostName = hostMeta.hostName;
+in {
   # Basic networking configuration
   # Note: macOS networking is mostly managed through System Preferences
   # These are the available nix-darwin networking options
@@ -15,9 +17,9 @@
 
   networking = {
     # Default network names (can be overridden by host-specific settings)
-    hostName = lib.mkDefault "${myvars.username}";
-    computerName = lib.mkDefault "${myvars.username}";
-    localHostName = lib.mkDefault "${myvars.username}";
+    hostName = lib.mkDefault hostName;
+    computerName = lib.mkDefault hostName;
+    localHostName = lib.mkDefault hostName;
 
     # Network services configuration to suppress warnings
     # This tells nix-darwin which network services to manage

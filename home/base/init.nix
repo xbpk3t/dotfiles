@@ -1,15 +1,17 @@
 {
-  myvars,
   pkgs,
   lib,
+  userMeta,
   ...
-}: {
+}: let
+  username = userMeta.username;
+in {
   home = {
-    username = myvars.username;
+    inherit username;
     homeDirectory = lib.mkForce (
       if pkgs.stdenv.isDarwin
-      then "/Users/${myvars.username}"
-      else "/home/${myvars.username}"
+      then "/Users/${username}"
+      else "/home/${username}"
     );
     stateVersion = lib.mkDefault "24.11";
   };
