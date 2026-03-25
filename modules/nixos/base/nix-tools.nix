@@ -71,11 +71,6 @@ in {
   # nixpkgs.config 已上移到 outputs/default.nix 的 pkgs 构造阶段，
   # 以兼容 home-manager.useGlobalPkgs + readOnlyPkgs 模式并消除评估警告。
 
-  documentation.nixos.enable = lib.mkDefault false;
-  # NOTE:
-  # 关闭 NixOS options 文档生成（options.json）。
-  # 这会规避当前 Nix 对 make-options-doc 派生出的 builtins.derivation context 警告。
-
   # nixos-cli - Modern NixOS management CLI
   # https://github.com/nix-community/nixos-cli
   # https://nix-community.github.io/nixos-cli/installation.html
