@@ -25,6 +25,32 @@ in {
     };
   };
 
+  documentation = {
+    # server 默认关闭大部分文档产物，减少系统包体积与无关输出。
+    enable = lib.mkDefault false;
+    doc.enable = lib.mkDefault false;
+    info.enable = lib.mkDefault false;
+    man.enable = lib.mkDefault false;
+
+    # NixOS manual/options 文档在本仓库里本来就倾向关闭；这里再次作为 server profile 明确声明。
+    # 关闭 NixOS options 文档生成（options.json）。
+    # 这会规避当前 Nix 对 make-options-doc 派生出的 builtins.derivation context 警告。
+    nixos.enable = lib.mkDefault false;
+  };
+
+  programs.command-not-found.enable = lib.mkDefault false;
+
+  fonts.fontconfig.enable = lib.mkDefault false;
+
+  xdg = {
+    # 这些 freedesktop/XDG 组件主要服务桌面环境；在 server 上默认关闭更符合角色语义。
+    autostart.enable = lib.mkDefault false;
+    icons.enable = lib.mkDefault false;
+    menus.enable = lib.mkDefault false;
+    mime.enable = lib.mkDefault false;
+    sounds.enable = lib.mkDefault false;
+  };
+
   networking = {
     # hostName 由 inventory 注入；这里提供默认值，避免单机调试时为空
     hostName = lib.mkDefault "nixos-vps";
@@ -47,6 +73,12 @@ in {
         acmeEmail = userMeta.mail;
       };
     };
+  };
+
+  modules.systemd.manager.watchdog = {
+    # VPS 属于典型无人值守场景，默认启用 systemd Manager watchdog 兜底。
+    # 若后续某台机器的 hypervisor/watchdog 行为特殊，直接在对应 host 覆写即可。
+    enable = true;
   };
 
   hardware.enableRedistributableFirmware = lib.mkForce false;
