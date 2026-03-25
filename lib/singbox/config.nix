@@ -102,8 +102,8 @@ in {
       # Clash API 若监听在 0.0.0.0，官方强烈要求设置 secret
       secret = clashSecret;
       # https://github.com/Zephyruso/zashboard
-      # [2026-03-25] 用自己打包的zashbaord替代了 metacubexd
-      external_ui = pkgs.zashboard;
+      # [2026-03-25] 用自己打包的zashbaord替代了 metacubexd。注意这里写了 /share/zashboard，因为 zashboard 的 入口被挂在了 /ui/share/zashboard/，不是你想要的 /ui/
+      external_ui = "${pkgs.zashboard}/share/zashboard";
     };
   };
 
