@@ -117,6 +117,12 @@ rec {
 
     # Declarative Dokploy stack for NixOS
     nix-dokploy.url = "github:el-kurto/nix-dokploy";
+
+    # Nix unit testing tools
+    # https://github.com/nix-community/nixt
+    nixt.url = "github:nix-community/nixt";
+    # https://github.com/nix-community/nix-unit
+    nix-unit.url = "github:nix-community/nix-unit";
   };
 
   outputs = inputs @ {flake-parts, ...}:

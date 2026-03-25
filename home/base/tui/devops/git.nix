@@ -40,6 +40,12 @@
     # https://mynixos.com/nixpkgs/package/tig
     # https://github.com/jonas/tig
     tig
+
+    # gitlab-cli
+    # https://mynixos.com/nixpkgs/package/glab
+    # https://gitlab.com/gitlab-org/cli
+    # https://docs.gitlab.com/cli/
+    glab
   ];
 
   programs.diff-so-fancy = {
@@ -50,5 +56,13 @@
   # worktrunk
   # hooks、AI 集成、缓存、merge
   # why this? 也有 WorktreeWise, git-wt, LazyWorktree 等其他类似工具，为啥选择这个？
+  # 这个要比 git-wt 好用
+  # https://github.com/k1LoW/git-wt
+  # https://mynixos.com/nixpkgs/package/git-wt
   xdg.configFile."worktrunk/config.toml".text = builtins.readFile ./worktrunk.toml;
+
+  xdg.configFile."glab-cli/aliases.yml".text = ''
+    ci: pipeline ci
+    pr: mr
+  '';
 }
