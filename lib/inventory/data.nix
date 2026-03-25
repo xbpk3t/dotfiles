@@ -1,8 +1,39 @@
-{
+let
+  commonUser = {
+    username = "luck";
+    mail = "yyzw@live.com";
+  };
+  commonTime = {
+    timeZone = "Asia/Shanghai";
+  };
+in {
+  nixos-ws = {
+    nixos-ws = {
+      hostName = "nixos-ws";
+      primaryIp = "192.168.234.194";
+      ssh.user = "luck";
+      user = commonUser;
+      time = commonTime;
+    };
+  };
+
+  macos-ws = {
+    macos-ws = {
+      hostName = "macos-ws";
+      primaryIp = "127.0.0.1";
+      ssh.user = "luck";
+      user = commonUser;
+      time = commonTime;
+    };
+  };
+
   nixos-vps = {
     nixos-vps-dev = rec {
       hostName = "nixos-vps-dev";
       primaryIp = "142.171.154.61";
+      acmeEmail = "yyzw@live.com";
+      user = commonUser;
+      time = commonTime;
       hardware = {
         cpuCores = 5;
         memGiB = 6;
@@ -44,6 +75,9 @@
     nixos-vps-svc = rec {
       hostName = "nixos-vps-svc";
       primaryIp = "103.85.224.63";
+      acmeEmail = "yyzw@live.com";
+      user = commonUser;
+      time = commonTime;
       hardware = {
         cpuCores = 4;
         memGiB = 4;
@@ -88,6 +122,8 @@
       # What：部署/连接默认地址。
       # Why：homelab 走 tailnet，避免依赖公网/NAT。
       primaryIp = "100.81.204.63";
+      user = commonUser;
+      time = commonTime;
       k3s = {
         # What：控制面地址（server/agent 都需要）。
         # Why：统一 tailnet，确保控制面与 flannel 通信稳定。

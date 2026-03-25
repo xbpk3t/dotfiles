@@ -1,21 +1,17 @@
 {
-  # NOTE: the args not used in this file CAN NOT be removed!
-  # because haumea pass argument lazily,
-  # and these arguments are used in the functions like `mylib.nixosSystem`, etc.
   inputs,
   lib,
   mylib,
-  myvars,
+  mkSpecialArgs,
   ...
 } @ args: let
   name = "nixos-vps";
   ssh-user = "root";
-  customPkgsOverlay = import (mylib.relativeToRoot "pkgs/overlay.nix");
 
   # 角色（不变）：infra 基线
   baseModules = {
     system = "x86_64-linux";
-    inherit lib myvars;
+    inherit lib;
     nixos-modules =
       [
         inputs.sops-nix.nixosModules.sops
@@ -40,27 +36,6 @@
   inventory = mylib.inventory."nixos-vps";
   nodes = inventory;
 
-  genSpecialArgs = system: let
-    pkgs = import inputs.nixpkgs {
-      inherit system;
-      config.allowUnfree = true;
-      overlays = [customPkgsOverlay];
-    };
-  in {
-    inherit
-      inputs
-      mylib
-      myvars
-      pkgs
-      ;
-
-    pkgs-unstable = import inputs.nixpkgs-unstable or inputs.nixpkgs {
-      inherit system;
-      config.allowUnfree = true;
-      overlays = [customPkgsOverlay];
-    };
-  };
-
   mkNodeModule = name: node:
     {
       # 变更项都放到 inventory，避免散落在各个 hosts
@@ -69,7 +44,7 @@
       modules.networking.tailscale.derper = {
         enable = true;
         domain = node.tailscale.derpDomain;
-        acmeEmail = myvars.mail;
+        acmeEmail = node.acmeEmail;
       };
     }
     // lib.optionalAttrs (node ? k3s) {
@@ -83,13 +58,13 @@
       // {
         nixos-modules = baseModules.nixos-modules ++ [nodeModule];
       };
-    systemArgs = modules // args;
-    nixosConfig = mylib.nixosSystem (
-      systemArgs
+    systemArgs =
+      modules
+      // args
       // {
-        inherit genSpecialArgs;
-      }
-    );
+        specialArgs = mkSpecialArgs baseModules.system node;
+      };
+    nixosConfig = mylib.nixosSystem systemArgs;
     deployNode = mylib.inventory.deployRsNode {
       inherit name node;
       nixosConfiguration = nixosConfig;

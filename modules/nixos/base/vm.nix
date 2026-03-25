@@ -1,10 +1,11 @@
 {
   config,
   lib,
-  myvars,
+  userMeta,
   ...
 }: let
   inherit (lib) mkIf mkMerge optionals;
+  username = userMeta.username;
 in {
   ###################################################################################
   #
@@ -86,7 +87,7 @@ in {
     (mkIf config.virtualisation.libvirtd.enable {libvirtd = {};})
   ];
 
-  users.users."${myvars.username}".extraGroups =
+  users.users."${username}".extraGroups =
     optionals config.virtualisation.docker.enable ["docker"]
     ++ optionals config.virtualisation.podman.enable ["podman"]
     ++ optionals config.virtualisation.libvirtd.enable ["libvirtd"];

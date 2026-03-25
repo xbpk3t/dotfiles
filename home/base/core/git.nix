@@ -1,4 +1,6 @@
-{myvars, ...}: {
+{userMeta, ...}: let
+  mail = userMeta.mail;
+in {
   programs.git = {
     enable = true;
     lfs.enable = true;
@@ -27,7 +29,7 @@
       };
       user = {
         name = "xbpk3t";
-        email = myvars.mail;
+        email = mail;
       };
 
       core = {

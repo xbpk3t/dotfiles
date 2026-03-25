@@ -1,12 +1,13 @@
 {
   config,
   lib,
-  myvars,
   pkgs,
+  userMeta,
   ...
 }: let
   cfg = config.modules.extra.android-tools.enable;
   inherit (lib) mkEnableOption mkIf;
+  username = userMeta.username;
 in {
   options.modules.extra.android-tools.enable =
     mkEnableOption "Android platform tools (adb/fastboot) with udev rules";
@@ -16,6 +17,6 @@ in {
     services.udev.packages = [pkgs.android-udev-rules];
 
     users.groups.adbusers = {};
-    users.users."${myvars.username}".extraGroups = ["adbusers"];
+    users.users."${username}".extraGroups = ["adbusers"];
   };
 }
