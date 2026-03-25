@@ -218,6 +218,8 @@ in {
   #   score: 5
   # - url: https://github.com/ibhagwan/fzf-lua
 
+  # https://github.com/nix-community/nix4nvchad 评估了一下只能替代目前 nvim.nix 里35%左右的配置，所以没必要替换了
+
   # MAYBE: [2025-11-13] 研究一下 Telescope 的 advanced usage 以及相关插件
   # PLAN: 把yazi.nvim 直接做到 toggleterm　里面
   config = mkIf cfg.enable {
