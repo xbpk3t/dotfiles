@@ -6,7 +6,24 @@ let
   commonTime = {
     timeZone = "Asia/Shanghai";
   };
+  commonEditor = {
+    # Why: 编辑器相关配置会被 shell、git、gh、xdg、lazygit 等多个模块共同消费。
+    # 把它放到 host metadata 源头层，可以和 user/time 一样由 specialArgs 统一透传，
+    # 避免在 outputs/default.nix 或各模块里重复写死同一组 editor 常量。
+    command = "hx";
+    desktopEntry = "Helix.desktop";
+    lazygitPreset = "helix";
+  };
 in {
+  nixos-avf = {
+    nixos-avf = {
+      hostName = "nixos-avf";
+      user = commonUser;
+      time = commonTime;
+      editor = commonEditor;
+    };
+  };
+
   nixos-ws = {
     nixos-ws = {
       hostName = "nixos-ws";
@@ -14,6 +31,7 @@ in {
       ssh.user = "luck";
       user = commonUser;
       time = commonTime;
+      editor = commonEditor;
     };
   };
 
@@ -24,6 +42,7 @@ in {
       ssh.user = "luck";
       user = commonUser;
       time = commonTime;
+      editor = commonEditor;
     };
   };
 
@@ -34,6 +53,7 @@ in {
       acmeEmail = "yyzw@live.com";
       user = commonUser;
       time = commonTime;
+      editor = commonEditor;
       hardware = {
         cpuCores = 5;
         memGiB = 6;
@@ -78,6 +98,7 @@ in {
       acmeEmail = "yyzw@live.com";
       user = commonUser;
       time = commonTime;
+      editor = commonEditor;
       hardware = {
         cpuCores = 4;
         memGiB = 4;
@@ -124,6 +145,7 @@ in {
       primaryIp = "100.81.204.63";
       user = commonUser;
       time = commonTime;
+      editor = commonEditor;
       k3s = {
         # What：控制面地址（server/agent 都需要）。
         # Why：统一 tailnet，确保控制面与 flannel 通信稳定。

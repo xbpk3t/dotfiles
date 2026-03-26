@@ -35,6 +35,7 @@
 in {
   inherit primaryHostForNode;
   # 分组入口（简化调用）：mylib.inventory.<group>
+  "nixos-avf" = groupOrEmpty "nixos-avf";
   "nixos-vps" = groupOrEmpty "nixos-vps";
   "nixos-homelab" = groupOrEmpty "nixos-homelab";
   "nixos-ws" = groupOrEmpty "nixos-ws";

@@ -1,4 +1,8 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  editorMeta,
+  ...
+}: {
   home.packages = with pkgs; [
     lazygit
     # 新增 delta 以支持 side-by-side diff
@@ -37,7 +41,7 @@
       quitOnTopLevelReturn = true;
       disableStartupPopups = true;
       promptToReturnFromSubprocess = false;
-      os = {editPreset = "nvim";};
+      os = {editPreset = editorMeta.lazygitPreset;};
       keybinding = {
         files = {
           stashAllChanges = "<c-a>"; # instead of just 's' which I typod for 'c'
