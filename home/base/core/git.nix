@@ -1,4 +1,8 @@
-{userMeta, ...}: let
+{
+  userMeta,
+  editorMeta,
+  ...
+}: let
   mail = userMeta.mail;
 in {
   programs.git = {
@@ -35,7 +39,7 @@ in {
       core = {
         autocrlf = "input";
         filemode = false;
-        editor = "nvim";
+        editor = editorMeta.command;
       };
       init = {
         defaultBranch = "main";

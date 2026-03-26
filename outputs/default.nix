@@ -62,6 +62,9 @@
       inherit hostMeta;
       userMeta = hostMeta.user;
       timeMeta = hostMeta.time;
+      # Why: outputs/default.nix 只负责把 host metadata 分发给模块，
+      # 不再在 wiring 层硬编码 editor 偏好值；editor 的真实来源固定为 hostMeta.editor。
+      editorMeta = hostMeta.editor;
     };
 
   # 传给 outputs/<system>/src/*.nix 的公共参数。
@@ -171,7 +174,8 @@ in {
       }
       // architectureOutput.apps
       // lib.optionalAttrs (
-        builtins.hasAttr "packages" inputs.nixos-facter
+        pkgs.stdenv.hostPlatform.isLinux
+        && builtins.hasAttr "packages" inputs.nixos-facter
         && builtins.hasAttr system inputs.nixos-facter.packages
         && builtins.hasAttr "default" inputs.nixos-facter.packages.${system}
       ) {

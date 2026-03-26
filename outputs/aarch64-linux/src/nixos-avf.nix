@@ -6,16 +6,7 @@
   ...
 } @ args: let
   name = "nixos-avf";
-  hostMeta = {
-    hostName = name;
-    user = {
-      username = "luck";
-      mail = "yyzw@live.com";
-    };
-    time = {
-      timeZone = "Asia/Shanghai";
-    };
-  };
+  node = mylib.inventory."nixos-avf".${name};
 
   modules = {
     system = "aarch64-linux";
@@ -34,7 +25,7 @@
     modules
     // args
     // {
-      specialArgs = mkSpecialArgs modules.system hostMeta;
+      specialArgs = mkSpecialArgs modules.system node;
     }
   );
 in {
