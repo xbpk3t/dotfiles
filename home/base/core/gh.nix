@@ -1,4 +1,4 @@
-_: {
+{editorMeta, ...}: {
   programs.gh = {
     enable = true;
 
@@ -7,7 +7,7 @@ _: {
       git_protocol = "https";
 
       # 编辑器设置
-      editor = "helix";
+      editor = editorMeta.command;
 
       # 提示设置
       prompt = "enabled";

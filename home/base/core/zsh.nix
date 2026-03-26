@@ -2,6 +2,7 @@
   lib,
   pkgs,
   config,
+  editorMeta,
   ...
 }: {
   home = {
@@ -25,7 +26,7 @@
     sessionVariables =
       {
         # 通用配置
-        # EDITOR = "nvim";
+        # EDITOR = editorMeta.command;
         # BROWSER = "chromium-browser";
         GITHUB_TOKEN = "$(gh auth token)";
         PNPM_HOME = "$HOME/.local/share/pnpm";
@@ -163,7 +164,7 @@
         "rd" = "rmdir";
 
         # 编辑器
-        "vim" = "LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 nvim";
+        "vim" = "LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 ${editorMeta.command}";
 
         #    # 搜索时包含隐藏文件
         #    rgh = "rg --hidden";
@@ -190,7 +191,7 @@
         yz = "yazi";
         ff = "fastfetch";
         lg = "lazygit";
-        v = "nvim .";
+        v = "${editorMeta.command} .";
       };
 
       # https://mynixos.com/home-manager/options/programs.zsh.history
