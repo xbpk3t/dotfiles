@@ -115,9 +115,6 @@ rec {
     # https://github.com/tak-bro/aicommit2
     # aicommit2.url = "github:tak-bro/aicommit2";
 
-    # Declarative Dokploy stack for NixOS
-    nix-dokploy.url = "github:el-kurto/nix-dokploy";
-
     # Nix unit testing tools
     # https://github.com/nix-community/nixt
     nixt.url = "github:nix-community/nixt";

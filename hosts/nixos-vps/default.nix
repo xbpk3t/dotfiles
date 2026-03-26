@@ -95,7 +95,6 @@ in {
   };
 
   services = {
-    dokploy-server.enable = false;
     singbox-server.enable = true;
   };
 
