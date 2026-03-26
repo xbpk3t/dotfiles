@@ -15,16 +15,11 @@
 #
 # - 标签页管理能力弱：找不到“多行 tab wrap”或“显示当前打开 tab 数量”等，导致可见 tab 很少，需要疯狂横向滚动或完全依赖
 
-
-
-
 - feat: git side-by-side viewer
   url:
     - https://github.com/zed-industries/zed/discussions/26770
   isFix: true
-  fixVer:  # 目前默认两栏模式
-
-
+  fixVer: # 目前默认两栏模式
 
 - feat: TODO highlight
   url:
@@ -34,31 +29,22 @@
   isFix: true
   des: zed默认不支持，但是可以通过插件实现
 
-
-- feat: 通过CMD+`切换项目
+- feat: 通过 CMD+` 切换项目
   des: 怎么通过 CMD+` 快捷键，直接在多个project之间切换？我在配置 use_system_window_tabs 之前，本身通过 CMD+` 这种mac本身提供的窗口切换来切换项目是可行的，但是在添加该配置之后，因为本身没有多窗口了，所以怎么需要配置哪个快捷键来保证类似操作？
   isFix: true # 正如上面所说，不支持CMD+`切换。但是本身就有 projects: open recent 这个操作（以及相应的 Cmd+Alt+O）
-
-
-
 
 - feat: 类似CMD+E切换最近修改文件
   isFix: true
   des: 直接用 Ctrl+Tab 切换一样的。但是存在一些bug（比如最近文件很混乱）
 
-
 - feat: 内存开销并不低
   isFix: true
   des: LSP没有lazy load机制，默认LSP很多都是node实现的，单个进程都在80MB，开10个就是800MB内存开销
-
 
 - feat: theme
   des: 没有好theme，我只喜欢Monokai，但是挑了不少theme都很丑（完全不如goland内置的Color Scheme）。很多人都认为zed本身有色差（很糊，相较于goland，很多字都看不清，费眼睛），我也这么认为。
   isFix: true
   solution: 自己手搓theme
-
-
-
 
 - feat: Outline for mardown indent
   isFix: true
@@ -66,18 +52,12 @@
     - https://github.com/zed-industries/zed/pull/45643
   fixVer: v0.220.0
 
-
 ---
-
-
-
-
 - feat: git commit history
   foundDate: 2026-01-18
   isFix: false
   score: 4
   des: 用 tig, serie 可以替代实现该需求
-
 
 - feat: Local History
   isFix: false
@@ -86,9 +66,6 @@
   url:
     - https://github.com/zed-industries/zed/discussions/24004
 
-
-
-
 # 用 nb cli + zed task 替代实现了
 - feat: scratch
   isFix: false
@@ -96,12 +73,9 @@
   url:
     - https://github.com/zed-industries/zed/discussions/32441
 
-
 # 用 webapp 替代了（这个feat也没必要强求）
 - feat: DB插件
   isFix: false
-
-
 
 # https://github.com/alexandretrotel/todo-tree
 # https://github.com/alexandretrotel/zed-todo-tree
@@ -113,18 +87,14 @@
   isFix: false
   des: 一个高频需求，社区也有很多实现。目前的问题在于 交付形态。zed官方希望最终效果是类似 goland/vscode 的那种在Pannel展示的 TODO Tree，但是 目前zed官方不打算实现这个需求，而extension开发也没有提供UI支持，这样社区也没办法做这个需求。所以可能暂时无法实现该需求。
 
-
 # [2026-02-03]
 # zed不支持 Local history，真的太蠢了。最近一周连续两次误操作导致本地未commit代码被冲掉（一次是将近两天的修改，这次是最近几天修改的taskfile，改了三四天了，想要一次commit上去），我知道都TM怪我没stash，怪我蠢。但是如果有Local history是不是能好点？用回goland了。
-
-
 
 - feat: Remote SSH Auto Reconnect
   isFix: false
   des: 目前zed不支持 Auto Reconnect，必须要手动重连
   url:
     - https://github.com/zed-industries/zed/issues/39206
-
 
 # https://zed.dev/docs/languages 文档里已经列出了所有langs的LSP
 - feat: LSP list
