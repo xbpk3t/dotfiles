@@ -2,6 +2,8 @@
 version: '3'
 
 includes:
+  tf:
+    taskfile: ./infra/Taskfile.yml
   sk:
     taskfile: ./.taskfile/nix/Taskfile.sops.yml
     # dir: '{{.USER_WORKING_DIR}}'
