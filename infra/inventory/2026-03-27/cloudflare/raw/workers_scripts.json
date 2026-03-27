@@ -1,0 +1,27 @@
+{
+  "result": [
+    {
+      "created_on": "2025-02-01T09:30:16.796239Z",
+      "modified_on": "2025-02-01T09:52:29.560196Z",
+      "id": "dp",
+      "tag": "f277944c27b644edae3d259c200f2719",
+      "tags": [],
+      "deployment_id": "",
+      "tail_consumers": null,
+      "logpush": false,
+      "has_assets": false,
+      "has_modules": true,
+      "etag": "3aefde431057de7c6852eb528fae6189d7bc139bc30de6000d026619b4b8a3d9",
+      "handlers": [
+        "fetch"
+      ],
+      "last_deployed_from": "dash",
+      "compatibility_date": "2025-02-01",
+      "usage_model": "standard",
+      "routes": null
+    }
+  ],
+  "success": true,
+  "errors": [],
+  "messages": []
+}

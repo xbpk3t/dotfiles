@@ -1,0 +1,24 @@
+{
+  "result": {
+    "id": "96540bd100b82adba941163704660c31",
+    "name": "HappyHacking",
+    "type": "standard",
+    "settings": {
+      "enforce_twofactor": false,
+      "api_access_enabled": null,
+      "access_approval_expiry": null,
+      "abuse_contact_email": null
+    },
+    "legacy_flags": {
+      "enterprise_zone_quota": {
+        "maximum": 0,
+        "current": 0,
+        "available": 0
+      }
+    },
+    "created_on": "2023-10-16T14:43:21.174487Z"
+  },
+  "success": true,
+  "errors": [],
+  "messages": []
+}

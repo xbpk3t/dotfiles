@@ -1,0 +1,1406 @@
+{
+  "result": [
+    {
+      "id": "1b8418d8-7b95-4f00-b039-cfe07d6b338f",
+      "name": "blog",
+      "subdomain": "blog-cfg.pages.dev",
+      "domains": [
+        "blog-cfg.pages.dev",
+        "blog.lucc.dev"
+      ],
+      "source": {
+        "type": "github",
+        "config": {
+          "owner": "xbpk3t",
+          "owner_id": "8591495",
+          "repo_name": "docs",
+          "repo_id": "711229681",
+          "production_branch": "main",
+          "pr_comments_enabled": true,
+          "deployments_enabled": true,
+          "production_deployments_enabled": true,
+          "preview_deployment_setting": "all",
+          "preview_branch_includes": [
+            "*"
+          ],
+          "preview_branch_excludes": [],
+          "path_includes": [
+            "*"
+          ],
+          "path_excludes": []
+        }
+      },
+      "build_config": {
+        "build_command": "",
+        "destination_dir": "",
+        "root_dir": "",
+        "web_analytics_tag": "c45f6e30b4744bb4a6a553d815e870f9",
+        "web_analytics_token": "adb84e79998044a8967882d8a6d333a2"
+      },
+      "deployment_configs": {
+        "preview": {
+          "env_vars": null,
+          "fail_open": true,
+          "always_use_latest_compatibility_date": false,
+          "compatibility_date": "2025-11-27",
+          "compatibility_flags": [],
+          "build_image_major_version": 3,
+          "usage_model": "standard"
+        },
+        "production": {
+          "env_vars": null,
+          "fail_open": true,
+          "always_use_latest_compatibility_date": false,
+          "compatibility_date": "2025-11-27",
+          "compatibility_flags": [],
+          "build_image_major_version": 3,
+          "usage_model": "standard"
+        }
+      },
+      "latest_deployment": {
+        "id": "14b8a980-5de7-4ae2-8bdc-24aae3f6785b",
+        "short_id": "14b8a980",
+        "project_id": "1b8418d8-7b95-4f00-b039-cfe07d6b338f",
+        "project_name": "blog",
+        "environment": "preview",
+        "url": "https://14b8a980.blog-cfg.pages.dev",
+        "created_on": "2026-03-26T12:53:21.454188Z",
+        "modified_on": "2026-03-26T12:54:09.056231Z",
+        "latest_stage": {
+          "name": "deploy",
+          "started_on": "2026-03-26T12:53:57.947582Z",
+          "ended_on": "2026-03-26T12:54:09.056231Z",
+          "status": "success"
+        },
+        "deployment_trigger": {
+          "type": "github:push",
+          "metadata": {
+            "branch": "feat/quant-sync-mirror",
+            "commit_hash": "0d1fd0d61c678ba17563e0cd34cc16605f069cbb",
+            "commit_message": "feat(quant): add simtradelab workflow and portfolio demo",
+            "commit_dirty": false
+          }
+        },
+        "stages": [
+          {
+            "name": "queued",
+            "started_on": "2026-03-26T12:53:21.881493Z",
+            "ended_on": "2026-03-26T12:53:45.851819Z",
+            "status": "success"
+          },
+          {
+            "name": "initialize",
+            "started_on": "2026-03-26T12:53:45.851819Z",
+            "ended_on": "2026-03-26T12:53:47.995276Z",
+            "status": "success"
+          },
+          {
+            "name": "clone_repo",
+            "started_on": "2026-03-26T12:53:47.995276Z",
+            "ended_on": "2026-03-26T12:53:50.633841Z",
+            "status": "success"
+          },
+          {
+            "name": "build",
+            "started_on": "2026-03-26T12:53:50.633841Z",
+            "ended_on": "2026-03-26T12:53:57.947582Z",
+            "status": "success"
+          },
+          {
+            "name": "deploy",
+            "started_on": "2026-03-26T12:53:57.947582Z",
+            "ended_on": "2026-03-26T12:54:09.056231Z",
+            "status": "success"
+          }
+        ],
+        "build_config": {
+          "build_command": "",
+          "destination_dir": "",
+          "build_caching": null,
+          "root_dir": "",
+          "web_analytics_tag": null,
+          "web_analytics_token": null
+        },
+        "source": {
+          "type": "github",
+          "config": {
+            "owner": "xbpk3t",
+            "repo_name": "docs",
+            "production_branch": "main",
+            "pr_comments_enabled": false
+          }
+        },
+        "env_vars": {},
+        "compatibility_date": "2025-11-27",
+        "compatibility_flags": [],
+        "build_image_major_version": 3,
+        "usage_model": "bundled",
+        "aliases": [
+          "https://feat-quant-sync-mirror.blog-cfg.pages.dev"
+        ],
+        "is_skipped": false,
+        "production_branch": "main",
+        "uses_functions": true
+      },
+      "canonical_deployment": {
+        "id": "e5cd657f-5751-4a1c-bf2e-8777548db6dd",
+        "short_id": "e5cd657f",
+        "project_id": "1b8418d8-7b95-4f00-b039-cfe07d6b338f",
+        "project_name": "blog",
+        "environment": "production",
+        "url": "https://e5cd657f.blog-cfg.pages.dev",
+        "created_on": "2026-03-24T12:32:16.232097Z",
+        "modified_on": "2026-03-24T12:32:19.357325Z",
+        "latest_stage": {
+          "name": "deploy",
+          "started_on": null,
+          "ended_on": "2026-03-24T12:32:19.357325Z",
+          "status": "success"
+        },
+        "deployment_trigger": {
+          "type": "ad_hoc",
+          "metadata": {
+            "branch": "main",
+            "commit_hash": "7322ecff667e00321e9b25f1b12fc655900e9d85",
+            "commit_message": "feat: z",
+            "commit_dirty": true
+          }
+        },
+        "stages": [
+          {
+            "name": "queued",
+            "started_on": "2026-03-24T12:32:16.232097Z",
+            "ended_on": null,
+            "status": "active"
+          },
+          {
+            "name": "initialize",
+            "started_on": null,
+            "ended_on": null,
+            "status": "idle"
+          },
+          {
+            "name": "clone_repo",
+            "started_on": null,
+            "ended_on": null,
+            "status": "idle"
+          },
+          {
+            "name": "build",
+            "started_on": null,
+            "ended_on": null,
+            "status": "idle"
+          },
+          {
+            "name": "deploy",
+            "started_on": null,
+            "ended_on": "2026-03-24T12:32:19.357325Z",
+            "status": "success"
+          }
+        ],
+        "build_config": {
+          "build_command": "",
+          "destination_dir": "",
+          "build_caching": null,
+          "root_dir": "",
+          "web_analytics_tag": null,
+          "web_analytics_token": null
+        },
+        "source": {
+          "type": "github",
+          "config": {
+            "owner": "xbpk3t",
+            "repo_name": "docs",
+            "production_branch": "main",
+            "pr_comments_enabled": false
+          }
+        },
+        "env_vars": {},
+        "compatibility_date": "2025-11-27",
+        "compatibility_flags": [],
+        "build_image_major_version": 3,
+        "usage_model": "bundled",
+        "aliases": [
+          "https://blog.lucc.dev"
+        ],
+        "is_skipped": false,
+        "production_branch": "main",
+        "uses_functions": true
+      },
+      "created_on": "2025-11-27T06:10:20.943905Z",
+      "production_branch": "main",
+      "production_script_name": "pages-worker--9361133-production",
+      "preview_script_name": "pages-worker--9361133-preview",
+      "uses_functions": true,
+      "framework": "",
+      "framework_version": ""
+    },
+    {
+      "id": "af7e0975-806f-49a1-b543-3aa6067b8f10",
+      "name": "slides",
+      "subdomain": "slides-6fn.pages.dev",
+      "domains": [
+        "slides-6fn.pages.dev",
+        "s.lucc.dev"
+      ],
+      "source": {
+        "type": "github",
+        "config": {
+          "owner": "xbpk3t",
+          "owner_id": "8591495",
+          "repo_name": "docs",
+          "repo_id": "711229681",
+          "production_branch": "main",
+          "pr_comments_enabled": true,
+          "deployments_enabled": true,
+          "production_deployments_enabled": true,
+          "preview_deployment_setting": "all",
+          "preview_branch_includes": [
+            "*"
+          ],
+          "preview_branch_excludes": [],
+          "path_includes": [
+            "*"
+          ],
+          "path_excludes": []
+        }
+      },
+      "build_config": {
+        "build_command": "",
+        "destination_dir": "",
+        "root_dir": "",
+        "web_analytics_tag": "9c83f3f6a81a47b789f1d1a8d2024e72",
+        "web_analytics_token": "26402b8ea3c04bf6bfd8dafd35d4b7a7"
+      },
+      "deployment_configs": {
+        "preview": {
+          "env_vars": null,
+          "fail_open": true,
+          "always_use_latest_compatibility_date": false,
+          "compatibility_date": "2025-08-31",
+          "compatibility_flags": [],
+          "build_image_major_version": 3,
+          "usage_model": "standard"
+        },
+        "production": {
+          "env_vars": null,
+          "fail_open": true,
+          "always_use_latest_compatibility_date": false,
+          "compatibility_date": "2025-08-31",
+          "compatibility_flags": [],
+          "build_image_major_version": 3,
+          "usage_model": "standard"
+        }
+      },
+      "latest_deployment": {
+        "id": "cf7bd6a1-23ca-4cce-a85c-07dd140b77fd",
+        "short_id": "cf7bd6a1",
+        "project_id": "af7e0975-806f-49a1-b543-3aa6067b8f10",
+        "project_name": "slides",
+        "environment": "preview",
+        "url": "https://cf7bd6a1.slides-6fn.pages.dev",
+        "created_on": "2026-03-26T12:53:21.454188Z",
+        "modified_on": "2026-03-26T12:53:48.507946Z",
+        "latest_stage": {
+          "name": "deploy",
+          "started_on": "2026-03-26T12:53:35.720059Z",
+          "ended_on": "2026-03-26T12:53:48.507946Z",
+          "status": "success"
+        },
+        "deployment_trigger": {
+          "type": "github:push",
+          "metadata": {
+            "branch": "feat/quant-sync-mirror",
+            "commit_hash": "0d1fd0d61c678ba17563e0cd34cc16605f069cbb",
+            "commit_message": "feat(quant): add simtradelab workflow and portfolio demo",
+            "commit_dirty": false
+          }
+        },
+        "stages": [
+          {
+            "name": "queued",
+            "started_on": "2026-03-26T12:53:21.710455Z",
+            "ended_on": "2026-03-26T12:53:21.848305Z",
+            "status": "success"
+          },
+          {
+            "name": "initialize",
+            "started_on": "2026-03-26T12:53:21.848305Z",
+            "ended_on": "2026-03-26T12:53:24.564314Z",
+            "status": "success"
+          },
+          {
+            "name": "clone_repo",
+            "started_on": "2026-03-26T12:53:24.564314Z",
+            "ended_on": "2026-03-26T12:53:28.371477Z",
+            "status": "success"
+          },
+          {
+            "name": "build",
+            "started_on": "2026-03-26T12:53:28.371477Z",
+            "ended_on": "2026-03-26T12:53:35.720059Z",
+            "status": "success"
+          },
+          {
+            "name": "deploy",
+            "started_on": "2026-03-26T12:53:35.720059Z",
+            "ended_on": "2026-03-26T12:53:48.507946Z",
+            "status": "success"
+          }
+        ],
+        "build_config": {
+          "build_command": "",
+          "destination_dir": "",
+          "build_caching": null,
+          "root_dir": "",
+          "web_analytics_tag": null,
+          "web_analytics_token": null
+        },
+        "source": {
+          "type": "github",
+          "config": {
+            "owner": "xbpk3t",
+            "repo_name": "docs",
+            "production_branch": "main",
+            "pr_comments_enabled": false
+          }
+        },
+        "env_vars": {},
+        "compatibility_date": "2025-08-31",
+        "compatibility_flags": [],
+        "build_image_major_version": 3,
+        "usage_model": "bundled",
+        "aliases": [
+          "https://feat-quant-sync-mirror.slides-6fn.pages.dev"
+        ],
+        "is_skipped": false,
+        "production_branch": "main",
+        "uses_functions": true
+      },
+      "canonical_deployment": {
+        "id": "30104ff9-7868-4514-b093-1fcd4d234e38",
+        "short_id": "30104ff9",
+        "project_id": "af7e0975-806f-49a1-b543-3aa6067b8f10",
+        "project_name": "slides",
+        "environment": "production",
+        "url": "https://30104ff9.slides-6fn.pages.dev",
+        "created_on": "2026-03-24T12:31:48.177297Z",
+        "modified_on": "2026-03-24T12:31:54.640805Z",
+        "latest_stage": {
+          "name": "deploy",
+          "started_on": null,
+          "ended_on": "2026-03-24T12:31:54.640805Z",
+          "status": "success"
+        },
+        "deployment_trigger": {
+          "type": "ad_hoc",
+          "metadata": {
+            "branch": "main",
+            "commit_hash": "7322ecff667e00321e9b25f1b12fc655900e9d85",
+            "commit_message": "feat: z",
+            "commit_dirty": true
+          }
+        },
+        "stages": [
+          {
+            "name": "queued",
+            "started_on": "2026-03-24T12:31:48.177297Z",
+            "ended_on": null,
+            "status": "active"
+          },
+          {
+            "name": "initialize",
+            "started_on": null,
+            "ended_on": null,
+            "status": "idle"
+          },
+          {
+            "name": "clone_repo",
+            "started_on": null,
+            "ended_on": null,
+            "status": "idle"
+          },
+          {
+            "name": "build",
+            "started_on": null,
+            "ended_on": null,
+            "status": "idle"
+          },
+          {
+            "name": "deploy",
+            "started_on": null,
+            "ended_on": "2026-03-24T12:31:54.640805Z",
+            "status": "success"
+          }
+        ],
+        "build_config": {
+          "build_command": "",
+          "destination_dir": "",
+          "build_caching": null,
+          "root_dir": "",
+          "web_analytics_tag": null,
+          "web_analytics_token": null
+        },
+        "source": {
+          "type": "github",
+          "config": {
+            "owner": "xbpk3t",
+            "repo_name": "docs",
+            "production_branch": "main",
+            "pr_comments_enabled": false
+          }
+        },
+        "env_vars": {},
+        "compatibility_date": "2025-08-31",
+        "compatibility_flags": [],
+        "build_image_major_version": 3,
+        "usage_model": "bundled",
+        "aliases": [
+          "https://s.lucc.dev"
+        ],
+        "is_skipped": false,
+        "production_branch": "main",
+        "uses_functions": true
+      },
+      "created_on": "2025-08-31T09:35:04.344435Z",
+      "production_branch": "main",
+      "production_script_name": "pages-worker--7535371-production",
+      "preview_script_name": "pages-worker--7535371-preview",
+      "uses_functions": true,
+      "framework": "",
+      "framework_version": ""
+    },
+    {
+      "id": "ac8f5130-3bfb-47d0-840e-8fefceed78fb",
+      "name": "docs",
+      "subdomain": "docs-fq6.pages.dev",
+      "domains": [
+        "docs-fq6.pages.dev",
+        "docs.lucc.dev"
+      ],
+      "source": {
+        "type": "github",
+        "config": {
+          "owner": "xbpk3t",
+          "owner_id": "8591495",
+          "repo_name": "docs",
+          "repo_id": "446885053",
+          "production_branch": "gh-pages",
+          "pr_comments_enabled": true,
+          "deployments_enabled": true,
+          "production_deployments_enabled": true,
+          "preview_deployment_setting": "none",
+          "preview_branch_includes": [
+            "*"
+          ],
+          "preview_branch_excludes": [],
+          "path_includes": [
+            "*"
+          ],
+          "path_excludes": []
+        }
+      },
+      "build_config": {
+        "build_command": "",
+        "destination_dir": "",
+        "build_caching": true,
+        "root_dir": "",
+        "web_analytics_tag": "d6bce5f5b1694a4ab9b1f41d42af4a72",
+        "web_analytics_token": "1890cd750cf74257a04419fba5886b03"
+      },
+      "deployment_configs": {
+        "preview": {
+          "env_vars": null,
+          "fail_open": true,
+          "always_use_latest_compatibility_date": false,
+          "compatibility_date": "2023-10-24",
+          "compatibility_flags": [],
+          "build_image_major_version": 2,
+          "usage_model": "standard"
+        },
+        "production": {
+          "env_vars": {
+            "CFP_PASSWORD": {
+              "type": "plain_text",
+              "value": "159357@"
+            }
+          },
+          "fail_open": true,
+          "always_use_latest_compatibility_date": false,
+          "compatibility_date": "2023-10-24",
+          "compatibility_flags": [],
+          "build_image_major_version": 2,
+          "usage_model": "standard",
+          "placement": {
+            "mode": "smart"
+          }
+        }
+      },
+      "latest_deployment": {
+        "id": "865a20ef-cdfd-4952-bd4e-339301eee902",
+        "short_id": "865a20ef",
+        "project_id": "ac8f5130-3bfb-47d0-840e-8fefceed78fb",
+        "project_name": "docs",
+        "environment": "production",
+        "url": "https://865a20ef.docs-fq6.pages.dev",
+        "created_on": "2026-03-24T12:32:58.31308Z",
+        "modified_on": "2026-03-24T12:33:01.385366Z",
+        "latest_stage": {
+          "name": "deploy",
+          "started_on": null,
+          "ended_on": "2026-03-24T12:33:01.385366Z",
+          "status": "success"
+        },
+        "deployment_trigger": {
+          "type": "ad_hoc",
+          "metadata": {
+            "branch": "gh-pages",
+            "commit_hash": "7322ecff667e00321e9b25f1b12fc655900e9d85",
+            "commit_message": "feat: z",
+            "commit_dirty": true
+          }
+        },
+        "stages": [
+          {
+            "name": "queued",
+            "started_on": "2026-03-24T12:32:58.31308Z",
+            "ended_on": null,
+            "status": "active"
+          },
+          {
+            "name": "initialize",
+            "started_on": null,
+            "ended_on": null,
+            "status": "idle"
+          },
+          {
+            "name": "clone_repo",
+            "started_on": null,
+            "ended_on": null,
+            "status": "idle"
+          },
+          {
+            "name": "build",
+            "started_on": null,
+            "ended_on": null,
+            "status": "idle"
+          },
+          {
+            "name": "deploy",
+            "started_on": null,
+            "ended_on": "2026-03-24T12:33:01.385366Z",
+            "status": "success"
+          }
+        ],
+        "build_config": {
+          "build_command": "",
+          "destination_dir": "",
+          "build_caching": true,
+          "root_dir": "",
+          "web_analytics_tag": null,
+          "web_analytics_token": null
+        },
+        "source": {
+          "type": "github",
+          "config": {
+            "owner": "xbpk3t",
+            "repo_name": "docs",
+            "production_branch": "gh-pages",
+            "pr_comments_enabled": false
+          }
+        },
+        "env_vars": {
+          "CFP_PASSWORD": {
+            "type": "plain_text",
+            "value": "159357@"
+          }
+        },
+        "compatibility_date": "2023-10-24",
+        "compatibility_flags": [],
+        "build_image_major_version": 2,
+        "usage_model": "bundled",
+        "aliases": [
+          "https://docs.lucc.dev"
+        ],
+        "is_skipped": false,
+        "production_branch": "gh-pages",
+        "uses_functions": true
+      },
+      "canonical_deployment": {
+        "id": "865a20ef-cdfd-4952-bd4e-339301eee902",
+        "short_id": "865a20ef",
+        "project_id": "ac8f5130-3bfb-47d0-840e-8fefceed78fb",
+        "project_name": "docs",
+        "environment": "production",
+        "url": "https://865a20ef.docs-fq6.pages.dev",
+        "created_on": "2026-03-24T12:32:58.31308Z",
+        "modified_on": "2026-03-24T12:33:01.385366Z",
+        "latest_stage": {
+          "name": "deploy",
+          "started_on": null,
+          "ended_on": "2026-03-24T12:33:01.385366Z",
+          "status": "success"
+        },
+        "deployment_trigger": {
+          "type": "ad_hoc",
+          "metadata": {
+            "branch": "gh-pages",
+            "commit_hash": "7322ecff667e00321e9b25f1b12fc655900e9d85",
+            "commit_message": "feat: z",
+            "commit_dirty": true
+          }
+        },
+        "stages": [
+          {
+            "name": "queued",
+            "started_on": "2026-03-24T12:32:58.31308Z",
+            "ended_on": null,
+            "status": "active"
+          },
+          {
+            "name": "initialize",
+            "started_on": null,
+            "ended_on": null,
+            "status": "idle"
+          },
+          {
+            "name": "clone_repo",
+            "started_on": null,
+            "ended_on": null,
+            "status": "idle"
+          },
+          {
+            "name": "build",
+            "started_on": null,
+            "ended_on": null,
+            "status": "idle"
+          },
+          {
+            "name": "deploy",
+            "started_on": null,
+            "ended_on": "2026-03-24T12:33:01.385366Z",
+            "status": "success"
+          }
+        ],
+        "build_config": {
+          "build_command": "",
+          "destination_dir": "",
+          "build_caching": true,
+          "root_dir": "",
+          "web_analytics_tag": null,
+          "web_analytics_token": null
+        },
+        "source": {
+          "type": "github",
+          "config": {
+            "owner": "xbpk3t",
+            "repo_name": "docs",
+            "production_branch": "gh-pages",
+            "pr_comments_enabled": false
+          }
+        },
+        "env_vars": {
+          "CFP_PASSWORD": {
+            "type": "plain_text",
+            "value": "159357@"
+          }
+        },
+        "compatibility_date": "2023-10-24",
+        "compatibility_flags": [],
+        "build_image_major_version": 2,
+        "usage_model": "bundled",
+        "aliases": [
+          "https://docs.lucc.dev"
+        ],
+        "is_skipped": false,
+        "production_branch": "gh-pages",
+        "uses_functions": true
+      },
+      "created_on": "2023-10-24T08:16:58.120932Z",
+      "production_branch": "gh-pages",
+      "production_script_name": "pages-worker--1540950-production",
+      "preview_script_name": "pages-worker--1540950-preview",
+      "uses_functions": true,
+      "framework": "",
+      "framework_version": ""
+    },
+    {
+      "id": "5740c7b0-9323-4862-b899-6b99e50acfbe",
+      "name": "music",
+      "subdomain": "music-6gm.pages.dev",
+      "domains": [
+        "music-6gm.pages.dev",
+        "music.lucc.dev"
+      ],
+      "source": {
+        "type": "github",
+        "config": {
+          "owner": "xbpk3t",
+          "owner_id": "8591495",
+          "repo_name": "zzz",
+          "repo_id": "878906090",
+          "production_branch": "gh-pages",
+          "pr_comments_enabled": true,
+          "deployments_enabled": true,
+          "production_deployments_enabled": true,
+          "preview_deployment_setting": "all",
+          "preview_branch_includes": [
+            "*"
+          ],
+          "preview_branch_excludes": [],
+          "path_includes": [
+            "*"
+          ],
+          "path_excludes": []
+        }
+      },
+      "build_config": {
+        "build_command": "",
+        "destination_dir": "dist",
+        "root_dir": "",
+        "web_analytics_tag": null,
+        "web_analytics_token": null
+      },
+      "deployment_configs": {
+        "preview": {
+          "env_vars": null,
+          "fail_open": true,
+          "always_use_latest_compatibility_date": false,
+          "compatibility_date": "2025-11-12",
+          "compatibility_flags": [],
+          "build_image_major_version": 3,
+          "usage_model": "standard"
+        },
+        "production": {
+          "env_vars": {},
+          "d1_databases": {
+            "DB": {
+              "id": "6f4f878f-4845-4801-9386-458c612f0a72"
+            }
+          },
+          "fail_open": true,
+          "always_use_latest_compatibility_date": false,
+          "compatibility_date": "2025-11-17",
+          "compatibility_flags": [],
+          "build_image_major_version": 3,
+          "usage_model": "standard",
+          "wrangler_config_hash": "4b80cbe3a76bfc7f6c1e67d5fe86ecc6921786292b1ecf9ad418989e78aa0ef9"
+        }
+      },
+      "latest_deployment": {
+        "id": "9210940c-c724-4d0e-ba26-bd5f5bcda5da",
+        "short_id": "9210940c",
+        "project_id": "5740c7b0-9323-4862-b899-6b99e50acfbe",
+        "project_name": "music",
+        "environment": "preview",
+        "url": "https://9210940c.music-6gm.pages.dev",
+        "created_on": "2025-12-05T16:20:39.827604Z",
+        "modified_on": "2025-12-05T16:20:48.488071Z",
+        "latest_stage": {
+          "name": "build",
+          "started_on": "2025-12-05T16:20:45.060014Z",
+          "ended_on": "2025-12-05T16:20:48.488071Z",
+          "status": "failure"
+        },
+        "deployment_trigger": {
+          "type": "github:push",
+          "metadata": {
+            "branch": "main",
+            "commit_hash": "2880d24a98703f4406a8a927f9b429f35c3e6305",
+            "commit_message": "feat(vscs): 直接用duckdb洗数据，并直接把数据源（excel, csv）也直接用git tracking",
+            "commit_dirty": false
+          }
+        },
+        "stages": [
+          {
+            "name": "queued",
+            "started_on": "2025-12-05T16:20:40.002828Z",
+            "ended_on": "2025-12-05T16:20:40.002828Z",
+            "status": "success"
+          },
+          {
+            "name": "initialize",
+            "started_on": "2025-12-05T16:20:40.002828Z",
+            "ended_on": "2025-12-05T16:20:42.884529Z",
+            "status": "success"
+          },
+          {
+            "name": "clone_repo",
+            "started_on": "2025-12-05T16:20:42.884529Z",
+            "ended_on": "2025-12-05T16:20:45.060014Z",
+            "status": "success"
+          },
+          {
+            "name": "build",
+            "started_on": "2025-12-05T16:20:45.060014Z",
+            "ended_on": "2025-12-05T16:20:48.488071Z",
+            "status": "failure"
+          },
+          {
+            "name": "deploy",
+            "started_on": null,
+            "ended_on": null,
+            "status": "idle"
+          }
+        ],
+        "build_config": {
+          "build_command": "",
+          "destination_dir": "dist",
+          "build_caching": null,
+          "root_dir": "",
+          "web_analytics_tag": null,
+          "web_analytics_token": null
+        },
+        "source": {
+          "type": "github",
+          "config": {
+            "owner": "xbpk3t",
+            "repo_name": "zzz",
+            "production_branch": "gh-pages",
+            "pr_comments_enabled": false
+          }
+        },
+        "env_vars": {},
+        "compatibility_date": "2025-11-12",
+        "compatibility_flags": [],
+        "build_image_major_version": 3,
+        "usage_model": null,
+        "aliases": null,
+        "is_skipped": false,
+        "production_branch": "gh-pages",
+        "uses_functions": null
+      },
+      "canonical_deployment": {
+        "id": "4df81b58-8f1d-4aae-9391-d91141256872",
+        "short_id": "4df81b58",
+        "project_id": "5740c7b0-9323-4862-b899-6b99e50acfbe",
+        "project_name": "music",
+        "environment": "production",
+        "url": "https://4df81b58.music-6gm.pages.dev",
+        "created_on": "2025-11-22T15:01:19.897424Z",
+        "modified_on": "2025-11-22T15:01:22.981322Z",
+        "latest_stage": {
+          "name": "deploy",
+          "started_on": null,
+          "ended_on": "2025-11-22T15:01:22.981322Z",
+          "status": "success"
+        },
+        "deployment_trigger": {
+          "type": "ad_hoc",
+          "metadata": {
+            "branch": "gh-pages",
+            "commit_hash": "8b0a0f5269a18e92e4a6457ee0d6e56fe7d3fcc9",
+            "commit_message": "feat: add temp",
+            "commit_dirty": true
+          }
+        },
+        "stages": [
+          {
+            "name": "queued",
+            "started_on": "2025-11-22T15:01:19.897424Z",
+            "ended_on": null,
+            "status": "active"
+          },
+          {
+            "name": "initialize",
+            "started_on": null,
+            "ended_on": null,
+            "status": "idle"
+          },
+          {
+            "name": "clone_repo",
+            "started_on": null,
+            "ended_on": null,
+            "status": "idle"
+          },
+          {
+            "name": "build",
+            "started_on": null,
+            "ended_on": null,
+            "status": "idle"
+          },
+          {
+            "name": "deploy",
+            "started_on": null,
+            "ended_on": "2025-11-22T15:01:22.981322Z",
+            "status": "success"
+          }
+        ],
+        "build_config": {
+          "build_command": "",
+          "destination_dir": "dist",
+          "build_caching": null,
+          "root_dir": "",
+          "web_analytics_tag": null,
+          "web_analytics_token": null
+        },
+        "source": {
+          "type": "github",
+          "config": {
+            "owner": "xbpk3t",
+            "repo_name": "zzz",
+            "production_branch": "gh-pages",
+            "pr_comments_enabled": false
+          }
+        },
+        "env_vars": {},
+        "d1_databases": {
+          "DB": {
+            "id": "6f4f878f-4845-4801-9386-458c612f0a72"
+          }
+        },
+        "compatibility_date": "2025-11-17",
+        "compatibility_flags": [],
+        "build_image_major_version": 3,
+        "usage_model": "bundled",
+        "aliases": [
+          "https://music.lucc.dev"
+        ],
+        "is_skipped": false,
+        "production_branch": "gh-pages",
+        "uses_functions": true
+      },
+      "created_on": "2025-11-12T08:28:27.065318Z",
+      "production_branch": "gh-pages",
+      "production_script_name": "pages-worker--9079696-production",
+      "preview_script_name": "pages-worker--9079696-preview",
+      "uses_functions": true,
+      "framework": "",
+      "framework_version": ""
+    },
+    {
+      "id": "2f13fa5e-d163-4db7-a417-5aa3cf7ecb5a",
+      "name": "nextflux",
+      "subdomain": "nextflux-a0c.pages.dev",
+      "domains": [
+        "nextflux-a0c.pages.dev"
+      ],
+      "source": {
+        "type": "github",
+        "config": {
+          "owner": "xbpk3t",
+          "owner_id": "8591495",
+          "repo_name": "nextflux",
+          "repo_id": "1098920099",
+          "production_branch": "main",
+          "pr_comments_enabled": true,
+          "deployments_enabled": true,
+          "production_deployments_enabled": true,
+          "preview_deployment_setting": "all",
+          "preview_branch_includes": [
+            "*"
+          ],
+          "preview_branch_excludes": [],
+          "path_includes": [
+            "*"
+          ],
+          "path_excludes": []
+        }
+      },
+      "build_config": {
+        "build_command": "npm run build",
+        "destination_dir": "dist",
+        "root_dir": "",
+        "web_analytics_tag": null,
+        "web_analytics_token": null
+      },
+      "deployment_configs": {
+        "preview": {
+          "env_vars": null,
+          "fail_open": true,
+          "always_use_latest_compatibility_date": false,
+          "compatibility_date": "2025-11-18",
+          "compatibility_flags": [],
+          "build_image_major_version": 3,
+          "usage_model": "standard"
+        },
+        "production": {
+          "env_vars": null,
+          "fail_open": true,
+          "always_use_latest_compatibility_date": false,
+          "compatibility_date": "2025-11-18",
+          "compatibility_flags": [],
+          "build_image_major_version": 3,
+          "usage_model": "standard"
+        }
+      },
+      "latest_deployment": {
+        "id": "41aa1043-5fa4-44ad-944e-f300737356e0",
+        "short_id": "41aa1043",
+        "project_id": "2f13fa5e-d163-4db7-a417-5aa3cf7ecb5a",
+        "project_name": "nextflux",
+        "environment": "production",
+        "url": "https://41aa1043.nextflux-a0c.pages.dev",
+        "created_on": "2025-11-18T10:14:53.525932Z",
+        "modified_on": "2025-11-18T10:15:48.054793Z",
+        "latest_stage": {
+          "name": "deploy",
+          "started_on": "2025-11-18T10:15:33.145567Z",
+          "ended_on": "2025-11-18T10:15:48.054793Z",
+          "status": "success"
+        },
+        "deployment_trigger": {
+          "type": "ad_hoc",
+          "metadata": {
+            "branch": "main",
+            "commit_hash": "f0d3b17ff112c170714146959bec76cdd87752ff",
+            "commit_message": "UI tweaks",
+            "commit_dirty": false
+          }
+        },
+        "stages": [
+          {
+            "name": "queued",
+            "started_on": "2025-11-18T10:14:53.955212Z",
+            "ended_on": "2025-11-18T10:14:53.955212Z",
+            "status": "success"
+          },
+          {
+            "name": "initialize",
+            "started_on": "2025-11-18T10:14:53.955212Z",
+            "ended_on": "2025-11-18T10:14:56.355898Z",
+            "status": "success"
+          },
+          {
+            "name": "clone_repo",
+            "started_on": "2025-11-18T10:14:56.355898Z",
+            "ended_on": "2025-11-18T10:14:58.787578Z",
+            "status": "success"
+          },
+          {
+            "name": "build",
+            "started_on": "2025-11-18T10:14:58.787578Z",
+            "ended_on": "2025-11-18T10:15:33.145567Z",
+            "status": "success"
+          },
+          {
+            "name": "deploy",
+            "started_on": "2025-11-18T10:15:33.145567Z",
+            "ended_on": "2025-11-18T10:15:48.054793Z",
+            "status": "success"
+          }
+        ],
+        "build_config": {
+          "build_command": "npm run build",
+          "destination_dir": "dist",
+          "build_caching": null,
+          "root_dir": "",
+          "web_analytics_tag": null,
+          "web_analytics_token": null
+        },
+        "source": {
+          "type": "github",
+          "config": {
+            "owner": "xbpk3t",
+            "repo_name": "nextflux",
+            "production_branch": "main",
+            "pr_comments_enabled": false
+          }
+        },
+        "env_vars": {},
+        "compatibility_date": "2025-11-18",
+        "compatibility_flags": [],
+        "build_image_major_version": 3,
+        "usage_model": null,
+        "aliases": null,
+        "is_skipped": false,
+        "production_branch": "main",
+        "uses_functions": false,
+        "framework": "react-router"
+      },
+      "canonical_deployment": {
+        "id": "41aa1043-5fa4-44ad-944e-f300737356e0",
+        "short_id": "41aa1043",
+        "project_id": "2f13fa5e-d163-4db7-a417-5aa3cf7ecb5a",
+        "project_name": "nextflux",
+        "environment": "production",
+        "url": "https://41aa1043.nextflux-a0c.pages.dev",
+        "created_on": "2025-11-18T10:14:53.525932Z",
+        "modified_on": "2025-11-18T10:15:48.054793Z",
+        "latest_stage": {
+          "name": "deploy",
+          "started_on": "2025-11-18T10:15:33.145567Z",
+          "ended_on": "2025-11-18T10:15:48.054793Z",
+          "status": "success"
+        },
+        "deployment_trigger": {
+          "type": "ad_hoc",
+          "metadata": {
+            "branch": "main",
+            "commit_hash": "f0d3b17ff112c170714146959bec76cdd87752ff",
+            "commit_message": "UI tweaks",
+            "commit_dirty": false
+          }
+        },
+        "stages": [
+          {
+            "name": "queued",
+            "started_on": "2025-11-18T10:14:53.955212Z",
+            "ended_on": "2025-11-18T10:14:53.955212Z",
+            "status": "success"
+          },
+          {
+            "name": "initialize",
+            "started_on": "2025-11-18T10:14:53.955212Z",
+            "ended_on": "2025-11-18T10:14:56.355898Z",
+            "status": "success"
+          },
+          {
+            "name": "clone_repo",
+            "started_on": "2025-11-18T10:14:56.355898Z",
+            "ended_on": "2025-11-18T10:14:58.787578Z",
+            "status": "success"
+          },
+          {
+            "name": "build",
+            "started_on": "2025-11-18T10:14:58.787578Z",
+            "ended_on": "2025-11-18T10:15:33.145567Z",
+            "status": "success"
+          },
+          {
+            "name": "deploy",
+            "started_on": "2025-11-18T10:15:33.145567Z",
+            "ended_on": "2025-11-18T10:15:48.054793Z",
+            "status": "success"
+          }
+        ],
+        "build_config": {
+          "build_command": "npm run build",
+          "destination_dir": "dist",
+          "build_caching": null,
+          "root_dir": "",
+          "web_analytics_tag": null,
+          "web_analytics_token": null
+        },
+        "source": {
+          "type": "github",
+          "config": {
+            "owner": "xbpk3t",
+            "repo_name": "nextflux",
+            "production_branch": "main",
+            "pr_comments_enabled": false
+          }
+        },
+        "env_vars": {},
+        "compatibility_date": "2025-11-18",
+        "compatibility_flags": [],
+        "build_image_major_version": 3,
+        "usage_model": null,
+        "aliases": null,
+        "is_skipped": false,
+        "production_branch": "main",
+        "uses_functions": false,
+        "framework": "react-router"
+      },
+      "created_on": "2025-11-18T10:14:49.513491Z",
+      "production_branch": "main",
+      "production_script_name": "pages-worker--9197167-production",
+      "preview_script_name": "pages-worker--9197167-preview",
+      "uses_functions": false,
+      "framework": "react-router",
+      "framework_version": "7.0.2"
+    },
+    {
+      "id": "ce9b0156-cc7b-46a1-a56e-4b5f735fdc6d",
+      "name": "me",
+      "subdomain": "me-4b9.pages.dev",
+      "domains": [
+        "me-4b9.pages.dev",
+        "lucc.dev"
+      ],
+      "build_config": {
+        "web_analytics_tag": "23d6ec54fe1f47879be87bdb210df6bf",
+        "web_analytics_token": "e5a0a2af00554b9aab138224fa8aa5ad"
+      },
+      "deployment_configs": {
+        "preview": {
+          "env_vars": null,
+          "fail_open": true,
+          "always_use_latest_compatibility_date": false,
+          "compatibility_date": "2025-03-03",
+          "compatibility_flags": [],
+          "build_image_major_version": 2,
+          "usage_model": "standard"
+        },
+        "production": {
+          "env_vars": null,
+          "fail_open": true,
+          "always_use_latest_compatibility_date": false,
+          "compatibility_date": "2025-03-03",
+          "compatibility_flags": [],
+          "build_image_major_version": 2,
+          "usage_model": "standard"
+        }
+      },
+      "latest_deployment": {
+        "id": "eeb05667-8ea0-4278-a418-bdd4f680d51e",
+        "short_id": "eeb05667",
+        "project_id": "ce9b0156-cc7b-46a1-a56e-4b5f735fdc6d",
+        "project_name": "me",
+        "environment": "production",
+        "url": "https://eeb05667.me-4b9.pages.dev",
+        "created_on": "2025-09-12T02:43:59.985152Z",
+        "modified_on": "2025-09-12T02:44:03.13896Z",
+        "latest_stage": {
+          "name": "deploy",
+          "started_on": null,
+          "ended_on": "2025-09-12T02:44:03.13896Z",
+          "status": "success"
+        },
+        "deployment_trigger": {
+          "type": "ad_hoc",
+          "metadata": {
+            "branch": "main",
+            "commit_hash": "b1778e5a5beb5027817ae9c6701eacc7d61faf48",
+            "commit_message": "Update About.tsx",
+            "commit_dirty": true
+          }
+        },
+        "stages": [
+          {
+            "name": "queued",
+            "started_on": "2025-09-12T02:43:59.985152Z",
+            "ended_on": null,
+            "status": "active"
+          },
+          {
+            "name": "initialize",
+            "started_on": null,
+            "ended_on": null,
+            "status": "idle"
+          },
+          {
+            "name": "clone_repo",
+            "started_on": null,
+            "ended_on": null,
+            "status": "idle"
+          },
+          {
+            "name": "build",
+            "started_on": null,
+            "ended_on": null,
+            "status": "idle"
+          },
+          {
+            "name": "deploy",
+            "started_on": null,
+            "ended_on": "2025-09-12T02:44:03.13896Z",
+            "status": "success"
+          }
+        ],
+        "build_config": {
+          "build_command": null,
+          "destination_dir": null,
+          "build_caching": null,
+          "root_dir": null,
+          "web_analytics_tag": null,
+          "web_analytics_token": null
+        },
+        "env_vars": {},
+        "compatibility_date": "2025-03-03",
+        "compatibility_flags": [],
+        "build_image_major_version": 2,
+        "usage_model": null,
+        "aliases": [
+          "https://lucc.dev"
+        ],
+        "is_skipped": false,
+        "production_branch": "main",
+        "uses_functions": false
+      },
+      "canonical_deployment": {
+        "id": "eeb05667-8ea0-4278-a418-bdd4f680d51e",
+        "short_id": "eeb05667",
+        "project_id": "ce9b0156-cc7b-46a1-a56e-4b5f735fdc6d",
+        "project_name": "me",
+        "environment": "production",
+        "url": "https://eeb05667.me-4b9.pages.dev",
+        "created_on": "2025-09-12T02:43:59.985152Z",
+        "modified_on": "2025-09-12T02:44:03.13896Z",
+        "latest_stage": {
+          "name": "deploy",
+          "started_on": null,
+          "ended_on": "2025-09-12T02:44:03.13896Z",
+          "status": "success"
+        },
+        "deployment_trigger": {
+          "type": "ad_hoc",
+          "metadata": {
+            "branch": "main",
+            "commit_hash": "b1778e5a5beb5027817ae9c6701eacc7d61faf48",
+            "commit_message": "Update About.tsx",
+            "commit_dirty": true
+          }
+        },
+        "stages": [
+          {
+            "name": "queued",
+            "started_on": "2025-09-12T02:43:59.985152Z",
+            "ended_on": null,
+            "status": "active"
+          },
+          {
+            "name": "initialize",
+            "started_on": null,
+            "ended_on": null,
+            "status": "idle"
+          },
+          {
+            "name": "clone_repo",
+            "started_on": null,
+            "ended_on": null,
+            "status": "idle"
+          },
+          {
+            "name": "build",
+            "started_on": null,
+            "ended_on": null,
+            "status": "idle"
+          },
+          {
+            "name": "deploy",
+            "started_on": null,
+            "ended_on": "2025-09-12T02:44:03.13896Z",
+            "status": "success"
+          }
+        ],
+        "build_config": {
+          "build_command": null,
+          "destination_dir": null,
+          "build_caching": null,
+          "root_dir": null,
+          "web_analytics_tag": null,
+          "web_analytics_token": null
+        },
+        "env_vars": {},
+        "compatibility_date": "2025-03-03",
+        "compatibility_flags": [],
+        "build_image_major_version": 2,
+        "usage_model": null,
+        "aliases": [
+          "https://lucc.dev"
+        ],
+        "is_skipped": false,
+        "production_branch": "main",
+        "uses_functions": false
+      },
+      "created_on": "2025-03-03T13:35:17.458857Z",
+      "production_branch": "main",
+      "production_script_name": "pages-worker--5389927-production",
+      "preview_script_name": "pages-worker--5389927-preview",
+      "uses_functions": false,
+      "framework": "",
+      "framework_version": ""
+    }
+  ],
+  "success": true,
+  "errors": [],
+  "messages": [],
+  "result_info": {
+    "page": 1,
+    "per_page": 10,
+    "count": 6,
+    "total_count": 6,
+    "total_pages": 1
+  }
+}

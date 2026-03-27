@@ -1,0 +1,24 @@
+{
+  "result": [
+    {
+      "id": "a98350c82e4148c9934e277472b8a503",
+      "title": "jsonbin",
+      "supports_url_encoding": true
+    },
+    {
+      "id": "aef42b1af9b2407ba9161ba6ee157660",
+      "title": "gx9",
+      "supports_url_encoding": true
+    }
+  ],
+  "errors": [],
+  "messages": [],
+  "success": true,
+  "result_info": {
+    "count": 2,
+    "page": 1,
+    "per_page": 100,
+    "total_count": 2,
+    "total_pages": 1
+  }
+}

@@ -1,0 +1,117 @@
+---
+version: "3"
+
+vars:
+  # 当前 Taskfile 位于 infra/.task，下一级是 infra/，再上一级才是 repo root。
+  INFRA_DIR: "{{.TASKFILE_DIR}}/.."
+
+tasks:
+  list:
+    desc: "列出 infra stacks"
+    summary: |
+      task tf:list
+      task tf:list TAG=cloudflare
+    vars:
+      EFFECTIVE_TAG: '{{if .TAG}}{{.TAG}}{{else}}layer-infra{{end}}'
+    dir: "{{.USER_WORKING_DIR}}"
+    cmds:
+      - terramate list --tags "{{.EFFECTIVE_TAG}}"
+
+  validate:
+    desc: "对单个 stack 做 tofu validate"
+    summary: |
+      task tf:validate STACK=infra/stacks/homelab/cloudflare/lucc.dev/dns
+    requires:
+      vars:
+        - STACK
+    dir: "{{.USER_WORKING_DIR}}/{{.STACK}}"
+    preconditions:
+      - sh: test -d "{{.USER_WORKING_DIR}}/{{.STACK}}"
+        msg: "STACK 必须是相对仓库根目录的有效路径，例如 infra/stacks/homelab/cloudflare/lucc.dev/dns"
+    cmds:
+      - rm -rf .terraform .terraform.lock.hcl
+      - tofu init -backend=false -input=false
+      - tofu validate
+
+  plan:
+    desc: "对单个 stack 或一组 tagged stacks 做 tofu plan"
+    summary: |
+      task tf:plan STACK=infra/stacks/homelab/cloudflare/account/pages
+      task tf:plan TAG=cloudflare
+    cmds:
+      - task: '{{if .STACK}}plan-stack{{else}}plan-tag{{end}}'
+        vars:
+          STACK: "{{.STACK}}"
+          TAG: "{{.TAG}}"
+    preconditions:
+      - sh: test -n "{{.STACK}}{{.TAG}}"
+        msg: "必须提供 STACK 或 TAG；STACK 适合日常维护，TAG 适合批量巡检"
+
+  plan-stack:
+    internal: true
+    requires:
+      vars:
+        - STACK
+    dir: "{{.USER_WORKING_DIR}}/{{.STACK}}"
+    preconditions:
+      - sh: test -d "{{.USER_WORKING_DIR}}/{{.STACK}}"
+        msg: "STACK 必须是相对仓库根目录的有效路径"
+      - sh: test -n "${CF_R2_AK:-}"
+        msg: "plan 需要 Cloudflare R2 backend 凭据，请提供 CF_R2_AK"
+      - sh: test -n "${CF_R2_SK:-}"
+        msg: "plan 需要 Cloudflare R2 backend 凭据，请提供 CF_R2_SK"
+      - sh: test -n "${CLOUDFLARE_API_TOKEN:-}"
+        msg: "plan 需要 Cloudflare API token，请提供 CLOUDFLARE_API_TOKEN"
+    env:
+      AWS_ACCESS_KEY_ID: "{{.CF_R2_AK}}"
+      AWS_SECRET_ACCESS_KEY: "{{.CF_R2_SK}}"
+      CLOUDFLARE_API_TOKEN: "{{.CLOUDFLARE_API_TOKEN}}"
+    cmds:
+      - tofu init -reconfigure -input=false
+      - tofu plan -input=false
+
+  plan-tag:
+    internal: true
+    requires:
+      vars:
+        - TAG
+    dir: "{{.USER_WORKING_DIR}}"
+    preconditions:
+      - sh: test -n "${CF_R2_AK:-}"
+        msg: "plan 需要 Cloudflare R2 backend 凭据，请提供 CF_R2_AK"
+      - sh: test -n "${CF_R2_SK:-}"
+        msg: "plan 需要 Cloudflare R2 backend 凭据，请提供 CF_R2_SK"
+      - sh: test -n "${CLOUDFLARE_API_TOKEN:-}"
+        msg: "plan 需要 Cloudflare API token，请提供 CLOUDFLARE_API_TOKEN"
+    env:
+      AWS_ACCESS_KEY_ID: "{{.CF_R2_AK}}"
+      AWS_SECRET_ACCESS_KEY: "{{.CF_R2_SK}}"
+      CLOUDFLARE_API_TOKEN: "{{.CLOUDFLARE_API_TOKEN}}"
+    cmds:
+      - terramate run --tags "{{.TAG}}" -- tofu init -reconfigure -input=false
+      - terramate run --tags "{{.TAG}}" -- tofu plan -input=false
+
+  apply:
+    desc: "对单个 stack 执行 tofu apply"
+    summary: |
+      task tf:apply STACK=infra/stacks/homelab/cloudflare/account/pages
+    requires:
+      vars:
+        - STACK
+    dir: "{{.USER_WORKING_DIR}}/{{.STACK}}"
+    preconditions:
+      - sh: test -d "{{.USER_WORKING_DIR}}/{{.STACK}}"
+        msg: "STACK 必须是相对仓库根目录的有效路径"
+      - sh: test -n "${CF_R2_AK:-}"
+        msg: "apply 需要 Cloudflare R2 backend 凭据，请提供 CF_R2_AK"
+      - sh: test -n "${CF_R2_SK:-}"
+        msg: "apply 需要 Cloudflare R2 backend 凭据，请提供 CF_R2_SK"
+      - sh: test -n "${CLOUDFLARE_API_TOKEN:-}"
+        msg: "apply 需要 Cloudflare API token，请提供 CLOUDFLARE_API_TOKEN"
+    env:
+      AWS_ACCESS_KEY_ID: "{{.CF_R2_AK}}"
+      AWS_SECRET_ACCESS_KEY: "{{.CF_R2_SK}}"
+      CLOUDFLARE_API_TOKEN: "{{.CLOUDFLARE_API_TOKEN}}"
+    cmds:
+      - tofu init -reconfigure -input=false
+      - tofu apply

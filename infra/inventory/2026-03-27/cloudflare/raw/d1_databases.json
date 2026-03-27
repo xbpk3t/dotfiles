@@ -1,0 +1,40 @@
+{
+  "result": [
+    {
+      "uuid": "6f4f878f-4845-4801-9386-458c612f0a72",
+      "name": "vscs",
+      "created_at": "2025-11-17T03:35:33.577Z",
+      "version": "production",
+      "num_tables": 0,
+      "file_size": 212992,
+      "jurisdiction": null
+    },
+    {
+      "uuid": "96375ee2-188f-44d4-ab16-eaa06828a4ac",
+      "name": "docs",
+      "created_at": "2025-09-02T06:21:24.935Z",
+      "version": "production",
+      "num_tables": 0,
+      "file_size": 12288,
+      "jurisdiction": null
+    },
+    {
+      "uuid": "8c7cd8e8-3305-444f-aa20-5c97fddd3cf5",
+      "name": "web-archive",
+      "created_at": "2024-12-01T11:47:03.961Z",
+      "version": "production",
+      "num_tables": 5,
+      "file_size": 90112,
+      "jurisdiction": null
+    }
+  ],
+  "errors": [],
+  "messages": [],
+  "success": true,
+  "result_info": {
+    "count": 3,
+    "page": 1,
+    "per_page": 100,
+    "total_count": 3
+  }
+}

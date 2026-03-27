@@ -1,0 +1,52 @@
+{
+  "result": [
+    {
+      "id": "ed10843353a6484e8b0036a67928b634",
+      "tag": "ed10843353a6484e8b0036a67928b634",
+      "name": "Rule created at 2025-02-20T06:52:34.085Z",
+      "matchers": [
+        {
+          "type": "literal",
+          "field": "to",
+          "value": "me@lucc.dev"
+        }
+      ],
+      "actions": [
+        {
+          "type": "forward",
+          "value": [
+            "jeffcottlu@gmail.com"
+          ]
+        }
+      ],
+      "enabled": true,
+      "priority": 0
+    },
+    {
+      "id": "c6b004c0ed4543ea9a81fba050167b31",
+      "tag": "c6b004c0ed4543ea9a81fba050167b31",
+      "name": "",
+      "matchers": [
+        {
+          "type": "all"
+        }
+      ],
+      "actions": [
+        {
+          "type": "drop"
+        }
+      ],
+      "enabled": false,
+      "priority": 2147483647
+    }
+  ],
+  "success": true,
+  "errors": [],
+  "messages": [],
+  "result_info": {
+    "page": 1,
+    "per_page": 50,
+    "count": 2,
+    "total_count": 2
+  }
+}

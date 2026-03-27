@@ -1,0 +1,418 @@
+{
+  "result": [
+    {
+      "id": "836a7ec135fe7637671a2403b62e1947",
+      "name": "atuin.lucc.dev",
+      "type": "A",
+      "content": "103.85.224.63",
+      "proxiable": true,
+      "proxied": true,
+      "ttl": 1,
+      "settings": {},
+      "meta": {},
+      "comment": null,
+      "tags": [],
+      "created_on": "2025-12-30T10:43:10.232164Z",
+      "modified_on": "2025-12-30T10:43:10.232164Z"
+    },
+    {
+      "id": "729efb0247d2ec74916fab7fec20892d",
+      "name": "beszel.lucc.dev",
+      "type": "A",
+      "content": "103.85.224.63",
+      "proxiable": true,
+      "proxied": true,
+      "ttl": 1,
+      "settings": {},
+      "meta": {},
+      "comment": null,
+      "tags": [],
+      "created_on": "2025-11-20T09:14:53.751723Z",
+      "modified_on": "2025-11-20T09:14:53.751723Z"
+    },
+    {
+      "id": "0a78e1bf7e0d58ac35378f3c7e117625",
+      "name": "g.lucc.dev",
+      "type": "A",
+      "content": "142.171.154.61",
+      "proxiable": true,
+      "proxied": true,
+      "ttl": 1,
+      "settings": {},
+      "meta": {},
+      "comment": "PAG- Grafana Dashboard",
+      "tags": [],
+      "created_on": "2026-01-29T13:40:25.796609Z",
+      "modified_on": "2026-01-29T13:40:25.796609Z",
+      "comment_modified_on": "2026-01-29T13:40:25.796609Z"
+    },
+    {
+      "id": "c159ba2bf018bcf724084f6db32b8f41",
+      "name": "k3s.lucc.dev",
+      "type": "A",
+      "content": "142.171.154.61",
+      "proxiable": true,
+      "proxied": true,
+      "ttl": 1,
+      "settings": {},
+      "meta": {},
+      "comment": null,
+      "tags": [],
+      "created_on": "2026-01-29T04:05:22.110388Z",
+      "modified_on": "2026-01-29T04:05:22.110388Z"
+    },
+    {
+      "id": "b41f31d965d2291529d41a82c4eb6cca",
+      "name": "mm.lucc.dev",
+      "type": "A",
+      "content": "142.171.154.61",
+      "proxiable": true,
+      "proxied": true,
+      "ttl": 1,
+      "settings": {},
+      "meta": {},
+      "comment": "memos",
+      "tags": [],
+      "created_on": "2026-01-19T16:45:07.234754Z",
+      "modified_on": "2026-01-29T05:34:13.229385Z",
+      "comment_modified_on": "2026-01-19T16:45:07.234754Z"
+    },
+    {
+      "id": "b98027e76f7b66e013d0ecc411acb470",
+      "name": "n8n.lucc.dev",
+      "type": "A",
+      "content": "103.85.224.63",
+      "proxiable": true,
+      "proxied": true,
+      "ttl": 1,
+      "settings": {},
+      "meta": {},
+      "comment": null,
+      "tags": [],
+      "created_on": "2025-12-03T09:55:31.533206Z",
+      "modified_on": "2025-12-03T09:55:31.533206Z"
+    },
+    {
+      "id": "4fcd9d79943910e1ae879564d5495170",
+      "name": "pan.lucc.dev",
+      "type": "A",
+      "content": "103.85.224.63",
+      "proxiable": true,
+      "proxied": true,
+      "ttl": 1,
+      "settings": {},
+      "meta": {},
+      "comment": "Openlist",
+      "tags": [],
+      "created_on": "2025-11-28T06:57:16.125507Z",
+      "modified_on": "2025-11-28T06:57:16.125507Z",
+      "comment_modified_on": "2025-11-28T06:57:16.125507Z"
+    },
+    {
+      "id": "fb5b88553a559deb2fc4687379c66df0",
+      "name": "pt.lucc.dev",
+      "type": "A",
+      "content": "103.85.224.63",
+      "proxiable": true,
+      "proxied": true,
+      "ttl": 1,
+      "settings": {},
+      "meta": {},
+      "comment": null,
+      "tags": [],
+      "created_on": "2025-12-03T09:55:40.395112Z",
+      "modified_on": "2025-12-03T09:55:40.395112Z"
+    },
+    {
+      "id": "1eb043e1ffe747891513e47be11b0a6f",
+      "name": "rsshub.lucc.dev",
+      "type": "A",
+      "content": "142.171.154.61",
+      "proxiable": true,
+      "proxied": true,
+      "ttl": 1,
+      "settings": {},
+      "meta": {},
+      "comment": null,
+      "tags": [],
+      "created_on": "2025-11-19T15:36:11.720846Z",
+      "modified_on": "2026-01-29T05:34:20.203238Z"
+    },
+    {
+      "id": "b4a7143da983c688d9a1e3256c7fe08e",
+      "name": "ts.lucc.dev",
+      "type": "A",
+      "content": "103.85.224.63",
+      "proxiable": true,
+      "proxied": true,
+      "ttl": 1,
+      "settings": {},
+      "meta": {},
+      "comment": "tailscale",
+      "tags": [],
+      "created_on": "2025-12-19T14:55:27.523778Z",
+      "modified_on": "2025-12-19T14:55:27.523778Z",
+      "comment_modified_on": "2025-12-19T14:55:27.523778Z"
+    },
+    {
+      "id": "1bd30865c3c123a847e1a5f859ec5e0a",
+      "name": "bc.lucc.dev",
+      "type": "CNAME",
+      "content": "public.r2.dev",
+      "proxiable": true,
+      "proxied": true,
+      "ttl": 1,
+      "settings": {
+        "flatten_cname": false
+      },
+      "meta": {
+        "r2_bucket": "blog",
+        "read_only": true
+      },
+      "comment": null,
+      "tags": [],
+      "created_on": "2025-12-06T08:02:09.734393Z",
+      "modified_on": "2025-12-06T08:02:09.734393Z"
+    },
+    {
+      "id": "442d7dbf738b136ce33fea1048c4331c",
+      "name": "blog.lucc.dev",
+      "type": "CNAME",
+      "content": "blog-cfg.pages.dev",
+      "proxiable": true,
+      "proxied": true,
+      "ttl": 1,
+      "settings": {
+        "flatten_cname": false
+      },
+      "meta": {},
+      "comment": null,
+      "tags": [],
+      "created_on": "2025-11-27T06:12:49.557864Z",
+      "modified_on": "2025-11-27T06:12:49.557864Z"
+    },
+    {
+      "id": "68bf0f40f96ff96acbd75a119e988750",
+      "name": "cdn.lucc.dev",
+      "type": "CNAME",
+      "content": "public.r2.dev",
+      "proxiable": true,
+      "proxied": true,
+      "ttl": 1,
+      "settings": {
+        "flatten_cname": false
+      },
+      "meta": {
+        "r2_bucket": "docs",
+        "read_only": true
+      },
+      "comment": null,
+      "tags": [],
+      "created_on": "2025-08-12T07:30:55.894976Z",
+      "modified_on": "2025-08-12T07:30:55.894976Z"
+    },
+    {
+      "id": "1316b702e2113771137d9131d25f3d65",
+      "name": "docs.lucc.dev",
+      "type": "CNAME",
+      "content": "docs-fq6.pages.dev",
+      "proxiable": true,
+      "proxied": true,
+      "ttl": 1,
+      "settings": {
+        "flatten_cname": false
+      },
+      "meta": {},
+      "comment": null,
+      "tags": [],
+      "created_on": "2025-02-21T06:44:52.742936Z",
+      "modified_on": "2025-02-21T06:44:52.742936Z"
+    },
+    {
+      "id": "a1690ebeade93455258a33b38f4bfe89",
+      "name": "dokploy.lucc.dev",
+      "type": "CNAME",
+      "content": "40f8fb2d-819c-4308-a166-1d60f92dc16a.cfargotunnel.com",
+      "proxiable": true,
+      "proxied": true,
+      "ttl": 1,
+      "settings": {
+        "flatten_cname": false
+      },
+      "meta": {},
+      "comment": null,
+      "tags": [],
+      "created_on": "2025-12-31T17:09:03.660119Z",
+      "modified_on": "2026-01-01T01:56:58.21103Z"
+    },
+    {
+      "id": "a80a731e11c54cc0a9707b454b0dea63",
+      "name": "lucc.dev",
+      "type": "CNAME",
+      "content": "me-4b9.pages.dev",
+      "proxiable": true,
+      "proxied": true,
+      "ttl": 1,
+      "settings": {
+        "flatten_cname": false
+      },
+      "meta": {},
+      "comment": null,
+      "tags": [],
+      "created_on": "2025-03-03T13:56:02.625195Z",
+      "modified_on": "2025-03-03T13:56:02.625195Z"
+    },
+    {
+      "id": "165e4b06ec8c27ac99f5167106a2fa38",
+      "name": "music.lucc.dev",
+      "type": "CNAME",
+      "content": "music-6gm.pages.dev",
+      "proxiable": true,
+      "proxied": true,
+      "ttl": 1,
+      "settings": {
+        "flatten_cname": false
+      },
+      "meta": {},
+      "comment": null,
+      "tags": [],
+      "created_on": "2025-11-12T10:15:06.325955Z",
+      "modified_on": "2025-11-12T10:15:06.325955Z"
+    },
+    {
+      "id": "21078041f801e1c49d6171d0226760eb",
+      "name": "s.lucc.dev",
+      "type": "CNAME",
+      "content": "slides-6fn.pages.dev",
+      "proxiable": true,
+      "proxied": true,
+      "ttl": 1,
+      "settings": {
+        "flatten_cname": false
+      },
+      "meta": {},
+      "comment": null,
+      "tags": [],
+      "created_on": "2025-08-31T09:47:52.413718Z",
+      "modified_on": "2025-08-31T09:47:52.413718Z"
+    },
+    {
+      "id": "3bfffe44f3323a9fdbbb8b455622f113",
+      "name": "lucc.dev",
+      "type": "MX",
+      "content": "route3.mx.cloudflare.net",
+      "priority": 51,
+      "proxiable": false,
+      "proxied": false,
+      "ttl": 1,
+      "settings": {},
+      "meta": {
+        "email_routing": true,
+        "read_only": true
+      },
+      "comment": null,
+      "tags": [],
+      "created_on": "2025-02-20T06:52:43.960704Z",
+      "modified_on": "2025-02-20T06:52:43.960704Z"
+    },
+    {
+      "id": "3cbcaf3176b7ea868a57dd13f47512c7",
+      "name": "lucc.dev",
+      "type": "MX",
+      "content": "route2.mx.cloudflare.net",
+      "priority": 38,
+      "proxiable": false,
+      "proxied": false,
+      "ttl": 1,
+      "settings": {},
+      "meta": {
+        "email_routing": true,
+        "read_only": true
+      },
+      "comment": null,
+      "tags": [],
+      "created_on": "2025-02-20T06:52:43.949536Z",
+      "modified_on": "2025-02-20T06:52:43.949536Z"
+    },
+    {
+      "id": "e16cff5af9f8ec1e705fff3020a654f5",
+      "name": "lucc.dev",
+      "type": "MX",
+      "content": "route1.mx.cloudflare.net",
+      "priority": 67,
+      "proxiable": false,
+      "proxied": false,
+      "ttl": 1,
+      "settings": {},
+      "meta": {
+        "email_routing": true,
+        "read_only": true
+      },
+      "comment": null,
+      "tags": [],
+      "created_on": "2025-02-20T06:52:43.942139Z",
+      "modified_on": "2025-02-20T06:52:43.942139Z"
+    },
+    {
+      "id": "650591690a857966f1ca8242f4108ab3",
+      "name": "cf2024-1._domainkey.lucc.dev",
+      "type": "TXT",
+      "content": "\"v=DKIM1; h=sha256; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAiweykoi+o48IOGuP7GR3X0MOExCUDY/BCRHoWBnh3rChl7WhdyCxW3jgq1daEjPPqoi7sJvdg5hEQVsgVRQP4DcnQDVjGMbASQtrY4WmB1VebF+RPJB2ECPsEDTpeiI5ZyUAwJaVX7r6bznU67g7LvFq35yIo4sdlmtZGV+i0H4cpYH9+3JJ78k\" \"m4KXwaf9xUJCWF6nxeD+qG6Fyruw1Qlbds2r85U9dkNDVAS3gioCvELryh1TxKGiVTkg4wqHTyHfWsp7KD3WQHYJn0RyfJJu6YEmL77zonn7p2SRMvTMP3ZEXibnC9gz3nnhR6wcYL8Q7zXypKTMD58bTixDSJwIDAQAB\"",
+      "proxiable": false,
+      "proxied": false,
+      "ttl": 1,
+      "settings": {},
+      "meta": {
+        "email_routing": true,
+        "read_only": true
+      },
+      "comment": null,
+      "tags": [],
+      "created_on": "2025-02-20T06:52:43.972111Z",
+      "modified_on": "2025-02-20T06:52:43.972111Z"
+    },
+    {
+      "id": "8eadaa51a16abe012878207f99ae5d33",
+      "name": "lucc.dev",
+      "type": "TXT",
+      "content": "\"v=spf1 include:_spf.mx.cloudflare.net ~all\"",
+      "proxiable": false,
+      "proxied": false,
+      "ttl": 1,
+      "settings": {},
+      "meta": {},
+      "comment": null,
+      "tags": [],
+      "created_on": "2025-02-20T06:52:43.966611Z",
+      "modified_on": "2025-02-20T06:52:43.966611Z"
+    },
+    {
+      "id": "6bc3b7e5f9391562ac7df710c3578362",
+      "name": "dp.lucc.dev",
+      "type": "AAAA",
+      "content": "100::",
+      "proxiable": true,
+      "proxied": true,
+      "ttl": 1,
+      "settings": {},
+      "meta": {
+        "origin_worker_id": "ea312fb627610bd6e294bb3a5b23d36a0130f88a",
+        "read_only": true
+      },
+      "comment": null,
+      "tags": [],
+      "created_on": "2025-02-20T05:53:07.751882Z",
+      "modified_on": "2025-02-20T05:53:07.751882Z"
+    }
+  ],
+  "success": true,
+  "errors": [],
+  "messages": [],
+  "result_info": {
+    "page": 1,
+    "per_page": 100,
+    "count": 24,
+    "total_count": 24,
+    "total_pages": 1
+  }
+}

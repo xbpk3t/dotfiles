@@ -1,0 +1,41 @@
+{
+  "success": true,
+  "errors": [],
+  "messages": [],
+  "result": {
+    "buckets": [
+      {
+        "name": "blog",
+        "creation_date": "2025-12-06T08:01:43.117Z"
+      },
+      {
+        "name": "docs",
+        "creation_date": "2025-08-12T07:06:09.779Z"
+      },
+      {
+        "name": "dokploy-backup",
+        "creation_date": "2025-12-31T07:44:11.295Z"
+      },
+      {
+        "name": "dokploy-volume-backup",
+        "creation_date": "2026-01-01T04:41:42.498Z"
+      },
+      {
+        "name": "luck-dotfiles-opentofu-state",
+        "creation_date": "2026-03-27T07:30:58.875Z"
+      },
+      {
+        "name": "rclone",
+        "creation_date": "2025-10-21T08:58:13.076Z"
+      },
+      {
+        "name": "scratches",
+        "creation_date": "2025-09-10T13:46:37.785Z"
+      },
+      {
+        "name": "vps",
+        "creation_date": "2025-12-02T08:36:36.418Z"
+      }
+    ]
+  }
+}

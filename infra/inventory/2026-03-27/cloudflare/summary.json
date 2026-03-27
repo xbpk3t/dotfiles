@@ -1,0 +1,118 @@
+{
+  "generated_at": "2026-03-27T09:16:31Z",
+  "token": {
+    "id": "62a65bde8c30dc3a0926112040e21a27",
+    "status": "active"
+  },
+  "account": {
+    "id": "96540bd100b82adba941163704660c31",
+    "name": "HappyHacking"
+  },
+  "zone": {
+    "id": "1c07a1b84d8273f4dfa6c3adce513f94",
+    "name": "lucc.dev",
+    "status": "active",
+    "type": "full"
+  },
+  "resources": [
+    {
+      "key": "dns_records",
+      "scope": "zone",
+      "count": 24,
+      "names": [
+        "atuin.lucc.dev",
+        "bc.lucc.dev",
+        "beszel.lucc.dev",
+        "blog.lucc.dev",
+        "cdn.lucc.dev",
+        "cf2024-1._domainkey.lucc.dev",
+        "docs.lucc.dev",
+        "dokploy.lucc.dev",
+        "dp.lucc.dev",
+        "g.lucc.dev",
+        "k3s.lucc.dev",
+        "lucc.dev",
+        "mm.lucc.dev",
+        "music.lucc.dev",
+        "n8n.lucc.dev",
+        "pan.lucc.dev",
+        "pt.lucc.dev",
+        "rsshub.lucc.dev",
+        "s.lucc.dev",
+        "ts.lucc.dev"
+      ]
+    },
+    {
+      "key": "email_routing_rules",
+      "scope": "zone",
+      "count": 2,
+      "names": [
+        "",
+        "Rule created at 2025-02-20T06:52:34.085Z"
+      ]
+    },
+    {
+      "key": "pages_projects",
+      "scope": "account",
+      "count": 6,
+      "names": [
+        "blog",
+        "docs",
+        "me",
+        "music",
+        "nextflux",
+        "slides"
+      ]
+    },
+    {
+      "key": "d1_databases",
+      "scope": "account",
+      "count": 3,
+      "names": [
+        "docs",
+        "vscs",
+        "web-archive"
+      ]
+    },
+    {
+      "key": "kv_namespaces",
+      "scope": "account",
+      "count": 2,
+      "names": [
+        "gx9",
+        "jsonbin"
+      ]
+    },
+    {
+      "key": "r2_buckets",
+      "scope": "account",
+      "count": 8,
+      "names": [
+        "blog",
+        "docs",
+        "dokploy-backup",
+        "dokploy-volume-backup",
+        "luck-dotfiles-opentofu-state",
+        "rclone",
+        "scratches",
+        "vps"
+      ]
+    },
+    {
+      "key": "workers_scripts",
+      "scope": "account",
+      "count": 1,
+      "names": [
+        "dp"
+      ]
+    },
+    {
+      "key": "workers_subdomain",
+      "scope": "account",
+      "count": 1,
+      "names": [
+        "yyzw"
+      ]
+    }
+  ]
+}
