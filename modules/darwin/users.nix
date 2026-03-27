@@ -2,21 +2,23 @@
 # Contains user configuration that can be shared between multiple hosts
 {
   mylib,
-  myvars,
+  globals,
   lib,
   pkgs,
+  userMeta,
   ...
 }: let
   cacheSettings = mylib.nixCacheSettings;
+  username = userMeta.username;
 in {
   # Default user configuration (can be overridden by host-specific settings)
   users.users = {
     # Main user configuration with defaults
-    "${myvars.username}" = {
-      home = "/Users/${myvars.username}";
-      description = myvars.username;
+    "${username}" = {
+      home = "/Users/${username}";
+      description = username;
       shell = lib.mkDefault (pkgs.zsh + "/bin/zsh");
-      openssh.authorizedKeys.keys = myvars.SSHPubKeys;
+      openssh.authorizedKeys.keys = globals.auth.sshPublicKeys;
     };
 
     # Note: Additional users should be created manually on macOS or via host-specific configuration
@@ -30,7 +32,7 @@ in {
     # 允许当前用户读取受限配置并使用额外缓存
     trusted-users = [
       "root"
-      myvars.username
+      username
     ];
 
     # 系统级 cache：确保 deploy-rs / nix run 也能命中

@@ -1,3 +1,0 @@
-# Sources
-
-Helm Chart Sources.

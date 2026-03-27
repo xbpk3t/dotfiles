@@ -13,33 +13,7 @@
     };
 
     # Sudo configuration
-    sudo.extraConfig = ''
-      # Environment variables to preserve
-      Defaults env_keep += "EDITOR VISUAL PAGER"
-      Defaults env_keep += "HOME XDG_*"
-      Defaults env_keep += "SSH_AUTH_SOCK"
-      Defaults env_keep += "KUBECONFIG"
-      Defaults env_keep += "AWS_*"
-      Defaults env_keep += "GOOGLE_*"
-      Defaults env_keep += "DOCKER_*"
-      # Keep Nix-related paths/certs so sudoed nix stays usable
-      Defaults env_keep += "PATH NIX_PATH NIX_SSL_CERT_FILE"
-
-      # Security settings
-      Defaults !tty_tickets
-      Defaults !insults
-      Defaults log_output
-      Defaults loglinelen=0
-      Defaults passwd_tries=3
-      Defaults badpass_message="Password incorrect, please try again"
-      Defaults passprompt="[sudo] password for %p: "
-      # 依次是 Determinate Nix
-      Defaults secure_path="/nix/var/nix/profiles/default/bin:/etc/profiles/per-user/%p/bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
-
-      # what: 允许 admin 组免密 sudo。
-      # why: deploy-rs 远程激活为非交互场景，没有 TTY 无法输入密码，会导致部署失败。
-      %admin ALL=(ALL) NOPASSWD: ALL
-    '';
+    sudo.extraConfig = builtins.readFile ./sudo.conf;
 
     # Certificate management
     pki = {
@@ -64,7 +38,7 @@
   # Security-related environment variables
   # TODO: 看看是否真的需要，如果不需要就删除掉
   # modules/darwin/sec.nix:63-74 把 GPG_TTY="$(tty)", GNUPGHOME="$HOME/.gnupg" 等写成字面量，launchd 设置环境不会做变量或命令展开，实际值会是包含 $ 的字符串，gpg/ssh/sops 路径全失效；改成绝对路径或在交互 shell 中 export GPG_TTY=$(tty)。
-  # modules/darwin/sec.nix 若仍需全局环境变量，最好用绝对路径（如 /Users/${myvars.username}/.gnupg）并在 shell profile 中再动态调整 GPG_TTY。
+  # modules/darwin/sec.nix 若仍需系统级环境变量，最好用绝对路径（如 /Users/<username>/.gnupg）并在 shell profile 中再动态调整 GPG_TTY。
   #  environment.variables = {
   #    # GPG settings
   #    GPG_TTY = "$(tty)";

@@ -1,10 +1,10 @@
 {
-  myvars,
   lib,
+  timeMeta,
   ...
 }: {
   # Set your time zone.
-  time.timeZone = lib.mkDefault (myvars.timeZone or "Asia/Shanghai");
+  time.timeZone = lib.mkDefault timeMeta.timeZone;
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";

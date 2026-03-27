@@ -1,0 +1,109 @@
+---
+# 目前zed相较goland的一些缺失功能
+
+# https://www.reddit.com/r/ZedEditor/comments/1mvqlph/zed_is_awesome_but_it_lacks_some_crucial/
+# 这篇文章的吐槽挺到位的
+# - 配置体验不一致：有的设置用 true/false，有的用 "enabled"/"disabled"，还有 "on"/"off"，即便只是二选一也不统一，观感和可维护性都很差。
+#
+# - Ctrl+Click 跳转/引用的交互很别扭（最大痛点）：
+#
+# - 在 VSCode 里常见的是“peek 小窗”或直接跳转；但在 Zed 里 Ctrl+Click 会先开一个“搜索式的新 tab”展示引用/定义，然后还得 Alt+Enter 再跳转，楼主觉得这是多余的中间步骤，极其影响效率。
+#
+# - 补全不带括号：方法名补全后只插入方法名，不自动补 ()（楼主认为 VSCode 往往能调）。
+#
+# - 改键删除的行为反直觉：删掉 keybinding 时不是移除条目/按键，而是把 command 变成 <null>，等于“保留壳子”，让人困惑。
+#
+# - 标签页管理能力弱：找不到“多行 tab wrap”或“显示当前打开 tab 数量”等，导致可见 tab 很少，需要疯狂横向滚动或完全依赖
+
+- feat: git side-by-side viewer
+  url:
+    - https://github.com/zed-industries/zed/discussions/26770
+  isFix: true
+  fixVer: # 目前默认两栏模式
+
+- feat: TODO highlight
+  url:
+    - https://github.com/zed-industries/zed/issues/11895
+    - https://github.com/zed-industries/zed/pull/9082
+  score: 5
+  isFix: true
+  des: zed默认不支持，但是可以通过插件实现
+
+- feat: 通过 CMD+` 切换项目
+  des: 怎么通过 CMD+` 快捷键，直接在多个project之间切换？我在配置 use_system_window_tabs 之前，本身通过 CMD+` 这种mac本身提供的窗口切换来切换项目是可行的，但是在添加该配置之后，因为本身没有多窗口了，所以怎么需要配置哪个快捷键来保证类似操作？
+  isFix: true # 正如上面所说，不支持CMD+`切换。但是本身就有 projects: open recent 这个操作（以及相应的 Cmd+Alt+O）
+
+- feat: 类似CMD+E切换最近修改文件
+  isFix: true
+  des: 直接用 Ctrl+Tab 切换一样的。但是存在一些bug（比如最近文件很混乱）
+
+- feat: 内存开销并不低
+  isFix: true
+  des: LSP没有lazy load机制，默认LSP很多都是node实现的，单个进程都在80MB，开10个就是800MB内存开销
+
+- feat: theme
+  des: 没有好theme，我只喜欢Monokai，但是挑了不少theme都很丑（完全不如goland内置的Color Scheme）。很多人都认为zed本身有色差（很糊，相较于goland，很多字都看不清，费眼睛），我也这么认为。
+  isFix: true
+  solution: 自己手搓theme
+
+- feat: Outline for mardown indent
+  isFix: true
+  url:
+    - https://github.com/zed-industries/zed/pull/45643
+  fixVer: v0.220.0
+
+---
+- feat: git commit history
+  foundDate: 2026-01-18
+  isFix: false
+  score: 4
+  des: 用 tig, serie 可以替代实现该需求
+
+- feat: Local History
+  isFix: false
+  score: 5
+  des: 确实是非常有用的功能，但是zed不支持，也没有第三方工具可以替代解决该问题
+  url:
+    - https://github.com/zed-industries/zed/discussions/24004
+
+# 用 nb cli + zed task 替代实现了
+- feat: scratch
+  isFix: false
+  des: "没有scratch（当然可以通过 CMD+shift+P 里使用 workspace: new file 可以打开一个类似goland里Buffer的文件，但是1、不支持文件类型。2、不支持通过shortcut直接打开scratches列表）"
+  url:
+    - https://github.com/zed-industries/zed/discussions/32441
+
+# 用 webapp 替代了（这个feat也没必要强求）
+- feat: DB插件
+  isFix: false
+
+# https://github.com/alexandretrotel/todo-tree
+# https://github.com/alexandretrotel/zed-todo-tree
+# [Add todo-tree extension using Zed tasks by alexandretrotel · Pull Request #4401 · zed-industries/extensions](https://github.com/zed-industries/extensions/pull/4401)
+#
+# https://github.com/zed-industries/extensions/issues/523
+# https://github.com/Gruntfuggly/todo-tree
+- feat: TODO-Tree
+  isFix: false
+  des: 一个高频需求，社区也有很多实现。目前的问题在于 交付形态。zed官方希望最终效果是类似 goland/vscode 的那种在Pannel展示的 TODO Tree，但是 目前zed官方不打算实现这个需求，而extension开发也没有提供UI支持，这样社区也没办法做这个需求。所以可能暂时无法实现该需求。
+
+# [2026-02-03]
+# zed不支持 Local history，真的太蠢了。最近一周连续两次误操作导致本地未commit代码被冲掉（一次是将近两天的修改，这次是最近几天修改的taskfile，改了三四天了，想要一次commit上去），我知道都TM怪我没stash，怪我蠢。但是如果有Local history是不是能好点？用回goland了。
+
+- feat: Remote SSH Auto Reconnect
+  isFix: false
+  des: 目前zed不支持 Auto Reconnect，必须要手动重连
+  url:
+    - https://github.com/zed-industries/zed/issues/39206
+
+# https://zed.dev/docs/languages 文档里已经列出了所有langs的LSP
+- feat: LSP list
+  des: zed 是否会提供类似 hx --health 这种查看所有本身 xxx  LSP 的命令？
+  isFix: false
+  score: 3
+
+- feat: git commit panel 可以点选并展示单个文件
+  des: 而非全部diff统一都全部列在Editor
+  isFix: false
+  score: 5
+  # [Single-File Git Diff from Git Panel · zed-industries/zed · Discussion #38420](https://github.com/zed-industries/zed/discussions/38420)

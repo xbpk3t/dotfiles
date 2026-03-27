@@ -1,4 +1,4 @@
-{myvars, ...}: let
+{userMeta, ...}: let
   hostName = "nixos-avf";
 in {
   # why this? 把Android手机作为个人项目的开发机remote server使用
@@ -12,7 +12,7 @@ in {
   avf = {
     # 关键：Android Terminal 首次进入时会直接使用这个用户登录。
     # 这里复用仓库里的主用户名，避免再引入一套单独命名。
-    defaultUser = myvars.username;
+    defaultUser = userMeta.username;
 
     # 说明：先保持 graphics 打开，符合 upstream 默认行为。
     # 若后续遇到特定设备兼容性问题，再按机型关闭。

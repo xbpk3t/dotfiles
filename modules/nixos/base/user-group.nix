@@ -1,8 +1,11 @@
 {
-  myvars,
+  globals,
   pkgs,
+  userMeta,
   ...
-}: {
+}: let
+  username = userMeta.username;
+in {
   # Don't allow mutation of users outside the config.
   users.mutableUsers = false;
 
@@ -22,7 +25,7 @@
   # };
 
   users.groups = {
-    "${myvars.username}" = {};
+    "${username}" = {};
     dialout = {};
     # for openocd (embedded system development)
     plugdev = {};
@@ -30,26 +33,26 @@
 
   # root's ssh key are mainly used for remote deployment
   users.users.root = {
-    inherit (myvars) initialHashedPassword;
+    inherit (globals.auth) initialHashedPassword;
     # 设置 root shell 为 zsh
     shell = pkgs.zsh;
-    openssh.authorizedKeys.keys = myvars.SSHPubKeys;
+    openssh.authorizedKeys.keys = globals.auth.sshPublicKeys;
   };
 
-  users.users."${myvars.username}" = {
+  users.users."${username}" = {
     # we have to use initialHashedPassword here when using tmpfs for /
-    inherit (myvars) initialHashedPassword;
-    home = "/home/${myvars.username}";
+    inherit (globals.auth) initialHashedPassword;
+    home = "/home/${username}";
     isNormalUser = true;
     # 显式设置用户 shell 为 zsh
     shell = pkgs.zsh;
 
     # !!! 需要添加该配置，否则无法使用 ssh luck@host 登录目标host
     openssh.authorizedKeys.keys =
-      myvars.SSHPubKeys;
+      globals.auth.sshPublicKeys;
 
     extraGroups = [
-      myvars.username
+      username
       "users"
       "wheel"
       "networkmanager" # for nmtui / nm-connection-editor

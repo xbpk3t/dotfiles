@@ -1,4 +1,10 @@
-{myvars, ...}: {
+{
+  userMeta,
+  editorMeta,
+  ...
+}: let
+  mail = userMeta.mail;
+in {
   programs.git = {
     enable = true;
     lfs.enable = true;
@@ -27,13 +33,13 @@
       };
       user = {
         name = "xbpk3t";
-        email = myvars.mail;
+        email = mail;
       };
 
       core = {
         autocrlf = "input";
         filemode = false;
-        editor = "nvim";
+        editor = editorMeta.command;
       };
       init = {
         defaultBranch = "main";

@@ -1,8 +1,10 @@
 {
   config,
-  myvars,
+  userMeta,
   ...
-}: {
+}: let
+  username = userMeta.username;
+in {
   # https://mynixos.com/nixpkgs/options/services.restic
   # 仅在 NixOS 端定时备份 docs-images 到 Cloudflare R2
 
@@ -18,7 +20,7 @@
     passwordFile = config.sops.secrets.pwgenSk.path;
 
     # 备份路径（只关心 docs-images）
-    paths = ["/home/${myvars.username}/Desktop/docs-images"];
+    paths = ["/home/${username}/Desktop/docs-images"];
 
     # 排除规则：如需额外忽略，可在此追加
     exclude = ["**/.cache" "*.tmp" "*.swp" "*.swx"];
@@ -37,16 +39,7 @@
     # 通过 ExecStartPre 生成临时 env 文件，把 R2 凭据喂给 restic
     environmentFile = "/run/restic/docs-images.env";
 
-    backupPrepareCommand = ''
-            set -euo pipefail
-            install -d -m 0700 -o root -g root /run/restic
-            cat > /run/restic/docs-images.env <<EOF
-      AWS_ACCESS_KEY_ID=$(cat ${config.sops.secrets.rcloneR2AccessKeyId.path})
-      AWS_SECRET_ACCESS_KEY=$(cat ${config.sops.secrets.rcloneR2SecretAccessKey.path})
-      AWS_DEFAULT_REGION=auto
-      EOF
-            chmod 0400 /run/restic/docs-images.env
-    '';
+    backupPrepareCommand = builtins.readFile ./restic-docs-images-prepare.sh;
 
     backupCleanupCommand = ''
       rm -f /run/restic/docs-images.env

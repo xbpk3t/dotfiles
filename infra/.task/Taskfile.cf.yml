@@ -1,0 +1,52 @@
+---
+version: "3"
+
+
+tasks:
+  inventory:
+    desc: "拉取 Cloudflare live inventory"
+    summary: |
+      task tf:inventory
+      task tf:cf:inventory DATE=2026-03-27
+    dir: "{{.USER_WORKING_DIR}}/infra"
+    preconditions:
+      - sh: test -n "${CLOUDFLARE_API_TOKEN:-}"
+        msg: "必须先提供 CLOUDFLARE_API_TOKEN"
+      - sh: test -n "${CF_ACCOUNT:-}"
+        msg: "必须先提供 CF_ACCOUNT"
+      - sh: test -n "${CF_ZONE:-}"
+        msg: "必须先提供 CF_ZONE"
+    env:
+      CF_API_TOKEN: "{{.CLOUDFLARE_API_TOKEN}}"
+      CF_ACCOUNT_ID: "{{.CF_ACCOUNT}}"
+      CF_ZONE_ID: "{{.CF_ZONE}}"
+    cmds:
+      - scripts/cloudflare-inventory.sh {{.DATE}}
+
+  list:
+    desc: "列出 Cloudflare 相关 stacks"
+    summary: |
+      task tf:cf:list
+    dir: "{{.USER_WORKING_DIR}}"
+    cmds:
+      - terramate list --tags "cloudflare"
+
+  plan:
+    desc: "批量预览 Cloudflare stacks 的计划变更"
+    summary: |
+      task tf:cf:plan
+    dir: "{{.USER_WORKING_DIR}}"
+    preconditions:
+      - sh: test -n "${CF_R2_AK:-}"
+        msg: "plan 需要 Cloudflare R2 backend 凭据，请提供 CF_R2_AK"
+      - sh: test -n "${CF_R2_SK:-}"
+        msg: "plan 需要 Cloudflare R2 backend 凭据，请提供 CF_R2_SK"
+      - sh: test -n "${CLOUDFLARE_API_TOKEN:-}"
+        msg: "plan 需要 Cloudflare API token，请提供 CLOUDFLARE_API_TOKEN"
+    env:
+      AWS_ACCESS_KEY_ID: "{{.CF_R2_AK}}"
+      AWS_SECRET_ACCESS_KEY: "{{.CF_R2_SK}}"
+      CLOUDFLARE_API_TOKEN: "{{.CLOUDFLARE_API_TOKEN}}"
+    cmds:
+      - terramate run --tags "cloudflare" -- tofu init -reconfigure -input=false
+      - terramate run --tags "cloudflare" -- tofu plan -input=false

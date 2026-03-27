@@ -7,6 +7,8 @@ stdenvNoCC.mkDerivation (_finalAttrs: rec {
   pname = "apple-pingfang";
   version = "2024-07-02";
 
+  # Generated from:
+  #   nurl https://github.com/ZWolken/PingFang/archive/92cad0e8cfce61ddae4a220739a250d95f22fb78.tar.gz
   src = fetchFromGitHub {
     owner = "ZWolken";
     repo = "PingFang";

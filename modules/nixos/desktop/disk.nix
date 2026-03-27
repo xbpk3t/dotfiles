@@ -1,4 +1,6 @@
-{myvars, ...}: {
+{userMeta, ...}: let
+  mail = userMeta.mail;
+in {
   # 启动菜单等待时间
   # boot.loader.timeout = lib.mkForce 10;
 
@@ -19,7 +21,7 @@
       autodetect = true;
       notifications.mail = {
         enable = true;
-        recipient = "${myvars.mail}";
+        recipient = mail;
       };
     };
   };

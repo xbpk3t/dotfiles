@@ -1,4 +1,8 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  editorMeta,
+  ...
+}: {
   # https://mynixos.com/home-manager/options/programs.nushell
 
   programs = {
@@ -8,8 +12,8 @@
       # 环境变量配置
       environmentVariables = {
         # 编辑器配置
-        EDITOR = "nvim";
-        VISUAL = "nvim";
+        EDITOR = editorMeta.command;
+        VISUAL = editorMeta.command;
       };
 
       # Nushell 核心设置

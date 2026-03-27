@@ -1,10 +1,10 @@
 {
-  myvars,
+  globals,
   lib,
   ...
 }: let
   hostName = "nixos-homelab";
-  inherit (myvars.networking) nameservers;
+  inherit (globals.networking) nameservers;
 in {
   imports = [
     ./hardware.nix
@@ -72,8 +72,13 @@ in {
       tailscale.enable = true;
     };
 
+    systemd.manager.watchdog = {
+      # homelab 机器也偏无人值守，启用 systemd Manager watchdog 作为死机自愈兜底。
+      # 若将来需要按硬件单独调 Runtime/Reboot/KExec 超时，直接在该 host 调整参数即可。
+      enable = true;
+    };
+
     homelab = {
-      dokploy.enable = false;
       samba = {
         enable = true;
         shareName = "luck";

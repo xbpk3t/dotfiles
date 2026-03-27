@@ -2,7 +2,7 @@
   config,
   lib,
   mylib,
-  myvars,
+  userMeta,
   ...
 }:
 with lib; let
@@ -16,6 +16,7 @@ with lib; let
   hy2Enabled = singbox ? hy2;
   hy2Domain = singbox.hy2.domain;
   hy2Port = singbox.hy2.port or singbox.port or port;
+  mail = userMeta.mail;
 in {
   options.services.singbox-server = {
     enable = mkEnableOption "sing-box server (Reality)";
@@ -124,7 +125,7 @@ in {
     (mkIf hy2Enabled {
       security.acme.acceptTerms = mkDefault true;
       security.acme.certs."${hy2Domain}" = {
-        email = myvars.mail;
+        email = mail;
         dnsProvider = "cloudflare";
         environmentFile = config.sops.secrets.acme_cloudflare_env.path;
         group = "sing-box";

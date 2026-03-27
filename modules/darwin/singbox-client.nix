@@ -2,16 +2,16 @@
   config,
   pkgs,
   lib,
-  myvars,
   mylib,
+  userMeta,
   ...
 }:
 with lib; let
   cfg = config.modules.networking.singbox;
+  username = userMeta.username;
   client = import ../../lib/singbox/client-config.nix {
     inherit
       config
-      myvars
       mylib
       lib
       pkgs
@@ -75,10 +75,10 @@ in {
         };
         # Why：把 runtime artifact 固定到 /var/lib/sing-box，避免落到 /tmp 后被系统清理。
         WorkingDirectory = "/var/lib/sing-box";
-        StandardOutPath = "/Users/${myvars.username}/Library/Logs/sing-box.log";
-        StandardErrorPath = "/Users/${myvars.username}/Library/Logs/sing-box.log";
+        StandardOutPath = "/Users/${username}/Library/Logs/sing-box.log";
+        StandardErrorPath = "/Users/${username}/Library/Logs/sing-box.log";
         EnvironmentVariables = {
-          PATH = "/etc/profiles/per-user/${myvars.username}/bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
+          PATH = "/etc/profiles/per-user/${username}/bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
           # 保留 info 方便继续观察；若后续确认日志放大 CPU，再单独下调为 warn。
           SING_BOX_LOG_LEVEL = "info";
         };

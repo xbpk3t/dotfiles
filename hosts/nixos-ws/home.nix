@@ -18,8 +18,4 @@
       hk-hdy.enable = true;
     };
   };
-
-  modules.tui = {
-    # nvf.enable = true;
-  };
 }

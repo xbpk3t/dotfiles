@@ -2,7 +2,7 @@
   inputs,
   lib,
   mylib,
-  myvars,
+  mkSpecialArgs,
   ...
 } @ args: let
   name = "nixos-homelab";
@@ -10,31 +10,9 @@
   inventory = mylib.inventory."nixos-homelab";
   nodes = inventory;
 
-  # 与 nixos-ws 共用 overlay；禁用 NVIDIA 但保留 unfree 支持
-  genSpecialArgs = system: let
-    customPkgsOverlay = import (mylib.relativeToRoot "pkgs/overlay.nix");
-    pkgs = import inputs.nixpkgs {
-      inherit system;
-      config.allowUnfree = true;
-      overlays = [customPkgsOverlay];
-    };
-  in {
-    inherit
-      inputs
-      mylib
-      myvars
-      pkgs
-      ;
-    pkgs-unstable = import inputs.nixpkgs-unstable or inputs.nixpkgs {
-      inherit system;
-      config.allowUnfree = true;
-      overlays = [customPkgsOverlay];
-    };
-  };
-
   modules = {
     system = "x86_64-linux";
-    inherit lib myvars;
+    inherit lib;
     nixos-modules =
       [
         inputs.sops-nix.nixosModules.sops
@@ -82,13 +60,13 @@
       // {
         nixos-modules = modules.nixos-modules ++ [nodeModule];
       };
-    systemArgs = modulesWithNode // args;
-    nixosConfig = mylib.nixosSystem (
-      systemArgs
+    systemArgs =
+      modulesWithNode
+      // args
       // {
-        inherit genSpecialArgs;
-      }
-    );
+        specialArgs = mkSpecialArgs modules.system node;
+      };
+    nixosConfig = mylib.nixosSystem systemArgs;
     deployNode = mylib.inventory.deployRsNode {
       inherit name node;
       nixosConfiguration = nixosConfig;
