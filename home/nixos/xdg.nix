@@ -5,6 +5,7 @@
 {
   config,
   pkgs,
+  editorMeta,
   ...
 }: {
   home.packages = with pkgs; [
@@ -37,8 +38,7 @@
           "firefox.desktop"
         ];
         editor = [
-          "nvim.desktop"
-          "Helix.desktop"
+          editorMeta.desktopEntry
           "code.desktop"
           "code-insiders.desktop"
         ];
