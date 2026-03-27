@@ -12,6 +12,9 @@
 
   # use path relative to the root of the project
   relativeToRoot = lib.path.append ../.;
+  facter = import ./facter.nix {
+    inherit relativeToRoot;
+  };
   # Custom utilities
   scanPaths = path:
     builtins.map (f: (path + "/${f}")) (
@@ -36,6 +39,7 @@ in {
     langs
     vpsSysctl
     nixCacheSettings
+    facter
     scanPaths
     relativeToRoot
     ;

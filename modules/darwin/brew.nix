@@ -1,8 +1,10 @@
 {
   inputs,
-  myvars,
+  userMeta,
   ...
-}: {
+}: let
+  username = userMeta.username;
+in {
   # 我们常说（对Nix来说） Docker是 escape hatch，其实在Nix里，brew也是 escape hatch
   # 我们可以把
 
@@ -15,7 +17,7 @@
     # Apple Silicon 常需 Rosetta 装 x86 cask
     # enableRosetta = pkgs.stdenv.isAarch64;
     enableRosetta = false;
-    user = myvars.username;
+    user = username;
     autoMigrate = true;
   };
 

@@ -68,7 +68,6 @@ in {
         # 注意这里特意留空，因为我目前主力仍然使用 team的OAuth，这里如果设置provider后，就无法切换到team了
         model_provider = "";
         model_providers = {
-
           # https://linux.do/t/topic/1806073
           ice = {
             name = "ice";

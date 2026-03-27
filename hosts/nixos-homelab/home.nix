@@ -4,8 +4,8 @@
   };
 
   modules.AI = {
-    codex.enable = true;
-    skills.enable = true;
+    codex.enable = false;
+    skills.enable = false;
   };
 
   modules.ssh = {

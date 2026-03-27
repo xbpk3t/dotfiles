@@ -1,11 +1,12 @@
 {
   config,
-  myvars,
   pkgs,
   lib,
+  userMeta,
   ...
 }: let
   isSystemConfig = config ? system;
+  username = userMeta.username;
   # 平台相关配置
   platform = {
     userGroup =
@@ -29,7 +30,7 @@
       mode = "0400";
     }
     // lib.optionalAttrs isSystemConfig {
-      owner = myvars.username;
+      owner = username;
       group = platform.userGroup;
     };
 
@@ -53,8 +54,8 @@ in {
     # failed to create reader for decrypting sops data key with age: no identity matched any of the recipients. Did not find keys in locations 'SOPS_AGE_SSH_PRIVATE_KEY_FILE','/Users/luck/.ssh/id_rsa', 'SOPS_AGE_KEY','SOPS_AGE_KEY_FILE', and 'SOPS_AGE_KEY_CMD'.
     age.keyFile =
       if pkgs.stdenv.isDarwin
-      then "${platform.homePath}/${myvars.username}/Library/Application Support/sops/age/keys.txt"
-      else "${platform.homePath}/${myvars.username}/.config/sops/age/keys.txt";
+      then "${platform.homePath}/${username}/Library/Application Support/sops/age/keys.txt"
+      else "${platform.homePath}/${username}/.config/sops/age/keys.txt";
 
     age.sshKeyPaths = []; # Disable SSH key import
     gnupg.home = null; # Disable GPG key import
@@ -67,17 +68,23 @@ in {
     # 注意这里 lib.mkForce，因为如果不mkForce 仍然会按照默认 空字符串 赋值，导致该配置无效
     #
     # 让 sops-install-secrets 的 LaunchAgent 拿到可用 PATH（需要 getconf）
-    environment.PATH = lib.mkForce "/usr/bin:/bin:/usr/sbin:/sbin:/run/current-system/sw/bin:/etc/profiles/per-user/${myvars.username}/bin";
+    environment.PATH = lib.mkForce "/usr/bin:/bin:/usr/sbin:/sbin:/run/current-system/sw/bin:/etc/profiles/per-user/${username}/bin";
 
     secrets = {
       # Me
       me_pwgen = mkUserSecret "me/pwgen";
 
       # Cloudflare
-      # cf_account = mkUserSecret "cloudflare/account_id";
-      # cfTokenDNS = mkUserSecret "cloudflare/token/DNS";
-      cf_r2_AK = mkUserSecret "cloudflare/r2/ak";
-      cf_r2_SK = mkUserSecret "cloudflare/r2/sk";
+      cf_account = mkUserSecret "cf/account_id";
+      cf_zone = mkUserSecret "cf/zone_id";
+
+      cf_r2_AK = mkUserSecret "cf/r2/ak";
+      cf_r2_SK = mkUserSecret "cf/r2/sk";
+
+      cf_token_read_all = mkUserSecret "cf/token/read_all";
+      cf_token_DNS = mkUserSecret "cf/token/DNS";
+
+      cf_workers_cfp = mkUserSecret "cf/workers/cfp";
 
       # SSH
       ssh_github = mkUserSecret "ssh/github";

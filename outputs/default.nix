@@ -1,208 +1,202 @@
 {
-  self,
-  nixpkgs,
+  config,
+  inputs,
+  lib,
   ...
-} @ inputs: let
-  inherit (inputs.nixpkgs) lib;
+}: let
+  # 当前仓库明确支持的 target systems。
+  # why: flake-parts 的 perSystem 会基于这里展开；这里是顶层支持矩阵的单一入口。
+  supportedSystems = [
+    "aarch64-darwin"
+    "aarch64-linux"
+    "x86_64-linux"
+  ];
+
+  # 仓库内自定义 lib，供 hosts/modules/home 共享。
   mylib = import ../lib {inherit lib;};
-  myvars = import ../vars {inherit lib;};
+  globals = config.globals;
   customPkgsOverlay = import ../pkgs/overlay.nix;
 
-  # Add my custom lib, vars, nixpkgs instance, and all the inputs to specialArgs,
-  # so that I can use them in all my nixos/home-manager/darwin modules.
-  genSpecialArgs = system: let
-    pkgs = import inputs.nixpkgs {
+  # Stable pkgs：作为系统构建与 Home Manager 的主 pkgs 实例。
+  # 注意：
+  # - overlays 统一在这里注入，避免各 host 重复写。
+  # - allowUnfree / allowBroken 等策略也统一收口在这里。
+  mkPkgs = system:
+    import inputs.nixpkgs {
       inherit system;
-      # to install chrome, you need to enable unfree packages
       config.allowUnfree = true;
-      # 接受 NVIDIA 驱动license，否则无法build
       config.nvidia.acceptLicense = true;
-      # 允许安装 broken 包（如 zig）
       config.allowBroken = true;
-      # 全局构建行为（原先在 nixpkgs.config 模块层声明）。
-      # NOTE: 在 HM useGlobalPkgs 场景下，把这些配置收敛到 pkgs 构造阶段，
-      # 可避免 "nixpkgs.config/overlays will be ignored" 的评估警告。
       config.enableParallelBuilding = true;
       config.buildManPages = false;
       config.buildDocs = false;
-      overlays = [
-        customPkgsOverlay
-      ];
+      overlays = [customPkgsOverlay];
     };
-  in {
-    inherit
-      inputs
-      mylib
-      myvars
-      pkgs
-      ;
 
-    # use unstable branch for some packages to get the latest updates
-    pkgs-unstable = import inputs.nixpkgs-unstable or inputs.nixpkgs {
-      inherit system; # refer the `system` parameter form outer scope recursively
-      # To use chrome, we need to allow the installation of non-free software
+  # Unstable pkgs：只通过 specialArgs 暴露给需要显式使用的模块。
+  # why: 主系统仍以 stable pkgs 语义为准，避免“默认全仓库都漂到 unstable”。
+  mkPkgsUnstable = system:
+    import (inputs.nixpkgs-unstable or inputs.nixpkgs) {
+      inherit system;
       config.allowUnfree = true;
       config.allowBroken = true;
       config.enableParallelBuilding = true;
       config.buildManPages = false;
       config.buildDocs = false;
-      overlays = [
-        customPkgsOverlay
-      ];
+      overlays = [customPkgsOverlay];
     };
+
+  # 共享给 nixos/darwin/home modules 的基础 specialArgs。
+  # 注意：这里同时透传 stable 与 unstable 两套 pkgs，模块侧按需取用。
+  genSpecialArgs = system: {
+    inherit inputs mylib globals;
+    pkgs = mkPkgs system;
+    pkgs-unstable = mkPkgsUnstable system;
   };
 
-  # This is the args for all the haumea modules in this folder.
-  args = inputs: {
+  # host-aware specialArgs：在基础 specialArgs 之上补齐当前主机的身份信息。
+  # why: user/time/networking 等主机差异数据不应散落在各模块里手写。
+  mkSpecialArgs = system: hostMeta:
+    (genSpecialArgs system)
+    // {
+      inherit hostMeta;
+      userMeta = hostMeta.user;
+      timeMeta = hostMeta.time;
+      # Why: outputs/default.nix 只负责把 host metadata 分发给模块，
+      # 不再在 wiring 层硬编码 editor 偏好值；editor 的真实来源固定为 hostMeta.editor。
+      editorMeta = hostMeta.editor;
+    };
+
+  # 传给 outputs/<system>/src/*.nix 的公共参数。
+  baseOutputArgs = {
     inherit
       inputs
       lib
       mylib
-      myvars
+      globals
       genSpecialArgs
+      mkSpecialArgs
       ;
   };
 
-  # modules for each supported system
-  darwinSystems = {
-    aarch64-darwin = import ./aarch64-darwin (args inputs
-      // {
-        system = "aarch64-darwin";
-        inherit self;
-      });
+  # 加载某一架构目录下的 role outputs，并注入公共参数。
+  loadRoleOutputs = dir: extraArgs: let
+    outputFiles =
+      builtins.map (name: dir + "/${name}")
+      (builtins.filter
+        (name:
+          name
+          != "default.nix"
+          && lib.strings.hasSuffix ".nix" name)
+        (builtins.attrNames (builtins.readDir dir)));
+  in
+    map (path: import path (baseOutputArgs // extraArgs)) outputFiles;
+
+  # 将同一架构下多个 output 文件合并为一份标准输出结构。
+  mergeRoleOutputList = outputs: {
+    apps = lib.attrsets.mergeAttrsList (map (it: it.apps or {}) outputs);
+    darwinConfigurations = lib.attrsets.mergeAttrsList (
+      map (it: it.darwinConfigurations or {}) outputs
+    );
+    deploy = {
+      nodes = lib.attrsets.mergeAttrsList (map (it: it.deploy.nodes or {}) outputs);
+    };
+    nixosConfigurations = lib.attrsets.mergeAttrsList (
+      map (it: it.nixosConfigurations or {}) outputs
+    );
+    packages = lib.attrsets.mergeAttrsList (map (it: it.packages or {}) outputs);
   };
-  linuxSystems = {
-    aarch64-linux = import ./aarch64-linux (args inputs
-      // {
-        system = "aarch64-linux";
-        inherit self;
-      });
-    x86_64-linux = import ./x86_64-linux (args inputs
-      // {
-        system = "x86_64-linux";
-        inherit self;
-      });
+
+  # 三套架构分别收敛成统一输出。
+  architectureOutputs = {
+    aarch64-darwin = mergeRoleOutputList (loadRoleOutputs ./aarch64-darwin/src {
+      system = "aarch64-darwin";
+    });
+    aarch64-linux = mergeRoleOutputList (loadRoleOutputs ./aarch64-linux/src {
+      system = "aarch64-linux";
+    });
+    x86_64-linux = mergeRoleOutputList (loadRoleOutputs ./x86_64-linux/src {
+      system = "x86_64-linux";
+    });
   };
-  allSystems = darwinSystems // linuxSystems;
-  allSystemNames = builtins.attrNames allSystems;
-  darwinSystemValues = builtins.attrValues darwinSystems;
-  linuxSystemValues = builtins.attrValues linuxSystems;
-  allSystemValues = darwinSystemValues ++ linuxSystemValues;
-  # NOTE: deploy-rs 的 checks 在“当前机器”执行。
-  # Why：在 Linux 上去 check/build darwin profile 会报
-  #      “Required system: aarch64-darwin”。因此 checks 必须限制在本机系统。
-  # What：deploy 仍暴露全平台节点用于跨平台部署，但 checks 仅覆盖当前系统。
+
+  architectureOutputValues = builtins.attrValues architectureOutputs;
   currentSystem = builtins.currentSystem or null;
+
+  # deploy-rs 的 deployChecks 只对“当前求值系统”运行。
+  # why: deploy-rs 的检查实现按 system 分发，跨系统强行求值没有收益，还会引入噪音。
   currentSystemValues =
-    if currentSystem != null && builtins.hasAttr currentSystem allSystems
-    then [allSystems.${currentSystem}]
+    if currentSystem != null && builtins.hasAttr currentSystem architectureOutputs
+    then [architectureOutputs.${currentSystem}]
     else [];
-  # Why：deployChecks 会构建可激活的 profile，必须是本机可构建的系统。
-  # What：为 checks 构造一个“仅当前系统节点”的 deploy 视图。
+
+  # 仅收敛当前系统的 deploy nodes，供 deployChecks 使用。
   deployCurrent = {
     nodes = lib.attrsets.mergeAttrsList (map (it: it.deploy.nodes or {}) currentSystemValues);
   };
 
-  # Helper function to generate a set of attributes for each system
-  forAllSystems = func: (nixpkgs.lib.genAttrs allSystemNames func);
-
-  # Default system used for running Namaka snapshot tests.
-  namakaTestSystem = "x86_64-linux";
-  namakaTestSpecialArgs = genSpecialArgs namakaTestSystem;
+  # flake 顶层需要汇总后的 darwin/nixos/deploy outputs。
+  mergedNixosConfigurations = lib.attrsets.mergeAttrsList (
+    map (it: it.nixosConfigurations or {}) architectureOutputValues
+  );
+  mergedDarwinConfigurations = lib.attrsets.mergeAttrsList (
+    map (it: it.darwinConfigurations or {}) architectureOutputValues
+  );
+  mergedDeployNodes = lib.attrsets.mergeAttrsList (
+    map (it: it.deploy.nodes or {}) architectureOutputValues
+  );
 in {
-  # Add attribute sets into outputs, for debugging
-  debugAttrs = {
-    inherit
-      darwinSystems
-      linuxSystems
-      allSystems
-      allSystemNames
-      ;
+  systems = supportedSystems;
+
+  perSystem = {system, ...}: let
+    specialArgs = genSpecialArgs system;
+    pkgs = specialArgs.pkgs;
+    architectureOutput = architectureOutputs.${system};
+
+    # deploy-rs 官方推荐把 deployChecks 接到 flake checks。
+    # 注意：这里只在当前 system 上启用，避免无意义的跨系统检查。
+    deployChecks =
+      if
+        currentSystem
+        != null
+        && system == currentSystem
+        && builtins.hasAttr currentSystem inputs."deploy-rs".lib
+      then inputs."deploy-rs".lib.${currentSystem}.deployChecks deployCurrent
+      else {};
+  in {
+    # flake apps:
+    # - deploy-rs: 统一部署入口
+    # - nixos-facter: 直接暴露 fact collection CLI，便于 `nix run .#nixos-facter`
+    apps =
+      {
+        deploy-rs = inputs."deploy-rs".apps.${system}.deploy-rs;
+        default = inputs."deploy-rs".apps.${system}.default;
+      }
+      // architectureOutput.apps
+      // lib.optionalAttrs (
+        pkgs.stdenv.hostPlatform.isLinux
+        && builtins.hasAttr "packages" inputs.nixos-facter
+        && builtins.hasAttr system inputs.nixos-facter.packages
+        && builtins.hasAttr "default" inputs.nixos-facter.packages.${system}
+      ) {
+        nixos-facter = {
+          type = "app";
+          program = "${inputs.nixos-facter.packages.${system}.default}/bin/nixos-facter";
+        };
+      };
+
+    checks = deployChecks;
+
+    # `nix fmt` / flake formatter 的统一入口。
+    formatter = pkgs.nixfmt;
+    packages = architectureOutput.packages;
   };
 
-  # NixOS Hosts
-  nixosConfigurations = lib.attrsets.mergeAttrsList (
-    map (it: it.nixosConfigurations or {}) linuxSystemValues
-  );
-
-  # macOS Hosts
-  darwinConfigurations = lib.attrsets.mergeAttrsList (
-    map (it: it.darwinConfigurations or {}) darwinSystemValues
-  );
-
-  # Packages
-  packages = forAllSystems (system: allSystems.${system}.packages or {});
-
-  # Apps
-  apps = forAllSystems (system: {
-    # Why：把 deploy-rs CLI 挂到当前仓库 flake 输出上，避免 task 直接
-    #      `nix run github:serokell/deploy-rs` 时绕开本仓库的 flake.lock。
-    # What：透传已 pin 的 deploy-rs app；后续统一用 `nix run .#deploy-rs`。
-    deploy-rs = inputs."deploy-rs".apps.${system}.deploy-rs;
-    # Why：保留 default app 作为兼容入口，便于手动 `nix run .` 或外部复用。
-    default = inputs."deploy-rs".apps.${system}.default;
-  });
-
-  # Eval Tests for all systems.
-  evalTests = lib.lists.all (it: it.evalTests == {}) allSystemValues;
-
-  # Namaka snapshot tests evaluate the fixtures under ./tests via haumea.
-  checks =
-    (inputs.namaka.lib.load {
-      src = self + "/tests/haumea";
-      inputs = {
-        inherit lib;
-        inherit (inputs) haumea;
-        pkgs = namakaTestSpecialArgs.pkgs;
-      };
-    })
-    // (
-      # Why：deployChecks 会构建可激活 profile；跨系统（如 Linux 上构建 darwin）
-      #      在本机不可构建。
-      # What：只对当前系统生成 deployChecks，并使用仅含本机节点的 deploy 视图。
-      if currentSystem != null && builtins.hasAttr currentSystem inputs."deploy-rs".lib
-      then {
-        ${currentSystem} = inputs."deploy-rs".lib.${currentSystem}.deployChecks deployCurrent;
-      }
-      else {}
-    );
-
-  # Development Shells
-  devShells = forAllSystems (
-    system: let
-      pkgs = nixpkgs.legacyPackages.${system};
-    in {
-      default = pkgs.mkShell {
-        packages = with pkgs; [
-          # fix https://discourse.nixos.org/t/non-interactive-bash-errors-from-flake-nix-mkshell/33310
-          bashInteractive
-          # fix `cc` replaced by clang, which causes nvim-treesitter compilation error
-          gcc
-          # Nix-related
-          nixfmt
-          deadnix
-          statix
-          # spell checker
-          typos
-          # code formatter
-          nodePackages.prettier
-          # namaka for snapshot testing
-          inputs.namaka.packages.${system}.default
-        ];
-        name = "dots";
-        # inherit (self.checks.${system}.pre-commit-check) shellHook;
-      };
-    }
-  );
-
-  # Format the nix code in this flake
-  formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixfmt);
-
-  # deploy-rs deployment nodes are provided by each host file.
-  # https://github.com/serokell/deploy-rs
-  deploy = {
-    # Why：允许在同一入口下发跨平台部署（Linux + darwin + 其他 profile）。
-    # What：合并所有系统节点到 deploy.nodes；checks 已在上方限制为当前系统。
-    nodes = lib.attrsets.mergeAttrsList (map (it: it.deploy.nodes or {}) allSystemValues);
+  flake = {
+    darwinConfigurations = mergedDarwinConfigurations;
+    deploy = {
+      nodes = mergedDeployNodes;
+    };
+    nixosConfigurations = mergedNixosConfigurations;
   };
 }

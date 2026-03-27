@@ -1,11 +1,12 @@
 {
   config,
   lib,
-  myvars,
+  userMeta,
   ...
 }: let
   inherit (lib) mkIf;
   cfg = config.programs.wireshark.enable;
+  username = userMeta.username;
 in {
   # https://mynixos.com/nixpkgs/options/programs.wireshark
   # https://mynixos.com/nixpkgs/package/wireshark
@@ -18,5 +19,5 @@ in {
   };
 
   users.groups = mkIf cfg {wireshark = {};};
-  users.users."${myvars.username}".extraGroups = mkIf cfg ["wireshark"];
+  users.users."${username}".extraGroups = mkIf cfg ["wireshark"];
 }

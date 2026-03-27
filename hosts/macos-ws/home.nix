@@ -25,11 +25,6 @@
     skills.enable = true;
   };
 
-  modules.tui = {
-    # terminal 直接使用 helix（而非nvim）
-    nvim.enable = false;
-  };
-
   modules.langs = {
     lsp.enable = true;
   };

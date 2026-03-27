@@ -1,5 +1,5 @@
 {
-  myvars,
+  globals,
   config,
   lib,
   ...
@@ -14,8 +14,8 @@ let
 
   # Following RNC pattern: dynamically inherit host-specific variables
 
-  # Network configuration from vars/networking.nix
-  inherit (myvars.networking) nameservers;
+  # Network configuration from globals.networking
+  inherit (globals.networking) nameservers;
   # NetworkManager 自动管理，不需要网关和静态IP配置
 in {
   imports = [

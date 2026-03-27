@@ -1,6 +1,6 @@
 {
   pkgs,
-  myvars,
+  globals,
   ...
 }: {
   # 只在桌面下添加 nixos container. 否则在 VPS 里（即使不启用）也会占用磁盘
@@ -14,7 +14,7 @@
       hostAddress = "10.254.0.1";
       localAddress = "10.254.0.2";
       specialArgs = {
-        inherit myvars;
+        inherit globals;
       };
       config = {
         imports = [
@@ -33,7 +33,7 @@
         };
 
         users.users.root.openssh.authorizedKeys.keys =
-          myvars.SSHPubKeys or [];
+          globals.auth.sshPublicKeys;
 
         system.stateVersion = "24.11";
       };

@@ -1,0 +1,59 @@
+---
+version: "3"
+
+includes:
+  stack:
+    taskfile: ./.task/Taskfile.stack.yml
+  cf:
+    taskfile: ./.task/Taskfile.cf.yml
+
+tasks:
+  default:
+    desc: "列出 infra stacks"
+    summary: |
+      task tf
+      task tf TAG=cloudflare
+    cmds:
+      - task: stack:list
+        vars:
+          TAG: "{{.TAG}}"
+
+  validate:
+    desc: "对单个 infra stack 做本地校验"
+    summary: |
+      task tf:validate STACK=infra/stacks/homelab/cloudflare/lucc.dev/dns
+      task tf:validate STACK=infra/stacks/homelab/cloudflare/account/pages
+    cmds:
+      - task: stack:validate
+        vars:
+          STACK: "{{.STACK}}"
+
+  plan:
+    desc: "对单个 stack 或一组 tagged stacks 做计划预览"
+    summary: |
+      task tf:plan STACK=infra/stacks/homelab/cloudflare/account/pages
+      task tf:plan TAG=cloudflare
+    cmds:
+      - task: stack:plan
+        vars:
+          STACK: "{{.STACK}}"
+          TAG: "{{.TAG}}"
+
+  apply:
+    desc: "对单个 infra stack 执行 apply"
+    summary: |
+      task tf:apply STACK=infra/stacks/homelab/cloudflare/account/pages
+    cmds:
+      - task: stack:apply
+        vars:
+          STACK: "{{.STACK}}"
+
+  inventory:
+    desc: "拉取 Cloudflare live inventory"
+    summary: |
+      task tf:inventory
+      task tf:inventory DATE=2026-03-27
+    cmds:
+      - task: cf:inventory
+        vars:
+          DATE: "{{.DATE}}"
