@@ -75,10 +75,16 @@ in {
       me_pwgen = mkUserSecret "me/pwgen";
 
       # Cloudflare
-      # cf_account = mkUserSecret "cloudflare/account_id";
-      # cfTokenDNS = mkUserSecret "cloudflare/token/DNS";
-      cf_r2_AK = mkUserSecret "cloudflare/r2/ak";
-      cf_r2_SK = mkUserSecret "cloudflare/r2/sk";
+      cf_account = mkUserSecret "cf/account_id";
+      cf_zone = mkUserSecret "cf/zone_id";
+
+      cf_r2_AK = mkUserSecret "cf/r2/ak";
+      cf_r2_SK = mkUserSecret "cf/r2/sk";
+
+      cf_token_read_all = mkUserSecret "cf/token/read_all";
+      cf_token_DNS = mkUserSecret "cf/token/DNS";
+
+      cf_workers_cfp = mkUserSecret "cf/workers/cfp";
 
       # SSH
       ssh_github = mkUserSecret "ssh/github";
