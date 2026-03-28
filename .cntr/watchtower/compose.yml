@@ -1,0 +1,24 @@
+---
+# https://github.com/containrrr/watchtower
+
+
+version: '3.8'
+services:
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - TZ=Asia/Shanghai
+      - WATCHTOWER_POLL_INTERVAL=300 # Check for updates every 300 seconds (5 minutes)
+      # Optional: Enable cleanup of old images
+      - WATCHTOWER_CLEANUP=true
+      # Optional: Enable notifications (e.g., email, Slack, Gotify)
+      # - WATCHTOWER_NOTIFICATIONS=email
+      # - WATCHTOWER_NOTIFICATION_EMAIL_FROM=your-email@example.com
+      # - WATCHTOWER_NOTIFICATION_EMAIL_TO=your-email@example.com
+      # - WATCHTOWER_NOTIFICATION_EMAIL_SERVER=smtp.example.com
+      # - WATCHTOWER_NOTIFICATION_EMAIL_SERVER_PORT=587
+      # - WATCHTOWER_NOTIFICATION_EMAIL_SERVER_USER=your-email@example.com
+      # - WATCHTOWER_NOTIFICATION_EMAIL_SERVER_PASSWORD=your-email-password
+    restart: unless-stopped
