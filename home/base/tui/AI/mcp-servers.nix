@@ -1,6 +1,19 @@
 {config}: {
   # 本MCP配置，可以在codex和claude-code中复用
 
+  # https://x.com/runes_leo/status/2037479240837579242
+  # web-access
+  #  读推文 → xreach
+  #  公开网页 → Jina
+  #  需要登录的站 → web-access（CDP 直连 Chrome）
+  #  浏览器交互 → Chrome MCP
+  #  反爬 → Scrapling
+  #  JS 重渲染 → Playwright
+  #  全都不行 → XCrawl 兜底
+
+  # https://www.tinyfish.ai/ TinyFish MCP，这个我觉得挺好，它能让 Claude 直接上网浏览、抓取网页、做资料调研，还能返回结构化结果，不只是给一段静态回答。我最近会拿它来给自己的周刊找 AI 新闻，比如抓最近几小时 Hacker News 上比较热门的内容，再整理成一份干净的摘要列表，效率很高。
+  # https://github.com/excalidraw/excalidraw-mcp Excalidraw MCP，这个更适合拿来想事情，尤其是流程图、系统结构这类内容，靠文字说不清的时候，画一下会快很多。
+
   # TODO: programs.mcp ???
   # https://mynixos.com/home-manager/option/programs.mcp.servers
   # https://github.com/zhongjis/nix-config/blob/935ac824ed0c27868b9ae4e75753c8ad94508dd0/modules/home-manager/features/mcp.nix#L15
@@ -19,6 +32,22 @@
       "@modelcontextprotocol/server-filesystem"
       config.home.homeDirectory
     ];
+    # 这个 server 覆盖整个 Home，读操作默认放行，写操作保持显式确认。
+    tools = {
+      create_directory.approval_mode = "prompt";
+      directory_tree.approval_mode = "approve";
+      edit_file.approval_mode = "prompt";
+      get_file_info.approval_mode = "approve";
+      list_directory.approval_mode = "approve";
+      list_directory_with_sizes.approval_mode = "approve";
+      move_file.approval_mode = "prompt";
+      read_file.approval_mode = "approve";
+      read_media_file.approval_mode = "approve";
+      read_multiple_files.approval_mode = "approve";
+      read_text_file.approval_mode = "approve";
+      search_files.approval_mode = "approve";
+      write_file.approval_mode = "prompt";
+    };
   };
   "sequential-thinking" = {
     type = "stdio";
@@ -27,6 +56,9 @@
       "-y"
       "@modelcontextprotocol/server-sequential-thinking"
     ];
+    tools = {
+      sequentialthinking.approval_mode = "approve";
+    };
   };
   memory = {
     type = "stdio";
@@ -35,6 +67,17 @@
       "-y"
       "@modelcontextprotocol/server-memory"
     ];
+    tools = {
+      add_observations.approval_mode = "prompt";
+      create_entities.approval_mode = "prompt";
+      create_relations.approval_mode = "prompt";
+      delete_entities.approval_mode = "prompt";
+      delete_observations.approval_mode = "prompt";
+      delete_relations.approval_mode = "prompt";
+      open_nodes.approval_mode = "approve";
+      read_graph.approval_mode = "approve";
+      search_nodes.approval_mode = "approve";
+    };
   };
   context7 = {
     type = "stdio";
@@ -43,6 +86,11 @@
       "-y"
       "@upstash/context7-mcp"
     ];
+    # 依据 Context7 当前 MCP 命名，均为只读文档检索。
+    tools = {
+      "query-docs".approval_mode = "approve";
+      "resolve-library-id".approval_mode = "approve";
+    };
   };
 
   # startup_timeout_sec: 某些 Python/uvx MCP 首次 cold start 较慢，需要放宽超时。
@@ -51,6 +99,10 @@
     command = "uvx";
     args = ["mcp-nixos"];
     startup_timeout_sec = 50;
+    tools = {
+      nix.approval_mode = "approve";
+      nix_versions.approval_mode = "approve";
+    };
   };
 
   octocode = {
@@ -61,6 +113,14 @@
       "octocode-mcp@latest"
     ];
     startup_timeout_sec = 30;
+    # octocode 只提供 GitHub 只读检索/读取能力，默认直接放行，避免每次工具调用都手动确认。
+    tools = {
+      githubGetFileContent.approval_mode = "approve";
+      githubSearchCode.approval_mode = "approve";
+      githubSearchPullRequests.approval_mode = "approve";
+      githubSearchRepositories.approval_mode = "approve";
+      githubViewRepoStructure.approval_mode = "approve";
+    };
   };
   ddg = {
     type = "stdio";
@@ -69,6 +129,9 @@
       "dlx"
       "duckduckgo-mcp-server"
     ];
+    tools = {
+      duckduckgo_search.approval_mode = "approve";
+    };
   };
 
   "code-index" = {
@@ -76,6 +139,22 @@
     command = "uvx";
     args = ["code-index-mcp"];
     startup_timeout_sec = 30;
+    tools = {
+      build_deep_index.approval_mode = "approve";
+      check_temp_directory.approval_mode = "approve";
+      clear_settings.approval_mode = "prompt";
+      configure_file_watcher.approval_mode = "prompt";
+      create_temp_directory.approval_mode = "approve";
+      find_files.approval_mode = "approve";
+      get_file_summary.approval_mode = "approve";
+      get_file_watcher_status.approval_mode = "approve";
+      get_settings_info.approval_mode = "approve";
+      get_symbol_body.approval_mode = "approve";
+      refresh_index.approval_mode = "approve";
+      refresh_search_tools.approval_mode = "approve";
+      search_code_advanced.approval_mode = "approve";
+      set_project_path.approval_mode = "prompt";
+    };
   };
   # Chrome 146+ 推荐使用 --autoConnect 附着当前浏览器实例。
   # 前置条件: chrome://inspect/#remote-debugging 已开启 Remote debugging。
@@ -89,9 +168,43 @@
       "--channel"
       "stable"
     ];
+    # 只默认放行观察/采样类工具；任何会改页面状态、提交输入或执行任意脚本的操作都要求确认。
+    tools = {
+      click.approval_mode = "prompt";
+      close_page.approval_mode = "prompt";
+      drag.approval_mode = "prompt";
+      emulate.approval_mode = "prompt";
+      evaluate_script.approval_mode = "prompt";
+      fill.approval_mode = "prompt";
+      fill_form.approval_mode = "prompt";
+      get_console_message.approval_mode = "approve";
+      get_network_request.approval_mode = "approve";
+      handle_dialog.approval_mode = "prompt";
+      hover.approval_mode = "prompt";
+      lighthouse_audit.approval_mode = "approve";
+      list_console_messages.approval_mode = "approve";
+      list_network_requests.approval_mode = "approve";
+      list_pages.approval_mode = "approve";
+      navigate_page.approval_mode = "prompt";
+      new_page.approval_mode = "prompt";
+      performance_analyze_insight.approval_mode = "approve";
+      performance_start_trace.approval_mode = "prompt";
+      performance_stop_trace.approval_mode = "prompt";
+      press_key.approval_mode = "prompt";
+      resize_page.approval_mode = "prompt";
+      select_page.approval_mode = "prompt";
+      take_memory_snapshot.approval_mode = "prompt";
+      take_screenshot.approval_mode = "approve";
+      take_snapshot.approval_mode = "approve";
+      type_text.approval_mode = "prompt";
+      upload_file.approval_mode = "prompt";
+      wait_for.approval_mode = "approve";
+    };
   };
 
   # mcp-remote 代理模式: 本地 stdio <-> 远端 MCP over HTTP。
+  # 暂不显式配置 tools：先保持默认 prompt。
+  # 原因是远端 tool 清单可能随服务端变化，后续可在 `codex mcp get deepwiki` 后再精确补全。
   deepwiki = {
     type = "stdio";
     command = "npx";
@@ -106,6 +219,8 @@
   #  };
   # 注意: Authorization header 里是占位符，真实 token 由 shell alias 在运行时注入。
   # 不要把真实 PAT 写死到仓库配置中。
+  # 暂不显式配置 tools：官方 GitHub MCP 可能包含写操作，先保持默认 prompt 更稳妥。
+  # 如果后续确认只想放行只读工具，再根据 `codex mcp get github` 的实际清单精确声明。
   github = {
     type = "stdio";
     command = "npx";
@@ -119,4 +234,9 @@
       "Authorization: Bearer YOUR_GITHUB_PAT"
     ];
   };
+
+  # stitch MCP
+  # https://linux.do/t/topic/1832590
+  # https://github.com/davideast/stitch-mcp
+  # https://stitch.withgoogle.com/docs/mcp/setup
 }

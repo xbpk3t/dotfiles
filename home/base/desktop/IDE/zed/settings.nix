@@ -487,7 +487,8 @@ in {
   # https://zed.dev/docs/configuring-zed#auto-install-extensions
   # 注意 https://mynixos.com/home-manager/option/programs.zed-editor.extensions 也可以预配置 extensions
   # https://github.com/nix-community/home-manager/blob/master/modules/programs/zed-editor.nix#L32
-  # [2026-01-18] 可以看到本身 hm 的 extensions 配置项，也是借用 auto_install_extensions 实现的，二者本身是一码事。所以为啥不用zed本身提供的配置项呢？另外，hm的ext并不支持 auto_update_extensions，所以为了保证一致性和可维护性，我们把相应配置项做个整合
+  # [2026-01-18] zed的ext安装，用哪种更好？zed官方的conf，还是 hm的conf?
+  # 可以看到本身 hm 的 extensions 配置项，也是借用 auto_install_extensions 实现的，二者本身是一码事。所以为啥不用zed本身提供的配置项呢？另外，hm的ext并不支持 auto_update_extensions，所以为了保证一致性和可维护性，我们把相应配置项做个整合
   auto_install_extensions = exts;
   auto_update_extensions = exts;
 

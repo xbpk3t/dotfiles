@@ -25,7 +25,7 @@ vars:
   SKILLS_CMD: "pnpx skills"
   CTX7_CMD: "pnpx -y ctx7"
   DEFAULT_AGENT: "codex"
-  # DEFAULT_SCOPE 影响是否追加 -g（global 安装到 ~/.codex/skills）
+  # DEFAULT_SCOPE 影响是否追加 -g（当前 skills CLI 的 global store 实际落在 ~/.agents/skills）
   DEFAULT_SCOPE: "global"
   # DEFAULT_MODE 使用 copy 可避免 symlink 失效
   DEFAULT_MODE: "copy"

@@ -1,0 +1,53 @@
+version: "3"
+
+
+#- pprof top10 -cum
+#- pprof web
+#- pprof web mapaccess1
+#- pprof web mallocgc
+#- pprof list DFS
+#- pprof list FindLoops
+
+
+# [quasilyte/qbenchstat: My personal, slightly improved version of benchstat utility](https://github.com/quasilyte/qbenchstat) Better benchstat. Support "Colored output" and "significance test". 单次的基准测试，往往没有统计意义，所以我们需要使用 benchstat 工具进行一组基准测试，用来查看基准值的稳定程度
+
+
+tasks:
+  pprof:
+    desc: "执行多步骤性能分析"
+    summary: "task -g go:pprof"
+    cmds:
+      # 1. 全局瓶颈定位
+      - task: analyze-top
+      # 2. 可视化调用链
+      - task: analyze-web
+      # 3. 专项优化（需替换为你的热点函数）
+      - task: analyze-focus func=FindLoops
+
+  analyze-top: # 输出 **`top10 -cum` 结果**，识别累积耗时最高的函数
+    desc: 输出 CPU pprof 累积耗时 Top10 函数
+    summary: "task -g go:analyze-top"
+    cmds:
+      - echo "==== 累积耗时 Top10 函数 ===="
+      - go tool pprof -top -cum cpu.pprof | head -20
+
+  analyze-web: # 打开**全局调用图**，可视化函数依赖关系
+    desc: 生成并打开 CPU pprof 全局调用图
+    summary: "task -g go:analyze-web"
+    cmds:
+      - echo "==== 生成全局调用图 (web) ===="
+      - go tool pprof -web cpu.pprof
+
+  analyze-focus: # **组合使用 `list` 和 `web`**，聚焦分析特定函数（如 `FindLoops`）的代码行和子图
+    desc: 聚焦分析指定函数的 CPU pprof 调用子图
+    summary: "task -g go:analyze-focus func=FindLoops"
+    vars:
+      func: '{{.func}}'
+    requires:
+      vars: [func]
+    cmds:
+      - echo "==== 分析特定函数 {{.func}} ===="
+      # 代码行级分析
+      - go tool pprof -list '{{.func}}' cpu.pprof
+      # 生成调用子图
+      - go tool pprof -web -focus '{{.func}}' cpu.pprof

@@ -65,10 +65,14 @@ in {
           };
         };
 
-        # 注意这里特意留空，因为我目前主力仍然使用 team的OAuth，这里如果设置provider后，就无法切换到team了
-        model_provider = "";
+        # 默认不声明 model_provider，让 Codex 继续走本地 ChatGPT OAuth 登录态。否则会报错 Error: Model provider `` not found
+        # 只有显式使用 `--profile ice|test|ggboom` 时，才切换到对应第三方 provider。
+
+        # https://ldoh.105117.xyz/
+        # https://linux.do/t/topic/1837955/39 在mac用开 ChatGPT Plus (用)
         model_providers = {
           # https://linux.do/t/topic/1806073
+          # https://ice.v.ua/dashboard
           ice = {
             name = "ice";
             base_url = "https://ice.v.ua";
@@ -86,10 +90,38 @@ in {
 
           # https://linux.do/t/topic/1558896
           # https://ai.qaq.al/dashboard
+          # https://sign.qaq.al/redeem
           ggboom = {
             name = "ggboom";
             base_url = "https://ai.qaq.al";
             env_key = "OPENAI_API_KEY_GGBoom";
+            wire_api = "responses";
+          };
+
+          # https://linux.do/t/topic/1614522
+          # https://openai.api-test.us.ci/console
+          zzz = {
+            name = "zzz";
+            base_url = "https://new.api-test.us.ci/v1";
+            env_key = "OPENAI_API_KEY_ZZZ";
+            wire_api = "responses";
+          };
+
+          # https://freeapi.dgbmc.top/console/
+          # https://linux.do/t/topic/1841046
+          dgb = {
+            name = "dgb";
+            base_url = "https://freeapi.dgbmc.top/v1";
+            env_key = "OPENAI_API_KEY_DGB";
+            wire_api = "responses";
+          };
+
+          # https://linux.do/t/topic/1845022
+          # https://windhub.cc/console/
+          ark = {
+            name = "ark";
+            base_url = "https://windhub.cc/v1";
+            env_key = "OPENAI_API_KEY_ARK";
             wire_api = "responses";
           };
         };
@@ -109,6 +141,21 @@ in {
             model_provider = "ggboom";
             model = "gpt-5.4";
           };
+
+          zzz = {
+            model_provider = "zzz";
+            model = "gpt-5.4";
+          };
+
+          dgb = {
+            model_provider = "dgb";
+            model = "gpt-5.4";
+          };
+
+          ark = {
+            model_provider = "ark";
+            model = "gpt-5.4";
+          };
         };
       };
       custom-instructions = ''
@@ -124,21 +171,31 @@ in {
         # For Context7 MCP
         CONTEXT7_API_KEY = "$(cat ${config.sops.secrets.API_context7.path})";
 
-        OPENAI_API_KEY_ICE = "$(cat ${config.sops.secrets.LLM_Sub2API_ICE.path})";
+        OPENAI_API_KEY_ICE = "$(cat ${config.sops.secrets.LLM_Sub2API_ice.path})";
 
-        OPENAI_API_KEY_TEST = "$(cat ${config.sops.secrets.LLM_Sub2API_TEST.path})";
+        OPENAI_API_KEY_TEST = "$(cat ${config.sops.secrets.LLM_Sub2API_test.path})";
 
-        OPENAI_API_KEY_GGBoom = "$(cat ${config.sops.secrets.LLM_Sub2API_GGBoom.path})";
+        OPENAI_API_KEY_GGBoom = "$(cat ${config.sops.secrets.LLM_Sub2API_ggboom.path})";
+
+        OPENAI_API_KEY_ZZZ = "$(cat ${config.sops.secrets.LLM_Sub2API_zzz.path})";
+
+        OPENAI_API_KEY_DGB = "$(cat ${config.sops.secrets.LLM_Sub2API_dgb.path})";
+
+        OPENAI_API_KEY_ARK = "$(cat ${config.sops.secrets.LLM_Sub2API_ark.path})";
       };
       shellAliases = {
         # 每次启动 codex 时动态注入 GitHub PAT，避免把 token 写入静态配置。
-        codex = "CODEX_GITHUB_PERSONAL_ACCESS_TOKEN=$(gh auth token) command codex";
+        # codex = "CODEX_GITHUB_PERSONAL_ACCESS_TOKEN=$(gh auth token) command codex";
+
         # 按需切换第三方 provider；不影响默认的 ChatGPT OAuth 登录态。
 
         # 用来切换profile
         codex-ice = "codex --profile ice";
         codex-test = "codex --profile test";
         codex-gg = "codex --profile ggboom";
+        codex-zzz = "codex --profile zzz";
+        codex-dgb = "codex --profile dgb";
+        codex-ark = "codex --profile ark";
       };
     };
 

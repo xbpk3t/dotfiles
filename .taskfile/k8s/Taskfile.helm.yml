@@ -1,6 +1,9 @@
 ---
 version: "3"
 
+
+# PLAN: [2026-03-28] 整理下面这些task，存在以下问题：1、
+
 # Helm Taskfile - Comprehensive Helm ecosystem automation
 # Covers: helm, helmfile, chart-releaser, helm-diff
 #
