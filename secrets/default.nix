@@ -95,9 +95,12 @@ in {
       # LLM
       LLM_GLM = mkUserSecret "LLM/GLM";
       LLM_deepseek = mkUserSecret "LLM/deepseek";
-      LLM_Sub2API_ICE = mkUserSecret "LLM/Sub2API-ICE";
-      LLM_Sub2API_TEST = mkUserSecret "LLM/Sub2API-TEST";
-      LLM_Sub2API_GGBoom = mkUserSecret "LLM/Sub2API-GGBoom";
+      LLM_Sub2API_ice = mkUserSecret "LLM/sub2API/ice";
+      LLM_Sub2API_test = mkUserSecret "LLM/sub2API/test";
+      LLM_Sub2API_ggboom = mkUserSecret "LLM/sub2API/ggboom";
+      LLM_Sub2API_zzz = mkUserSecret "LLM/sub2API/zzz";
+      LLM_Sub2API_dgb = mkUserSecret "LLM/sub2API/dgb";
+      LLM_Sub2API_ark = mkUserSecret "LLM/sub2API/ark";
 
       # singbox
       singbox_UUID = mkRootSecret "singbox/UUID";

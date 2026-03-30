@@ -12,7 +12,8 @@
       # https://github.com/andreafrancia/trash-cli
       # trash-list
       # trash-empty
-      trash-cli
+      # [2026-03-28] 其实没啥用，移除掉了
+      # trash-cli
     ];
 
     # PLAN: 目前 fzf-tab 的使用非常麻烦（需要替代掉默认的zsh tab），等有更好的nix支持之后，再添加

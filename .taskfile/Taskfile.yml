@@ -11,7 +11,6 @@ includes:
   pc: devops/Taskfile.pre-commit.yml
   rclone: devops/Taskfile.rclone.yml
   droid: devops/Taskfile.droid.yml
-  tf: devops/Taskfile.tf.yml
 
   # go
   gz: go/Taskfile.gz.yml

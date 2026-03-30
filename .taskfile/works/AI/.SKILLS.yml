@@ -750,3 +750,8 @@ vars:
     - repo: superclaude-org/superclaude_framework
 
   NEED_TO_ADD:
+    # https://skills.sh/cxuu/golang-skills
+    - repo: cxuu/golang-skills
+
+
+    # https://github.com/JCodesMore/ai-website-cloner-template

@@ -1,4 +1,30 @@
-# Cloudflare 收编收尾说明
+---
+title: Cloudflare 收编收尾说明
+date: 2026-03-27
+---
+
+
+
+## TLDR
+
+
+
+- 【state策略】tf的state到底存在哪？怎么组织？怎么访问？
+
+每个 tf state 都要有 state，要不是 local state，要不 remote state (S3, ...)
+
+
+
+
+
+
+
+
+
+
+
+
+## 0. 前言
 
 这篇文档是这次 `infra/` 内 Cloudflare 收编工作的最终收尾说明。
 
