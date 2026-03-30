@@ -60,16 +60,16 @@ mkcd() {
 }
 
 # rm 函数：使用 trash-cli 安全删除
-rm() {
-  if command -v trash-put &> /dev/null; then
-    trash-put "$@"
-  elif command -v trash &> /dev/null; then
-    trash "$@"
-  else
-    echo "Error: 'trash' command not found. Please install 'trash-cli' to use safe deletion."
-    return 1
-  fi
-}
+#  rm() {
+#    if command -v trash-put &> /dev/null; then
+#      trash-put "$@"
+#    elif command -v trash &> /dev/null; then
+#      trash "$@"
+#    else
+#      echo "Error: 'trash' command not found. Please install 'trash-cli' to use safe deletion."
+#      return 1
+#    fi
+#  }
 
 # ===== 性能优化 =====
 # 减少不必要的路径扫描

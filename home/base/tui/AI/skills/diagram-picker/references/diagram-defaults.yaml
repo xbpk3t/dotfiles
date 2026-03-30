@@ -2,6 +2,10 @@ version: 1
 
 # Diagram defaults and selection reasons (manual)
 
+# mermaid 的 graph 不支持在 node旁边写 description
+
+# mermaid graph 类似 puml mindmap, 但是不如后者
+
 diagram_defaults:
   flowchart:
     default: mermaid

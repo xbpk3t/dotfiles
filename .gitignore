@@ -22,7 +22,6 @@ specs/
 
 result
 result-*
-/.cntr/
 
 /PaaS
 /nixos-k3s

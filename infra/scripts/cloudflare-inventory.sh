@@ -7,7 +7,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DATE_STAMP="${1:-$(date +%F)}"
-OUT_DIR="${ROOT_DIR}/inventory/${DATE_STAMP}/cloudflare"
+OUT_DIR="${ROOT_DIR}/.inventory/${DATE_STAMP}/cloudflare"
 RAW_DIR="${OUT_DIR}/raw"
 SUMMARY_JSON="${OUT_DIR}/summary.json"
 SUMMARY_MD="${OUT_DIR}/README.md"
