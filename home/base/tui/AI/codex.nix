@@ -75,7 +75,7 @@ in {
           # https://ice.v.ua/dashboard
           ice = {
             name = "ice";
-            base_url = "https://ice.v.ua";
+            base_url = "https://ice.v.ua/v1";
             env_key = "OPENAI_API_KEY_ICE";
             wire_api = "responses";
           };
@@ -83,7 +83,7 @@ in {
           # https://linux.do/t/topic/1806866
           test = {
             name = "test";
-            base_url = "http://119.8.113.226:9999/";
+            base_url = "http://119.8.113.226:9999/v1";
             env_key = "OPENAI_API_KEY_TEST";
             wire_api = "responses";
           };
@@ -93,7 +93,7 @@ in {
           # https://sign.qaq.al/redeem
           ggboom = {
             name = "ggboom";
-            base_url = "https://ai.qaq.al";
+            base_url = "https://ai.qaq.al/v1";
             env_key = "OPENAI_API_KEY_GGBoom";
             wire_api = "responses";
           };

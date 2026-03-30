@@ -14,4 +14,4 @@
 
 ## Notice
 
-注意修改代码，不要轻易修改 `docs/<topic>/review` 里的相关内容
+注意修改代码，不要轻易修改 `docs/` 里的文档内容；当前 `docs/` 采用按 topic 分目录的扁平结构，以各 topic 下的 `README.md` 与按日期命名的 review 文档为主。
