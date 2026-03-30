@@ -17,29 +17,20 @@
   globals = config.globals;
   customPkgsOverlay = import ../pkgs/overlay.nix;
 
-  # Stable pkgs：作为系统构建与 Home Manager 的主 pkgs 实例。
+  # 单通道 rolling pkgs：作为系统构建与 Home Manager 的主 pkgs 实例。
   # 注意：
   # - overlays 统一在这里注入，避免各 host 重复写。
   # - allowUnfree / allowBroken 等策略也统一收口在这里。
+  # - 当前仓库只保留一套 pkgs，避免“名义双通道，实际同源”的虚假抽象。
+  # - 分支策略统一交给 flake inputs；这里不再重复制造 stable/unstable 概念。
   mkPkgs = system:
     import inputs.nixpkgs {
       inherit system;
       config.allowUnfree = true;
       config.nvidia.acceptLicense = true;
-      config.allowBroken = true;
-      config.enableParallelBuilding = true;
-      config.buildManPages = false;
-      config.buildDocs = false;
-      overlays = [customPkgsOverlay];
-    };
-
-  # Unstable pkgs：只通过 specialArgs 暴露给需要显式使用的模块。
-  # why: 主系统仍以 stable pkgs 语义为准，避免“默认全仓库都漂到 unstable”。
-  mkPkgsUnstable = system:
-    import (inputs.nixpkgs-unstable or inputs.nixpkgs) {
-      inherit system;
-      config.allowUnfree = true;
-      config.allowBroken = true;
+      # 默认禁止 broken packages。
+      # Why: broken package 应该是显式例外，而不是整仓默认吞掉风险信号。
+      config.allowBroken = false;
       config.enableParallelBuilding = true;
       config.buildManPages = false;
       config.buildDocs = false;
@@ -47,11 +38,11 @@
     };
 
   # 共享给 nixos/darwin/home modules 的基础 specialArgs。
-  # 注意：这里同时透传 stable 与 unstable 两套 pkgs，模块侧按需取用。
+  # 注意：这里只透传一套 pkgs。
+  # Why: 仓库当前明确采用单通道模型，模块侧不再接触第二套 pkgs 入口。
   genSpecialArgs = system: {
     inherit inputs mylib globals;
     pkgs = mkPkgs system;
-    pkgs-unstable = mkPkgsUnstable system;
   };
 
   # host-aware specialArgs：在基础 specialArgs 之上补齐当前主机的身份信息。
