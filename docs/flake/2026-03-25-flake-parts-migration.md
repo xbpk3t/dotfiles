@@ -1,6 +1,6 @@
 ---
 title: flake-parts 迁移提纲
-type: guide
+type: review
 status: draft
 date: 2026-03-25
 updated: 2026-03-25

@@ -96,6 +96,11 @@ date: 2026-01-11
 # 2、另外，remote server 只支持 debian/ubuntu，即使如此也没有对这两个distro的很多 corner case做出优化。当然，这点也是因为不同公有云平台，即使对于相同的debian:11 也会有不同的预制处理，可能也无法兼顾到各种corner case，但是问题在于任何优化都没有，我尝试把两台VPS（分别是debian:11和debian:13）做init，都有各自的问题，需要手动调整
 # 3、还有之前遇到的，Default Server 迁移到其他server时，会遇到问题。目前不支持把已部署资源移动到另一台服务器，只能手动重部署。
 
+# 4. services.traefik 跑在宿主机网络的 namespace 里，但是 Dokploy 的动态回源地址是 swarm overlay网段（10.0.x.x），宿主机根本打不通 overlay IP，于是回源超时，返回504
+
+
+
+---
 # - 构建资源把机器打爆 / 卡死导致全站受影响
 #Dokploy 官方自己在“Going Production”里提醒：nixpacks/buildpacks 构建可能导致超时甚至把服务器“freeze”，建议改成 CI/CD 构建后推镜像。
 #
@@ -292,6 +297,23 @@ hto:
   - 【路由优化】如何提升证书与路由稳定性？确保 DNS 正确、labels 命名唯一、网络接入一致并留足证书生成时间
   - 【安全加固】如何避免防火墙“形同虚设”？使用 ufw-docker 或云防火墙限制容器暴露端口，同时强化 SSH 安全策略
 ```
+
+
+
+### what
+
+Dokploy的核心技术栈是 docker-swarm + traefik
+
+
+### zzz
+
+当时也尝试了 dokku,
+
+结论是这些还不如 dokploy 好用呢
+
+
+
+
 
 </details>
 

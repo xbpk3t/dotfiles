@@ -12,6 +12,10 @@ summary: "在把 NixOS 配置得比较顺手之后，我自然也想把 Android 
 unlisted: true
 ---
 
+
+## TLDR
+
+
 :::tip[TLDR]
 
 我的想法就是三段：
@@ -25,6 +29,28 @@ unlisted: true
 ---
 
 具体查看代码
+
+:::
+
+
+这里其实是两个问题：
+
+- 1、声明式安装APP
+- 2、把 Android 作为开发机
+
+
+
+- 1、目前没有 declarative 管理APP的方案。至于整个手机配置，就更不现实了。没必要幻想什么“手机配置完全nix化”，更现实的目标是：
+  - 1、有APP清单
+  - 2、通过 adb 来清除预装APP
+- 2、AVF跟root完全是两码事
+
+
+
+
+
+
+
 
 ```markdown
 我觉得 **挺好，而且比我前面那个更适合写成博客**。
@@ -205,9 +231,14 @@ unlisted: true
 我可以直接按你这个三段式，帮你列一版更具体的三级提纲。
 ```
 
-:::
 
-## 手机刷linux，为啥不推荐直接刷宿主机？
+
+
+## 相关基本认知
+
+
+
+### 手机刷linux，为啥不推荐直接刷宿主机？
 
 ```yaml
 # 手机刷linux
@@ -228,10 +259,30 @@ unlisted: true
 #→ 更务实的路线：保留 Android + 装 Termux，当 Linux 开发机用。
 ```
 
-## 为啥现在不推荐root?
+
+
+
+
+
+
+### AVF的价值何在？
+
+核心价值就在于可以
+
+
+[devopsexpertlearning/termux-kubernetes-docker: Run a full Docker and Kubernetes (K3s) environment on Android using Termux. This guide uses QEMU to virtualize Alpine Linux, enabling root-level container features without rooting your device.](https://github.com/devopsexpertlearning/termux-kubernetes-docker)
+
+
+
+
+
+
+
+
+
+### 为啥现在不推荐root?
 
 ```yaml
-# PLAN[2026-01-19]: 下次换个一加手机。一加手机已经是国产手机里，对于root门槛最低的了。这个一加的 深度测试，是不是其实基本上没有门槛，正常手机只要申请，就能root。
 ## 一加（国行 ColorOS 16 起）：改成“申请加入深度测试 → 审核通过 → 获得解锁 BL 权限”，官方明确说不需要答题、目前没有名额限制、一般 1–2 个工作日审核。
 ## 小米（尤其国行 HyperOS 这两年）：仍然有官方解锁渠道，但规则更“考试/资格审查/限制”——例如新增资格审查（账号注册天数、社区违规记录、设备/IP 变动等），以及一些时间窗口/台数限制等。
 #

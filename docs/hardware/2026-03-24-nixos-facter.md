@@ -8,7 +8,22 @@ tags: [nix, nixos, hardware, facter]
 summary: 说明本仓库如何接入 nixos-facter、它负责什么、它不负责什么，以及新主机的接入与验证方式。
 ---
 
-# NixOS Facter Hardware Guide
+
+## TLDR
+
+
+:::tip[TLDR]
+
+
+
+
+:::
+
+
+
+
+
+---
 
 ```markdown
 ## nix-community/nixos-facter (2/5)

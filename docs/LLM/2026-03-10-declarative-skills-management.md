@@ -42,3 +42,12 @@ https://github.com/xbpk3t/dotfiles/blob/main/home/base/tui/AI/skills.nix
 https://github.com/xbpk3t/dotfiles/blob/main/.taskfile/works/AI/Taskfile.skills.yml
 
 实际验证可以共存且不冲突
+
+
+
+---
+
+
+[2026-03-29] 今天看到的，所见略同。我对于 skills 直接根据是否自用，拆分到两个folder，是非常好的实践
+
+[李继刚 on X: "把遇到的问题分为两类：通用类和私有类。 通用类需求，比如获取任意网页内容，一定有很专业的人在研究，没必要重新发明轮子，不论是开源的或是付费的，直接找到最好用的取用即可。 私有类需求，比如你读书时就喜欢使用某种自己沉淀下来分析框架，外面哪怕有再多相关" / X](https://x.com/lijigang/status/2038090572800606262)
