@@ -1,6 +1,6 @@
 ---
 title: linux内核参数调优
-type: guide
+type: review
 date: 2026-01-26
 status: active
 updated: 2026-01-26

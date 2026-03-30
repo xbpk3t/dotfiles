@@ -1,5 +1,5 @@
 ---
-title: exploring-comin
+title: 初探 comin
 type: review
 status: active
 date: 2026-03-25
@@ -13,7 +13,52 @@ tags:
 summary: 评估 comin 作为 pull-first 主机部署方案时，对当前仓库的吸引力、风险和不适配点。
 ---
 
-# exploring-comin
+
+
+:::tip[TLDR]
+
+本文为GPT生成，这里写点自己的想法，以及本文的总结：
+
+目前deploy存在两难，我讨厌 deploy-rs/colmena 这套 push-mode，总要等待，并且难以保证所有配置项可以实时同步。
+
+具体来说，这里存在两难：
+
+- 1、多端部署问题。也就是必须要手动执行命令来部署指定host
+- 2、push-mode 需要保证控制端不掉（尤其在控制端通常是workstation的情况下，不知道多少个凌晨，在改完配置后，都要等着deploy完成，验证确实可用之后，才放心commit代码，非常操心伤神），否则部署流程被打断，就会失败。
+
+
+当然，这两个方案都有办法克服掉
+
+- 1、针对问题1，我现在 `.taskfile/nix/Taskfile.deploy.yml` 里面直接用 gum choose 来多选hosts，来批量部署。但是这里到具体细节，同样存在两难，也就是“并行部署和multi-platform问题”，colmena支持并行部署，但不支持多平台，deploy-rs支持多平台，但不支持并行部署。
+- 2、针对问题2，可以用 zellij 登录 homelab，然后用homelab来作为控制端，来对所有hosts做deploy 来解决。能明显缓解“workstation 掉线导致部署中断”的问题。但它没有从范式上规避 push-mode，只是把控制端从“不稳定的人机终端”换成“更稳定的常驻机器”。
+
+---
+
+
+> ***如果按照上面的说法，是否就是说 pull-mode 就真的远胜于 push-mode方案了？***
+
+也并非如此，用了 pull-mode 之后，上面两个问题可以迎刃而解，但是也会带来一些新问题。
+
+一些显而易见的新问题：
+
+pull-mode 相比 push-mode 的要求更高，具体来说：
+
+- 1、运维要求
+- 2、对 main branch 代码质量要求
+
+
+- 不再
+
+
+
+
+
+
+:::
+
+
+
+
 
 ```markdown
 ## nlewo/comin (3/5)
