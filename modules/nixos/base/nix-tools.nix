@@ -58,8 +58,8 @@ in {
 
     # 定时GC
     gc = {
-      # 使用 nh 来管理垃圾回收，禁用内置的 nix.gc
-      automatic = lib.mkDefault false;
+      # 直接使用原生 nix.gc，避免额外依赖 nh。
+      automatic = lib.mkDefault true;
       options = "--delete-older-than 8d";
     };
 
