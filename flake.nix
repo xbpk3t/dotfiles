@@ -4,12 +4,17 @@ rec {
   inputs = {
     flake-parts.url = "github:hercules-ci/flake-parts";
 
-    # Use existing nixpkgs inputs
+    # 主仓库统一收敛到单通道 rolling branch。
+    # Why:
+    # - 当前仓库不再保留 stable/unstable 双通道，避免虚假抽象
+    # - dotfiles 更偏向持续滚动升级，而不是半年一次手动切 release branch
+    # - 统一跟随 nixpkgs-unstable，能降低 branch maintenance 成本
     nixpkgs-darwin.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
 
     # home-manager, used for managing user configuration
     home-manager = {
+      # 在单通道 rolling 模式下，保持与 nixpkgs-unstable 同步演进。
       url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
@@ -26,6 +31,7 @@ rec {
     };
 
     darwin = {
+      # nix-darwin 也统一跟随 rolling branch，避免 Darwin 侧单独维护 release pin。
       url = "github:lnl7/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
