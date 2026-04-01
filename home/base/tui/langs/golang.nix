@@ -2,7 +2,8 @@
   pkgs,
   config,
   ...
-}: {
+}:
+{
   home.packages = with pkgs; [
     go
 
@@ -13,8 +14,10 @@
     gosec
     protoc-gen-go
     protoc-gen-go-grpc
-    gopls # https://github.com/golang/tools includes modernize
-    golines # https://github.com/segmentio/golines
+    # https://github.com/golang/tools includes modernize
+    gopls
+    # https://github.com/segmentio/golines
+    golines
     goimports-reviser
     cobra-cli
     nilaway
