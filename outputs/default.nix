@@ -143,6 +143,10 @@ in {
     specialArgs = genSpecialArgs system;
     pkgs = specialArgs.pkgs;
     architectureOutput = architectureOutputs.${system};
+    libChecks = import ../lib/tests {
+      inherit pkgs;
+      lib = pkgs.lib;
+    };
 
     # deploy-rs 官方推荐把 deployChecks 接到 flake checks。
     # 注意：这里只在当前 system 上启用，避免无意义的跨系统检查。
@@ -176,7 +180,9 @@ in {
         };
       };
 
-    checks = deployChecks;
+    # 注意：`checks` 是仓库默认质量闸门的统一入口。
+    # deploy-rs checks 负责 deployment safety，libChecks 负责仓库内的基础回归测试。
+    checks = deployChecks // libChecks;
 
     # `nix fmt` / flake formatter 的统一入口。
     formatter = pkgs.nixfmt;

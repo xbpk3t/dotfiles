@@ -1,11 +1,11 @@
 {lib ? import <nixpkgs/lib>}: let
   mylib = import ../default.nix {inherit lib;};
 
-  # 测试真实的 services 目录
-  servicesPath = ./../../modules/nixos/services;
+  # 使用当前仓库里真实存在、并且确实通过 `scanPaths` 聚合 imports 的目录。
+  baseModulesPath = ./../../modules/nixos/base;
 
   # 使用真实的 scanPaths 函数
-  scanResult = mylib.scanPaths servicesPath;
+  scanResult = mylib.scanPaths baseModulesPath;
 
   # 检查关键文件是否存在
 
@@ -13,30 +13,30 @@
 
   # 实际结果中应该包含的文件
   shouldContain = [
-    (servicesPath + "/sddm.nix")
-    (servicesPath + "/xserver.nix")
+    (baseModulesPath + "/core.nix")
+    (baseModulesPath + "/security.nix")
   ];
 
   # 实际结果中不应该包含的文件
   shouldNotContain = [
-    (servicesPath + "/default.nix")
+    (baseModulesPath + "/default.nix")
   ];
 
   # 直接计算测试结果避免循环引用
-  containsSddm = builtins.elem (servicesPath + "/sddm.nix") scanResult;
-  containsXserver = builtins.elem (servicesPath + "/xserver.nix") scanResult;
-  containsDefault = builtins.elem (servicesPath + "/default.nix") scanResult;
+  containsCore = builtins.elem (baseModulesPath + "/core.nix") scanResult;
+  containsSecurity = builtins.elem (baseModulesPath + "/security.nix") scanResult;
+  containsDefault = builtins.elem (baseModulesPath + "/default.nix") scanResult;
   notEmpty = scanResult != [];
   allTestsPass =
     scanResult
     != []
-    && (builtins.elem (servicesPath + "/sddm.nix") scanResult)
-    && (builtins.elem (servicesPath + "/xserver.nix") scanResult)
-    && !(builtins.elem (servicesPath + "/default.nix") scanResult);
+    && (builtins.elem (baseModulesPath + "/core.nix") scanResult)
+    && (builtins.elem (baseModulesPath + "/security.nix") scanResult)
+    && !(builtins.elem (baseModulesPath + "/default.nix") scanResult);
 in {
   # 返回测试结果
   testResults = {
-    inherit containsSddm containsXserver containsDefault notEmpty allTestsPass;
+    inherit containsCore containsSecurity containsDefault notEmpty allTestsPass;
   };
 
   # 调试信息
@@ -44,8 +44,8 @@ in {
     scanResultLength = builtins.length scanResult;
     shouldContain = shouldContain;
     shouldNotContain = shouldNotContain;
-    servicesPath = toString servicesPath;
-    inherit containsSddm containsXserver containsDefault notEmpty;
+    baseModulesPath = toString baseModulesPath;
+    inherit containsCore containsSecurity containsDefault notEmpty;
     allTestsPass = allTestsPass;
   };
 
@@ -57,8 +57,8 @@ in {
     ${toString scanResult}
 
     Critical issues:
-    - SDDM module found: ${toString containsSddm}
-    - Xserver module found: ${toString containsXserver}
+    - core.nix found: ${toString containsCore}
+    - security.nix found: ${toString containsSecurity}
     - Default.nix correctly excluded: ${toString (
       if !containsDefault
       then "true"
@@ -72,13 +72,13 @@ in {
     scanPaths function verification failed.
 
     Expected behavior:
-    - Should find sddm.nix: ${
-      if containsSddm
+    - Should find core.nix: ${
+      if containsCore
       then "✅"
       else "❌"
     }
-    - Should find xserver.nix: ${
-      if containsXserver
+    - Should find security.nix: ${
+      if containsSecurity
       then "✅"
       else "❌"
     }
@@ -93,7 +93,7 @@ in {
       else "❌"
     }
 
-    This means your services modules ${
+    This means your base modules ${
       if allTestsPass
       then "ARE"
       else "are NOT"
