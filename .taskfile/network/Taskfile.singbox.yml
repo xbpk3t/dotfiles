@@ -1,0 +1,27 @@
+---
+version: '3'
+
+
+tasks:
+  darwin:
+    platforms: [darwin]
+    summary: "task -g singbox:darwin"
+    desc: mac的singbox总是遇到各种问题，所以用这个来
+    cmds:
+      - sudo launchctl bootout system /Library/LaunchDaemons/local.singbox.tun.plist
+      - sudo launchctl bootstrap system /Library/LaunchDaemons/local.singbox.tun.plist
+      - sudo launchctl kickstart -k "system/local.singbox.tun"
+
+
+  # Create a script to download sing-box configuration with retry logic
+  # 独立的配置下载脚本，与 sing-box 主服务解耦
+  update-config:
+    desc: 下载订阅并原子更新 sing-box 配置（需要 SINGBOX_URL）。暂时用不到了，已经不再用这种 download config.json 的方案了。
+    summary: "task -g update-config"
+    preconditions:
+      - sh: command -v curl
+        msg: "找不到 curl，可通过 env CURL=... 指定绝对路径"
+      - sh: command -v jq
+        msg: "找不到 jq，可通过 env JQ=... 指定绝对路径"
+    set: [pipefail]
+    cmd: nu ./scripts/singbox/update-config.nu

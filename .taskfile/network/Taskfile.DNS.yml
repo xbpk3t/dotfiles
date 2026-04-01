@@ -1,0 +1,134 @@
+---
+version: '3'
+
+
+# [2026-03-31] 本轮调整说明
+#
+# 当前这个文件只保留 dig 相关 task，用于高频 DNS 查询动作。
+#
+# 本轮移除了以下 CLI 相关 task：
+# - systemd-resolved: status / flush / stats / cache / query / dump
+# - nscd: invalidate / stats
+# - dnsmasq: restart / reload / stats
+# - unbound: flush / stats
+# - bind/rndc: flush / flushname / flushtree
+# - getent: hosts / ahosts
+#
+# 删除原因：
+# - 这些 task 大多属于本机 resolver / cache / DNS service 管理，不属于高频 DNS查询动作。
+# - 它们和 dig 的“查记录 / 查链路 / 指定 resolver 查询”不是同一层问题，放在一起会让 Taskfile 再次变成大杂烩。
+# - 其中不少 task 带有明显的系统环境绑定或管理语义，依赖特定服务是否存在，不适合作为当前这轮 DNS 入口的默认保留内容。
+# - 这轮收敛的目标不是覆盖更多命令，而是把 DNS task 收敛到最常重复使用的查询场景。
+
+
+vars:
+  DIG_TYPES: "A AAAA MX NS TXT SOA SRV"
+  DIG_ANSWER: "dig +noall +answer"
+  DIG_SHORT: "dig +short"
+
+tasks:
+  _dig:
+    internal: true
+    desc: "Template: dig query"
+    vars:
+      HOST: ''
+      MODE: ''
+      RESOLVER: ''
+      TYPE: ''
+    platforms: [linux, darwin]
+    preconditions:
+      - sh: command -v dig >/dev/null 2>&1
+        msg: dig not found
+      - sh: 'echo " {{.DIG_TYPES}} " | grep -q " {{.TYPE}} "'
+        msg: 'Invalid TYPE="{{.TYPE}}". Allowed: {{.DIG_TYPES}}'
+    cmds:
+      - |
+        if [ "{{.MODE}}" = "short" ]; then
+          {{.DIG_SHORT}} {{ if .RESOLVER }}@{{.RESOLVER}} {{ end }}{{.HOST}} {{.TYPE}}
+        else
+          {{.DIG_ANSWER}} {{ if .RESOLVER }}@{{.RESOLVER}} {{ end }}{{.HOST}} {{.TYPE}}
+        fi
+
+  answer:
+    desc: Query a DNS record with answer output
+    summary: "task -g dns:answer HOST=<host> TYPE=<type>"
+    platforms: [linux, darwin]
+    requires:
+      vars: [HOST, TYPE]
+    vars:
+      MODE: answer
+      HOST: '{{.HOST | default ""}}'
+      TYPE: '{{.TYPE | default ""}}'
+    cmds:
+      - task: _dig
+        vars:
+          HOST: '{{.HOST}}'
+          TYPE: '{{.TYPE}}'
+          MODE: '{{.MODE}}'
+
+  short:
+    desc: Query a DNS record with short output
+    summary: "task -g dns:short HOST=<host> TYPE=<type>"
+    platforms: [linux, darwin]
+    requires:
+      vars: [HOST, TYPE]
+    vars:
+      MODE: short
+      HOST: '{{.HOST | default ""}}'
+      TYPE: '{{.TYPE | default ""}}'
+    cmds:
+      - task: _dig
+        vars:
+          HOST: '{{.HOST}}'
+          TYPE: '{{.TYPE}}'
+          MODE: '{{.MODE}}'
+
+  resolver:
+    desc: Query via a specific DNS server
+    summary: "task -g dns:resolver HOST=<host> TYPE=<type> RESOLVER=<ip>"
+    platforms: [linux, darwin]
+    requires:
+      vars: [HOST, TYPE, RESOLVER]
+    vars:
+      MODE: answer
+      HOST: '{{.HOST | default ""}}'
+      TYPE: '{{.TYPE | default ""}}'
+      RESOLVER: '{{.RESOLVER | default ""}}'
+    cmds:
+      - task: _dig
+        vars:
+          HOST: '{{.HOST}}'
+          TYPE: '{{.TYPE}}'
+          MODE: '{{.MODE}}'
+          RESOLVER: '{{.RESOLVER}}'
+
+  trace:
+    desc: Trace the DNS delegation path
+    summary: "task -g dns:trace HOST=<host> TYPE=<type>"
+    platforms: [linux, darwin]
+    requires:
+      vars: [HOST, TYPE]
+    vars:
+      HOST: '{{.HOST | default ""}}'
+      TYPE: '{{.TYPE | default ""}}'
+    preconditions:
+      - sh: command -v dig >/dev/null 2>&1
+        msg: dig not found
+      - sh: 'echo " {{.DIG_TYPES}} " | grep -q " {{.TYPE}} "'
+        msg: 'Invalid TYPE="{{.TYPE}}". Allowed: {{.DIG_TYPES}}'
+    cmds:
+      - dig {{.HOST}} {{.TYPE}} +trace
+
+  reverse:
+    desc: Reverse lookup for an IP
+    summary: "task -g dns:reverse IP=<ip>"
+    platforms: [linux, darwin]
+    requires:
+      vars: [IP]
+    vars:
+      IP: '{{.IP | default ""}}'
+    preconditions:
+      - sh: command -v dig >/dev/null 2>&1
+        msg: dig not found
+    cmds:
+      - dig -x {{.IP}} +noall +answer

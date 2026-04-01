@@ -1,0 +1,144 @@
+---
+version: '3'
+
+# [2026-03-31] 把 tc 整合到了 Taskfile.iproute2.yml 里
+#
+# 本轮移除的工具级 task：
+# - tc
+#
+# 为什么把 tc 收进这里：
+# - tc 属于 iproute2 工具族，继续拆成独立 Taskfile 的收益不高。
+# - 当前保留的 qdisc / class / filter 都是接口级只读观察动作，和 addr / route /
+#   rule / neigh 属于同一层系统网络状态检查。
+# - 因此本轮把 tc 收进 Taskfile.iproute2.yml，统一成“IP 路由与接口状态”入口。
+
+tasks:
+  link:
+    desc: ip link show (list links)
+    summary: "task -g link"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v ip
+        msg: ip not found
+    cmds:
+      - ip link show
+
+  addr:
+    desc: ip addr show (list addresses)
+    summary: "task -g addr"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v ip
+        msg: ip not found
+    cmds:
+      - ip addr show
+
+  route:
+    desc: ip route show (IPv4 routes)
+    summary: "task -g route"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v ip
+        msg: ip not found
+    cmds:
+      - ip route show
+
+  route6:
+    desc: ip -6 route show (IPv6 routes)
+    summary: "task -g route6"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v ip
+        msg: ip not found
+    cmds:
+      - ip -6 route show
+
+  rule:
+    desc: ip rule show (policy routing)
+    summary: "task -g rule"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v ip
+        msg: ip not found
+    cmds:
+      - ip rule show
+
+  neigh:
+    desc: ip neigh show (ARP/NDP)
+    summary: "task -g neigh"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v ip
+        msg: ip not found
+    cmds:
+      - ip neigh show
+
+  monitor:
+    desc: ip monitor (addr/route/neigh changes)
+    summary: "task -g monitor"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v ip
+        msg: ip not found
+    cmds:
+      # 适合排查路由/邻居表变化
+      - ip monitor
+
+  route:get:
+    desc: ip route get (path to destination)
+    summary: "task -g route:get DST=<ip|host>"
+    vars:
+      DST: ''
+    platforms: [linux]
+    requires:
+      vars: [DST]
+    preconditions:
+      - sh: command -v ip
+        msg: ip not found
+    cmds:
+      # 查看目的地址的实际选路
+      - ip route get {{.DST}}
+
+  qdisc:
+    desc: tc qdisc show
+    summary: "task -g qdisc IFACE=<iface>"
+    vars:
+      IFACE: '{{.IFACE | default ""}}'
+    platforms: [linux]
+    requires:
+      vars: [IFACE]
+    preconditions:
+      - sh: command -v tc >/dev/null 2>&1
+        msg: tc not found
+    cmds:
+      # qdisc = queueing discipline，适合看接口当前队列策略
+      - sudo tc qdisc show dev {{.IFACE}}
+
+  class:
+    desc: tc class show
+    summary: "task -g class IFACE=<iface>"
+    vars:
+      IFACE: '{{.IFACE | default ""}}'
+    platforms: [linux]
+    requires:
+      vars: [IFACE]
+    preconditions:
+      - sh: command -v tc >/dev/null 2>&1
+        msg: tc not found
+    cmds:
+      - sudo tc class show dev {{.IFACE}}
+
+  filter:
+    desc: tc filter show
+    summary: "task -g filter IFACE=<iface>"
+    vars:
+      IFACE: '{{.IFACE | default ""}}'
+    platforms: [linux]
+    requires:
+      vars: [IFACE]
+    preconditions:
+      - sh: command -v tc >/dev/null 2>&1
+        msg: tc not found
+    cmds:
+      # filter 视图适合检查 tc classifier / action 的挂载情况
+      - sudo tc filter show dev {{.IFACE}}
