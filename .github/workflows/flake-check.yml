@@ -1,0 +1,30 @@
+name: flake-check
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+concurrency:
+  # 避免同一分支上的旧任务继续占用 runner。
+  group: flake-check-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  flake-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v19
+
+      - name: Enable Nix cache
+        uses: DeterminateSystems/magic-nix-cache-action@v13
+
+      - name: Run flake checks
+        # 这里故意只调用 `nix flake check`，
+        # 让 CI 复用仓库在 flake `checks` 中定义的统一测试清单，而不是在 workflow 里复制一份。
+        run: nix flake check --accept-flake-config
