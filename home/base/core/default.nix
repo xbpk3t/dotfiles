@@ -9,8 +9,23 @@
   home.packages = with pkgs;
     [
       # Basic utilities
+
+      # [7 Amazing Terminal API Tools You Need To Try](https://www.youtube.com/watch?v=eyXxEBZMVQI)
       curl
       wget
+      # https://mynixos.com/nixpkgs/package/httpie
+      # httpie
+
+      # https://github.com/ducaale/xh
+      # https://posting.sh/
+
+      #- cURL
+      #- xh
+      #- Nushell http
+      #- Httpie
+      #- Curlie
+      #- Kulala nvim
+      #- Posting
 
       tree
 
