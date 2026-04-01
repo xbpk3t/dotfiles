@@ -1,4 +1,8 @@
-{pkgs, ...}: {
+{
+  lib,
+  pkgs,
+  ...
+}: {
   home.packages = with pkgs; [
     # Node.js 生态
     nodejs
@@ -8,7 +12,8 @@
     nodePackages.serve # https://github.com/vercel/serve 用来preview本地打包好的dist文件（vite可以直接vite preview）
 
     # [2026-01-21] rebuild error, hash mismatch, so comment it
-    # tsx
+    # https://mynixos.com/nixpkgs/package/tsx
+    tsx
 
     typescript
     # error: 'ts-node' was removed because it is unmaintained, and since NodeJS 22.6.0+, experimental TypeScript support is built-in to NodeJS.
@@ -24,6 +29,16 @@
     # https://mynixos.com/nixpkgs/package/stylelint
     stylelint
   ];
+
+  # 注意 pnpm 跟 npm 的配置文件不同。而 npm本身是支持 hm配置的，所以采用这个方式配置。
+  # https://mynixos.com/nixpkgs/options/programs.npm
+  home.file = lib.mkIf pkgs.stdenv.isDarwin {
+    "Library/Preferences/pnpm/rc".source = ./pnpmrc;
+  };
+
+  xdg.configFile = lib.mkIf pkgs.stdenv.isLinux {
+    "pnpm/rc".source = ./pnpmrc;
+  };
 
   # https://mynixos.com/home-manager/options/programs.bun
   # [2026-01-19] 安装 OMO 需要先安装bun

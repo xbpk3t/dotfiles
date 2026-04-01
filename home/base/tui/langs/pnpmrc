@@ -1,0 +1,22 @@
+# 只允许安装至少 7 天前发布的包，降低恶意新版本被立即安装的风险
+minimumReleaseAge=10080
+
+# 禁止传递依赖通过 git / tarball URL 等非常规源拉取代码，收窄供应链来源
+blockExoticSubdeps=true
+
+# 如果包的新版本相较旧版本降低了信任级别，则拒绝安装
+# 这可以拦住一部分“包被接管后重新发布”的场景
+trustPolicy=no-downgrade
+
+# 对发布已久的老包不再强制执行 trustPolicy，减少历史包缺少 provenance 带来的误伤
+trustPolicyIgnoreAfter=43200
+
+# 在执行 pnpm run / pnpm exec 前，若依赖状态与锁文件不一致则直接报错
+# 避免在脏的 node_modules 状态下误执行脚本
+verifyDepsBeforeRun=error
+
+# 更激进的 build script 审批策略先不默认全局开启，否则容易把现有项目安装流程打断。
+# 如果后续你要进一步收紧，可以按项目逐步启用下面两项，并显式维护 allowBuilds。
+# strictDepBuilds=true
+# allowBuilds:
+#   esbuild=true

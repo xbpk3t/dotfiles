@@ -7,7 +7,10 @@
   programs.uv = {
     enable = true;
 
+    # https://docs.astral.sh/uv/reference/settings/
     settings = {
+      # 只允许解析 7 天前发布的包，降低刚发布恶意版本被立即安装的风险
+      exclude-newer = "7 days";
       python-downloads = "never";
       python-preference = "system";
     };
