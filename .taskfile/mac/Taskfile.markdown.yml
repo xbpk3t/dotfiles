@@ -13,4 +13,4 @@ tasks:
     cmd: gm {{.CLI_ARGS}}
     preconditions:
       - sh: command -v gm
-        msg: Pls install gm (using go install github.com/kpym/gm@latest)
+        msg: Please install gm (using go install github.com/kpym/gm@latest)

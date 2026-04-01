@@ -12,16 +12,21 @@ version: "3"
 #- pnpm rm -g <pkg> # 全局卸载，相当于npm uninstall，rm是uninstall的alias，需要注意的是只写pkg名就可以了，不要加version. 比如 npm rm -g create-react-app.
 
 tasks:
-  config:
+  default:
     desc: "config 任务"
-    summary: "task -g config"
+    summary: "task -g pnpm"
+    silent: true
+    interactive: true
     cmds:
+      - echo "pnpm global config:"
+      - pnpm config list --global
       - echo "所有全局包列表:"
       - pnpm list -g
       - echo "全局包位置:"
       - pnpm root -g
       - echo "【存储管理】store位置:"
       - pnpm store path
+
 
   cleanup:
     desc: "cleanup 任务"
@@ -45,3 +50,7 @@ tasks:
       - npm-check
     dir: '{{.USER_WORKING_DIR}}'
     interactive: true
+
+  # https://github.com/millionco/react-doctor
+  # pnpm install -g react-doctor 直接安装到global cli
+  # react-doctor . --verbose          # 显示具体文件和行号
