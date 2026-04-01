@@ -1,10 +1,6 @@
 ---
 name: diagram-picker
 description: Pick diagram type -> tool, then generate source + SVG in .diagram with fixed naming rules
-tool-id: diagram-picker
-tool-binary: mermaid,plantuml,d2,pikchr,typst
-tool-version: unknown
-generated-at: 2026-03-05T00:00:00.000Z
 ---
 
 # diagram-picker
