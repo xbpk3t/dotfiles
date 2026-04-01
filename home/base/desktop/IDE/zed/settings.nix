@@ -402,6 +402,9 @@ in {
       show_author_name = true;
     };
     hunk_style = "staged_hollow";
+
+    # 双栏diff view
+    diff_view_style = "split";
   };
 
   # 也就是 CMD+Shift+O 打开的文件搜索框

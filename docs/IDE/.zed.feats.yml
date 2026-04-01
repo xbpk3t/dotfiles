@@ -107,3 +107,8 @@
   isFix: false
   score: 5
   # [Single-File Git Diff from Git Panel · zed-industries/zed · Discussion #38420](https://github.com/zed-industries/zed/discussions/38420)
+
+
+- bug: 新开的terminal tab不会直接读取到最新的env
+  foundDate: 2026-03-31
+  des: 比如说我在nix里新增了某个codex的provider（需要补充相应env），在goland里，新开tab即可直接读取并使用，但是在zed里，就会报 `Missing env variable`，很明显就是没有读取到
