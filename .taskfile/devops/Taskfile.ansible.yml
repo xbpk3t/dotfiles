@@ -26,29 +26,29 @@ vars:
 
 
 tasks:
-  ping:
-    desc: "ping 任务"
-    summary: "task -g ping"
-    cmds:
-      - ansible {{.CLI_ARGS}} --list-host # 查看组中的host清单
-      - ansible {{.CLI_ARGS}} -m ping -vvv # 确保ssh能够连接所有目标服务器(请一定确认ssh连接已建立，因为未建立ssh连接也会成功)
-      - ansible {{.CLI_ARGS}} -a uptime
-      - ansible {{.CLI_ARGS}} -m command -a 'echo Hello World on Docker.'
-  #      - ansible rancher -a 'hostname' -vvv
-  #      - ansible rancher --list
-  #
-  #      - ansible rancher -a 'docker ps -a'
-  #
-  #      - ansible rancher --check -m script -a './k8s-install.sh' -i hosts
-  #      - ansible rancher -m script -a './k8s-install.sh' -i hosts
-  #      - ansible rancher -m script -a './k8s-install.sh'
+#  ping:
+#    desc: "ping 任务"
+#    summary: "task -g ping"
+#    cmds:
+#      - ansible {{.CLI_ARGS}} --list-host # 查看组中的host清单
+#      - ansible {{.CLI_ARGS}} -m ping -vvv # 确保ssh能够连接所有目标服务器(请一定确认ssh连接已建立，因为未建立ssh连接也会成功)
+#      - ansible {{.CLI_ARGS}} -a uptime
+#      - ansible {{.CLI_ARGS}} -m command -a 'echo Hello World on Docker.'
+#  #      - ansible rancher -a 'hostname' -vvv
+#  #      - ansible rancher --list
+#  #
+#  #      - ansible rancher -a 'docker ps -a'
+#  #
+#  #      - ansible rancher --check -m script -a './k8s-install.sh' -i hosts
+#  #      - ansible rancher -m script -a './k8s-install.sh' -i hosts
+#  #      - ansible rancher -m script -a './k8s-install.sh'
 
 
-  centos:
-    desc: "centos 任务"
-    summary: "task -g centos"
-    cmds:
-      - ansible-playbook -v playbook/centos.yml -i hosts # 执行并查看输出细节
+#  centos:
+#    desc: "centos 任务"
+#    summary: "task -g centos"
+#    cmds:
+#      - ansible-playbook -v playbook/centos.yml -i hosts # 执行并查看输出细节
 
   #      - # ansible-playbook -v playbook/helloworld.yml -i hosts
   #      - # ansible-playbook -v playbook/k8s.yml -i hosts
@@ -83,7 +83,7 @@ tasks:
 
 
   # [chusiang/ansible-managed-node.dockerfile: Building the Docker image with run the OpenSSH daemon and Python for Ansible.](https://github.com/chusiang/ansible-managed-node.dockerfile) 用来在本地玩ansible
-  setup:
-    desc: "setup 任务"
-    summary: "task -g setup"
-    cmd: docker run --name server1 -d -P chusiang/ansible-managed-node:centos-7
+#  setup:
+#    desc: "setup 任务"
+#    summary: "task -g setup"
+#    cmd: docker run --name server1 -d -P chusiang/ansible-managed-node:centos-7

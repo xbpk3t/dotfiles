@@ -121,14 +121,14 @@ tasks:
             - remove # 删除软件包及依赖
     cmds:
       - echo "Starting {{.SERVICE}}"
-      - task: execute
+      - task: _execute
         vars:
           ACTION: "{{.SERVICE}}"
           ARGS: "{{.CLI_ARGS}}"
 
 
   # 执行命令的模板任务
-  execute:
+  _execute:
     internal: true
     vars:
       ACTION: '{{.ACTION}}'
