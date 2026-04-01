@@ -69,7 +69,8 @@ in {
         # 只有显式使用 `--profile ice|test|ggboom` 时，才切换到对应第三方 provider。
 
         # https://ldoh.105117.xyz/
-        # https://linux.do/t/topic/1837955/39 在mac用开 ChatGPT Plus (用)
+
+        # https://linux.do/t/topic/1837955/39 在mac用开 ChatGPT Plus (用土区+礼品卡，¥80/月)
         model_providers = {
           # https://linux.do/t/topic/1806073
           # https://ice.v.ua/dashboard
@@ -90,7 +91,7 @@ in {
 
           # https://linux.do/t/topic/1558896
           # https://ai.qaq.al/dashboard
-          # https://sign.qaq.al/redeem
+          # https://sign.qaq.al/app
           ggboom = {
             name = "ggboom";
             base_url = "https://ai.qaq.al/v1";
@@ -122,6 +123,15 @@ in {
             name = "ark";
             base_url = "https://windhub.cc/v1";
             env_key = "OPENAI_API_KEY_ARK";
+            wire_api = "responses";
+          };
+
+          # https://free.9e.nz/dashboard
+          # https://linux.do/t/topic/1855760
+          kkk = {
+            name = "kkk";
+            base_url = "https://free.9e.nz/v1";
+            env_key = "OPENAI_API_KEY_KKK";
             wire_api = "responses";
           };
         };
@@ -156,10 +166,14 @@ in {
             model_provider = "ark";
             model = "gpt-5.4";
           };
+
+          kkk = {
+            model_provider = "kkk";
+            model = "gpt-5.4";
+          };
         };
       };
-      custom-instructions = ''
-      '';
+      custom-instructions = "";
     };
 
     home = {
@@ -182,6 +196,8 @@ in {
         OPENAI_API_KEY_DGB = "$(cat ${config.sops.secrets.LLM_Sub2API_dgb.path})";
 
         OPENAI_API_KEY_ARK = "$(cat ${config.sops.secrets.LLM_Sub2API_ark.path})";
+
+        OPENAI_API_KEY_KKK = "$(cat ${config.sops.secrets.LLM_Sub2API_kkk.path})";
       };
       shellAliases = {
         # 每次启动 codex 时动态注入 GitHub PAT，避免把 token 写入静态配置。
@@ -196,6 +212,7 @@ in {
         codex-zzz = "codex --profile zzz";
         codex-dgb = "codex --profile dgb";
         codex-ark = "codex --profile ark";
+        codex-kkk = "codex --profile kkk";
       };
     };
 

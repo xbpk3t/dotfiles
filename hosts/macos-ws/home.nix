@@ -21,8 +21,8 @@
 
   modules.AI = {
     codex.enable = true;
-    opencode.enable = true;
     skills.enable = true;
+    opencode.enable = false;
   };
 
   modules.langs = {
