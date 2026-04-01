@@ -24,7 +24,7 @@ summary: 汇总当前仓库中 VPS 内核参数调优与内核安全方向的长
 - 相关实现集中在：
   - `lib/vps-sysctl.nix`
   - `modules/nixos/vps/sysctl.nix`
-- 现有详细方案记录见 [`2026-01-26-vps-kernel-sysctl.md`](/Users/luck/Desktop/dotfiles/docs/kernel/2026-01-26-vps-kernel-sysctl.md)。
+- 现有详细方案记录见 [`2026-01-26-vps-kernel-sysctl.md`](docs/kernel/2026-01-26-vps-kernel-sysctl.md)。
 
 ## VPS Kernel Security
 
@@ -44,4 +44,4 @@ summary: 汇总当前仓库中 VPS 内核参数调优与内核安全方向的长
 
 ## References
 
-- VPS 内核 / sysctl 调优方案：[`2026-01-26-vps-kernel-sysctl.md`](/Users/luck/Desktop/dotfiles/docs/kernel/2026-01-26-vps-kernel-sysctl.md)
+- VPS 内核 / sysctl 调优方案：[`2026-01-26-vps-kernel-sysctl.md`](docs/kernel/2026-01-26-vps-kernel-sysctl.md)
