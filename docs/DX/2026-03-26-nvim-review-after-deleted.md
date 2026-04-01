@@ -45,7 +45,7 @@ helix相较于nvim的优缺点真就是一体两面。helix的内存占用仅30M
     - url: https://github.com/ahmedkhalf/project.nvim
       score: 4
 
-    - url: https://github.com/mistweaverco/kulala.nvim # [7 Amazing Terminal API Tools You Need To Try](https://www.youtube.com/watch?v=eyXxEBZMVQI)
+    - url: https://github.com/mistweaverco/kulala.nvim
 
     - url: https://github.com/jellydn/hurl.nvim/
     - url: https://github.com/mfussenegger/nvim-dap

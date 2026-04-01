@@ -67,7 +67,7 @@ URL: <https://github.com/nlewo/comin>
 
 具体原因：
 
-- 你的仓库已经在 Kubernetes 层采用了明显的 GitOps 思路：[`homelab-flux-sync.sh`](/Users/luck/Desktop/dotfiles/homelab-flux-sync.sh) 和 `manifests/` + Flux 已经证明你接受“Git 为事实源”。
+- 你的仓库已经在 Kubernetes 层采用了明显的 GitOps 思路：[`homelab-flux-sync.sh`](homelab-flux-sync.sh) 和 `manifests/` + Flux 已经证明你接受“Git 为事实源”。
 - 对 NixOS 主机层，如果你后续也想走“目标机自拉取、自应用”的 pull 模式，`comin` 在理念上是能接上的。
 - 但你当前**明确的主机部署主链路**是 `deploy-rs`，而且仓库里还有从 Colmena 迁移到 `deploy-rs` 的文档，这说明你已经做过部署范式收敛，不宜轻易再分叉。
 - 因此它不是没用，而是**只在你明确想把主机层也改成 GitOps pull 模式时才有用**；否则会和现有 `deploy-rs` 主链路形成双轨。
@@ -83,9 +83,9 @@ URL: <https://github.com/nlewo/comin>
 
 这和当前仓库的现状形成了一个很自然的对比：
 
-- Kubernetes workload 层已经是明显的 GitOps/pull 模式，见 [`homelab-flux-sync.sh`](/Users/luck/Desktop/dotfiles/homelab-flux-sync.sh) 与 `manifests/`。
-- 主机层已经收敛到 `deploy-rs`，而且是有意为之，不是临时拼出来的，见 [`docs/deploy/deploy-rs-migration.md`](/Users/luck/Desktop/dotfiles/docs/deploy/deploy-rs-migration.md)。
-- `deploy-rs` 已经深度接入 flake outputs、checks、inventory adapter 和 Taskfile，见 [`outputs/default.nix`](/Users/luck/Desktop/dotfiles/outputs/default.nix)、[`lib/inventory/utils.nix`](/Users/luck/Desktop/dotfiles/lib/inventory/utils.nix)、[`/.taskfile/nix/Taskfile.deploy.yml`](/Users/luck/Desktop/dotfiles/.taskfile/nix/Taskfile.deploy.yml)。
+- Kubernetes workload 层已经是明显的 GitOps/pull 模式，见 [`homelab-flux-sync.sh`](homelab-flux-sync.sh) 与 `manifests/`。
+- 主机层已经收敛到 `deploy-rs`，而且是有意为之，不是临时拼出来的，见 [`docs/deploy/deploy-rs-migration.md`](docs/deploy/deploy-rs-migration.md)。
+- `deploy-rs` 已经深度接入 flake outputs、checks、inventory adapter 和 Taskfile，见 [`outputs/default.nix`](outputs/default.nix)、[`lib/inventory/utils.nix`](lib/inventory/utils.nix)、[`/.taskfile/nix/Taskfile.deploy.yml`](.taskfile/nix/Taskfile.deploy.yml)。
 
 所以问题不是 “comin 能不能用”，而是：
 

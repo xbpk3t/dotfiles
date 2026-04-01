@@ -23,7 +23,7 @@ summary: 汇总当前仓库中 k3s 集群的架构取舍、组件边界、常用
 
 - 当前集群以 `k3s + FluxCD` 为主线，强调最小 bootstrap、分层声明和逐步收敛。
 - 长期稳定结论统一记录在本文件。
-- 历史排障过程保留在 review 文档中，例如 [`2026-01-28-k3s-fluxcd-bootstrapping.md`](/Users/luck/Desktop/dotfiles/docs/k3s/2026-01-28-k3s-fluxcd-bootstrapping.md)。
+- 历史排障过程保留在 review 文档中，例如 [`2026-01-28-k3s-fluxcd-bootstrapping.md`](docs/k3s/2026-01-28-k3s-fluxcd-bootstrapping.md)。
 
 ## GitOps Baseline
 
@@ -241,4 +241,4 @@ https://id.${SECRET_DOMAIN}/login/setup
 
 ## References
 
-- 历史 bootstrap / 排障记录：[`2026-01-28-k3s-fluxcd-bootstrapping.md`](/Users/luck/Desktop/dotfiles/docs/k3s/2026-01-28-k3s-fluxcd-bootstrapping.md)
+- 历史 bootstrap / 排障记录：[`2026-01-28-k3s-fluxcd-bootstrapping.md`](docs/k3s/2026-01-28-k3s-fluxcd-bootstrapping.md)

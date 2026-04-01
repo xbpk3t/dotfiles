@@ -188,7 +188,7 @@ task tf:apply STACK=infra/stacks/homelab/cloudflare/account/d1
 
 以 DNS 为例：
 
-- 改 [infra/stacks/homelab/cloudflare/lucc.dev/dns/locals.tf](/Users/luck/Desktop/dotfiles/infra/stacks/homelab/cloudflare/lucc.dev/dns/locals.tf)
+- 改 [infra/stacks/homelab/cloudflare/lucc.dev/dns/locals.tf](infra/stacks/homelab/cloudflare/lucc.dev/dns/locals.tf)
 - 然后跑：
 
 ```bash
