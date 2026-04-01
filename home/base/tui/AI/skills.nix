@@ -5,6 +5,13 @@
   ...
 }: let
   cfg = config.modules.AI.skills;
+  remoteCatalog = import ./skills-catalog.nix;
+  remoteSources =
+    lib.mapAttrs (_: repo: {
+      inherit (repo) input subdir;
+    })
+    remoteCatalog;
+  remoteEnabledSkills = lib.flatten (lib.mapAttrsToList (_: repo: repo.skills) remoteCatalog);
 in {
   imports = [
     inputs.agent-skills.homeManagerModules.default
@@ -23,20 +30,29 @@ in {
     # https://github.com/i9wa4/dotfiles/blob/main/nix/home-manager/modules/agent-skills.nix
     programs.agent-skills = {
       enable = true;
-      sources = {
-        local = {
-          path = ./skills;
-        };
-      };
+      sources =
+        {
+          local = {
+            path = ./skills;
+          };
+        }
+        // remoteSources;
+
       skills = {
-        # enableAll = [ "local" ];
-        enableAll = true;
+        # 注意这里没有 enableAll = true，因为如果整仓开启会让配置失去控制力，不利于指定需要的skills
+        enableAll = ["local"];
+        enable = remoteEnabledSkills;
       };
 
+      # 注意这个 targets 是用来把 skills folder 放到不同cli工具的folder，以实现skills的复用。所以所有这里配置了的 targets 里的 skills 都是完全一致的。
       targets.codex = {
         enable = true;
         # dest = ".agents/skills";
         dest = ".codex/skills";
+        # 技术要点：copy-tree 避免 symlink 在部分工具/环境中失效
+        #        structure = "copy-tree";
+        # structure = "link";
+        # structure = "symlink-tree";
         # link: home.file symlinks
         # symlink-tree and copy-tree run in home.activation.
         # symlink-tree: rsync -a --delete (preserve symlinks)
@@ -46,14 +62,5 @@ in {
         structure = "link";
       };
     };
-
-    # [2026-03-08] 直接用taskfile管理第三方skills了，所以注释掉
-    #  home.file.".agents/.skill-lock.json" = {
-    #    source =
-    #      config.lib.file.mkOutOfStoreSymlink
-    #      "${config.home.homeDirectory}/Desktop/dotfiles/home/base/tui/AI/.skill-lock.json";
-    #
-    #    force = true;
-    #  };
   };
 }
