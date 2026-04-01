@@ -1,10 +1,6 @@
 ---
 name: jq
 description: JSON processor for filtering, transforming, and extracting data
-tool-id: jq
-tool-binary: jq
-tool-version: jq-1.8.1
-generated-at: 2026-03-05T00:00:00.000Z
 ---
 # jq
 
