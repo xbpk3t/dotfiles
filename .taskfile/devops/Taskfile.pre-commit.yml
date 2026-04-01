@@ -27,6 +27,36 @@ vars:
     - deadnix
 
 
+# [2026-03-31] 精简 pre-commit task
+#
+# 本轮移除的 task：
+# - init-template
+# - migrate
+# - try-repo
+#
+# 删除原因：
+# - 这三个动作都不是当前仓库里高频、稳定的日常 workflow。
+# - init-template 和 migrate 更偏一次性初始化 / 历史配置迁移，属于“知道有这个命令
+#   即可”的低频操作，不值得长期挂在 Taskfile 主入口里。
+# - try-repo 更偏 hook 开发 / 调试场景，不像普通仓库使用者会反复执行。
+# - 另外，init-template 和 try-repo 都依赖 CLI_ARGS 透传，多参数语义不清，也不符合
+#   当前这轮 Taskfile 收敛方向。
+#
+# 后续又继续移除的 task：
+# - update
+# - uninstall
+#
+# 进一步删除原因：
+# - update 只是 pre-commit autoupdate 的单步封装，而 maintain 已经包含 clean / gc /
+#   install-hooks / autoupdate 这一整套维护流程；当前不再单独保留一个更轻的 update
+#   入口。
+# - uninstall 的语义只是移除当前仓库 .git/hooks/ 里的 pre-commit hook script，
+#   不会删除 .pre-commit-config.yaml，也不会清理本地 cache；对当前仓库的日常维护来说，
+#   这个动作过于边缘，不值得继续挂在主入口里。
+
+
+
+
 tasks:
   default:
     desc: "default 任务"
@@ -34,50 +64,6 @@ tasks:
     cmd: "{{.PC_CLI}} run --all-files"  # 检查所有文件（非暂存区）
     dir: '{{.USER_WORKING_DIR}}'
     interactive: true
-
-
-  update:
-    desc: 更新远程仓库版本
-    summary: "task -g pc:update"
-    cmd: '{{.PC_CLI}} autoupdate'
-    dir: '{{.USER_WORKING_DIR}}'
-#    internal: true
-
-
-  # 新增维护任务
-  maintain:
-    desc: 对全局Pre-commit的hook进行 clean+gc+重装 操作
-    summary: "task -g pc:maintain"
-    cmds:
-      - "{{.PC_CLI}} clean"  # 清理缓存
-      - "{{.PC_CLI}} gc"     # 垃圾回收
-      - "{{.PC_CLI}} install-hooks"  # 重装钩子
-      - task: update
-    dir: '{{.USER_WORKING_DIR}}'
-
-  init-template:
-    desc: 初始化 Git templateDir 并写入 hook 脚本
-    summary: "task -g pc:init-template [CLI_ARGS]"
-    cmd: "{{.PC_CLI}} init-templatedir {{.CLI_ARGS}}"  # 初始化Git模板
-    dir: '{{.USER_WORKING_DIR}}'
-
-  uninstall:
-    desc: 卸载 pre-commit hook 脚本
-    summary: "task -g pc:uninstall"
-    cmd: "{{.PC_CLI}} uninstall"  # 卸载钩子
-    dir: '{{.USER_WORKING_DIR}}'
-
-  migrate:
-    desc: 迁移旧版 pre-commit 配置
-    summary: "task -g pc:migrate"
-    cmd: '{{.PC_CLI}} migrate-config'  # 配置文件迁移
-    dir: '{{.USER_WORKING_DIR}}'
-
-  try-repo:
-    desc: 试运行指定仓库的 hooks
-    summary: "task -g pc:try-repo [CLI_ARGS]"
-    cmd: '{{.PC_CLI}} try-repo {{.CLI_ARGS}}'  # 测试新仓库
-    dir: '{{.USER_WORKING_DIR}}'
 
   hook:
     desc: 执行指定hook（交互式选择或直接运行检查）
@@ -88,3 +74,14 @@ tasks:
     vars:
       SELECTED:
         sh: gum choose {{.HOOKS | join " "}}
+
+  # 新增维护任务
+  maintain:
+    desc: 对全局Pre-commit的hook进行 clean+gc+重装 操作
+    summary: "task -g pc:maintain"
+    cmds:
+      - "{{.PC_CLI}} clean"  # 清理缓存
+      - "{{.PC_CLI}} gc"     # 垃圾回收
+      - "{{.PC_CLI}} install-hooks"  # 重装钩子
+      - "{{.PC_CLI}} autoupdate"  # 重装钩子
+    dir: '{{.USER_WORKING_DIR}}' # 更新远程仓库版本

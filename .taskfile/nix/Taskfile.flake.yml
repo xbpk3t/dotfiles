@@ -20,7 +20,6 @@ tasks:
     desc: "更新所有 flake 到最新版本，并查看更新内容"
     summary: "task -g update"
     cmds:
-      # - task: upgrade
       - nix flake update # nix flake update --flake ./nix
       - nix flake show
 
