@@ -1,0 +1,61 @@
+#cloud-config
+
+# 这个模板面向阿里云 ECS 上的 Ubuntu/Debian 类 VPS。
+# 用法：把其中的占位符替换掉，再作为 ECS 的 user_data 提交。
+
+# hostname 建议在实例维度显式设置，避免后续 inventory 和 SSH 提示混乱。
+hostname: REPLACE_WITH_HOSTNAME
+fqdn: REPLACE_WITH_HOSTNAME.example.com
+
+# 默认保持 UTC 更稳妥；如果机器明确只服务于中国时区，再改成 Asia/Shanghai。
+timezone: UTC
+
+# 首次启动时做基础更新。
+# 注意：package_upgrade 可能拉长 first boot 时间，甚至触发需要重启的内核更新；
+# 如果你更重视首启速度，可以先只保留 package_update。
+package_update: true
+package_upgrade: true
+
+packages:
+  - curl
+  - git
+  - htop
+  - tmux
+  - vim
+
+users:
+  - default
+  - name: deploy
+    gecos: Deploy User
+    shell: /bin/bash
+    groups:
+      - sudo
+    sudo:
+      - ALL=(ALL) NOPASSWD:ALL
+    # 推荐只走 SSH public key，不要给长期密码登录留口子。
+    lock_passwd: true
+    ssh_authorized_keys:
+      - REPLACE_WITH_YOUR_SSH_PUBLIC_KEY
+
+# 关闭 SSH password auth，收敛到 key-based login。
+# 前提：上面的 ssh_authorized_keys 已经替换成可用公钥。
+ssh_pwauth: false
+disable_root: true
+
+# write_files 适合放少量、稳定的静态文件。
+# 如果后续需要更复杂的配置管理，建议交给 Ansible/Nix，而不是继续堆在 cloud-init。
+write_files:
+  - path: /etc/motd
+    permissions: "0644"
+    content: |
+      Managed by cloud-init.
+      Host: REPLACE_WITH_HOSTNAME
+
+runcmd:
+  # cloud-init 的 runcmd 更适合做轻量 bootstrap。
+  # 这里避免塞入过长脚本，降低首启失败时的排查成本。
+  - [sh, -c, "id deploy >/dev/null 2>&1 && echo 'deploy user is ready'"]
+  - [sh, -c, "test -f /etc/motd && echo 'motd written by cloud-init'"]
+
+# final_message 会出现在 cloud-init-output.log 里，便于确认首启是否跑完。
+final_message: "cloud-init finished for ${INSTANCE_ID:-unknown-instance} after $UPTIME seconds"
