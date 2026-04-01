@@ -1,16 +1,6 @@
 {config}: {
   # 本MCP配置，可以在codex和claude-code中复用
 
-  # https://x.com/runes_leo/status/2037479240837579242
-  # web-access
-  #  读推文 → xreach
-  #  公开网页 → Jina
-  #  需要登录的站 → web-access（CDP 直连 Chrome）
-  #  浏览器交互 → Chrome MCP
-  #  反爬 → Scrapling
-  #  JS 重渲染 → Playwright
-  #  全都不行 → XCrawl 兜底
-
   # https://www.tinyfish.ai/ TinyFish MCP，这个我觉得挺好，它能让 Claude 直接上网浏览、抓取网页、做资料调研，还能返回结构化结果，不只是给一段静态回答。我最近会拿它来给自己的周刊找 AI 新闻，比如抓最近几小时 Hacker News 上比较热门的内容，再整理成一份干净的摘要列表，效率很高。
   # https://github.com/excalidraw/excalidraw-mcp Excalidraw MCP，这个更适合拿来想事情，尤其是流程图、系统结构这类内容，靠文字说不清的时候，画一下会快很多。
 
@@ -21,6 +11,34 @@
   # MAYBE: [2026-03-04] 等别人发 neo4j-mcp 了。官方3个方案：binary install, docker, 自己打包nixpkg. 前两种我不选，第三种嫌麻烦。当然mac上可以直接brew安装，但是不通用所以我也不选。
   # https://github.com/neo4j/mcp
   # https://neo4j.com/docs/mcp/current/
+
+  # https://x.com/sitinme/status/2038571689441890311
+  # 1.web-access
+  #
+  #给 Claude Code 补完整上网能力，它可以直接接管你正在用的 Chrome，连登录态都能复用。你已经登录的小红书、GitHub、各种网站，AI 都能直接进去看。还可以开子 Agent 并行查资料，查多个网站时速度明显快很多。
+  #
+  #2.Lightpanda
+  #
+  #它是直接从零造了一个给机器用的浏览器。不是 Chromium 魔改，是 Zig 从头写的。
+  #特点：更轻、更快、更适合 Agent。跑大规模网页抓取和自动化时，性能和内存占用都挺夸张，属于那种一看就知道是冲着 Agent 时代来的基础设施。
+  #
+  #3.OpenClaw Zero Token
+  #
+  #通过浏览器自动化去复用网页端能力，想办法绕开官方 API 付费体系，还做了一个兼容 OpenAI 的网关，能直接接很多第三方客户端。
+  #一句话总结就是：一个项目，尽量把 ChatGPT、Claude、Gemini 这类工具都“白嫖式”串起来。不过这种玩法合规和安全风险都不小，看看思路可以，真上生产得谨慎小心。
+  #
+  #4.bb-browser
+  #
+  #通过扩展 + CLI + MCP，把真实浏览器直接变成 Agent 的操作入口。很多常用网站都已经做好适配，AI 想搜内容、看社区、翻新闻，基本开箱就能跑。
+  #
+  #
+  #web-access → 直接接管你正在用的 Chrome 会话，复用登录态 → MCP 典型用法。
+  #Lightpanda → 从零用 Zig 写的极轻量浏览器，专门为 Agent 大规模抓取优化 → 底层浏览器基础设施，属于 MCP 生态。
+  #OpenClaw Zero Token → 浏览器自动化绕 API 付费 + OpenAI 兼容网关 → 同样是给 Agent 提供真实网页操作能力，MCP 范畴。
+  #bb-browser → 明确写着“扩展 + CLI + MCP”，把真实浏览器变成 Agent 操作入口，很多网站已预适配 → 直接就是 MCP server。
+  #
+  #总结：这几个都是给 Agent 接真实互联网的 MCP 类开源工具，而不是轻量化的 skills。
+  #想用的话，bb-browser 和 web-access 上手最快（直接接现有 Chrome）；Lightpanda 适合追求极致性能的大规模场景。
 
   # filesystem MCP: 授权范围是整个 Home 目录，AI tool 可读写此目录下文件。
   # 如需最小权限，建议改成项目目录而不是 config.home.homeDirectory。

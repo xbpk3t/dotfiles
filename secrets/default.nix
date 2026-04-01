@@ -101,6 +101,7 @@ in {
       LLM_Sub2API_zzz = mkUserSecret "LLM/sub2API/zzz";
       LLM_Sub2API_dgb = mkUserSecret "LLM/sub2API/dgb";
       LLM_Sub2API_ark = mkUserSecret "LLM/sub2API/ark";
+      LLM_Sub2API_kkk = mkUserSecret "LLM/sub2API/kkk";
 
       # singbox
       singbox_UUID = mkRootSecret "singbox/UUID";
