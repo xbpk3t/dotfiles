@@ -76,12 +76,13 @@ best_practices:
         level: SHOULD
         text: 多入口项目拆分多个 Taskfile.yml，在根 Taskfile 统一 includes  # 如果有多入口的项目，应该给每个入口各自一个Taskfile.yml（具体来说就是，在该pkg内是主Taskfile，再统一includes到项目根目录，统一调用）
       - id: cli_args_passthrough
-        title: CLI_ARGS 单参数透传
-        level: MUST
-        text: 用 {{.CLI_ARGS}} 透传命令行参数，仅限“单一位置参数”场景；涉及多个参数/flags/组合选项时用 vars 传递
+        title: CLI_ARGS 透传边界
+        level: SHOULD
+        text: 用 {{.CLI_ARGS}} 透传命令行参数时，默认只用于单一位置参数或刻意保留原生命令自由度的薄封装；若任务本身承载多个独立语义参数、参数间存在明确结构，或需要稳定接口，则应改用显式 vars
         notes:
+          - 允许保留 CLI_ARGS 的场景：单工具 wrapper、交互式 CLI、用户明确需要自由传 flags 的命令前端
           - 单一位置参数示例：单个路径、单个仓库名、单个容器名
-          - 多参数示例：目标+端口、多个 flags/选项组合、多个位置参数
+          - 应改用显式 vars 的场景：目标+端口、多个 flags/选项组合、多个位置参数、RELEASE_NAME/CHART_NAME/REPO_URL 这类结构化参数
       - id: keep_structure
         title: 保留原有结构
         level: MUST
