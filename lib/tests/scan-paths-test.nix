@@ -29,15 +29,19 @@
   in
     builtins.map (name: path + "/${name}") filteredNames;
 
+  # 注意：`builtins.attrNames` 会按字典序返回 key。
+  # 这里显式排序，避免把“元素集合正确”误写成“碰巧顺序一致”。
+  sortPaths = lib.sort builtins.lessThan;
+
   # 预期结果
-  expectedPaths = [
+  expectedPaths = sortPaths [
     "/test/path/test-module-1.nix"
     "/test/path/test-module-2.nix"
     "/test/path/subdir"
   ];
 
   # 实际结果
-  actualPaths = testScanPaths "/test/path";
+  actualPaths = sortPaths (testScanPaths "/test/path");
 
   # 测试结果
   testResults = {
