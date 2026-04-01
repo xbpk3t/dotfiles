@@ -4,8 +4,8 @@ URL: <https://github.com/zhaofengli/attic>
 
 具体原因：
 
-- 你当前已经是多主机、多平台、多 profile 部署仓库，且在 [`outputs/x86_64-linux/src/nixos-homelab.nix`](/Users/luck/Desktop/dotfiles/outputs/x86_64-linux/src/nixos-homelab.nix) 已经显式有 `remoteBuild = true` 这种跨机构建/部署考虑。
-- [`lib/nix-cache-settings.nix`](/Users/luck/Desktop/dotfiles/lib/nix-cache-settings.nix) 说明你已经非常依赖 binary cache，只是目前是“消费公共 cache”，不是“自建 cache”。
+- 你当前已经是多主机、多平台、多 profile 部署仓库，且在 [`outputs/x86_64-linux/src/nixos-homelab.nix`](outputs/x86_64-linux/src/nixos-homelab.nix) 已经显式有 `remoteBuild = true` 这种跨机构建/部署考虑。
+- [`lib/nix-cache-settings.nix`](lib/nix-cache-settings.nix) 说明你已经非常依赖 binary cache，只是目前是“消费公共 cache”，不是“自建 cache”。
 - 如果你后续想让 `macos-ws` 构建的结果更稳定地复用到 homelab/VPS，或者减少重复构建，Attic 的价值会非常直接。
 - 我给 `4/5` 而不是 `5/5`，因为它是**性能/交付效率增强项**，不是当前仓库不可或缺的缺口；你现在并没有因为“没有自建 cache”而卡住主链路。
 
