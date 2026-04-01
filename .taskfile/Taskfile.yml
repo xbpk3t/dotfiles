@@ -47,48 +47,29 @@ includes:
   sc: mac/Taskfile.scratches.yml
 
   # network
-  gost: network/proxy/Taskfile.gost.yml
-  ss: network/tcp/Taskfile.ss.yml
-  tcp: network/tcp/Taskfile.TCP.yml
-  throughput: network/perf/Taskfile.iperf.yml
-  dig: network/dns/Taskfile.dig.yml
-  whois: network/dns/Taskfile.whois.yml
-  ping: network/ip/icmp/Taskfile.ping.yml
-  tracepath: network/ip/icmp/Taskfile.tracepath.yml
-  traceroute: network/ip/icmp/Taskfile.traceroute.yml
-  nstat: network/ip/icmp/Taskfile.nstat.yml
-  nc: network/ip/icmp/Taskfile.ICMP.yml
+  gost: network/Taskfile.gost.yml
+  ss: network/Taskfile.ss.yml
+  tcp: network/Taskfile.TCP.yml
+  throughput: network/Taskfile.iperf.yml
+  dns: network/Taskfile.DNS.yml
+  ping: network/Taskfile.ping.yml
+  traceroute: network/Taskfile.traceroute.yml
   nz: network/Taskfile.z.yml
-  ip: network/ip/Taskfile.iproute2.yml
-  mtr: network/ip/icmp/Taskfile.mtr.yml
-  fping: network/ip/icmp/Taskfile.fping.yml
-  hping: network/ip/icmp/Taskfile.hping3.yml
-  nping: network/ip/icmp/Taskfile.nping.yml
-  nft: network/firewall/Taskfile.nft.yml
-  ipt: network/firewall/Taskfile.iptables.yml
-  conntrack: network/firewall/Taskfile.conntrack.yml
-  ethtool: network/ip/Taskfile.ethtool.yml
-  tc: network/ip/Taskfile.tc.yml
-  bpftool: network/ip/Taskfile.bpftool.yml
-  bpftrace: network/ip/Taskfile.bpftrace.yml
-  netperf: network/perf/Taskfile.netperf.yml
-  trafgen: network/perf/Taskfile.trafgen.yml
-  pktgen: network/perf/Taskfile.pktgen.yml
-  nmap: network/scan/Taskfile.nmap.yml
-  naabu: network/scan/Taskfile.naabu.yml
-  arping: network/l2/Taskfile.arping.yml
-  bridge: network/l2/Taskfile.bridge.yml
-  lldp: network/l2/Taskfile.lldp.yml
-  wifi: network/l2/Taskfile.iw.yml
-  macchanger: network/l2/Taskfile.macchanger.yml
-  curl: network/http/Taskfile.curl.yml
-  http: network/http/Taskfile.httpie.yml
-  wget: network/http/Taskfile.wget.yml
-  openssl: network/tls/Taskfile.openssl.yml
-  grpcurl: network/grpc/Taskfile.grpcurl.yml
-  websocat: network/ws/Taskfile.websocat.yml
+  ip: network/Taskfile.iproute2.yml
+  nping: network/Taskfile.nping.yml
+  firewall: network/Taskfile.firewall.yml
+  ethtool: network/Taskfile.ethtool.yml
+  bpftool: network/Taskfile.BPF.yml
+  bpftrace: network/Taskfile.BPF.yml
+  nmap: network/Taskfile.nmap.yml
+  naabu: network/Taskfile.naabu.yml
+  arping: network/Taskfile.arping.yml
+  wifi: network/Taskfile.iw.yml
+  curl: network/Taskfile.curl.yml
+  openssl: network/Taskfile.openssl.yml
+  grpcurl: network/Taskfile.grpcurl.yml
+  ws: network/Taskfile.ws.yml
   chrony: network/Taskfile.chrony.yml
-  nat: network/nat/Taskfile.nat.yml
 
 
   # nix

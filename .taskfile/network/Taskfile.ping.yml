@@ -1,0 +1,165 @@
+---
+version: '3'
+
+# [2026-03-31] 把 fping、mtr 整合到了 Taskfile.ping.yml 里
+#
+# 本轮移除的工具级 task：
+# - fping
+# - mtr
+#
+# 为什么把 fping 收进这里：
+# - fping 在“批量 host 探测 / CIDR sweep”上仍然有独立价值，但它并不需要继续单独占
+#   一个 Taskfile。
+# - 对当前仓库来说，单主机连通性以 ping 为主，批量探测只是同一类问题下的延伸场景。
+# - 因此把 fping 收成 ping:batch / ping:sweep，更符合“一个主入口 + 少量高频动作”的方向。
+#
+# 为什么把 mtr 收进这里：
+# - mtr 本质上是“持续路径探测 + 时延 / 丢包观察”，它和 ping、traceroute 属于同一类
+#   日常排障动作。
+# - 继续把 mtr 单独放成一个文件，会让连通性与路径质量观察分散在多个入口里。
+# - 因此本轮把 mtr 收成 ping:path / ping:path:v6，统一到连通性诊断入口下。
+#
+# 当前这个文件保留的是“连通性 / 批量探测 / 路径质量观察”这组高频动作，不再追求按
+# 工具逐个拆文件。
+#
+# 进一步说明：
+# - 这里不是把 ping、fping、mtr 当成完全等价的工具，而是把它们收拢成同一组高频诊
+#   断动作。
+# - ping 负责最基础的单目标连通性检查。
+# - fping 负责批量 host probe 和 CIDR sweep，这两类动作仍然保留，但不再值得单独维
+#   护一个 Taskfile。
+# - mtr 负责持续路径质量观察，适合看 latency、loss、path stability，也因此被收成
+#   ping:path / ping:path:v6。
+# - 这轮整合的重点不是“保留所有命令”，而是把最常重复使用的 connectivity workflow
+#   放到一个稳定入口里。
+
+
+
+
+tasks:
+  default:
+    desc: ICMP echo (IPv4)
+    summary: "task -g default HOST=<host> [COUNT=5] [SIZE=56] [INTERVAL=1]"
+    platforms: [linux]
+    requires:
+      vars: [HOST]
+    vars:
+      COUNT: '{{.COUNT | default "5"}}'
+      # SIZE 是 payload（bytes），不含 IPv4+ICMP 头
+      SIZE: '{{.SIZE | default "56"}}'
+      # INTERVAL 单位为秒（seconds）
+      INTERVAL: '{{.INTERVAL | default "1"}}'
+      HOST: ''
+    cmds:
+      - ping -c {{.COUNT}} -s {{.SIZE}} -i {{.INTERVAL}} {{.HOST}}
+
+  v6:
+    desc: ICMP echo (IPv6)
+    summary: "task -g v6 HOST=<host> [COUNT=5] [SIZE=56] [INTERVAL=1]"
+    platforms: [linux]
+    requires:
+      vars: [HOST]
+    vars:
+      COUNT: '{{.COUNT | default "5"}}'
+      # SIZE 是 payload（bytes），不含 IPv6+ICMPv6 头
+      SIZE: '{{.SIZE | default "56"}}'
+      # INTERVAL 单位为秒（seconds）
+      INTERVAL: '{{.INTERVAL | default "1"}}'
+      HOST: ''
+    cmds:
+      - ping -6 -c {{.COUNT}} -s {{.SIZE}} -i {{.INTERVAL}} {{.HOST}}
+
+  pmtu:
+    desc: IPv4 DF ping for PMTU probing
+    summary: "task -g pmtu HOST=<host> [SIZE=1472] [COUNT=3]"
+    platforms: [linux]
+    requires:
+      vars: [HOST]
+    vars:
+      # DF (Don't Fragment) 用于触发 PMTU 反馈
+      SIZE: '{{.SIZE | default "1472"}}'
+      COUNT: '{{.COUNT | default "3"}}'
+      HOST: ''
+    cmds:
+      - ping -M do -s {{.SIZE}} -c {{.COUNT}} {{.HOST}}
+
+  darwin:
+    desc: ICMP echo (IPv4, darwin)
+    summary: "task -g darwin HOST=<host> [COUNT=30] [SIZE=56] [INTERVAL=1]"
+    platforms: [darwin]
+    interactive: true
+    requires:
+      vars: [HOST]
+    vars:
+      COUNT: '{{.COUNT | default "30"}}'
+      # SIZE 是 payload（bytes），不含 IPv4+ICMP 头
+      SIZE: '{{.SIZE | default "56"}}'
+      # INTERVAL 单位为秒（seconds）
+      INTERVAL: '{{.INTERVAL | default "1"}}'
+      HOST: ''
+    cmds:
+      - ping -c {{.COUNT}} -s {{.SIZE}} -i {{.INTERVAL}} {{.HOST}}
+
+  batch:
+    desc: Batch host probe via fping
+    summary: "task -g batch HOSTS='<hosts>' [COUNT=5]"
+    platforms: [linux]
+    requires:
+      vars: [HOSTS]
+    vars:
+      # HOSTS 可以是空格分隔的多个 host / IP
+      HOSTS: '{{.HOSTS | default ""}}'
+      COUNT: '{{.COUNT | default "5"}}'
+    preconditions:
+      - sh: command -v fping >/dev/null 2>&1
+        msg: fping not found
+    cmds:
+      # -c: probe count, 适合快速批量存活检查
+      - fping -c {{.COUNT}} {{.HOSTS}}
+
+  sweep:
+    desc: CIDR sweep via fping
+    summary: "task -g sweep CIDR=<cidr>"
+    platforms: [linux]
+    requires:
+      vars: [CIDR]
+    vars:
+      CIDR: '{{.CIDR | default ""}}'
+    preconditions:
+      - sh: command -v fping >/dev/null 2>&1
+        msg: fping not found
+    cmds:
+      # -a: only alive, -g: generate targets from CIDR
+      - fping -a -g {{.CIDR}}
+
+  path:
+    desc: Path quality report via mtr (IPv4)
+    summary: "task -g path HOST=<host> [COUNT=50]"
+    platforms: [linux]
+    requires:
+      vars: [HOST]
+    vars:
+      HOST: '{{.HOST | default ""}}'
+      # COUNT 为 probe 次数，建议保留较高值以观察抖动 / 丢包趋势
+      COUNT: '{{.COUNT | default "50"}}'
+    preconditions:
+      - sh: command -v mtr >/dev/null 2>&1
+        msg: mtr not found
+    cmds:
+      # -r: report mode, -w: wide, -z: AS info, -c: probe count
+      - mtr -rwzc {{.COUNT}} {{.HOST}}
+
+  path:v6:
+    desc: Path quality report via mtr (IPv6)
+    summary: "task -g path:v6 HOST=<host> [COUNT=50]"
+    platforms: [linux]
+    requires:
+      vars: [HOST]
+    vars:
+      HOST: '{{.HOST | default ""}}'
+      COUNT: '{{.COUNT | default "50"}}'
+    preconditions:
+      - sh: command -v mtr >/dev/null 2>&1
+        msg: mtr not found
+    cmds:
+      - mtr -6 -rwzc {{.COUNT}} {{.HOST}}

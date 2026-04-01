@@ -1,12 +1,20 @@
 ---
 version: '3'
 
+
+
+#   - linux commands, check port occupancy, CPU load, memory usage, how to send signals to a process
+#   - iproute2
+
+
 includes:
   # tools for playbook reuse
   ping:
-    taskfile: ./ip/icmp/Taskfile.ping.yml
-  dig:
-    taskfile: ./dns/Taskfile.dig.yml
+    taskfile: ./Taskfile.ping.yml
+  traceroute:
+    taskfile: ./Taskfile.traceroute.yml
+  dns:
+    taskfile: ./Taskfile.DNS.yml
 
 tasks:
   pmtu:quick:
@@ -20,152 +28,91 @@ tasks:
       COUNT: '{{.COUNT | default "3"}}'
       HOST: '{{.HOST | default ""}}'
     cmds:
-      - task: nc:pmtu
+      - task: traceroute:tracepath
+        vars:
+          HOST: '{{.HOST}}'
+      - task: ping:pmtu
         vars:
           HOST: '{{.HOST}}'
           SIZE: '{{.SIZE}}'
           COUNT: '{{.COUNT}}'
 
-  wake:diag:
-    desc: wake network diagnose (macOS)
-    summary: "task -g wake:diag"
-    platforms: [darwin]
-    # output: 控制 Task 输出样式（interleaved 为默认）
-    output: interleaved
-    vars:
-      # OUT: 日志路径（默认写入 /tmp）
-      OUT: '{{.OUT | default (printf "/tmp/wake-net-diagnose-%s.log" (now | date "20060102-150405"))}}'
-      # WIFI_DEV: 当前主 Wi-Fi 设备名
-      WIFI_DEV:
-        sh: |
-          networksetup -listallhardwareports | awk '
-          $0 ~ /Hardware Port: (Wi-Fi|AirPort)/{getline; if ($1=="Device:") {print $2; exit}}
-          '
-      # NQ_MAX: networkQuality 最大运行时间（seconds）
-      # -M: Provide maximum runtime in seconds
-      NQ_MAX: '{{.NQ_MAX | default "10"}}'
-    preconditions:
-      - sh: command -v scutil
-        msg: scutil not found
-      - sh: command -v networksetup
-        msg: networksetup not found
-      - sh: command -v networkQuality
-        msg: networkQuality not found
-      - sh: command -v wdutil
-        msg: wdutil not found
-      - sh: command -v ping
-        msg: ping not found
-      - sh: command -v ifconfig
-        msg: ifconfig not found
-      - sh: command -v ipconfig
-        msg: ipconfig not found
-      - sh: command -v netstat
-        msg: netstat not found
-      - sh: command -v route
-        msg: route not found
-      - sh: command -v arp
-        msg: arp not found
-      - sh: command -v pmset
-        msg: pmset not found
-      - sh: command -v log
-        msg: log not found
+
+  ip-link:
+    desc: Show / manipulate link devices
+    summary: "task -g nz:ip-link"
+    cmd: ip link show
+
+  tun:
+    desc: Show TUN interfaces
+    summary: "task -g nz:tun"
+    cmd: ip link show | grep tun
+
+  ip-route:
+    desc: Show routing table
+    summary: "task -g nz:ip-route"
+    cmd: ip route show
+
+  ip-neigh:
+    desc: Show / manipulate neighbour objects
+    summary: "task -g nz:ip-neigh"
+    cmd: ip neigh
+
+  ip-addr:
+    desc: Show / manipulate protocol address
+    summary: "task -g nz:ip-addr"
+    cmd: ip addr show
+
+
+  # [jsdelivr/globalping-cli: A simple CLI tool to run networking commands remotely from hundreds of globally distributed servers](https://github.com/jsdelivr/globalping-cli)
+  global-ping:
+    desc: Run globalping ping from distributed probes
+    summary: "task -g nz:global-ping [CLI_ARGS]"
+    cmd: globalping ping {{.CLI_ARGS}}
+
+  # [batfish/batfish: Batfish is a network configuration analysis tool that can find bugs and guarantee the correctness of (planned or current) network configurations. It enables network engineers to rapidly and safely evolve their network, without fear of outages or security breaches.](https://github.com/batfish/batfish) 一个网络配置分析工具，用于验证和测试网络配置的正确性
+  batfish:
+    desc: Run batfish all-in-one container
+    summary: "task -g nz:batfish"
+    cmd: docker run --name batfish -v batfish-data:/data -p 8888:8888 -p 9997:9997 -p 9996:9996 batfish/allinone
+
+  # [mr-karan/doggo: :dog: Command-line DNS Client for Humans. Written in Golang](https://github.com/mr-karan/doggo)
+  doggo:
+    desc: Query DNS with doggo
+    summary: "task -g nz:doggo [CLI_ARGS]"
+    cmd: doggo {{.CLI_ARGS}}
+
+
+  # nmap - Network discovery and security auditing
+  #  nmap:
+
+
+
+  #  # [ycd/dstp: 🧪 Run common networking tests against any site.](https://github.com/ycd/dstp) 用于测试和监控TCP/HTTP连接
+  #  dstp:
+  #
+  #  # [monasticacademy/httptap: View HTTP/HTTPS requests made by any Linux program](https://github.com/monasticacademy/httptap) 无代理抓包工具
+  #  httptap:
+  #
+  #  # https://github.com/nxtrace/NTrace-core
+  #  nexttrace:
+  #    desc: 可视化路由跟踪工具
+  #
+  #  # [pouriyajamshidi/tcping: Ping TCP ports using tcping. Inspired by Linux's ping utility. Written in Go](https://github.com/pouriyajamshidi/tcping)
+  #  tcping:
+  #
+  #  # [hanshuaikang/Nping: 🏎 Nping mean NB Ping, A Ping Tool in Rust with Real-Time Data and Visualizations](https://github.com/hanshuaikang/Nping) 多地址并发 Ping 工具。基于 Rust 开发使用 ICMP 协议的 Ping 工具, 支持多地址并发 Ping, 可视化图表展示, 数据实时更新等特性。Rust 的多地址并发 Ping 工具。这是一个用 Rust 开发的可视化 Ping 工具，支持同时对多个目标地址并发 Ping 操作。它提供了分区折线图和表格视图等可视化展示，支持实时动态展示延迟、丢包率等性能指标，同时兼容 IPv4 和 IPv6 网络环境。
+  #  nping:
+
+
+  wifi:
+    desc: Manage Wi-Fi via nmcli
+    summary: "task -g nz:wifi"
     cmds:
-      - 'echo "## wake-net-diagnose"'
-      - 'echo "ts=$(date)"'
-      - 'echo "host=$(scutil --get LocalHostName 2>/dev/null || true)"'
-      - echo
-
-      - sw_vers || true
-      - uname -a || true
-      - uptime || true
-      - pmset -g || true
-
-      - 'echo "## log: wake/sleep (last 2h)"'
-      - log show --last 2h --style syslog --predicate 'eventMessage contains "Wake" OR eventMessage contains "Sleep" OR eventMessage contains "Wake reason"' 2>/dev/null | tail -n 200 || true
-
-      - 'echo "## networksetup: hardware ports"'
-      - networksetup -listallhardwareports || true
-      - 'echo "## networksetup: services"'
-      - networksetup -listallnetworkservices || true
-
-      - 'echo "## Wi-Fi device: {{.WIFI_DEV}}"'
-      - networksetup -getinfo "Wi-Fi" || true
-      - "if [ -n \"{{.WIFI_DEV}}\" ]; then networksetup -getairportnetwork \"{{.WIFI_DEV}}\" || true; fi"
-      - networksetup -getdnsservers "Wi-Fi" || true
-      - networksetup -getwebproxy "Wi-Fi" || true
-      - networksetup -getsecurewebproxy "Wi-Fi" || true
-      - networksetup -getautoproxyurl "Wi-Fi" || true
-      - networksetup -getproxybypassdomains "Wi-Fi" || true
-
-      - 'echo "## ifconfig en0"'
-      - ifconfig en0 || true
-      - 'echo "## ifconfig en1"'
-      - ifconfig en1 || true
-      - 'echo "## ifconfig en2"'
-      - ifconfig en2 || true
-      - 'echo "## ifconfig bridge0"'
-      - ifconfig bridge0 || true
-      - 'echo "## ifconfig utun0"'
-      - ifconfig utun0 || true
-      - 'echo "## ifconfig utun1"'
-      - ifconfig utun1 || true
-      - 'echo "## ifconfig utun2"'
-      - ifconfig utun2 || true
-      - 'echo "## ifconfig utun3"'
-      - ifconfig utun3 || true
-
-      - 'echo "## ipconfig getpacket en0"'
-      - ipconfig getpacket en0 2>/dev/null | sed 's/^/  /' || true
-      - 'echo "## ipconfig getpacket en1"'
-      - ipconfig getpacket en1 2>/dev/null | sed 's/^/  /' || true
-
-      - 'echo "## route"'
-      - netstat -rn -f inet || true
-      - route -n get default 2>/dev/null || true
-      - 'echo "## resolv.conf"'
-      - cat /etc/resolv.conf || true
-      - 'echo "## scutil --dns (head)"'
-      - scutil --dns | head -n 200 || true
-      - 'echo "## scutil --nwi"'
-      - scutil --nwi || true
-
-      - 'echo "## wdutil info"'
-      - sudo -n wdutil info || true
-
-      - 'echo "## connectivity"'
-      - task: ping:darwin
-        vars:
-          HOST: 1.1.1.1
-          COUNT: 3
-          INTERVAL: 1
-      - task: ping:darwin
-        vars:
-          HOST: 8.8.8.8
-          COUNT: 3
-          INTERVAL: 1
-
-      - 'echo "## networkQuality -s"'
-      - networkQuality -s -M {{.NQ_MAX}} || true
-
-      - 'echo "## dns: system resolver"'
-      - task: dig:q:A
-        vars:
-          HOST: example.com
-      - 'echo "## dns: direct to 1.1.1.1"'
-      - task: dig:at
-        vars:
-          HOST: example.com
-          TYPE: A
-          RESOLVER: 1.1.1.1
-
-      - 'echo "## processes: sing-box"'
-      - ps aux | grep -i "[s]ing-box" || true
-
-      - 'echo "## launchctl list (sing)"'
-      - launchctl list | grep -i sing || true
-
-      - 'echo "## arp -a (gateway)"'
-      - arp -a | head -n 50 || true
-
-      - 'echo "## done"'
-      - 'echo "log={{.OUT}}"'
+      - sudo nmcli dev # 查看网络设备
+      - sudo nmcli r wifi on # 开启wifi
+      - sudo nmcli dev wifi # 扫描wifi
+      - sudo nmcli dev wifi connect wifi-name password pwd # 连接wifi
+    preconditions:
+      - sh: command -v nmcli
+        msg: nmcli not found

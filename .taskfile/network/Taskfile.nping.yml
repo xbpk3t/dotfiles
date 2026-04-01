@@ -1,0 +1,81 @@
+---
+version: '3'
+
+# [2026-03-31] 删除 hping3，并把保留能力统一收进 Taskfile.nping.yml
+#
+# 本轮移除的工具级 task：
+# - hping3
+#
+# 为什么保留 nping、删除 hping3：
+# - 在当前仓库里，两者保留的高频场景几乎完全重叠，主要都是 ICMP probe 和 PMTU
+#   probing。
+# - 既然只保留这类“诊断型探测”能力，就没有必要同时维护 hping3 和 nping 两套入口。
+# - nping 对当前这组收敛后的场景已经足够，而 hping3 更强也更杂，继续保留会把这层
+#   重新带回“可定制 packet 大全集”的方向。
+#
+# 因此，这里统一只保留 nping 作为增强探测入口。
+#
+# 进一步说明：
+# - 当前保留的 icmp / pmtu 这两个动作，已经覆盖了这里真实需要的 probe 场景。
+# - hping3 并不是不能做这些事，而是它的能力范围明显大于当前需求，继续保留会让
+#   “少量诊断 task”再次膨胀成“可定制 packet 工具集合”。
+# - 因而这轮取舍不是否定 hping3 本身，而是明确把这里的边界收窄为“诊断型 probe”，
+#   并统一由 nping 承担。
+#
+# [2026-03-31] 把 nstat 也整合到了 Taskfile.nping.yml 里
+#
+# 本轮移除的工具级 task：
+# - nstat
+#
+# 为什么把 nstat 收进这里：
+# - nstat 提供的是 ICMP / fragment 相关的 kernel counters 视角，不是新的主入口。
+# - 它更适合作为 probe 之后的补充证据，而不是继续单独维护一个 Taskfile。
+# - 因此本轮把它收成 nping:stats，和 icmp / pmtu 一起归到“增强探测 + 诊断证据”这层。
+
+
+
+tasks:
+  icmp:
+    desc: nping ICMP probe
+    summary: "task -g icmp HOST=<host> [SIZE=56] [COUNT=5]"
+    platforms: [linux]
+    requires:
+      vars: [HOST]
+    vars:
+      SIZE: '{{.SIZE | default "56"}}'
+      COUNT: '{{.COUNT | default "5"}}'
+      HOST: ''
+    preconditions:
+      - sh: command -v nping
+        msg: nping not found
+    cmds:
+      # --icmp: ICMP probe, --data-length: payload bytes
+      - sudo nping --icmp {{.HOST}} --data-length {{.SIZE}} -c {{.COUNT}}
+
+  pmtu:
+    desc: nping ICMP for PMTU probing
+    summary: "task -g pmtu HOST=<host> [SIZE=1472]"
+    platforms: [linux]
+    requires:
+      vars: [HOST]
+    vars:
+      # SIZE 是 payload，1472 = 1500 - 20(IPv4) - 8(ICMP)
+      SIZE: '{{.SIZE | default "1472"}}'
+      HOST: ''
+    preconditions:
+      - sh: command -v nping
+        msg: nping not found
+    cmds:
+      # PMTU probing 默认不额外限制 count，适合手动观察反馈
+      - sudo nping --icmp {{.HOST}} --data-length {{.SIZE}}
+
+  stats:
+    desc: Show ICMP/IP fragment counters via nstat
+    summary: "task -g stats"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v nstat >/dev/null 2>&1
+        msg: nstat not found
+    cmds:
+      # 关注 ICMP / IPv4 / IPv6 fragment 相关 counters
+      - nstat -az | egrep 'Icmp|Icmp6|IpFrag|Ip6Frag'

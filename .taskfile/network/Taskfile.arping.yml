@@ -1,0 +1,27 @@
+---
+version: '3'
+
+
+#   - arping
+    # - 用来做二层可达性/ARP 邻居探测。
+    # - 关注“这个 IP 在这个二层上能不能回应 ARP”。
+
+
+
+tasks:
+  default:
+    desc: arping (L2 reachability)
+    summary: "task -g default HOST=<host> [COUNT=5] [IFACE=<iface>]"
+    platforms: [linux]
+    requires:
+      vars: [HOST]
+    vars:
+      COUNT: '{{.COUNT | default "5"}}'
+      HOST: ''
+      IFACE: ''
+    preconditions:
+      - sh: command -v arping
+        msg: arping not found
+    cmds:
+      # -I: 指定 interface
+      - arping -c {{.COUNT}} {{ if .IFACE }}-I {{.IFACE}} {{ end }}{{.HOST}}
