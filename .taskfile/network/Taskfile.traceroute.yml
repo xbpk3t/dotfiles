@@ -1,0 +1,117 @@
+---
+version: '3'
+
+# [2026-03-31] 把 tracepath 整合到 Taskfile.traceroute.yml 里
+# 本轮移除的工具级 task：
+# - tracepath
+#
+# 为什么把 tracepath 收进这里：
+# - tracepath 和 traceroute 都是“路径探测”工具，问题域高度一致，继续拆成两个文件的
+#   收益很低。
+# - tracepath 更轻，也更贴近 PMTU 相关场景；traceroute 更通用，保留了 ICMP / TCP
+#   等模式化路径查看。
+# - 因此本轮不再单独保留 Taskfile.tracepath.yml，而是把它收成 traceroute:tracepath
+#   和 traceroute:tracepath:v6 两个 task。
+#
+# 当前这个文件保留的是“路径探测”这一组动作：traceroute 的通用模式，以及 tracepath
+# 的轻量路径 / PMTU 视角。
+#
+# 进一步说明：
+# - 这里保留 traceroute，不是因为它比 tracepath 更“高级”，而是因为它仍然提供了
+#   ICMP / TCP 等模式化路径探测能力。
+# - 这里保留 tracepath，不是因为它需要继续单独成文件，而是因为它在轻量路径查看和
+#   PMTU 相关场景里仍然有很高的实际价值。
+# - 因此本轮的处理方式不是二选一删除，而是把两者合并到同一个 path tracing 入口中，
+#   让“通用路径探测”和“轻量 PMTU 视角”同时存在，但不再分散到两个文件里。
+
+
+
+tasks:
+  default:
+    desc: traceroute (IPv4)
+    summary: "task -g default HOST=<host>"
+    vars:
+      HOST: ''
+    platforms: [linux]
+    requires:
+      vars: [HOST]
+    cmds:
+      - traceroute -n {{.HOST}}
+
+  icmp:
+    desc: traceroute (ICMP mode)
+    summary: "task -g icmp HOST=<host>"
+    vars:
+      HOST: ''
+    platforms: [linux]
+    requires:
+      vars: [HOST]
+    cmds:
+      # -I: 使用 ICMP 探测
+      - traceroute -I -n {{.HOST}}
+
+  tcp:
+    desc: traceroute (TCP SYN)
+    summary: "task -g tcp HOST=<host> [PORT=443]"
+    platforms: [linux]
+    requires:
+      vars: [HOST]
+    vars:
+      # PORT 为目的端口（TCP SYN）
+      PORT: '{{.PORT | default "443"}}'
+      HOST: ''
+    cmds:
+      - traceroute -T -p {{.PORT}} -n {{.HOST}}
+
+  darwin:
+    desc: traceroute (IPv4, darwin)
+    summary: "task -g darwin HOST=<host>"
+    vars:
+      HOST: ''
+    platforms: [darwin]
+    requires:
+      vars: [HOST]
+    cmds:
+      # darwin traceroute 不支持 -n
+      - traceroute {{.HOST}}
+
+  icmp:darwin:
+    desc: traceroute (ICMP mode, darwin)
+    summary: "task -g icmp:darwin HOST=<host>"
+    vars:
+      HOST: ''
+    platforms: [darwin]
+    requires:
+      vars: [HOST]
+    cmds:
+      # -I: 使用 ICMP 探测
+      - traceroute -I {{.HOST}}
+
+  tracepath:
+    desc: tracepath (IPv4, no DNS)
+    summary: "task -g tracepath HOST=<host>"
+    platforms: [linux]
+    requires:
+      vars: [HOST]
+    vars:
+      HOST: '{{.HOST | default ""}}'
+    preconditions:
+      - sh: command -v tracepath >/dev/null 2>&1
+        msg: tracepath not found
+    cmds:
+      # -n: 不做 DNS resolve，输出更稳定，也更适合 PMTU 观察
+      - tracepath -n {{.HOST}}
+
+  tracepath:v6:
+    desc: tracepath (IPv6, no DNS)
+    summary: "task -g tracepath:v6 HOST=<host>"
+    platforms: [linux]
+    requires:
+      vars: [HOST]
+    vars:
+      HOST: '{{.HOST | default ""}}'
+    preconditions:
+      - sh: command -v tracepath6 >/dev/null 2>&1
+        msg: tracepath6 not found
+    cmds:
+      - tracepath6 -n {{.HOST}}

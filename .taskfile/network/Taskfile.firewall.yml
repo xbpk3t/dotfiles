@@ -1,0 +1,93 @@
+---
+version: "3"
+
+
+# [2026-03-31]
+# 移除掉 iptables 相关task（用 nft 替代，作为“规则面”），用 conntrack 来管理“状态面”。二者正好互补。
+#
+#   nft 主要负责：
+#
+#  - 看规则
+#  - 看链、表、hook
+#  - 做规则级排查
+#  - trace 包命中了哪条规则
+#
+#   conntrack 主要负责（它不是规则面，而是“状态面”）：
+#
+#  - 看连接跟踪状态
+#  - 看 NAT 映射后的连接条目
+#  - 看某个连接有没有进状态表
+#
+#
+#
+#
+# firewall 经典使用场景
+# 1、查看 rules
+# 2、排查某个packet为啥被拦截？
+# 3、连接有没有进入状态表
+# 4、NAT/转发问题排查
+#
+#
+#  - rules / trace：规则面，走 nft
+#  - state / find / stats：状态面，走 conntrack
+#
+#
+# ---
+# 从 Debian 10、Ubuntu 20.10 (Groovy)、RHEL 8、Fedora 32 起，主流发行版默认转向 nftables。
+
+tasks:
+  rules:
+    desc: Show nftables ruleset (read-only, requires sudo)
+    summary: "task -g firewall:rules"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v nft >/dev/null 2>&1
+        msg: nft not found
+    cmds:
+      - sudo nft list ruleset
+
+  trace:
+    desc: Monitor nftables rule trace (read-only, long-running, requires sudo)
+    summary: "task -g firewall:trace"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v nft >/dev/null 2>&1
+        msg: nft not found
+    cmds:
+      - sudo nft monitor trace
+
+  state:
+    desc: Show conntrack state table (read-only, requires sudo)
+    summary: "task -g firewall:state"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v conntrack >/dev/null 2>&1
+        msg: conntrack not found
+    cmds:
+      - sudo conntrack -L
+
+  find:
+    desc: Filter conntrack state table by grep pattern
+    summary: "task -g firewall:find QUERY='<pattern>'"
+    platforms: [linux]
+    requires:
+      vars: [QUERY]
+    vars:
+      QUERY: '{{.QUERY | default ""}}'
+    preconditions:
+      - sh: command -v conntrack >/dev/null 2>&1
+        msg: conntrack not found
+      - sh: command -v grep >/dev/null 2>&1
+        msg: grep not found
+    cmds:
+      - sudo conntrack -L | grep -E '{{.QUERY}}'
+
+  stats:
+    desc: Show conntrack statistics (read-only, requires sudo)
+    summary: "task -g firewall:stats"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v conntrack >/dev/null 2>&1
+        msg: conntrack not found
+    cmds:
+      - sudo conntrack -S

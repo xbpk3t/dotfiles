@@ -1,0 +1,59 @@
+---
+version: '3'
+
+tasks:
+  list:
+    desc: bpftrace list probes
+    summary: "task -g list"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v bpftrace
+        msg: bpftrace not found
+    cmds:
+      - sudo bpftrace -l
+
+  run:
+    desc: bpftrace run one-liner
+    summary: "task -g run PROG=<script>"
+    vars:
+      PROG: ''
+    platforms: [linux]
+    requires:
+      vars: [PROG]
+    preconditions:
+      - sh: command -v bpftrace
+        msg: bpftrace not found
+    cmds:
+      # PROG 为 bpftrace script
+      - sudo bpftrace '{{.PROG}}'
+
+  prog:
+    desc: bpftool prog show
+    summary: "task -g prog"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v bpftool
+        msg: bpftool not found
+    cmds:
+      - sudo bpftool prog show
+
+  map:
+    desc: bpftool map show
+    summary: "task -g map"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v bpftool
+        msg: bpftool not found
+    cmds:
+      - sudo bpftool map show
+
+  net:
+    desc: bpftool net list
+    summary: "task -g net"
+    platforms: [linux]
+    preconditions:
+      - sh: command -v bpftool
+        msg: bpftool not found
+    cmds:
+      # net: attach points
+      - sudo bpftool net

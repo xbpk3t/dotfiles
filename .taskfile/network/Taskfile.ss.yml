@@ -1,0 +1,271 @@
+version: '3'
+
+silent: true
+
+# ss = socket statistics. 对于 socket 的统计工具（而非只针对TCP的工具），包括以下功能：
+# - TCP 连接与状态
+# - 监听中的 TCP/UDP socket
+# - UNIX domain socket
+# - 进程维度的 socket 观察
+
+
+
+
+#  基础：
+#  task listen                  # 所有监听中的 TCP/UDP 端口 (ss -lntu)
+#  task tcp                     # 所有 TCP 连接 (ss -tn)
+#  task tcp:nolistening         # 所有非 LISTEN 的 TCP (ss -tan 'state != LISTEN')
+#  task all                     # TCP/UDP + 进程信息 (ss -tulpn)
+#  task summary                 # ss 统计汇总 (ss -s)
+#  task detail                  # TCP 内核详细信息 (ss -tin)
+#
+#  按状态：
+#  task tcp:established         # 已建立连接 (ESTABLISHED)
+#  task tcp:timewait            # TIME-WAIT 连接
+#  task state STATE=TIME-WAIT   # 按任意 TCP 状态过滤
+#  task state:count STATE=TIME-WAIT   # 按状态统计连接数
+#  task timewait:count                # 统计 TIME-WAIT
+#  task closewait:count               # 统计 CLOSE-WAIT
+#
+#  按端口 / IP：
+#  task port:listeners PORT=8080   # 某端口的监听程序 (sport = :PORT)
+#  task port:clients PORT=443      # 访问某端口的连接 (dport = :PORT)
+#  task ip:dst IP=1.2.3.4          # 目的 IP 过滤
+#  task ip:src CIDR=10.0.0.0/8     # 源网段过滤
+#  task raw FILTER="dport = :80"   # 自定义过滤表达式
+#
+#  UNIX 套接字：
+#  task unix                        # UNIX 域 socket
+#  task unix:proc                   # 带进程信息的 UNIX socket
+#
+#  fzf 交互增强（需要 fzf）：
+#  task fzf:listen                  # 交互浏览监听端口
+#  task fzf:tcp                     # 交互选中某 TCP 连接并查看详细信息
+
+
+tasks:
+  # ---------------- 默认入口 ----------------
+  default:
+    desc: Show ss helper usage
+    summary: "task -g ss"
+    cmds:
+      - task: help
+
+# ---------------- 基础 ----------------
+
+  listen:
+    desc: Show all listening TCP/UDP sockets (numeric)
+    summary: "task -g listen"
+    cmds:
+      - ss -lntu
+
+  tcp:
+    desc: Show all TCP sockets (numeric)
+    summary: "task -g tcp"
+    cmds:
+      - ss -tn
+
+  tcp:nolistening:
+    desc: Show all TCP sockets except LISTEN
+    summary: "task -g tcp:nolistening"
+    cmds:
+      - ss -tan 'state != LISTEN'
+
+  all:
+    desc: Show all TCP/UDP sockets with process info
+    summary: "task -g all"
+    cmds:
+      - ss -tulpn
+
+  summary:
+    desc: Show ss socket statistics summary
+    summary: "task -g summary"
+    cmds:
+      - ss -s
+
+  detail:
+    desc: Show TCP sockets with detailed kernel info
+    summary: "task -g detail"
+    cmds:
+      - ss -tin
+
+  # ---------------- 按状态 ----------------
+
+  tcp:established:
+    desc: Show ESTABLISHED TCP connections
+    summary: "task -g tcp:established"
+    cmds:
+      - ss -tan 'state ESTABLISHED'
+
+  tcp:timewait:
+    desc: Show TIME-WAIT TCP connections
+    summary: "task -g tcp:timewait"
+    cmds:
+      - ss -tan 'state TIME-WAIT'
+
+  state:
+    desc: Show TCP connections filtered by STATE (e.g. ESTABLISHED, TIME-WAIT)
+    summary: "task -g state STATE=TIME-WAIT"
+    vars:
+      STATE: '{{.STATE | default ""}}'
+    requires:
+      vars: [STATE]
+    preconditions:
+      - sh: test -n "{{.STATE}}"
+        msg: "Usage: task state STATE=TIME-WAIT"
+    cmds:
+      - ss -tan "state {{.STATE}}"
+
+  state:count:
+    desc: Count TCP connections in given STATE
+    summary: "task -g state:count STATE=TIME-WAIT"
+    vars:
+      STATE: '{{.STATE | default ""}}'
+      COUNT:
+        sh: ss -tan "state {{.STATE}}" | sed '1d' | wc -l
+    requires:
+      vars: [STATE]
+    preconditions:
+      - sh: test -n "{{.STATE}}"
+        msg: "Usage: task state:count STATE=TIME-WAIT"
+    cmds:
+      - "echo {{.STATE}} connections: {{.COUNT}}"
+
+  timewait:count:
+    desc: Count TIME-WAIT TCP connections
+    summary: "task -g timewait:count"
+    vars:
+      COUNT:
+        sh: ss -tan "state TIME-WAIT" | sed '1d' | wc -l
+    cmds:
+      - "echo TIME-WAIT connections: {{.COUNT}}"
+
+  closewait:count:
+    desc: Count CLOSE-WAIT TCP connections (may indicate app not closing sockets)
+    summary: "task -g closewait:count"
+    vars:
+      COUNT:
+        sh: ss -tan "state CLOSE-WAIT" | sed '1d' | wc -l
+    cmds:
+      - "echo CLOSE-WAIT connections: {{.COUNT}}"
+
+  # ---------------- 按端口 / IP ----------------
+
+  port:listeners:
+    desc: Show process listening on PORT (sport = :PORT)
+    summary: "task -g port:listeners PORT=8080"
+    vars:
+      PORT: '{{.PORT | default ""}}'
+    requires:
+      vars: [PORT]
+    preconditions:
+      - sh: test -n "{{.PORT}}"
+        msg: "Usage: task port:listeners PORT=8080"
+    cmds:
+      - ss -ltnp "sport = :{{.PORT}}"
+
+  port:clients:
+    desc: Show connections whose destination port is PORT (dport = :PORT)
+    summary: "task -g port:clients PORT=443"
+    vars:
+      PORT: '{{.PORT | default ""}}'
+    requires:
+      vars: [PORT]
+    preconditions:
+      - sh: test -n "{{.PORT}}"
+        msg: "Usage: task port:clients PORT=443"
+    cmds:
+      - ss -tan "dport = :{{.PORT}}"
+
+  ip:dst:
+    desc: Show TCP connections with given destination IP
+    summary: "task -g ip:dst IP=1.2.3.4"
+    vars:
+      IP: '{{.IP | default ""}}'
+    requires:
+      vars: [IP]
+    preconditions:
+      - sh: test -n "{{.IP}}"
+        msg: "Usage: task ip:dst IP=1.2.3.4"
+    cmds:
+      - ss -tan "dst {{.IP}}"
+
+  ip:src:
+    desc: Show TCP connections whose source is in CIDR (e.g. 10.0.0.0/8)
+    summary: "task -g ip:src CIDR=192.168.1.0/24"
+    vars:
+      CIDR: '{{.CIDR | default ""}}'
+    requires:
+      vars: [CIDR]
+    preconditions:
+      - sh: test -n "{{.CIDR}}"
+        msg: "Usage: task ip:src CIDR=192.168.1.0/24"
+    cmds:
+      - ss -tan "src {{.CIDR}}"
+
+  raw:
+    desc: Run ss -tan with a custom filter, e.g. FILTER="src 10.0.0.0/8 dport = :443"
+    summary: 'task -g raw FILTER="dport = :80"'
+    vars:
+      FILTER: '{{.FILTER | default ""}}'
+    requires:
+      vars: [FILTER]
+    preconditions:
+      - sh: test -n "{{.FILTER}}"
+        msg: 'Usage: task raw FILTER="dport = :80"'
+    # FILTER 不加引号，让 ss 自己解析 token
+    cmds:
+      - ss -tan {{.FILTER}}
+
+  # ---------------- UNIX 套接字 ----------------
+
+  unix:
+    desc: Show UNIX domain sockets
+    summary: "task -g unix"
+    cmds:
+      - ss -xln
+
+  unix:proc:
+    desc: Show UNIX domain sockets with process info
+    summary: "task -g unix:proc"
+    cmds:
+      - ss -xlnp
+
+  # ---------------- fzf 交互增强 ----------------
+
+  fzf:listen:
+    desc: Browse listening sockets via fzf (ss -ltnp | fzf)
+    summary: "task -g fzf:listen"
+    interactive: true
+    preconditions:
+      - sh: command -v fzf
+        msg: "fzf is not installed or not in PATH"
+    cmds:
+      - ss -ltnp | fzf --header='Listening sockets (ss -ltnp) — ESC 退出, 回车输出选中行' || true
+
+  fzf:tcp:
+    desc: Pick a TCP connection via fzf, then show detailed info (ss -tin)
+    summary: "task -g fzf:tcp"
+    interactive: true
+    preconditions:
+      - sh: command -v fzf
+        msg: "fzf is not installed or not in PATH"
+    vars:
+      LINE:
+        sh: ss -tanp | sed '1d' | fzf --header='Pick a TCP connection (ss -tanp)' || true
+      SRC:
+        sh: echo "{{.LINE}}" | awk '{print $4}'
+      DST:
+        sh: echo "{{.LINE}}" | awk '{print $5}'
+    cmds:
+      - |
+        if [ -z "{{.LINE}}" ]; then
+          echo "No connection selected."
+          exit 0
+        fi
+        echo "Selected connection:"
+        echo "  {{.SRC}} -> {{.DST}}"
+        echo
+        echo "Detailed info (ss -tin):"
+        echo "--------------------------------"
+        ss -tin "src {{.SRC}} dst {{.DST}}"

@@ -1,0 +1,97 @@
+---
+version: '3'
+
+# [7 Amazing Terminal API Tools You Need To Try](https://www.youtube.com/watch?v=eyXxEBZMVQI)
+# [Wait… cURL can do WHAT?! - YouTube](https://www.youtube.com/watch?v=3xmD4E2aqxo)
+#
+# 本轮收敛说明
+#
+# 当前 HTTP 层统一收敛到 curl，一个文件内只保留高频 HTTP 场景 task。
+#
+# 本轮移除了以下 CLI 相关 task：
+# - httpie: get / post-json
+# - wget: get
+#
+# 删除原因：
+# - 这几类 task 与 curl 在功能上高度重叠，继续并列维护会放大重复入口。
+# - 当前目标是保留稳定、高频、可复用的 HTTP 诊断与请求动作，而不是维护多个工具入口。
+# - 下载场景也可以直接用 curl 覆盖，没必要额外保留 wget 语义。
+
+tasks:
+  default:
+    desc: Default HTTP check (same as head)
+    summary: "task -g curl URL=<url>"
+    vars:
+      URL: '{{.URL | default ""}}'
+    platforms: [linux, darwin]
+    requires:
+      vars: [URL]
+    preconditions:
+      - sh: command -v curl >/dev/null 2>&1
+        msg: curl not found
+    cmds:
+      - task: head
+        vars:
+          URL: '{{.URL}}'
+
+  head:
+    desc: Fetch response headers with HEAD request
+    summary: "task -g curl:head URL=<url>"
+    vars:
+      URL: '{{.URL | default ""}}'
+    platforms: [linux, darwin]
+    requires:
+      vars: [URL]
+    preconditions:
+      - sh: command -v curl >/dev/null 2>&1
+        msg: curl not found
+    cmds:
+      - curl -fsSIL {{.URL}}
+
+  get:
+    desc: Fetch response body with GET request
+    summary: "task -g curl:get URL=<url>"
+    vars:
+      URL: '{{.URL | default ""}}'
+    platforms: [linux, darwin]
+    requires:
+      vars: [URL]
+    preconditions:
+      - sh: command -v curl >/dev/null 2>&1
+        msg: curl not found
+    cmds:
+      - curl -fsSL {{.URL}}
+
+  post-json:
+    desc: Send a POST request with JSON body
+    summary: "task -g curl:post-json URL=<url> DATA=<json>"
+    vars:
+      DATA: '{{.DATA | default ""}}'
+      URL: '{{.URL | default ""}}'
+    platforms: [linux, darwin]
+    requires:
+      vars: [URL, DATA]
+    preconditions:
+      - sh: command -v curl >/dev/null 2>&1
+        msg: curl not found
+    cmds:
+      - |
+        curl -fsSL -X POST \
+          -H 'Content-Type: application/json' \
+          --data '{{.DATA}}' \
+          {{.URL}}
+
+  download:
+    desc: Download a URL to a local file
+    summary: "task -g curl:download URL=<url> OUT=<path>"
+    vars:
+      OUT: '{{.OUT | default ""}}'
+      URL: '{{.URL | default ""}}'
+    platforms: [linux, darwin]
+    requires:
+      vars: [URL, OUT]
+    preconditions:
+      - sh: command -v curl >/dev/null 2>&1
+        msg: curl not found
+    cmds:
+      - curl -fL -o {{.OUT}} {{.URL}}
