@@ -319,19 +319,48 @@
     input = "obra-superpowers";
     subdir = "skills";
     skills = [
+      ######### 核心流程（注意顺序） ##########
+
       "brainstorming"
-      "dispatching-parallel-agents"
-      "executing-plans"
-      "finishing-a-development-branch"
-      "receiving-code-review"
-      "requesting-code-review"
-      "subagent-driven-development"
-      "systematic-debugging"
-      "test-driven-development"
-      "using-git-worktrees"
-      "using-superpowers"
-      "verification-before-completion"
       "writing-plans"
+      #      - 更保守
+      #      - 适合 inline 执行
+      #      - 是备选方案，不是主推方案
+      "executing-plans"
+      #      - 更现代、更强
+      #      - 适合有 subagent 的环境
+      #      - 是实现主路径里的推荐方案
+      "subagent-driven-development"
+      # 防止“以为完成了，其实没验证”
+      "verification-before-completion"
+      # 把“实现完成”变成“真正落地收尾”
+      #  它负责：
+      #
+      #  - 先验证测试
+      #  - 再给 merge / PR / keep / discard 选项
+      #  - 再决定 cleanup
+      "finishing-a-development-branch"
+
+      ######### 辅助skills ##########
+      "using-superpowers"
+      #  - 执行前的环境准备
+      #  - 很重要，但不是主线业务步骤
+      "using-git-worktrees"
+      #  - 实现阶段的约束方式
+      #  - 不是独立大阶段，更像 implementation discipline
+      "test-driven-development"
+      #  - 当出 bug / 测试失败时切进去
+      #  - 是异常分支，不是主线
+      "systematic-debugging"
+      #  - 实现后可选增强
+      #  - 更像质量保障附加流程
+      "requesting-code-review"
+      #  - 收到 review feedback 时才触发
+      #  - 明显属于分支处理
+      "receiving-code-review"
+      #  - 当任务能并行拆开时用
+      #  - 是执行策略，不是主线阶段
+      "dispatching-parallel-agents"
       "writing-skills"
     ];
   };
