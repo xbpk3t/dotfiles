@@ -112,3 +112,13 @@
 - bug: 新开的terminal tab不会直接读取到最新的env
   foundDate: 2026-03-31
   des: 比如说我在nix里新增了某个codex的provider（需要补充相应env），在goland里，新开tab即可直接读取并使用，但是在zed里，就会报 `Missing env variable`，很明显就是没有读取到
+
+
+- bug: rm外部文件后，zed里该文件仍然会展示，如果是goland里，该文件会自动消失
+  foundDate: 2026-04-02
+  des: 总之是非常干扰的一个问题
+
+
+- bug: Ctrl+Tab 切换文件，但是文件 Last Update 顺序是乱的
+  foundDate: 2026-04-02
+  des: 并且触发 Ctrl+Tab 时，有时还会有bug，比如说触发其他操作

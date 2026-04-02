@@ -1,5 +1,4 @@
-{ pkgs, ... }:
-{
+{pkgs, ...}: {
   home.packages = with pkgs; [
     # Docker
     hadolint
@@ -270,8 +269,8 @@
           imageScans = {
             enable = false;
             exclusions = {
-              namespaces = [ ];
-              labels = { };
+              namespaces = [];
+              labels = {};
             };
           };
           logger = {
@@ -298,7 +297,7 @@
           fred = {
             shortCut = "Ctrl-L";
             description = "Pod logs";
-            scopes = [ "po" ];
+            scopes = ["po"];
             command = "kubectl";
             background = false;
             args = [
@@ -340,8 +339,8 @@
               imageScans = {
                 enable = false;
                 exclusions = {
-                  namespaces = [ ];
-                  labels = { };
+                  namespaces = [];
+                  labels = {};
                 };
               };
               logger = {
@@ -368,7 +367,7 @@
         krr = {
           shortCut = "Shift-K";
           description = "Get krr";
-          scopes = [ "deployments, daemonsets, statefulsets" ];
+          scopes = ["deployments, daemonsets, statefulsets"];
           command = "bash";
           background = false;
           confirm = false;
@@ -381,7 +380,7 @@
         toggle-helmrelease = {
           shortCut = "Shift-T";
           confirm = true;
-          scopes = [ "helmreleases" ];
+          scopes = ["helmreleases"];
           description = "Toggle to suspend or resume a HelmRelease";
           command = "bash";
           background = false;
@@ -394,7 +393,7 @@
         toggle-kustomization = {
           shortCut = "Shift-T";
           confirm = true;
-          scopes = [ "kustomizations" ];
+          scopes = ["kustomizations"];
           description = "Toggle to suspend or resume a Kustomization";
           command = "bash";
           background = false;
@@ -408,7 +407,7 @@
           shortCut = "Shift-R";
           confirm = false;
           description = "Flux reconcile";
-          scopes = [ "gitrepositories" ];
+          scopes = ["gitrepositories"];
           command = "bash";
           background = false;
           args = [
@@ -421,7 +420,7 @@
           shortCut = "Shift-R";
           confirm = false;
           description = "Flux reconcile";
-          scopes = [ "helmreleases" ];
+          scopes = ["helmreleases"];
           command = "bash";
           background = false;
           args = [
@@ -433,7 +432,7 @@
         reconcile-helm-repo = {
           shortCut = "Shift-Z";
           description = "Flux reconcile";
-          scopes = [ "helmrepositories" ];
+          scopes = ["helmrepositories"];
           command = "bash";
           background = false;
           confirm = false;
@@ -446,7 +445,7 @@
         reconcile-oci-repo = {
           shortCut = "Shift-Z";
           description = "Flux reconcile";
-          scopes = [ "ocirepositories" ];
+          scopes = ["ocirepositories"];
           command = "bash";
           background = false;
           confirm = false;
@@ -460,7 +459,7 @@
           shortCut = "Shift-R";
           confirm = false;
           description = "Flux reconcile";
-          scopes = [ "kustomizations" ];
+          scopes = ["kustomizations"];
           command = "bash";
           background = false;
           args = [
@@ -473,7 +472,7 @@
           shortCut = "Shift-R";
           confirm = false;
           description = "Flux reconcile";
-          scopes = [ "imagerepositories" ];
+          scopes = ["imagerepositories"];
           command = "sh";
           background = false;
           args = [
@@ -486,7 +485,7 @@
           shortCut = "Shift-R";
           confirm = false;
           description = "Flux reconcile";
-          scopes = [ "imageupdateautomations" ];
+          scopes = ["imageupdateautomations"];
           command = "sh";
           background = false;
           args = [
@@ -499,7 +498,7 @@
           shortCut = "Shift-S";
           confirm = false;
           description = "Suspended Helm Releases";
-          scopes = [ "helmrelease" ];
+          scopes = ["helmrelease"];
           command = "sh";
           background = false;
           args = [
@@ -512,7 +511,7 @@
           shortCut = "Shift-S";
           confirm = false;
           description = "Suspended Kustomizations";
-          scopes = [ "kustomizations" ];
+          scopes = ["kustomizations"];
           command = "sh";
           background = false;
           args = [
