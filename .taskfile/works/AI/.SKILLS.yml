@@ -20,6 +20,12 @@ vars:
         # what: 用于 Web 设计规范 相关任务
         - web-design-guidelines
 
+    # https://github.com/openai/codex/issues/2880
+    # https://github.com/jinghan23/codex-export
+    # 试用了一下，不够好用，但也算是差强人意，能用的程度。比如我自己用 prompts 导出的要好点不多
+    - repo: jinghan23/codex-export
+
+
 
   CANDIDATES:
     # https://github.com/MiniMax-AI/skills
