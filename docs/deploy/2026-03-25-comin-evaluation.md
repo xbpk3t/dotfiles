@@ -51,7 +51,30 @@ pull-mode 相比 push-mode 的要求更高，具体来说：
 
 
 
+---
 
+> 注意这些都属于 infra/OS 层的deploy工具，而非APP层（APP层通常用 fluxcd/ArgoCD）
+
+
+colmena / deploy-rs：push/编排式
+
+从一个控制端（CI、你的电脑、某台 orchestrator）通过 SSH 等方式去部署到一批机器，强调并行、批量、编排、profiles 等。
+
+comin：pull/GitOps 代理式
+
+每台机器自己跑一个 agent，按周期拉取 Git 并把状态收敛到“Git 里声明的样子”。
+
+
+```markdown
+colmena / deploy-rs（push 模式）：
+配置代码只在控制端（你的电脑、CI、orchestrator）。
+控制端 eval/build 出 closure（或 profile），然后通过 SSH 把二进制结果推送到目标机器。
+目标机器上不需要有你的 Nix 源码，只需要能接收 store path 并激活就行（更“轻量”，适合代码不想暴露到生产机的情况）。
+
+comin（pull 模式）：
+每台机器自己负责拉代码、自己 eval/build。
+因此必须能拿到完整的 Nix 代码。
+```
 
 
 :::
