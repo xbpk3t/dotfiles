@@ -79,6 +79,10 @@ rec {
 
     agent-skills.url = "github:Kyure-A/agent-skills-nix";
     llm-agents.url = "github:numtide/llm-agents.nix";
+    mcp-servers-nix = {
+      url = "github:natsukium/mcp-servers-nix";
+      inputs.nixpkgs.follows = "nixpkgs-darwin";
+    };
 
     #============= skills ==============#
     ast-grep-agent-skill = {
@@ -119,6 +123,11 @@ rec {
     # https://x.com/vikingmute/status/2036043855594975485
     obra-superpowers = {
       url = "github:obra/superpowers";
+      flake = false;
+    };
+
+    impeccable = {
+      url = "github:pbakaus/impeccable";
       flake = false;
     };
     #============= skills ==============#

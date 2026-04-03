@@ -20,11 +20,26 @@ vars:
         # what: 用于 Web 设计规范 相关任务
         - web-design-guidelines
 
+    # https://skills.sh/vercel-labs/skills
+    - repo: vercel-labs/skills
+      skills:
+        # 遇到问题时，使用 find-skills 会推荐skills
+        - find-skills
+
     # https://github.com/openai/codex/issues/2880
     # https://github.com/jinghan23/codex-export
     # 试用了一下，不够好用，但也算是差强人意，能用的程度。比如我自己用 prompts 导出的要好点不多
     - repo: jinghan23/codex-export
 
+    # https://skills.sh/openai/skills
+    # 本身分为两部分 .system 和 .curated. 前者是codex本身内置的，后者则需要单独安装，但是看了一下其实也没什么特别重要的skills
+    - repo: openai/skills
+      skills:
+        #- score: 4.4/5
+        #- what: 面向 GitHub PR/CI 失败排查与修复的专项 skill，会检查 PR checks 并驱动修复流程。
+        #- why: 这是很典型的高价值专项 skill，问题边界清晰，真实场景也非常高频。
+        #- note: 依赖 GitHub/CI 上下文；如果仓库不走 GitHub checks，这项价值会明显下降。
+        - gh-fix-ci
 
 
   CANDIDATES:
@@ -51,3 +66,226 @@ vars:
       skills:
         # https://skills.sh/github/awesome-copilot/plantuml-ascii
         # - plantuml-ascii
+
+    # https://github.com/mitsuhiko/agent-stuff
+    #- what: 用 tmux 私有 socket 远程控制交互式 CLI，会话可被持续驱动、抓取 pane 输出，并明确告诉用户如何 attach 观察。
+    #- why: 这类 skill 很适合处理 REPL、gdb、长跑 CLI、半交互调试等场景，属于很有技术味道的实用增强。
+    #- note: 对不使用 tmux 的用户门槛偏高；但一旦你接受这套工作流，复用率会很高。
+    #- htu:
+    #  - 用 `$tmux` 起一个隔离 tmux session 跑交互式命令，并告诉我如何 attach。
+    #  - 用 `$tmux` 远程驱动一个 Python/gdb 会话，持续抓 pane 输出。
+    - repo: mitsuhiko/agent-stuff
+
+    # https://github.com/gillkyle/agent-tail
+    #- what: 把浏览器 console 和 dev server stdout/stderr 统一落盘到日志文件，便于 `tail`、`grep`、持久化排查。
+    #- why: 这对前端/全栈调试非常实用，尤其是你已经在做本地 web app 自动化时，它能补上“日志抓取”这块短板。
+    #- note: 偏工具型 skill，本身不修 bug；价值来自和调试/测试 workflow 组合使用。
+    #- htu:
+    #  - 用 `$agent-tail` 启一个前端服务并把 console/server logs 落到文件。
+    #  - 用 `$agent-tail` 帮我看最近一轮调试里的 browser.log / combined.log。
+    - repo: gillkyle/agent-tail
+
+    # https://github.com/freee/freee-mcp
+    #- what: 围绕 freee MCP / API 的专项 skill，提供会计、人事、发票、工数、销售等 API 参考与接入方式。
+    #- why: 如果你会和 freee 生态打交道，它比泛泛的 API 使用 prompt 更可执行。
+    #- note: 明确是垂直 SaaS skill，对大多数通用开发场景不具备高频价值。
+    #- htu:
+    #  - 用 `$freee-api-skill` 找到某个 freee API 的参数和请求示例。
+    #  - 用 `$freee-api-skill` 看看当前该走 Remote MCP 还是本地 `freee-mcp`。
+    - repo: freee/freee-mcp
+
+    # https://github.com/tmustier/pi-extensions
+    # https://github.com/badlogic/pi-mono
+    # pi-mono 就是对标 codex, open-code 之类的cli工具，感觉用不太到
+    - repo: tmustier/pi-extensions
+
+    # https://github.com/jgraph/drawio-mcp
+    #- score: 4.1/5
+    #- what: 把用户想要的图直接生成成原生 `.drawio` 文件，必要时还能导出 PNG/SVG/PDF。
+    #- why: 这是非常具体且有产出的 diagram skill，和你已有 `mermaid-diagrams` / `diagram-picker` 形成互补，而不是重复。
+    #- note: 更偏 draw.io 原生资产生成；如果你主要用 Mermaid，触发频率可能没那么高。
+    #- htu:
+    #  - 用 `$drawio` 生成一个可编辑的 `.drawio` 架构图。
+    #  - 用 `$drawio` 画流程图并导出成 SVG/PDF。
+    - repo: jgraph/drawio-mcp
+
+
+    # https://github.com/streamlit/agent-skills
+    #
+    - repo: streamlit/agent-skills
+
+
+    # https://github.com/dbt-labs/dbt-agent-skills
+    #### adding-dbt-unit-test
+    #
+    #- score: 4.1/5
+    #- what: 给 dbt model 补 unit test，强调高价值场景、fixture 设计和预期输出。
+    #- why: dbt 的测试方式有明显领域特征，这种专项 skill 比通用 testing prompt 更容易落地。
+    #- note: 只在 dbt 项目里有价值。
+    #- htu:
+    #    - 用 `$adding-dbt-unit-test` 给这个 model 写 unit test。
+    #    - 用 `$adding-dbt-unit-test` 先识别最值得测的边界。
+    #- source: `dbt-labs/dbt-agent-skills`
+    #
+    #### answering-natural-language-questions-with-dbt
+    #
+    #- score: 3.9/5
+    #- what: 面向“自然语言提问 -> 借助 dbt 语义层/上下文回答”的 skill。
+    #- why: 对已有 dbt 语义层的团队很实用，能把数据问答和建模上下文对齐。
+    #- note: 没有语义层或 dbt 体系时几乎用不上。
+    #- htu:
+    #    - 用 `$answering-natural-language-questions-with-dbt` 回答这个业务指标问题。
+    #    - 用 `$answering-natural-language-questions-with-dbt` 基于现有 dbt 语义定义解释口径。
+    #- source: `dbt-labs/dbt-agent-skills`
+    #
+    #### building-dbt-semantic-layer
+    #
+    #- score: 4.0/5
+    #- what: 帮你设计或扩展 dbt Semantic Layer，包括 metric / entity / semantic model 等结构。
+    #- why: 这是 dbt 里相对难的一块，专项 skill 的价值比通用 SQL 指南高。
+    #- note: 明显偏高级用法，不是所有 dbt 项目都会走到这一步。
+    #- htu:
+    #    - 用 `$building-dbt-semantic-layer` 设计这个业务指标的 semantic model。
+    #    - 用 `$building-dbt-semantic-layer` 看看这个 metric 定义该怎么拆。
+    #- source: `dbt-labs/dbt-agent-skills`
+    #
+    #### configuring-dbt-mcp-server
+    #
+    #- score: 3.8/5
+    #- what: 配置 dbt MCP server，让 agent 能更稳定地接入 dbt 文档/项目上下文。
+    #- why: 如果你已经在走 MCP 化工具链，这是很自然的 glue skill。
+    #- note: 偏集成配置，不是日常高频业务 skill。
+    #- htu:
+    #    - 用 `$configuring-dbt-mcp-server` 帮我把 dbt MCP server 配起来。
+    #    - 用 `$configuring-dbt-mcp-server` 看当前 dbt 项目接 MCP 还差什么。
+    #- source: `dbt-labs/dbt-agent-skills`
+    #
+    #### fetching-dbt-docs
+    #
+    #- score: 3.7/5
+    #- what: 拉取和检索 dbt docs / references / 项目文档，用于后续建模和排障。
+    #- why: 这类 skill 适合做上下文摄取层，能减少模型乱猜 dbt 结构。
+    #- note: 更像辅助 skill，通常要和别的 dbt skill 配合。
+    #- htu:
+    #    - 用 `$fetching-dbt-docs` 把这个项目的 dbt docs 先抓出来。
+    #    - 用 `$fetching-dbt-docs` 查这个 model / source 的文档定义。
+    #- source: `dbt-labs/dbt-agent-skills`
+    #
+    #### running-dbt-commands
+    #
+    #- score: 3.8/5
+    #- what: 规范执行 `dbt run / test / build / show` 等命令，处理常见运行姿势与输出。
+    #- why: 虽然看起来基础，但把命令运行边界写清楚，对 agent 很有帮助。
+    #- note: 更像基础设施 skill，增量不如建模/测试类技能大。
+    #- htu:
+    #    - 用 `$running-dbt-commands` 跑这个 model 的 build / test。
+    #    - 用 `$running-dbt-commands` 只针对某个 selector 执行 dbt 命令。
+    #- source: `dbt-labs/dbt-agent-skills`
+    #
+    #### troubleshooting-dbt-job-errors
+    #
+    #- score: 4.1/5
+    #- what: 排查 dbt job / parsing / compilation / database execution errors。
+    #- why: 排障类 skill 往往比“最佳实践”更容易产生直接价值，这个主题也很常见。
+    #- note: 需要真实错误输出和项目上下文才能发挥作用。
+    #- htu:
+    #    - 用 `$troubleshooting-dbt-job-errors` 帮我看这个 dbt job 为什么失败。
+    #    - 用 `$troubleshooting-dbt-job-errors` 根据错误日志定位是 parsing 还是 warehouse 问题。
+    #- source: `dbt-labs/dbt-agent-skills`
+    #
+    #### using-dbt-for-analytics-engineering
+    #
+    #- score: 4.4/5
+    #- what: dbt 主入口 skill，覆盖建模、重构、测试、探索 source、评估变更影响等完整 workflow。
+    #- why: 这是 dbt 组里最值得收的一项，主题范围适中，而且 workflow 很成熟。
+    #- note: 如果只收一个 dbt skill，这个优先级最高。
+    #- htu:
+    #    - 用 `$using-dbt-for-analytics-engineering` 帮我改这个 dbt model。
+    #    - 用 `$using-dbt-for-analytics-engineering` 先评估改动影响，再决定怎么改 DAG。
+    #- source: `dbt-labs/dbt-agent-skills`
+    #
+    #### working-with-dbt-mesh
+    #
+    #- score: 3.9/5
+    #- what: 面向 dbt Mesh / 多项目边界协作的专项 skill。
+    #- why: 对复杂数据平台很有用，尤其在跨团队数据契约场景。
+    #- note: 偏组织级高级话题，小团队单项目通常用不到。
+    #- htu:
+    #    - 用 `$working-with-dbt-mesh` 设计这两个 dbt project 的边界。
+    #    - 用 `$working-with-dbt-mesh` 看这个跨团队依赖应不应该走 Mesh。
+    #- source: `dbt-labs/dbt-agent-skills`
+    #
+    #### migrating-dbt-core-to-fusion
+    #
+    #- score: 3.8/5
+    #- what: 指导从 dbt Core 迁移到 Fusion。
+    #- why: 迁移类 skill 价值在“少用但关键”，命中场景时很实用。
+    #- note: 太专项，除非你明确有 Fusion 迁移需求。
+    #- htu:
+    #    - 用 `$migrating-dbt-core-to-fusion` 帮我梳理迁移步骤和风险。
+    #    - 用 `$migrating-dbt-core-to-fusion` 看现有项目迁到 Fusion 要改哪些点。
+    #- source: `dbt-labs/dbt-agent-skills`
+    #
+    #### migrating-dbt-project-across-platforms
+    #
+    #- score: 3.8/5
+    #- what: 做 dbt 项目跨平台迁移，例如不同 warehouse / 平台之间的迁移。
+    #- why: 命中时价值大，尤其适合迁移 checklist 与兼容性排查。
+    #- note: 非日常高频需求。
+    #- htu:
+    #    - 用 `$migrating-dbt-project-across-platforms` 评估这个项目跨平台迁移成本。
+    #    - 用 `$migrating-dbt-project-across-platforms` 列出 SQL / macro 兼容性风险。
+    - repo: dbt-labs/dbt-agent-skills
+
+
+
+
+
+    # https://github.com/kamranahmedse/diffity
+    - repo: kamranahmedse/diffity
+      skills:
+        #- score: 3.7/5
+        #- what: 打开 diffity diff viewer，把当前工作区或某个 ref 的 diff 直接暴露给浏览器查看。
+        #- why: 它把 diff 可视化这一步做成一个明确入口，适合先看再评。
+        #- note: 单独看价值一般，因为它本身更像 `diffity-review` / `diffity-resolve` 的入口动作。
+        - diffity-diff
+
+        #- score: 4.0/5
+        #- what: 读取 diffity 会话中的 unified diff，并使用 agent CLI 生成 inline review comments。
+        #- why: 对“AI 先审一遍 diff 并且把意见落成真正的 review comment”这个场景很实用。
+        #- note: 前提是你接受 diffity 这套 review 介质；否则它就是额外系统复杂度。
+        - diffity-review
+
+        #- score: 4.1/5
+        #- what: 读取 diffity 中未解决的 review threads，按评论内容做代码修复、回复或 resolve。
+        #- why: 它把“看评论 -> 改代码 -> resolve thread”串成闭环，属于比单纯 code review 更完整的 workflow。
+        #- note: 依赖上游评论质量；如果评论含糊或建议本身不对，还是需要人工把关。
+        - diffity-resolve
+
+
+    # https://github.com/databricks-solutions/ai-dev-kit
+    - repo: databricks-solutions/ai-dev-kit
+      skills:
+      # https://github.com/databricks-solutions/ai-dev-kit/tree/main/databricks-skills
+
+    # https://github.com/databricks/databricks-agent-skills
+    - repo: databricks/databricks-agent-skills
+      skills:
+        - databricks-apps
+        - databricks-core
+        - databricks-jobs
+        - databricks-lakebase
+        - databricks-pipelines
+
+    # https://github.com/ericosiu/ai-marketing-skills
+    # https://x.com/axiaisacat/status/2038542054704214348
+
+    # 用来clone website的skill
+    # https://github.com/JCodesMore/ai-website-cloner-template
+
+    # 用来做 SEO和GEO的skill
+    # https://github.com/aaron-he-zhu/seo-geo-claude-skills
+
+
+    # https://github.com/tanweai/pua
+    # https://github.com/thedotmack/claude-mem

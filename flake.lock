@@ -1021,6 +1021,22 @@
         "type": "github"
       }
     },
+    "impeccable": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1775075660,
+        "narHash": "sha256-uG5CawCZxRSOkufxapNuUarIbs+f9UUepE8QX3BH5gI=",
+        "owner": "pbakaus",
+        "repo": "impeccable",
+        "rev": "3a4fc70f0e17fccb22565d37e868f8e2f3e73bdd",
+        "type": "github"
+      },
+      "original": {
+        "owner": "pbakaus",
+        "repo": "impeccable",
+        "type": "github"
+      }
+    },
     "import-tree": {
       "locked": {
         "lastModified": 1763762820,
@@ -1078,6 +1094,26 @@
       "original": {
         "owner": "numtide",
         "repo": "llm-agents.nix",
+        "type": "github"
+      }
+    },
+    "mcp-servers-nix": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs-darwin"
+        ]
+      },
+      "locked": {
+        "lastModified": 1775007230,
+        "narHash": "sha256-wo4XcRNwYfM3kStNo52DcCI0CF3RPfDkqcM66FiYcmY=",
+        "owner": "natsukium",
+        "repo": "mcp-servers-nix",
+        "rev": "81aa816d486cf2df47e70cbb5629e22c5d057169",
+        "type": "github"
+      },
+      "original": {
+        "owner": "natsukium",
+        "repo": "mcp-servers-nix",
         "type": "github"
       }
     },
@@ -1900,7 +1936,9 @@
         "flake-parts": "flake-parts_2",
         "hashicorp-agent-skills": "hashicorp-agent-skills",
         "home-manager": "home-manager_2",
+        "impeccable": "impeccable",
         "llm-agents": "llm-agents",
+        "mcp-servers-nix": "mcp-servers-nix",
         "nix-homebrew": "nix-homebrew",
         "nix-index-database": "nix-index-database",
         "nix-unit": "nix-unit",
