@@ -22,12 +22,6 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    # https://github.com/ymat19/dotfiles/blob/main/modules/ai-agent.nix
-    # https://github.com/edmundmiller/dotfiles/blob/main/skills/flake.nix
-    # https://github.com/ryoppippi/dotfiles/blob/main/nix/modules/home/agent-skills.nix
-    # https://github.com/mikinovation/dotfiles/blob/main/config/nix/configs/agent-skills.nix
-    # https://github.com/mikinovation/dotfiles/blob/main/config/nix/flake.nix
-    # https://github.com/i9wa4/dotfiles/blob/main/nix/home-manager/modules/agent-skills.nix
     programs.agent-skills = {
       enable = true;
       sources =

@@ -47,7 +47,9 @@
       # - [algorithmic-art] 用 $algorithmic-art 帮我做一个基于 <concept> 的 generative art 作品
       # - [p5js] 用 $algorithmic-art 用 p5.js 做一个可交互的 flow fields / particles / noise sketch
       # - [seeded] 用 $algorithmic-art 做一个带 seeded randomness、可调参数的算法艺术实验
-      "algorithmic-art"
+      # [2026-04-03] 用不到，注释掉
+      # "algorithmic-art"
+
       # what: 文档共创 workflow
       # why: 适合协作写文档、proposal、spec、decision doc，会按 Context Gathering -> Refinement -> Reader Testing 三阶段推进
       # note: 它不是“直接替你写完”的 prompt，而是文档共创 workflow；适合中大型文档，不适合一段简单说明
@@ -56,14 +58,6 @@
       # - [spec] 用 $doc-coauthoring 带我起草这份 technical spec / decision doc
       # - [proposal] 用 $doc-coauthoring 按共创 workflow 来整理这份 proposal，不要直接自由发挥
       "doc-coauthoring"
-      # what: 高质量 frontend 设计与实现
-      # why: 适合直接生成高质量 web UI / page / component / artifact，强调 production-grade、强风格和避免 AI slop
-      # note: 是这组技能里的前端总入口；当任务是做页面、组件、落地视觉方向时，通常优先用它
-      # htu:
-      # - [frontend] 用 $frontend-design 帮我做这个页面 / 组件，要求有明确设计方向
-      # - [landing-page] 用 $frontend-design 做一个有强风格的 landing page，不要 generic AI aesthetics
-      # - [artifact] 用 $frontend-design 做一个可直接展示的 HTML / React artifact
-      "frontend-design"
       # what: 内部沟通写作
       # why: 适合写内部沟通材料，比如 status report、leadership update、3P、incident report、FAQ
       # note: 会根据沟通类型去套对应格式和示例；重点是 internal communication，不是一般 public-facing writing
@@ -81,6 +75,7 @@
       # - [eval] 用 $skill-creator 帮我评测并迭代这个 skill
       # - [description] 用 $skill-creator 优化这个 skill 的 description，让 trigger 更准确
       "skill-creator"
+
       # what: 主题工厂 / artifact 主题应用
       # why: 适合给 slide deck、docs、HTML 页面等 artifact 套一个现成主题，或在现有主题基础上生成新 theme
       # note: 更偏“统一视觉主题应用”，不是从零做设计；它依赖 theme showcase / themes 目录里的预设主题
@@ -111,6 +106,7 @@
   };
 
   # https://skills.sh/wshobson/agents
+  # [2026-04-03] 这个repo的skills太多了，需要严格筛选
   wshobson-agents = {
     input = "wshobson-agents";
     subdir = "plugins/kubernetes-operations/skills";
@@ -120,12 +116,69 @@
   };
 
   # https://skills.sh/hashicorp/agent-skills
+  # https://github.com/hashicorp/agent-skills
+  # https://github.com/hashicorp/agent-skills/tree/main/terraform/code-generation/skills
+  # https://github.com/hashicorp/agent-skills/tree/main/terraform/provider-development/skills
   hashicorp-agent-skills = {
     input = "hashicorp-agent-skills";
     subdir = "terraform/code-generation/skills";
     skills = [
       "terraform-style-guide"
       "terraform-test"
+
+      #  #- score: 4.0/5
+      #  #- what: 把已有 Terraform 代码重构成更像模块的结构。
+      #  #- why: 对现成 IaC 代码逐步模块化是很真实的需求，这项比“从零写模块”更有现实感。
+      #  #- note: 对 Terraform-heavy 仓库才有高价值。
+      #  "refactor-module"
+      #
+      #  #- score: 3.8/5
+      #  #- what: 处理 Terraform Stacks。
+      #  #- why: 命中时很有用，但适用面不算大。
+      #  #- note: 偏新特性/专项主题。
+      #  "terraform-stacks"
+      #
+      #  #- score: 4.1/5
+      #  #- what: 脚手架一个新的 Terraform provider，按 Plugin Framework 标准走一遍初始化。
+      #  #- why: 对 provider 开发来说很实用，而且步骤清晰，不是泛泛而谈。
+      #  #- note: 受众窄，但命中时价值高。
+      #  "new-terraform-provider"
+      #
+      #  #- score: 3.8/5
+      #  #- what: 处理 provider 中的 actions。
+      #  #- why: provider 开发专项主题，适合深水区用户。
+      #  #- note: 窄，但专业。
+      #  #- htu:
+      #  #  - 用 `$provider-actions` 设计这个 provider action。
+      #  #  - 用 `$provider-actions` 看 action 该怎么建模。
+      #  "provider-actions"
+      #
+      #  #- score: 4.0/5
+      #  #- what: 设计和实现 provider resources。
+      #  #- why: 这是 provider 开发核心主题之一。
+      #  #- note: 人群窄，但很硬核。
+      #  #- htu:
+      #  #  - 用 `$provider-resources` 帮我实现这个 Terraform resource。
+      #  #  - 用 `$provider-resources` 看 resource schema / lifecycle 怎么放。
+      #  "provider-resources"
+      #
+      #  #- score: 4.0/5
+      #  #- what: Terraform provider 的测试模式与最佳实践。
+      #  #- why: 专业度高，且测试是 provider 生态里的痛点。
+      #  #- note: 仅 provider 开发场景。
+      #  #- htu:
+      #  #  - 用 `$provider-test-patterns` 给这个 provider 补测试。
+      #  #  - 用 `$provider-test-patterns` 看 acceptance/unit test 边界。
+      #  "provider-test-patterns"
+      #
+      #  #- score: 3.9/5
+      #  #- what: 运行 Terraform provider acceptance tests。
+      #  #- why: 对 provider 开发是高频动作。
+      #  #- note: 单独看更像执行型 helper，但仍有价值。
+      #  #- htu:
+      #  #  - 用 `$run-acceptance-tests` 跑这个 provider 的 acceptance tests。
+      #  #  - 用 `$run-acceptance-tests` 帮我检查运行前提和环境变量。
+      #  "run-acceptance-tests"
     ];
   };
 
@@ -305,16 +358,7 @@
 
   # https://x.com/vikingmute/status/2036043855594975485
   # https://github.com/obra/superpowers
-  #  - 需求不清/做功能/要方案 -> brainstorming
-  #  - 要拆计划 -> writing-plans
-  #  - 开始实现 -> executing-plans
-  #  - 并行子任务 -> subagent-driven-development 或 dispatching-parallel-agents
-  #  - 写代码或修 bug 前 -> test-driven-development
-  #  - 遇到异常/测试失败 -> systematic-debugging
-  #  - 完成一个任务 -> requesting-code-review
-  #  - 收到 review -> receiving-code-review
-  #  - 准备宣称完成 -> verification-before-completion
-  #  - 准备合并或结束分支 -> finishing-a-development-branch
+  # [2026-04-03] 虽然都说“superpowers和SuperClaude是两码事”，具体来说“Superpowers 管的是“怎么正确地开发”（TDD、代码审查），SuperClaude 管的是怎么高效地指挥 coding agent 干活。两个可以配合着用。”。但是按照我的理解，其实 superpowers 就足够覆盖掉 SuperClaude 了，并且后者的skills过于细碎，不够易用
   obra-superpowers = {
     input = "obra-superpowers";
     subdir = "skills";
@@ -322,6 +366,7 @@
       ######### 核心流程（注意顺序） ##########
 
       "brainstorming"
+      # [2026-04-01] 直接用这个替代掉 planning-with-files 了
       "writing-plans"
       #      - 更保守
       #      - 适合 inline 执行
@@ -362,6 +407,96 @@
       #  - 是执行策略，不是主线阶段
       "dispatching-parallel-agents"
       "writing-skills"
+    ];
+  };
+
+  # design skills
+  # https://x.com/dingyi/status/2033679210766843928
+  # https://x.com/nicoletang0717/status/2039738939519741986
+  # https://x.com/axiaisacat/status/2030297324962857044
+  # https://github.com/pbakaus/impeccable
+  # how to use: https://impeccable.style/cheatsheet
+  impeccable = {
+    input = "impeccable";
+    subdir = ".codex/skills";
+    skills = [
+      ######### 核心流程（注意顺序） ##########
+
+      # what: impeccable 版的前端设计主 skill
+      # why: 作为这组 design workflow 的总入口，提供设计原则、反模式和 context gathering protocol，后续 audit/normalize/polish 等都依赖它
+      # note: 这里显式用 `pbakaus/impeccable` 的 `frontend-design` 替代 anthropic 同名 skill；上面的 anthropic 条目已移除，避免同名覆盖关系不清
+      "frontend-design"
+      # what: 技术质量审计
+      # why: 适合先做 accessibility / performance / responsive / theming / anti-pattern 的系统扫描，给后续修复动作提供优先级
+      # note: 偏诊断，不直接改代码；通常是进入这套 workflow 的第一步
+      "audit"
+      # what: UX / 视觉设计批评与审视
+      # why: 适合检查层级、信息组织、情绪氛围、清晰度和整体体验，不局限于可测量的技术问题
+      # note: 和 `audit` 互补；前者偏技术质量，后者偏设计判断
+      "critique"
+      # what: 澄清文案与交互表达
+      # why: 适合处理 button label、empty state、error copy、instruction text 等“不够清楚”的 UX writing 问题
+      # note: 偏信息表达层面的修正，通常作为 critique/audit 之后的定向修复
+      "clarify"
+      # what: 对齐设计系统与规范
+      # why: 适合统一 token、spacing、组件风格和 theme 用法，把页面拉回到一致的系统语言
+      # note: 是从“发现问题”走向“系统化修复”的主力 skill 之一
+      "normalize"
+      # what: 提炼与减法
+      # why: 适合去掉多余层级、装饰和噪音，把界面压缩到更清晰的核心表达
+      # note: 偏结构与内容的减法，不是纯视觉 polish
+      "distill"
+      # what: 抽取复用组件与模式
+      # why: 适合把已经成型的 UI 模式沉淀成可复用组件，降低重复实现和风格漂移
+      # note: 更偏实现与设计系统沉淀，通常发生在界面方向稳定之后
+      "extract"
+      # what: 健壮性与边界处理
+      # why: 适合补 error handling、empty/loading states、i18n、异常路径和防御性 UX
+      # note: 让设计不仅“好看”，也能在真实使用场景里站得住
+      "harden"
+      # what: 前端性能优化
+      # why: 适合处理动画代价、渲染性能、资源加载和交互流畅度等问题
+      # note: 更偏 engineering quality；通常在主要设计方向确定后再收这部分收益
+      "optimize"
+      # what: 最终出货前的 polish
+      # why: 适合作为最后一轮收尾，把前面已经改到位的页面做精修，提升完成度和一致性
+      # note: 是核心流程的收尾动作，不适合一上来就直接用它代替前面的诊断与修正
+      "polish"
+
+      ######### 辅助核心流程 ##########
+
+      # what: 一次性的 design context 建立
+      # why: 适合为项目沉淀用户、品牌、审美方向和设计原则，让后续 impeccable commands 有稳定上下文
+      # note: 很重要，但更像 workflow 的初始化步骤；不是每次改页面都要单独跑
+      "teach-impeccable"
+      # what: 适配不同设备与场景
+      # why: 适合针对 mobile / tablet / desktop 或不同容器环境调整布局、密度和交互
+      # note: 偏专项修复，通常在 audit 发现响应式问题或明确有多端要求时触发
+      "adapt"
+      # what: 增加有目的的动效
+      # why: 适合用 motion 强化层级、反馈和氛围，而不是堆无意义微交互
+      # note: 是增强项，不是主线必经步骤；需要建立在已有清晰结构之上
+      "animate"
+      # what: 提升视觉张力
+      # why: 适合在界面太平、太保守时增强对比、层级和 personality
+      # note: 用来“加力度”，通常和 `quieter` 构成一对相反方向的调节杆
+      "bolder"
+      # what: 引入更有策略的色彩
+      # why: 适合在现有结构稳定的前提下，增强 palette、accent 和整体色彩表达
+      # note: 偏色彩专项，不替代 `normalize` 对 token / theming 的系统整理
+      "colorize"
+      # what: 增加愉悦感与记忆点
+      # why: 适合在不影响主任务流的前提下加入小惊喜、小反馈和情绪价值
+      # note: 属于体验加分项，优先级通常低于 clarity、a11y 和 robustness
+      "delight"
+      # what: 新手引导与 onboarding 体验
+      # why: 适合设计首次使用流程、提示、引导状态和渐进披露
+      # note: 明显是场景化专项 skill，不属于每个页面都会走的主线
+      "onboard"
+      # what: 收敛过强的表达
+      # why: 适合当界面过于吵、过于重、过度装饰时，把视觉语气压回更克制的状态
+      # note: 和 `bolder` 对偶，用来做反向调参，而不是独立主阶段
+      "quieter"
     ];
   };
 }

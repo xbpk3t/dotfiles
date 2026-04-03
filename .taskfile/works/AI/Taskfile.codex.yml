@@ -1,0 +1,23 @@
+---
+version: "3"
+
+vars:
+  CODEX_PROVIDERS_SCRIPT: '{{.TASKFILE_DIR}}/codex-providers-check.nu'
+  CODEX_CONFIG: '{{joinPath .HOME ".codex" "config.toml"}}'
+
+tasks:
+  default:
+    desc: "bulk probe third-party Codex model providers"
+    summary: "task -g codexp"
+    silent: true
+    interactive: true
+    preconditions:
+      - sh: command -v nu >/dev/null
+        msg: nu not found
+      - sh: command -v codex >/dev/null
+        msg: codex not found
+      - sh: test -f "{{.CODEX_CONFIG}}"
+        msg: "{{.CODEX_CONFIG}} not found"
+      - sh: test -f "{{.CODEX_PROVIDERS_SCRIPT}}"
+        msg: "{{.CODEX_PROVIDERS_SCRIPT}} not found"
+    cmd: 'nu "{{.CODEX_PROVIDERS_SCRIPT}}"'

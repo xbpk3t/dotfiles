@@ -6,7 +6,6 @@
   ...
 }: let
   cfg = config.modules.AI.codex;
-  mcpServers = import ./mcp-servers.nix {inherit config;};
 in {
   # codex resume   打开可恢复的会话列表
   # codex resume --last 直接恢复当前工作目录下最近一次会话
@@ -17,11 +16,20 @@ in {
     enable = mkEnableOption "Enable Codex";
   };
 
+  # 中转站
+  # https://www.helpaio.com/transit
+  # https://cubence.com/
+  # https://relaypulse.top/ 感觉 SSSAiCode 还不错（小月卡）
+  # https://api.ikuncode.cc/console/topup gpt-5.4
+  # 输入价格 ¥0.5000 / 1M Tokens
+  # 补全价格 ¥3.0000 / 1M Tokens
+  # 正好是 SSSAiCode 的一半
   config = lib.mkIf cfg.enable {
     # https://mynixos.com/home-manager/options/programs.codex
     # https://github.com/openai/codex
     programs.codex = {
       enable = true;
+      enableMcpIntegration = true;
       # package = pkgs.codex;
       package = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.codex;
 
@@ -52,9 +60,6 @@ in {
           unified_exec = true;
           view_image_tool = true;
         };
-        # MCP servers 统一从 ./mcp-servers.nix 导入，避免散落在多个文件。
-        mcp_servers = mcpServers;
-
         # 声明式 trusted projects：避免首次进入仓库时反复询问 trust。
         projects = {
           "${config.home.homeDirectory}/Desktop/dotfiles" = {
@@ -78,14 +83,6 @@ in {
             name = "ice";
             base_url = "https://ice.v.ua/v1";
             env_key = "OPENAI_API_KEY_ICE";
-            wire_api = "responses";
-          };
-
-          # https://linux.do/t/topic/1806866
-          test = {
-            name = "test";
-            base_url = "http://119.8.113.226:9999/v1";
-            env_key = "OPENAI_API_KEY_TEST";
             wire_api = "responses";
           };
 
@@ -134,16 +131,37 @@ in {
             env_key = "OPENAI_API_KEY_KKK";
             wire_api = "responses";
           };
+
+          # https://codex.mqc.me/dashboard
+          mqc = {
+            name = "mqc";
+            base_url = "https://claude.colin1112.tech/v1";
+            env_key = "OPENAI_API_KEY_MQC";
+            wire_api = "responses";
+          };
+
+          # https://linux.do/t/topic/1853293
+          # https://muyuan.do/console/
+          jun = {
+            name = "jun";
+            base_url = "https://muyuan.do/v1";
+            env_key = "OPENAI_API_KEY_JUN";
+            wire_api = "responses";
+          };
+
+          # https://elysiver.h-e.top/console
+          ely = {
+            name = "ely";
+            # base_url = "https://elysia.h-e.top/v1";
+            base_url = "https://elysiver.h-e.top/v1";
+            env_key = "OPENAI_API_KEY_ELY";
+            wire_api = "responses";
+          };
         };
 
         profiles = {
           ice = {
             model_provider = "ice";
-            model = "gpt-5.4";
-          };
-
-          test = {
-            model_provider = "test";
             model = "gpt-5.4";
           };
 
@@ -171,6 +189,21 @@ in {
             model_provider = "kkk";
             model = "gpt-5.4";
           };
+
+          mqc = {
+            model_provider = "mqc";
+            model = "gpt-5.4";
+          };
+
+          jun = {
+            model_provider = "jun";
+            model = "gpt-5.4";
+          };
+
+          ely = {
+            model_provider = "ely";
+            model = "gpt-5.4";
+          };
         };
       };
       custom-instructions = "";
@@ -185,9 +218,7 @@ in {
         # For Context7 MCP
         CONTEXT7_API_KEY = "$(cat ${config.sops.secrets.API_context7.path})";
 
-        OPENAI_API_KEY_ICE = "$(cat ${config.sops.secrets.LLM_Sub2API_ice.path})";
-
-        OPENAI_API_KEY_TEST = "$(cat ${config.sops.secrets.LLM_Sub2API_test.path})";
+        OPENAI_API_KEY_ICE = "$(cat ${config.sops.secrets.LLM_Sub2API_default.path})";
 
         OPENAI_API_KEY_GGBoom = "$(cat ${config.sops.secrets.LLM_Sub2API_ggboom.path})";
 
@@ -197,7 +228,13 @@ in {
 
         OPENAI_API_KEY_ARK = "$(cat ${config.sops.secrets.LLM_Sub2API_ark.path})";
 
-        OPENAI_API_KEY_KKK = "$(cat ${config.sops.secrets.LLM_Sub2API_kkk.path})";
+        OPENAI_API_KEY_KKK = "$(cat ${config.sops.secrets.LLM_Sub2API_default.path})";
+
+        OPENAI_API_KEY_MQC = "$(cat ${config.sops.secrets.LLM_Sub2API_mqc.path})";
+
+        OPENAI_API_KEY_JUN = "$(cat ${config.sops.secrets.LLM_Sub2API_jun.path})";
+
+        OPENAI_API_KEY_ELY = "$(cat ${config.sops.secrets.LLM_Sub2API_ely.path})";
       };
       shellAliases = {
         # 每次启动 codex 时动态注入 GitHub PAT，避免把 token 写入静态配置。
@@ -207,12 +244,15 @@ in {
 
         # 用来切换profile
         codex-ice = "codex --profile ice";
-        codex-test = "codex --profile test";
         codex-gg = "codex --profile ggboom";
         codex-zzz = "codex --profile zzz";
         codex-dgb = "codex --profile dgb";
         codex-ark = "codex --profile ark";
         codex-kkk = "codex --profile kkk";
+
+        codex-mqc = "codex --profile mqc";
+        codex-jun = "codex --profile jun";
+        codex-ely = "codex --profile ely";
       };
     };
 

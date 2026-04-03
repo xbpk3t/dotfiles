@@ -82,6 +82,7 @@ includes:
   # works
   sec: works/Taskfile.sec.yml
   skills: works/AI/Taskfile.skills.yml
+  codex: works/AI/Taskfile.codex.yml
 
 
 
