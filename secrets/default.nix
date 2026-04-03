@@ -95,13 +95,15 @@ in {
       # LLM
       LLM_GLM = mkUserSecret "LLM/GLM";
       LLM_deepseek = mkUserSecret "LLM/deepseek";
-      LLM_Sub2API_ice = mkUserSecret "LLM/sub2API/ice";
-      LLM_Sub2API_test = mkUserSecret "LLM/sub2API/test";
+      # 如果sub2api支持自定义sk，那么就修改为 pwgen sub2api
+      LLM_Sub2API_default = mkUserSecret "LLM/sub2API/default";
       LLM_Sub2API_ggboom = mkUserSecret "LLM/sub2API/ggboom";
       LLM_Sub2API_zzz = mkUserSecret "LLM/sub2API/zzz";
       LLM_Sub2API_dgb = mkUserSecret "LLM/sub2API/dgb";
       LLM_Sub2API_ark = mkUserSecret "LLM/sub2API/ark";
-      LLM_Sub2API_kkk = mkUserSecret "LLM/sub2API/kkk";
+      LLM_Sub2API_mqc = mkUserSecret "LLM/sub2API/mqc";
+      LLM_Sub2API_jun = mkUserSecret "LLM/sub2API/jun";
+      LLM_Sub2API_ely = mkUserSecret "LLM/sub2API/ely";
 
       # singbox
       singbox_UUID = mkRootSecret "singbox/UUID";
