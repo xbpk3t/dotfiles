@@ -607,8 +607,6 @@
 #       des: 切换项目
 #     - cmd: <leader>fe
 #       des: 切换文件浏览器(Neo-tree)
-#     - cmd: <leader>ft
-#       des: 查找 TODO 注释
 #     - cmd: <leader>nh
 #       des: 清除搜索高亮
 #

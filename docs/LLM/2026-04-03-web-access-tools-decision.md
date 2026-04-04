@@ -163,3 +163,68 @@ TinyFish MCP，这个我觉得挺好，它能让 Claude 直接上网浏览、抓
 - 在 [`home/base/tui/AI/mcp-servers.nix`](home/base/tui/AI/mcp-servers.nix) 中新增 `bb-browser`
 - 暂不将 `agent-browser` 放入 `home/base/tui/AI/skills-catalog.nix`
 - 暂不引入 `TinyFish MCP`
+
+
+
+
+## zzz [2026-04-03]
+
+
+
+https://x.com/runes_leo/status/2037479240837579242
+
+
+
+```yaml
+
+
+# https://x.com/runes_leo/status/2037479240837579242
+# https://github.com/eze-is/web-access 也是少有的，将联网搜索和浏览器操控结合到一起的skill，也是我自己现在默认的联网skill了。Claude code本身自带的搜索工具，并不能够搜到非公开的站内信息，碰到小红书、B站这种站内内容，基本搜不到什么有用的东西。但装上这个skill之后，搜索能力就完全不一样了。可以通过Chrome DevTools Protocol直接连你本地的Chrome进程，带着你的登录状态，所以其实你平时登录过的微博、小红书、B站、飞书，它都能直接用，不需要重新登录。
+# web-access
+#  读推文 → xreach
+#  公开网页 → Jina
+#  需要登录的站 → web-access（CDP 直连 Chrome）
+#  浏览器交互 → Chrome MCP
+#  反爬 → Scrapling
+#  JS 重渲染 → Playwright
+#  全都不行 → XCrawl 兜底
+
+```
+
+
+
+
+```markdown
+**web-access 和 bb-browser 都是专为 Claude Code（以及类似 OpenClaw 等 AI Agent 框架）设计的开源 Skill，主要解决 AI 联网/浏览器自动化痛点：复用用户真实 Chrome 登录态、绕过反爬/登录墙、实现可靠网页操作。**
+
+两者核心都通过 **Chrome DevTools Protocol (CDP)** 连接本地 Chrome，实现“你的浏览器就是 API”的效果。但实现思路和侧重点不同：
+- **web-access**（repo: eze-is/web-access）强调**智能调度 + 通用自动化**，内置 3 层通道策略（WebSearch/WebFetch/curl/Jina/CDP 自动选择）、并行分治、站点经验积累。
+- **bb-browser**（repo: epiral/bb-browser）强调**浏览器即 API + 平台预适配**，提供 36+ 平台（Twitter、Reddit、GitHub、知乎、B站、小红书等）、103 个高阶 CLI 命令，直接在页面上下文 eval JS / fetch（带真实 cookie），极致隐身。
+
+### 为什么我选择这些对比项？
+我慎重筛选了 **9 个最实用、最能体现差异的核心维度**（避免泛泛的“开源/免费”等无关项）：
+- 优先考虑**用户实际体验**（安装、易用性）、**核心技术差异**（调度 vs 预适配）、**场景适配**（通用任务 vs 特定平台）、**性能/稳定性**（社区实测反馈）。
+- 排除重复或不关键的（如两者都支持本地 Chrome、都开源 MIT 协议、都依赖 CDP）。
+- 依据来自官方 GitHub、Zhihu/X 社区实测对比（如公众号/小红书/B站/GitHub 场景），确保客观且对 Agent 用户有指导意义。
+
+### 对比表格（✅ = 该项明显优势 / 更强；❌ = 相对劣势 / 较弱；⚖️ = 基本相当）
+
+| 对比项              | web-access                  | bb-browser                  | 优劣说明 |
+|---------------------|-----------------------------|-----------------------------|----------|
+| **安装配置难度**   | ✅（Claude Code Skill 一键安装，文档清晰） | ❌（早期需 Chrome 扩展，后续 CLI 简化但仍较繁琐） | bb-browser 配置门槛更高，社区反馈“去掉版本问题后难度仍大于 web-access”。 |
+| **登录态复用**     | ⚖️（CDP 连接用户 Chrome） | ⚖️（CDP + 真实 tab 上下文） | 两者都极强，利用已有登录态，无需二次认证。 |
+| **反检测/隐身能力**| ❌                         | ✅（JS eval + webpack 调用，网站以为是“真人”操作） | bb-browser 更激进，隐身效果更好，尤其反爬严格的平台。 |
+| **通用浏览器自动化**（点击、输入、上传、复杂交互） | ✅（完整 CDP 操作 + 结构化浏览哲学） | ⚖️（支持但更偏 CLI 命令） | web-access 更适合复杂多步网页任务（如表单填写）。 |
+| **特定平台适配**（知乎、B站、小红书等中文站点） | ❌                         | ✅（36 平台 103 命令，开箱即用结构化数据） | bb-browser 胜出，中文平台体验碾压，社区实测最优。 |
+| **智能调度策略**   | ✅（3 层通道自动选择 + 并行分治 + 站点经验积累） | ❌                         | web-access 更“聪明”，能自主判断用搜索还是浏览器，长期越用越稳。 |
+| **并行任务处理**   | ✅（支持多 Agent 并行）     | ❌                         | web-access 效率更高，适合批量任务。 |
+| **输出结构化程度** | ⚖️（依赖 CDP 提取）        | ✅（预置 CLI 命令直接返回 JSON） | bb-browser 输出更规整，适合数据抓取/分析。 |
+| **最佳适用场景**   | ✅（通用研究、复杂网页操作、需要智能决策的任务） | ✅（高频特定平台数据提取、极致隐身需求） | web-access 更万金油；bb-browser 在中文社交/视频平台场景更强。 |
+
+### 总结建议（基于社区反馈）
+- **选 web-access**：如果你追求**智能、通用、易用**，想让 Agent 像人一样“思考”怎么上网（搜索/浏览混合），推荐优先。适合大多数日常 Agent 任务。
+- **选 bb-browser**：如果你重度依赖**特定平台**（尤其是中文网站），需要极致隐身 + 结构化 API 式调用，bb-browser 更合适。
+- **可以两者共用**：很多用户同时装，两者互补（web-access 管调度，bb-browser 管特定站点）。
+
+两者都在快速迭代，如果你有具体使用场景（比如某个网站），我可以再帮你细化推荐！
+```
