@@ -1,4 +1,5 @@
 ---
+name: commit
 description: Generate a Conventional Commit message from staged diff
 argument-hint: [TYPE=<feat|fix|docs|refactor|test|chore>] [SCOPE=<scope>] [TICKET=<id>] [LANG=<en|zh>] [BODY=<0|1>]
 ---

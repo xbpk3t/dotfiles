@@ -6,6 +6,7 @@
   node = import ./node-id.nix {inherit lib;};
   inventory = import ./inventory {inherit lib;};
   attrs = import ./attrs.nix {inherit lib;};
+  AI = import ./AI.nix {inherit lib;};
   langs = import ./langs.nix;
   vpsSysctl = import ./vps-sysctl.nix {inherit lib;};
   nixCacheSettings = import ./nix-cache-settings.nix;
@@ -36,6 +37,7 @@ in {
     node
     inventory
     attrs
+    AI
     langs
     vpsSysctl
     nixCacheSettings

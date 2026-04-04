@@ -8,7 +8,6 @@ spec:
   interval: 1h
   url: https://github.com/prometheus-community/helm-charts.git
   ref:
-    # TODO trace me via renovate
     # renovate: datasource=github-releases depName=prometheus-community/helm-charts
     # What：与 HelmRelease 的 kube-prometheus-stack 版本对齐。
     # Why：避免 CRD 与 chart 版本不匹配导致异常。

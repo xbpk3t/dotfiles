@@ -1,4 +1,5 @@
 ---
+name: commit-zh
 description: Generate a Conventional Commit message from staged diff (with type & scope inference)
 argument-hint: [TYPE=<feat|fix|docs|refactor|test|perf|style|chore|build|ci>] [SCOPE=<scope>] [TICKET=<id>] [LANG=<en|zh>] [BODY=<0|1>]
 ---

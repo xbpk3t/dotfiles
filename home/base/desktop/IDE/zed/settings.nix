@@ -392,7 +392,6 @@ in {
   };
 
   # https://zed.dev/docs/configuring-zed#git
-  # MAYBE[2026-01-19](single-file diff view):
   git = {
     git_gutter = "hide";
     inline_blame = {
