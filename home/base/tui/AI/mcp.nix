@@ -25,6 +25,8 @@ in {
   # https://linux.do/t/topic/1832590
   # https://github.com/davideast/stitch-mcp
   # https://stitch.withgoogle.com/docs/mcp/setup
+  # https://x.com/yangyi/status/2040272305277079728
+  # https://github.com/VoltAgent/awesome-design-md
 
   config = lib.mkIf mcpEnabled {
     programs.mcp.enable = true;
