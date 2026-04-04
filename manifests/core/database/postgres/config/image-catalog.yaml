@@ -5,7 +5,6 @@ metadata:
   namespace: database
 spec:
   images:
-    # TODO renovate?
     - major: 16
       image: ghcr.io/cloudnative-pg/postgresql:16.4-38
 ---
@@ -16,6 +15,5 @@ metadata:
   namespace: database
 spec:
   images:
-    # TODO renovate?
     - major: 16
       image: "ghcr.io/tensorchord/cloudnative-pgvecto.rs:16-v0.2.1"

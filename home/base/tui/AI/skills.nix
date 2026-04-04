@@ -2,16 +2,19 @@
   config,
   lib,
   inputs,
+  mylib,
   ...
 }: let
   cfg = config.modules.AI.skills;
   remoteCatalog = import ./skills-catalog.nix;
+  activeRemoteCatalog = lib.filterAttrs (_: repo: repo.skills != []) remoteCatalog;
   remoteSources =
     lib.mapAttrs (_: repo: {
       inherit (repo) input subdir;
+      filter.nameRegex = mylib.AI.mkExactNameRegex repo.skills;
     })
-    remoteCatalog;
-  remoteEnabledSkills = lib.flatten (lib.mapAttrsToList (_: repo: repo.skills) remoteCatalog);
+    activeRemoteCatalog;
+  remoteEnabledSkills = lib.flatten (lib.mapAttrsToList (_: repo: repo.skills) activeRemoteCatalog);
 in {
   imports = [
     inputs.agent-skills.homeManagerModules.default

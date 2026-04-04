@@ -61,7 +61,6 @@
   # https://github.com/thedadams/zed-comment
   # https://github.com/stsewd/tree-sitter-comment comment插件就是基于该LSP实现的
   # 可以通过 theme_overrides 来custom 这些comments style，但是没必要
-  # 注意该插件不支持自定义 TODO Tag (比如说我需要的 PLAN)
   "comment" = true;
 
   # https://github.com/zed-extensions/log

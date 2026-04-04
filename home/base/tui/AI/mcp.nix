@@ -8,8 +8,7 @@
     config.modules.AI.codex.enable
     || config.modules.AI.claude.enable;
 in {
-  # [2026-04-03]
-  # 把mcp server由 mcp-servers-nix 管理，优势在于可以让 codex/cc 等所有cli复用一份mcp配置。带来的问题是 msn只有 command, args, env, url, headers 等通用字段，不支持codex的 approve 操作。
+  # [2026-04-03] 把mcp server由 mcp-servers-nix 管理，优势在于可以让 codex/cc 等所有cli复用一份mcp配置。带来的问题是 msn只有 command, args, env, url, headers 等通用字段，不支持codex的 approve 操作。
 
   imports = [
     inputs.mcp-servers-nix.homeManagerModules.default

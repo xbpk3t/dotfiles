@@ -27,10 +27,6 @@
     kubernetes-polaris
     conftest
 
-    # TODO: ??? error occurred: Command "/nix/store/r9wbjib6xxjkyb9yvjvrkl4sq61i2lyn-gcc-wrapper-15.2.0/bin/cc" "-O3" "-ffunction-sections" "-fdata-sections" "-fPIC" "-m64" "-I" "/build/source/target/x86_64-unknown-linux-gnu/release/build/onig_sys-aaedb31d5d4019c3/out" "-I" "oniguruma/src" "-DHAVE_UNISTD_H=1" "-DHAVE_SYS_TYPES_H=1" "-DHAVE_SYS_TIME_H=1" "-o" "/build/source/target/x86_64-unknown-linux-gnu/release/build/onig_sys-aaedb31d5d4019c3/out/c77b18e714869709-regparse.o" "-c" "oniguruma/src/regparse.c" with args cc did not execute successfully (status code exit status: 1).
-    # https://github.com/grampelberg/kty
-    # kty
-
     # https://github.com/steveteuber/kubectl-graph  最近接手了一个规模比较大的集群，光是整理集群中的资源就使人头昏眼花，虽然我自认 kubectl 使用的已经十分熟练，但是上千个 k8s Resource 看下来还是不堪重负。在不能为集群安装任何其他工具的情况下，可以改造的就只有我自己的 Client 端，也就是 kubectl 了。本文就介绍一个有趣的 kubectl 插件：kubectl-graph。
     kubectl-graph
 
@@ -153,8 +149,6 @@
     # kind
     # minikube
 
-    # K8s TUI
-    k9s
     # 多 Pod 日志查看
     stern
     # 上下文切换
@@ -201,9 +195,9 @@
   ];
 
   programs = {
+    # K8s TUI
     # https://mynixos.com/home-manager/options/programs.k9s
-    #
-    #
+    # [2026-04-04] https://github.com/grampelberg/kty k9s 功能远比 kty 丰富且成熟。支持资源浏览、日志、shell、端口转发、编辑 YAML、批量操作、自定义视图等，界面类似 kty 的仪表板，但操作更流畅、快捷键丰富、支持多集群切换。所以移除掉kty
     k9s = {
       enable = true;
       skins = {
