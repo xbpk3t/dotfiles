@@ -105,8 +105,8 @@ in {
             wire_api = "responses";
           };
 
-          # https://freeapi.dgbmc.top/console/
           # https://linux.do/t/topic/1841046
+          # https://freeapi.dgbmc.top/console/
           dgb = {
             name = "dgb";
             base_url = "https://freeapi.dgbmc.top/v1";
@@ -123,8 +123,8 @@ in {
             wire_api = "responses";
           };
 
-          # https://free.9e.nz/dashboard
           # https://linux.do/t/topic/1855760
+          # https://free.9e.nz/dashboard
           kkk = {
             name = "kkk";
             base_url = "https://free.9e.nz/v1";
