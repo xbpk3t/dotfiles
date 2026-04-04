@@ -16,12 +16,6 @@
       # trash-cli
     ];
 
-    # PLAN: 目前 fzf-tab 的使用非常麻烦（需要替代掉默认的zsh tab），等有更好的nix支持之后，再添加
-    # https://github.com/0xtter/nixos-configuration/blob/main/home-manager/thomas.nix
-    # https://www.youtube.com/watch?v=eKkFbvanlP8
-    # https://github.com/Aloxaf/fzf-tab
-    # https://mynixos.com/nixpkgs/package/zsh-fzf-tab
-
     # 环境变量
     # Note: Dynamic variables (those using command substitution) are set in zsh initContent
     sessionVariables =
@@ -204,7 +198,26 @@
       };
 
       # 使用新的 initContent 替代 deprecated 的 initExtraBeforeCompInit 和 initExtra
-      initContent = lib.mkOrder 550 (builtins.readFile ./zsh-init.zsh);
+      initContent = lib.mkMerge [
+        (lib.mkOrder 550 (builtins.readFile ./zsh-init.zsh))
+
+        # fzf-tab
+        # https://github.com/Aloxaf/fzf-tab
+        # https://mynixos.com/nixpkgs/package/zsh-fzf-tab
+        # fzf-tab 必须放在 compinit 之后、autosuggestions 之前。
+        #  - compinit 在 programs.zsh.completionInit 阶段执行
+        #  - autosuggestions 会在更后面 wrap ZLE widgets
+        #  - programs.zsh.plugins 的 source 位点比 autosuggestions 更晚
+        #  而 fzf-tab 要求位于 compinit 之后、autosuggestions 之前，所以这里不用 programs.zsh.plugins，
+        #  改为手动插入一个有序的 initContent 片段。
+        # Home Manager 当前顺序里：
+        # - completionInit / compinit: 570
+        # - autosuggestions: 700
+        # 因此这里显式卡在中间，避免被 programs.zsh.plugins 的更晚 source 顺序破坏。
+        (lib.mkOrder 650 ''
+          source ${pkgs.zsh-fzf-tab}/share/fzf-tab/fzf-tab.plugin.zsh
+        '')
+      ];
 
       # zsh 退出时执行的命令
       logoutExtra = ''
