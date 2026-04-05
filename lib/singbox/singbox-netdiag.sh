@@ -4,6 +4,7 @@ set -Eeuo pipefail
 # 用法：
 #   ./singbox-netdiag.sh
 #   ./singbox-netdiag.sh --collect-only
+#   ./singbox-netdiag.sh --high-cpu-snapshot
 #   ./singbox-netdiag.sh --repair-only
 #   ./singbox-netdiag.sh --enforce-dns
 #   ./singbox-netdiag.sh --dns 223.5.5.5 --service "Wi-Fi"
@@ -21,6 +22,7 @@ TARGET_DNS="223.5.5.5"
 COLLECT_ONLY="false"
 ENFORCE_DNS="false"
 REPAIR_ONLY="false"
+HIGH_CPU_SNAPSHOT="false"
 RESTORE_SELECTOR="true"
 WAIT_NETWORK_SECONDS="0"
 READY_TIMEOUT_SECONDS="30"
@@ -37,6 +39,11 @@ while [[ $# -gt 0 ]]; do
       ;;
     --repair-only)
       REPAIR_ONLY="true"
+      shift
+      ;;
+    --high-cpu-snapshot)
+      HIGH_CPU_SNAPSHOT="true"
+      COLLECT_ONLY="true"
       shift
       ;;
     --enforce-dns)
@@ -192,6 +199,27 @@ fetch_clash_secret() {
   fi
 
   return 0
+}
+
+get_singbox_pid() {
+  local output=""
+  local pid=""
+
+  output="$(launchctl print system/local.singbox.tun 2>/dev/null || true)"
+  pid="$(printf '%s\n' "$output" | sed -n 's/^[[:space:]]*pid = \([0-9][0-9]*\)$/\1/p' | head -n1)"
+
+  if [[ -n "$pid" ]]; then
+    printf '%s\n' "$pid"
+    return 0
+  fi
+
+  pid="$(pgrep -xo -f 'sing-box run -c /run/secrets/rendered/singbox-client.json' || true)"
+  if [[ -n "$pid" ]]; then
+    printf '%s\n' "$pid"
+    return 0
+  fi
+
+  return 1
 }
 
 capture_selector_before_repair() {
@@ -411,6 +439,31 @@ collect_clash_api() {
   run_allow_fail_shell "GET /proxies/urltest" "curl -sS -H 'Authorization: Bearer ${CLASH_SECRET}' http://127.0.0.1:9090/proxies/urltest"
 }
 
+collect_high_cpu_snapshot() {
+  local pid=""
+
+  echo
+  echo "################################################################"
+  echo "### HIGH CPU SNAPSHOT"
+  echo "################################################################"
+
+  if ! pid="$(get_singbox_pid)"; then
+    warn "未识别到 sing-box pid，继续采集非 pid 依赖信息。"
+  else
+    info "识别到 sing-box pid: ${pid}"
+    run_allow_fail "ps -p ${pid}" ps -p "$pid" -o pid,ppid,%cpu,%mem,etime,state,command
+    run_priv_allow_fail "lsof -p ${pid}" lsof -p "$pid"
+  fi
+
+  run_allow_fail_shell "netstat sing-box focus" "netstat -anv | rg '223\\.5\\.5\\.5|8443|9090|:53\\b'"
+
+  if fetch_clash_secret; then
+    run_allow_fail_shell "GET /connections" "curl -sS -H 'Authorization: Bearer ${CLASH_SECRET}' http://127.0.0.1:9090/connections"
+  else
+    warn "未拿到 clash_api secret，跳过 /connections 采集。"
+  fi
+}
+
 probe_url() {
   local label="$1"
   local url="$2"
@@ -466,7 +519,15 @@ YOUTUBE_PROBE_FILE="$(mktemp "${TMPDIR:-/tmp}/youtube-probe.XXXXXX")"
 trap 'rm -f "$CHATGPT_PROBE_FILE" "$YOUTUBE_PROBE_FILE"' EXIT
 
 info "日志文件: ${LOG_FILE}"
-info "参数: WIFI_SERVICE=${WIFI_SERVICE}, TARGET_DNS=${TARGET_DNS}, COLLECT_ONLY=${COLLECT_ONLY}, REPAIR_ONLY=${REPAIR_ONLY}, ENFORCE_DNS=${ENFORCE_DNS}, RESTORE_SELECTOR=${RESTORE_SELECTOR}, WAIT_NETWORK_SECONDS=${WAIT_NETWORK_SECONDS}, READY_TIMEOUT_SECONDS=${READY_TIMEOUT_SECONDS}"
+info "参数: WIFI_SERVICE=${WIFI_SERVICE}, TARGET_DNS=${TARGET_DNS}, COLLECT_ONLY=${COLLECT_ONLY}, REPAIR_ONLY=${REPAIR_ONLY}, HIGH_CPU_SNAPSHOT=${HIGH_CPU_SNAPSHOT}, ENFORCE_DNS=${ENFORCE_DNS}, RESTORE_SELECTOR=${RESTORE_SELECTOR}, WAIT_NETWORK_SECONDS=${WAIT_NETWORK_SECONDS}, READY_TIMEOUT_SECONDS=${READY_TIMEOUT_SECONDS}"
+
+if [[ "$HIGH_CPU_SNAPSHOT" == "true" ]]; then
+  collect_state "high-cpu"
+  collect_high_cpu_snapshot
+  echo
+  info "完成。高 CPU 现场日志: ${LOG_FILE}"
+  exit 0
+fi
 
 if [[ "$REPAIR_ONLY" != "true" ]]; then
   collect_state "before"
