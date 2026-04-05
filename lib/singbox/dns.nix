@@ -99,12 +99,16 @@
 
     # A/AAAA 的最终兜底：走 FakeIP（仅处理未被上面规则命中的域名）。
     # 重点：保持这条在规则靠后位置，避免“全量域名都 FakeIP”。
+    # 不再设置 rewrite_ttl = 1：
+    # - TTL 被压到 1 会显著放大重复 DNS 查询频率
+    # - 在 Darwin 的 TUN + FakeIP 场景下，这会进一步放大日志、系统调用和 CPU 开销
+    # - 当前优先目标是先把运行态负载降下来，保持默认 TTL 行为更稳妥
     {
       query_type = [
         "A"
         "AAAA"
       ];
-      rewrite_ttl = 1;
+      # rewrite_ttl = 1;
       server = "fakeip";
     }
   ];
