@@ -226,8 +226,8 @@
       '';
 
       # PATH 设置（使用 Home Manager 的正确方式）
-      # PLAN: [2025-10-06] home.sessionPath -> programs.zsh.sessionVariables 现在zsh有bug，只能这么来处理
-      #  [bug: home.sessionPath is broken with ZSH · Issue #2991 · nix-community/home-manager](https://github.com/nix-community/home-manager/issues/2991)
+      # MAYBE: [2025-10-06] home.sessionPath -> programs.zsh.sessionVariables 现在zsh有bug，只能这么来处理
+      # [bug: home.sessionPath is broken with ZSH · Issue #2991 · nix-community/home-manager](https://github.com/nix-community/home-manager/issues/2991)
       # [2026-04-04] 查了一下，这个还没fix. Zsh 模块实现都还是把 hm-session-vars.sh 从 .zshenv 里 source，然后再在 .zshenv 里写 programs.zsh.sessionVariables。home.sessionPath 仍然只是生成到 hm-session-vars.sh 里的 PATH prepend 逻辑，没有改到更晚的加载阶段。
       sessionVariables = {
         PNPM_HOME = "$HOME/.local/share/pnpm";

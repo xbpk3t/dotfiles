@@ -6,7 +6,6 @@ includes:
 
 tasks:
 
-  # TODO: 感觉应该直接通过import其他task，然后这里直接加载相应的task
   sysinfo:
     desc: "sysinfo 任务"
     summary: "task -g sysinfo"
