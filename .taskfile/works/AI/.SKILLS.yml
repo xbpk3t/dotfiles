@@ -41,6 +41,23 @@ vars:
         #- note: 依赖 GitHub/CI 上下文；如果仓库不走 GitHub checks，这项价值会明显下降。
         - gh-fix-ci
 
+    # https://github.com/bmad-labs/skills
+    - repo: bmad-labs/skills
+      skills:
+        # TS code-style
+        # https://github.com/pipiliang/clean-code-typescript
+        # [2026-04-04] 看了一下这个skills要比那几个目前star和installation更多的好很多，试用看看
+        - typescript-clean-code
+        - typescript-e2e-testing
+        - typescript-unit-testing
+
+    # https://skills.sh/sickn33/antigravity-awesome-skills
+    # https://github.com/sickn33/antigravity-awesome-skills
+    - repo: antigravity-awesome-skills
+      skills:
+        - typescript-expert
+        - docker-expert
+
 
   CANDIDATES:
     # https://github.com/MiniMax-AI/skills
@@ -289,3 +306,5 @@ vars:
 
     # https://github.com/tanweai/pua
     # https://github.com/thedotmack/claude-mem
+
+    # https://skills.sh/garrytan/gstack/gstack

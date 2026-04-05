@@ -1,10 +1,11 @@
 {pkgs, ...}: {
+  # https://x.com/vikingmute/status/2004471362841403485  speed up rust build on macos. Add APP in "Developer Tools".
   home.packages = with pkgs; [
-    # MAYBE[2026-03-25](fenix): 之后评估一下是否要引入 fenix 作为rust工具链的 flake
+    # MAYBE: [2026-03-25](fenix) 之后评估一下是否要引入 fenix 作为rust工具链的 flake
     # https://mynixos.com/fenix
     # https://github.com/nix-community/fenix
 
-    # MAYBE[2026-03-25](crane): 评估一下是否需要引入 crane
+    # MAYBE: [2026-03-25](crane) 评估一下是否需要引入 crane
     # https://github.com/ipetkov/crane
     #- `crane` 很适合“用 Nix 构建 Rust 项目”。
     #- 但你当前仓库是系统配置仓库，不是 Rust 项目构建仓库；它没有可以直接发挥价值的主舞台。

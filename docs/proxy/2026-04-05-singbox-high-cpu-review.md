@@ -1,4 +1,4 @@
---- 
+---
 title: sing-box 高 CPU review
 date: 2026-04-05
 type: review
