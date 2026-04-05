@@ -79,8 +79,8 @@ in {
         StandardErrorPath = "/Users/${username}/Library/Logs/sing-box.log";
         EnvironmentVariables = {
           PATH = "/etc/profiles/per-user/${username}/bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
-          # 保留 info 方便继续观察；若后续确认日志放大 CPU，再单独下调为 warn。
-          SING_BOX_LOG_LEVEL = "info";
+          # Darwin 下先保持 warn，避免 TUN 活跃时日志本身放大 CPU/I/O。
+          SING_BOX_LOG_LEVEL = "warn";
         };
       };
     };

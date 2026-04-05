@@ -31,8 +31,8 @@ in {
   log = {
     # 开启便于debug
     disabled = false;
-    # 设置为warn，防止日志喷涌. 改为info
-    level = "info";
+    # Darwin 的 TUN 模式会产生大量 per-connection/per-packet 日志，保持 warn 避免 CPU/I/O 被日志放大。
+    level = "warn";
     # 注意这个log path跟systemd本身生成的log（$HOME/Library/Logs/sing-box.log）不是一码事。如果不设置这个path，systemd生成的日志没有timestamp，很难排查问题
     output = "/tmp/singbox.log";
     timestamp = true;
