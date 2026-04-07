@@ -52,6 +52,27 @@
       server = "local";
       disable_cache = true;
     }
+    # 已知的 ad / browser built-in DoH 域名直接拒绝，避免继续制造无意义查询。
+    # 注意：sing-box 1.13 新格式里不再靠 server = "block" 这样的伪 transport。
+    # 用 rule action 直接 reject，避免再触发 "transport not found: block"。
+    # 这条必须放在 clash_mode 规则前面，否则 direct/global 模式会先吃掉 A/AAAA 查询。
+    {
+      rule_set = [
+        "AdGuardSDNSFilter"
+        "chrome-doh"
+      ];
+      action = "reject";
+    }
+
+    # macOS/浏览器会周期性尝试 WPAD 自动代理发现。
+    # 这些请求对当前 TUN 代理没有价值，还会在异常态下持续刷 NXDOMAIN 日志。
+    # 同样需要早于 clash_mode 规则，否则不会命中 reject。
+    {
+      domain = ["wpad"];
+      domain_suffix = ["wpad"];
+      action = "reject";
+    }
+
     # Clash 模式优先于 FakeIP 兜底：
     # - direct 模式返回 real IP（local）
     # - global 模式走 remote 解析
@@ -72,16 +93,6 @@
         "AAAA"
       ];
       server = "remote";
-      disable_cache = true;
-    }
-    # 和机场原始配置保持一致：已知的 ad / browser built-in DoH 域名直接返回成功码，
-    # 避免这些查询在 wake recovery 初期继续制造噪音或抢占 DNS 路径。
-    {
-      rule_set = [
-        "AdGuardSDNSFilter"
-        "chrome-doh"
-      ];
-      server = "block";
       disable_cache = true;
     }
 

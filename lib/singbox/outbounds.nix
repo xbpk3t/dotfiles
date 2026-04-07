@@ -96,7 +96,9 @@ in
         tag = "urltest";
         outbounds = map (o: o.tag) outs;
         url = "http://www.gstatic.com/generate_204";
-        interval = "5m";
+        # 高 CPU 现场里能看到明显的 5 分钟周期噪音，先把探测频率降下来，
+        # 避免网络异常时 urltest 成为额外放大器。
+        interval = "30m";
         tolerance = 50;
       }
       # select 保留手动选择，默认指向 urltest 以展示延迟
