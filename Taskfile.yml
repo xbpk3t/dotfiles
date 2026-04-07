@@ -16,6 +16,9 @@ includes:
   deploy:
     taskfile: ./.taskfile/nix/Taskfile.deploy.yml
     dir: '{{.USER_WORKING_DIR}}'
+  rollback:
+    taskfile: ./.taskfile/nix/Taskfile.rollback.yml
+    dir: '{{.USER_WORKING_DIR}}'
   store:
     taskfile: ./.taskfile/nix/Taskfile.store.yml
     dir: '{{.USER_WORKING_DIR}}'
