@@ -1,0 +1,35 @@
+---
+version: '3'
+
+vars:
+  PLATFORM:
+    sh: 'uname -s'
+
+tasks:
+  default:
+    desc: "回滚当前机器到上一代系统配置"
+    summary: "task rollback"
+    platforms: [darwin, linux]
+    cmds:
+      - task: _darwin
+        if: '[ "{{.PLATFORM}}" = "Darwin" ]'
+      - task: _linux
+        if: '[ "{{.PLATFORM}}" = "Linux" ]'
+
+  _darwin:
+    internal: true
+    platforms: [darwin]
+    preconditions:
+      - sh: 'command -v darwin-rebuild >/dev/null'
+        msg: "darwin-rebuild 未安装，无法执行 Darwin rollback"
+    cmds:
+      - sudo "$(command -v darwin-rebuild)" switch --rollback
+
+  _linux:
+    internal: true
+    platforms: [linux]
+    preconditions:
+      - sh: 'command -v nixos-cli >/dev/null'
+        msg: "nixos-cli 未安装，无法执行 NixOS rollback"
+    cmds:
+      - sudo "$(command -v nixos-cli)" rollback
