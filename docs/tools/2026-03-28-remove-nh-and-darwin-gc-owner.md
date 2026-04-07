@@ -36,3 +36,11 @@ summary: 移除 nh，并把 Darwin 侧的 GC owner 明确收敛到 Determinate N
 
 - 这次不追求扩展能力，只做职责收敛和行为显式化。
 - 后续如果排查 Darwin 垃圾回收，优先看 `Determinate Nixd` 的配置与日志，不再看 `nh`。
+
+
+## 给 Determinate Nixd 补充 Auto prune generations能力 [2026-04-07]
+
+- why this config:
+  `determinateNixd.garbageCollector.strategy = "automatic"` 只明确了 Darwin 侧的 GC owner 是 Determinate Nixd，但没有覆盖按时间裁剪旧 system generations 的保留策略。因此额外补一条 host 级 `launchd`，定时执行 `nix-collect-garbage --delete-older-than 7d`。
+- why put it in darwin hosts:
+  这属于 `macos-ws` 的主机级运维策略，不是所有 Darwin 机器都必须共享的基础能力。先放在 host 层更符合当前仓库“按 host 决定是否启用”的约定，后续如果多台 Darwin 机器都需要，再抽成通用模块。
