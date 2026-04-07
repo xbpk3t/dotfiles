@@ -53,3 +53,43 @@ bash lib/singbox/singbox-netdiag.sh --high-cpu-snapshot
 
 - 输出日志默认会落到 `~/Library/Logs/singbox-netdiag-<timestamp>.log`
 - 抓完现场之后，再决定是否执行 bootout / bootstrap / kickstart 恢复
+
+## 修改wapd等DNS配置（来避免部分噪声） [2026-04-07]
+
+这次对 `sing-box` 配置又做了两处收敛修改：
+
+
+- 在 `dns.rules` 里把 `AdGuardSDNSFilter` / `chrome-doh` 和 `wpad` 改为 `action = "reject"`，并把这些规则提前到 `clash_mode` 规则之前，避免先被 `direct/global` 模式短路
+- 把 `urltest.interval` 从 `5m` 调整为 `30m`，先降低异常网络状态下的周期性探测放大
+
+
+这次修正解决的是一个确定存在的配置问题：
+
+- `wpad` / `chrome-doh` 规则之前实际没有命中
+- `server = "block"` 这种旧写法会带来额外错误日志
+
+
+---
+
+
+仍需继续观察的点：
+
+
+- 后续是否还会出现 `300%+` 的高 CPU 现场
+- `/tmp/singbox.log` 里是否还会持续出现 `bad rdata / buffer size too small`
+- 即使 `wpad` 噪音下降后，是否还存在某个客户端或某条 DNS/TUN 路径在异常态下持续重试
+
+当前结论仍然保持保守：
+
+- 这轮修改更像是移除了已确认的配置层放大器
+- 还不能证明它就是 sing-box 高 CPU 的唯一根因
+
+### 开盖后的瞬时 `no route to internet` 日志
+
+- 2026-04-07 又观察到一批 `dial tcp ...: no route to internet` 日志，同时影响了：
+  - 直连 DoH（如 `223.5.5.5:443`）
+  - 代理节点出站（如 `142.171.154.61:8443`）
+- 结合当时是在刚开盖后的恢复窗口触发、随后网络自行恢复，这批日志更像 Darwin 网络 / TUN / 默认路由尚未完全恢复时的瞬时错误，而不是新的稳定配置缺陷。
+- 当前先不继续为这类日志单独改 `sing-box` 配置，后续重点观察两点：
+  - 这类错误是否只出现在 wake recovery 的短窗口内
+  - 它是否会再次演变成需要手动 `kickstart` 或导致高 CPU 的持续故障
