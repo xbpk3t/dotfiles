@@ -73,7 +73,9 @@ includes:
 
 
   # nix
+  # 注意这部分同时在 global task 和 dotfiles项目级taskfile里引用（为了同时方便全局调用和在项目里调用）
   deploy: nix/Taskfile.deploy.yml
+  rollback: nix/Taskfile.rollback.yml
   flake: nix/Taskfile.flake.yml
   store: nix/Taskfile.store.yml
   test: nix/Taskfile.test.yml
