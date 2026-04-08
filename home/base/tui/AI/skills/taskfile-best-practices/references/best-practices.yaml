@@ -109,4 +109,14 @@ best_practices:
         title: set pipefail 约束
         level: MUST_NOT
         text: "在 task 里使用 set: [pipefail]，不要在 cmd 中手写 set -euo pipefail"
-...
+
+      - id: Command-Level Conditional
+        title: 直接在cmd里使用内置if操作，而非在cmd的script里用if
+        level: MUST
+        text: |
+          cmds:
+            - echo "Starting build..."
+            # This command only runs if the 'dist' directory does NOT exist
+            - cmd: mkdir dist
+              if: '[ ! -d dist ]'
+            - echo "Build complete."

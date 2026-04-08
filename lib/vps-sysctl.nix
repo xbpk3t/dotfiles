@@ -225,6 +225,7 @@
     # ################## MEMORY MANAGEMENT ############
 
     # 默认按 SSD/NVMe 处理（减少 swap 参与，偏低延迟）
+    ## 默认情况下，Linux 内核的 swappiness 值为 60。较高的值会导致内核更积极地使用交换空间，而较低的值会减少对交换空间的使用。
     "vm.swappiness" =
       if isSsd
       then 10
@@ -286,6 +287,7 @@
     "net.core.dev_weight" = 64;
 
     # listen backlog 上限：提升高并发建连能力
+    # 要配置 Linux 的 TCP backlog 大小，可以通过修改 net.core.somaxconn 参数来实现。TCP backlog 是指 TCP 服务器监听时，允许处于等待连接状态的客户端的数量。较大的 backlog 数值可以提高服务器的并发连接能力。
     "net.core.somaxconn" = somaxconn;
 
     # busy poll/read：降低延迟但会占用 CPU
