@@ -25,6 +25,8 @@ vars:
     - statix-fix
     - statix-check
     - deadnix
+    - mermaid-lint
+    - plantuml-check
 
 
 # [2026-03-31] 精简 pre-commit task
