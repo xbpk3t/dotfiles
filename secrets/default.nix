@@ -95,6 +95,7 @@ in {
       # LLM
       LLM_GLM = mkUserSecret "LLM/GLM";
       LLM_deepseek = mkUserSecret "LLM/deepseek";
+      LLM_OpenRouter = mkUserSecret "LLM/OpenRouter";
       # 如果sub2api支持自定义sk，那么就修改为 pwgen sub2api
       LLM_Sub2API_default = mkUserSecret "LLM/sub2API/default";
       LLM_Sub2API_ggboom = mkUserSecret "LLM/sub2API/ggboom";

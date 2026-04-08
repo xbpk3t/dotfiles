@@ -34,10 +34,13 @@ in {
       package = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.codex;
 
       # https://github.com/openai/codex/blob/main/docs/config.md
+      # https://developers.openai.com/codex/config-reference
       settings = {
         # 默认模型；可被命令行 `-m` 临时覆盖。
         model = "gpt-5.4";
+
         # on-request: 默认命令先在 sandbox 内执行，超权限时再请求批准。
+        # [2026-04-08] 我原本的需求是：现在切换到 mcp-servers-nix 之后，无法默认approve全部这些MCP操作，所以想要通过该配置进行配置。事实证明该配置项无法实现该需求。
         approval_policy = "on-request";
         # danger-full-access: 关闭 filesystem sandbox，适合你当前本机自动化场景，但风险更高。
         sandbox_mode = "danger-full-access";
@@ -74,6 +77,9 @@ in {
         # 只有显式使用 `--profile ice|test|ggboom` 时，才切换到对应第三方 provider。
 
         # https://ldoh.105117.xyz/
+        # 公益站自动签到
+        # https://linux.do/t/topic/1001042/1117
+        # https://github.com/qixing-jk/all-api-hub
 
         # https://linux.do/t/topic/1837955/39 在mac用开 ChatGPT Plus (用土区+礼品卡，¥80/月)
         model_providers = {
