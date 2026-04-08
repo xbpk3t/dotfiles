@@ -88,10 +88,6 @@
     # dogdns
     # doggo
 
-    # https://mynixos.com/nixpkgs/package/termshark
-    # 基于终端界面的 Wireshark
-    termshark
-
     # https://mynixos.com/nixpkgs/package/ipcalc
     # 计算子网掩码/网段
     ipcalc
