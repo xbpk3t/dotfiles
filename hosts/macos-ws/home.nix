@@ -22,7 +22,7 @@
   modules.AI = {
     codex.enable = true;
     skills.enable = true;
-    opencode.enable = false;
+    opencode.enable = true;
   };
 
   modules.langs = {
