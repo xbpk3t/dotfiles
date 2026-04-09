@@ -251,6 +251,22 @@
         "type": "github"
       }
     },
+    "ce-codex": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1775709216,
+        "narHash": "sha256-pIKTTTtiEpxeY/mu2u95iFCPdshfzgaYxollRhIgm1w=",
+        "owner": "xbpk3t",
+        "repo": "ce-codex",
+        "rev": "1d2651fa6bd1d4ac50fec6ffbdd2bf4a5914495b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "xbpk3t",
+        "repo": "ce-codex",
+        "type": "github"
+      }
+    },
     "crane": {
       "inputs": {
         "flake-compat": "flake-compat_6",
@@ -1928,6 +1944,7 @@
         "antfu-skills": "antfu-skills",
         "anthropic-skills": "anthropic-skills",
         "ast-grep-agent-skill": "ast-grep-agent-skill",
+        "ce-codex": "ce-codex",
         "cxuu-golang-skills": "cxuu-golang-skills",
         "darwin": "darwin",
         "deploy-rs": "deploy-rs",

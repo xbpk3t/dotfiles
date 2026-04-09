@@ -130,6 +130,11 @@ rec {
       url = "github:pbakaus/impeccable";
       flake = false;
     };
+
+    ce-codex = {
+      url = "github:xbpk3t/ce-codex";
+      flake = false;
+    };
     #============= skills ==============#
 
     # nixos-cli - Modern NixOS management CLI
