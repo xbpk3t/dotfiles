@@ -499,4 +499,91 @@
       "quieter"
     ];
   };
+
+  # https://github.com/EveryInc/compound-engineering-plugin
+  # https://github.com/xbpk3t/ce-codex
+  # [2026-04-09] CE 这套东西很多，但不是每个 skill 都适合直接暴露给我日常调用。这里按“核心流程 + 强相关辅助能力”筛选：
+  # - 核心流程：就是 ideate -> brainstorm -> plan -> work -> review -> compound 这条主链
+  # - 辅助 skills：只保留明显能增强主链体验的会话续接、轻量执行、todo 生命周期管理；不把大量 reviewer persona / agent persona 一次性灌进来
+  # - prompts 用法：这一组除了 `$ce-*` 这种 skill 触发外，也已经把对应 prompts 接到了 Codex 里，所以可以直接用 `/ce-ideate`、`/ce-brainstorm`、`/ce-plan`、`/ce-work`、`/ce-review`、`/ce-compound`
+  # - prompts 与 skills 的关系：prompt 更像显式命令入口；skill 更像被系统/你在合适时机触发的能力本体。日常上手优先记 `/ce-plan` / `/ce-review` 这类 prompt 即可
+  ce-codex = {
+    input = "ce-codex";
+    subdir = "skills";
+    skills = [
+      ######### 核心流程（注意顺序） ##########
+
+      # what: 发散找值得做的项目/优化点
+      # why: 适合在还没有明确目标时先做一轮高质量 ideation，而不是直接进入实现
+      # note: 属于主流程最前置的“找方向”步骤，不是每次都用，但命中时价值很高
+      "ce-ideate"
+
+      # what: 把模糊想法澄清成 requirements doc
+      # why: 适合 feature 还不清晰、范围和取舍还没定的时候先做需求澄清
+      # note: CE 主流程里负责 WHAT，不负责 HOW
+      "ce-brainstorm"
+
+      # what: 把 requirements 转成可执行的 plan
+      # why: CE 体系里最核心的规划技能之一，直接决定后续 work/review 的质量
+      # note: 负责 HOW，不直接写代码
+      "ce-plan"
+
+      # what: 按 plan 落地执行具体工作
+      # why: 是 CE 主链里真正把规划转成实现的执行入口
+      # note: 默认比 beta 版本更稳，应该优先保留这个
+      "ce-work"
+
+      # what: 在当前 ce-work 之外保留一条更激进的执行路径
+      # why: 有些场景想试试 upstream 新工作流时可以切过去，不用等我再手动接一次
+      # note: 属于主流程的实验分支，不作为默认入口
+      "ce-work-beta"
+
+      # what: 对当前改动做结构化 review
+      # why: CE 的价值不只在 plan，也在 review 这一步的多 persona 审查和 findings merge
+      # note: 主流程后段关键环节
+      "ce-review"
+
+      # what: 把一次实现/修复中沉淀出的经验写成 solution
+      # why: 这是 compound engineering 真正“复利”的核心，不只是写代码
+      # note: 主流程收尾能力
+      "ce-compound"
+
+      # what: 对已有 compound 产物做刷新和再整理
+      # why: 当旧 solution 过时或需要补充最新 learnings 时有用
+      # note: 是 compound 的延伸，不替代主流程里的 ce-compound
+      "ce-compound-refresh"
+
+      ######### 辅助skills ##########
+
+      # what: 管理 CE 的会话续接和上下文延续
+      # why: 当一个 CE 流程跨多轮、多天继续推进时，这个比重新从头进入更顺
+      # note: 不是主流程步骤，但很适合真实长期项目
+      "ce-sessions"
+
+      # what: 更轻量地执行 plan，偏“let's fucking go”风格的直接推进
+      # why: 有时不想走完整 ce-work 的铺垫，而是想基于已有 plan 快速开干
+      # note: 是主线执行的轻量替代入口
+      "lfg"
+
+      # what: lfg 的一个近似/变体执行入口
+      # why: upstream 明确保留了这条路径，适合后续比较两套执行体验
+      # note: 和 lfg 类似，属于辅助执行分支
+      "slfg"
+
+      # what: 创建持久化 todo 条目
+      # why: CE 的 review/autofix/todo 生命周期是一整套链路，缺这个入口会断掉
+      # note: 明显属于主流程配套能力
+      "todo-create"
+
+      # what: 批量解决 ready 状态的 todos
+      # why: 当 review 之后进入一批后续修复时，这个能把 todo 真正闭环
+      # note: 是 todo 生命周期里的执行阶段
+      "todo-resolve"
+
+      # what: 审核和分类 pending todos，决定哪些进入 ready
+      # why: 没有 triage，todo 系统很容易堆积变乱
+      # note: 是 todo 生命周期里的治理步骤
+      "todo-triage"
+    ];
+  };
 }

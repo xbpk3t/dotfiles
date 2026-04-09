@@ -8,6 +8,12 @@
 }: let
   cfg = config.modules.AI.codex;
   providerCatalog = import ./codex-providers.nix;
+  codexPrompts = pkgs.runCommandLocal "codex-prompts" {} ''
+    mkdir -p "$out"
+
+    cp -R ${inputs.ce-codex}/prompts/. "$out"/
+    cp -R ${./prompts}/. "$out"/
+  '';
 in {
   # codex resume   打开可恢复的会话列表
   # codex resume --last 直接恢复当前工作目录下最近一次会话
@@ -104,7 +110,7 @@ in {
     home.file.".codex/config.toml".force = true;
 
     home.file.".codex/prompts" = {
-      source = ./prompts;
+      source = codexPrompts;
       recursive = true;
       force = true;
     };
