@@ -30,6 +30,13 @@ in {
             minimap = false;
             theme = "auto";
           };
+
+          # 默认不加 co-author
+          attribution = {
+            commit = "";
+            pr = "";
+          };
+
           #  behavior = {
           #    autoSave = true;
           #    confirmOnExit = false;
