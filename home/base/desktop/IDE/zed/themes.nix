@@ -1,3 +1,5 @@
+# [Theme Builder — Zed](https://zed.dev/theme-builder) 在线自定义 zed theme
+#
 # 无法完全移植 IDEA/GoLand 的 Monokai 颜色方案的原因（误差来源）：
 # 1) 语义层级不同：.icls 有大量语言/语义细分项，Zed 只有通用 Tree-sitter 分类，无法一一对应。
 # 2) 渲染能力不同：.icls 支持背景/下划线/错误条纹等效果，Zed 主题字段并不完全覆盖。

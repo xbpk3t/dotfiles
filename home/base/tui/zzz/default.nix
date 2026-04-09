@@ -22,6 +22,9 @@
     # https://github.com/nashsu/AutoCLI
     #
 
+    # 企业微信cli
+    # https://github.com/WecomTeam/wecom-cli
+
     # vercel-cli
     # https://mynixos.com/nixpkgs/package/nodePackages.vercel
 
