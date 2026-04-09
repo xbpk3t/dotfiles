@@ -1,15 +1,18 @@
-# [中转站]
-# https://www.helpaio.com/transit
-# https://cubence.com/
-# https://relaypulse.top/ 感觉 SSSAiCode 还不错（小月卡）
-# https://api.ikuncode.cc/console/topup gpt-5.4. 输入价格 ¥0.5/1M, 补全价格 ¥3/1M. 正好是 SSSAiCode 的一半
+# [怎么管理这些公益站//公益站自动签到]
+## https://github.com/qixing-jk/all-api-hub 目前在用的公益站自动签到工具，浏览器插件
+## https://linux.do/t/topic/1671489/1047 MetaAPI，相当于“中转站的中转站”，自建（而非浏览器插件这种本地），但是我怀疑如果要中转两次的话，latency是否会变差？
+
 # [公益站]
-# https://ldoh.105117.xyz/
-# 公益站自动签到
-# https://linux.do/t/topic/1001042/1117
-# https://github.com/qixing-jk/all-api-hub
+## https://ldoh.105117.xyz/
+
+# [中转站]
+## https://www.helpaio.com/transit
+## https://cubence.com/
+## https://relaypulse.top/ 感觉 SSSAiCode 还不错（小月卡）
+## https://api.ikuncode.cc/console/topup gpt-5.4. 输入价格 ¥0.5/1M, 补全价格 ¥3/1M. 正好是 SSSAiCode 的一半
+
 # [ChatGPT Plus]
-# https://linux.do/t/topic/1837955/39 在mac用开 ChatGPT Plus (用土区+礼品卡，¥80/月)
+## https://linux.do/t/topic/1837955/39 在mac用开 ChatGPT Plus (用土区+礼品卡，¥80/月)
 {
   # Codex provider Metadata
   #
