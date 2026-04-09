@@ -314,9 +314,23 @@ vars:
     # https://github.com/himself65/finance-skills
 
 
+    # Web3 安全
+    # 主要用来防御AI Agent在真实对抗环境（尤其是Web3/AI插件生态）中常见的攻击：
     #
+    # - 安装恶意Skill/MCP/插件（供应链投毒）
+    # - 打开可疑GitHub仓库（藏恶意代码）
+    # - 点击/分析外部URL或文档（提示注入、钓鱼）
+    # - 处理链上地址（AML风险、诈骗地址）
+    # - 评估第三方产品/服务（权限过大、架构不安全）
+    # - 验证聊天中别人分享的链接或工具（社交工程攻击）
+    #
+    # 它会根据风险级别自动生成报告，并决定是直接拒绝、高危提醒、还是需要人工审批。
     # https://github.com/slowmist/slowmist-agent-security
 
     # KubeSphere skills
     # [KubeSphere Skills 正式发布：让 OpenClaw 更懂 KubeSphere - kubesphere - 博客园](https://www.cnblogs.com/kubesphere/p/19829970)
     # https://github.com/kubesphere/kubesphere/tree/master/skills
+
+    # 优化文案
+    # https://github.com/op7418/Humanizer-zh
+    # 去除 AI 生成文档中常见的“AI 味”表述，采用两段式处理，帮你提升 AI 生成内容的观感。

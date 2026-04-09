@@ -1,4 +1,8 @@
-{mylib, ...}: {
+{
+  mylib,
+  pkgs,
+  ...
+}: {
   imports = [../base] ++ mylib.scanPaths ./.;
 
   home.packages = with pkgs; [
