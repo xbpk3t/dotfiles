@@ -4,7 +4,6 @@ type: review
 status: active
 date: 2025-12-17
 updated: 2025-12-17
-slug: /2025/server-security-for-nixos
 unlisted: true
 tags:
   - nixos
@@ -424,14 +423,31 @@ README 的主线（你后面的 checklist 也按这个结构来）大致是：
 
 建议你把 repo 给的“通用必须项”整理成你自己的基线表（示例）([GitHub][12])：
 
-| 类别     | 设置项（示例）                                                 | 推荐方向            |
-| -------- | -------------------------------------------------------------- | ------------------- |
-| 身份认证 | `PermitRootLogin`                                              | `no`                |
-| 身份认证 | `PasswordAuthentication`                                       | `no`（优先）        |
-| 授权控制 | `AllowGroups`                                                  | 仅允许指定组        |
-| 转发能力 | `X11Forwarding`                                                | `no`                |
-| 转发能力 | `AllowTcpForwarding` / `AllowAgentForwarding` / `PermitTunnel` | 默认 `no`，确需再开 |
-| 加密套件 | `KexAlgorithms` / `Ciphers` / `MACs`                           | 按 Mozilla 现代基线 |
+```yaml
+- "类别": "身份认证"
+  "设置项（示例）": "`PermitRootLogin`"
+  "推荐方向": "`no`"
+
+- "类别": "身份认证"
+  "设置项（示例）": "`PasswordAuthentication`"
+  "推荐方向": "`no`（优先）"
+
+- "类别": "授权控制"
+  "设置项（示例）": "`AllowGroups`"
+  "推荐方向": "仅允许指定组"
+
+- "类别": "转发能力"
+  "设置项（示例）": "`X11Forwarding`"
+  "推荐方向": "`no`"
+
+- "类别": "转发能力"
+  "设置项（示例）": "`AllowTcpForwarding` / `AllowAgentForwarding` / `PermitTunnel`"
+  "推荐方向": "默认 `no`，确需再开"
+
+- "类别": "加密套件"
+  "设置项（示例）": "`KexAlgorithms` / `Ciphers` / `MACs`"
+  "推荐方向": "按 Mozilla 现代基线"
+```
 
 ### 1.4 移除弱 Diffie-Hellman moduli（< 3072 bits）
 

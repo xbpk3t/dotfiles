@@ -2,9 +2,9 @@
 title: sing-box 在 mac 唤醒后断网问题的后续复盘
 type: review
 status: active
-slug: /2026/singbox-darwin-wake-recovery-followup
 date: 2026-03-22
 updated: 2026-03-22
+isOriginal: false
 tags:
   - sing-box
   - mac

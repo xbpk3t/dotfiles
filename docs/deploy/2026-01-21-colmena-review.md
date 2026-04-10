@@ -4,8 +4,7 @@ type: guide
 status: archived
 date: 2026-01-21
 updated: 2026-01-21
-adr: ../deploy-rs-migration.md
-replacement: ../deploy-rs-migration.md
+isOriginal: false
 reason: 用 deploy-rs 替代 colmena
 tags:
   - nix
@@ -14,7 +13,6 @@ tags:
 summary: 归档旧的 Colmena 部署设计与使用方式，作为迁移到 deploy-rs 之前的历史参考。
 ---
 
-# colmena
 
 ## 当前实现概览
 
@@ -113,15 +111,42 @@ Colmena 的 `meta.nixpkgs` / `meta.specialArgs` 会自动继承 flake 的 `genSp
 
 #### 对比表
 
-| 对比项                            | 现有写法（colmenaTargets+mkNodes） | 官方写法（makeHive / 手写节点） | 判断理由                                                                                              |
-| --------------------------------- | ---------------------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| 可读性/上手成本                   | ❌                                 | ✅                              | 官方形式与文档一致，一眼能看到 `deployment.*`；现有写法需理解 `colmenaTargets→mkNodes` 才能追到节点。 |
-| 调试路径                          | ❌                                 | ✅                              | 官方写法节点即结果，`colmena eval` 与文件定义一致；DSL 需 mentally 展开，出错时定位更慢。             |
-| 与社区/文档一致度                 | ❌                                 | ✅                              | 官方示例、博客几乎都用 makeHive/手写；DSL 属自定义，外部资料少。                                      |
-| 多实例扇出能力                    | ✅                                 | ❌                              | DSL 可用一个 profile 扇出多 host（但当前实现有 bug）；官方需逐节点手写或轻量循环。                    |
-| 公共配置复用                      | ⬜                                 | ✅                              | makeHive 支持 `meta`/`defaults` 原生承载；DSL 也能复用但需自定义 glue。                               |
-| 当前可用性（多 host push）        | ❌                                 | ✅                              | 现状 `targetHosts` >1 时 push 失败；官方一节点一 host 天然规避。                                      |
-| 演进灵活性（拆文件、分 prod/dev） | ⬜                                 | ✅                              | 官方可轻松拆 `hive.nix`/`inventory.nix` 并保持明文；DSL 拆分后仍需保持生成链完整。                    |
+```yaml
+- "对比项": "可读性/上手成本"
+  "现有写法（colmenaTargets+mkNodes）": "❌"
+  "官方写法（makeHive / 手写节点）": "✅"
+  "判断理由": "官方形式与文档一致，一眼能看到 `deployment.*`；现有写法需理解 `colmenaTargets→mkNodes` 才能追到节点。"
+
+- "对比项": "调试路径"
+  "现有写法（colmenaTargets+mkNodes）": "❌"
+  "官方写法（makeHive / 手写节点）": "✅"
+  "判断理由": "官方写法节点即结果，`colmena eval` 与文件定义一致；DSL 需 mentally 展开，出错时定位更慢。"
+
+- "对比项": "与社区/文档一致度"
+  "现有写法（colmenaTargets+mkNodes）": "❌"
+  "官方写法（makeHive / 手写节点）": "✅"
+  "判断理由": "官方示例、博客几乎都用 makeHive/手写；DSL 属自定义，外部资料少。"
+
+- "对比项": "多实例扇出能力"
+  "现有写法（colmenaTargets+mkNodes）": "✅"
+  "官方写法（makeHive / 手写节点）": "❌"
+  "判断理由": "DSL 可用一个 profile 扇出多 host（但当前实现有 bug）；官方需逐节点手写或轻量循环。"
+
+- "对比项": "公共配置复用"
+  "现有写法（colmenaTargets+mkNodes）": "⬜"
+  "官方写法（makeHive / 手写节点）": "✅"
+  "判断理由": "makeHive 支持 `meta`/`defaults` 原生承载；DSL 也能复用但需自定义 glue。"
+
+- "对比项": "当前可用性（多 host push）"
+  "现有写法（colmenaTargets+mkNodes）": "❌"
+  "官方写法（makeHive / 手写节点）": "✅"
+  "判断理由": "现状 `targetHosts` >1 时 push 失败；官方一节点一 host 天然规避。"
+
+- "对比项": "演进灵活性（拆文件、分 prod/dev）"
+  "现有写法（colmenaTargets+mkNodes）": "⬜"
+  "官方写法（makeHive / 手写节点）": "✅"
+  "判断理由": "官方可轻松拆 `hive.nix`/`inventory.nix` 并保持明文；DSL 拆分后仍需保持生成链完整。"
+```
 
 符号说明：✅ 优势，❌ 劣势，⬜ 中性/取决于用法。
 

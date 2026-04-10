@@ -1,0 +1,18 @@
+flowchart LR
+  WS["nixos-ws (workstation)<br>Darwin"]
+  HL[nixos-homelab<br>NixOS]
+  VPS[nixos-vps<br>NixOS]
+  CACHE[(binary cache<br>Attic/Cachix/...)]
+
+  %% Stage 2: reuse build artifacts (two options)
+
+  %% Option A: Global reuse via cache
+  HL -->|push artifacts| CACHE
+  VPS -->|pull/substitute| CACHE
+
+  %% Option B: Reuse without cache (point-to-point)
+  HL -->|nix-copy-closure<br>store paths| VPS
+
+  %% Control plane (deploy/activate)
+  WS -->|deploy / activate| HL
+  WS -->|deploy / activate| VPS

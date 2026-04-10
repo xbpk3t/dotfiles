@@ -1,0 +1,17 @@
+{
+    "zashboard": {
+        "cargoLock": null,
+        "date": null,
+        "extract": null,
+        "name": "zashboard",
+        "passthru": null,
+        "pinned": false,
+        "src": {
+            "name": null,
+            "sha256": "sha256-eLyXie/sblgOZU7w/rNbjdqbj9dSNpNZrZMXEUVGafM=",
+            "type": "url",
+            "url": "https://github.com/Zephyruso/zashboard/releases/download/v3.3.0/dist.zip"
+        },
+        "version": "v3.3.0"
+    }
+}

@@ -1,0 +1,75 @@
+@startuml
+left to right direction
+skinparam shadowing false
+
+' Yellow sticky notes
+skinparam noteBackgroundColor #FFF2A8
+skinparam noteBorderColor #C9B458
+skinparam noteFontColor #222222
+
+' --- Nodes (roles) ---
+rectangle "workstation (ws)\nDarwin/macOS" as WS
+rectangle "dotfiles/flake\n(remote workspace/repo)" as SRC
+
+rectangle "nixos-homelab\nNixOS" as HL
+rectangle "nixos-vps\nNixOS" as VPS
+database  "binary cache\n(Attic/Cachix/...)" as CACHE
+
+' --- Core relationship: ws pulls config source for eval ---
+WS --> SRC : fetch / eval\n(flake)
+
+' --- Two strategies (stage 2) ---
+package "Path A: Global reuse via binary cache" as PA {
+  HL --> CACHE : push artifacts
+  VPS --> CACHE : pull/substitute artifacts
+  WS --> VPS : deploy / activate
+}
+
+package "Path B: Reuse without cache" as PB {
+  HL --> VPS : nix-copy-closure\n(store paths)
+  WS --> VPS : deploy / activate
+}
+
+' --- Notes (no visible connectors) ---
+note as N_WS
+  ws 只做“控制端”：
+  评估配置、发起部署流程
+end note
+
+note as N_SRC
+  源码在 remote
+  (不要求在 homelab 上)
+end note
+
+note as N_HL
+  homelab 可以充当：
+  builder / artifact source
+end note
+
+note as N_CACHE
+  适合机器多、追求复用：
+  产物集中缓存，全局共享
+end note
+
+note as N_VPS
+  vps 是部署目标
+  build/拉取产物取决于路径 A/B
+end note
+
+note as N_KEY
+  关键点：
+  “复用”取决于产物怎么共享
+  - cache（全局）
+  - closure copy（点对点）
+  源码在哪不是决定因素
+end note
+
+' Hidden links for layout only (no lines drawn)
+N_WS -[hidden]-> WS
+N_SRC -[hidden]-> SRC
+N_HL -[hidden]-> HL
+N_CACHE -[hidden]-> CACHE
+N_VPS -[hidden]-> VPS
+N_KEY -[hidden]-> HL
+
+@enduml

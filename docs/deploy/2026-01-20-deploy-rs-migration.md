@@ -1,6 +1,6 @@
 ---
 title: 从colmena迁移到deploy-rs
-type: guide
+type: review
 status: active
 date: 2026-01-20
 updated: 2026-01-20
@@ -28,15 +28,42 @@ summary: 记录本仓库从 Colmena 迁移到 deploy-rs 的动机、取舍和输
 
 ## colmena vs deploy-rs
 
-| 对比项（合并后）                                                    | Colmena | deploy-rs | 为什么这么判                                                                                                                                                                                 |
-| ------------------------------------------------------------------- | ------: | --------: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **批量部署体验：批量“选择”+ 批量“执行”**                            |      ✅ |        ✅ | Colmena 在“选择一批节点”上提供内建 tag/glob（`--on @tag`/glob），这是你日常批量操作最省心的部分。 deploy-rs 强在“执行批量 targets”，但“选择谁”更多靠 `--targets` 列表/封装而非内建标签语法。 |
-| **内置 Secrets/Keys 子系统（out-of-store + 生命周期/依赖集成）**    |      ✅ |        ❌ | Colmena 内建 `deployment.keys`，默认 `/run/keys`，可设上传时机并生成 systemd units。 deploy-rs 没有等价的内建 keys 子系统（通常靠 sops-nix/agenix）。                                        |
-| **多 Profile / 多用户 / 不止 NixOS system profile 的部署模型**      |      ❌ |        ✅ | deploy-rs 明确强调 multi-profile、任意用户、任意数量 profiles，不限于 root/NixOS system profile。                                                                                            |
-| **安全网：Magic Rollback（连不上自动回滚）**                        |      ❌ |        ✅ | deploy-rs README 明确提供并解释 Magic Rollback。 Colmena 没有把它作为同级“内建卖点/机制”写在文档中（更多是用户侧讨论需求）。                                                                 |
-| **对 Flakes 的绑定程度（兼容 legacy vs 强约束治理）**               |      ✅ |        ❌ | Colmena 同时一等支持 flake 与 `hive.nix`（非 flake）工作流。 deploy-rs 设计上更 flake-first（虽有兼容手段但主路径是 flakes）。                                                               |
-| **CI/静态校验：`nix flake check` 级别部署定义校验（deployChecks）** |      ❌ |        ✅ | deploy-rs 提供 `deployChecks` 并建议接入 flake `checks`。 Colmena 文档层面没有同等的 deployChecks 集成点。                                                                                   |
-| **并行度/规模化参数：文档化并行部署与限制项**                       |      ✅ |        ❌ | Colmena 有并行度文档，并提供 `--limit` / `--eval-node-limit` 等参数。 deploy-rs README 里不突出这一层“并行调参”的官方接口。                                                                  |
+```yaml
+- "对比项（合并后）": "**批量部署体验：批量“选择”+ 批量“执行”**"
+  "Colmena": "✅"
+  "deploy-rs": "✅"
+  "为什么这么判": "Colmena 在“选择一批节点”上提供内建 tag/glob（`--on @tag`/glob），这是你日常批量操作最省心的部分。 deploy-rs 强在“执行批量 targets”，但“选择谁”更多靠 `--targets` 列表/封装而非内建标签语法。"
+
+- "对比项（合并后）": "**内置 Secrets/Keys 子系统（out-of-store + 生命周期/依赖集成）**"
+  "Colmena": "✅"
+  "deploy-rs": "❌"
+  "为什么这么判": "Colmena 内建 `deployment.keys`，默认 `/run/keys`，可设上传时机并生成 systemd units。 deploy-rs 没有等价的内建 keys 子系统（通常靠 sops-nix/agenix）。"
+
+- "对比项（合并后）": "**多 Profile / 多用户 / 不止 NixOS system profile 的部署模型**"
+  "Colmena": "❌"
+  "deploy-rs": "✅"
+  "为什么这么判": "deploy-rs 明确强调 multi-profile、任意用户、任意数量 profiles，不限于 root/NixOS system profile。"
+
+- "对比项（合并后）": "**安全网：Magic Rollback（连不上自动回滚）**"
+  "Colmena": "❌"
+  "deploy-rs": "✅"
+  "为什么这么判": "deploy-rs README 明确提供并解释 Magic Rollback。 Colmena 没有把它作为同级“内建卖点/机制”写在文档中（更多是用户侧讨论需求）。"
+
+- "对比项（合并后）": "**对 Flakes 的绑定程度（兼容 legacy vs 强约束治理）**"
+  "Colmena": "✅"
+  "deploy-rs": "❌"
+  "为什么这么判": "Colmena 同时一等支持 flake 与 `hive.nix`（非 flake）工作流。 deploy-rs 设计上更 flake-first（虽有兼容手段但主路径是 flakes）。"
+
+- "对比项（合并后）": "**CI/静态校验：`nix flake check` 级别部署定义校验（deployChecks）**"
+  "Colmena": "❌"
+  "deploy-rs": "✅"
+  "为什么这么判": "deploy-rs 提供 `deployChecks` 并建议接入 flake `checks`。 Colmena 文档层面没有同等的 deployChecks 集成点。"
+
+- "对比项（合并后）": "**并行度/规模化参数：文档化并行部署与限制项**"
+  "Colmena": "✅"
+  "deploy-rs": "❌"
+  "为什么这么判": "Colmena 有并行度文档，并提供 `--limit` / `--eval-node-limit` 等参数。 deploy-rs README 里不突出这一层“并行调参”的官方接口。"
+```
 
 ---
 
