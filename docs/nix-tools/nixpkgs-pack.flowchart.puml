@@ -1,0 +1,117 @@
+@startuml
+
+
+' nurl 还是最常用的工具（尤其是针对本身有release时，可以用 nurl直接拿到相应hash）
+' crane 专用于 rust生态（比较复杂时）
+
+
+' - 有可直接消费的 release，就优先 fetchurl / fetchzip
+' - 没有 release 时，Go / Python / Rust 这类常见生态先用 nix-init 生成初稿，再手工 tweak 原生 builder
+' - Rust 只有在“持续维护的项目型场景，且关心 CI / cache / checks”时，才额外考虑 crane
+' - dream2nix 不属于默认路径，它只在“多包 + 多语言 + 长期维护”的规模化维护场景下再评估
+
+
+' - nix-init + 原生 nixpkgs builder 是默认方案
+' - crane 是 Rust 特化方案，不是通用默认项
+' - dream2nix 是规模化统一管理方案，不适合现在就作为仓库级基础设施引入
+' - npmlock2nix: 不需要把 npmlock2nix 作为主要分支，但强烈建议把 Node 分支从“手写合适的 builder”细化一下，把 buildNpmPackage 放在第一优先级，把 npmlock2nix 作为“需要更高灵活性时的备选”补充进去。
+
+
+
+
+skinparam backgroundColor transparent
+skinparam shadowing false
+skinparam activity {
+  BorderColor #5B5B5B
+  FontColor #1F1F1F
+  DiamondBorderColor #5B5B5B
+  DiamondBackgroundColor #F7F7F7
+  StartColor #222222
+  EndColor #222222
+}
+skinparam note {
+  BackgroundColor #FAFAFA
+  BorderColor #BBBBBB
+  FontColor #444444
+}
+
+title nixpkgs 打包时的工具选择
+
+start
+
+:评估 upstream;
+
+if (有 release 产物?) then (是)
+  #DFF6DD:直接消费 release;
+  if (单文件 / 二进制?) then (是)
+    :fetchurl;
+  else (否)
+    :fetchzip;
+  endif
+
+else (否)
+  if (Rust 生态?) then (是)
+    #DDEBFF:nix-init 起稿;
+    :tweak buildRustPackage;
+
+    if (Rust 项目型维护?) then (是)
+      #FFE7CC:考虑 crane;
+    endif
+
+  else (否)
+    if (Go / Python?) then (是)
+      #DDEBFF:nix-init 起稿;
+      :tweak 原生 builder;
+
+    else (否)  ' 这里是前面非 Rust/Go/Python 的分支
+
+      if (Node / npm / pnpm?) then (是)
+        if (有 package-lock.json 且适合标准化打包?) then (是)
+          #DFF6DD:优先使用 buildNpmPackage + importNpmLock;
+          note right
+            nixpkgs 官方推荐
+            适合大多数 leaf package / 有 release 的情况
+          end note
+
+        else (否)
+          if (需要高度自定义构建 / 开发 shell / monorepo / 复杂 postinstall?) then (是)
+            #DDEBFF:考虑 npmlock2nix.build / .shell;
+            note right
+              更灵活，无代码生成
+              特别适合自己的应用项目
+            end note
+          else (否)
+            :手写 mkDerivation + 手动处理依赖;
+          endif
+        endif
+
+        if (使用 pnpm?) then (是)
+          note right
+            可尝试 npmHooks + pnpm 相关 hook
+            或等待/贡献 buildPnpmPackage
+          end note
+        endif
+
+      else (否)
+        :手写 derivation;
+      endif
+    endif
+
+
+  endif
+endif
+
+if (多包 + 多语言 + 长期维护?) then (是)
+  #E9D8FD:再评估 dream2nix;
+endif
+
+#FFF3BF:目标 = 最简洁且可维护;
+stop
+
+note right
+nurl:
+辅助生成/更新 source 与 hash，
+不是选型分支
+end note
+
+@enduml

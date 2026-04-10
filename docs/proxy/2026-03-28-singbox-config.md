@@ -1,4 +1,8 @@
-
+---
+title: singbox 配置解析
+isOriginal: true
+date: 2026-03-28
+---
 
 
 ## singbox运行机制

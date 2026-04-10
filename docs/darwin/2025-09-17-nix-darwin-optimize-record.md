@@ -4,9 +4,8 @@ type: review
 status: active
 date: 2025-09-17
 updated: 2025-09-17
-slug: /2025/nix-darwin-optimize-record
-tags:
-  - nix
+isOriginal: true
+tags: [nix, darwin]
 ---
 
 ## shell 脚本里的 `~`

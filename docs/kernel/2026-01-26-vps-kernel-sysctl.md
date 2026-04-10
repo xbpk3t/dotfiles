@@ -4,6 +4,7 @@ type: review
 date: 2026-01-26
 status: active
 updated: 2026-01-26
+isOriginal: false
 related: lib/vps-sysctl.nix
 tags:
   - kernel
@@ -188,12 +189,27 @@ Speedtest.net：下载 18.88 Mbps / 上传 18.21 Mbps / 延迟 47.878 ms
 
 ### mode 对应策略（默认表）
 
-| mode        | BDP 倍数 | 内存占用上限 | backlog 放大 |
-| ----------- | -------: | -----------: | -----------: |
-| steady      |       1x |           2% |           1x |
-| balanced    |       2x |           4% |           2x |
-| performance |       3x |           8% |           3x |
-| aggressive  |       4x |          12% |           4x |
+```yaml
+- "mode": "steady"
+  "BDP 倍数": "1x"
+  "内存占用上限": "2%"
+  "backlog 放大": "1x"
+
+- "mode": "balanced"
+  "BDP 倍数": "2x"
+  "内存占用上限": "4%"
+  "backlog 放大": "2x"
+
+- "mode": "performance"
+  "BDP 倍数": "3x"
+  "内存占用上限": "8%"
+  "backlog 放大": "3x"
+
+- "mode": "aggressive"
+  "BDP 倍数": "4x"
+  "内存占用上限": "12%"
+  "backlog 放大": "4x"
+```
 
 ## 主要输出项（示意）
 

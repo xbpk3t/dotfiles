@@ -53,11 +53,16 @@
   fixVer: v0.220.0
 
 ---
+
 - feat: git commit history
   foundDate: 2026-01-18
-  isFix: false
+  isFix: true
   score: 4
   des: 用 tig, serie 可以替代实现该需求
+  fixVer: v0.23 # https://x.com/zeddotdev/status/2041951959050043503
+
+
+
 
 - feat: Local History
   isFix: false
@@ -114,11 +119,8 @@
   des: 比如说我在nix里新增了某个codex的provider（需要补充相应env），在goland里，新开tab即可直接读取并使用，但是在zed里，就会报 `Missing env variable`，很明显就是没有读取到
 
 
-- bug: rm外部文件后，zed里该文件仍然会展示，如果是goland里，该文件会自动消失
+- bug: 搜索到的matched item，在删掉相应内容后，再次搜索后，仍然会在搜索 matched item中展示
   foundDate: 2026-04-02
-  des: 总之是非常干扰的一个问题
-
-
-- bug: Ctrl+Tab 切换文件，但是文件 Last Update 顺序是乱的
-  foundDate: 2026-04-02
-  des: 并且触发 Ctrl+Tab 时，有时还会有bug，比如说触发其他操作
+  url:
+    - https://github.com/zed-industries/zed/issues/28398
+  des: 需要关闭该搜索页，再次搜索才能匹配到正确的 latest matched item。我感觉这个是zed架构问题（因为zed很明显没有做文件动态xxx，这个bug跟很多其他bug很明显是联动的）

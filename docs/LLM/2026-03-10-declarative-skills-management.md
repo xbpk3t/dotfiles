@@ -4,7 +4,6 @@ type: guide
 status: active
 date: 2026-03-10
 updated: 2026-03-10
-slug: /2026/declarative-skills-management
 unlisted: false
 tags:
   - nix
@@ -143,7 +142,7 @@ skill，所以需要我上面说的 gum choose (又或者说你觉得可能 gum 
 
 直接把所有 `score = 5` 的 repo（代表“确认会长期存在”的skills） 都直接迁移到 nix里了，但是迁移过来之后就想到了为啥之前没用nix管理这些第三方skills了，具体来说，以下三点：
 
-- 1、`agent-skills`里 repo跟skills拆开到两块了，就导致可维护性也会变差。
+- 1、***`agent-skills`里 repo跟skills拆开到两块了，就导致可维护性也会变差。***
 - 2、需要在 `flake.nix` 里添加这些skills的repo
 - 3、担心如果只用nix来管理skills的话，有时临时添加和删除skills还需要重新rebuild，非常麻烦。
 - 4、`agent-skills` 需要手动配置 `subdir`，而非 skills cli这种会自动扫描 subdir，就会很麻烦，维护成本也更高。
@@ -154,3 +153,64 @@ skill，所以需要我上面说的 gum choose (又或者说你觉得可能 gum 
 ***所以做了一个关键决策：第三方 skills metadata 抽离到 `skills-catalog.nix`***
 
 也就解决掉了上面所说的这个之前以来一直困扰我的问题。上点价值的话，其实还是一直以来的那个话，“遇到问题不要绕，认准了就去解决”，其实说来说去最核心的还是上面说的“`agent-skills`里 repo跟skills拆开到两块，很难维护”的问题，正确的思路应该是，***我终究是需要声明式管理skills的，所以这个问题是需要去解决的，而非像之前一样，直接把local和remote两种skills拆分。***
+
+
+
+
+
+## 移除部分第三方skills [2026-04-01]
+
+
+
+```yaml
+
+# https://x.com/axiaisacat/status/2030297324962857044
+# https://github.com/pbakaus/impeccable
+# how to use: https://impeccable.style/cheatsheet
+- repo: pbakaus/impeccable
+  score: 4 # 建议归类(OPTIONAL)
+  skills:
+    - adapt
+    - animate
+    - audit
+    - bolder
+    - clarify
+    - colorize
+    - critique
+    - delight
+    - distill
+    - extract
+    - frontend-design
+    - harden
+    - normalize
+    - onboard
+    - optimize
+    - polish
+    - quieter
+    - teach-impeccable
+
+
+```
+
+
+`pbakaus/impeccable` 本身不是“没用”，相反它是一整套很强的前端设计工具箱，覆盖 design critique、layout/typography/color 调整、polish、harden、optimize 等多个方向，并且明确反对 AI slop。问题在于它的使用前提比较重：很多子 skill 都要求先建立设计上下文，再按具体命令手动调用，所以它更像一套专项工作台，而不是适合长期留在第三方声明式清单里的通用 skills。
+
+因此这里最终选择把它从第三方 skills 清单里移除，而不是继续放在 taskfile / skills-cli 管理。核心原因不是能力不足，而是它更适合按项目、本地直接管理和按需使用；放在 declarative 的第三方清单里，噪音会偏大，也不符合当前这套“CORE declarative + 专项 local”的分层思路。
+
+
+## 移除 ruler [2026-04-09]
+
+简单来说 [intellectronica/ruler](https://github.com/intellectronica/ruler) 的核心能力就是把
+
+- MCP
+- skills
+- rules / instructions (AGENTS.md)
+
+这些直接在 codex, cc, qwen, cursor, windsurf 之类主流 agent 之间实现复用
+
+
+但是对我来说我现在已经用 `mcp-servers-nix` 来管理 MCP, `agent-skills` 来管理 skills。可以完全 declarative 管理 MCP和skills，完全是 ruler 的上位替代。
+
+这样一来，`ruler` 剩下的核心价值就只剩“跨 agent 同步 instructions”。但这部分在实际工作流里并不成立为一个强需求，因为 `AGENTS.md` 本身更偏项目级上下文，天然应该跟着仓库和目录层级走，而不是再额外抽成一个全局同步层。
+
+所以综合下来，ruler对我来说就没啥意义了，直接删掉。

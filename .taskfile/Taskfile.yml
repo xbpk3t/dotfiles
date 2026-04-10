@@ -43,7 +43,6 @@ includes:
   me: mac/Taskfile.me.yml
   # alfred: mac/Taskfile.alfred.yml
   pnpm: mac/Taskfile.pnpm.yml
-  # ruler: mac/Taskfile.ruler.yml
   sc: mac/Taskfile.scratches.yml
 
   # network

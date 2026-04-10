@@ -1,5 +1,8 @@
-pkgs: {
+pkgs: let
+  sources = pkgs.callPackage ./sources.nix {};
+in {
   apple-pingfang = pkgs.callPackage ./apple-pingfang {};
-  ruler = pkgs.callPackage ./ruler {};
-  zashboard = pkgs.callPackage ./zashboard {};
+  zashboard = pkgs.callPackage ./zashboard {
+    inherit sources;
+  };
 }
