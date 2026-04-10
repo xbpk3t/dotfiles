@@ -4,7 +4,6 @@ type: review
 status: active
 date: 2025-12-01
 updated: 2025-12-01
-slug: /2025/container-solutions-for-nixos
 unlisted: true
 tags: [nix]
 ---
@@ -65,14 +64,37 @@ https://github.com/xbpk3t/dotfiles/pull/21
 
 ## 方案演进表格
 
-| 方案                                                                     | 为什么设计该方案？                                                                                                                                                                                                         | 为什么对该方案做出调整？                                                                                                                                                   | 调整为什么方案                                                                                    |
-| ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| **1. NixOS 原生 services + oci-containers（extra 模块每服务一个）**      | 初衷是希望像 nixpkgs 那样“全声明式”：每个服务变成 Nix module，使用 services.\* 与 virtualisation.oci-containers 完整托管生命周期，并提供同模块的 ingress。                                                                 | 随着服务数量增加：大量重复模板（systemd/tmpfiles/ingress），维护成本高；并且你已有成熟 compose.yml，不想重写成 Nix。                                                       | **2. 把容器整合到 cntr/，用 oci-containers 统一管理容器。**                                       |
-| **2. modules/nixos/cntr + oci-containers**                               | 把容器模块化，拆出 cntr/，实现更清晰的结构。容器生命周期仍由 Nix 声明式管理。                                                                                                                                              | 发现仍然需要大量重复 systemd 模板；许多服务本来就是 compose.yml，继续翻译重复劳动；想降低维护成本。                                                                        | **3. 引入自研 compose helper（mkPodmanComposeService / mkDockerComposeService）。**               |
-| **3. 自研 compose helper + sops-nix**                                    | 目标：写一个统一 helper 自动完成：systemd oneshot + tmpfiles + secrets 注入 + ingress 绑定，让每个服务的 default.nix 最小化（只传 composeFile）。                                                                          | helper 越写越复杂：需读取 config 触发递归、逻辑膨胀；开始考虑直接用成熟社区方案替代。                                                                                      | **4. 切到官方模块：nix-managed-docker-compose（NMDC）。**                                         |
-| **4. 使用 NMDC（services.managedDockerCompose）管理所有 compose 栈**     | 优点：官方 NixOS 模块；直接 `composeFile = ./compose.yml`；systemd 自动生成；还支持 substitutions/substitutionsFromFiles 注入 secrets。                                                                                    | 实战踩坑：NMDC 串行处理所有 compose 项目 → 一个失败就退出；对网络不稳定/镜像拉取失败非常脆弱；与自研 helper 同样复杂甚至更差；开始反思：是否应该完全停止“声明式容器管理”。 | **5. Docker 生命周期彻底解耦：Nix 只负责分发 compose.yml，容器生命周期改用 Taskfile（命令式）。** |
-| **5. 完全解耦：Nix 下发 compose.yml，容器用 Taskfile 管理**              | 新思路：1）compose.yml 仍放仓库；2）通过 home.file / environment.etc 部署到 VPS（例如 /srv/compose/\<stack>/compose.yml）；3）容器完全用 task compose:up/down 控制；Nix 不再干预容器生命周期。这样最稳定、最符合现实运维。 | 剩余顾虑：① 如何设计 Taskfile；② 之前 ingress 与模块 enable 绑定，现在解耦后 ingress 如何保持声明式。                                                                      | **6. ingress 继续声明式管理，容器生命周期命令式：Nix 只维护“域名 → 端口”映射。**                  |
-| **6. 最终方案：Ingress & Caddy 留在 Nix，Compose 生命周期交给 Taskfile** | Caddy 仍声明式：统一管理所有 domain → upstream。容器由 Taskfile 起/停，两者彻底 decouple。你只需保证任务启动的服务端口与 ingress 配置一致即可。                                                                            | 这样避免了 declarative/imperative 混用导致的心智负担；入口层继续稳定版本化，应用层完全自由。                                                                               | **当前稳定方案：Nix 管 ingress，Taskfile 管容器。**                                               |
+```yaml
+- "方案": "**1. NixOS 原生 services + oci-containers（extra 模块每服务一个）**"
+  "为什么设计该方案？": "初衷是希望像 nixpkgs 那样“全声明式”：每个服务变成 Nix module，使用 services.\* 与 virtualisation.oci-containers 完整托管生命周期，并提供同模块的 ingress。"
+  "为什么对该方案做出调整？": "随着服务数量增加：大量重复模板（systemd/tmpfiles/ingress），维护成本高；并且你已有成熟 compose.yml，不想重写成 Nix。"
+  "调整为什么方案": "**2. 把容器整合到 cntr/，用 oci-containers 统一管理容器。**"
+
+- "方案": "**2. modules/nixos/cntr + oci-containers**"
+  "为什么设计该方案？": "把容器模块化，拆出 cntr/，实现更清晰的结构。容器生命周期仍由 Nix 声明式管理。"
+  "为什么对该方案做出调整？": "发现仍然需要大量重复 systemd 模板；许多服务本来就是 compose.yml，继续翻译重复劳动；想降低维护成本。"
+  "调整为什么方案": "**3. 引入自研 compose helper（mkPodmanComposeService / mkDockerComposeService）。**"
+
+- "方案": "**3. 自研 compose helper + sops-nix**"
+  "为什么设计该方案？": "目标：写一个统一 helper 自动完成：systemd oneshot + tmpfiles + secrets 注入 + ingress 绑定，让每个服务的 default.nix 最小化（只传 composeFile）。"
+  "为什么对该方案做出调整？": "helper 越写越复杂：需读取 config 触发递归、逻辑膨胀；开始考虑直接用成熟社区方案替代。"
+  "调整为什么方案": "**4. 切到官方模块：nix-managed-docker-compose（NMDC）。**"
+
+- "方案": "**4. 使用 NMDC（services.managedDockerCompose）管理所有 compose 栈**"
+  "为什么设计该方案？": "优点：官方 NixOS 模块；直接 `composeFile = ./compose.yml`；systemd 自动生成；还支持 substitutions/substitutionsFromFiles 注入 secrets。"
+  "为什么对该方案做出调整？": "实战踩坑：NMDC 串行处理所有 compose 项目 → 一个失败就退出；对网络不稳定/镜像拉取失败非常脆弱；与自研 helper 同样复杂甚至更差；开始反思：是否应该完全停止“声明式容器管理”。"
+  "调整为什么方案": "**5. Docker 生命周期彻底解耦：Nix 只负责分发 compose.yml，容器生命周期改用 Taskfile（命令式）。**"
+
+- "方案": "**5. 完全解耦：Nix 下发 compose.yml，容器用 Taskfile 管理**"
+  "为什么设计该方案？": "新思路：1）compose.yml 仍放仓库；2）通过 home.file / environment.etc 部署到 VPS（例如 /srv/compose/\<stack>/compose.yml）；3）容器完全用 task compose:up/down 控制；Nix 不再干预容器生命周期。这样最稳定、最符合现实运维。"
+  "为什么对该方案做出调整？": "剩余顾虑：① 如何设计 Taskfile；② 之前 ingress 与模块 enable 绑定，现在解耦后 ingress 如何保持声明式。"
+  "调整为什么方案": "**6. ingress 继续声明式管理，容器生命周期命令式：Nix 只维护“域名 → 端口”映射。**"
+
+- "方案": "**6. 最终方案：Ingress & Caddy 留在 Nix，Compose 生命周期交给 Taskfile**"
+  "为什么设计该方案？": "Caddy 仍声明式：统一管理所有 domain → upstream。容器由 Taskfile 起/停，两者彻底 decouple。你只需保证任务启动的服务端口与 ingress 配置一致即可。"
+  "为什么对该方案做出调整？": "这样避免了 declarative/imperative 混用导致的心智负担；入口层继续稳定版本化，应用层完全自由。"
+  "调整为什么方案": "**当前稳定方案：Nix 管 ingress，Taskfile 管容器。**"
+```
 
 ---
 
@@ -284,10 +306,15 @@ Docker compose 本身应该是 declarative 而非 Imperative 的
 
 按层拆开：
 
-| 层级                            | 谁负责 rollback？ | 怎么做                                                                                    |
-| ------------------------------- | ----------------- | ----------------------------------------------------------------------------------------- |
-| 系统 & ingress（NixOS + Caddy） | **Nix**           | 用 `nixos-rebuild switch --rollback` 回到上一代；Caddy 配置一起回滚。                     |
-| 容器 & 应用（docker compose）   | **Git + 你自己**  | `git checkout` 回到旧版 compose.yml，然后执行 `task compose:up`（或类似命令）重新起容器。 |
+```yaml
+- "层级": "系统 & ingress（NixOS + Caddy）"
+  "谁负责 rollback？": "**Nix**"
+  "怎么做": "用 `nixos-rebuild switch --rollback` 回到上一代；Caddy 配置一起回滚。"
+
+- "层级": "容器 & 应用（docker compose）"
+  "谁负责 rollback？": "**Git + 你自己**"
+  "怎么做": "`git checkout` 回到旧版 compose.yml，然后执行 `task compose:up`（或类似命令）重新起容器。"
+```
 
 关键点：
 **Nix 不再负责容器 rollback**，容器只和 `compose.yml` 的 Git 历史 + 你的命令有关。
@@ -296,10 +323,15 @@ Docker compose 本身应该是 declarative 而非 Imperative 的
 
 ### 1.2 谁负责监控 health？
 
-| 层级           | 谁负责 health？  | 你的语义                                                                                                 |
-| -------------- | ---------------- | -------------------------------------------------------------------------------------------------------- |
-| 系统 & ingress | systemd + Caddy  | Nix 只确保 Caddy 这个 service 活着；Caddy 如果 upstream 不通就返回 502/504，但不会让 Nix 部署失败。      |
-| 容器 & 应用    | Docker 自己 + 你 | `docker compose` 按 `restart`、`healthcheck` 等规则处理；Taskfile 只是触发 up/down，Nix 不关心容器健康。 |
+```yaml
+- "层级": "系统 & ingress"
+  "谁负责 health？": "systemd + Caddy"
+  "你的语义": "Nix 只确保 Caddy 这个 service 活着；Caddy 如果 upstream 不通就返回 502/504，但不会让 Nix 部署失败。"
+
+- "层级": "容器 & 应用"
+  "谁负责 health？": "Docker 自己 + 你"
+  "你的语义": "`docker compose` 按 `restart`、`healthcheck` 等规则处理；Taskfile 只是触发 up/down，Nix 不关心容器健康。"
+```
 
 如果未来加 Prometheus/Alertmanager，它们属于“观测层”，只观察，不操纵 Nix rollback。
 
@@ -309,10 +341,15 @@ Docker compose 本身应该是 declarative 而非 Imperative 的
 
 区分 ingress & 容器：
 
-| 对象                            | 谁有“语义上的发言权”？                | 语义                                                                                                                     |
-| ------------------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| 某个域名 ingress（Caddy route） | **Nix 配置**                          | 如果 Nix 配置中删除了这个 ingress，下次 `switch` 后它就应当在 Caddy 配置中消失，从系统视角“它不该存在”。                 |
-| 某个 docker compose 栈 / 容器   | **Taskfile + compose.yml + 你的操作** | 如果不再需要某个栈：删掉 repo 中对应目录/Task，执行一次 `docker compose down`，之后 Nix 重建系统也不会“帮你复活”这个栈。 |
+```yaml
+- "对象": "某个域名 ingress（Caddy route）"
+  "谁有“语义上的发言权”？": "**Nix 配置**"
+  "语义": "如果 Nix 配置中删除了这个 ingress，下次 `switch` 后它就应当在 Caddy 配置中消失，从系统视角“它不该存在”。"
+
+- "对象": "某个 docker compose 栈 / 容器"
+  "谁有“语义上的发言权”？": "**Taskfile + compose.yml + 你的操作**"
+  "语义": "如果不再需要某个栈：删掉 repo 中对应目录/Task，执行一次 `docker compose down`，之后 Nix 重建系统也不会“帮你复活”这个栈。"
+```
 
 一句话总结：
 **入口层存在性由 Nix 决定，容器层存在性由 Docker/你自己决定。**
@@ -323,10 +360,15 @@ Docker compose 本身应该是 declarative 而非 Imperative 的
 
 你当前架构下，这个问题已经“拆层”了：
 
-| 场景                                  | 谁在跑                      | 行为                                                                                                                 |
-| ------------------------------------- | --------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `nixos-rebuild switch` 时网络问题     | NixOS 下载 / eval           | 只影响 Nix 包/通道，不会尝试拉容器镜像，因此不会因为某个镜像拉不下来而导致整次系统部署失败。                         |
-| 执行 `task compose:up` 时镜像拉不下来 | Taskfile + `docker compose` | 只影响当前栈 / 当前命令。可以让它直接 fail 然后你手动重试，也可以在 Taskfile 里自定义“失败策略”。对 Nix 完全无影响。 |
+```yaml
+- "场景": "`nixos-rebuild switch` 时网络问题"
+  "谁在跑": "NixOS 下载 / eval"
+  "行为": "只影响 Nix 包/通道，不会尝试拉容器镜像，因此不会因为某个镜像拉不下来而导致整次系统部署失败。"
+
+- "场景": "执行 `task compose:up` 时镜像拉不下来"
+  "谁在跑": "Taskfile + `docker compose`"
+  "行为": "只影响当前栈 / 当前命令。可以让它直接 fail 然后你手动重试，也可以在 Taskfile 里自定义“失败策略”。对 Nix 完全无影响。"
+```
 
 因此在这套方案里：
 
@@ -546,11 +588,25 @@ Terraform + K8s、K8s + Helm + ArgoCD、Nix + k3s
 
 下表假设的是**比较健康/常见的架构用法**（不是唯一正确，但是在实践中比较少踩坑的那种）。
 
-| Stack 组合                                | 谁是 lifecycle owner？（谁主导“活着/挂掉/重建”的过程）                                                                                                                                                                                                                      | 谁负责 rollback？（按“版本/快照”回到之前状态）                                                                                                                                                                                                                                      | 谁能删资源？（“可以/应该”删，而不是“技术上能不能”）                                                                                                                                                                                                         | 谁能认为「这个东西不存在了」？（在语义上有权说：这个对象不该再存在）                                                                                                                                                                                                                        |
-| ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Terraform + Kubernetes**                | **Terraform 负责云基础设施生命周期**（VPC、节点、LB、RDS…）**Kubernetes 负责 Pod/Service 生命周期**（调度、重启、水平伸缩）                                                                                                                                                 | 基础设施层：**Terraform rollback / state 操作**（例如切回上一个 apply 的 plan 或用 git + state 管理）集群内工作负载：通常依赖 **GitOps/Helm/手动 kubectl apply 的版本**，Terraform 不负责 Pod 级别 rollback。                                                                       | **Terraform “应该”删 infra 资源**：它管理的那一层（节点组、LB、DNS、Bucket…）应该只通过 `terraform apply`/`destroy` 改动。Kubernetes 控制器删的是集群内对象（Deployment/Pod/Service），不直接动云资源。                                                     | 在 infra 层：**Terraform 拥有解释权**——state 里没有的资源，长期而言应该被视为“流浪资源”。在集群层：**Kubernetes (加上你选的 GitOps/Helm) 拥有解释权**——manifest 里没有的对象应被认为是“脏东西”，迟早要清掉。                                                                                |
-| **Kubernetes + Helm + ArgoCD**            | 推荐做法：**ArgoCD 是 lifecycle owner**（Git 里怎么写，集群就长成什么样）。Helm 只是模板引擎和打包工具；Kubernetes 是 runtime，负责实际运行与重启。                                                                                                                         | **ArgoCD 负责 rollback**：回滚到 Git 的某个 commit 或某个 Application Revision。Helm 在这种架构下不再单独对线上集群做 `helm upgrade --install`，而是由 ArgoCD 调用。                                                                                                                | Git 里的 manifest + ArgoCD 决定“该不该存在”。**ArgoCD 可以删 K8s 资源**（把它从 Git 中删掉，ArgoCD 会同步删除）；**Helm CLI 不再直接删线上资源**，否则会和 Argo 冲突。                                                                                      | **Git（即 ArgoCD 的源）说了算**：Git 里不再存在的 Deployment/Service，理论上就不应该存在于集群里；ArgoCD 的 “Prune” 动作就是在执行“这些不在声明里的东西要被视为不存在并删掉”。                                                                                                              |
-| **Nix + k3s（或 Nix + 任意 Kubernetes）** | 如果你用 Nix 只安装 k3s（二进制、服务），而 **工作负载由 GitOps/Helm 管**：→ **Nix 仅是“集群 runtime 的 lifecycle owner”**（启动/升级 k3s），不管业务 Pod。如果你用 Nix 生成 K8s manifest 并直接 kubectl apply：→ 那一层上 **Nix + Git 变成 workload 的 lifecycle owner**。 | 系统层：**Nix rollback**（`nixos-rebuild switch --rollback`）负责 k3s 版本、系统 daemon 状态回滚。集群工作负载：看你选什么：– 如果 GitOps（ArgoCD/Flux），rollback 由 GitOps 工具 + Git 负责；– 如果 Nix 直接产 manifest 并 apply，rollback 实际上是 “回退 Nix 配置 + 重新 apply”。 | 系统层：**Nix 可以删/改 k3s 自身**（版本、服务、启动方式），但一般不直接删 Pod。集群内：– 如使用 GitOps：**GitOps 工具删资源**；– 如用 Nix 直接 apply：**Nix 的配置说删，kubectl 照做**。手动 `kubectl delete` 技术上能做，但会被下一次 apply/GitOps 恢复。 | 系统层：Nix 可以认为 “本机不应该再跑一个 k3s server 了”，于是移除 service；工作负载层：– 用 GitOps：**Git 仓库是“真相来源”**，仓库删掉的对象应视为不存在；– 用 Nix 生成 manifest：**Nix 配置是“真相来源”**，配置里没了就应该认定这东西不存在（即使你手动 kubectl apply 过，它也是脏状态）。 |
+```yaml
+- "Stack 组合": "**Terraform + Kubernetes**"
+  "谁是 lifecycle owner？（谁主导“活着/挂掉/重建”的过程）": "**Terraform 负责云基础设施生命周期**（VPC、节点、LB、RDS…）**Kubernetes 负责 Pod/Service 生命周期**（调度、重启、水平伸缩）"
+  "谁负责 rollback？（按“版本/快照”回到之前状态）": "基础设施层：**Terraform rollback / state 操作**（例如切回上一个 apply 的 plan 或用 git + state 管理）集群内工作负载：通常依赖 **GitOps/Helm/手动 kubectl apply 的版本**，Terraform 不负责 Pod 级别 rollback。"
+  "谁能删资源？（“可以/应该”删，而不是“技术上能不能”）": "**Terraform “应该”删 infra 资源**：它管理的那一层（节点组、LB、DNS、Bucket…）应该只通过 `terraform apply`/`destroy` 改动。Kubernetes 控制器删的是集群内对象（Deployment/Pod/Service），不直接动云资源。"
+  "谁能认为「这个东西不存在了」？（在语义上有权说：这个对象不该再存在）": "在 infra 层：**Terraform 拥有解释权**——state 里没有的资源，长期而言应该被视为“流浪资源”。在集群层：**Kubernetes (加上你选的 GitOps/Helm) 拥有解释权**——manifest 里没有的对象应被认为是“脏东西”，迟早要清掉。"
+
+- "Stack 组合": "**Kubernetes + Helm + ArgoCD**"
+  "谁是 lifecycle owner？（谁主导“活着/挂掉/重建”的过程）": "推荐做法：**ArgoCD 是 lifecycle owner**（Git 里怎么写，集群就长成什么样）。Helm 只是模板引擎和打包工具；Kubernetes 是 runtime，负责实际运行与重启。"
+  "谁负责 rollback？（按“版本/快照”回到之前状态）": "**ArgoCD 负责 rollback**：回滚到 Git 的某个 commit 或某个 Application Revision。Helm 在这种架构下不再单独对线上集群做 `helm upgrade --install`，而是由 ArgoCD 调用。"
+  "谁能删资源？（“可以/应该”删，而不是“技术上能不能”）": "Git 里的 manifest + ArgoCD 决定“该不该存在”。**ArgoCD 可以删 K8s 资源**（把它从 Git 中删掉，ArgoCD 会同步删除）；**Helm CLI 不再直接删线上资源**，否则会和 Argo 冲突。"
+  "谁能认为「这个东西不存在了」？（在语义上有权说：这个对象不该再存在）": "**Git（即 ArgoCD 的源）说了算**：Git 里不再存在的 Deployment/Service，理论上就不应该存在于集群里；ArgoCD 的 “Prune” 动作就是在执行“这些不在声明里的东西要被视为不存在并删掉”。"
+
+- "Stack 组合": "**Nix + k3s（或 Nix + 任意 Kubernetes）**"
+  "谁是 lifecycle owner？（谁主导“活着/挂掉/重建”的过程）": "如果你用 Nix 只安装 k3s（二进制、服务），而 **工作负载由 GitOps/Helm 管**：→ **Nix 仅是“集群 runtime 的 lifecycle owner”**（启动/升级 k3s），不管业务 Pod。如果你用 Nix 生成 K8s manifest 并直接 kubectl apply：→ 那一层上 **Nix + Git 变成 workload 的 lifecycle owner**。"
+  "谁负责 rollback？（按“版本/快照”回到之前状态）": "系统层：**Nix rollback**（`nixos-rebuild switch --rollback`）负责 k3s 版本、系统 daemon 状态回滚。集群工作负载：看你选什么：– 如果 GitOps（ArgoCD/Flux），rollback 由 GitOps 工具 + Git 负责；– 如果 Nix 直接产 manifest 并 apply，rollback 实际上是 “回退 Nix 配置 + 重新 apply”。"
+  "谁能删资源？（“可以/应该”删，而不是“技术上能不能”）": "系统层：**Nix 可以删/改 k3s 自身**（版本、服务、启动方式），但一般不直接删 Pod。集群内：– 如使用 GitOps：**GitOps 工具删资源**；– 如用 Nix 直接 apply：**Nix 的配置说删，kubectl 照做**。手动 `kubectl delete` 技术上能做，但会被下一次 apply/GitOps 恢复。"
+  "谁能认为「这个东西不存在了」？（在语义上有权说：这个对象不该再存在）": "系统层：Nix 可以认为 “本机不应该再跑一个 k3s server 了”，于是移除 service；工作负载层：– 用 GitOps：**Git 仓库是“真相来源”**，仓库删掉的对象应视为不存在；– 用 Nix 生成 manifest：**Nix 配置是“真相来源”**，配置里没了就应该认定这东西不存在（即使你手动 kubectl apply 过，它也是脏状态）。"
+```
 
 ---
 

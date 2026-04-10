@@ -2,10 +2,8 @@
 title: sing-box 在 macOS 唤醒后长时间断网问题的诊断和fix
 type: review
 status: active
-slug: /2026/singbox-darwin-wake-recovery
 date: 2026-03-20
-updated: 2026-03-20
-unlisted: true
+isOriginal: false
 tags:
   - sing-box
   - mac

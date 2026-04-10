@@ -1,6 +1,7 @@
 ---
 title: 从入门到放弃：半个月速通 dokploy
 date: 2026-01-11
+isOriginal: true
 ---
 
 :::warning
@@ -131,6 +132,62 @@ date: 2026-01-11
 **_但是上面这些也只是不好用而已，我深刻反思后，觉得最核心的问题在于：我还是需要一个足够声明式配置的应用部署平台_**
 
 :::
+
+
+
+### case-1
+
+
+```markdown
+
+# Beszel 访问问题处理记录
+
+日期：2026-01-10
+
+## 目标
+- 保持 Dokploy 动态路由管理（不写死静态路由）。
+- 解决 Traefik 回源 504（宿主机无法访问 overlay 容器 IP）。
+
+## 核心结论
+- Traefik 以宿主机 systemd 服务运行时，Dokploy 动态路由回源地址是 overlay IP（如 10.0.1.2:8090），宿主机无法访问，导致 504。
+- 需要把 Traefik 切回容器方式加入 `dokploy-network`，与 Dokploy 的动态路由机制一致。
+
+## 已做代码改动（本地）
+文件：`modules/nixos/vps/dokploy-server/default.nix`
+1) 保持 `/etc/dokploy` 目录结构，ACME 文件由容器写入：
+   - `acme.json` owner 改为 `root:root 0600`（容器 root 可写）。
+   - 中文注释说明 Traefik 容器写入方式。
+2) 移除 systemd 原生 Traefik 服务配置：
+   - 删除 `services.traefik` 与 `ReadWritePaths` 等配置。
+3) 新增 Traefik 容器服务：
+   - `systemd.services.dokploy-traefik`
+   - 使用 `docker run` 加入 `dokploy-network`
+   - 挂载 `/etc/dokploy/traefik/traefik.yml` 与 `dynamic/`
+   - 暴露 80/443（tcp/udp）
+   - 采用 `traefik:v3.6.1`
+
+## 远端已验证事实（排障证据）
+- Traefik API 显示回源为 overlay IP（示例）：`http://10.0.1.2:8090`
+- 宿主机无法访问该 IP：`curl http://10.0.1.2:8090` 超时
+
+## 待执行步骤（生效/验证）
+1) 通过 colmena / nixos-rebuild 应用配置。
+2) 在服务器执行：
+   - `sudo systemctl stop traefik`（确保旧 systemd Traefik 不占用端口）
+   - `sudo systemctl start dokploy-traefik`
+3) 验证：
+   - `curl -I -H "Host: beszel.lucc.dev" http://127.0.0.1`
+   - `curl -vk --resolve beszel.lucc.dev:443:127.0.0.1 https://beszel.lucc.dev --max-time 10`
+   - `curl -s http://127.0.0.1:8080/api/http/services | jq '.[] | {name:.name, servers:.loadBalancer.servers}'`
+     期望回源地址为可访问的容器内部网络地址（overlay 可达，因为 Traefik 也在 overlay 内）。
+
+## 备注
+- 本次方案严格依赖 Dokploy 动态路由，不新增静态 file provider 路由。
+
+```
+
+
+
 
 ## 换成什么方案？
 
@@ -302,7 +359,41 @@ hto:
 
 ### what
 
-Dokploy的核心技术栈是 docker-swarm + traefik
+:::tip
+
+> ***Dokploy的核心技术栈是 docker-swarm + traefik***
+
+:::
+
+---
+
+
+```markdown
+是的，你的理解**基本正确**。
+
+**Dokploy** 的核心基础设施确实是 **Docker Swarm + Traefik** 这两个关键组件：
+
+- **Docker Swarm**：Dokploy 在安装时会自动初始化 Docker Swarm（即使是单节点也会进入 Swarm 模式）。它原生支持 Docker Swarm 集群，可以轻松扩展到多节点（manager + workers），并使用 `docker stack deploy` 来部署复杂的应用。Dokploy 的很多高级功能（如多服务器部署、replicas、健康检查等）都是构建在 Swarm 之上的。
+
+- **Traefik**：作为 Dokploy 的**反向代理和负载均衡器**（reverse proxy & load balancer），负责自动服务发现（Docker Provider + Swarm Provider）、路由、TLS（Let’s Encrypt 自动证书）、HTTP/3 等。Dokploy 会自动为你的应用添加 Traefik labels（或动态配置文件），实现零配置暴露域名。
+
+### 补充说明（让理解更完整）：
+- **不是纯 standalone Docker**：虽然 Dokploy 也完美支持普通的 `docker compose`（单容器或多服务），但其底层和集群功能强烈依赖 Swarm。即使单节点部署，也推荐/默认使用 Swarm 模式。
+- **Traefik 是核心入口**：所有外部流量基本都走 Traefik（80/443 端口），它会根据 labels 或动态配置自动路由到后端服务。
+- 其他技术栈部分：
+  - 前端/面板：Next.js + TypeScript
+  - 数据库：PostgreSQL（主存配置） + Redis（队列）
+  - 构建：支持 Nixpacks、Heroku Buildpacks、Dockerfile 等
+
+总之，你说的 **“Dokploy的核心技术栈是 docker-swarm + traefik”** 抓住了它最核心、最具特色的部分 —— 这也是 Dokploy 相比一些其他自托管 PaaS（如 Coolify）在生产/集群场景下被认为更强的原因之一。
+
+如果你在实际使用中遇到 Swarm + Traefik 的具体配置问题（比如 labels 放置、overlay network、multi-node 高可用等），可以再详细说说，我可以帮你细化。
+```
+
+
+
+
+
 
 
 ### zzz

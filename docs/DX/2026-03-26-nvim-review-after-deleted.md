@@ -1,5 +1,6 @@
 ---
 title: 删除nvim相关配置后的review
+isOriginal: true
 ---
 
 :::tip
@@ -25,6 +26,18 @@ helix相较于nvim的优缺点真就是一体两面。helix的内存占用仅30M
 
 
 :::
+
+
+
+
+## nvf config
+
+
+
+
+<details>
+<summary>nvim using nvf</summary>
+
 
 ```yaml
 - url: https://github.com/NotAShelf/nvf
@@ -105,4 +118,98 @@ helix相较于nvim的优缺点真就是一体两面。helix的内存占用仅30M
         - 【技术选型】为啥我选择使用nvf，而非 nixvim。也没有选择 LazyVim / LunarVim / AstroNvim / NvChad 之类的 nvim发行版？
 
         # lazy.nvim neovim插件管理器
+```
+
+
+</details>
+
+
+
+
+
+## helix
+
+
+
+```yaml
+
+#- "***vim motions 指的具体是什么？现在helix跟 vim motions 有哪些不同的具体操作？***"
+# ## 1) “vim motions” 指的具体是什么？
+
+# 在 Vim 里，**motion（移动/动作范围）**本质上是“把光标从 A 移到 B 的命令”，它既可以单独用于导航，也可以**跟 operator（操作符）组合，用来定义操作范围**。
+
+# 单独用：`w`（到下一个词首）、`e`（到词尾）、`0`（行首）、`$`（行尾）、`gg`（文件开头）、`G`（文件末尾）……
+# 跟操作符用：比如 `d{motion}`、`c{motion}`、`y{motion}`
+#   含义是：对“光标从起点移动到终点之间覆盖的文本”做 delete/change/yank。Vim 的帮助里就是这么定义 operator + motion 的：motion 用来决定 operator 作用的那段文本范围。 ([vimhelp.org][1])
+
+# 另外常见的一个相关概念是 **text objects（文本对象）**（如 `iw`、`ap`），它们常被当成“特殊的范围描述”，在 Vim 里通常也是被 operator/visual 使用（例如 `ciw`、`dap`）。
+
+# ---
+
+# ## 2) 现在 Helix 跟 Vim motions 有哪些不同的具体操作？
+
+# Helix 受 Kakoune 思路影响更大：**以 selection（选区）为中心**。你仍然会用到很多“移动”，但**组合方式、默认语义、以及一些 motion 的行为**跟 Vim 不一样。
+
+# ### A. 最大差异：Vim 是 “operator → motion”，Helix 更像 “选中 → 操作”
+
+# 在 Helix 的 Normal 模式里，`d`/`c`/`y`这些是**直接对“当前选区”生效**的命令：
+
+# `d` = Delete selection ([docs.helix-editor.com][2])
+# `c` = Change selection（删掉选区并进入插入） ([docs.helix-editor.com][2])
+# `y` = Yank selection ([docs.helix-editor.com][2])
+
+# 所以在 Helix 里，经常是先把范围选出来，再按 `d/c/y`。
+
+# **具体对比例子：**
+
+# Vim：`ciw`（change inner word）
+#   Helix：`miw` 先“选中 word”，再 `c` 进入修改
+
+#   `mi` = select inside textobject；`w`= word ([docs.helix-editor.com][3])
+#   `c` = change selection ([docs.helix-editor.com][2])
+#     组合就是：`miw c`
+
+# Vim：`diw`（delete inner word）
+#   Helix：`miw d`
+
+# Vim：`dd`（删整行）
+#   Helix：`x` 选中当前行（再按一次会扩到下一行），然后 `d` ([docs.helix-editor.com][2])
+#   组合就是：`x d`
+
+# ### B. Helix 有专门的“扩选模式”：`v` 后，移动键会“扩展选区”
+
+# Helix 的 Select/extend mode（`v`）会让“移动”从“移动光标”变成“扩展选区”。官方文档明确说：Select mode 基本复用 Normal 的按键，但会把 movement 变成 extend；并举例 `vgl` 会把选区扩到行尾。 ([docs.helix-editor.com][2])
+
+# 这对应 Vim 里的 Visual 模式，但 Helix 更“默认围绕选区工作”。
+
+# ### C. `f/F/t/T` 的行为不同：Helix **不限制在当前行**
+
+# Helix 文档直接写了：**不像 Vim，Helix 的 `f/F/t/T` 不局限于当前行**。 ([docs.helix-editor.com][2])
+# （这会让一些“找字符跳转”的肌肉记忆产生明显差异。）
+
+# ### D. Helix 内建“多选区/多光标式”操作（而 Vim 通常靠插件）
+
+# Helix 有大量 selection manipulation 的按键是围绕“多选区”设计的，比如：
+
+# `C` 把选区复制到下一行并加一个光标（Add cursor below） ([docs.helix-editor.com][2])
+# 合并/旋转/保留主选区等一系列多选区操作 ([docs.helix-editor.com][2])
+
+# ### E. Helix 把 Tree-sitter 语法树当成一等公民：有“语法感知的 motions/扩选”
+
+# Helix 支持基于语法树移动/扩选，比如：
+
+# `Alt-o / Alt-i / Alt-p / Alt-n` 等按语法树父子/兄弟节点扩展或移动选区（TS） ([docs.helix-editor.com][2])
+# textobject 里还有 `f`（函数）、`t`（类型/类）、`a`（参数）等依赖 tree-sitter 的对象选择 ([docs.helix-editor.com][3])
+# 以及类似 vim-unimpaired 风格的 `]f`、`[t` 在函数/类型间跳转 ([docs.helix-editor.com][2])
+
+# 这类能力在 Vim 里通常要靠 treesitter + 插件生态才能做到（而且键位/体验因配置差异很大）。
+
+# ---
+
+# 如果你愿意，我可以按“你在 Vim 最常用的 10 个 operator+moton 组合”（比如 `dw/de/ciw/cap/d%/yip` 这类）给你列一份**Helix 等价按键速查**，会更贴近你的肌肉记忆迁移。
+
+# [1]: https://vimhelp.org/motion.txt.html?utm_source=chatgpt.com "Vim: motion.txt - Vim: help"
+# [2]: https://docs.helix-editor.com/keymap.html "Keymap"
+# [3]: https://docs.helix-editor.com/textobjects.html "Textobjects"
+
 ```

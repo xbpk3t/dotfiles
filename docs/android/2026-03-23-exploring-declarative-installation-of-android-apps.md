@@ -1,244 +1,309 @@
 ---
 title: 初探Android声明式安装APP
 type: review
-status: active
-slug: /2026/exploring-declarative-installation-of-Android-Apps
-date: 2026-03-23
-updated: 2026-03-23
+date: 2026-04-10
+isOriginal: true
 tags:
   - Android
+  - NixOS
   - ADB
-summary: "在把 NixOS 配置得比较顺手之后，我自然也想把 Android 手机纳入类似的管理方式。研究了一圈之后，我发现个人 Android 手机上的 App 管理问题，并不能直接套用 NixOS 的思路。最后真正能落地的，不是 AVF、不是 root、不是 nix-on-droid，而是一份 App 清单加上一套 ADB bootstrap 流程。"
-unlisted: true
+  - AVF
+summary: "在把 NixOS 配置慢慢整理顺之后，我自然也想把 Android 一并纳入类似的管理方式。继续往下研究后，我发现这里其实混着两个问题：Android host 本体的 App 安装与恢复，和 Android 设备作为开发机。前者最终只能落到一份 App manifest 加一套 ADB bootstrap；后者如果真想接近 Nix-like 环境，答案则不在 Android host，而在 AVF 里的 guest。"
 ---
+
 
 
 ## TLDR
 
-
 :::tip[TLDR]
 
-我的想法就是三段：
+最开始我想解决的其实只有一句话：
 
-在处理好NixOS所有配置之后，就想着对Android手机也做个类似处理
+**能不能把 Android 也像 NixOS 一样，当成一个 host 来管理？**
 
-但是基于... （也就是文中部分内容）要列出：有哪些约束条件？-> 这里来澄清部分认知
+最后我发现，这里面其实混了两个完全不同的问题：
 
-确定了具体方案
+- Android host 本体上的 App 安装与恢复，能不能配置化、可重复
+- Android 设备能不能成为一台像样的开发机
+
+它们同源，但不能混着答。
+
+我的最终结论是：
+
+- **对于 Android host 本体**，不要幻想什么 `nix-darwin for Android`
+- **对于 App 安装与恢复**，现实可行的上限是 `manifest + ADB bootstrap`
+- **对于开发环境**，最优解（及最终解）就是 `AVF`，之前的 `Termux`, `nix-on-droid`、root 本身，大概率都只能算是某种“过渡方案”了。
+- **真正适合被 Nix 化的**，不是 Android host，而是 Android 上那台 Linux / NixOS guest
+
+:::
+
+
+
+
+## 起点：想把 Android 也纳入“配置即结果”的范围
+
+在把 NixOS 这边的配置慢慢整理顺之后，我很自然地产生了一个想法：
+
+既然桌面和服务器都可以逐渐靠近“配置即结果”，那 Android 手机能不能也做类似的事情？
+
+这个念头本身并不激进。
+
+无非是想把手机上那些重复劳动尽量收拢起来：
+
+- 装哪些 App
+- 换机之后怎么恢复
+- 重置系统之后如何尽快回到可用状态
+- 能不能少一点靠记忆，多一点靠记录和脚本
+
+如果再往前想一步，脑子里就会出现一个更有诱惑力的目标：
+
+**能不能像 NixOS 一样，把 Android 也变成某种可配置、可重复、最好还带点声明式味道的东西。**
+
+甚至会继续延伸出另一个看起来也很顺的想法：
+
+既然手机也是一台 ARM 设备，那它能不能顺便作为随身携带的轻量开发机，甚至直接跑一些服务？
+
+问题也正是从这里开始变复杂的。
+
+因为我后来发现，这里其实不是一个问题，而是两个问题。
+
+## 真正的误区，不是没找到工具，而是一开始把两个问题混在了一起
+
+:::danger
+
+当然，或许说，这也并非是两个问题，只是在 `Android`目前这种厂商主导、深度定制系统的情况下，同一个问题被分化为了两个，因为
+
+:::
+
+
+
+我最开始脑子里的目标其实很朴素：
+
+- 让 Android 也像一个 host
+- 能用类似 Nix / Home Manager 的方式管理环境和应用
+
+但继续往下看之后，会发现这个目标其实裂成了两部分：
+
+### 1. Android host 本体的 App 安装与恢复，能不能配置化
+
+这里关心的是：
+
+- 装哪些 App
+- 包名是什么
+- 来源是什么
+- 换机或重置之后怎么补回来
+- 能不能把手工点点点收敛成一个可以重复执行的流程
+
+这本质上是在问：
+
+**Android host 本体，能不能被“半声明式”地管理。**
+
+### 2. Android 设备能不能作为开发机
+
+这里关心的则是另一套东西：
+
+- 有没有像样的 shell 和工具链
+- 能不能运行完整的 Linux 用户态
+- 能不能跑容器、服务、守护进程
+- 能不能像一台真正的 Linux host 一样长期维护
+
+这本质上是在问：
+
+**Android 设备上，能不能获得一个更像 NixOS / Linux host 的运行环境。**
+
+这两个问题当然相关。
+
+但它们不是同一道题。
+
+一旦混着答，整个讨论就会一直飘在半空里：看起来涉及了 AVF、root、Termux、`nix-on-droid`、F-Droid、ADB、Shizuku 这些名词，但每条线都只沾了一点边，最后反而很难落出一个稳定结论。
+
+所以更准确的做法，是先把这两个问题拆开。
+
+
+
+
+
+## 1、声明式安装APP
+
+
+:::tip
+
+***目前没有 declarative 管理APP的方案。至于整个手机配置，就更不现实了。没必要幻想什么“手机配置完全nix化”***，更现实的目标是：
+
+- 1、有APP清单
+- 2、通过 `adb` 来清除预装APP
 
 ---
 
 具体查看代码
 
+
+- [android.nix](home/base/tui/zzz/android.nix) 里面安装 `fdroidcl`
+- [Taskfile.droid.yml](.taskfile/devops/Taskfile.droid.yml) 核心代码
+
+
 :::
 
 
-这里其实是两个问题：
+下面来说说是怎么收束到当前这个方案的：
 
-- 1、声明式安装APP
-- 2、把 Android 作为开发机
+首先，手机系统不同于电脑，并非可以直接分为 Windows, Mac, Linux 这么三类，而是由各手机厂商深度定制的（这里排除掉ios，只讨论Android），而各家都不一致，压根没有像 nix生态给这几家做适配，很显然这些主流手机厂商也没有任何动机去主动做nix适配。所以这里没有“怎么用nix去配置手机”的讨论空间。比如说：
 
 
+- 登录态怎么恢复
+- 应用内部配置怎么恢复
+- 权限怎么恢复
+- 后台、自启动、电量优化怎么处理
+- 应用本身有没有导入导出能力
 
-- 1、目前没有 declarative 管理APP的方案。至于整个手机配置，就更不现实了。没必要幻想什么“手机配置完全nix化”，更现实的目标是：
-  - 1、有APP清单
-  - 2、通过 adb 来清除预装APP
-- 2、AVF跟root完全是两码事
+当然，我看到nix社区跟我同样想法的人也有很多，并且已经有一些实质进展了，比如说
 
 
+[Nix Android? : r/NixOS](https://www.reddit.com/r/NixOS/comments/1l2dxyt/nix_android/)
 
+[Nixos for android : r/NixOS](https://www.reddit.com/r/NixOS/comments/1caohq7/nixos_for_android/)
 
+[mobile-nixos/mobile-nixos](https://github.com/mobile-nixos/mobile-nixos)
 
+[nix-community/robotnix](https://github.com/nix-community/robotnix)
 
 
+[Building Custom Android Kernel with Nix - Lan Tian @ Blog](https://lantian.pub/en/article/modify-computer/build-custom-android-kernel-with-nix.lantian/)
 
-```markdown
-我觉得 **挺好，而且比我前面那个更适合写成博客**。
 
-因为你的三段式不是“知识点罗列”，而是很自然的叙事线：
 
-**已有 NixOS 经验 → 想把同样方法迁移到 Android → 发现约束 → 收敛到现实方案**
 
-这个结构的好处是：
 
-- 有明确的**动机**
-- 中间的“约束条件”天然就是**澄清误区**
-- 最后能自然落到**可执行结论**
-- 很像一篇“思考过程记录”，可读性会比工具综述强很多
 
-我会建议你就按这个思路写，但稍微再收一下，让三段更有层次。
+```yaml
+        移除【Droid-ify】、【Shizuku】这两个repo。“最像包管理器的是 Privileged Extension（通常需 system app/ROM 集成或 root）；不 root 可走 Shizuku + Neo Store/Droid-ify”、“用无线调试启动 Shizuku，授权 Droid-ify；Droid-ify 支持 Shizuku 安装方式。Neo Store 可导出/导入 app 清单以便恢复（但多仓库可能有歧义）。” 这套东西意思不大，少折腾就手动/系统迁移；换机频繁就做清单化；只有追求可复现/愿意维护自动化链路才值得上 Nix 管清单或 Shizuku。想要像 nix-darwin 那样对整个手机系统做预设，是不可能的，最多也就只能做到以上这种自动安装APP（但是也仅限于 F-Droid 支持的这些开源APP）
 
----
+        ***关于Android这个东西，归根到底问题在于我的需求不清晰，到底是要预配置，还是作为开发机使用***
 
-## 我建议的三段改法
+        这其实是两码事
 
-### 第一段：动机
+        1、本身无法实现预配置。预装APP是宿主机这层处理的，现在的主流方案是 Droid-ify + Shizuku，跟nix不搭噶，也没办法用nix做预制（毕竟不存在nix-darwin这样的东西，安卓手机生态过于分散，且也没有一个类似）
+```
 
-这一段就写你最初的出发点，不要一上来定义 AVF。
 
-可以很自然：
+有哪些约束条件？-> 这里来澄清部分认知
 
-- 我已经把 NixOS 配置得比较顺了
-- 就会本能地想：Android 能不能也做类似的声明式管理
-- 最开始脑子里那个目标其实很朴素：
-  - 让 Android 也像一个 host
-  - 能用类似 Nix / HM 的方式管理环境和应用
+其实核心在于这里的几个边界：
 
-这一段的作用是让读者代入你的问题意识。
 
----
+真正需要声明式管理的，是 Android 上那台 NixOS guest；而不是强行把 Android 本体改造成第三个 Nix host。
 
-### 第二段：约束条件 / 澄清认知
 
-这是全文最关键的一段。
+[ImranR98/Obtainium: Get Android app updates straight from the source.](https://github.com/ImranR98/Obtainium?tab=readme-ov-file)
 
-你这段最好不要写成“缺点清单”，而是写成：
 
-**“我本来以为 X，但实际是 Y”**
 
-这样会更有博客感，也更适合承接前文。
 
-比如可以拆成这几条认知修正：
 
-- 我本来以为 `nixos-avf` 是把 Android 纳入 Nix host
-  → 实际上它管理的是 **Android 上的一台 NixOS VM**
 
-- 我本来以为玩到这一步大概率得先 root
-  → 实际上 **不一定需要 root**，root 更多是排障/兜底路径
 
-- 我本来以为 Android 本体的 App 管理也能像 Nix 一样声明式
-  → 实际上 **个人场景下还没有成熟、通用、低摩擦的方案**
 
-- 我本来以为“声明式安装 App”是一个统一问题
-  → 实际上要分清：
-  - Android host 本体
-  - AVF 里的 guest
-  - 开发机侧工具链
 
-这一段本质上就是你说的“列出约束条件”，但用“认知澄清”的形式会更顺。
 
----
 
-### 第三段：确定具体方案
+## 2、把 Android 当开发机（AVF）
 
-这一段就不要再发散了，直接落你自己的最终选择。
+如果我们把需求放到“把手机当开发机”用，那么可选方案就很多了。我们这里逐个做个排除，并说明为什么 `AVF` 就是最优解和最终解。
 
-我建议你把方案写得非常明确：
 
-- **Android 本体**：不追求伪装成第三个 Nix host
-- **Nix 风格的可复现环境**：放进 AVF 里的 NixOS guest
-- **Android 本体的 App 安装**：接受它只能做到半声明式，走 `manifest + ADB bootstrap`
-- **manifest**：用 YAML
-- **脚本逻辑**：`yq + jq + adb`
+:::tip[TLDR]
 
-这一段的重点不是“列出所有候选方案”，而是：
+作为开发机，就是3条路线：
 
-**我最后决定怎么做，为什么这么做。**
+- Termux本质是个APP，相当于某个用户态里面做了linux这套（但是只有一层皮）
+- Termux+QEMU. 我看到有人在Termux里跑container（甚至k3s），这个实际上是通过Termux+QEMU实现的。不是 Android 宿主直接跑容器。QEMU 路线“能成”，但性能/续航/复杂度成本高。完全没意义。
+- AVF本质是个VM（可能通过 Terminal/Linux VM 的入口呈现），本身提供了全套linux能力（甚至可以用nixos-avf刷成nixos，玩法就彻底打开了）
 
-这样文章才会有收束感。
+***最终总结：对我的需求来说，Termux太鸡肋了，而 Termux + QEMU 又会影响手机日常使用。所以最优解就是换个支持AVF的手机。***
 
----
+这里还有个附加问题：有了AVF之后，还有必要root吗？没必要
 
-## 你的结构为什么比“工具综述”更好
 
-因为你的写法会天然形成一个很好的节奏：
+:::
 
-### 1. 提出期待
 
-“我想把 Android 也纳入 Nix 式管理”
 
-### 2. 发现现实边界
+### Termux
 
-“但 Android 和 NixOS 不是同一个问题域”
+:::tip
 
-### 3. 找到现实答案
+***首先来看 `Termux` 这个***
 
-“于是我改成分层方案，而不是硬追求 Android 完全声明式”
 
-这比单纯写：
+:::
 
-- AVF 是什么
-- Obtainium 是什么
-- fdroidcl 是什么
-- ADB 是什么
 
-要强很多。
+它本质上还是 Android 上的一层 app 用户态环境。
 
----
+也就是说，它更像：
 
-## 我建议你文章里的核心句子
+**“一台 Android 手机上很好用的 Linux 终端”**
 
-你这篇文章最好有一句能贯穿全文的话。
-我觉得可以用这句：
+而不是：
 
-> 我想要的不是“把 Android 伪装成 NixOS”，而是找到 Android 与 Nix 之间最现实的分工边界。
+**“一台完整的、适合长期当 host 维护的 Linux 机器”**
 
-或者更偏技术一点：
+如果只是想临时做点 CLI 工作，它当然成立。
+但如果目标已经变成“随身开发机”甚至“能跑更完整服务的 host”，它就会开始显得有点鸡肋。
 
-> 真正需要声明式管理的，是 Android 上那台 NixOS guest；而不是强行把 Android 本体改造成第三个 Nix host。
 
-有了这句话，整篇文章就很稳。
+### nix-on-droid
 
----
+:::tip
 
-## 我建议的标题方向
+***再来看 `nix-on-droid`，本质上其实***
 
-按你这个三段式，标题也最好是“从想法到收敛”，而不是百科式标题。
+:::
 
-比如：
 
-- **想把 Android 也纳入 Nix 管理？我最后得到的现实答案**
-- **从 NixOS 到 Android：声明式管理手机这件事，到底哪里行得通**
-- **我本来想把 Android 变成第三个 Nix host，后来发现不是这么回事**
-- **在 Android 上追求声明式管理：约束、误区与最终方案**
 
-这类标题会很贴你的结构。
+```yaml
+    - date: 2025-12-24
+      des: |
+        移除【nix-community/nix-on-droid（Android 上的 Nix 环境。本质上是 termius）】。这玩意就是个client，而对我来说，笔记本永远在手边、而且就是最佳 client，并且希望所有其他设备都应该是server。所以对我来说，我是希望可以直接 ssh 到这台手机上的，但是如果不能作为server，就没啥意思了。
+        用NOD有啥好处（或者说，大部分人用NOD的目的是啥）？
 
----
+        其实这么看下来，我感觉NOD没啥意思，不如等有了AVF之后，可玩性大大提升之后再玩？
 
-## 我唯一会提醒你的点
+        1、作为 开发机，跑不了container，鸡肋（NOD 的核心基建就是 PRoot/proot-static 这类用户态 chroot/bind-mount 模拟，它本来就不是为容器/系统服务那套内核能力准备的）
+        2、作为 运维机（也就是client，笔记本不离身的话，意义同样不大）
+        3、常驻服务。我看了一下有点麻烦，AVF本身就是以此为卖点的。
 
-你第二段写“约束条件”时，别写成纯 checklist。
-不然会很像文档，不像博客。
+    # 1、nix-on-droid 的核心价值是把 Nix 变成一个很强的“本机终端环境/工具箱”（客户端形态）。你不需要这个，因为你已经有“随身最佳 client（笔记本）”。
+    # 2、你真正想要的是“手机作为 server”：可被 ssh、能长期跑服务、可维护、可预期。这恰好是 Android（尤其未 root）最不擅长的形态：后台保活、省电策略、网络切换、端口暴露等会让它作为 server 的体验非常不稳定；而 nix-on-droid 并不会从根上解决这些系统级问题（它主要跑在 app 沙盒/用户态）。
+    # 3、即便你 root 后去折腾“真 server”（比如让手机跑 Linux chroot/甚至 docker），那也基本是另一条路，和 nix-on-droid 关系不大；nix-on-droid 最多作为“在手机上装 CLI 的一种方式”，但你既然本来就不把手机当 client，这个加成也不大。
 
-更好的写法是：
-
-- 先写你的原始预期
-- 再写实际碰到的边界
-- 最后写这个边界如何改变你的方案选择
-
-也就是每个约束都最好回答一个问题：
-
-**“这个约束，具体改变了我什么判断？”**
-
-这样第三段的“确定方案”才不会显得突然。
-
----
-
-## 我的结论
-
-**我觉得你这个三段式是对的，而且比我前面建议的更贴近你真正想写的东西。**
-甚至我会建议你就坚持这个结构，不要再扩成大而全综述。
-
-最自然的骨架就是：
-
-1. **为什么我会想把 Android 也纳入 Nix 式管理**
-2. **这件事有哪些现实约束，以及它们如何澄清我的认知**
-3. **最终我决定采用什么方案，以及为什么**
-
-这个结构已经够好了。
-
-我可以直接按你这个三段式，帮你列一版更具体的三级提纲。
 ```
 
 
 
 
-## 相关基本认知
+
+
+### Termux + QEMU
+
+:::tip
+***这里还有个邪修办法， `Termux + QEMU`***（比如 [devopsexpertlearning/termux-kubernetes-docker](https://github.com/devopsexpertlearning/termux-kubernetes-docker)）
+
+:::
 
 
 
-### 手机刷linux，为啥不推荐直接刷宿主机？
+### 为啥现在不推荐root?
+
+:::tip
+
+***那root呢？直接把手机刷成Linux，那肯定就能突破上面这些问题了，不是吗？***
+
+:::
+
+
+手机刷linux，为啥不推荐直接刷宿主机？
 
 ```yaml
 # 手机刷linux
@@ -262,25 +327,6 @@ unlisted: true
 
 
 
-
-
-
-### AVF的价值何在？
-
-核心价值就在于可以
-
-
-[devopsexpertlearning/termux-kubernetes-docker: Run a full Docker and Kubernetes (K3s) environment on Android using Termux. This guide uses QEMU to virtualize Alpine Linux, enabling root-level container features without rooting your device.](https://github.com/devopsexpertlearning/termux-kubernetes-docker)
-
-
-
-
-
-
-
-
-
-### 为啥现在不推荐root?
 
 ```yaml
 ## 一加（国行 ColorOS 16 起）：改成“申请加入深度测试 → 审核通过 → 获得解锁 BL 权限”，官方明确说不需要答题、目前没有名额限制、一般 1–2 个工作日审核。
@@ -340,3 +386,54 @@ unlisted: true
 [4]: https://support.google.com/wallet/answer/12200245?hl=en "Fix problems with tap to pay transactions - Google Wallet Help"
 [5]: https://source.android.com/docs/core/architecture/bootloader/locking_unlocking "Lock and unlock the bootloader  |  Android Open Source Project"
 ```
+
+
+
+
+
+### AVF
+
+:::tip
+
+AVF跟root完全是两码事
+
+核心价值就在于可以
+
+:::
+
+
+
+
+
+
+
+## 结语
+
+最开始我其实是带着一种很自然的 Nix 迁移冲动去看 Android 的。
+
+我希望它也能被配置化，也能被记录，也能被恢复，最好还能带一点声明式的味道。
+
+结果一路看下来之后，我发现这个问题并不是“有没有找到那个足够酷的工具”，而是：
+
+**我一开始其实把两道题混成了一道。**
+
+如果问题是 Android host 本体上的 App 安装与恢复，那么最后真正能落地的，只会是一个很朴素的答案：
+
+**维护一份 App manifest，再用 ADB 把装机过程脚本化。**
+
+如果问题是 Android 设备能不能作为开发机，那么真正值得认真看的答案，也不是继续在 Android host 本体上硬拗，而是：
+
+**把开发环境放进 AVF guest。**
+
+所以最后留下来的，不是“Android 也变成第三个 Nix host”。
+
+而是一个更现实、也更准确的判断：
+
+**Android host 和 Android guest，应该被当成两个不同的问题来处理。**
+
+前者追求的是可重复 bootstrap。
+后者才有资格谈接近 NixOS 式的环境管理。
+
+这个结论没有最开始那个愿景那么漂亮。
+
+但它至少让我知道，下一次如果我真的要重新配置一台 Android 设备，到底该在哪一层认真投入精力。

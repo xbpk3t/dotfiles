@@ -12,6 +12,11 @@
 用来存放自己打包的一些pkg
 
 
+## Compound
+
+- `compound/` 用来沉淀已解决问题和可复用实践，按 category 分目录，并通过 frontmatter（如 `module`、`tags`、`problem_type`）增强检索；在实现、调试或评估相关改动时，这里的已有结论可能有参考价值。
+
+
 ## Notice
 
 注意修改代码，不要轻易修改 `docs/` 里的文档内容；当前 `docs/` 采用按 topic 分目录的扁平结构，以各 topic 下的 `README.md` 与按日期命名的 review 文档为主。

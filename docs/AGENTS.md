@@ -80,6 +80,7 @@ docs/
 title: 示例标题
 type: readme # 或 review
 status: active # draft | active | archived
+isOriginal: true # true | false
 date: 2026-03-24
 updated: 2026-03-24
 tags: [nix]

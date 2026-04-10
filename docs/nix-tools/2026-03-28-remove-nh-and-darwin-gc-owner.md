@@ -4,6 +4,7 @@ type: review
 status: done
 date: 2026-03-28
 updated: 2026-03-28
+isOriginal: false
 tags: [nix, darwin, determinate-nix, gc, nh]
 summary: 移除 nh，并把 Darwin 侧的 GC owner 明确收敛到 Determinate Nixd。
 ---
@@ -11,11 +12,15 @@ summary: 移除 nh，并把 Darwin 侧的 GC owner 明确收敛到 Determinate N
 
 ## TLDR
 
+:::tip[TLDR]
+
 这次处理的目标很小，核心是把 `nh` 从当前工作流里下线，并把 Darwin 侧的 GC 责任边界说清楚。
 
 问题核心还是出自于 darwin 上（用nh配置）的GC一直没生效
 
 之所以用nh，就是之前希望可以把 darwin和nixos的相关操作，都收束到 `nh`，但是现在看来没什么必要。NixOS上最好用的方案，肯定是 `nixos-cli` 了。而 darwin上，我使用的 Determinate-Nix 本身也提供了全套的更适用于 darwin 的方案。所以最终决定移除掉 nh，都选择各自的原生方案。
+
+:::
 
 
 

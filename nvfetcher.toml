@@ -1,0 +1,16 @@
+# nvfetcher 只负责统一维护 upstream version / src hash / fetch recipe。
+# 真正的打包逻辑仍然保留在 pkgs/<name>/default.nix 中。
+#
+# 当前先只接入适合“直接消费 release artifact”的 package：
+# - 维护成本最低
+# - 不会把 builder 选型和 source 更新流程耦合在一起
+# https://github.com/iynaix/dotfiles/blob/main/nvfetcher.toml
+
+[zashboard]
+src.github = "Zephyruso/zashboard"
+
+# upstream 已经发布 dist.zip，当前 derivation 也是直接消费静态产物。
+# 这里让 nvfetcher 只负责跟踪 release version 与对应 hash。
+#
+# 注意：zashboard 的 GitHub release tag 自带 `v` 前缀，因此这里不能再手动补一个 `v`。
+fetch.url = "https://github.com/Zephyruso/zashboard/releases/download/$ver/dist.zip"

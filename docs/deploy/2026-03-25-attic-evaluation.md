@@ -1,6 +1,14 @@
+---
+title: 初探 attic
+date: 2026-03-25
+type: evaluation
+isOriginal: false
+---
+
+
 ## zhaofengli/attic (4/5)
 
-URL: <https://github.com/zhaofengli/attic>
+URL: [https://github.com/zhaofengli/attic](https://github.com/zhaofengli/attic)
 
 具体原因：
 

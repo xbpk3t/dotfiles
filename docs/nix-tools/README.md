@@ -2,15 +2,10 @@
 title: Nix Tools
 type: guide
 status: active
-date: 2026-03-25
-updated: 2026-03-25
 tags: [nix, tools]
 summary: 当前仓库中与 Nix 本身强相关的 CLI 工具汇总，按职责分组。
 ---
 
-# Nix Tools
-
-本文只做汇总，不展开成教程。
 
 ## 1. 日常管理主入口
 
