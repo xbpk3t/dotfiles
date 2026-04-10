@@ -70,7 +70,7 @@ Run `man nix.conf` for more information on the `substituters` configuration opti
 
 把问题追到最后，结论其实很简单：在我当前这套 Darwin 环境里，真正接管 Nix runtime 的并不是 `nix-darwin`，而是 Determinate 自己的运行时管理路径。
 
-Determinate 官方文档对这一点说得很明确：如果要和 `nix-darwin` 一起使用，就应该让 Determinate 来负责 Nix 自身的配置，而不是继续让 `nix-darwin` 管理 Nix 本体；在这种模式下，自定义配置的受支持入口是 `nix.custom.conf`，而不是直接期待 `nix-darwin` 接管所有 Nix 运行时细节。[^determinate-darwin] [^determinate-config]
+Determinate 官方文档对这一点说得很明确：如果要和 `nix-darwin` 一起使用，就应该让 Determinate 来负责 Nix 自身的配置，而不是继续让 `nix-darwin` 管理 Nix 本体；在这种模式下，自定义配置的受支持入口是 `nix.custom.conf`，而不是直接期待 `nix-darwin` 接管所有 Nix 运行时细节。
 
 也就是说，这次排查最后把我带到了一个比 cache 更基础的问题上：
 
@@ -91,7 +91,7 @@ Determinate 官方文档对这一点说得很明确：如果要和 `nix-darwin` 
 - `nix-installer`：一个跨平台的安装器，负责把 Nix 以更一致的方式落到 macOS、Linux、WSL 等环境里；
 - `Determinate Nix`：基于 Nix 的下游发行与运行时增强；
 - `FlakeHub`：围绕 flakes 的发布、发现和分发平台；
-- 以及进一步偏组织治理、供应链和企业场景的配套能力。[^nix-installer] [^flakehub] [^secure-packages]
+- 以及进一步偏组织治理、供应链和企业场景的配套能力。
 
 所以如果只把它理解为“替代 `curl | sh` 的安装脚本”，其实会低估它真正想做的事情。
 
@@ -129,7 +129,7 @@ Determinate 官方文档对这一点说得很明确：如果要和 `nix-darwin` 
 
 ### 官方方案：官方安装脚本 + `nix-darwin`
 
-截至目前，Nix 官方在 macOS 上推荐的入口依然是 `nixos.org/nix/install` 这条安装脚本。官方下载安装页给 macOS 的命令仍然是通过这条脚本完成多用户安装，而不是别的发行版或分支。[^nix-download]
+截至目前，Nix 官方在 macOS 上推荐的入口依然是 `nixos.org/nix/install` 这条安装脚本。官方下载安装页给 macOS 的命令仍然是通过这条脚本完成多用户安装，而不是别的发行版或分支。
 
 这条路线的优点很明确：
 
@@ -150,13 +150,13 @@ Determinate 和 `nix-darwin` 的组合，本质上是一种明确分工：
 - `nix-darwin` 继续负责 Darwin 侧的声明式系统配置；
 - Determinate 负责 Nix 自身的安装、daemon、配置入口、以及部分运行时行为。
 
-这个方案的直接好处，是 Darwin 上很多 historically 比较容易让人心里没底的 runtime 问题，会被它打包成一套更“工程化”的路径。例如安装器、卸载、`/nix` 的落地方式、daemon 行为、配置入口等，都有更强的统一性。[^determinate-nix]
+这个方案的直接好处，是 Darwin 上很多 historically 比较容易让人心里没底的 runtime 问题，会被它打包成一套更“工程化”的路径。例如安装器、卸载、`/nix` 的落地方式、daemon 行为、配置入口等，都有更强的统一性。
 
 但代价同样很清楚：
 
 - 你要接受它不是纯 upstream 的 Nix；
 - 你要接受 Darwin 侧的配置入口会与 NixOS 存在分叉；
-- 你还要接受社区对它一直存在一些两极化评价，尤其涉及下游分叉、FlakeHub 绑定、以及和上游治理关系的问题。[^determinate-controversy] [^sc-statement]
+- 你还要接受社区对它一直存在一些两极化评价，尤其涉及下游分叉、FlakeHub 绑定、以及和上游治理关系的问题。
 
 所以它不是“全面更好”，而是“把优先级换了一下”。
 
@@ -164,7 +164,7 @@ Determinate 和 `nix-darwin` 的组合，本质上是一种明确分工：
 
 `Lix` 也值得单独提一下，因为它很容易在搜索时和“官方 Darwin 安装方案”混在一起。
 
-但至少到现在，`Lix` 并不是 Nix 官方在 macOS 上的新默认安装路径。它更像是另一个独立项目：有自己的发行方向、自己的安装器、自己的兼容承诺。你可以把它看成“Nix 生态里另一条明确存在的分支路线”，但不应该把它误认为“官方已经迁过去了”。[^lix-install]
+但至少到现在，`Lix` 并不是 Nix 官方在 macOS 上的新默认安装路径。它更像是另一个独立项目：有自己的发行方向、自己的安装器、自己的兼容承诺。你可以把它看成“Nix 生态里另一条明确存在的分支路线”，但不应该把它误认为“官方已经迁过去了”。
 
 所以如果把 Darwin 上的现实选择简单粗暴地概括一下，大致是：
 
@@ -250,25 +250,3 @@ Determinate 和 `nix-darwin` 的组合，本质上是一种明确分工：
 如果一定要把这篇文章压成最后一句话，那大概就是：
 
 > 我最开始以为自己只是在排查一次 Darwin 上的 cache miss，最后却发现，我真正需要重新判断的，是在 macOS 上到底该把 Nix 当成一个自己完全掌控的工具，还是一套更值得被托管的 runtime。
-
-## 参考链接
-
-- Nix 官方下载页：<https://nixos.org/download>
-- Determinate 与 `nix-darwin` 的配合说明：<https://docs.determinate.systems/guides/nix-darwin>
-- Determinate Nix 文档：<https://docs.determinate.systems/determinate-nix>
-- Determinate `nix-installer`：<https://github.com/DeterminateSystems/nix-installer>
-- FlakeHub 文档：<https://docs.determinate.systems/flakehub>
-- Lix 安装文档：<https://lix.systems/install/>
-- NixOS Discourse: `Determinate Nix 3.0`：<https://discourse.nixos.org/t/determinate-nix-3-0/61202>
-- NixOS Discourse: `On Flakes and Determinate Nix`：<https://discourse.nixos.org/t/on-flakes-and-determinate-nix/61390>
-
-[^nix-download]: Nix 官方下载页当前的 macOS 安装入口仍然是 `nixos.org/nix/install`：<https://nixos.org/download>
-[^determinate-darwin]: Determinate 官方关于与 `nix-darwin` 配合的说明：<https://docs.determinate.systems/guides/nix-darwin>
-[^determinate-config]: Determinate Nix 文档明确说明 `nix.custom.conf` 是受支持的自定义配置入口：<https://docs.determinate.systems/determinate-nix>
-[^nix-installer]: `nix-installer` 仓库：<https://github.com/DeterminateSystems/nix-installer>
-[^flakehub]: FlakeHub 文档：<https://docs.determinate.systems/flakehub>
-[^secure-packages]: Determinate Secure Packages 文档：<https://docs.determinate.systems/secure-packages/>
-[^determinate-nix]: Determinate Nix 文档：<https://docs.determinate.systems/determinate-nix>
-[^determinate-controversy]: NixOS Discourse 上关于 `Determinate Nix 3.0` 的讨论：<https://discourse.nixos.org/t/determinate-nix-3-0/61202>
-[^sc-statement]: NixOS Steering Committee 关于 `Flakes and Determinate Nix` 的公开说明：<https://discourse.nixos.org/t/on-flakes-and-determinate-nix/61390>
-[^lix-install]: Lix 安装文档：<https://lix.systems/install/>
