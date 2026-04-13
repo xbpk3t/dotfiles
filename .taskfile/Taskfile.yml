@@ -69,6 +69,7 @@ includes:
   grpcurl: network/Taskfile.grpcurl.yml
   ws: network/Taskfile.ws.yml
   chrony: network/Taskfile.chrony.yml
+  sb: network/Taskfile.singbox.yml
 
 
   # nix

@@ -213,6 +213,8 @@ repos:
     hooks:
       - id: deadnix
         args: [--edit]
+        exclude: pkgs/_sources/ # 这个文件不应该修改
+
 
   - repo: https://github.com/kamadorueda/alejandra
     rev: 4.0.0
