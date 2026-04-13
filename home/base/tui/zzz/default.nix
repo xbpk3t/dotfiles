@@ -26,7 +26,6 @@
     # https://github.com/WecomTeam/wecom-cli
 
     # vercel-cli
-    # https://mynixos.com/nixpkgs/package/nodePackages.vercel
 
     # 钉钉cli
     # https://github.com/DingTalk-Real-AI/dingtalk-workspace-cli

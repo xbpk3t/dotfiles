@@ -17,6 +17,7 @@
     nurl
 
     # https://github.com/berberman/nvfetcher
+    # nvfetcher -- -c nvfetcher.toml -o pkgs/_sources
     # 统一维护 repo 内自定义 source 的更新元数据。
     # 注意：它不是 builder，本质上是 source update generator。
     nvfetcher

@@ -14,7 +14,7 @@
   # Codex provider Metadata
   #
   # 必填：
-  # - baseURL: Provider 的 OpenAI 兼容 API 地址。
+  # - url: Provider 的 OpenAI 兼容 API 地址。
   # - env: 注入 Codex 运行环境的环境变量名。
   # - sk: 对应 config.sops.secrets.<sk>.path 的 secret 名。
   #
@@ -28,11 +28,11 @@
   # - shell alias 固定生成为 `codex-<name>`。
 
   # https://linux.do/t/topic/1806073
-  # https://ice.v.ua/dashboard
+  # https://icoe.pp.ua/dashboard
   ice = {
     # https://linux.do/t/topic/1927587
     # base_url = "https://ice.v.ua/v1";
-    baseURL = "https://icoe.pp.ua/v1";
+    url = "https://icoe.pp.ua/v1";
     env = "OPENAI_API_KEY_ICE";
     sk = "LLM_Sub2API_default";
   };
@@ -41,17 +41,17 @@
   # https://ai.qaq.al/dashboard
   # https://sign.qaq.al/app
   ggboom = {
-    baseURL = "https://ai.qaq.al/v1";
+    url = "https://ai.qaq.al/v1";
     env = "OPENAI_API_KEY_GGBoom";
     sk = "LLM_Sub2API_ggboom";
   };
 
   # https://linux.do/t/topic/1614522
-  # https://openai.api-test.us.ci/console
+  # https://new-api.publicvm.com/console
   zzz = {
     # https://linux.do/t/topic/1912239/13
     # base_url = "https://new.api-test.us.ci/v1";
-    baseURL = "https://new-api.publicvm.com/v1";
+    url = "https://new-api.publicvm.com/v1";
     env = "OPENAI_API_KEY_ZZZ";
     sk = "LLM_Sub2API_zzz";
   };
@@ -59,7 +59,7 @@
   # https://linux.do/t/topic/1841046
   # https://freeapi.dgbmc.top/console/
   dgb = {
-    baseURL = "https://freeapi.dgbmc.top/v1";
+    url = "https://freeapi.dgbmc.top/v1";
     env = "OPENAI_API_KEY_DGB";
     sk = "LLM_Sub2API_dgb";
   };
@@ -67,22 +67,24 @@
   # https://linux.do/t/topic/1845022
   # https://windhub.cc/console/
   ark = {
-    baseURL = "https://windhub.cc/v1";
+    url = "https://windhub.cc/v1";
     env = "OPENAI_API_KEY_ARK";
     sk = "LLM_Sub2API_ark";
+    # model = "grok-4.20-beta";
+    model = "glm-5.1";
   };
 
   # https://linux.do/t/topic/1855760
   # https://free.9e.nz/dashboard
   kkk = {
-    baseURL = "https://free.9e.nz/v1";
+    url = "https://free.9e.nz/v1";
     env = "OPENAI_API_KEY_KKK";
     sk = "LLM_Sub2API_default";
   };
 
   # https://codex.mqc.me/dashboard
   mqc = {
-    baseURL = "https://claude.colin1112.tech/v1";
+    url = "https://claude.colin1112.tech/v1";
     env = "OPENAI_API_KEY_MQC";
     sk = "LLM_Sub2API_mqc";
   };
@@ -90,7 +92,7 @@
   # https://linux.do/t/topic/1853293
   # https://muyuan.do/console/
   jun = {
-    baseURL = "https://muyuan.do/v1";
+    url = "https://muyuan.do/v1";
     env = "OPENAI_API_KEY_JUN";
     sk = "LLM_Sub2API_jun";
   };
@@ -98,15 +100,35 @@
   # https://elysiver.h-e.top/console
   ely = {
     # base_url = "https://elysia.h-e.top/v1";
-    baseURL = "https://elysiver.h-e.top/v1";
+    url = "https://elysiver.h-e.top/v1";
     env = "OPENAI_API_KEY_ELY";
     sk = "LLM_Sub2API_ely";
   };
 
   # https://api.42w.shop/console
   w42 = {
-    baseURL = "https://api.42w.shop/v1";
+    url = "https://api.42w.shop/v1";
     env = "OPENAI_API_KEY_W42";
     sk = "LLM_Sub2API_w42";
+  };
+
+  # https://demo.awa1.fun/console
+  mu = {
+    url = "https://demo.awa1.fun/v1";
+    env = "OPENAI_API_KEY_MU";
+    sk = "LLM_Sub2API_mu";
+    model = "GLM-5.1";
+  };
+
+  cpa = {
+    url = "http://127.0.0.1:8317/v1";
+    env = "OPENAI_API_KEY_CPA";
+    sk = "LLM_Sub2API_default";
+  };
+
+  metapi = {
+    url = "http://127.0.0.1:4000/v1";
+    env = "OPENAI_API_KEY_METAPI";
+    sk = "LLM_Sub2API_METAPI";
   };
 }

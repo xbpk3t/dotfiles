@@ -423,9 +423,9 @@
       ######### 核心流程（注意顺序） ##########
 
       # what: impeccable 版的前端设计主 skill
-      # why: 作为这组 design workflow 的总入口，提供设计原则、反模式和 context gathering protocol，后续 audit/normalize/polish 等都依赖它
-      # note: 这里显式用 `pbakaus/impeccable` 的 `frontend-design` 替代 anthropic 同名 skill；上面的 anthropic 条目已移除，避免同名覆盖关系不清
-      "frontend-design"
+      # why: 作为这组 design workflow 的总入口，提供设计原则、反模式和 context gathering protocol，后续 audit/polish 等都依赖它
+      # note: upstream 已把主入口统一命名为 `impeccable`，不再使用旧的 `frontend-design`
+      "impeccable"
       # what: 技术质量审计
       # why: 适合先做 accessibility / performance / responsive / theming / anti-pattern 的系统扫描，给后续修复动作提供优先级
       # note: 偏诊断，不直接改代码；通常是进入这套 workflow 的第一步
@@ -438,18 +438,10 @@
       # why: 适合处理 button label、empty state、error copy、instruction text 等“不够清楚”的 UX writing 问题
       # note: 偏信息表达层面的修正，通常作为 critique/audit 之后的定向修复
       "clarify"
-      # what: 对齐设计系统与规范
-      # why: 适合统一 token、spacing、组件风格和 theme 用法，把页面拉回到一致的系统语言
-      # note: 是从“发现问题”走向“系统化修复”的主力 skill 之一
-      "normalize"
       # what: 提炼与减法
       # why: 适合去掉多余层级、装饰和噪音，把界面压缩到更清晰的核心表达
       # note: 偏结构与内容的减法，不是纯视觉 polish
       "distill"
-      # what: 抽取复用组件与模式
-      # why: 适合把已经成型的 UI 模式沉淀成可复用组件，降低重复实现和风格漂移
-      # note: 更偏实现与设计系统沉淀，通常发生在界面方向稳定之后
-      "extract"
       # what: 健壮性与边界处理
       # why: 适合补 error handling、empty/loading states、i18n、异常路径和防御性 UX
       # note: 让设计不仅“好看”，也能在真实使用场景里站得住
@@ -465,10 +457,6 @@
 
       ######### 辅助核心流程 ##########
 
-      # what: 一次性的 design context 建立
-      # why: 适合为项目沉淀用户、品牌、审美方向和设计原则，让后续 impeccable commands 有稳定上下文
-      # note: 很重要，但更像 workflow 的初始化步骤；不是每次改页面都要单独跑
-      "teach-impeccable"
       # what: 适配不同设备与场景
       # why: 适合针对 mobile / tablet / desktop 或不同容器环境调整布局、密度和交互
       # note: 偏专项修复，通常在 audit 发现响应式问题或明确有多端要求时触发
@@ -489,10 +477,6 @@
       # why: 适合在不影响主任务流的前提下加入小惊喜、小反馈和情绪价值
       # note: 属于体验加分项，优先级通常低于 clarity、a11y 和 robustness
       "delight"
-      # what: 新手引导与 onboarding 体验
-      # why: 适合设计首次使用流程、提示、引导状态和渐进披露
-      # note: 明显是场景化专项 skill，不属于每个页面都会走的主线
-      "onboard"
       # what: 收敛过强的表达
       # why: 适合当界面过于吵、过于重、过度装饰时，把视觉语气压回更克制的状态
       # note: 和 `bolder` 对偶，用来做反向调参，而不是独立主阶段
@@ -564,11 +548,6 @@
       # why: 有时不想走完整 ce-work 的铺垫，而是想基于已有 plan 快速开干
       # note: 是主线执行的轻量替代入口
       "lfg"
-
-      # what: lfg 的一个近似/变体执行入口
-      # why: upstream 明确保留了这条路径，适合后续比较两套执行体验
-      # note: 和 lfg 类似，属于辅助执行分支
-      "slfg"
 
       # what: 创建持久化 todo 条目
       # why: CE 的 review/autofix/todo 生命周期是一整套链路，缺这个入口会断掉
