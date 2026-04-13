@@ -14,7 +14,7 @@ in {
   mkCodexModelProviders = providers:
     lib.mapAttrs (name: provider: {
       inherit name;
-      base_url = provider.baseURL;
+      base_url = provider.url;
       env_key = provider.env;
       wire_api = provider.wireApi or "responses";
     })
