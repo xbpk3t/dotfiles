@@ -2,12 +2,10 @@
   config,
   inputs,
   lib,
-  mylib,
   pkgs,
   ...
 }: let
   cfg = config.modules.AI.codex;
-  providerCatalog = import ./codex-providers.nix;
   codexPrompts = pkgs.runCommandLocal "codex-prompts" {} ''
     mkdir -p "$out"
 
@@ -74,36 +72,46 @@ in {
         };
 
         # 默认不声明 model_provider，让 Codex 继续走本地 ChatGPT OAuth 登录态。否则会报错 Error: Model provider `` not found
-        # 只有显式使用 `--profile ice|test|ggboom` 时，才切换到对应第三方 provider。
+        # 只有显式使用 `--profile metapi` 时，才切换到对应第三方 provider。
 
-        model_providers = mylib.AI.mkCodexModelProviders providerCatalog;
+        model_provider = "metapi";
+        model_providers = {
+          metapi = {
+            name = "metapi";
+            base_url = "http://127.0.0.1:4000/v1";
+            env_key = "LLM_MetAPI";
+            wire_api = "responses";
+          };
+        };
 
-        profiles = mylib.AI.mkCodexProfiles providerCatalog;
+        # [2026-04-14] profiles 是用来创建可切换的命名方案。因为把所有provider都由 MetAPI管理，所以不再需要了
+        #  profiles = {
+        #    metapi = {
+        #      model_provider = "metapi";
+        #      model = "gpt-5.4";
+        #    };
+        #  };
       };
       custom-instructions = "";
     };
 
     home = {
-      sessionVariables =
-        {
-          # https://github.com/openai/codex/issues/848
-          # 允许 no-sandbox 模式运行。仅建议在可信本机环境使用。
-          CODEX_UNSAFE_ALLOW_NO_SANDBOX = 1;
+      sessionVariables = {
+        # https://github.com/openai/codex/issues/848
+        # 允许 no-sandbox 模式运行。仅建议在可信本机环境使用。
+        CODEX_UNSAFE_ALLOW_NO_SANDBOX = 1;
 
-          # For Context7 MCP
-          CONTEXT7_API_KEY = "$(cat ${config.sops.secrets.API_context7.path})";
-        }
-        // mylib.AI.mkCodexSessionVariables {
-          inherit config;
-          providers = providerCatalog;
-        };
+        # For Context7 MCP
+        CONTEXT7_API_KEY = "$(cat ${config.sops.secrets.API_context7.path})";
 
-      shellAliases =
-        {
-          # 每次启动 codex 时动态注入 GitHub PAT，避免把 token 写入静态配置。
-          # codex = "CODEX_GITHUB_PERSONAL_ACCESS_TOKEN=$(gh auth token) command codex";
-        }
-        // mylib.AI.mkCodexShellAliases providerCatalog;
+        LLM_MetAPI = "$(cat ${config.sops.secrets.LLM_MetAPI.path})";
+      };
+      shellAliases = {
+        # 每次启动 codex 时动态注入 GitHub PAT，避免把 token 写入静态配置。
+        # codex = "CODEX_GITHUB_PERSONAL_ACCESS_TOKEN=$(gh auth token) command codex";
+
+        # 按需切换第三方 provider；不影响默认的 ChatGPT OAuth 登录态。
+      };
     };
 
     # Allow Home Manager to overwrite ~/.codex/config.toml without backups/prompts
