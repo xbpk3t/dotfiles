@@ -6,10 +6,10 @@
   home.packages = with pkgs; [
     # Node.js 生态
     nodejs
-    nodePackages.eslint
-    nodePackages.prettier
+    eslint
+    prettier
     pnpm
-    nodePackages.serve # https://github.com/vercel/serve 用来preview本地打包好的dist文件（vite可以直接vite preview）
+    serve # https://github.com/vercel/serve 用来preview本地打包好的dist文件（vite可以直接vite preview）
 
     # [2026-01-21] rebuild error, hash mismatch, so comment it
     # https://mynixos.com/nixpkgs/package/tsx
@@ -17,8 +17,8 @@
 
     typescript
     # error: 'ts-node' was removed because it is unmaintained, and since NodeJS 22.6.0+, experimental TypeScript support is built-in to NodeJS.
-    # nodePackages.ts-node
-    nodePackages.yaml-language-server
+    # ts-node
+    yaml-language-server
 
     # Web 开发
     # tailwindcss
