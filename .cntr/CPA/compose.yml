@@ -1,0 +1,14 @@
+name: CPA
+
+services:
+  CPA:
+    image: eceasy/cli-proxy-api:latest
+    container_name: cli-proxy-api
+#    ports:
+#      - "8317:8317"
+    network_mode: host
+    volumes:
+      # 注释掉ro，为了可以在CPA面板修改后，直接同步到本地配置（符合我的本地使用需求，因为我连 ak和sk都没配置）
+      - ./config.yaml:/CLIProxyAPI/config.yaml # :ro
+      - ./auth-dir:/root/.cli-proxy-api
+    restart: unless-stopped
