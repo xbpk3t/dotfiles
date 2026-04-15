@@ -328,9 +328,9 @@
         # 用来在不同host之间自动sync，否则 在一台机器上注册/导入/首次同步，需要执行 atuin register 以及 atuin import auto，最后 atuin sync 手动同步。就很麻烦。
         # encryption key must be base64; session token is a UUID-like string
         # encryption key：用于加密你的本地/同步历史，必须是随机的 256‑bit 值并以 Base64 存储。
-        key_path = config.sops.secrets.autin_key.path;
+        key_path = config.sops.secrets.AUTIN_KEY.path;
         # session token：登录云端 API 的“会话令牌”，通常是一个带连字符的 UUID 字符串。
-        session_path = config.sops.secrets.autin_session.path;
+        session_path = config.sops.secrets.AUTIN_SESSION.path;
 
         # 相比prefix更好用
         search_mode = "fuzzy";

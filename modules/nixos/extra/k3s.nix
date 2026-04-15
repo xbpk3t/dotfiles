@@ -7,7 +7,7 @@
   inherit (lib) mkIf mkMerge;
   cfg = config.modules.extra.k3s;
   role = cfg.role;
-  tokenPath = config.sops.secrets.k3s_token.path;
+  tokenPath = config.sops.secrets.K3S_TOKEN.path;
   isServer = role == "server";
   isAgent = role == "agent";
   validRole = isServer || isAgent;

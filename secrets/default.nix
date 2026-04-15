@@ -72,41 +72,37 @@ in {
 
     secrets = {
       # Me
-      me_pwgen = mkUserSecret "me/pwgen";
+      # me_pwgen = mkUserSecret "me/pwgen";
 
       # Cloudflare
-      cf_account = mkUserSecret "cf/account_id";
-      cf_zone = mkUserSecret "cf/zone_id";
+      CF_ACCOUNT = mkUserSecret "cf/account_id";
+      CF_ZONE = mkUserSecret "cf/zone_id";
 
-      cf_r2_AK = mkUserSecret "cf/r2/ak";
-      cf_r2_SK = mkUserSecret "cf/r2/sk";
+      CF_R2_AK = mkUserSecret "cf/r2/ak";
+      CF_R2_SK = mkUserSecret "cf/r2/sk";
 
-      cf_token_read_all = mkUserSecret "cf/token/read_all";
-      cf_token_DNS = mkUserSecret "cf/token/DNS";
+      # 同时具体 read all & write all 权限的token，为了方便 terraform 使用
+      CF_TOKEN_READ_WRITE_ALL = mkUserSecret "cf/token/read_all";
+      # CF_TOKEN_DNS = mkUserSecret "cf/token/DNS";
 
-      cf_workers_cfp = mkUserSecret "cf/workers/cfp";
+      CF_WORKERS_CFP = mkUserSecret "cf/workers/cfp";
 
       # SSH
-      ssh_github = mkUserSecret "ssh/github";
-      ssh_clawcloud = mkUserSecret "ssh/claw";
-      ssh_hdy = mkUserSecret "ssh/hdy";
-      ssh_racknerd = mkUserSecret "ssh/RN";
+      SSH_GITHUB = mkUserSecret "ssh/github";
+      SSH_HDY = mkUserSecret "ssh/hdy";
+      SSH_RACKNERD = mkUserSecret "ssh/RN";
 
       # LLM
-      LLM_GLM = mkUserSecret "LLM/GLM";
-      LLM_deepseek = mkUserSecret "LLM/deepseek";
-      LLM_OpenRouter = mkUserSecret "LLM/OpenRouter";
-      # 如果sub2api支持自定义sk，那么就修改为 pwgen sub2api
       LLM_MetAPI = mkUserSecret "LLM/MetAPI";
 
       # singbox
-      singbox_UUID = mkRootSecret "singbox/UUID";
-      singbox_pri_key = mkRootSecret "singbox/pri_key";
-      singbox_pub_key = mkRootSecret "singbox/pub_key";
-      singbox_ID = mkRootSecret "singbox/id";
-      singbox_hy2_pwd = mkRootSecret "singbox/hy2_pwd";
-      singbox_flyingbird = mkRootSecret "singbox/flyingbird";
-      singbox_clash_secret = mkRootSecret "singbox/clash_secret";
+      SINGBOX_UUID = mkRootSecret "singbox/UUID";
+      SINGBOX_PRI_KEY = mkRootSecret "singbox/pri_key";
+      SINGBOX_PUB_KEY = mkRootSecret "singbox/pub_key";
+      SINGBOX_ID = mkRootSecret "singbox/id";
+      SINGBOX_HY2_PWD = mkRootSecret "singbox/hy2_pwd";
+      SINGBOX_FLYINGBIRD = mkRootSecret "singbox/flyingbird";
+      SINGBOX_CLASH_SK = mkRootSecret "singbox/clash_secret";
 
       # Shared API tokens
       # youtubeApiKey = mkUserSecret "youtube/api_key";
@@ -116,17 +112,17 @@ in {
       # spotifyClientId = mkUserSecret "spotify/client_id";
       # spotifyClientSecret = mkUserSecret "spotify/client_secret";
 
-      API_context7 = mkUserSecret "API/context7";
+      API_CONTEXT7 = mkUserSecret "API/context7";
 
       # Atuin
-      autin_key = mkUserSecret "atuin/key";
-      autin_session = mkUserSecret "atuin/session";
+      AUTIN_KEY = mkUserSecret "atuin/key";
+      AUTIN_SESSION = mkUserSecret "atuin/session";
 
       # Acme
-      acme_cloudflare_env = mkUserSecret "acme/cloudflare_env";
+      ACME_CF_ENV = mkUserSecret "acme/cloudflare_env";
 
       # k3s
-      k3s_token = mkRootSecret "k3s/token";
+      K3S_TOKEN = mkRootSecret "k3s/token";
     };
   };
 }

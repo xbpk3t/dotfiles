@@ -100,7 +100,7 @@ in {
 
   # k3s agent：VPS 统一作为 worker 节点
   modules.extra.k3s = {
-    enable = true;
+    enable = false;
     role = "agent";
     # serverIP 由 inventory 注入，避免多处重复维护
     serverPort = 6443;

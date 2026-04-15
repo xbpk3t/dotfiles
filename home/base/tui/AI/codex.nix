@@ -102,7 +102,7 @@ in {
         CODEX_UNSAFE_ALLOW_NO_SANDBOX = 1;
 
         # For Context7 MCP
-        CONTEXT7_API_KEY = "$(cat ${config.sops.secrets.API_context7.path})";
+        CONTEXT7_API_KEY = "$(cat ${config.sops.secrets.API_CONTEXT7.path})";
 
         LLM_MetAPI = "$(cat ${config.sops.secrets.LLM_MetAPI.path})";
       };
