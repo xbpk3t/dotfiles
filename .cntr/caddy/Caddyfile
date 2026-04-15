@@ -1,0 +1,3 @@
+api.lucc.dev {
+  reverse_proxy host.docker.internal:4000
+}
