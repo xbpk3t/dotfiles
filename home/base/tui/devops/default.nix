@@ -34,6 +34,10 @@
 
     # https://github.com/cloudflare/workers-sdk
     # https://mynixos.com/nixpkgs/package/wrangler
+
+    # MAYBE: 等cf cli 成熟后，可以用来替代 wrangler
+    # https://blog.cloudflare.com/cf-cli-local-explorer/
+    # https://www.npmjs.com/package/cf
     # wrangler
 
     # API 工具

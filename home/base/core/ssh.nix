@@ -17,13 +17,6 @@ in {
         };
       };
 
-      hk-claw = {
-        enable = lib.mkOption {
-          type = lib.types.bool;
-          default = false;
-        };
-      };
-
       hk-hdy = {
         enable = lib.mkOption {
           type = lib.types.bool;
@@ -71,7 +64,7 @@ in {
             hostname = "ssh.github.com";
             user = "git";
             port = 443;
-            identityFile = config.sops.secrets.ssh_github.path;
+            identityFile = config.sops.secrets.SSH_GITHUB.path;
             identitiesOnly = true;
           };
         }
@@ -83,7 +76,7 @@ in {
             hostname = "103.85.224.63";
             user = "luck";
             port = 22;
-            identityFile = config.sops.secrets.ssh_hdy.path;
+            identityFile = config.sops.secrets.SSH_HDY.path;
             identitiesOnly = true;
           };
         }
@@ -93,17 +86,8 @@ in {
             hostname = "142.171.154.61";
             user = "luck";
             port = 22;
-            identityFile = config.sops.secrets.ssh_racknerd.path;
+            identityFile = config.sops.secrets.SSH_RACKNERD.path;
             identitiesOnly = true;
-          };
-        }
-        // lib.optionalAttrs cfg.hosts.hk-claw.enable {
-          # claw-cloud
-          "47.79.17.202" = {
-            hostname = "47.79.17.202";
-            user = "root";
-            port = 22;
-            identityFile = config.sops.secrets.ssh_clawcloud.path;
           };
         }
         // lib.optionalAttrs cfg.hosts.homelab.enable {

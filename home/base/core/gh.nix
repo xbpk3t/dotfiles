@@ -1,4 +1,7 @@
 {editorMeta, ...}: {
+  # MAYBE: gh-stack
+  # https://github.github.com/gh-stack/getting-started/quick-start/
+
   programs.gh = {
     enable = true;
 

@@ -33,31 +33,31 @@ with lib; let
   secrets =
     if pkgs.stdenv.isDarwin
     then {
-      uuid = config.sops.placeholder.singbox_UUID;
-      publicKey = config.sops.placeholder.singbox_pub_key;
-      shortId = config.sops.placeholder.singbox_ID;
-      clashSecret = config.sops.placeholder.singbox_clash_secret;
-      flyingbirdPassword = config.sops.placeholder.singbox_flyingbird;
-      hy2Password = config.sops.placeholder.singbox_hy2_pwd;
+      uuid = config.sops.placeholder.SINGBOX_UUID;
+      publicKey = config.sops.placeholder.SINGBOX_PUB_KEY;
+      shortId = config.sops.placeholder.SINGBOX_ID;
+      clashSecret = config.sops.placeholder.SINGBOX_CLASH_SK;
+      flyingbirdPassword = config.sops.placeholder.SINGBOX_FLYINGBIRD;
+      hy2Password = config.sops.placeholder.SINGBOX_HY2_PWD;
     }
     else {
       uuid = {
-        _secret = config.sops.secrets.singbox_UUID.path;
+        _secret = config.sops.secrets.SINGBOX_UUID.path;
       };
       publicKey = {
-        _secret = config.sops.secrets.singbox_pub_key.path;
+        _secret = config.sops.secrets.SINGBOX_PUB_KEY.path;
       };
       shortId = {
-        _secret = config.sops.secrets.singbox_ID.path;
+        _secret = config.sops.secrets.SINGBOX_ID.path;
       };
       clashSecret = {
-        _secret = config.sops.secrets.singbox_clash_secret.path;
+        _secret = config.sops.secrets.SINGBOX_CLASH_SK.path;
       };
       flyingbirdPassword = {
-        _secret = config.sops.secrets.singbox_flyingbird.path;
+        _secret = config.sops.secrets.SINGBOX_FLYINGBIRD.path;
       };
       hy2Password = {
-        _secret = config.sops.secrets.singbox_hy2_pwd.path;
+        _secret = config.sops.secrets.SINGBOX_HY2_PWD.path;
       };
     };
 
