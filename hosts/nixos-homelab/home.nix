@@ -12,7 +12,6 @@
     enable = true;
     hosts = {
       # github.enable = true;
-      hk-claw.enable = true;
       hk-hdy.enable = true;
       LA.enable = true;
     };

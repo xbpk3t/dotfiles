@@ -52,7 +52,7 @@ in {
 
                 users = [
                   {
-                    uuid = {_secret = config.sops.secrets.singbox_UUID.path;};
+                    uuid = {_secret = config.sops.secrets.SINGBOX_UUID.path;};
                     flow = "xtls-rprx-vision";
                   }
                 ];
@@ -70,11 +70,11 @@ in {
                     };
 
                     # 从 sops 文件读入
-                    private_key = {_secret = config.sops.secrets.singbox_pri_key.path;};
+                    private_key = {_secret = config.sops.secrets.SINGBOX_PRI_KEY.path;};
 
                     # short_id 允许多个，这里只用一个
                     short_id = [
-                      {_secret = config.sops.secrets.singbox_ID.path;}
+                      {_secret = config.sops.secrets.SINGBOX_ID.path;}
                     ];
                   };
                 };
@@ -89,7 +89,7 @@ in {
 
                 users = [
                   {
-                    password = {_secret = config.sops.secrets.singbox_hy2_pwd.path;};
+                    password = {_secret = config.sops.secrets.SINGBOX_HY2_PWD.path;};
                   }
                 ];
 
@@ -127,7 +127,7 @@ in {
       security.acme.certs."${hy2Domain}" = {
         email = mail;
         dnsProvider = "cloudflare";
-        environmentFile = config.sops.secrets.acme_cloudflare_env.path;
+        environmentFile = config.sops.secrets.ACME_CF_ENV.path;
         group = "sing-box";
         # 证书更新后自动 reload，避免 HY2 继续使用旧证书
         reloadServices = ["sing-box.service"];

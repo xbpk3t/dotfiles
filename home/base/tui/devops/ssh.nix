@@ -9,6 +9,8 @@
 
     # MAYBE: [2025-12-23] 做一下termscp预配置。不过还是等一下hm，
     # termscp每次都要自己build，就很麻烦，所以先注释掉
+    # [2026-04-15] 再次确认了，termscp需要自己build
+    # https://mynixos.com/nixpkgs/package/termscp
     # termscp
 
     # https://mynixos.com/nixpkgs/package/trzsz-ssh

@@ -50,7 +50,7 @@ in {
 
       acmeEnvironmentFile = mkOption {
         type = types.str;
-        default = config.sops.secrets.acme_cloudflare_env.path;
+        default = config.sops.secrets.ACME_CF_ENV.path;
         description = "Path to ACME DNS-01 environment file.";
       };
 
