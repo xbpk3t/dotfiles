@@ -28,4 +28,8 @@
   modules.langs = {
     lsp.enable = true;
   };
+
+  modules.ms = {
+    colima.enable = true;
+  };
 }
