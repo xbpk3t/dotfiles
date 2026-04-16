@@ -1646,3 +1646,40 @@ popup 是跟niri相关（退出fullscreen就可以了）
 
 
 有过纠结和犹豫
+
+
+
+
+
+## 重新用回 Chrome 作为 Default Browser [2026-04-16]
+
+
+chrome相较于firefox的优势：
+
+- 0、需要用到 `bb-browser`之类的 web-access-tools，这类工具默认使用chrome而非firefox。这点是核心原因。
+- 1、chrome也有 vertical tab了
+- 2、为啥很多网页/网站在 chrome 响应就很快，但是在firefox则很慢，甚至压根无响应。这个问题是否存在？怎么解释？
+- 3、alfred 和 Hammerspoon 都对chrome支持更好
+
+
+
+```yaml
+## 1. **站点偏向 Chrome 适配**：很多网站主要测试 Chromium，Firefox 兼容性差一些。
+## 2. **Firefox 隐私拦截更严格**：会拦第三方脚本、Cookie、跟踪器，导致页面功能异常。
+## 3. **风控/验证码对 Firefox 更敏感**：部分站点会把 Firefox 判得更严格，出现转圈、403、验证失败。
+## 4. **底层实现不同**：两者在网络协议、渲染、JS 引擎、硬件加速上有差异，所以同一网站表现可能不同。
+```
+
+
+---
+
+目前还不适应的点：
+
+- 1、firefox原生支持 `Ctrl+Tab`来切换 Recent Tabs，Chrome则需要通过插件才能实现该操作，但是不支持设置 `Ctrl+Tab` 作为 shortcut。这点已经做过证实，确实如此。拓展来说，firefox对于Tab的shortcut要合理很多，跟其他APP的一致性更好，短按`Ctrl+Tab`直接切换，长按则展示Tab列表，进行`Next Tabs`切换。
+- 2、firefox的 history, bookmark 都默认展示在 `Side Panel`，并且也都提供了相应shortcut，要远比Chrome的好用。
+
+
+---
+
+
+基于上述的优缺点，最终做出切换到chrome的决策

@@ -10,6 +10,13 @@ in {
   # https://mynixos.com/nixpkgs/options/services.tailscale
   # https://nixos.wiki/wiki/Tailscale
 
+  # Taildrop
+  # 我把一个文件通过此功能传到另一台linux机器上了，目标path在哪？需要自己取出文件
+  ## sudo tailscale file get <目标路径>
+  ## sudo tailscale file get ~/Downloads
+  ## 取出到当前目录
+  ## sudo tailscale file get .
+
   options.modules.networking.tailscale = {
     enable = mkEnableOption "Tailscale client (WireGuard-based mesh VPN) on this host";
 
