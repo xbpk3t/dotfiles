@@ -2,10 +2,9 @@ host: ""
 port: 8317
 auth-dir: "/root/.cli-proxy-api"
 api-keys:
-  # - "replace-with-local-api-key"
 remote-management:
   allow-remote: true
-  # secret-key: "replace-with-local-secret-hash"
+  secret-key: "$2a$10$.35DRMPw9tmifSn854AoKOIjH.Lbn4f7vBeWUB24MOYvVcH78RMsC"
 routing:
   strategy: round-robin
 logging-to-file: true

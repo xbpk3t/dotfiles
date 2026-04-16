@@ -224,7 +224,7 @@ CPA + MetAPI 部署在同一台 VPS 后：
 - 2、MetAPI 支持对于model批量测活
 - 3、在“连接管理”里，尽量通过“账号管理”（而非“API Key管理”）来管理所有provider
 - 4、MetAPI 对于 NewAPI 支持最好，添加站点后，在“连接管理”直接添加相应“系统访问令牌”，之后就可以通过 MetAPI 实现完全托管（自动签到等操作）。
-
+- 5、【Model权重管理】想要实现上面说的“分级权重”，在 「路由」中选择相应model，然后直接拖动其中的provider，来分层 P0, P1, P2（这里我们的方案就是 GPT sub走P0, 公益站走P1，中转站兜底走P2）。但是注意为了保证可用性，需要把路由策略改为“稳定优先”，否则 高权重provider挂了之后，可能也不会自动转发到后面的provider
 
 
 
@@ -327,3 +327,47 @@ AAR + CPA + new-api
 
 
 https://github.com/lxf746/any-auto-register
+
+
+
+### 方案：AutoTeam
+
+
+[【开源】AutoTeam: 一个 Team 订阅，无限 Codex 额度 - 开发调优 / 开发调优, Lv2 - LINUX DO](https://linux.do/t/topic/1943318/23)
+
+
+[cnitlrt/AutoTeam: ChatGPT Team 账号自动轮转管理 - Codex 额度监控、自动换号、CPA 认证同步](https://github.com/cnitlrt/AutoTeam)
+
+
+```markdown
+众所周知，一个0刀gpt team里面可以有5个seat，如果里面的成员变成6个就会有封team的风险，由于现在openai将team的额度给下调，导致一个team账号问几个问题就额度见底了，所以我就在想能不能搞个自动化的workflow，让这5个seat不停地换人, 用完的踢掉, 恢复了的重新进, 实在不行就自动注册新号顶上, 全程不用手动操作。
+```
+
+
+
+
+### 方案：GenericAgent
+
+[地表最强web | GenericAgent 实现注册机思路 - 开发调优 / 开发调优, Lv2 - LINUX DO](https://linux.do/t/topic/1968890)
+
+基于 GenericAgent 这个 `Agent Browser`来实现对于注册机的自动化操作。这个思路还真不错。
+
+
+
+
+
+## 中转站 vs Team/Plus [2026-04-16]
+
+:::tip
+
+实测对比一下同样是¥5，team还是 ikun 中转站？哪个更省？实测后写到之前那个blog里
+
+:::
+
+[大佬们每天codex蹬多少token？ - 搞七捻三 - LINUX DO](https://linux.do/t/topic/1974341)
+
+
+[求中转推荐编程太烧钱了 - 搞七捻三 - LINUX DO](https://linux.do/t/topic/1968190/13)
+
+
+[codex team额度再次大砍！ - 搞七捻三 - LINUX DO](https://linux.do/t/topic/1963609/3)
