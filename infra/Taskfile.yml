@@ -48,6 +48,16 @@ tasks:
         vars:
           STACK: "{{.STACK}}"
 
+  state-rm:
+    desc: "从单个 infra stack 的 remote state 中移除指定资源地址"
+    summary: |
+      task tf:state-rm STACK=infra/stacks/homelab/cloudflare/lucc.dev/dns ADDRESS='cloudflare_dns_record.records["bc"]'
+    cmds:
+      - task: stack:state-rm
+        vars:
+          STACK: "{{.STACK}}"
+          ADDRESS: "{{.ADDRESS}}"
+
   inventory:
     desc: "拉取 Cloudflare live inventory"
     summary: |
