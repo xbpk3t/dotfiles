@@ -22,7 +22,7 @@
         "secrets/default.nix"
         "modules/nixos/base"
         "modules/nixos/vps"
-        "modules/nixos/extra/k3s.nix"
+        "modules/nixos/extra/k3s/default.nix"
       ];
     home-modules = map mylib.relativeToRoot [
       "hosts/${name}/home.nix"

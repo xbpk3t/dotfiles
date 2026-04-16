@@ -126,6 +126,12 @@ in {
           ];
         };
 
+        # Agent Browser (类似 bbrowser 之类的 web-access-tools)
+        # MAYBE: [2026-04-16] 找到更好用的 Agent Browser （尝试 GenericAgent）
+        # https://linux.do/t/topic/1962519
+        # https://github.com/lsdefine/GenericAgent
+        # https://linux.do/t/topic/1979802
+
         # https://github.com/epiral/bb-browser
         # bb-browser: 复用真实 Chrome 登录态的浏览器 MCP。
         # 这次选择它，不是因为它比 skill“更酷”，而是因为浏览器能力更适合作为 MCP 能力层接入。

@@ -35,7 +35,8 @@ in {
       # https://developers.openai.com/codex/config-reference
       settings = {
         # 默认模型；可被命令行 `-m` 临时覆盖。
-        model = "gpt-5.4";
+        # model = "gpt-5.4";
+        model = "gpt-5.3-codex";
 
         # on-request: 默认命令先在 sandbox 内执行，超权限时再请求批准。
         # [2026-04-08] 我原本的需求是：现在切换到 mcp-servers-nix 之后，无法默认approve全部这些MCP操作，所以想要通过该配置进行配置。事实证明该配置项无法实现该需求。
@@ -78,7 +79,7 @@ in {
         model_providers = {
           metapi = {
             name = "metapi";
-            base_url = "http://127.0.0.1:4000/v1";
+            base_url = "https://api.lucc.dev/v1";
             env_key = "LLM_MetAPI";
             wire_api = "responses";
           };

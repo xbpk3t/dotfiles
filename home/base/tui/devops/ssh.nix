@@ -7,13 +7,12 @@
     # 用 lazyssh 替代了 sshs
     lazyssh
 
-    # MAYBE: [2025-12-23] 做一下termscp预配置。不过还是等一下hm，
-    # termscp每次都要自己build，就很麻烦，所以先注释掉
-    # [2026-04-15] 再次确认了，termscp需要自己build
-    # https://mynixos.com/nixpkgs/package/termscp
-    # termscp
-
+    # 文件传输工具
     # https://mynixos.com/nixpkgs/package/trzsz-ssh
+    # [2026-04-16] 移除 termscp，两点原因：1、我的核心需求是临时上传、下载文件。基于此需求 trzsz 要比 termscp 更好用。2、termscp安装时需要build，并且很慢。
+    # trzsz 具体用法：
+    # 1、用 tssh --install-trzsz user@your-vps 在目标VPS上安装 trzsz （默认装到 ~/.local/bin/，在NixOS下没有相应的更nix的方案，所以暂时这么处理也可）
+    # 2、直接用ssh登录（推荐用tssh登录，兼容性更好，但是ssh也没啥问题）。trz 上传， tsz 下载。
     trzsz-ssh
   ];
 }
