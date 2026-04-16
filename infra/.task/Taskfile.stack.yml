@@ -115,3 +115,29 @@ tasks:
     cmds:
       - tofu init -reconfigure -input=false
       - tofu apply
+
+  state-rm:
+    desc: "从单个 stack 的 remote state 中移除指定资源地址"
+    summary: |
+      task tf:state-rm STACK=infra/stacks/homelab/cloudflare/lucc.dev/dns ADDRESS='cloudflare_dns_record.records["bc"]'
+    requires:
+      vars:
+        - STACK
+        - ADDRESS
+    dir: "{{.USER_WORKING_DIR}}/{{.STACK}}"
+    preconditions:
+      - sh: test -d "{{.USER_WORKING_DIR}}/{{.STACK}}"
+        msg: "STACK 必须是相对仓库根目录的有效路径"
+      - sh: test -n "${CF_R2_AK:-}"
+        msg: "state-rm 需要 Cloudflare R2 backend 凭据，请提供 CF_R2_AK"
+      - sh: test -n "${CF_R2_SK:-}"
+        msg: "state-rm 需要 Cloudflare R2 backend 凭据，请提供 CF_R2_SK"
+      - sh: test -n "${CLOUDFLARE_API_TOKEN:-}"
+        msg: "state-rm 需要 Cloudflare API token，请提供 CLOUDFLARE_API_TOKEN"
+    env:
+      AWS_ACCESS_KEY_ID: "{{.CF_R2_AK}}"
+      AWS_SECRET_ACCESS_KEY: "{{.CF_R2_SK}}"
+      CLOUDFLARE_API_TOKEN: "{{.CLOUDFLARE_API_TOKEN}}"
+    cmds:
+      - tofu init -reconfigure -input=false
+      - tofu state rm '{{.ADDRESS}}'
