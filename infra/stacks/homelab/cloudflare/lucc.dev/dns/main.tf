@@ -68,11 +68,6 @@ moved {
 }
 
 moved {
-  from = cloudflare_dns_record.bc_lucc_dev_cname_11
-  to   = cloudflare_dns_record.records["bc"]
-}
-
-moved {
   from = cloudflare_dns_record.blog_lucc_dev_cname_12
   to   = cloudflare_dns_record.records["blog"]
 }

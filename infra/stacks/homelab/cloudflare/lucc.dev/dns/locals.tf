@@ -7,6 +7,18 @@ locals {
   # 这里开始使用 human-facing records model。
   # 日常维护时优先改这个数据结构，而不是继续手写一堆 resource blocks。
   dns_records_managed = {
+    api = {
+      id      = null
+      name    = "api.lucc.dev"
+      type    = "A"
+      content = "142.171.154.61"
+      ttl     = 1
+      # 开启cf橙云代理
+      proxied  = true
+      priority = null
+      comment  = "metapi"
+    }
+
     grafana = {
       id       = "0a78e1bf7e0d58ac35378f3c7e117625"
       name     = "g.lucc.dev"
@@ -47,16 +59,7 @@ locals {
       comment  = "tailscale"
       priority = null
     }
-    bc = {
-      id       = "1bd30865c3c123a847e1a5f859ec5e0a"
-      name     = "bc.lucc.dev"
-      type     = "CNAME"
-      content  = "public.r2.dev"
-      ttl      = 1
-      proxied  = true
-      comment  = null
-      priority = null
-    }
+
     blog = {
       id       = "442d7dbf738b136ce33fea1048c4331c"
       name     = "blog.lucc.dev"
