@@ -25,8 +25,13 @@ summary = true
 
 [merge]
 # 推荐默认安全合并策略：先 rebase、合并后自动 remove worktree、执行 hooks
-squash = true
+
+# 把当前 worktree 分支上 从 main 分出来之后的所有 commit，全部 squash（压扁）成一条新 commit
+# [2026-04-16] 修改为false，因为我需要在merge后，仍然保留worktree上的commit，而非合并为一个commit
+squash = false
 commit = true
+
+# 设置为true，否则会在merge时，会产生一个 Merge Commit
 rebase = true
 remove = true
 verify = true
