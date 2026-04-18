@@ -40,7 +40,6 @@ in {
 
       "tencent-lemon"
       "wechat"
-      "firefox"
 
       "ghostty"
 
@@ -48,6 +47,8 @@ in {
 
       # [2026-01-17] 在mac上我选择用chrome，而非firefox。因为
       "google-chrome"
+
+      # "firefox"
 
       # [2026-03-28] 用不到了。对我来说 raycast核心功能就是 todoist，直接用web端了。另外raycast需要常驻内存200MB左右（包体本身占用内存150MB, 还有个座位 extension的node进程，50MB）
       # "raycast"
