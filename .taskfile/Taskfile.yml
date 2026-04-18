@@ -40,7 +40,6 @@ includes:
   img: mac/Taskfile.img.yml
   trzsz: mac/Taskfile.trzsz.yml
   # scrapy: mac/Taskfile.scrapy.yml
-  me: mac/Taskfile.me.yml
   # alfred: mac/Taskfile.alfred.yml
   pnpm: mac/Taskfile.pnpm.yml
   sc: mac/Taskfile.scratches.yml
