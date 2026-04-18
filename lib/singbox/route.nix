@@ -43,6 +43,18 @@
       outbound = "direct";
     }
     # 私网直连：避免局域网/内网走代理
+    # 注意：FakeIP 网段（198.18.0.0/15, fc00::/18）不能被这里误命中，否则会被直连并在 TLS 握手阶段卡住。
+    # 在 sing-box 1.13 + reverse_mapping=false 的组合下，连接可能只剩 FakeIP 目标地址可匹配，
+    # 这时 ip_is_private=true 会把 FakeIP 当成“私网”送进 direct，导致 Rule 模式下特定域名超时。
+    # [2026-04-18] 开启该配置后，又会导致开盖后无法直接联网，所以注释掉
+    #    {
+    #      ip_cidr = [
+    #        "198.18.0.0/15"
+    #        "fc00::/18"
+    #      ];
+    #      action = "route";
+    #      outbound = "select";
+    #    }
     {
       ip_is_private = true;
       action = "route";
