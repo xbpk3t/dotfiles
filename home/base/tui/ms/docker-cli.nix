@@ -27,5 +27,9 @@
   home.packages = with pkgs; [
     # https://mynixos.com/nixpkgs/package/docker
     docker
+
+    # https://mynixos.com/nixpkgs/package/docker-credential-helpers
+    # 否则会报 osxkeychain not found
+    docker-credential-helpers
   ];
 }
