@@ -6,6 +6,17 @@
   ...
 }: let
   cfg = config.modules.AI.codex;
+  mcpServersForCodex =
+    (
+      inputs.mcp-servers-nix.lib.evalModule pkgs {
+        inherit
+          (config.mcp-servers)
+          programs
+          settings
+          ;
+        flavor = "codex";
+      }
+    ).config.settings.servers;
   codexPrompts = pkgs.runCommandLocal "codex-prompts" {} ''
     mkdir -p "$out"
 
@@ -27,7 +38,10 @@ in {
     # https://github.com/openai/codex
     programs.codex = {
       enable = true;
-      enableMcpIntegration = true;
+      # [2026-04-18] 关闭 HM bridge 到 programs.mcp.servers 的自动整合：
+      # mcp-servers-nix 在 HM bridge 下会裁剪 server 字段，仅保留 command/args/env/url/headers。
+      # codex 专有字段（如 tools.*.approval_mode、startup_timeout_sec）需要直接放在 mcp_servers 里。
+      enableMcpIntegration = false;
       # package = pkgs.codex;
       package = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.codex;
 
@@ -75,7 +89,11 @@ in {
         # 默认不声明 model_provider，让 Codex 继续走本地 ChatGPT OAuth 登录态。否则会报错 Error: Model provider `` not found
         # 只有显式使用 `--profile metapi` 时，才切换到对应第三方 provider。
 
-        model_provider = "metapi";
+        # [2026-04-18] 直接注入 mcp-servers-nix 的 codex flavor server 配置。
+        # 这样 settings.servers.<name>.tools.*.approval_mode 可以原样进入 Codex 的 mcp_servers。
+        mcp_servers = mcpServersForCodex;
+
+        # model_provider = "metapi";
         model_providers = {
           metapi = {
             name = "metapi";
@@ -86,12 +104,13 @@ in {
         };
 
         # [2026-04-14] profiles 是用来创建可切换的命名方案。因为把所有provider都由 MetAPI管理，所以不再需要了
-        #  profiles = {
-        #    metapi = {
-        #      model_provider = "metapi";
-        #      model = "gpt-5.4";
-        #    };
-        #  };
+        profiles = {
+          metapi = {
+            model_provider = "metapi";
+            # model = "gpt-5.4";
+            model = "gpt-5.3-codex";
+          };
+        };
       };
       custom-instructions = "";
     };
@@ -122,6 +141,26 @@ in {
       source = codexPrompts;
       recursive = true;
       force = true;
+    };
+
+    programs.agent-skills = {
+      # 注意这个 targets 是用来把 skills folder 放到不同cli工具的folder，以实现skills的复用。所以所有这里配置了的 targets 里的 skills 都是完全一致的。
+      targets.codex = {
+        enable = true;
+        # dest = ".agents/skills";
+        dest = ".codex/skills";
+        # 技术要点：copy-tree 避免 symlink 在部分工具/环境中失效
+        #        structure = "copy-tree";
+        # structure = "link";
+        # structure = "symlink-tree";
+        # link: home.file symlinks
+        # symlink-tree and copy-tree run in home.activation.
+        # symlink-tree: rsync -a --delete (preserve symlinks)
+        # copy-tree: rsync -aL --delete (dereference symlinks).
+        # [2026-03-07] 遇到了个问题，默认link，codex无法读取skills，所以改为 copy-tree
+        # structure = "copy-tree";
+        structure = "link";
+      };
     };
   };
 }
