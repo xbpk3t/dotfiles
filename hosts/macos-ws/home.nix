@@ -20,6 +20,7 @@
 
   modules.AI = {
     codex.enable = true;
+    claude.enable = true;
     skills.enable = true;
     opencode.enable = true;
   };
