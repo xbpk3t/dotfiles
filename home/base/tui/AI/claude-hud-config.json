@@ -1,0 +1,47 @@
+{
+  "lineLayout": "expanded",
+  "showSeparators": false,
+  "pathLevels": 1,
+  "gitStatus": {
+    "enabled": true,
+    "showDirty": true,
+    "showAheadBehind": true,
+    "showFileStats": false
+  },
+  "display": {
+    "showModel": true,
+    "showProject": true,
+    "showContextBar": true,
+    "contextValue": "both",
+    "showConfigCounts": false,
+    "showDuration": true,
+    "showSpeed": false,
+    "showTokenBreakdown": true,
+    "showUsage": true,
+    "usageBarEnabled": true,
+    "showTools": false,
+    "showAgents": true,
+    "showTodos": true,
+    "showSessionName": true,
+    "showClaudeCodeVersion": false,
+    "showMemoryUsage": false,
+    "autocompactBuffer": "enabled",
+    "usageThreshold": 0,
+    "sevenDayThreshold": 80,
+    "environmentThreshold": 0,
+    "customLine": ""
+  },
+  "colors": {
+    "context": "green",
+    "usage": "brightBlue",
+    "warning": "yellow",
+    "usageWarning": "brightMagenta",
+    "critical": "red",
+    "model": "cyan",
+    "project": "yellow",
+    "git": "magenta",
+    "gitBranch": "cyan",
+    "label": "dim",
+    "custom": "brightCyan"
+  }
+}
