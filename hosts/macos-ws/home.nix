@@ -22,7 +22,7 @@
     codex.enable = true;
     claude.enable = true;
     skills.enable = true;
-    opencode.enable = true;
+    opencode.enable = false;
   };
 
   modules.langs = {
