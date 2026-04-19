@@ -14,3 +14,15 @@ src.github = "Zephyruso/zashboard"
 #
 # 注意：zashboard 的 GitHub release tag 自带 `v` 前缀，因此这里不能再手动补一个 `v`。
 fetch.url = "https://github.com/Zephyruso/zashboard/releases/download/$ver/dist.zip"
+
+[chrome-devtools-mcp]
+# 这里用 `gh release view` 读取最新 release tag，再在 nvfetcher 层剥掉 tag 前缀。
+# Why:
+# - 我们最终消费的是 npm 发布包本身，不是从 GitHub 源码重建；
+# - upstream 的 GitHub tag 形如 `chrome-devtools-mcp-v0.21.0`，而 npm tarball URL 需要裸版本 `0.21.0`；
+# - 直接问 GitHub release API 比访问 npm registry 的 latest JSON 更贴近这个项目的发布入口；
+# - `from_pattern/to_pattern` 只负责把 tag 转成 npm tarball 需要的裸版本，source update 逻辑仍然留在 nvfetcher 层。
+src.cmd = "gh release view -R ChromeDevTools/chrome-devtools-mcp --json tagName -q .tagName"
+src.from_pattern = "chrome-devtools-mcp-v(.+)"
+src.to_pattern = "\\1"
+fetch.url = "https://registry.npmjs.org/chrome-devtools-mcp/-/chrome-devtools-mcp-$ver.tgz"
