@@ -5,6 +5,14 @@
   fetchFromGitHub,
   dockerTools,
 }: {
+  chrome-devtools-mcp = {
+    pname = "chrome-devtools-mcp";
+    version = "0.21.0";
+    src = fetchurl {
+      url = "https://registry.npmjs.org/chrome-devtools-mcp/-/chrome-devtools-mcp-0.21.0.tgz";
+      sha256 = "sha256-KMHWSSctf6ihIT792yZeTqaYuHqmUanN2SJje5PI184=";
+    };
+  };
   zashboard = {
     pname = "zashboard";
     version = "v3.3.0";

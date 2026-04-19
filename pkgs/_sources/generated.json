@@ -1,4 +1,19 @@
 {
+    "chrome-devtools-mcp": {
+        "cargoLock": null,
+        "date": null,
+        "extract": null,
+        "name": "chrome-devtools-mcp",
+        "passthru": null,
+        "pinned": false,
+        "src": {
+            "name": null,
+            "sha256": "sha256-KMHWSSctf6ihIT792yZeTqaYuHqmUanN2SJje5PI184=",
+            "type": "url",
+            "url": "https://registry.npmjs.org/chrome-devtools-mcp/-/chrome-devtools-mcp-0.21.0.tgz"
+        },
+        "version": "0.21.0"
+    },
     "zashboard": {
         "cargoLock": null,
         "date": null,
