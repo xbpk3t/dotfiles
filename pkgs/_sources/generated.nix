@@ -13,12 +13,23 @@
       sha256 = "sha256-KMHWSSctf6ihIT792yZeTqaYuHqmUanN2SJje5PI184=";
     };
   };
+  trzsz = {
+    pname = "trzsz";
+    version = "v1.2.0";
+    src = fetchFromGitHub {
+      owner = "trzsz";
+      repo = "trzsz-go";
+      rev = "v1.2.0";
+      fetchSubmodules = false;
+      sha256 = "sha256-CokZAXT61UKSsKnzE5mPMdAZecGX/8mgDkG4yDSat5M=";
+    };
+  };
   zashboard = {
     pname = "zashboard";
-    version = "v3.3.0";
+    version = "v3.5.0";
     src = fetchurl {
-      url = "https://github.com/Zephyruso/zashboard/releases/download/v3.3.0/dist.zip";
-      sha256 = "sha256-eLyXie/sblgOZU7w/rNbjdqbj9dSNpNZrZMXEUVGafM=";
+      url = "https://github.com/Zephyruso/zashboard/releases/download/v3.5.0/dist.zip";
+      sha256 = "sha256-t3iKxz6Ko1by3p79nPTcPXuEIa+PWBFP4HrPn2y1N5Y=";
     };
   };
 }

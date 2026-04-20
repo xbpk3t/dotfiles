@@ -26,3 +26,9 @@ src.cmd = "gh release view -R ChromeDevTools/chrome-devtools-mcp --json tagName 
 src.from_pattern = "chrome-devtools-mcp-v(.+)"
 src.to_pattern = "\\1"
 fetch.url = "https://registry.npmjs.org/chrome-devtools-mcp/-/chrome-devtools-mcp-$ver.tgz"
+
+[trzsz]
+src.github_tag = "trzsz/trzsz-go"
+src.from_pattern = "^(v([0-9\\.]+))$"
+src.to_pattern = "\\1"
+fetch.github = "trzsz/trzsz-go"
