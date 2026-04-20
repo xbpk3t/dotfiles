@@ -35,7 +35,3 @@ result-*
 /.task
 mac-*.md
 wake-*.sh
-
-# metapi local secrets and runtime data
-.cntr/metapi/.env
-.cntr/metapi/data/
