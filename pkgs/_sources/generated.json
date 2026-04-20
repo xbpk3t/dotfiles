@@ -14,6 +14,27 @@
         },
         "version": "0.21.0"
     },
+    "trzsz": {
+        "cargoLock": null,
+        "date": null,
+        "extract": null,
+        "name": "trzsz",
+        "passthru": null,
+        "pinned": false,
+        "src": {
+            "deepClone": false,
+            "fetchSubmodules": false,
+            "leaveDotGit": false,
+            "name": null,
+            "owner": "trzsz",
+            "repo": "trzsz-go",
+            "rev": "v1.2.0",
+            "sha256": "sha256-CokZAXT61UKSsKnzE5mPMdAZecGX/8mgDkG4yDSat5M=",
+            "sparseCheckout": [],
+            "type": "github"
+        },
+        "version": "v1.2.0"
+    },
     "zashboard": {
         "cargoLock": null,
         "date": null,
@@ -23,10 +44,10 @@
         "pinned": false,
         "src": {
             "name": null,
-            "sha256": "sha256-eLyXie/sblgOZU7w/rNbjdqbj9dSNpNZrZMXEUVGafM=",
+            "sha256": "sha256-t3iKxz6Ko1by3p79nPTcPXuEIa+PWBFP4HrPn2y1N5Y=",
             "type": "url",
-            "url": "https://github.com/Zephyruso/zashboard/releases/download/v3.3.0/dist.zip"
+            "url": "https://github.com/Zephyruso/zashboard/releases/download/v3.5.0/dist.zip"
         },
-        "version": "v3.3.0"
+        "version": "v3.5.0"
     }
 }

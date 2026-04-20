@@ -63,6 +63,9 @@ in {
 
       # https://mynixos.com/nixpkgs/package/fluxcd-operator-mcp
       # fluxcd-operator-mcp
+
+      # https://mynixos.com/nixpkgs/package/markitdown-mcp
+      # markitdown-mcp
     ];
 
     mcp-servers = {
