@@ -1,0 +1,56 @@
+---
+
+settings:
+  # tail / 跟随模式下初始加载的日志行数
+  tailModeLines: 10000
+
+  # 自动刷新间隔，单位秒
+  updateInterval: 5
+
+  # journal 分组 / 列表使用的字段
+  # 常见值如 SYSLOG_IDENTIFIER、_SYSTEMD_UNIT
+  journalField: SYSLOG_IDENTIFIER
+
+  # journald 日志优先级过滤下限
+  # 这里是 debug，表示不过滤掉更高优先级的日志
+  journalPriority: debug
+
+  # 要查看哪些 boot 的日志
+  # all 表示全部启动记录
+  journalBoot: all
+
+  # 是否禁用鼠标
+  # false 表示启用鼠标操作
+  mouseDisable: false
+
+  # 是否禁用自动换行
+  # false 表示启用换行，长日志不会横向截断
+  wrapModeDisable: false
+
+  # 颜色主题模式
+  colorMode: default
+
+# LazyJournal 界面默认入口配置
+interface:
+  # systemd / journald 默认打开的日志列表
+  # systemUnits 表示优先看 systemd services
+  systemLogList: systemUnits
+
+  # 文件日志默认打开的列表
+  fileLogList: varlog
+
+  # 容器日志默认打开的列表
+  containerLogList: docker
+
+  # 是否启用“按起始日期过滤”的模式
+  # false 表示默认关闭
+  sinceDateFilterMode: false
+
+# SSH 远程主机预设
+#ssh:
+#  hosts:
+#    # 远程主机示例 1
+#    - user@host1
+#
+#    # 远程主机示例 2，附带自定义端口
+#    - user@host2 -p 2222
