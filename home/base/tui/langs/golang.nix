@@ -6,25 +6,51 @@
   home.packages = with pkgs; [
     go
 
-    gotools # goimports
+    # goimports
+    # https://mynixos.com/nixpkgs/package/gotools
+    gotools
+
     gum
-    gofumpt
+
+    # [2026-04-20] 注释掉 gosec, gofumpt, golines，因为本身可以作为 golangci-lint 的 linters/formatters 使用
     golangci-lint
-    gosec
+    # https://mynixos.com/nixpkgs/package/gosec
+    # https://github.com/securego/gosec
+    # gosec
+    # gofumpt
+    # https://github.com/segmentio/golines
+    # golines
+
     protoc-gen-go
     protoc-gen-go-grpc
     # https://github.com/golang/tools includes modernize
     gopls
-    # https://github.com/segmentio/golines
-    golines
+
     goimports-reviser
     cobra-cli
     nilaway
-    go-swag # = swaggo/swag
+
+    # = swaggo/swag
+    go-swag
     goreleaser
-    go-mockery # https://github.com/vektra/mockery
-    templ # https://github.com/a-h/templ
-    go-migrate # https://github.com/golang-migrate/migrate
+
+    # https://github.com/vektra/mockery
+    go-mockery
+
+    # https://github.com/a-h/templ
+    templ
+
+    # https://github.com/golang-migrate/migrate
+    go-migrate
+
+    # https://mynixos.com/nixpkgs/package/go-mod-graph-chart
+    go-mod-graph-chart
+
+    # https://mynixos.com/nixpkgs/package/goctl
+    goctl
+
+    # https://mynixos.com/nixpkgs/package/betteralign
+    betteralign
   ];
 
   # Go 运行时和配置
