@@ -8,6 +8,10 @@
     # https://github.com/nmeum/android-tools
     android-tools
 
+    # MAYBE: [2026-04-20] android-cli
+    # https://developer.android.com/tools/agents/android-cli?hl=zh-cn
+    # https://x.com/AI_jacksaku/status/2045342051097604405
+
     # https://github.com/tadfisher/android-nixpkgs
     # 注意与 android-tools 不同，这个 android-nixpkgs 是对于所有 Android SDK 的nix包装。
     # 但是更推荐使用 https://mynixos.com/nixpkgs/packages/androidenv.androidPkgs 而非这个flake。都是同一套东西，但是官方这套的version更stable
