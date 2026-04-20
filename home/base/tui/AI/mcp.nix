@@ -18,6 +18,14 @@ in {
     inputs.mcp-servers-nix.homeManagerModules.default
   ];
 
+  # TODO: [2026-04-20] v1.122.0 之后支持 default_tools_approval_mode = "approve"; 来直接设置该mcp全部凑走均为approve，
+  # https://github.com/openai/codex/issues/16501
+  # 如果你还想保留少数需要手动确认的操作，再补：
+  #tools = {
+  #  fill_form.approval_mode = "prompt";
+  #  performance_stop_trace.approval_mode = "prompt";
+  #};
+
   # MAYBE: [2026-04-03](excalidraw-mcp)
   # https://github.com/excalidraw/excalidraw-mcp Excalidraw MCP，这个更适合拿来想事情，尤其是流程图、系统结构这类内容，靠文字说不清的时候，画一下会快很多。
 
@@ -167,49 +175,48 @@ in {
         };
 
         # https://github.com/ChromeDevTools/chrome-devtools-mcp
-        # Chrome 146+ 推荐使用 --autoConnect 附着当前浏览器实例。
-        # 这里改为调用仓库内自打包的 `pkgs.chrome-devtools-mcp`，而不是 `npx ...@latest`。
+        # 默认改为让 MCP 自己拉起受控 Chrome，而不是附着当前正在使用的浏览器。
+        # Why:
+        # - `--autoConnect` 依赖 chrome://inspect/#remote-debugging 的握手与授权弹窗，实际更脆；
+        # - 当前机器上的默认 Chrome 暴露的 9222 端点并不是标准可消费的 DevTools discovery 接口；
+        # - 让 MCP 自己启动独立 profile 的 Chrome，是 upstream 默认路径，也更容易验证是否工作正常。
+        # 这里继续调用仓库内自打包的 `pkgs.chrome-devtools-mcp`，而不是 `npx ...@latest`。
         # Why:
         # - 这个仓库已经有自维护 `pkgs/` 入口，适合把常用 MCP server 纳入 declarative 管理；
         # - upstream npm tarball 已经带预编译产物，直接打包发布物比每次运行时走 npx 下载更稳，也更符合当前仓库的打包选型；
         # - 版本升级统一交给 nvfetcher，避免 MCP 启动时再发生隐式在线更新。
-        # 前置条件: chrome://inspect/#remote-debugging 已开启 Remote debugging。
         "chrome-devtools" = {
           command = "${pkgs.chrome-devtools-mcp}/bin/chrome-devtools-mcp";
-          args = [
-            "--autoConnect"
-            "--channel"
-            "stable"
-          ];
+          args = [];
           tools = {
-            click.approval_mode = "prompt";
-            close_page.approval_mode = "prompt";
-            drag.approval_mode = "prompt";
-            emulate.approval_mode = "prompt";
-            evaluate_script.approval_mode = "prompt";
-            fill.approval_mode = "prompt";
+            click.approval_mode = "approve";
+            close_page.approval_mode = "approve";
+            drag.approval_mode = "approve";
+            emulate.approval_mode = "approve";
+            evaluate_script.approval_mode = "approve";
+            fill.approval_mode = "approve";
             fill_form.approval_mode = "prompt";
             get_console_message.approval_mode = "approve";
             get_network_request.approval_mode = "approve";
-            handle_dialog.approval_mode = "prompt";
-            hover.approval_mode = "prompt";
+            handle_dialog.approval_mode = "approve";
+            hover.approval_mode = "approve";
             lighthouse_audit.approval_mode = "approve";
             list_console_messages.approval_mode = "approve";
             list_network_requests.approval_mode = "approve";
             list_pages.approval_mode = "approve";
-            navigate_page.approval_mode = "prompt";
-            new_page.approval_mode = "prompt";
+            navigate_page.approval_mode = "approve";
+            new_page.approval_mode = "approve";
             performance_analyze_insight.approval_mode = "approve";
-            performance_start_trace.approval_mode = "prompt";
+            performance_start_trace.approval_mode = "approve";
             performance_stop_trace.approval_mode = "prompt";
-            press_key.approval_mode = "prompt";
-            resize_page.approval_mode = "prompt";
-            select_page.approval_mode = "prompt";
-            take_memory_snapshot.approval_mode = "prompt";
+            press_key.approval_mode = "approve";
+            resize_page.approval_mode = "approve";
+            select_page.approval_mode = "approve";
+            take_memory_snapshot.approval_mode = "approve";
             take_screenshot.approval_mode = "approve";
             take_snapshot.approval_mode = "approve";
-            type_text.approval_mode = "prompt";
-            upload_file.approval_mode = "prompt";
+            type_text.approval_mode = "approve";
+            upload_file.approval_mode = "approve";
             wait_for.approval_mode = "approve";
           };
         };

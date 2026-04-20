@@ -8,8 +8,7 @@
   source = sources.chrome-devtools-mcp;
 in
   stdenvNoCC.mkDerivation rec {
-
-    # NOTE: 注意如果直接用 brew install chrome-devtools-mcp 或者 npx global install 都可以直接安装该pkg，但是为了便于多端复用，所以打个nixpkgs
+    # NOTE: 注意如果直接用 brew install chrome-devtools-mcp 或者 npx global install 都可以直接安装该pkg，但是为了便于多端复用，所以打个nixpkgs。注意对我这个nix方案来说，chrome-devtools 本身 notfound 不重要
     # https://formulae.brew.sh/formula/chrome-devtools-mcp
     # https://github.com/ChromeDevTools/chrome-devtools-mcp/blob/main/skills/chrome-devtools-cli/references/installation.md
     pname = "chrome-devtools-mcp";
