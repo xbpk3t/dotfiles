@@ -214,12 +214,18 @@ repos:
         pass_filenames: false
         language: system
 
-      - id: caddy-check
-        name: Caddyfile check
-        entry: bash -euo pipefail -c 'caddy fmt --diff Caddyfile && caddy validate --config Caddyfile'
-        language: unsupported
+      # caddy 本身不会“自动扫描仓库里的 Caddyfile”，validate / caddy fmt 都是一次处理一个 config 路径（--config  <file>），所以这里只能写死path
+      - id: caddy-fmt
+        name: caddy-fmt
+        language: system
         pass_filenames: false
-        files: (^|/)Caddyfile(\..*)?$
+        entry: caddy fmt --diff .cntr/caddy/Caddyfile --overwrite
+
+      - id: caddy-validate
+        name: caddy-validate
+        language: system
+        pass_filenames: false
+        entry: caddy validate --config .cntr/caddy/Caddyfile
 
 
   - repo: https://github.com/astro/deadnix
