@@ -15,8 +15,14 @@ repos:
     hooks:
       - id: check-toml
       - id: end-of-file-fixer
-      - id: check-added-large-files # 定义的hook脚本，在repo的.pre-commit-hooks.yaml中定义
-        args: ["--maxkb=5120"]
+
+      # 定义的hook脚本，在repo的.pre-commit-hooks.yaml中定义
+      - id: check-added-large-files
+        args: ["--maxkb=1024", "--enforce-all"]
+
+      - id: check-added-large-files
+        args: ["--maxkb=5120", "--enforce-all"]
+
       - id: trailing-whitespace # 移除尾部空格符
       - id: check-merge-conflict # 检查是否含有合并冲突符号
       - id: check-json
@@ -207,6 +213,14 @@ repos:
         types: [nix]
         pass_filenames: false
         language: system
+
+      - id: caddy-check
+        name: Caddyfile check
+        entry: bash -euo pipefail -c 'caddy fmt --diff Caddyfile && caddy validate --config Caddyfile'
+        language: unsupported
+        pass_filenames: false
+        files: (^|/)Caddyfile(\..*)?$
+
 
   - repo: https://github.com/astro/deadnix
     rev: v1.3.1
