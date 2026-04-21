@@ -3,55 +3,86 @@
   config,
   ...
 }: {
-  home.packages = with pkgs; [
-    go
+  home.packages = with pkgs;
+    [
+      # 分类1：Go 核心工具链与语言服务
+      # tags(desc): 核心工具链 > 语言运行时 > Go
+      go
 
-    # goimports
-    # https://mynixos.com/nixpkgs/package/gotools
-    gotools
+      # goimports
+      # https://mynixos.com/nixpkgs/package/gotools
+      # tags(desc): 核心工具链 > 官方工具集 > Go
+      gotools
 
-    gum
+      # https://github.com/golang/tools includes modernize
+      # tags(desc): 语言服务 > LSP > 代码智能
+      gopls
 
-    # [2026-04-20] 注释掉 gosec, gofumpt, golines，因为本身可以作为 golangci-lint 的 linters/formatters 使用
-    golangci-lint
-    # https://mynixos.com/nixpkgs/package/gosec
-    # https://github.com/securego/gosec
-    # gosec
-    # gofumpt
-    # https://github.com/segmentio/golines
-    # golines
+      # tags(desc): 开发体验 > 交互CLI > 终端UI
+      gum
+    ]
+    ++ [
+      # 分类2：代码质量与静态分析
+      # [2026-04-20] 注释掉 gosec, gofumpt, golines，因为本身可以作为 golangci-lint 的 linters/formatters 使用
+      # tags(desc): 代码质量 > 聚合检查 > 静态分析
+      golangci-lint
+      # https://mynixos.com/nixpkgs/package/gosec
+      # https://github.com/securego/gosec
+      # gosec
+      # gofumpt
+      # https://github.com/segmentio/golines
+      # golines
 
-    protoc-gen-go
-    protoc-gen-go-grpc
-    # https://github.com/golang/tools includes modernize
-    gopls
+      # tags(desc): 代码质量 > import规范化 > 格式化
+      goimports-reviser
 
-    goimports-reviser
-    cobra-cli
-    nilaway
+      # tags(desc): 代码质量 > 静态分析 > 空指针安全
+      nilaway
 
-    # = swaggo/swag
-    go-swag
-    goreleaser
+      # https://mynixos.com/nixpkgs/package/betteralign
+      # tags(desc): 代码质量 > 可读性 > 对齐格式化
+      betteralign
+    ]
+    ++ [
+      # 分类3：代码生成与工程脚手架
+      # tags(desc): 代码生成 > Protobuf > 序列化
+      protoc-gen-go
 
-    # https://github.com/vektra/mockery
-    go-mockery
+      # tags(desc): 代码生成 > gRPC > Protobuf
+      protoc-gen-go-grpc
 
-    # https://github.com/a-h/templ
-    templ
+      # tags(desc): 工程脚手架 > CLI框架 > 代码生成
+      cobra-cli
 
-    # https://github.com/golang-migrate/migrate
-    go-migrate
+      # = swaggo/swag
+      # tags(desc): 代码生成 > API文档 > OpenAPI
+      go-swag
 
-    # https://mynixos.com/nixpkgs/package/go-mod-graph-chart
-    go-mod-graph-chart
+      # https://github.com/vektra/mockery
+      # tags(desc): 测试工具 > Mock生成 > 代码生成
+      go-mockery
 
-    # https://mynixos.com/nixpkgs/package/goctl
-    goctl
+      # https://github.com/a-h/templ
+      # tags(desc): 前端模板 > 代码生成 > Go生态
+      templ
 
-    # https://mynixos.com/nixpkgs/package/betteralign
-    betteralign
-  ];
+      # https://mynixos.com/nixpkgs/package/goctl
+      # tags(desc): 工程脚手架 > 微服务框架 > 代码生成
+      goctl
+    ]
+    ++ [
+      # 分类4：发布、迁移与依赖分析
+      # tags(desc): 发布交付 > Release自动化 > CI/CD
+      goreleaser
+
+      # https://github.com/golang-migrate/migrate
+      # tags(desc): 数据迁移 > 数据库 > 运维
+      go-migrate
+
+      # https://mynixos.com/nixpkgs/package/go-mod-graph-chart
+      # tags(desc): 依赖分析 > 可视化 > 模块管理
+      go-mod-graph-chart
+    ];
 
   # Go 运行时和配置
   programs.go = {
