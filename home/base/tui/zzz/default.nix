@@ -36,4 +36,14 @@
     # 直接用yaml写简历，貌似真的不错，网站本身支持在线简历。RenderCV 是一个用于生成高质量简历的引擎，能够从 YAML 输入文件创建 PDF 格式的简历。
     rendercv
   ];
+
+  # https://github.com/mikf/gallery-dl
+  # https://mynixos.com/nixpkgs/package/gallery-dl
+  # https://mynixos.com/home-manager/options/programs.gallery-dl
+  programs.gallery-dl = {
+    enable = true;
+    settings = {
+      extractor.base-directory = "~/Downloads";
+    };
+  };
 }

@@ -8,6 +8,10 @@
 
     # Kubernetes 工具
     # MAYBE: fatal error: out of memory allocating arena map / failed to create OS thread 内存不够，导致整个依赖链（home-manager-path 等）被挂起。
+    #- minikube dashboard # 启动 Minikube 的 Kubernetes dashboard
+    #- minikube start --driver=docker --container-runtime=docker # 使用 Docker 作为虚拟化程序和容器运行时启动 Minikube
+    #- eval $(minikube docker-env) # 设置环境变量，使得 Docker 能够构建和运行 Minikube 中的镜像
+    #- minikube addons list # 列出所有可用的 Minikube 插件（addons）
     # minikube
 
     kompose
@@ -125,6 +129,8 @@
 
     # https://github.com/komodorio/helm-dashboard/
     helm-dashboard
+    # https://github.com/mkubaczyk/helmsman
+    # https://mynixos.com/nixpkgs/package/helmsman
 
     # Kubernetes 相关工具
     kubectl
@@ -147,7 +153,6 @@
     #
     kustomize
     # kind
-    # minikube
 
     # 多 Pod 日志查看
     stern
@@ -191,7 +196,14 @@
     # pkgs-stable.kubernetes-helm
 
     # build go project to container image
+    #- url: https://github.com/ko-build/ko
+    #  doc: https://ko.build/
+    #  des: 专门用来打包golang应用容器的image的工具，被很多k8s生态下的主流OSS使用
+    # https://mynixos.com/nixpkgs/package/ko
     # ko
+
+    # https://mynixos.com/nixpkgs/package/kor
+    # kor
   ];
 
   programs = {
