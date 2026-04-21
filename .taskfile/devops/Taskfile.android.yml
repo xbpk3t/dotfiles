@@ -2,9 +2,9 @@
 version: "3"
 
 vars:
-  DROID_SCRIPT: "{{.TASKFILE_DIR}}/droid/droid.nu"
-  DROID_APPS_FILE: "{{.TASKFILE_DIR}}/droid/apps.yml"
-  DROID_DEBLOAT_FILE: "{{.TASKFILE_DIR}}/droid/debloat.yml"
+  DROID_SCRIPT: "{{.TASKFILE_DIR}}/android/droid.nu"
+  DROID_APPS_FILE: "{{.TASKFILE_DIR}}/android/apps.yml"
+  DROID_DEBLOAT_FILE: "{{.TASKFILE_DIR}}/android/debloat.yml"
   DROID_USER: '{{if .USER_ID}}{{.USER_ID}}{{else}}0{{end}}' # 重要：默认只处理主用户 user 0
   DROID_LOG_SINCE: '{{if .SINCE}}{{.SINCE}}{{else}}12h{{end}}'
 
@@ -96,38 +96,38 @@ tasks:
       - task: _ensure:debloat-file
       - 'nu "{{.DROID_SCRIPT}}" debloat-apply --config "{{.DROID_DEBLOAT_FILE}}" --user-id "{{.DROID_USER}}"'
 
-  diag:debloat:log:
-    desc: 基于 debloat.yml 检查近期 logcat 中与被处理包相关的异常信号
-    summary: "task -g droid:diag:debloat:log [USER_ID=0] [SINCE=12h]"
-    cmds:
-      - task: _ensure:nu
-      - task: _ensure:adb
-      - task: _ensure:debloat-file
-      - 'nu "{{.DROID_SCRIPT}}" diag-debloat-log --config "{{.DROID_DEBLOAT_FILE}}" --user-id "{{.DROID_USER}}" --since "{{.DROID_LOG_SINCE}}"'
-
-  diag:debloat:jobs:
-    desc: 基于 dumpsys activity/alarm/jobscheduler 检查 debloat 包相关调度与服务痕迹
-    summary: "task -g droid:diag:debloat:jobs [USER_ID=0]"
-    cmds:
-      - task: _ensure:nu
-      - task: _ensure:adb
-      - task: _ensure:debloat-file
-      - 'nu "{{.DROID_SCRIPT}}" diag-debloat-jobs --config "{{.DROID_DEBLOAT_FILE}}" --user-id "{{.DROID_USER}}"'
-
-  diag:debloat:battery:
-    desc: 基于 dumpsys batterystats 检查 debloat 包相关电量/唤醒线索
-    summary: "task -g droid:diag:debloat:battery [USER_ID=0]"
-    cmds:
-      - task: _ensure:nu
-      - task: _ensure:adb
-      - task: _ensure:debloat-file
-      - 'nu "{{.DROID_SCRIPT}}" diag-debloat-battery --config "{{.DROID_DEBLOAT_FILE}}" --user-id "{{.DROID_USER}}"'
-
-  diag:debloat:full:
-    desc: 汇总执行 debloat 日志、调度、电量诊断
-    summary: "task -g droid:diag:debloat:full [USER_ID=0] [SINCE=12h]"
-    cmds:
-      - task: _ensure:nu
-      - task: _ensure:adb
-      - task: _ensure:debloat-file
-      - 'nu "{{.DROID_SCRIPT}}" diag-debloat-full --config "{{.DROID_DEBLOAT_FILE}}" --user-id "{{.DROID_USER}}" --since "{{.DROID_LOG_SINCE}}"'
+#  diag:debloat:log:
+#    desc: 基于 debloat.yml 检查近期 logcat 中与被处理包相关的异常信号
+#    summary: "task -g droid:diag:debloat:log [USER_ID=0] [SINCE=12h]"
+#    cmds:
+#      - task: _ensure:nu
+#      - task: _ensure:adb
+#      - task: _ensure:debloat-file
+#      - 'nu "{{.DROID_SCRIPT}}" diag-debloat-log --config "{{.DROID_DEBLOAT_FILE}}" --user-id "{{.DROID_USER}}" --since "{{.DROID_LOG_SINCE}}"'
+#
+#  diag:debloat:jobs:
+#    desc: 基于 dumpsys activity/alarm/jobscheduler 检查 debloat 包相关调度与服务痕迹
+#    summary: "task -g droid:diag:debloat:jobs [USER_ID=0]"
+#    cmds:
+#      - task: _ensure:nu
+#      - task: _ensure:adb
+#      - task: _ensure:debloat-file
+#      - 'nu "{{.DROID_SCRIPT}}" diag-debloat-jobs --config "{{.DROID_DEBLOAT_FILE}}" --user-id "{{.DROID_USER}}"'
+#
+#  diag:debloat:battery:
+#    desc: 基于 dumpsys batterystats 检查 debloat 包相关电量/唤醒线索
+#    summary: "task -g droid:diag:debloat:battery [USER_ID=0]"
+#    cmds:
+#      - task: _ensure:nu
+#      - task: _ensure:adb
+#      - task: _ensure:debloat-file
+#      - 'nu "{{.DROID_SCRIPT}}" diag-debloat-battery --config "{{.DROID_DEBLOAT_FILE}}" --user-id "{{.DROID_USER}}"'
+#
+#  diag:debloat:full:
+#    desc: 汇总执行 debloat 日志、调度、电量诊断
+#    summary: "task -g droid:diag:debloat:full [USER_ID=0] [SINCE=12h]"
+#    cmds:
+#      - task: _ensure:nu
+#      - task: _ensure:adb
+#      - task: _ensure:debloat-file
+#      - 'nu "{{.DROID_SCRIPT}}" diag-debloat-full --config "{{.DROID_DEBLOAT_FILE}}" --user-id "{{.DROID_USER}}" --since "{{.DROID_LOG_SINCE}}"'
