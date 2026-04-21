@@ -13,7 +13,6 @@ version: "3"
 # help                Show help for a specific command.
 
 vars:
-  PC_CLI: pre-commit
   HOOKS:
     - yamllint
     - golangci-lint
@@ -63,7 +62,7 @@ tasks:
   default:
     desc: "default 任务"
     summary: "task -g pc"
-    cmd: "{{.PC_CLI}} run --all-files"  # 检查所有文件（非暂存区）
+    cmd: pre-commit run --all-files  # 检查所有文件（非暂存区）
     dir: '{{.USER_WORKING_DIR}}'
     interactive: true
 
@@ -72,7 +71,7 @@ tasks:
     summary: "task -g pc:hook"
     interactive: true
     dir: '{{.USER_WORKING_DIR}}'
-    cmd: '{{.PC_CLI}} run {{.SELECTED}}'
+    cmd: pre-commit run {{.SELECTED}}
     vars:
       SELECTED:
         sh: gum choose {{.HOOKS | join " "}}
@@ -82,8 +81,8 @@ tasks:
     desc: 对全局Pre-commit的hook进行 clean+gc+重装 操作
     summary: "task -g pc:maintain"
     cmds:
-      - "{{.PC_CLI}} clean"  # 清理缓存
-      - "{{.PC_CLI}} gc"     # 垃圾回收
-      - "{{.PC_CLI}} install-hooks"  # 重装钩子
-      - "{{.PC_CLI}} autoupdate"  # 重装钩子
+      - pre-commit clean  # 清理缓存
+      - pre-commit gc     # 垃圾回收
+      - pre-commit install-hooks  # 重装钩子
+      - pre-commit autoupdate  # 重装钩子
     dir: '{{.USER_WORKING_DIR}}' # 更新远程仓库版本
