@@ -18,14 +18,6 @@ in {
     inputs.mcp-servers-nix.homeManagerModules.default
   ];
 
-  # TODO: [2026-04-20] v1.122.0 之后支持 default_tools_approval_mode = "approve"; 来直接设置该mcp全部凑走均为approve，
-  # https://github.com/openai/codex/issues/16501
-  # 如果你还想保留少数需要手动确认的操作，再补：
-  #tools = {
-  #  fill_form.approval_mode = "prompt";
-  #  performance_stop_trace.approval_mode = "prompt";
-  #};
-
   # MAYBE: [2026-04-03](excalidraw-mcp)
   # https://github.com/excalidraw/excalidraw-mcp Excalidraw MCP，这个更适合拿来想事情，尤其是流程图、系统结构这类内容，靠文字说不清的时候，画一下会快很多。
 
@@ -121,28 +113,12 @@ in {
         # ddg 负责搜索
         # 严格说它们是上下游，不是同一个工具位；但从用户口径“帮我上网查资料”来看，它们经常服务同一个目标。也就是说，这组是工作流重叠，不是实现重叠。如果你偏向极简配置，这组也值得审视；但如果你希望“先搜索再打开”，保留两者是合理的。
         fetch = {
-          tools = {
-            fetch.approval_mode = "approve";
-          };
+          default_tools_approval_mode = "approve";
         };
 
         # filesystem 可以列目录、读文件、搜索文件、读多文件、拿文件信息，甚至写改文件。filesystem 是通用文件系统能力。
         filesystem = {
-          tools = {
-            create_directory.approval_mode = "prompt";
-            directory_tree.approval_mode = "approve";
-            edit_file.approval_mode = "prompt";
-            get_file_info.approval_mode = "approve";
-            list_directory.approval_mode = "approve";
-            list_directory_with_sizes.approval_mode = "approve";
-            move_file.approval_mode = "prompt";
-            read_file.approval_mode = "approve";
-            read_media_file.approval_mode = "approve";
-            read_multiple_files.approval_mode = "approve";
-            read_text_file.approval_mode = "approve";
-            search_files.approval_mode = "approve";
-            write_file.approval_mode = "prompt";
-          };
+          default_tools_approval_mode = "approve";
         };
 
         # https://github.com/johnhuang316/code-index-mcp
@@ -151,30 +127,12 @@ in {
         #  "code-index" = {
         #    command = "uvx";
         #    args = ["code-index-mcp"];
-        #    tools = {
-        #      build_deep_index.approval_mode = "approve";
-        #      check_temp_directory.approval_mode = "approve";
-        #      clear_settings.approval_mode = "prompt";
-        #      configure_file_watcher.approval_mode = "prompt";
-        #      create_temp_directory.approval_mode = "approve";
-        #      find_files.approval_mode = "approve";
-        #      get_file_summary.approval_mode = "approve";
-        #      get_file_watcher_status.approval_mode = "approve";
-        #      get_settings_info.approval_mode = "approve";
-        #      get_symbol_body.approval_mode = "approve";
-        #      refresh_index.approval_mode = "approve";
-        #      refresh_search_tools.approval_mode = "approve";
-        #      search_code_advanced.approval_mode = "approve";
-        #      set_project_path.approval_mode = "prompt";
-        #    };
+        #    default_tools_approval_mode = "approve";
         #  };
 
         nixos = {
           startup_timeout_sec = 50;
-          tools = {
-            nix.approval_mode = "approve";
-            nix_versions.approval_mode = "approve";
-          };
+          default_tools_approval_mode = "approve";
         };
 
         # https://github.com/ChromeDevTools/chrome-devtools-mcp
@@ -191,45 +149,12 @@ in {
         "chrome-devtools" = {
           command = "${pkgs.chrome-devtools-mcp}/bin/chrome-devtools-mcp";
           args = [];
-          tools = {
-            click.approval_mode = "approve";
-            close_page.approval_mode = "approve";
-            drag.approval_mode = "approve";
-            emulate.approval_mode = "approve";
-            evaluate_script.approval_mode = "approve";
-            fill.approval_mode = "approve";
-            fill_form.approval_mode = "prompt";
-            get_console_message.approval_mode = "approve";
-            get_network_request.approval_mode = "approve";
-            handle_dialog.approval_mode = "approve";
-            hover.approval_mode = "approve";
-            lighthouse_audit.approval_mode = "approve";
-            list_console_messages.approval_mode = "approve";
-            list_network_requests.approval_mode = "approve";
-            list_pages.approval_mode = "approve";
-            navigate_page.approval_mode = "approve";
-            new_page.approval_mode = "approve";
-            performance_analyze_insight.approval_mode = "approve";
-            performance_start_trace.approval_mode = "approve";
-            performance_stop_trace.approval_mode = "prompt";
-            press_key.approval_mode = "approve";
-            resize_page.approval_mode = "approve";
-            select_page.approval_mode = "approve";
-            take_memory_snapshot.approval_mode = "approve";
-            take_screenshot.approval_mode = "approve";
-            take_snapshot.approval_mode = "approve";
-            type_text.approval_mode = "approve";
-            upload_file.approval_mode = "approve";
-            wait_for.approval_mode = "approve";
-          };
+          default_tools_approval_mode = "approve";
         };
 
         # context7 偏库/框架文档
         context7 = {
-          tools = {
-            "query-docs".approval_mode = "approve";
-            "resolve-library-id".approval_mode = "approve";
-          };
+          default_tools_approval_mode = "approve";
         };
 
         # https://docs.devin.ai/work-with-devin/deepwiki-mcp
@@ -266,55 +191,19 @@ in {
         #  };
 
         #  terraform = {
-        #    tools = {
-        #      terraform_validate.approval_mode = "approve";
-        #      terraform_plan.approval_mode = "approve";
-        #      terraform_output.approval_mode = "approve";
-        #      terraform_state_list.approval_mode = "approve";
-        #      terraform_state_show.approval_mode = "approve";
-        #      terraform_fmt.approval_mode = "approve";
-        #      terraform_providers.approval_mode = "approve";
-        #      terraform_init.approval_mode = "prompt";
-        #      terraform_apply.approval_mode = "prompt";
-        #      terraform_destroy.approval_mode = "prompt";
-        #    };
+        #  default_tools_approval_mode = "approve";
         #  };
 
         #  playwright = {
-        #    tools = {
-        #      browser_snapshot.approval_mode = "approve";
-        #      browser_take_screenshot.approval_mode = "approve";
-        #      browser_network_requests.approval_mode = "approve";
-        #      browser_console_messages.approval_mode = "approve";
-        #      browser_wait_for.approval_mode = "approve";
-        #      browser_navigate.approval_mode = "prompt";
-        #      browser_click.approval_mode = "prompt";
-        #      browser_hover.approval_mode = "prompt";
-        #      browser_type.approval_mode = "prompt";
-        #      browser_press_key.approval_mode = "prompt";
-        #      browser_select_option.approval_mode = "prompt";
-        #      browser_fill_form.approval_mode = "prompt";
-        #      browser_go_back.approval_mode = "prompt";
-        #      browser_go_forward.approval_mode = "prompt";
-        #      browser_close.approval_mode = "prompt";
-        #    };
+        #  default_tools_approval_mode = "approve";
         #  };
 
         # 先预留，按需启用（当前先注释）。
         # serena = {
-        #   tools = {
-        #     find_symbol.approval_mode = "approve";
-        #     find_referencing_symbols.approval_mode = "approve";
-        #     get_symbols_overview.approval_mode = "approve";
-        #     replace_symbol_body.approval_mode = "prompt";
-        #   };
+        #  default_tools_approval_mode = "approve";
         # };
         # grafana = {
-        #   tools = {
-        #     search_dashboards.approval_mode = "approve";
-        #     get_dashboard.approval_mode = "approve";
-        #     query_datasource.approval_mode = "approve";
-        #   };
+        # default_tools_approval_mode = "approve";
         # };
       };
     };
