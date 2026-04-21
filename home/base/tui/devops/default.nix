@@ -23,6 +23,10 @@
     yamllint
     markdownlint-cli
 
+    # https://mynixos.com/nixpkgs/package/api-linter
+    # https://mynixos.com/nixpkgs/package/dotenv-linter
+    # https://mynixos.com/nixpkgs/package/gitlab-ci-linter
+
     # https://mynixos.com/nixpkgs/package/kdlfmt
     # kdlfmt 的 pre-commit 仍然需要bin才能使用
     kdlfmt

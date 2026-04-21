@@ -19,6 +19,12 @@ in {
       force = true;
     };
 
+    home = {
+      shellAliases = {
+        colima-start = "colima start --save-config=false";
+      };
+    };
+
     # https://mynixos.com/home-manager/options/services.colima
     # https://mynixos.com/nixpkgs/package/colima
     services.colima = {

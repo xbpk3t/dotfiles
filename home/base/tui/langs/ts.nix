@@ -41,6 +41,7 @@
   };
 
   # https://mynixos.com/home-manager/options/programs.bun
+  # $HOME/.config/.bunfig.toml
   # [2026-01-19] 安装 OMO 需要先安装bun
   programs.bun = {
     enable = true;
