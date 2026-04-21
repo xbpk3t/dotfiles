@@ -112,7 +112,6 @@ in {
           };
         };
       };
-      custom-instructions = "";
     };
 
     home = {
