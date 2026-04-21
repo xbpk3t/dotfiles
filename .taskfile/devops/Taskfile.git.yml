@@ -17,9 +17,6 @@ dir: '{{.USER_WORKING_DIR}}'
 #- git rebase -i HEAD~n # 合并前n个commit。需要注意的是，编辑时把pick改为s即可，记得第一个不要修改（需要父commit）
 
 
-vars:
-  GH_TOKEN:
-    sh: gh auth token
 
 # PLAN: [2026-03-07] 这种涉及实际命令执行的，不应该放到taskfile级别的vars里（1、把这条加到 taskfile-BP 的 skills里。2、处理本taskfile的问题）
 #  COMMIT_HASH:
@@ -82,56 +79,7 @@ tasks:
     dir: '{{.USER_WORKING_DIR}}'
 
 
-
-
-
-  # 查看 tag list
-  tag-list:
-    desc: "tag list 任务"
-    summary: "task -g tag-list"
-    cmd:
-
-
-  #  - url: https://github.com/Bhupesh-V/ugit
-  #    des: 千呼万唤才出来的git工具，用来撤销git操作。最经典的场景就是，经常有那种已经commit了，然后还有点代码想放到那个commit里提交上去。这个就很难操作，这种情况下用ugit就很容易了。
-  # 使用 ugit 撤销上一次 Git 操作（支持交互式选择）
   # 怎么修改（上一次commit的，以及指定commit的） commit message? # git rebase -i：修改某次 commit 的 message。
-  undo:
-    desc: "使用 ugit 撤销上一次 Git 操作（支持交互式菜单）"
-    summary: "task -g undo"
-    silent: true
-    cmd: |
-      if [ -z "{{.CLI_ARGS}}"]; then
-      ugit;
-      else
-      ugit undo {{.CLI_ARGS}};
-      fi
-    dir: '{{.USER_WORKING_DIR}}'
-
-  #- 操作场景: 【回滚本地未提交代码】丢弃未暂存更改
-  #  原生 Git 命令: "git restore . 或 git checkout -- ."
-  #  ugit 替代方案: "ugit → 选择 Undo git add"
-  #
-  #- 操作场景: 【回滚本地已提交的代码】
-  #  原生 Git 命令: "git reset --soft HEAD~1（保留修改）；git reset --hard HEAD~1（彻底删除）"
-  #  ugit 替代方案: "ugit → 选择 Undo git commit"
-  #
-  #- 操作场景: 回滚所有未暂存/未贮藏代码
-  #  原生 Git 命令: "git restore . && git clean -df（含未跟踪文件）"
-  #  ugit 替代方案: "ugit → 组合使用 Undo git add + git clean"
-  #
-  #- 操作场景: 【撤回已 push 的提交】
-  #  原生 Git 命令: "git revert <commit>（安全）；git reset --hard <commit> && git push -f（危险）"
-  #  ugit 替代方案: "ugit → 选择 Undo git push"
-  #
-  #- 操作场景: 恢复误删除的 commit
-  #  原生 Git 命令: "git reflog → 找到 commit hash → git reset --hard <hash>"
-  #  ugit 替代方案: "ugit → 选择 Undo git reset"
-  #
-  #- 操作场景: 彻底删除历史 commit
-  #  原生 Git 命令: "git reset --hard <commit-id>（本地）；git push origin HEAD --force（远程）"
-  #  ugit 替代方案: "ugit 仅支持删除最近 commit（等效 reset HEAD~1）"
-
 
 
   # https://github.com/newren/git-filter-repo
@@ -162,41 +110,35 @@ tasks:
     summary: "task -g fetch"
     preconditions:
       - sh: command -v fetch
+        msg:
       - sh: command -v gh
     vars:
       DEFAULT_BRANCH:
         sh: gh repo view {{.CLI_ARGS}} --json defaultBranchRef --jq .defaultBranchRef.name
       REPO_NAME: '{{.CLI_ARGS | splitList "/" | last}}'
+      GH_TOKEN:
+        sh: gh auth token
     cmd: fetch --repo="{{.CLI_ARGS}}" --github-oauth-token={{.GH_TOKEN}} --branch="{{.DEFAULT_BRANCH}}" {{.REPO_NAME}}
     dir: '{{.USER_WORKING_DIR}}'
     interactive: true
 
 
-
-  token:
-    desc: "token 任务"
-    summary: "task -g token"
-    silent: true
-    interactive: true
-    cmd: 'echo {{.GH_TOKEN}}'
-
-
   #- url: https://github.com/cli/cli
   # [Manual | GitHub CLI](https://cli.github.com/manual/)
-  gist:clear:
-    desc: 清空所有gist
-    summary: "task -g gist:clear"
-    interactive: true
-    cmds:
-      - "echo gist numbers: {{.GIST_LIST | splitLines | len}}"
-      - for:
-          var: GIST_LIST
-          split: "\n"
-        cmd: "gh gist delete --yes {{.ITEM}}"
-    vars:
-      GIST_LIST:
-        sh: gh gist list --limit 100 | awk '{print $1}'
-      ITEM: ''
+#  gist:clear:
+#    desc: 清空所有gist
+#    summary: "task -g gist:clear"
+#    interactive: true
+#    cmds:
+#      - "echo gist numbers: {{.GIST_LIST | splitLines | len}}"
+#      - for:
+#          var: GIST_LIST
+#          split: "\n"
+#        cmd: "gh gist delete --yes {{.ITEM}}"
+#    vars:
+#      GIST_LIST:
+#        sh: gh gist list --limit 100 | awk '{print $1}'
+#      ITEM: ''
 
   # 我现在main分支的代码挂了，我怎么把代码切到之前的某个正常commit，并且把这部分新增的commit切到一个新branch？操作的具体流程 # git checkout -b <new-branch> <existed-branch> && git reset --hard <commit-id> && git push -f
 
@@ -224,13 +166,9 @@ tasks:
     vars:
       size: "{{.size | default 20}}"
 
-
-
-
   #- git grep -n -p <str> # 从当前branch中查找指定字符串，相比于 'git grep -n <str>' 会显示匹配行以及上下几行的内容
   #- git grep -n -p <str> <commit号/tag号> # 从指定commit中查找指定字符串
   #- git rev-list --all | xargs git grep <str> # 从所有历史commit中查找指定字符串
-
 
   # for commit in $(git rev-list --all); do
   #  git grep <str> $commit -- "*.nix" && echo "Found in commit $commit"
@@ -246,12 +184,6 @@ tasks:
     dir: '{{.USER_WORKING_DIR}}'
 
 
-  #- git remote rm origin && git remote add origin <url> # git 怎么修改远程仓库地址
-  modify-origin:
-    desc: 修改远程仓库地址
-    summary: "task -g modify-origin"
-    cmd: git remote rm origin && git remote add origin {{.CLI_ARGS}}
-    dir: '{{.USER_WORKING_DIR}}'
 
 
   #- git log --graph --date=short # 查看提交记录，相当于 glods
@@ -263,18 +195,6 @@ tasks:
   #  - git gc 是啥意思？有啥用？ # [git clean - Reduce Git repository size - Stack Overflow](https://stackoverflow.com/questions/2116778/reduce-git-repository-size)
   #  - If I delete a git branch, whether .git folder size will decrease or not? git gc # git gc --prune=now
   # git-gc:
-
-
-
-  #- url: https://github.com/kubernetes/git-sync
-  #  des: 怎么保证repo和其upstream同步?
-  # fork 后如何同步源的最新代码：我fork出来的分支，怎么同步后来父分支的更新？ # [Syncing a fork - GitHub Docs](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork) git remote add <upstream> && git fetch <upstream> && git checkout main && git merge <upstream>/master
-  # sync-upstream:
-
-
-  # 怎么合并多个 commit? rebase、merge、cherry pick都可以合并多个 commit，有啥区别? Why we'd better use merge?***" # rebase 操作和 cherry-pick 操作都会修改 commit-id，导致无法追溯问题。所以通常禁止使用，只允许 merge 操作公共分支（merge将两个分支上的所有提交记录合并成一个新的提交记录，并且保留原来的提交记录。这个操作不会修改提交记录的 SHA 值），方便 debug。
-  # merge-commit:
-
 
 
   # case: 类似docs-images这种项目，我需要用git来检查已修改文件，但因为全都是大文件，所以必然会导致.git的size很大，所以怎么解决这个问题？

@@ -2,7 +2,6 @@
 version: '3'
 
 vars:
-  RCLONE: "rclone"
   RCLONE_REMOTE: "r2"                     # rclone.conf 中的存储配置名
   TREE_SIG_SCRIPT: '{{.TASKFILE_DIR}}/scripts/tree-sig.nu' # 重要：tree signature 逻辑统一收敛到 nushell script，Taskfile 只负责 orchestration
 
@@ -26,14 +25,14 @@ tasks:
     requires:
       vars: [BUCKET, LOCAL_PATH]
     cmds:
-      #      - '{{.RCLONE}} sync --update --checksum --fast-list --transfers 30 --s3-upload-concurrency 30 "{{.LOCAL_PATH}}" "{{.RCLONE_REMOTE}}:{{.BUCKET}}" --stats=10s --progress {{.DRY_RUN_FLAG}}'
-      - '{{.RCLONE}} sync --update --checksum --fast-list --transfers 30 --s3-upload-concurrency 30 "{{.LOCAL_PATH}}" "{{.RCLONE_REMOTE}}:{{.BUCKET}}" --stats-one-line -v {{.EXCLUDE_FLAGS}} {{.DRY_RUN_FLAG}}'
+      #      - 'rclone sync --update --checksum --fast-list --transfers 30 --s3-upload-concurrency 30 "{{.LOCAL_PATH}}" "{{.RCLONE_REMOTE}}:{{.BUCKET}}" --stats=10s --progress {{.DRY_RUN_FLAG}}'
+      - 'rclone sync --update --checksum --fast-list --transfers 30 --s3-upload-concurrency 30 "{{.LOCAL_PATH}}" "{{.RCLONE_REMOTE}}:{{.BUCKET}}" --stats-one-line -v {{.EXCLUDE_FLAGS}} {{.DRY_RUN_FLAG}}'
 
   bisync:
     internal: true
     desc: rclone bisync 操作
     cmds:
-      - '{{.RCLONE}} bisync "{{.LOCAL_PATH}}" "{{.RCLONE_REMOTE}}:{{.BUCKET}}" --create-empty-src-dirs --resync --stats-one-line -v {{.DRY_RUN_FLAG}}'
+      - 'rclone bisync "{{.LOCAL_PATH}}" "{{.RCLONE_REMOTE}}:{{.BUCKET}}" --create-empty-src-dirs --resync --stats-one-line -v {{.DRY_RUN_FLAG}}'
     requires:
       vars: [RCLONE, LOCAL_PATH, RCLONE_REMOTE, BUCKET, DRY_RUN_FLAG]
 
@@ -42,7 +41,7 @@ tasks:
     internal: true
     desc: rclone check 操作
     cmds:
-      - '{{.RCLONE}} check "{{.LOCAL_PATH}}" "{{.RCLONE_REMOTE}}:{{.BUCKET}}" --size-only --one-way {{.DRY_RUN_FLAG}}'
+      - 'rclone check "{{.LOCAL_PATH}}" "{{.RCLONE_REMOTE}}:{{.BUCKET}}" --size-only --one-way {{.DRY_RUN_FLAG}}'
     requires:
       vars: [RCLONE, LOCAL_PATH, RCLONE_REMOTE, BUCKET, DRY_RUN_FLAG]
 
@@ -77,7 +76,7 @@ tasks:
           --stamp "{{.DOCS_IMAGES_SYNC_STAMP}}"
       - echo "Execute sync-docs task success"
     preconditions:
-      - sh: command -v "{{.RCLONE}}" >/dev/null
+      - sh: command -v "rclone" >/dev/null
         msg: "rclone not found: install rclone"
       - sh: command -v nu >/dev/null
         msg: "nu not found"
@@ -114,13 +113,13 @@ tasks:
       vars: [BUCKET]
     cmds:
       - echo "rclone 配置文件路径"
-      - '{{.RCLONE}} config file'
+      - 'rclone config file'
       - echo "统计远程存储使用量"
-      - '{{.RCLONE}} size {{.RCLONE_REMOTE}}:{{.BUCKET}}'
+      - 'rclone size {{.RCLONE_REMOTE}}:{{.BUCKET}}'
       - echo "列出所有配置的远程存储"
-      - '{{.RCLONE}} listremotes'
+      - 'rclone listremotes'
       - echo "列出远程文件详情（含大小/时间）" # 列出指定路径下的所有的文件以及文件大小和路径，并且显示上传时间
-      - '{{.RCLONE}} lsl {{.RCLONE_REMOTE}}:{{.BUCKET}}/{{.TARGET_PATH}}'
+      - 'rclone lsl {{.RCLONE_REMOTE}}:{{.BUCKET}}/{{.TARGET_PATH}}'
 
 
   rev-sync:
@@ -128,7 +127,7 @@ tasks:
     internal: true
     desc: "⚠️ 同步远程文件到本地（会删除本地多余文件）"
     cmds:
-      - '{{.RCLONE}} sync {{.RCLONE_REMOTE}}:{{.BUCKET}}/{{.REMOTE_PATH}} {{.LOCAL_PATH}} {{.DRY_RUN_FLAG}}'
+      - 'rclone sync {{.RCLONE_REMOTE}}:{{.BUCKET}}/{{.REMOTE_PATH}} {{.LOCAL_PATH}} {{.DRY_RUN_FLAG}}'
     vars:
       REMOTE_PATH: "docs"  # 指定远程路径
       BUCKET: ''
@@ -142,7 +141,7 @@ tasks:
     internal: true
     desc: "🔥 删除远程文件夹内容（默认模拟执行）"
     cmds:
-      - '{{.RCLONE}} delete {{.RCLONE_REMOTE}}:{{.BUCKET}}/{{.TARGET_PATH}} {{.DRY_RUN_FLAG}}'
+      - 'rclone delete {{.RCLONE_REMOTE}}:{{.BUCKET}}/{{.TARGET_PATH}} {{.DRY_RUN_FLAG}}'
     vars:
       TARGET_PATH: "x"  # 需删除的路径
       BUCKET: ''
@@ -154,7 +153,7 @@ tasks:
     internal: true
     desc: "🔥 彻底删除远程文件夹（包括目录本身）"
     cmds:
-      - '{{.RCLONE}} purge {{.RCLONE_REMOTE}}:{{.BUCKET}}/{{.TARGET_PATH}} {{.DRY_RUN_FLAG}}'
+      - 'rclone purge {{.RCLONE_REMOTE}}:{{.BUCKET}}/{{.TARGET_PATH}} {{.DRY_RUN_FLAG}}'
     vars:
       BUCKET: ''
       DRY_RUN_FLAG: ''
@@ -167,7 +166,7 @@ tasks:
     internal: true
     desc: 删除所有空目录
     cmds:
-      - '{{.RCLONE}} rmdirs {{.RCLONE_REMOTE}}:{{.BUCKET}}/{{.BASE_PATH}} -v'
+      - 'rclone rmdirs {{.RCLONE_REMOTE}}:{{.BUCKET}}/{{.BASE_PATH}} -v'
     vars:
       BASE_PATH: ''
       BUCKET: ''
