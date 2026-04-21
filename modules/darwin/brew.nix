@@ -27,18 +27,18 @@ in {
     brews = [
       # https://github.com/gruntwork-io/fetch
       "fetch"
+
+      # https://github.com/tw93/Mole
+      "mole"
     ];
 
     # 以下casks根据重要性排序
     casks = [
       "alfred"
       "hammerspoon"
-      # "visual-studio-code"
 
       "goland"
-      # "jetbrains-toolbox"
 
-      "tencent-lemon"
       "wechat"
 
       "ghostty"
@@ -57,6 +57,9 @@ in {
       # "wireshark-app"
       # "rustdesk"
       # "orbstack"
+      # "jetbrains-toolbox"
+      # "visual-studio-code"
+      # "tencent-lemon"
 
       # https://github.com/insanum/gcalcli
       # https://formulae.brew.sh/formula/gcalcli
