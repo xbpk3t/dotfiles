@@ -1,0 +1,8 @@
+---
+version: "3"
+
+includes:
+  git: ./Taskfile.git.yml
+  pc: ./Taskfile.pre-commit.yml
+  rclone: ./Taskfile.rclone.yml
+  android: ./Taskfile.android.yml

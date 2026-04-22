@@ -1,0 +1,28 @@
+---
+version: "3"
+
+includes:
+  gost: ./Taskfile.gost.yml
+  ss: ./Taskfile.ss.yml
+  tcp: ./Taskfile.TCP.yml
+  throughput: ./Taskfile.iperf.yml
+  dns: ./Taskfile.DNS.yml
+  ping: ./Taskfile.ping.yml
+  traceroute: ./Taskfile.traceroute.yml
+  nz: ./Taskfile.z.yml
+  ip: ./Taskfile.iproute2.yml
+  nping: ./Taskfile.nping.yml
+  firewall: ./Taskfile.firewall.yml
+  ethtool: ./Taskfile.ethtool.yml
+  bpftool: ./Taskfile.BPF.yml
+  bpftrace: ./Taskfile.BPF.yml
+  nmap: ./Taskfile.nmap.yml
+  naabu: ./Taskfile.naabu.yml
+  arping: ./Taskfile.arping.yml
+  wifi: ./Taskfile.iw.yml
+  curl: ./Taskfile.curl.yml
+  openssl: ./Taskfile.openssl.yml
+  grpcurl: ./Taskfile.grpcurl.yml
+  ws: ./Taskfile.ws.yml
+  chrony: ./Taskfile.chrony.yml
+  sb: ./Taskfile.singbox.yml
