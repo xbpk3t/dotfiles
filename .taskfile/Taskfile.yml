@@ -3,86 +3,48 @@ version: "3"
 
 includes:
   # devops
-  git: devops/Taskfile.git.yml
-  linters: devops/Taskfile.linters.yml
-  ansible: devops/Taskfile.ansible.yml
-  gor: devops/Taskfile.goreleaser.yml
-  caddy: devops/Taskfile.caddy.yml
-  pc: devops/Taskfile.pre-commit.yml
-  rclone: devops/Taskfile.rclone.yml
-  droid: devops/Taskfile.droid.yml
+  # linters: devops/Taskfile.linters.yml
+  # ansible: devops/Taskfile.ansible.yml
+  # gor: devops/Taskfile.goreleaser.yml
+  # caddy: devops/Taskfile.caddy.yml
+  devops:
+    taskfile: devops/Taskfile.yml
+    flatten: true
 
-  # go
-  gz: go/Taskfile.gz.yml
-  go: go/Taskfile.go.yml
+  # langs
+  langs:
+    taskfile: langs/Taskfile.yml
+    flatten: true
 
   # k8s
-  k3d: k8s/Taskfile.k3d.yml
-  docker: k8s/Taskfile.docker.yml
-  mk: k8s/Taskfile.minikube.yml
-  dc: k8s/Taskfile.dc.yml
-  helm: k8s/Taskfile.helm.yml
-  k8s: k8s/Taskfile.k8s.yml
+  k8s:
+    taskfile: k8s/Taskfile.yml
+    flatten: true
 
   # kernel
-  linux: kernel/Taskfile.linux.yml
-  monitor: kernel/Taskfile.monitor.yml
-  pkg: kernel/Taskfile.pkg.yml
-  shell: kernel/Taskfile.shell.yml
-  sysd: kernel/Taskfile.systemd.yml
-  power: kernel/Taskfile.power.yml
-  proc: kernel/proc/default.yml
+  kernel:
+    taskfile: kernel/Taskfile.yml
+    flatten: true
 
   # mac
-  mac: mac/Taskfile.mac.yml
-  mac-cleanup: mac/Taskfile.mac-cleanup.yml
-  brew: mac/Taskfile.brew.yml
-  img: mac/Taskfile.img.yml
-  trzsz: mac/Taskfile.trzsz.yml
-  # scrapy: mac/Taskfile.scrapy.yml
-  # alfred: mac/Taskfile.alfred.yml
-  pnpm: mac/Taskfile.pnpm.yml
-  sc: mac/Taskfile.scratches.yml
+  macos:
+    taskfile: mac/Taskfile.yml
+    flatten: true
 
   # network
-  gost: network/Taskfile.gost.yml
-  ss: network/Taskfile.ss.yml
-  tcp: network/Taskfile.TCP.yml
-  throughput: network/Taskfile.iperf.yml
-  dns: network/Taskfile.DNS.yml
-  ping: network/Taskfile.ping.yml
-  traceroute: network/Taskfile.traceroute.yml
-  nz: network/Taskfile.z.yml
-  ip: network/Taskfile.iproute2.yml
-  nping: network/Taskfile.nping.yml
-  firewall: network/Taskfile.firewall.yml
-  ethtool: network/Taskfile.ethtool.yml
-  bpftool: network/Taskfile.BPF.yml
-  bpftrace: network/Taskfile.BPF.yml
-  nmap: network/Taskfile.nmap.yml
-  naabu: network/Taskfile.naabu.yml
-  arping: network/Taskfile.arping.yml
-  wifi: network/Taskfile.iw.yml
-  curl: network/Taskfile.curl.yml
-  openssl: network/Taskfile.openssl.yml
-  grpcurl: network/Taskfile.grpcurl.yml
-  ws: network/Taskfile.ws.yml
-  chrony: network/Taskfile.chrony.yml
-  sb: network/Taskfile.singbox.yml
-
+  network:
+    taskfile: network/Taskfile.yml
+    flatten: true
 
   # nix
   # 注意这部分同时在 global task 和 dotfiles项目级taskfile里引用（为了同时方便全局调用和在项目里调用）
-  deploy: nix/Taskfile.deploy.yml
-  rollback: nix/Taskfile.rollback.yml
-  flake: nix/Taskfile.flake.yml
-  store: nix/Taskfile.store.yml
-  test: nix/Taskfile.test.yml
-  sops: nix/Taskfile.sops.yml
+  nix:
+    taskfile: nix/Taskfile.yml
 
   # works
-  sec: works/Taskfile.sec.yml
-  skills: works/AI/Taskfile.skills.yml
+  works:
+    taskfile: works/Taskfile.yml
+    flatten: true
 
 
 
@@ -93,4 +55,8 @@ tasks:
     summary: "task -g default"
     silent: true
     interactive: true
-    cmd: task -l
+    cmd: task --list
+
+  count:
+    desc: "task count (注意只有 public task)"
+    cmd: task --list --json | jq '.tasks | length'

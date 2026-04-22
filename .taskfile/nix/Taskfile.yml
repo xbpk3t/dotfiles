@@ -1,0 +1,12 @@
+---
+version: "3"
+
+includes:
+  deploy: ./Taskfile.deploy.yml
+  flake: ./Taskfile.flake.yml
+  nixos-anywhere: ./Taskfile.nixos-anywhere.yml
+  nixos-container: ./Taskfile.nixos-container.yml
+  rollback: ./Taskfile.rollback.yml
+  sk: ./Taskfile.sops.yml
+  store: ./Taskfile.store.yml
+  test: ./Taskfile.test.yml

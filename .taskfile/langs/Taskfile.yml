@@ -1,0 +1,7 @@
+---
+version: "3"
+
+includes:
+  gz: ./Taskfile.gz.yml
+  go: ./Taskfile.go.yml
+  pnpm: ./Taskfile.pnpm.yml
