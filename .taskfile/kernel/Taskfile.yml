@@ -1,0 +1,9 @@
+---
+version: "3"
+
+includes:
+  linux: ./Taskfile.linux.yml
+  monitor: ./Taskfile.monitor.yml
+  shell: ./Taskfile.shell.yml
+  power: ./Taskfile.power.yml
+  proc: ./proc/default.yml

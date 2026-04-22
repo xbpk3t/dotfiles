@@ -21,12 +21,6 @@ vars:
   CONCURRENCY_RESOLVED: '{{.CONCURRENCY | default .CONCURRENCY_DEFAULT}}'
 
 tasks:
-  list:
-    desc: "列出 deploy-rs 节点"
-    summary: "task -g list"
-    cmds:
-      - '{{.NODES_CMD}}'
-
   default:
     desc: "deploy-rs 部署（支持多选）"
     summary: "task -g default"
@@ -43,19 +37,26 @@ tasks:
         printf "%s\n" "{{.HOSTS}}" | xargs -P "{{.CONCURRENCY_RESOLVED}}" -I{} \
           {{.DEPLOY_RS_CMD}} ".#{}" -- --impure
 
-  profile:
-    desc: "deploy-rs 部署指定 profile"
-    summary: "task -g profile"
-    vars:
-      HOST:
-        sh: '{{.NODES_CMD}} | gum choose --header "选择节点"'
-      PROFILE:
-        sh: 'gum input --prompt "Profile 名称 (默认 system): "'
+  list:
+    desc: "列出 deploy-rs 节点"
+    summary: "task -g list"
     cmds:
-      - |
-        profile="{{.PROFILE}}"
-        if [[ -z "$profile" ]]; then
-          {{.DEPLOY_RS_CMD}} .#{{.HOST}} -- --impure
-        else
-          {{.DEPLOY_RS_CMD}} .#{{.HOST}}."$profile" -- --impure
-        fi
+      - '{{.NODES_CMD}}'
+
+# [2026-04-22] 注释掉，因为 default task 本身支持的 多选就已经覆盖掉这个单选profile 的需求了
+#  profile:
+#    desc: "deploy-rs 部署指定 profile"
+#    summary: "task -g profile"
+#    vars:
+#      HOST:
+#        sh: '{{.NODES_CMD}} | gum choose --header "选择节点"'
+#      PROFILE:
+#        sh: 'gum input --prompt "Profile 名称 (默认 system): "'
+#    cmds:
+#      - |
+#        profile="{{.PROFILE}}"
+#        if [[ -z "$profile" ]]; then
+#          {{.DEPLOY_RS_CMD}} .#{{.HOST}} -- --impure
+#        else
+#          {{.DEPLOY_RS_CMD}} .#{{.HOST}}."$profile" -- --impure
+#        fi
