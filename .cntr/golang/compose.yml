@@ -49,7 +49,6 @@ volumes:
 services:
   #  # 开发环境 - Golang
   #  golang:
-  #    profiles: ["dev"]
   #    build:
   #      context: ./golang
   #    container_name: devenv_golang
