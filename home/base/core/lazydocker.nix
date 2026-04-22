@@ -50,6 +50,78 @@
         serviceTop = "{{ .DockerCompose }} top {{ .Service.Name }}";
       };
 
+      customCommands = {
+        containers = [
+          {
+            name = "inspect-ip (all containers)";
+            attach = true;
+            shell = true;
+
+            # docker inspect --format='{{.Name}} - {{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(docker ps -aq)
+            # 查看所有容器IP地址
+            command = "docker ps -aq | xargs -r docker inspect | jq -r '.[] | \"\\(.Name) - \\(.NetworkSettings.Networks | to_entries | map(.value.IPAddress) | join(\" \"))\"'";
+            serviceNames = [];
+          }
+          {
+            name = "exit-code (selected container)";
+            attach = true;
+            shell = false;
+            # 检查容器退出码
+            # docker inspect --format='{{.ExitCode}}' {{.CONTAINER}}
+            command = "docker inspect {{ .Container.ID }} | jq -r '.[0].State.ExitCode'";
+            serviceNames = [];
+          }
+          {
+            name = "ctop";
+            attach = true;
+            shell = false;
+            command = "ctop";
+            serviceNames = [];
+          }
+          {
+            name = "check-mem (selected container)";
+            attach = true;
+            shell = false;
+            command = "docker stats --no-stream --format 'table {{\"{{\"}}.Name{{\"}}\"}}\\t{{\"{{\"}}.MemUsage{{\"}}\"}}\\t{{\"{{\"}}.MemPerc{{\"}}\"}}' {{ .Container.Name }}";
+            serviceNames = [];
+          }
+          {
+            name = "check-cpu (selected container)";
+            attach = true;
+            shell = false;
+            command = "docker stats --no-stream --format 'table {{\"{{\"}}.Name{{\"}}\"}}\\t{{\"{{\"}}.CPUPerc{{\"}}\"}}' {{ .Container.Name }}";
+            serviceNames = [];
+          }
+        ];
+
+        images = [
+          {
+            # 查看镜像构建历史
+            name = "image-history (selected image)";
+            attach = true;
+            shell = false;
+            command = "docker history {{ .Image.ID }}";
+            serviceNames = [];
+          }
+          {
+            name = "analyze (dive selected image)";
+            attach = true;
+            shell = false;
+            command = "dive {{ .Image.ID }}";
+            serviceNames = [];
+          }
+          {
+            name = "verify (selected image size)";
+            attach = true;
+            shell = true;
+
+            # docker inspect {{.IMAGE_NAME}}:{{.IMAGE_TAG}} --format='{{"{{.Size}}"}}' | numfmt --to=iec
+            command = "docker image inspect {{ .Image.ID }} | jq -r '.[0].Size' | numfmt --to=iec";
+            serviceNames = [];
+          }
+        ];
+      };
+
       oS = {
         openCommand = "open {{filename}}";
         openLinkCommand = "open {{link}}";
