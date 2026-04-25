@@ -32,6 +32,15 @@ if not success2 then
     print("ChromeTabLimit 错误:", err2)
 end
 
+local success3, err3 = pcall(function()
+    hs.loadSpoon("HearingToggle")
+    spoon.HearingToggle:start()
+end)
+if not success3 then
+    hs.alert.show("HearingToggle 加载失败")
+    print("HearingToggle 错误:", err3)
+end
+
 -- ========================================
 -- 系统功能
 -- ========================================
