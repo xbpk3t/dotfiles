@@ -35,3 +35,6 @@ result-*
 /.task
 mac-*.md
 wake-*.sh
+
+# 主要针对 taskfile checksum
+*/checksum/

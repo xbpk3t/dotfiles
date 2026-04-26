@@ -1,0 +1,95 @@
+---
+
+#* `recent` → **部分对应**：进 journald 列表后选 source 看最近日志，但不是 `journalctl -n` 那种“全局混合最近 N 条”
+#* `service` → **强对应**：`System units` 里搜服务，`Enter`
+#* `follow` → **强对应**：进入日志后默认就是流式跟随，`Ctrl+S / Ctrl+U / Ctrl+R` 辅助控制。
+
+# LazyJournal 能不能复制日志、导出日志？怎么操作？
+# 复制文本：支持
+#主要依赖终端选择复制，比如 Alt+Shift + 鼠标
+#直接导出当前视图到文件：我没有查到官方文档化支持
+#-l/--logging：
+#不是导出日志
+#而是把 LazyJournal 自己执行的命令写到日志文件中，便于调试/追踪
+#所以当时我给你的实战建议是：
+#
+#用 LazyJournal 找问题、筛选、定位
+#真正要导出时，还是回到 journalctl
+
+
+- topic: recent
+  cmds:
+    - cmd: 启动 lazyjournal
+      des: journalctl -n <LINES> --no-pager
+
+    - cmd: Tab
+      des: 切到 journals 区域
+
+    - cmd: h / l
+      des: 在 System journals / System units 等 journald 列表之间切换
+
+    - cmd: j / k
+      des: 选择一个日志源（近似对应查看最近日志；不是 1:1 的全局 recent）
+
+    - cmd: Enter
+      des: 打开该日志源的最近日志
+
+    - cmd: Ctrl + E
+      des: 跳到日志末尾（更接近 recent 的视角）
+
+    - cmd: Ctrl + A
+      des: 跳到日志开头
+
+    - cmd: /
+      des: 过滤当前日志内容
+
+    - cmd: "说明"
+      des: journalctl -n <LINES> --no-pager（仅部分对应；LazyJournal 更偏“先选 source 再看日志”）
+
+
+- topic: service
+  cmds:
+    - cmd: 启动 lazyjournal
+      des: journalctl -u <SVC> -n 100 --no-pager
+
+    - cmd: 默认进入 System units
+      des: 等价于从 systemd service 列表选择 unit
+
+    - cmd: j / k
+      des: 在 service 列表中移动
+
+    - cmd: /
+      des: 过滤服务名，例如 sshd / traefik / singbox
+
+    - cmd: Enter
+      des: journalctl -u <SVC> -n 100 --no-pager
+
+    - cmd: Ctrl + E
+      des: 跳到该 service 日志末尾
+
+    - cmd: Ctrl + A
+      des: 跳到该 service 日志开头
+
+
+- topic: follow
+  cmds:
+    - cmd: 先进入某个 service 或 journald source
+      des: journalctl -u <SVC> -f / journalctl -f
+
+    - cmd: Enter
+      des: 打开该日志视图并开始跟随新日志
+
+    - cmd: Ctrl + S
+      des: 切换 stream mode（近似对应 -f）
+
+    - cmd: Ctrl + U
+      des: 切换自动更新
+
+    - cmd: Ctrl + R
+      des: 手动刷新当前日志
+
+    - cmd: Ctrl + E
+      des: 保持视角在最新日志附近
+
+    - cmd: "说明"
+      des: 对应 journalctl -f 或 journalctl -u <SVC> -f（这是强对应场景）
