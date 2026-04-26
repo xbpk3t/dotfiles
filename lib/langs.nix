@@ -14,7 +14,9 @@
       rustfmt
 
       # https://mynixos.com/nixpkgs/package/gopls
-      gopls
+      # [2026-04-26] 跟 gotools 的 modernize pkg conflicts 了
+      # (lib.lowPrio gopls)
+
       # https://mynixos.com/nixpkgs/package/zls
       zls
 
