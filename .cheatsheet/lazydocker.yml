@@ -1,0 +1,206 @@
+---
+
+#- docker image run
+#- docker stats --no-stream <container> # 查看 docker 容器的内存占用，只返回当前状态
+#- docker stats --format 'table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}' <container> # 查看 docker 容器的内存占用，格式化输出
+#- docker inspect --format='{{.Name}} - {{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(docker ps -aq) # 查看所有docker容器的ip
+#- docker inspect --format='{{.LogPath}}' <container-name> # 清理某个容器的运行日志
+#- docker inspect <container-id> --format='{{.State.ExitCode}}' # 查看某个容器的退出码。退出码必须在 0-255 之间，0 表示正常退出。外界将程序中断退出，状态码在 129-255。程序自身异常退出，状态码一般在 1-128。
+#- docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Ports}}\t{{.ID}}\t{{.Status}}' # 格式化查看 docker ps
+#- docker network prune # 清理所有没用的容器网络
+#- docker volume ls/inspect/rm/prune # prune, 删除所有现在没有使用的数据卷(类似image的prune)
+#- docker search <formulae> # 从官方仓库搜索image
+#- docker pull # 拉到本地
+#- docker system df # 查看images, containers, volumes所占用的空间
+#- docker commit # 提交镜像
+#- docker history <nginx:latest> # 查看本地镜像的历史提交记录
+#- docker diff <container name/id>
+#- docker exec -it <container name/id> /bin/bash # 进入容器使用exec，而不是attch，因为attch退出后会导致容器停止
+#- docker export/import # 导出/导入 容器
+#- docker image rm $(docker image ls -q <image name>) # 删除镜像名中含有<image name>的镜像
+#- docker image prune -a # 清除所有没有使用的镜像(不仅是dangling images)
+#- docker image prune # 删除所有dangling images(就是没有tag的镜像，比如说二阶段提交后遗弃的一阶段镜像)
+#- docker image prune -a -f && docker container prune -f && docker rmi $(docker images | grep "^<none>" | awk "{print $3}") # 删除悬空镜像、不用的容器、批量删除tag为none的镜像
+#- docker inspect --format '{{ .State.Pid }}' <CONTAINER ID or NAME> # 获取某个容器的PID信息
+#- docker inspect --format '{{ .NetworkSettings.IPAddress }}' <CONTAINER ID or NAME> # 获取某个容器的IP地址
+#- docker container prune # Remove all stopped containers. 清理所有stopped的容器
+#- docker system prune # Remove unused data. 清理所有的stopped的容器、所有dangling状态的image、无用网络
+#- docker rm -fv <containerID> # 停止删除容器，并删除volume
+#- docker container stop/rm $(docker ps -aq) # 停止/清除 所有容器
+#- docker manifest inspect --verbose <image> # 查看manifest (RepoTags, Config, Layers)信息，如果需要更简要的输出，就去掉--verbose
+#- docker image inspect <image> # 比如 docker image inspect <debian>
+#- docker exec -it $(docker ps -ql) sh # 查看docker iptables rules
+#- docker info | grep Storage
+#- docker run --rm -v docker-mariadb_db-mariadb:/data -v $(pwd):/backup ubuntu tar cvf /backup/backup.tar /data # 设置了具名volume，根据docker安全策略是无法找到volume对应的物理文件的，那怎么导出这些sql呢？
+
+
+
+# compose / service 侧：第一份 taskfile 为主
+
+- cmd: "Services/U"
+  des: "docker compose up -d" # 对应 dc-up / full；若要等价 taskfile 里的 --profile full --build，需改 commandTemplates.up 或 dockerCompose 模板
+
+- cmd: "Services/u"
+  des: "docker compose up -d <service>" # 对应单服务 up；可部分覆盖 profile 组合类 task，但不能直接表达 dev/db/cache/monitor/trace/ms/analytics/web-dev/api-dev/micro-dev/data-dev 这些预设组合
+
+- cmd: "Services/D"
+  des: "docker compose down" # 对应 dc-down
+
+- cmd: "Services/R"
+  des: "docker compose up -d --build <service> / docker compose up -d --force-recreate <service> / docker compose restart <service>" # 对应 dc-build / dc-restart；这是 restart options 菜单，不是纯 build-only
+
+- cmd: "Services/r"
+  des: "docker compose restart <service>" # 对应 dc-restart
+
+- cmd: "Services/s"
+  des: "docker compose stop <service>" # 对应按服务 stop；原 taskfile 没单独封装，但属于内置能力
+
+- cmd: "Services/S"
+  des: "docker compose start <service>" # 对应按服务 start；原 taskfile 没单独封装，但属于内置能力
+
+- cmd: "Services/m"
+  des: "docker compose logs -f <service>" # 对应 dc-logs；默认 logs.since 是 60m，tail 默认可配置，不一定等价你 taskfile 的 --tail {{LINES}}
+
+- cmd: "Services/E"
+  des: "docker compose exec <service> <shell>" # 对应 dc-exec；若你要强制 /bin/bash 或自定义 shell，通常要配 custom command
+
+- cmd: "Services/enter -> Main/[ ] -> Top"
+  des: "docker compose top <service>" # 对应 dc-top
+
+- cmd: "Services/enter -> Main/[ ] -> Logs"
+  des: "docker compose logs -f <service>" # 对应 dc-logs；和 Services/m 是同类能力，只是一个走主面板
+
+- cmd: "Services/c"
+  des: "custom docker compose command" # 对应 dc-pull / dc-config / dc-events / 带 --profile 的 up；这类多半靠自定义命令补
+
+- cmd: "Services/b"
+  des: "bulk docker compose commands" # 对应批量 service 操作；适合替代部分场景化 task，但不是 profile preset 的直接等价物
+
+- cmd: "Services/d"
+  des: "docker compose rm / remove service containers" # 更接近 remove containers；不是 dc-down 的 project 级 down
+
+- cmd: "Services/w"
+  des: "open first published port in browser" # 可辅助 health / monitor / trace / grafana / jaeger 一类访问，但不是 docker/compose CLI 本身
+
+
+# container 侧：第二份 taskfile 为主
+
+- cmd: "Containers/s"
+  des: "docker stop <container>" # 对应 stop-container
+
+- cmd: "Containers/d"
+  des: "docker rm <container>" # 对应 rm-container；若目标正在运行，是否强制删除取决于 lazydocker 当前实现，不宜直接等价成 docker rm -f
+
+- cmd: "Containers/r"
+  des: "docker restart <container>" # 第二份 taskfile没单独写 restart，但这是原生能力
+
+- cmd: "Containers/p"
+  des: "docker pause <container>" # 第二份 taskfile没单独写 pause，但这是原生能力
+
+- cmd: "Containers/a"
+  des: "docker attach <container>" # 原 taskfile 明确更偏向 exec 而不是 attach；attach 退出行为和 exec 不同
+
+- cmd: "Containers/E"
+  des: "docker exec -it <container> <shell>" # 可部分对应 run-container 之后的进入容器、也可覆盖你注释里的 docker exec -it ... /bin/bash；若要固定 shell，通常要靠 custom command
+
+- cmd: "Containers/m"
+  des: "docker logs -f <container>" # 对应 container-logs；默认 logs.since 是 60m，可在配置中改成显示全部
+
+- cmd: "Containers/enter -> Main/[ ] -> Stats"
+  des: "docker stats <container>" # 对应 container-stats / check-mem / check-cpu 的主要诉求；但不是逐字等价于你那些 cgroup 采样脚本
+
+- cmd: "Containers/enter -> Main/[ ] -> Config"
+  des: "docker inspect <container>" # 可部分对应 inspect-ip / exit-code / log-clean 前置 inspect；但默认不是你那些精确 format 输出
+
+- cmd: "Containers/enter -> Main/[ ] -> Env"
+  des: "docker inspect / docker exec env" # 原 taskfile没封装 env 查看，但这是内置信息面板
+
+- cmd: "Containers/enter -> Main/[ ] -> Top"
+  des: "docker top <container>" # 可部分对应 ctop / 容器进程查看
+
+- cmd: "Containers/c"
+  des: "custom docker command" # 对应 inspect-ip / exit-code / log-clean / capture 等需要 docker inspect、nsenter、tcpdump 的场景
+
+- cmd: "Containers/b"
+  des: "bulk docker container commands" # 适合批量 stop/rm 一类；不是 task runner 级别的编排
+
+
+# image / volume / network：第二份 taskfile 为主
+
+- cmd: "Images/d"
+  des: "docker rmi <image>" # 对应 image-clean / verify 的一部分；但不是 image prune -a 的直接等价物
+
+- cmd: "Images/c"
+  des: "custom docker image command" # 对应 image-history / build / scan / analyze / optimize / squash / verify；这些大多要靠外部工具或自定义命令
+
+- cmd: "Images/b"
+  des: "bulk docker image commands" # 适合批量删镜像；可部分覆盖 image-clean
+
+- cmd: "Volumes/d"
+  des: "docker volume rm <volume>" # 对应 system-clean / image-backup 的一部分；不是 volume prune 的直接等价物
+
+- cmd: "Volumes/c"
+  des: "custom docker volume command" # 对应 image-backup；可挂 docker run --rm -v <volume>:/data ... tar ... 这类备份命令
+
+- cmd: "Volumes/b"
+  des: "bulk docker volume commands" # 适合批量 volume 管理；不是 volume prune 的直接等价物
+
+- cmd: "Networks/d"
+  des: "docker network rm <network>" # 对应 system-clean 的一部分；不是 network prune 的直接等价物
+
+- cmd: "Networks/c"
+  des: "custom docker network command" # 对应 inspect network / 辅助诊断；原 taskfile没单独封装
+
+- cmd: "Networks/b"
+  des: "bulk docker network commands" # 适合批量 network 管理；不是 network prune 的直接等价物
+
+
+# project / config / 全局辅助
+
+- cmd: "Project/o"
+  des: "open ~/.config/lazydocker/config.yml" # 用来改 dockerCompose、logs.since、logs.tail、customCommands；很多 task 是否能被替代，取决于这里的模板配置
+
+- cmd: "Project/e"
+  des: "edit ~/.config/lazydocker/config.yml" # 同上；若想把 podman-compose 设成默认，通常改 commandTemplates.dockerCompose
+
+- cmd: "Project/m"
+  des: "view lazydocker's own logs" # 不是 docker / compose 业务命令本身，只是排查 lazydocker 行为
+
+- cmd: "1 / 2 / 3 / 4 / 5 / 6"
+  des: "focus Projects / Services / Containers / Images / Volumes / Networks panel" # 这是导航，不直接对应 docker 命令，但方便在不同 task 语义之间切换
+
+- cmd: "[ / ]"
+  des: "switch main tabs" # 常用于在 Logs / Stats / Env / Config / Top 之间切换，不直接对应 docker 命令
+
+- cmd: "enter"
+  des: "focus main panel" # 常用于进入 Logs / Stats / Config / Top 视图，不直接对应 docker 命令
+
+- cmd: "/"
+  des: "filter current list" # 辅助定位 service/container/image/volume/network，不直接对应 docker 命令
+
+
+# 明确建议保留 taskfile，不建议交给 lazydocker 原生替代的能力
+
+- cmd: "N/A"
+  des: "docker run -d --name <app> -p <port>:80 <image>" # run-container；公开资料里没看到 lazydocker 内置创建任意新容器的工作流
+
+- cmd: "N/A"
+  des: "docker system prune -af && docker volume prune -f && docker network prune -f" # system-clean；lazydocker 可分面板删，但不是这条一键链式命令的直接等价物
+
+- cmd: "N/A"
+  des: "truncate -s 0 $(docker inspect --format='{{.LogPath}}' <container>)" # log-clean；通常只能借助 custom command
+
+- cmd: "N/A"
+  des: "docker history <image>" # image-history；lazydocker 可看 layer/inspect，但不是 docker history 的直接等价文本输出
+
+- cmd: "N/A"
+  des: "hadolint / trivy / dive / slim / docker-squash" # lint / scan / analyze / optimize / squash / zzz；这些属于外部工具链，不是 lazydocker 原生职责
+
+- cmd: "N/A"
+  des: "nsenter -t <pid> -n tcpdump ..." # capture；通常只能借助 custom command，且依赖宿主机工具链
+
+- cmd: "N/A"
+  des: "docker compose --profile ... up -d" # dev / db / cache / monitor / trace / ms / analytics / web-dev / api-dev / micro-dev / data-dev；profile 组合入口建议继续留在 taskfile
+
+- cmd: "N/A"
+  des: "docker compose config / docker compose events / docker compose pull" # dc-config / dc-events / dc-pull；更适合作为 custom command 或继续保留 taskfile
