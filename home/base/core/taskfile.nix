@@ -2,41 +2,31 @@
   pkgs,
   mylib,
   ...
-}: let
-  # 保留 .taskfile 目录（子 Taskfile、脚本、assets），直接同步到 $HOME/taskfile/
-  taskfileDir = mylib.relativeToRoot ".taskfile";
+}: {
+  # !!! 注意这里对于 taskfile 的设计。核心需求在于：可以同时保证在 tg 和 tgg 调用，具体来说：
+  ## 1、保证 dotfiles 项目内的 .taskfile folder 独立可用
+  ## 2、保证分发到 global taskfile之后，也可用
+  # 可以看到核心问题在于，在保证项目内可调用情况下，放到 global taskfile里，需要给每层 includes taskfile 都加一个 taskfile 的 prefix，否则层级就不对了。那怎么解决呢？
+  # 之前尝试了用 jq 来在 home.file 里根据入口的 taskfile.yml，给所有 includes里都塞一个taskfile，作为prefix。但是这个修改是脆弱的，果然在修改taskfile.yml写法之后，这个就挂了。之后决定换个写法，这个方案是最简易的。我们在 ~ 下面的 taskfile 只需要 includes我们这个 .taskfile/Taskfile.yml 就行了，这样其实这两个taskfile，从功能来说，其实就合二为一了。
 
-  # 生成供 `task -g` 使用的 Taskfile.yml
-  # - 仅保留 version + includes，其他字段不需要进入全局入口
-  # - 为 includes 的路径自动补齐前缀 taskfile/，并去掉开头的 ./ 或已有的 taskfile/，防止重复
-  # - 当前仓库 includes 均为字符串路径；若后续引入 map 形式，需要再扩展表达式
-  taskfileGlobal =
-    pkgs.runCommand "taskfile-global.yml" {
-      buildInputs = [pkgs.yq-go]; # mikefarah/yq (Go 版)
-    } ''
-      yq eval '. as $r | {"version": ($r.version // "3"),
-        "includes": (
-          ($r.includes // {}) | with_entries(
-            .value = "taskfile/" + (
-              .value
-              | sub("^\\./","")
-              | sub("^taskfile/","")
-            )
-          )
-        )
-      }' ${mylib.relativeToRoot ".taskfile/Taskfile.yml"} > $out
-    '';
-in {
   # 分发 .taskfile 目录（供 includes 解析到子 Taskfile）
   home.file."taskfile" = {
-    source = taskfileDir;
+    source = mylib.relativeToRoot ".taskfile";
     recursive = true;
     force = true;
   };
 
   # 分发由 Nix 生成的全局入口 Taskfile.yml（供 `task -g` 自动发现）
   home.file."Taskfile.yml" = {
-    source = taskfileGlobal;
+    source = pkgs.writeText "taskfile-global.yml" ''
+      ---
+      version: "3"
+
+      includes:
+        all:
+          taskfile: taskfile/Taskfile.yml
+          flatten: true
+    '';
     force = true;
   };
 
