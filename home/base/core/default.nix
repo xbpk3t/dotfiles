@@ -40,7 +40,8 @@
       gnumake
       cmake
 
-      dateutils # 操作日期和时间表达式 dateadd、datediff、strptime
+      # [2026-04-25] darwin 上rebuild失败
+      # dateutils # 操作日期和时间表达式 dateadd、datediff、strptime
 
       # 文件处理
       tree

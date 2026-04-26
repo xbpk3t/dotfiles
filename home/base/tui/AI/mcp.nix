@@ -73,7 +73,8 @@ in {
         fetch.enable = true;
 
         # https://mynixos.com/nixpkgs/package/mcp-nixos
-        nixos.enable = true;
+        # [2026-04-26] build 失败，所以改为false
+        # nixos.enable = false;
 
         # https://mynixos.com/nixpkgs/package/github-mcp-server
         github = {
@@ -130,10 +131,10 @@ in {
         #    default_tools_approval_mode = "approve";
         #  };
 
-        nixos = {
-          startup_timeout_sec = 50;
-          default_tools_approval_mode = "approve";
-        };
+        #  nixos = {
+        #    startup_timeout_sec = 50;
+        #    default_tools_approval_mode = "approve";
+        #  };
 
         # https://github.com/ChromeDevTools/chrome-devtools-mcp
         # 默认改为让 MCP 自己拉起受控 Chrome，而不是附着当前正在使用的浏览器。

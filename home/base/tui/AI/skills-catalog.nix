@@ -416,73 +416,74 @@
   # https://x.com/axiaisacat/status/2030297324962857044
   # https://github.com/pbakaus/impeccable
   # how to use: https://impeccable.style/cheatsheet
-  impeccable = {
-    input = "impeccable";
-    subdir = ".codex/skills";
-    skills = [
-      ######### 核心流程（注意顺序） ##########
-
-      # what: impeccable 版的前端设计主 skill
-      # why: 作为这组 design workflow 的总入口，提供设计原则、反模式和 context gathering protocol，后续 audit/polish 等都依赖它
-      # note: upstream 已把主入口统一命名为 `impeccable`，不再使用旧的 `frontend-design`
-      "impeccable"
-      # what: 技术质量审计
-      # why: 适合先做 accessibility / performance / responsive / theming / anti-pattern 的系统扫描，给后续修复动作提供优先级
-      # note: 偏诊断，不直接改代码；通常是进入这套 workflow 的第一步
-      "audit"
-      # what: UX / 视觉设计批评与审视
-      # why: 适合检查层级、信息组织、情绪氛围、清晰度和整体体验，不局限于可测量的技术问题
-      # note: 和 `audit` 互补；前者偏技术质量，后者偏设计判断
-      "critique"
-      # what: 澄清文案与交互表达
-      # why: 适合处理 button label、empty state、error copy、instruction text 等“不够清楚”的 UX writing 问题
-      # note: 偏信息表达层面的修正，通常作为 critique/audit 之后的定向修复
-      "clarify"
-      # what: 提炼与减法
-      # why: 适合去掉多余层级、装饰和噪音，把界面压缩到更清晰的核心表达
-      # note: 偏结构与内容的减法，不是纯视觉 polish
-      "distill"
-      # what: 健壮性与边界处理
-      # why: 适合补 error handling、empty/loading states、i18n、异常路径和防御性 UX
-      # note: 让设计不仅“好看”，也能在真实使用场景里站得住
-      "harden"
-      # what: 前端性能优化
-      # why: 适合处理动画代价、渲染性能、资源加载和交互流畅度等问题
-      # note: 更偏 engineering quality；通常在主要设计方向确定后再收这部分收益
-      "optimize"
-      # what: 最终出货前的 polish
-      # why: 适合作为最后一轮收尾，把前面已经改到位的页面做精修，提升完成度和一致性
-      # note: 是核心流程的收尾动作，不适合一上来就直接用它代替前面的诊断与修正
-      "polish"
-
-      ######### 辅助核心流程 ##########
-
-      # what: 适配不同设备与场景
-      # why: 适合针对 mobile / tablet / desktop 或不同容器环境调整布局、密度和交互
-      # note: 偏专项修复，通常在 audit 发现响应式问题或明确有多端要求时触发
-      "adapt"
-      # what: 增加有目的的动效
-      # why: 适合用 motion 强化层级、反馈和氛围，而不是堆无意义微交互
-      # note: 是增强项，不是主线必经步骤；需要建立在已有清晰结构之上
-      "animate"
-      # what: 提升视觉张力
-      # why: 适合在界面太平、太保守时增强对比、层级和 personality
-      # note: 用来“加力度”，通常和 `quieter` 构成一对相反方向的调节杆
-      "bolder"
-      # what: 引入更有策略的色彩
-      # why: 适合在现有结构稳定的前提下，增强 palette、accent 和整体色彩表达
-      # note: 偏色彩专项，不替代 `normalize` 对 token / theming 的系统整理
-      "colorize"
-      # what: 增加愉悦感与记忆点
-      # why: 适合在不影响主任务流的前提下加入小惊喜、小反馈和情绪价值
-      # note: 属于体验加分项，优先级通常低于 clarity、a11y 和 robustness
-      "delight"
-      # what: 收敛过强的表达
-      # why: 适合当界面过于吵、过于重、过度装饰时，把视觉语气压回更克制的状态
-      # note: 和 `bolder` 对偶，用来做反向调参，而不是独立主阶段
-      "quieter"
-    ];
-  };
+  # [2026-04-26] impeccable 对于 codex目前似乎不再支持直接处理了，无法直接显式声明 skills，所以也就无法直接使用，注释掉
+  #  impeccable = {
+  #    input = "impeccable";
+  #    subdir = ".codex/skills";
+  #    skills = [
+  #      ######### 核心流程（注意顺序） ##########
+  #
+  #      # what: impeccable 版的前端设计主 skill
+  #      # why: 作为这组 design workflow 的总入口，提供设计原则、反模式和 context gathering protocol，后续 audit/polish 等都依赖它
+  #      # note: upstream 已把主入口统一命名为 `impeccable`，不再使用旧的 `frontend-design`
+  #      "impeccable"
+  #      # what: 技术质量审计
+  #      # why: 适合先做 accessibility / performance / responsive / theming / anti-pattern 的系统扫描，给后续修复动作提供优先级
+  #      # note: 偏诊断，不直接改代码；通常是进入这套 workflow 的第一步
+  #      "audit"
+  #      # what: UX / 视觉设计批评与审视
+  #      # why: 适合检查层级、信息组织、情绪氛围、清晰度和整体体验，不局限于可测量的技术问题
+  #      # note: 和 `audit` 互补；前者偏技术质量，后者偏设计判断
+  #      "critique"
+  #      # what: 澄清文案与交互表达
+  #      # why: 适合处理 button label、empty state、error copy、instruction text 等“不够清楚”的 UX writing 问题
+  #      # note: 偏信息表达层面的修正，通常作为 critique/audit 之后的定向修复
+  #      "clarify"
+  #      # what: 提炼与减法
+  #      # why: 适合去掉多余层级、装饰和噪音，把界面压缩到更清晰的核心表达
+  #      # note: 偏结构与内容的减法，不是纯视觉 polish
+  #      "distill"
+  #      # what: 健壮性与边界处理
+  #      # why: 适合补 error handling、empty/loading states、i18n、异常路径和防御性 UX
+  #      # note: 让设计不仅“好看”，也能在真实使用场景里站得住
+  #      "harden"
+  #      # what: 前端性能优化
+  #      # why: 适合处理动画代价、渲染性能、资源加载和交互流畅度等问题
+  #      # note: 更偏 engineering quality；通常在主要设计方向确定后再收这部分收益
+  #      "optimize"
+  #      # what: 最终出货前的 polish
+  #      # why: 适合作为最后一轮收尾，把前面已经改到位的页面做精修，提升完成度和一致性
+  #      # note: 是核心流程的收尾动作，不适合一上来就直接用它代替前面的诊断与修正
+  #      "polish"
+  #
+  #      ######### 辅助核心流程 ##########
+  #
+  #      # what: 适配不同设备与场景
+  #      # why: 适合针对 mobile / tablet / desktop 或不同容器环境调整布局、密度和交互
+  #      # note: 偏专项修复，通常在 audit 发现响应式问题或明确有多端要求时触发
+  #      "adapt"
+  #      # what: 增加有目的的动效
+  #      # why: 适合用 motion 强化层级、反馈和氛围，而不是堆无意义微交互
+  #      # note: 是增强项，不是主线必经步骤；需要建立在已有清晰结构之上
+  #      "animate"
+  #      # what: 提升视觉张力
+  #      # why: 适合在界面太平、太保守时增强对比、层级和 personality
+  #      # note: 用来“加力度”，通常和 `quieter` 构成一对相反方向的调节杆
+  #      "bolder"
+  #      # what: 引入更有策略的色彩
+  #      # why: 适合在现有结构稳定的前提下，增强 palette、accent 和整体色彩表达
+  #      # note: 偏色彩专项，不替代 `normalize` 对 token / theming 的系统整理
+  #      "colorize"
+  #      # what: 增加愉悦感与记忆点
+  #      # why: 适合在不影响主任务流的前提下加入小惊喜、小反馈和情绪价值
+  #      # note: 属于体验加分项，优先级通常低于 clarity、a11y 和 robustness
+  #      "delight"
+  #      # what: 收敛过强的表达
+  #      # why: 适合当界面过于吵、过于重、过度装饰时，把视觉语气压回更克制的状态
+  #      # note: 和 `bolder` 对偶，用来做反向调参，而不是独立主阶段
+  #      "quieter"
+  #    ];
+  #  };
 
   # https://github.com/EveryInc/compound-engineering-plugin
   # https://github.com/xbpk3t/ce-codex

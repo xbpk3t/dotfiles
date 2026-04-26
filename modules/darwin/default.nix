@@ -26,4 +26,12 @@
       strategy = "automatic";
     };
   };
+
+  # 与 server 侧策略对齐，默认关闭文档产物，减少无关闭包并规避 options.json context warning。
+  documentation = {
+    enable = false;
+    doc.enable = false;
+    info.enable = false;
+    man.enable = false;
+  };
 }

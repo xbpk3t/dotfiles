@@ -10,6 +10,9 @@ in {
     inputs.stylix.homeModules.stylix
   ];
 
+  # 显式采用 HM 新默认，避免 legacy default warning。
+  gtk.gtk4.theme = null;
+
   stylix = {
     enable = lib.mkDefault true;
 

@@ -8,6 +8,7 @@ in {
   programs.git = {
     enable = true;
     lfs.enable = true;
+    signing.format = null;
 
     # 全局忽略文件配置
     ignores = [

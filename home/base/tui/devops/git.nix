@@ -1,4 +1,8 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  lib,
+  ...
+}: {
   home.packages = with pkgs;
     [
       # 分类1：Git 核心操作与协作流程
@@ -122,7 +126,7 @@
       #    desc: "从历史中彻底删除指定路径 (git-extras)"
       #    cmd: git obliterate {{.PATH}}
       # tags(desc): 工作流增强 > 子命令扩展 > Git生态
-      git-extras
+      (lib.lowPrio git-extras)
     ]
     ++ [
       # 分类2：代码质量、安全与历史清理
@@ -190,6 +194,9 @@
   # 这个要比 git-wt 好用
   # https://github.com/k1LoW/git-wt
   # https://mynixos.com/nixpkgs/package/git-wt
+  # [2026-04-22] worktrunk 要比 agent-worktree 更好用。“对大多数人来说，worktrunk 更强、更全，也通常更值得优先选；但不能简单说 agent-worktree 的所有核心体验都被一比一包含了，它在‘单次 agent 闭环’和‘默认合回原 base’这两个点上是更明确的。”
+  ## 要平台化、长期用、功能全：选 worktrunk。
+  ## 要极简 agent 闭环、做完就收：agent-worktree 反而更“顺手”。
   xdg.configFile."worktrunk/config.toml".text = builtins.readFile ./worktrunk.toml;
 
   xdg.configFile."glab-cli/aliases.yml".text = ''
