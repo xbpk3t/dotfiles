@@ -1,6 +1,7 @@
 {
   pkgs,
   config,
+  lib,
   ...
 }: {
   home.packages = with pkgs;
@@ -16,7 +17,8 @@
 
       # https://github.com/golang/tools includes modernize
       # tags(desc): 语言服务 > LSP > 代码智能
-      gopls
+      # [2026-04-26] 跟 gotools 的 modernize pkg conflicts 了
+      (lib.lowPrio gopls)
 
       # tags(desc): 开发体验 > 交互CLI > 终端UI
       gum
