@@ -31,10 +31,50 @@ tasks:
   default:
     desc: "生成集群用的 SOPS Secret（入口任务）"
     summary: "task -g default"
+    set: [pipefail]
     deps:
-      - k8s:generate
+      - k8s:check
+      - _k8s:ensure-output-dir
+    vars:
+      # 配置：由私钥派生的 age 公钥（用于加密输出）
+      AGE_PUBLIC_KEY:
+        sh: 'age-keygen -y "{{.AGE_KEY_FILE}}"'
+    sources:
+      - '{{.SOPS_FILE}}'
+      - '{{.AGE_KEY_FILE}}'
+    generates:
+      - '{{.OUTPUT_FILE}}'
+    cmds:
+      - |
+        SOPS_AGE_KEY_FILE="{{.AGE_KEY_FILE}}" sops -d "{{.SOPS_FILE}}" | \
+          yq eval -o=json '.' - | \
+          jq -c '
+            del(.sops) as $s |
+            {
+              apiVersion: "v1",
+              kind: "Secret",
+              metadata: {
+                name: "{{.K8S_SECRET_NAME}}",
+                namespace: "{{.K8S_NAMESPACE}}"
+              },
+              stringData: (
+                [ $s | paths(scalars) as $p
+                  | { ( $p | map(tostring) | join("_") | ascii_upcase ):
+                      ( $s | getpath($p) // "" | tostring )
+                    }
+                ] | add
+              )
+            }
+          ' | \
+          yq eval -o=yaml - | \
+          SOPS_CONFIG=/dev/null sops --encrypt --age "{{.AGE_PUBLIC_KEY}}" --encrypted-regex '{{.SOPS_ENCRYPTED_REGEX}}' \
+            --input-type yaml --output-type yaml /dev/stdin > "{{.OUTPUT_FILE}}"
 
-  k8s:check:
+        echo "已生成: {{.OUTPUT_FILE}}"
+
+
+  _k8s:check:
+    internal: true
     desc: "检查 secrets 与 age 私钥是否存在"
     summary: "task -g k8s:check"
     preconditions:
@@ -51,52 +91,9 @@ tasks:
       - sh: command -v age-keygen
         msg: "缺少依赖：age-keygen"
 
-  k8s:ensure-output-dir:
+  _k8s:ensure-output-dir:
+    internal: true
     desc: "确保输出目录存在"
     summary: "task -g k8s:ensure-output-dir"
     cmds:
       - 'mkdir -p "{{.OUTPUT_DIR}}"'
-
-  k8s:generate:
-    desc: "渲染并加密集群 Secret"
-    summary: "task -g k8s:generate"
-    set: [pipefail]
-    deps:
-      - k8s:check
-      - k8s:ensure-output-dir
-    vars:
-      # 配置：由私钥派生的 age 公钥（用于加密输出）
-      AGE_PUBLIC_KEY:
-        sh: 'age-keygen -y "{{.AGE_KEY_FILE}}"'
-    sources:
-      - '{{.SOPS_FILE}}'
-      - '{{.AGE_KEY_FILE}}'
-    generates:
-      - '{{.OUTPUT_FILE}}'
-    cmds:
-      - |
-          SOPS_AGE_KEY_FILE="{{.AGE_KEY_FILE}}" sops -d "{{.SOPS_FILE}}" | \
-            yq eval -o=json '.' - | \
-            jq -c '
-              del(.sops) as $s |
-              {
-                apiVersion: "v1",
-                kind: "Secret",
-                metadata: {
-                  name: "{{.K8S_SECRET_NAME}}",
-                  namespace: "{{.K8S_NAMESPACE}}"
-                },
-                stringData: (
-                  [ $s | paths(scalars) as $p
-                    | { ( $p | map(tostring) | join("_") | ascii_upcase ):
-                        ( $s | getpath($p) // "" | tostring )
-                      }
-                  ] | add
-                )
-              }
-            ' | \
-            yq eval -o=yaml - | \
-            SOPS_CONFIG=/dev/null sops --encrypt --age "{{.AGE_PUBLIC_KEY}}" --encrypted-regex '{{.SOPS_ENCRYPTED_REGEX}}' \
-              --input-type yaml --output-type yaml /dev/stdin > "{{.OUTPUT_FILE}}"
-
-          echo "已生成: {{.OUTPUT_FILE}}"

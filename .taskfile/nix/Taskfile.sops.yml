@@ -27,12 +27,13 @@ tasks:
       - 'echo "✅ secrets 文件格式正确"'
 
   # 列出所有加密的键
-  list-keys:
-    desc: "列出所有加密的键"
-    summary: "task -g list-keys"
-    interactive: true
-    cmds:
-      - 'sops -d {{.SOPS_FILE}} | yq eval "keys" -'
+  # [2026-04-27] 有用，但总是记不起来要用这个task（通常直接用view task）代替了
+#  list-keys:
+#    desc: "列出所有加密的键"
+#    summary: "task -g list-keys"
+#    interactive: true
+#    cmds:
+#      - 'sops -d {{.SOPS_FILE}} | yq eval "keys" -'
 
 
 # 加密 secrets 文件
