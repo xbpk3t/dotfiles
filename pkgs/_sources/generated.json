@@ -14,6 +14,27 @@
         },
         "version": "0.21.0"
     },
+    "launchk": {
+        "cargoLock": null,
+        "date": null,
+        "extract": null,
+        "name": "launchk",
+        "passthru": null,
+        "pinned": false,
+        "src": {
+            "deepClone": false,
+            "fetchSubmodules": false,
+            "leaveDotGit": false,
+            "name": null,
+            "owner": "intellekthq",
+            "repo": "launchk",
+            "rev": "launchk-0.3.1",
+            "sha256": "sha256-j9ZU3owYtbKBG4rxZG7GyWymYsFSGR9OJSV+21KBq/A=",
+            "sparseCheckout": [],
+            "type": "github"
+        },
+        "version": "launchk-0.3.1"
+    },
     "trzsz": {
         "cargoLock": null,
         "date": null,
