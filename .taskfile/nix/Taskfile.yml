@@ -8,5 +8,4 @@ includes:
   nixos-container: ./Taskfile.nixos-container.yml
   rollback: ./Taskfile.rollback.yml
   sk: ./Taskfile.sops.yml
-  store: ./Taskfile.store.yml
   test: ./Taskfile.test.yml

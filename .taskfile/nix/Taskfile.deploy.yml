@@ -24,6 +24,7 @@ tasks:
   default:
     desc: "deploy-rs 部署（支持多选）"
     summary: "task -g default"
+    dir: '{{.USER_WORKING_DIR}}'
     vars:
       HOSTS:
         sh: '{{.NODES_CMD}} | gum choose --no-limit --header "选择节点（可多选）"'
@@ -37,11 +38,14 @@ tasks:
         printf "%s\n" "{{.HOSTS}}" | xargs -P "{{.CONCURRENCY_RESOLVED}}" -I{} \
           {{.DEPLOY_RS_CMD}} ".#{}" -- --impure
 
-  list:
-    desc: "列出 deploy-rs 节点"
-    summary: "task -g list"
-    cmds:
-      - '{{.NODES_CMD}}'
+
+# [2026-04-27] 其实没啥用，注释掉
+#  list:
+#    desc: "列出 deploy-rs 节点"
+#    summary: "task -g list"
+#    dir: '{{.USER_WORKING_DIR}}'
+#    cmds:
+#      - '{{.NODES_CMD}}'
 
 # [2026-04-22] 注释掉，因为 default task 本身支持的 多选就已经覆盖掉这个单选profile 的需求了
 #  profile:

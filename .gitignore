@@ -36,5 +36,6 @@ result-*
 mac-*.md
 wake-*.sh
 
+# ignore 本项目里所有 checksum folder
 # 主要针对 taskfile checksum
-*/checksum/
+checksum/

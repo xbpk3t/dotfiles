@@ -4,24 +4,5 @@ version: '3'
 includes:
   tf:
     taskfile: ./infra/Taskfile.yml
-  sk:
-    taskfile: ./.taskfile/nix/Taskfile.sops.yml
-    # dir: '{{.USER_WORKING_DIR}}'
-  sops:
-    taskfile: ./.taskfile/nix/Taskfile.sops.yml
-    dir: '{{.USER_WORKING_DIR}}'
-  flake:
-    taskfile: ./.taskfile/nix/Taskfile.flake.yml
-    dir: '{{.USER_WORKING_DIR}}'
-  deploy:
-    taskfile: ./.taskfile/nix/Taskfile.deploy.yml
-    dir: '{{.USER_WORKING_DIR}}'
-  rollback:
-    taskfile: ./.taskfile/nix/Taskfile.rollback.yml
-    dir: '{{.USER_WORKING_DIR}}'
-  store:
-    taskfile: ./.taskfile/nix/Taskfile.store.yml
-    dir: '{{.USER_WORKING_DIR}}'
-  test:
-    taskfile: ./.taskfile/nix/Taskfile.test.yml
-    dir: '{{.USER_WORKING_DIR}}'
+  nix:
+    taskfile: ./.taskfile/nix/Taskfile.yml
