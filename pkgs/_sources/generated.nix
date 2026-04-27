@@ -13,6 +13,17 @@
       sha256 = "sha256-KMHWSSctf6ihIT792yZeTqaYuHqmUanN2SJje5PI184=";
     };
   };
+  launchk = {
+    pname = "launchk";
+    version = "launchk-0.3.1";
+    src = fetchFromGitHub {
+      owner = "intellekthq";
+      repo = "launchk";
+      rev = "launchk-0.3.1";
+      fetchSubmodules = false;
+      sha256 = "sha256-j9ZU3owYtbKBG4rxZG7GyWymYsFSGR9OJSV+21KBq/A=";
+    };
+  };
   trzsz = {
     pname = "trzsz";
     version = "v1.2.0";
