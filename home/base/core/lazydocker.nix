@@ -1,4 +1,4 @@
-{...}: {
+{lib, ...}: {
   # https://mynixos.com/home-manager/options/programs.lazydocker
 
   # https://github.com/jesseduffield/lazydocker/issues/4#issuecomment-3367900538
@@ -31,7 +31,7 @@
       };
 
       commandTemplates = {
-        dockerCompose = "docker-compose";
+        dockerCompose = "docker compose";
         restartService = "{{ .DockerCompose }} restart {{ .Service.Name }}";
         up = "{{ .DockerCompose }} up -d";
         down = "{{ .DockerCompose }} down";
@@ -143,4 +143,21 @@
       };
     };
   };
+
+  # [Hide project/services panels when not in a docker-compose project · jesseduffield/lazydocker@e3c1c86](https://github.com/jesseduffield/lazydocker/commit/e3c1c8630ae77af0eabca15e00aa270ffbb1d21b) Hide project/services panels when not in a docker-compose project. 按理说应该没问题，但是仍然被识别为应该hide，所以
+  programs.zsh.initContent = lib.mkAfter ''
+    lzd() {
+      local project file
+
+      for file in docker-compose.yml docker-compose.yaml compose.yml compose.yaml; do
+        if [[ -f "$file" ]]; then
+          project="$(basename "$PWD")"
+          lazydocker -p "$project"
+          return
+        fi
+      done
+
+      lazydocker
+    }
+  '';
 }
