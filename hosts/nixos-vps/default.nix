@@ -95,7 +95,8 @@ in {
   };
 
   services = {
-    singbox-server.enable = true;
+    singbox-server.enable = false;
+    mihomo-server.enable = true;
   };
 
   # k3s agent：VPS 统一作为 worker 节点
