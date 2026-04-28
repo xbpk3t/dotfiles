@@ -24,6 +24,7 @@
         "modules/nixos/base"
         "modules/nixos/desktop"
         "modules/nixos/extra/singbox-client.nix"
+        "modules/nixos/extra/mihomo-client.nix"
         "modules/nixos/extra/vscode-remote.nix"
       ];
     home-modules = map mylib.relativeToRoot [
