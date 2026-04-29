@@ -85,11 +85,45 @@ in {
             "swift-lsp@claude-plugins-official" = true;
           };
 
-          # 降低运行噪音，避免额外 telemetry / survey 干扰
           env = {
+            # 降低运行噪音，避免额外 telemetry / survey 干扰
+            # 它等价于同时设置 DISABLE_AUTOUPDATER、DISABLE_FEEDBACK_COMMAND、DISABLE_ERROR_REPORTING、DISABLE_TELEMETRY。而且 survey 在 DISABLE_TELEMETRY 或 CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC 设置后也会被禁用。
+            # 但这里仍显式列出关键开关，方便阅读和后续单独调整
+            CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC = "1";
+            # 关闭 Sentry error reporting，也就是 Claude Code 自己崩溃、异常、错误日志上报。
             DISABLE_ERROR_REPORTING = "1";
-            DISABLE_BUG_COMMAND = "1";
+            DISABLE_TELEMETRY = "1";
+
+            # 关闭旧版 /feedback 反馈命令；旧变量名 DISABLE_BUG_COMMAND 仍兼容
+            DISABLE_FEEDBACK_COMMAND = "1";
+            # 关闭 “How is Claude doing?” 这种 session quality survey 弹窗/调查。官方也说如果设置了 DISABLE_TELEMETRY 或 CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC，survey 也会被关掉。
             CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY = "1";
+
+            # 建议新增：Nix 管 Claude Code 包版本，不需要它自己更新
+            DISABLE_AUTOUPDATER = "1";
+            # 建议新增：你用了 ANTHROPIC_BASE_URL 代理时，ToolSearch 默认会被关掉
+            # | 值        | 行为                         | 我的判断                  |
+            #| -------- | -------------------------- | --------------------- |
+            #| `true`   | 永远 defer tools             | 激进，proxy 兼容性要求更高      |
+            #| `auto`   | 工具占上下文不大时 upfront，否则 defer | 比较稳                   |
+            #| `auto:5` | 超过 5% context 才 defer      | 更保守，适合 gateway        |
+            #| `false`  | 全部 upfront load            | 最兼容，但 MCP 多时吃 context |
+            ENABLE_TOOL_SEARCH = "true";
+
+            # [DS-V4-Pro， max模式很强，直接跳过high effort - 开发调优 - LINUX DO](https://linux.do/t/topic/2060808)
+            # 关键：不要写 effortLevel = "max"，用 env 持久化 max
+            # effortLevel 是否会耗费更多token?
+            # 官方说 effort 会影响响应里的所有 token 消耗，包括文本解释、tool calls/function arguments、extended thinking；max 是“absolute maximum capability with no constraints on token spending”。但“多多少”没有固定倍数。原因是 effort 不是硬 token budget，而是行为信号；同一个任务可能只多一点，也可能因为更频繁思考、更多 tool call、更长分析链路而多很多。官方也明确说 max 适合最深推理，但可能收益递减、容易 overthinking，建议在采用为默认前测试。
+            # 建议 claude --effort max 临时开启，或者在 prompt 里说 ultrathink。官方也提到 ultrathink 是单 turn 的 in-context 指令，不会改变 API effort level。
+            # [2026-04-29] 从 max -> xhigh，避免耗费太多token
+            CLAUDE_CODE_EFFORT_LEVEL = "xhigh";
+
+            # 可选：通过 gateway 时，减少系统 prompt 中客户端归因头变化，有助于 gateway 层 prompt cache 命中
+            CLAUDE_CODE_ATTRIBUTION_HEADER = "0";
+
+            # 可选：你确实要用 experimental agent teams 再开
+            # 实验功能：多 Claude Code session 协作。会显著增加 token，用时再开。
+            # CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
           };
 
           editor = {
