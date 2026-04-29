@@ -28,6 +28,7 @@ version: '3'
 
 tasks:
   default:
+    # score: 5 — recommend: public, 路径探测最基础入口，排障高频
     desc: traceroute (IPv4)
     summary: "task -g default HOST=<host>"
     vars:
@@ -39,6 +40,7 @@ tasks:
       - traceroute -n {{.HOST}}
 
   icmp:
+    # score: 4 — recommend: public, ICMP 模式 traceroute，默认 UDP 不通时备用
     desc: traceroute (ICMP mode)
     summary: "task -g icmp HOST=<host>"
     vars:
@@ -51,6 +53,7 @@ tasks:
       - traceroute -I -n {{.HOST}}
 
   tcp:
+    # score: 4 — recommend: public, TCP SYN 模式 traceroute，防火墙环境替代方案
     desc: traceroute (TCP SYN)
     summary: "task -g tcp HOST=<host> [PORT=443]"
     platforms: [linux]
@@ -64,6 +67,7 @@ tasks:
       - traceroute -T -p {{.PORT}} -n {{.HOST}}
 
   darwin:
+    # score: 3 — recommend: public, macOS traceroute，参数不同
     desc: traceroute (IPv4, darwin)
     summary: "task -g darwin HOST=<host>"
     vars:
@@ -76,6 +80,7 @@ tasks:
       - traceroute {{.HOST}}
 
   icmp:darwin:
+    # score: 2 — recommend: internal, macOS + ICMP 组合场景太窄
     desc: traceroute (ICMP mode, darwin)
     summary: "task -g icmp:darwin HOST=<host>"
     vars:
@@ -88,6 +93,7 @@ tasks:
       - traceroute -I {{.HOST}}
 
   tracepath:
+    # score: 3 — recommend: public, 轻量路径探测+PMTU 视角，补充 traceroute
     desc: tracepath (IPv4, no DNS)
     summary: "task -g tracepath HOST=<host>"
     platforms: [linux]
@@ -103,6 +109,7 @@ tasks:
       - tracepath -n {{.HOST}}
 
   tracepath:v6:
+    # score: 2 — recommend: internal, IPv6 tracepath，场景窄
     desc: tracepath (IPv6, no DNS)
     summary: "task -g tracepath:v6 HOST=<host>"
     platforms: [linux]

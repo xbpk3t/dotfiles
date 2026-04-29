@@ -25,9 +25,17 @@ date: 2026-04-20
 
 ## 设计决策
 
-### 使用 Notification 而非 Alert
+### 使用 compact Alert 而非 Notification
 
-优势在于：
+之前会认为
 
+```markdown
 - 1、ChromeTabLimit 的提示是 schedule 提示，并且内容很多（导致面积很大），如果做成 Alert，就会导致造成遮挡，很干扰正常使用。
 - 2、Notification 可以通过开启 `Focus Mode`免打扰来mute，但是 Alert 则除非关掉 hs，否则无法mute。前者更灵活。
+```
+
+但是实际体验中存在问题
+
+确实不再干扰网页正文浏览，但是会遮挡住右上侧，***且需要自己手动点掉***。所以在想，既然 alter面积太大，那我做成 mini size不就行了吗？
+
+所以做成了 Compact Alert

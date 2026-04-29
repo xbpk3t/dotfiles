@@ -28,6 +28,7 @@
       "hosts/${name}/home.nix"
       "secrets/default.nix"
       "home/base/core"
+      "home/base/tui/works/pwn.nix"
       "home/extra/zed-remote.nix"
     ];
   };

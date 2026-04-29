@@ -29,6 +29,7 @@ vars:
 tasks:
   _dig:
     internal: true
+    # score: 5 — recommend: internal (已经是 internal), dig 查询模板，内部使用
     desc: "Template: dig query"
     vars:
       HOST: ''
@@ -50,6 +51,7 @@ tasks:
         fi
 
   answer:
+    # score: 5 — recommend: public, DNS 查询最基础入口，高频
     desc: Query a DNS record with answer output
     summary: "task -g dns:answer HOST=<host> TYPE=<type>"
     platforms: [linux, darwin]
@@ -67,6 +69,7 @@ tasks:
           MODE: '{{.MODE}}'
 
   short:
+    # score: 4 — recommend: public, DNS 精简输出，快速查记录
     desc: Query a DNS record with short output
     summary: "task -g dns:short HOST=<host> TYPE=<type>"
     platforms: [linux, darwin]
@@ -84,6 +87,7 @@ tasks:
           MODE: '{{.MODE}}'
 
   resolver:
+    # score: 4 — recommend: public, 指定 DNS 服务器查询，排查 DNS 污染/分流有用
     desc: Query via a specific DNS server
     summary: "task -g dns:resolver HOST=<host> TYPE=<type> RESOLVER=<ip>"
     platforms: [linux, darwin]
@@ -103,6 +107,7 @@ tasks:
           RESOLVER: '{{.RESOLVER}}'
 
   trace:
+    # score: 4 — recommend: public, DNS 委托路径追踪，排查 DNS 解析链路
     desc: Trace the DNS delegation path
     summary: "task -g dns:trace HOST=<host> TYPE=<type>"
     platforms: [linux, darwin]
@@ -120,6 +125,7 @@ tasks:
       - dig {{.HOST}} {{.TYPE}} +trace
 
   reverse:
+    # score: 3 — recommend: public, IP 反向查询，偶尔排查用
     desc: Reverse lookup for an IP
     summary: "task -g dns:reverse IP=<ip>"
     platforms: [linux, darwin]

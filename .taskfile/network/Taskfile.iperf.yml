@@ -1,31 +1,10 @@
 ---
 version: '3'
 
-# [2026-03-31]
-# 本轮调整后，network/perf 只保留 iperf3 相关 task。
-#
-# 本轮移除的工具级 task：
-# - netperf
-# - pktgen
-# - trafgen
-#
-# 为什么用 iperf3 替代 netperf：
-# - 当前仓库真正需要保留的高频场景，是端到端的 TCP / UDP 吞吐测试。
-# - netperf 和 iperf3 在这类场景上高度重叠，继续同时维护两套入口，只会形成重复
-#   的心智模型和并行的任务定义。
-# - iperf3 更适合作为这里统一的吞吐测试入口，因为它已经足够覆盖常见的 client /
-#   server 测试流程，以及并发流、多路压测、双向测试这些高频动作。
-#
-# 为什么移除 pktgen 和 trafgen：
-# - pktgen 和 trafgen 更偏向发包、造流量、报文生成，不是这一轮要保留的端到端吞吐
-#   测试工具。
-# - 如果继续把它们放在 network/perf 里，这个目录会重新变成 benchmark、packet
-#   crafting、traffic generation 混在一起的大杂烩。
-# - 本轮的目标是把 network/perf 收敛成“稳定、高频、可重复调用的吞吐测试入口”，
-#   因此只保留 iperf3。
 
 tasks:
   server:
+    # score: 3 — recommend: public, iperf3 server 模式，按需启动
     desc: Start iperf3 server
     summary: "task -g throughput:server [BIND=<addr>] [PORT=5201]"
     platforms: [linux, darwin]
@@ -39,6 +18,7 @@ tasks:
       - iperf3 -s {{ if .BIND }}-B {{.BIND}} {{ end }}-p {{.PORT}}
 
   tcp:
+    # score: 4 — recommend: public, iperf3 TCP 吞吐测试，带宽评估高频
     desc: Run iperf3 TCP throughput test
     summary: "task -g throughput:tcp HOST=<host> [DURATION=10] [PORT=5201]"
     platforms: [linux, darwin]
@@ -55,6 +35,7 @@ tasks:
       - iperf3 -c {{.HOST}} -t {{.DURATION}} -p {{.PORT}}
 
   udp:
+    # score: 3 — recommend: public, UDP 吞吐测试，特定场景
     desc: Run iperf3 UDP throughput test
     summary: "task -g throughput:udp HOST=<host> [BANDWIDTH=100M] [DURATION=10] [PORT=5201]"
     platforms: [linux, darwin]
@@ -72,6 +53,7 @@ tasks:
       - iperf3 -u -c {{.HOST}} -b {{.BANDWIDTH}} -t {{.DURATION}} -p {{.PORT}}
 
   parallel:
+    # score: 3 — recommend: public, 多流并发压测，高级场景
     desc: Run iperf3 multi-stream TCP throughput test
     summary: "task -g throughput:parallel HOST=<host> [STREAMS=8] [DURATION=10] [PORT=5201]"
     platforms: [linux, darwin]
@@ -89,6 +71,7 @@ tasks:
       - iperf3 -c {{.HOST}} -P {{.STREAMS}} -t {{.DURATION}} -p {{.PORT}}
 
   bidir:
+    # score: 2 — recommend: internal, 双向吞吐测试，场景窄
     desc: Run iperf3 bidirectional TCP throughput test
     summary: "task -g throughput:bidir HOST=<host> [DURATION=10] [PORT=5201]"
     platforms: [linux, darwin]
