@@ -37,6 +37,7 @@ version: "3"
 
 tasks:
   rules:
+    # score: 5 — recommend: public, 查看 nftables 规则集，防火墙排障核心
     desc: Show nftables ruleset (read-only, requires sudo)
     summary: "task -g firewall:rules"
     platforms: [linux]
@@ -47,6 +48,7 @@ tasks:
       - sudo nft list ruleset
 
   trace:
+    # score: 4 — recommend: public, nftables trace 实时追踪包匹配路径，高级排障
     desc: Monitor nftables rule trace (read-only, long-running, requires sudo)
     summary: "task -g firewall:trace"
     platforms: [linux]
@@ -57,6 +59,7 @@ tasks:
       - sudo nft monitor trace
 
   state:
+    # score: 4 — recommend: public, 查看 conntrack 连接跟踪表，NAT/状态排障高频
     desc: Show conntrack state table (read-only, requires sudo)
     summary: "task -g firewall:state"
     platforms: [linux]
@@ -67,6 +70,7 @@ tasks:
       - sudo conntrack -L
 
   find:
+    # score: 3 — recommend: public, 搜索 conntrack 表，特定场景有用
     desc: Filter conntrack state table by grep pattern
     summary: "task -g firewall:find QUERY='<pattern>'"
     platforms: [linux]
@@ -83,6 +87,7 @@ tasks:
       - sudo conntrack -L | grep -E '{{.QUERY}}'
 
   stats:
+    # score: 3 — recommend: public, conntrack 统计信息，快速看连接数概况
     desc: Show conntrack statistics (read-only, requires sudo)
     summary: "task -g firewall:stats"
     platforms: [linux]

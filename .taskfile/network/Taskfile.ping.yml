@@ -38,6 +38,7 @@ version: '3'
 
 tasks:
   default:
+    # score: 5 — recommend: public, ICMP echo 最基础连通性检查，高频
     desc: ICMP echo (IPv4)
     summary: "task -g default HOST=<host> [COUNT=5] [SIZE=56] [INTERVAL=1]"
     platforms: [linux]
@@ -54,6 +55,7 @@ tasks:
       - ping -c {{.COUNT}} -s {{.SIZE}} -i {{.INTERVAL}} {{.HOST}}
 
   v6:
+    # score: 3 — recommend: public, IPv6 ping，场景明确但非最高频
     desc: ICMP echo (IPv6)
     summary: "task -g v6 HOST=<host> [COUNT=5] [SIZE=56] [INTERVAL=1]"
     platforms: [linux]
@@ -70,6 +72,7 @@ tasks:
       - ping -6 -c {{.COUNT}} -s {{.SIZE}} -i {{.INTERVAL}} {{.HOST}}
 
   pmtu:
+    # score: 3 — recommend: public, PMTU 探测，特定场景有用
     desc: IPv4 DF ping for PMTU probing
     summary: "task -g pmtu HOST=<host> [SIZE=1472] [COUNT=3]"
     platforms: [linux]
@@ -84,6 +87,7 @@ tasks:
       - ping -M do -s {{.SIZE}} -c {{.COUNT}} {{.HOST}}
 
   darwin:
+    # score: 3 — recommend: public, macOS 上 ping，参数不同单独处理
     desc: ICMP echo (IPv4, darwin)
     summary: "task -g darwin HOST=<host> [COUNT=30] [SIZE=56] [INTERVAL=1]"
     platforms: [darwin]
@@ -101,6 +105,7 @@ tasks:
       - ping -c {{.COUNT}} -s {{.SIZE}} -i {{.INTERVAL}} {{.HOST}}
 
   batch:
+    # score: 3 — recommend: public, 批量 host probe，fping 替代方案特定场景
     desc: Batch host probe via fping
     summary: "task -g batch HOSTS='<hosts>' [COUNT=5]"
     platforms: [linux]
@@ -118,6 +123,7 @@ tasks:
       - fping -c {{.COUNT}} {{.HOSTS}}
 
   sweep:
+    # score: 2 — recommend: internal, CIDR 网段存活探测，场景窄
     desc: CIDR sweep via fping
     summary: "task -g sweep CIDR=<cidr>"
     platforms: [linux]
@@ -133,6 +139,7 @@ tasks:
       - fping -a -g {{.CIDR}}
 
   path:
+    # score: 4 — recommend: public, mtr 路径质量报告，排查丢包/抖动高频
     desc: Path quality report via mtr (IPv4)
     summary: "task -g path HOST=<host> [COUNT=50]"
     platforms: [linux]
@@ -150,6 +157,7 @@ tasks:
       - mtr -rwzc {{.COUNT}} {{.HOST}}
 
   path:v6:
+    # score: 2 — recommend: internal, IPv6 mtr 路径质量，场景更窄
     desc: Path quality report via mtr (IPv6)
     summary: "task -g path:v6 HOST=<host> [COUNT=50]"
     platforms: [linux]

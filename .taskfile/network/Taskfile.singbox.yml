@@ -4,6 +4,7 @@ version: '3'
 
 tasks:
   darwin:
+    # score: 2 — recommend: internal, 仅 mac 上重启 singbox 用，场景极窄
     platforms: [darwin]
     summary: "task -g singbox:darwin"
     desc: mac的singbox总是遇到各种问题，所以用这个来

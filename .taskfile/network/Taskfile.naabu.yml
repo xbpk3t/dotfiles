@@ -3,6 +3,7 @@ version: '3'
 
 tasks:
   default:
+    # score: 3 — recommend: public, 快速端口扫描，比 nmap 轻量，特定场景有用
     desc: naabu port scan
     summary: "task -g default HOSTS=<hosts> [PORTS=1-65535] [RATE=1000]"
     platforms: [linux, darwin]
@@ -20,6 +21,7 @@ tasks:
       - naabu -host {{.HOSTS}} -p {{.PORTS}} -rate {{.RATE}}
 
   list:
+    # score: 1 — recommend: remove, 仅列出网卡接口，有 ip link 就够了
     desc: naabu list network interfaces
     summary: "task -g list"
     platforms: [linux, darwin]

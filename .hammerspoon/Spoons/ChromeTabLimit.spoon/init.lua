@@ -43,14 +43,8 @@ obj.chromeAppName = "Google Chrome"
 --- 是否自动关闭多余的标签页（true: 自动关闭，false: 仅提醒）
 obj.autoCloseExcessTabs = false
 
---- ChromeTabLimit.alertDuration
---- Variable
---- 警告显示持续时间（秒），设置为 0 表示无限显示直到标签页数量符合要求
-obj.alertDuration = 0
-
 -- 内部状态
 obj.checkTimer = nil
-obj.currentAlert = nil
 obj.appWatcher = nil
 
 
@@ -136,30 +130,18 @@ end
 
 -- 显示警告并处理超出限制的情况
 local function handleTabLimitExceeded(tabCount, excessCount)
-    local message = string.format("Chrome 标签页过多！\n当前: %d 个，限制: %d 个\n需要关闭: %d 个标签页",
-                                  tabCount, obj.maxTabs, excessCount)
-
-    -- 关闭之前的警告
-    if obj.currentAlert then
-        hs.alert.closeSpecific(obj.currentAlert)
-        obj.currentAlert = nil
-    end
-
     if obj.autoCloseExcessTabs then
-        -- 自动关闭多余标签页
         local closedCount = closeExcessTabs(excessCount)
         if closedCount > 0 then
-            obj.currentAlert = notifs.tabsAutoClosed(closedCount)
+            notifs.tabsAutoClosed(closedCount)
             obj.logger.i("Auto closed " .. closedCount .. " excess tabs")
         else
-            -- 如果无法自动关闭，显示手动提醒
-            obj.currentAlert = notifs.tabsCloseFailed()
+            notifs.tabsCloseFailed()
             obj.logger.w("Unable to auto-close tabs, showing manual alert")
         end
     else
-        -- 仅显示提醒，不自动关闭
-        obj.currentAlert = notifs.tabLimitExceeded(tabCount, obj.maxTabs, excessCount)
-        obj.logger.w("Tab limit exceeded, showing alert only")
+        notifs.tabLimitExceeded(tabCount, obj.maxTabs, excessCount)
+        obj.logger.w("Tab limit exceeded, showing alert")
     end
 end
 
@@ -170,11 +152,6 @@ local function checkTabLimit()
     end
 
     if not isChromeRunning() then
-        -- Chrome 未运行，关闭任何现有警告
-        if obj.currentAlert then
-            hs.alert.closeSpecific(obj.currentAlert)
-            obj.currentAlert = nil
-        end
         return
     end
 
@@ -183,12 +160,6 @@ local function checkTabLimit()
     if tabCount > obj.maxTabs then
         local excessCount = tabCount - obj.maxTabs
         handleTabLimitExceeded(tabCount, excessCount)
-    else
-        -- 标签页数量正常，关闭任何现有警告
-        if obj.currentAlert then
-            hs.alert.closeSpecific(obj.currentAlert)
-            obj.currentAlert = nil
-        end
     end
 end
 
@@ -215,15 +186,9 @@ function obj:start()
         if appName == self.chromeAppName then
             if eventType == hs.application.watcher.launched then
                 self.logger.i("Chrome launched, starting tab monitoring")
-                -- Chrome 启动后稍等一下再开始检查
                 hs.timer.doAfter(2, checkTabLimit)
             elseif eventType == hs.application.watcher.terminated then
                 self.logger.i("Chrome terminated, stopping tab monitoring")
-                -- Chrome 关闭时清除警告
-                if self.currentAlert then
-                    hs.alert.closeSpecific(self.currentAlert)
-                    self.currentAlert = nil
-                end
             end
         end
     end)
@@ -254,11 +219,6 @@ function obj:stop()
     if self.appWatcher then
         self.appWatcher:stop()
         self.appWatcher = nil
-    end
-
-    if self.currentAlert then
-        hs.alert.closeSpecific(self.currentAlert)
-        self.currentAlert = nil
     end
 
     self.logger.i("ChromeTabLimit stopped")
