@@ -1,6 +1,8 @@
 ---
 version: '3'
 
+# score: 所有 task 平均 2-3 分，当前未纳入 network include，建议隐藏处理
+
 
 # sshpass -p '<pass>' ssh -t -o StrictHostKeyChecking=no luck@192.168.71.7 'cd /home/luck/nix-config && echo "<pass>" | sudo -S nixos-rebuild switch --flake .#nixos-ws 2>&1 | tail -100'
 
@@ -14,6 +16,7 @@ env:
 tasks:
 
   setup-ssh:
+    # score: 3 — recommend: public, 新机器 SSH 初始化全流程，偶尔用
     desc: Setup SSH for a new host
     summary: "task -g setup-ssh"
     cmds:
@@ -23,6 +26,7 @@ tasks:
 
   # 默认使用 rsa 算法生成key，但是建议使用 ed25519算法，更安全更快。使用 -C 来标识，比如说github就标识gh，我通常直接把 identifier 和 passphrase密码 设置为相同的，防止忘掉。产生公钥与私钥对，其中id_rsa 私钥，保留不动即可，后续 ssh 命令会自动读取此文件。id_rsa.pub 公钥，此文件需要被保存至目标服务器，用作验证。
   generate-key:
+    # score: 3 — recommend: public, 生成 SSH 密钥，加新机器时有用
     desc: 生成 SSH 密钥对（task -g ssh:generate-key HOST_ALIAS=github）
     summary: "task -g generate-key HOST_ALIAS=<name>"
     vars:
@@ -47,6 +51,7 @@ tasks:
   # 相当于 pbcopy命令。
   # ⚠️ 复制之后最好在服务端验证一下。
   copy-key:
+    # score: 3 — recommend: public, 上传公钥到服务器，加机器时有用
     desc: 上传公钥到目标服务器（task -g ssh:copy-key ）
     summary: "task -g copy-key HOST=<host> HOST_ALIAS=<name>"
     vars:
@@ -67,6 +72,7 @@ tasks:
   # 修改 known_hosts文件 的权限
   # 修改 私钥和公钥 的权限
   set-permissions:
+    # score: 2 — recommend: internal, 设置 SSH 文件权限，手动 chmod 就够了
     desc: Set SSH file permissions
     summary: "task -g set-permissions HOST_ALIAS=<name>"
     vars:
@@ -82,6 +88,7 @@ tasks:
 
 
   verify:
+    # score: 2 — recommend: internal, 验证私钥格式，一次性场景
     desc: "task -g ssh:verify PPK_PATH=/etc/ssh/github/private_key"
     summary: "task -g verify PPK_PATH=<path>"
     vars:
@@ -92,6 +99,7 @@ tasks:
 
 
   clear:
+    # score: 3 — recommend: public, 从 known_hosts 删除旧记录，换 IP 时有用
     desc: 从 $HOME/.ssh/known_hosts 里删除旧记录 # 之前一直是直接删除掉整个文件的，实际上可以通过该命令只删除指定host，不影响其他host
     summary: "task -g clear HOST=<host>"
     vars:

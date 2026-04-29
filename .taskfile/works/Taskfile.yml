@@ -3,5 +3,5 @@ version: "3"
 
 includes:
   sec: ./Taskfile.sec.yml
-  skills: ./AI/Taskfile.skills.yml
+  skills: ./Taskfile.skills.yml
   img: ./Taskfile.img.yml

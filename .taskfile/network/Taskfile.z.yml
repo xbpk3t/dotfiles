@@ -18,6 +18,7 @@ includes:
 
 tasks:
   pmtu:quick:
+    # score: 3 — recommend: public, PMTU 一站式诊断（tracepath+ping），组合 playbook
     desc: PMTU quick playbook (tracepath + DF ping)
     summary: "task -g pmtu:quick HOST=<host> [SIZE=1472] [COUNT=3]"
     requires:
@@ -39,26 +40,31 @@ tasks:
 
 
   ip-link:
+    # score: 2 — recommend: internal, 和 ip taskfile 里 link 重复，无需独立入口
     desc: Show / manipulate link devices
     summary: "task -g nz:ip-link"
     cmd: ip link show
 
   tun:
+    # score: 2 — recommend: internal, 查看 TUN 接口，特定场景
     desc: Show TUN interfaces
     summary: "task -g nz:tun"
     cmd: ip link show | grep tun
 
   ip-route:
+    # score: 2 — recommend: internal, 和 ip taskfile 里 route 重复
     desc: Show routing table
     summary: "task -g nz:ip-route"
     cmd: ip route show
 
   ip-neigh:
+    # score: 2 — recommend: internal, 和 ip taskfile 里 neigh 重复
     desc: Show / manipulate neighbour objects
     summary: "task -g nz:ip-neigh"
     cmd: ip neigh
 
   ip-addr:
+    # score: 2 — recommend: internal, 和 ip taskfile 里 addr 重复
     desc: Show / manipulate protocol address
     summary: "task -g nz:ip-addr"
     cmd: ip addr show
@@ -66,18 +72,21 @@ tasks:
 
   # [jsdelivr/globalping-cli: A simple CLI tool to run networking commands remotely from hundreds of globally distributed servers](https://github.com/jsdelivr/globalping-cli)
   global-ping:
+    # score: 3 — recommend: public, 全球分布式节点探测，特定场景有用
     desc: Run globalping ping from distributed probes
     summary: "task -g nz:global-ping [CLI_ARGS]"
     cmd: globalping ping {{.CLI_ARGS}}
 
   # [batfish/batfish: Batfish is a network configuration analysis tool that can find bugs and guarantee the correctness of (planned or current) network configurations. It enables network engineers to rapidly and safely evolve their network, without fear of outages or security breaches.](https://github.com/batfish/batfish) 一个网络配置分析工具，用于验证和测试网络配置的正确性
   batfish:
+    # score: 1 — recommend: remove, 网络配置分析工具，docker run 启动而已，不值得用 task 封装
     desc: Run batfish all-in-one container
     summary: "task -g nz:batfish"
     cmd: docker run --name batfish -v batfish-data:/data -p 8888:8888 -p 9997:9997 -p 9996:9996 batfish/allinone
 
   # [mr-karan/doggo: :dog: Command-line DNS Client for Humans. Written in Golang](https://github.com/mr-karan/doggo)
   doggo:
+    # score: 2 — recommend: internal, doggo DNS 查询，有 dig 就够了
     desc: Query DNS with doggo
     summary: "task -g nz:doggo [CLI_ARGS]"
     cmd: doggo {{.CLI_ARGS}}
@@ -106,6 +115,7 @@ tasks:
 
 
   wifi:
+    # score: 2 — recommend: internal, nmcli Wi-Fi 管理，和 iw 功能重叠
     desc: Manage Wi-Fi via nmcli
     summary: "task -g nz:wifi"
     cmds:

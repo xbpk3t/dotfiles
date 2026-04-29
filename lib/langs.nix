@@ -42,6 +42,7 @@
       helm-ls
 
       # https://mynixos.com/nixpkgs/package/lua-language-server
+      # [2026-04-28] 相比更好（lua-lsp已经基本上EOL了，）
       lua-language-server
 
       # https://mynixos.com/nixpkgs/package/texlab

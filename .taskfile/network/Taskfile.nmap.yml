@@ -7,6 +7,7 @@ vars:
 tasks:
   # 1. 主机发现
   host-discovery:
+    # score: 2 — recommend: internal, 菜单位置导航，不执行实际扫描
     desc: 主机发现相关任务
     summary: "task -g host-discovery"
     cmds:
@@ -17,6 +18,7 @@ tasks:
       - "echo \"使用: task nmap:host-discovery ping-scan -- <target>\""
 
   ping-scan:
+    # score: 3 — recommend: public, ICMP 存活探测，网段扫描有用
     desc: ICMP ping扫描发现主机
     summary: "task -g ping-scan"
     cmds:
@@ -26,6 +28,7 @@ tasks:
         msg: "请提供目标地址，例如: task nmap:ping-scan -- 192.168.1.0/24"
 
   arp-scan:
+    # score: 3 — recommend: public, ARP 扫描局域网存活，局域网有用
     desc: ARP扫描(局域网专用)
     summary: "task -g arp-scan"
     cmds:
@@ -35,6 +38,7 @@ tasks:
         msg: "请提供目标地址，例如: task nmap:arp-scan -- 192.168.1.0/24"
 
   no-ping:
+    # score: 3 — recommend: public, 跳过主机发现，防火墙环境有用
     desc: 跳过主机发现直接扫描
     summary: "task -g no-ping"
     cmds:
@@ -45,6 +49,7 @@ tasks:
 
   # 2. 端口扫描
   port-scan:
+    # score: 2 — recommend: internal, 菜单位置导航
     desc: 端口扫描相关任务
     summary: "task -g port-scan"
     cmds:
@@ -56,6 +61,7 @@ tasks:
       - "echo \"使用: task nmap:port-scan syn-scan -- <target>\""
 
   syn-scan:
+    # score: 4 — recommend: public, SYN 半开扫描，端口扫描最常用模式
     desc: SYN半开扫描（默认）
     summary: "task -g syn-scan"
     cmds:
@@ -65,6 +71,7 @@ tasks:
         msg: "请提供目标地址，例如: task nmap:syn-scan -- 192.168.1.1"
 
   tcp-scan:
+    # score: 3 — recommend: public, TCP 全连接扫描，SYN 被禁时备用
     desc: TCP全连接扫描
     summary: "task -g tcp-scan"
     cmds:
@@ -74,6 +81,7 @@ tasks:
         msg: "请提供目标地址，例如: task nmap:tcp-scan -- 192.168.1.1"
 
   udp-scan:
+    # score: 3 — recommend: public, UDP 端口扫描，特定场景
     desc: UDP端口扫描
     summary: "task -g udp-scan"
     cmds:
@@ -83,6 +91,7 @@ tasks:
         msg: "请提供目标地址，例如: task nmap:udp-scan -- 192.168.1.1"
 
   port-range:
+    # score: 3 — recommend: public, 指定端口范围，灵活扫描
     desc: 指定端口范围扫描
     summary: "task -g port-range"
     cmds:
@@ -93,6 +102,7 @@ tasks:
 
   # 3. 服务与系统识别
   fingerprint:
+    # score: 2 — recommend: internal, 菜单位置导航
     desc: 服务与系统识别相关任务
     summary: "task -g fingerprint"
     cmds:
@@ -103,6 +113,7 @@ tasks:
       - "echo \"使用: task nmap:fingerprint version-detect -- <target>\""
 
   version-detect:
+    # score: 4 — recommend: public, 服务版本探测，信息收集核心
     desc: 服务版本探测
     summary: "task -g version-detect"
     cmds:
@@ -112,6 +123,7 @@ tasks:
         msg: "请提供目标地址，例如: task nmap:version-detect -- 192.168.1.1"
 
   os-detect:
+    # score: 3 — recommend: public, 操作系统检测，信息收集
     desc: 操作系统检测
     summary: "task -g os-detect"
     cmds:
@@ -121,6 +133,7 @@ tasks:
         msg: "请提供目标地址，例如: task nmap:os-detect -- 192.168.1.1"
 
   aggressive:
+    # score: 4 — recommend: public, 综合扫描，快速全面评估
     desc: 综合扫描模式（OS检测+版本探测+脚本扫描）
     summary: "task -g aggressive"
     cmds:
@@ -131,6 +144,7 @@ tasks:
 
   # 4. 脚本扫描（NSE）
   script-scan:
+    # score: 2 — recommend: internal, 菜单位置导航
     desc: 脚本扫描相关任务
     summary: "task -g script-scan"
     cmds:
@@ -141,6 +155,7 @@ tasks:
       - "echo \"使用: task nmap:script-scan default-script -- <target>\""
 
   default-script:
+    # score: 3 — recommend: public, 默认 NSE 脚本扫描，信息收集补充
     desc: 默认安全脚本扫描
     summary: "task -g default-script"
     cmds:
@@ -150,6 +165,7 @@ tasks:
         msg: "请提供目标地址，例如: task nmap:default-script -- 192.168.1.1"
 
   vuln-scan:
+    # score: 2 — recommend: internal, NSE 漏洞扫描，时间长且场景少
     desc: 漏洞检测脚本
     summary: "task -g vuln-scan"
     cmds:
@@ -159,6 +175,7 @@ tasks:
         msg: "请提供目标地址，例如: task nmap:vuln-scan -- 192.168.1.1"
 
   ssl-cert:
+    # score: 3 — recommend: public, TLS 证书提取，和安全相关的信息收集
     desc: TLS证书信息提取
     summary: "task -g ssl-cert"
     cmds:
@@ -169,6 +186,7 @@ tasks:
 
   # 5. 输出与性能优化
   output-options:
+    # score: 1 — recommend: remove, 菜单位置导航，纯 help 无执行价值
     desc: 输出与性能优化相关任务
     summary: "task -g output-options"
     cmds:
@@ -179,6 +197,7 @@ tasks:
       - "echo \"使用: task nmap:output-options output-normal -- <target>\""
 
   output-normal:
+    # score: 2 — recommend: internal, 保存 nmap 结果到文件，重定向即可替代
     desc: 保存结果到文本文件
     summary: "task -g output-normal"
     cmds:
@@ -188,6 +207,7 @@ tasks:
         msg: "请提供目标地址，例如: task nmap:output-normal -- 192.168.1.1"
 
   output-xml:
+    # score: 1 — recommend: remove, 保存到 XML，几乎不用
     desc: 保存结果到XML文件
     summary: "task -g output-xml"
     cmds:
@@ -197,6 +217,7 @@ tasks:
         msg: "请提供目标地址，例如: task nmap:output-xml -- 192.168.1.1"
 
   fast-scan:
+    # score: 3 — recommend: public, T4 加速扫描，快速端口探测
     desc: 加速扫描（T4速度）
     summary: "task -g fast-scan"
     cmds:
@@ -207,6 +228,7 @@ tasks:
 
   # 6. 隐蔽扫描技巧
   stealth-scan:
+    # score: 1 — recommend: remove, 菜单位置导航
     desc: 隐蔽扫描技巧相关任务
     summary: "task -g stealth-scan"
     cmds:
@@ -217,6 +239,7 @@ tasks:
       - "echo \"使用: task nmap:stealth-scan fragment -- <target>\""
 
   fragment:
+    # score: 1 — recommend: remove, 分片绕过检测，几乎用不到
     desc: 分片数据包发送
     summary: "task -g fragment"
     cmds:
@@ -226,6 +249,7 @@ tasks:
         msg: "请提供目标地址，例如: task nmap:fragment -- 192.168.1.1"
 
   decoy:
+    # score: 1 — recommend: remove, 诱饵扫描，几乎用不到
     desc: 诱饵IP混淆来源
     summary: "task -g decoy"
     cmds:
@@ -235,6 +259,7 @@ tasks:
         msg: "请提供诱饵IP和目标地址，例如: task nmap:decoy -- 192.168.1.5,192.168.1.6 192.168.1.1"
 
   source-port:
+    # score: 1 — recommend: remove, 伪造源端口，几乎用不到
     desc: 伪造源端口
     summary: "task -g source-port"
     cmds:
@@ -245,6 +270,7 @@ tasks:
 
   # 实用组合命令
   quick-web-scan:
+    # score: 2 — recommend: internal, 快速 Web 服务扫描，组合命令可手动替代
     desc: 快速扫描网段存活主机并探测Web服务
     summary: "task -g quick-web-scan"
     cmds:

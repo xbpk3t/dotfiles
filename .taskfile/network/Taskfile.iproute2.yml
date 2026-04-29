@@ -14,6 +14,7 @@ version: '3'
 
 tasks:
   link:
+    # score: 5 — recommend: public, 查看网络接口，最基础操作
     desc: ip link show (list links)
     summary: "task -g link"
     platforms: [linux]
@@ -24,6 +25,7 @@ tasks:
       - ip link show
 
   addr:
+    # score: 5 — recommend: public, 查看 IP 地址配置，高频
     desc: ip addr show (list addresses)
     summary: "task -g addr"
     platforms: [linux]
@@ -34,6 +36,7 @@ tasks:
       - ip addr show
 
   route:
+    # score: 5 — recommend: public, 查看路由表，网络排障核心
     desc: ip route show (IPv4 routes)
     summary: "task -g route"
     platforms: [linux]
@@ -44,6 +47,7 @@ tasks:
       - ip route show
 
   route6:
+    # score: 3 — recommend: public, IPv6 路由表，特定场景
     desc: ip -6 route show (IPv6 routes)
     summary: "task -g route6"
     platforms: [linux]
@@ -54,6 +58,7 @@ tasks:
       - ip -6 route show
 
   rule:
+    # score: 4 — recommend: public, 策略路由规则查看，高级路由排查
     desc: ip rule show (policy routing)
     summary: "task -g rule"
     platforms: [linux]
@@ -64,6 +69,7 @@ tasks:
       - ip rule show
 
   neigh:
+    # score: 4 — recommend: public, ARP/NDP 邻居表，二层排障高频
     desc: ip neigh show (ARP/NDP)
     summary: "task -g neigh"
     platforms: [linux]
@@ -74,6 +80,7 @@ tasks:
       - ip neigh show
 
   monitor:
+    # score: 2 — recommend: internal, 实时监控路由/地址变化，调试场景
     desc: ip monitor (addr/route/neigh changes)
     summary: "task -g monitor"
     platforms: [linux]
@@ -85,6 +92,7 @@ tasks:
       - ip monitor
 
   route:get:
+    # score: 4 — recommend: public, 查看到目的地址的实际选路，排障高频
     desc: ip route get (path to destination)
     summary: "task -g route:get DST=<ip|host>"
     vars:
@@ -100,6 +108,7 @@ tasks:
       - ip route get {{.DST}}
 
   qdisc:
+    # score: 3 — recommend: public, 查看接口队列策略，性能调优有用
     desc: tc qdisc show
     summary: "task -g qdisc IFACE=<iface>"
     vars:
@@ -115,6 +124,7 @@ tasks:
       - sudo tc qdisc show dev {{.IFACE}}
 
   class:
+    # score: 2 — recommend: internal, tc class 查看，QoS 场景才用
     desc: tc class show
     summary: "task -g class IFACE=<iface>"
     vars:
@@ -129,6 +139,7 @@ tasks:
       - sudo tc class show dev {{.IFACE}}
 
   filter:
+    # score: 2 — recommend: internal, tc filter 查看，QoS 场景才用
     desc: tc filter show
     summary: "task -g filter IFACE=<iface>"
     vars:

@@ -10,6 +10,7 @@ version: '3'
 
 tasks:
   default:
+    # score: 3 — recommend: public, 二层可达性排查，特定场景有用但非日常
     desc: arping (L2 reachability)
     summary: "task -g default HOST=<host> [COUNT=5] [IFACE=<iface>]"
     platforms: [linux]
