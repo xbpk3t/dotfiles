@@ -85,9 +85,10 @@ in {
       singbox = {
         label = "LA-RN";
         server = primaryIp;
-        port = 8443;
+        vlessPort = 8443;
         hy2 = {
           domain = "hy2-nixos-vps-dev.lucc.dev";
+          port = 8500;
         };
       };
     };
@@ -130,9 +131,10 @@ in {
       singbox = {
         label = "HK-hdy";
         server = primaryIp;
-        port = 8443;
+        vlessPort = 8443;
         hy2 = {
           domain = "hy2-nixos-vps-svc.lucc.dev";
+          port = 8500;
         };
       };
     };

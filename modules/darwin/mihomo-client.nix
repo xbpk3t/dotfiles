@@ -54,6 +54,7 @@ in {
         StandardErrorPath = "/Users/${username}/Library/Logs/mihomo.log";
         EnvironmentVariables = {
           PATH = "/etc/profiles/per-user/${username}/bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
+          SAFE_PATHS = "${pkgs.metacubexd}";
         };
       };
     };

@@ -30,7 +30,7 @@
       type = "vless";
       tag = mkTag "vless" s;
       server = s.server;
-      server_port = s.port;
+      server_port = s.vlessPort;
       uuid = uuid;
       flow = flow;
       tls = {
@@ -59,7 +59,7 @@
     else let
       hy2 = s.hy2;
       domain = hy2.domain or null;
-      port = hy2.port or s.port or 8443;
+      port = hy2.port or 8500;
     in
       if domain == null
       then throw "singbox: servers.*.hy2.domain is required"

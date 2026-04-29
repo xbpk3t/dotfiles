@@ -8,14 +8,15 @@
 }:
 with lib; let
   cfg = config.services.mihomo-server;
-  port = 8443;
+  port = singbox.vlessPort or 8443;
   handshakeServer = "www.bing.com";
   inventory = mylib.inventory."nixos-vps";
   nodeName = config.networking.hostName;
   singbox = mylib.inventory.singboxForHost inventory nodeName;
   hy2Enabled = singbox ? hy2;
   hy2Domain = singbox.hy2.domain;
-  hy2Port = singbox.hy2.port or singbox.port or port;
+  # mihomo 不像 singbox 支持单端口协议复用，HY2 必须用独立端口
+  hy2Port = singbox.hy2.port or 8500;
   mail = userMeta.mail;
 
   serverConfig = builtins.toJSON {
