@@ -45,12 +45,12 @@ in {
               };
             };
             # what: Claude-Mem 记忆插件市场
-            "thedotmack" = {
-              source = {
-                source = "github";
-                repo = "thedotmack/claude-mem";
-              };
-            };
+            #  "thedotmack" = {
+            #    source = {
+            #      source = "github";
+            #      repo = "thedotmack/claude-mem";
+            #    };
+            #  };
             # what: ClaudeClaw 插件市场
             "claudeclaw" = {
               source = {
@@ -71,8 +71,11 @@ in {
           enabledPlugins = {
             # what: Claude HUD（显示模型/上下文/token/git/todo 等状态）
             "claude-hud@claude-hud" = true;
+
             # what: Claude-Mem（压缩并回注会话上下文）
-            "claude-mem@thedotmack" = true;
+            # [2026-04-29] 注释掉，总是往 AGENTS.md 里加入 <claude-mem-context>，另外我在使用 Trellis，所以不需要这个
+            # "claude-mem@thedotmack" = true;
+
             # what: ClaudeClaw（扩展命令和工作流能力）
             "claudeclaw@claudeclaw" = true;
             # what: nixd LSP（Nix 语言服务）
@@ -113,11 +116,46 @@ in {
               "~/Desktop/dotfiles"
               "~/Desktop/docs"
             ];
+
+            # plan 模式：默认先规划、你批准、再执行。方案层面的审批保留不动。
+            defaultMode = "auto";
+
+            # 显式放行的常见安全操作（分类器之上的双保险）
+            allow = [
+              "Bash(git:diff*)"
+              "Bash(git:log*)"
+              "Bash(git:status*)"
+              "Bash(git:branch*)"
+              "Bash(git:stash*)"
+              "Bash(git:add*)"
+              "Bash(git:commit*)"
+              "Bash(ls:*)"
+              "Bash(cat:*)"
+              "Bash(find:*)"
+              "Bash(grep:*)"
+              "Bash(nix:*)"
+              "Bash(npm:*)"
+              "Bash(pnpm:*)"
+              "Bash(tree:*)"
+              "Bash(which:*)"
+              "Bash(wc:*)"
+              "Bash(head:*)"
+              "Bash(tail:*)"
+              "WebFetch(*)"
+              "WebSearch(*)"
+              "MCP(*)"
+            ];
+
+            # 高风险操作仍需确认
             ask = [
               "Bash(git push:*)"
+              "Bash(rm:*)"
+              "Bash(sudo:*)"
+              "Bash(curl:*)"
+              "Bash(wget:*)"
             ];
+
             deny = [];
-            defaultMode = "plan";
           };
         };
       };
@@ -129,8 +167,11 @@ in {
           #  # API 认证令牌 - 使用 sops 管理，通过 cat 命令读取文件内容
           #  ANTHROPIC_AUTH_TOKEN = "$(cat ${config.sops.secrets.API_GLM.path})";
 
-          ANTHROPIC_BASE_URL = "https://api.lucc.dev";
-          ANTHROPIC_AUTH_TOKEN = "$(cat ${config.sops.secrets.LLM_MetAPI.path})";
+          # ANTHROPIC_BASE_URL = "https://api.lucc.dev";
+          # ANTHROPIC_AUTH_TOKEN = "$(cat ${config.sops.secrets.LLM_MetAPI.path})";
+
+          ANTHROPIC_BASE_URL = "http://127.0.0.1:8090";
+          ANTHROPIC_AUTH_TOKEN = "$(cat ${config.sops.secrets.LLM_AxonHub.path})";
         };
         shellAliases = {
           # 默认 alias 保持权限模型生效，避免和 settings.permissions.defaultMode 冲突。

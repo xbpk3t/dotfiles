@@ -1,0 +1,85 @@
+---
+
+# Compose project name. 这会影响默认 network/volume 名称，例如
+# litellm_default、litellm_litellm_postgres_data。
+name: litellm
+
+services:
+  litellm:
+    # 带 database extras 的官方 LiteLLM 镜像；本地试玩先用 main-stable。
+    # 长期主力或生产环境建议改成固定版本 tag 或 digest，避免不可预期升级。
+    image: ghcr.io/berriai/litellm-database:main-stable
+    container_name: litellm
+    restart: unless-stopped
+    command:
+      # 容器内读取下面只读挂载进去的 LiteLLM 配置。
+      - "--config=/app/config.yaml"
+      - "--port=4000"
+      # 本地开发先给 2 个 worker；如果只想减少资源占用，可以改成 1。
+      - "--num_workers=2"
+    ports:
+      # 只绑定 localhost：浏览器和本机 agent 可访问，但不会暴露到局域网。
+      - "127.0.0.1:4000:4000"
+    extra_hosts:
+      # Linux/NixOS 下让容器可以通过 host.docker.internal 访问宿主机服务。
+      # 如果 CPA 跑在宿主机或另一个本机 compose 端口上，CPA_BASE_URL 可以写成：
+      # http://host.docker.internal:<port>/v1
+      - "host.docker.internal:host-gateway"
+    environment:
+      # DATABASE_URL 是给 LiteLLM 用的连接串；postgres 是下面 service 的 DNS 名。
+      # POSTGRES_PASSWORD 由 Nix/session 提供，缺失时让 compose config/up 直接失败。
+      # DATABASE_URL: "postgresql://litellm:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@postgres:5432/litellm"
+      DATABASE_URL: "postgresql://litellm:666666@postgres:5432/litellm"
+      # 允许在 Admin UI/DB 中保存和管理模型配置。
+      STORE_MODEL_IN_DB: "True"
+      # Admin UI/API 的主密钥。LiteLLM 要求 master key 通常以 sk- 开头。
+      # LITELLM_MASTER_KEY: "${LITELLM_MASTER_KEY:?LITELLM_MASTER_KEY is required}"
+      LITELLM_MASTER_KEY: 666666
+
+      # 用于加密数据库中的敏感字段；已经创建模型/keys 后不要随意更换。
+      # LITELLM_SALT_KEY: "${LITELLM_SALT_KEY:?LITELLM_SALT_KEY is required}"
+      LITELLM_SALT_KEY: 159357
+      LITELLM_LOG: "INFO"
+      # 下面这些 provider key 都从 Nix/session 透传。默认空字符串的目的：
+      # 没配置某个 provider 时，stack 仍能启动，只是调用对应模型会失败。
+      OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
+      ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY:-}"
+      DEEPSEEK_API_KEY: "${DEEPSEEK_API_KEY:-sk-0ff56b492ef74daf9443add74f3de89b}"
+      GEMINI_API_KEY: "${GEMINI_API_KEY:-}"
+      OPENROUTER_API_KEY: "${OPENROUTER_API_KEY:-}"
+      # MetAPI 这里按 OpenAI-compatible provider 接入，通常 base url 要带 /v1。
+      METAPI_BASE_URL: "${METAPI_BASE_URL:-}"
+      METAPI_API_KEY: "${METAPI_API_KEY:-}"
+      # CPA/AutoTeam 这类服务负责 ChatGPT/Codex OAuth 账号池和保活；
+      # LiteLLM 只把它当 OpenAI-compatible API 使用，不直接管理 OAuth token。
+      CPA_BASE_URL: "${CPA_BASE_URL:-}"
+      CPA_API_KEY: "${CPA_API_KEY:-}"
+    volumes:
+      # 配置文件只读挂载，避免容器运行时改动 repo 中的声明式配置。
+      - ./config.yaml:/app/config.yaml:ro
+    depends_on:
+      postgres:
+        # 等 Postgres healthcheck 通过后再启动 LiteLLM，减少首次启动迁移失败概率。
+        condition: service_healthy
+
+  postgres:
+    # Postgres 16 是保守选择；LiteLLM 只需要普通 Postgres，不需要额外扩展。
+    image: postgres:18-alpine
+    container_name: litellm-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: litellm
+      POSTGRES_USER: litellm
+#      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}"
+      POSTGRES_PASSWORD: 666666
+    volumes:
+      # 命名 volume 保存 LiteLLM UI keys、spend logs、模型配置等数据库状态。
+      - litellm_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U litellm -d litellm"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  litellm_postgres_data:
