@@ -1,0 +1,67 @@
+# LiteLLM 对外暴露的是 model_name；客户端只需要传这些短名字。
+# 真正调用哪个 provider/model，由每个条目的 litellm_params.model 决定。
+model_list:
+  - model_name: deepseek-chat
+    litellm_params:
+      # DeepSeek 官方 provider。客户端请求 model=deepseek-chat 时会走这里。
+      model: deepseek/deepseek-chat
+      # LiteLLM 的 os.environ/VAR 语法：运行时从容器环境变量读取密钥。
+      api_key: os.environ/DEEPSEEK_API_KEY
+    model_info:
+      # 稳定 deployment id，方便在日志/header 里定位实际命中的后端。
+      id: deepseek-official-chat
+
+  - model_name: deepseek-reasoner
+    litellm_params:
+      # DeepSeek 推理模型；和 deepseek-chat 共用 DEEPSEEK_API_KEY。
+      model: deepseek/deepseek-reasoner
+      api_key: os.environ/DEEPSEEK_API_KEY
+    model_info:
+      id: deepseek-official-reasoner
+
+  - model_name: claude-sonnet
+    litellm_params:
+      # Anthropic 官方 provider。Claude Code 可以把这个名字当默认 Sonnet 模型用。
+      model: anthropic/claude-sonnet-4-5-20250929
+      api_key: os.environ/ANTHROPIC_API_KEY
+    model_info:
+      id: anthropic-claude-sonnet-main
+
+  - model_name: metapi-gpt-5.5
+    litellm_params:
+      # MetAPI 按 OpenAI-compatible endpoint 接入，所以 provider 前缀用 openai/。
+      # METAPI_BASE_URL 通常应是类似 https://api.example.com/v1 的地址。
+      model: openai/gpt-5.5
+      api_base: os.environ/METAPI_BASE_URL
+      api_key: os.environ/METAPI_API_KEY
+    model_info:
+      id: metapi-gpt-5-5-fallback
+
+  - model_name: codex-gpt
+    litellm_params:
+      # CPA/AutoTeam 负责 ChatGPT Team/Codex OAuth 账号池；
+      # LiteLLM 这里只按 OpenAI-compatible endpoint 调用它。
+      # 如果 CPA 暴露的模型名不是 gpt-5.3-codex，只需要改这一行。
+      model: openai/gpt-5.3-codex
+      # CPA_BASE_URL 通常应带 /v1，例如 http://host.docker.internal:8317/v1。
+      api_base: os.environ/CPA_BASE_URL
+      api_key: os.environ/CPA_API_KEY
+    model_info:
+      id: cpa-codex-gpt-main
+
+general_settings:
+  # Proxy/Admin UI 主密钥；也可作为管理员 API key 调用 /key/generate 等接口。
+  master_key: os.environ/LITELLM_MASTER_KEY
+  # 开启数据库后，virtual key、spend logs、UI 模型管理才有持久状态。
+  database_url: os.environ/DATABASE_URL
+
+litellm_settings:
+  # 给 Claude Code/agent 长请求留足时间；太短容易误判 provider 超时。
+  request_timeout: 600
+  # 单个模型组失败后先重试 2 次，仍失败才进入 fallback。
+  num_retries: 2
+  # false 保持日志可读；排障 provider 细节时可临时改 true。
+  set_verbose: false
+  # claude-sonnet 连续失败后，依次回退到 MetAPI 和 CPA。
+  # 注意 fallback 只在请求失败后触发，不会做负载均衡。
+  fallbacks: [{"claude-sonnet": ["metapi-gpt-5.5", "codex-gpt"]}]

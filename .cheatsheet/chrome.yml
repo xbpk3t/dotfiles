@@ -14,11 +14,11 @@
     - cmd: CMD + 0
       des: 重置页面缩放比例
 
-    - divider: true
     - cmd: CMD + R
-      des: 深度刷新
-    - cmd: CMD + Shift + R
-      des: 强制重新加载（清除缓存）
+      des: 普通刷新
+
+    - cmd: CMD + Shift + R # 或者 Shift + 点击刷新button （因为后者就相当于 CMD+R）
+      des: 深度刷新（强制重新加载/清除缓存）
 
     - divider: true
     - cmd: 空格键
