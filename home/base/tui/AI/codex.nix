@@ -49,7 +49,7 @@ in {
       # https://developers.openai.com/codex/config-reference
       settings = {
         # 默认模型；可被命令行 `-m` 临时覆盖。
-        model = "gpt-5.5";
+        model = "gpt-5.4";
 
         # on-request: 默认命令先在 sandbox 内执行，超权限时再请求批准。
         # [2026-04-08] 我原本的需求是：现在切换到 mcp-servers-nix 之后，无法默认approve全部这些MCP操作，所以想要通过该配置进行配置。事实证明该配置项无法实现该需求。
@@ -100,13 +100,25 @@ in {
             env_key = "LLM_MetAPI";
             wire_api = "responses";
           };
+
+          axonhub = {
+            name = "axonhub";
+            base_url = "http://127.0.0.1:8090/v1";
+            env_key = "LLM_AxonHub";
+            wire_api = "responses";
+          };
         };
 
         # [2026-04-14] profiles 是用来创建可切换的命名方案。因为把所有provider都由 MetAPI管理，所以不再需要了
         profiles = {
           metapi = {
             model_provider = "metapi";
-            model = "gpt-5.5";
+            model = "gpt-5.4";
+          };
+
+          axonhub = {
+            model_provider = "axonhub";
+            model = "gpt-5.4";
           };
         };
       };
@@ -122,6 +134,10 @@ in {
         CONTEXT7_API_KEY = "$(cat ${config.sops.secrets.API_CONTEXT7.path})";
 
         LLM_MetAPI = "$(cat ${config.sops.secrets.LLM_MetAPI.path})";
+
+        LLM_AxonHub = "$(cat ${config.sops.secrets.LLM_AxonHub.path})";
+
+        DEEPSEEK_API_KEY = "$(cat ${config.sops.secrets.LLM_DEEPSEEK.path})";
       };
       shellAliases = {
         # 每次启动 codex 时动态注入 GitHub PAT，避免把 token 写入静态配置。

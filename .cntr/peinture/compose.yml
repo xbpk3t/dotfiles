@@ -1,0 +1,80 @@
+---
+
+services:
+  # Imagine Server 应用
+  app:
+    image: ghcr.io/amery2010/imagine-server:v1.3.0
+    # 如果你想绝对固定版本，改成 digest 更稳：
+    # image: ghcr.io/amery2010/imagine-server@sha256:fc6ae8723582fd9fce18d4f311ed81b3a1fbadd07fa6883ed90897e78e7cf8ba
+    container_name: imagine-server
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - REDIS_URL=redis://redis:6379
+      - API_TOKEN=${API_TOKEN}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      - ADMIN_TOKEN=${ADMIN_TOKEN}
+      - HUGGINGFACE_TOKENS=${HUGGINGFACE_TOKENS}
+      - GITEE_TOKENS=${GITEE_TOKENS}
+      - MODELSCOPE_TOKENS=${MODELSCOPE_TOKENS}
+      - A4F_TOKENS=${A4F_TOKENS}
+      - GEMINI_TOKENS=${GEMINI_TOKENS}
+      - GROK_TOKENS=${GROK_TOKENS}
+      - OPENAI_TOKENS=${OPENAI_TOKENS}
+      - MODELSLAB_TOKENS=${MODELSLAB_TOKENS}
+      - GEMINI_API_BASE=${GEMINI_API_BASE}
+      - GROK_API_BASE=${GROK_API_BASE}
+      - OPENAI_API_BASE=${OPENAI_API_BASE}
+      - S3_ENDPOINT=${S3_ENDPOINT}
+      - S3_REGION=${S3_REGION}
+      - S3_ACCESS_KEY_ID=${S3_ACCESS_KEY_ID}
+      - S3_SECRET_ACCESS_KEY=${S3_SECRET_ACCESS_KEY}
+      - S3_BUCKET_NAME=${S3_BUCKET_NAME}
+      - S3_CDN_URL=${S3_CDN_URL}
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    # network_mode: host
+    networks:
+      - imagine-server-network
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})",
+        ]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+  # Redis 存储
+  redis:
+    image: redis:8-alpine
+    container_name: imagine-server-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    networks:
+      - imagine-server-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    command: redis-server --appendonly yes
+
+networks:
+  imagine-server-network:
+    driver: bridge
+
+volumes:
+  redis-data:
+    driver: local

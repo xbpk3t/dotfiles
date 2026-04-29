@@ -94,6 +94,8 @@ in {
 
       # LLM
       LLM_MetAPI = mkUserSecret "LLM/MetAPI";
+      LLM_AxonHub = mkUserSecret "LLM/AxonHub";
+      LLM_DEEPSEEK = mkUserSecret "LLM/deepseek";
 
       # singbox
       SINGBOX_UUID = mkRootSecret "singbox/UUID";
