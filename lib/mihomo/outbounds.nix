@@ -23,7 +23,7 @@
     name = mkTag "vless" s;
     type = "vless";
     server = s.server;
-    port = s.port;
+    port = s.vlessPort;
     uuid = uuid;
     flow = flow;
     tls = true;
@@ -41,7 +41,7 @@
     else let
       hy2 = s.hy2;
       domain = hy2.domain or null;
-      port = hy2.port or s.port or 8443;
+      port = hy2.port or 8500;
     in
       if domain == null
       then throw "mihomo: servers.*.hy2.domain is required"

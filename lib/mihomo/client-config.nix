@@ -1,5 +1,6 @@
 {
   config,
+  pkgs,
   lib,
   mylib,
   ...
@@ -45,6 +46,7 @@ with lib; let
     ipv6 = true;
     external-controller = "0.0.0.0:9090";
     secret = secrets.clashSecret;
+    external-ui = "${pkgs.metacubexd}";
     mixed-port = 7890;
     allow-lan = true;
     bind-address = "*";
@@ -103,53 +105,62 @@ with lib; let
       }
     ];
 
-    rules = [
-      # 私网直连
-      "IP-CIDR,127.0.0.0/8,DIRECT"
-      "IP-CIDR,10.0.0.0/8,DIRECT"
-      "IP-CIDR,172.16.0.0/12,DIRECT"
-      "IP-CIDR,192.168.0.0/16,DIRECT"
-      "IP-CIDR,100.64.0.0/10,DIRECT"
-      "IP-CIDR,224.0.0.0/4,DIRECT"
+    rules =
+      [
+        # 私网直连
+        "IP-CIDR,127.0.0.0/8,DIRECT"
+        "IP-CIDR,10.0.0.0/8,DIRECT"
+        "IP-CIDR,172.16.0.0/12,DIRECT"
+        "IP-CIDR,192.168.0.0/16,DIRECT"
+        "IP-CIDR,100.64.0.0/10,DIRECT"
+        "IP-CIDR,224.0.0.0/4,DIRECT"
 
-      # 必须代理的站点
-      "DOMAIN-SUFFIX,openai.com,Proxy"
-      "DOMAIN-SUFFIX,chatgpt.com,Proxy"
-      "DOMAIN-SUFFIX,github.com,Proxy"
-      "DOMAIN-SUFFIX,githubusercontent.com,Proxy"
-      "DOMAIN-SUFFIX,githubassets.com,Proxy"
-      "DOMAIN-SUFFIX,google.com,Proxy"
-      "DOMAIN-SUFFIX,youtube.com,Proxy"
-      "DOMAIN-SUFFIX,ytimg.com,Proxy"
-      "DOMAIN-SUFFIX,twimg.com,Proxy"
-      "DOMAIN-SUFFIX,docker.com,Proxy"
+        # SSH 避免回环（mihomo TUN 下的 SSH 流量走代理会导致循环依赖）
+        "DST-PORT,22,DIRECT"
 
-      # CN 域名直连
-      "DOMAIN-SUFFIX,cn,DIRECT"
-      "DOMAIN-KEYWORD,-cn,DIRECT"
+        # 代理节点 IP 直连（避免流量经代理再回连自己）
+      ]
+      ++ (map (s: "IP-CIDR,${s.server}/32,DIRECT,no-resolve") servers)
+      ++ [
+        # 必须代理的站点
+        "DOMAIN-SUFFIX,openai.com,Proxy"
+        "DOMAIN-SUFFIX,chatgpt.com,Proxy"
+        "DOMAIN-SUFFIX,github.com,Proxy"
+        "DOMAIN-SUFFIX,githubusercontent.com,Proxy"
+        "DOMAIN-SUFFIX,githubassets.com,Proxy"
+        "DOMAIN-SUFFIX,google.com,Proxy"
+        "DOMAIN-SUFFIX,youtube.com,Proxy"
+        "DOMAIN-SUFFIX,ytimg.com,Proxy"
+        "DOMAIN-SUFFIX,twimg.com,Proxy"
+        "DOMAIN-SUFFIX,docker.com,Proxy"
+        "DOMAIN-SUFFIX,cache.nixos.org,Proxy"
 
-      # 国内大站直连
-      "DOMAIN-SUFFIX,baidu.com,DIRECT"
-      "DOMAIN-SUFFIX,bilibili.com,DIRECT"
-      "DOMAIN-SUFFIX,taobao.com,DIRECT"
-      "DOMAIN-SUFFIX,alipay.com,DIRECT"
-      "DOMAIN-SUFFIX,qq.com,DIRECT"
-      "DOMAIN-SUFFIX,weibo.com,DIRECT"
-      "DOMAIN-SUFFIX,zhihu.com,DIRECT"
-      "DOMAIN-SUFFIX,jd.com,DIRECT"
-      "DOMAIN-SUFFIX,163.com,DIRECT"
-      "DOMAIN-SUFFIX,netease.com,DIRECT"
+        # CN 域名直连
+        "DOMAIN-SUFFIX,cn,DIRECT"
+        "DOMAIN-KEYWORD,-cn,DIRECT"
 
-      # GEOIP CN 直连
-      "GEOIP,CN,DIRECT"
+        # 国内大站直连
+        "DOMAIN-SUFFIX,baidu.com,DIRECT"
+        "DOMAIN-SUFFIX,bilibili.com,DIRECT"
+        "DOMAIN-SUFFIX,taobao.com,DIRECT"
+        "DOMAIN-SUFFIX,alipay.com,DIRECT"
+        "DOMAIN-SUFFIX,qq.com,DIRECT"
+        "DOMAIN-SUFFIX,weibo.com,DIRECT"
+        "DOMAIN-SUFFIX,zhihu.com,DIRECT"
+        "DOMAIN-SUFFIX,jd.com,DIRECT"
+        "DOMAIN-SUFFIX,163.com,DIRECT"
+        "DOMAIN-SUFFIX,netease.com,DIRECT"
 
-      # 本地域名直连
-      "DOMAIN-SUFFIX,local,DIRECT"
-      "DOMAIN-SUFFIX,lan,DIRECT"
+        # GEOIP CN 直连
+        "GEOIP,CN,DIRECT"
 
-      # 兜底代理
-      "MATCH,Proxy"
-    ];
+        # 本地域名直连
+        "DOMAIN-SUFFIX,local,DIRECT"
+        "DOMAIN-SUFFIX,lan,DIRECT"
+
+        # 兜底代理
+        "MATCH,Proxy"
+      ];
   };
 
   templatesContent = builtins.toJSON configAttrset;

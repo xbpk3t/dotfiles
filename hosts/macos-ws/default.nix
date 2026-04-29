@@ -2,8 +2,8 @@
   username = userMeta.username;
 in {
   modules.networking = {
-    singbox.enable = false;
-    mihomo.enable = true;
+    singbox.enable = true;
+    mihomo.enable = false;
   };
 
   # https://mynixos.com/nix-darwin/options/launchd
