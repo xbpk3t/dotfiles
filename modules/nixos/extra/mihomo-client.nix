@@ -36,6 +36,8 @@ in {
       wants = ["network-online.target"];
       partOf = ["systemd-networkd.service"];
       bindsTo = ["systemd-networkd.service"];
+      # mihomo 默认只允许 homedir 和 SAFE_PATHS 下的路径作为 external-ui
+      serviceConfig.Environment = "SAFE_PATHS=${pkgs.metacubexd}";
     };
 
     # DNS 防污染

@@ -7,7 +7,7 @@
 }:
 with lib; let
   cfg = config.services.singbox-server;
-  port = 8443;
+  port = singbox.vlessPort or 8443;
   # 伪装握手目标域名（随便换一个稳定的大站都行）
   handshakeServer = "www.bing.com";
   inventory = mylib.inventory."nixos-vps";
@@ -15,7 +15,7 @@ with lib; let
   singbox = mylib.inventory.singboxForHost inventory nodeName;
   hy2Enabled = singbox ? hy2;
   hy2Domain = singbox.hy2.domain;
-  hy2Port = singbox.hy2.port or singbox.port or port;
+  hy2Port = singbox.hy2.port or 8500;
   mail = userMeta.mail;
 in {
   options.services.singbox-server = {
