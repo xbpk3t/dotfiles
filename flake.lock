@@ -1036,22 +1036,6 @@
         "type": "github"
       }
     },
-    "impeccable": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1777070759,
-        "narHash": "sha256-MzCjoWqOc4ADSjMDW09V524m4uYWlAWrhOPz4X//ZLU=",
-        "owner": "pbakaus",
-        "repo": "impeccable",
-        "rev": "25353448e2e46aa473380a4e136bcd59a2b6699c",
-        "type": "github"
-      },
-      "original": {
-        "owner": "pbakaus",
-        "repo": "impeccable",
-        "type": "github"
-      }
-    },
     "import-tree": {
       "locked": {
         "lastModified": 1763762820,
@@ -1952,7 +1936,6 @@
         "flake-parts": "flake-parts_2",
         "hashicorp-agent-skills": "hashicorp-agent-skills",
         "home-manager": "home-manager_2",
-        "impeccable": "impeccable",
         "llm-agents": "llm-agents",
         "mcp-servers-nix": "mcp-servers-nix",
         "nix-homebrew": "nix-homebrew",
