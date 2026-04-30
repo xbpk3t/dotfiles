@@ -6,6 +6,7 @@ tasks:
     # score: 3 — recommend: public, 偶尔看一眼当前拥塞控制算法
     desc: "default 任务"
     summary: "task -g default"
+    platforms: [linux]
     cmds:
       # 拥塞控制算法
       # cat /proc/sys/net/ipv4/tcp_available_congestion_control
