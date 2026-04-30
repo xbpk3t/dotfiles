@@ -15,4 +15,7 @@ in {
 
   # 真实目录测试：验证仓库里的 services tree 仍然满足 `scanPaths` 的契约。
   real-scan-paths = mkEvalCheck "real-scan-paths-test" ./real-scan-paths-test.nix;
+
+  # 代理协议生成：验证 singbox / mihomo outbounds 会为新增协议生成节点。
+  proxy-outbounds = mkEvalCheck "proxy-outbounds-test" ./proxy-outbounds-test.nix;
 }
