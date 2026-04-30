@@ -10,6 +10,9 @@
     delta
   ];
 
+  # MAYBE: [2026-04-30] 判断一下是否要用 gitui 替代
+  # https://mynixos.com/home-manager/options/programs.gitui
+
   # https://mynixos.com/nixpkgs/options/programs.lazygit
   programs.lazygit = {
     enable = true;
