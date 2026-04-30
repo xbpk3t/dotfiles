@@ -364,6 +364,14 @@ https://github.com/lxf746/any-auto-register
 
 :::
 
+
+
+[Pricing – Codex | OpenAI Developers](https://developers.openai.com/codex/pricing?codex-usage-limits=plus)
+
+***如果按照官方文档所说，那么目前 Team 和 Plus 的用量完全相同，如果是 GPT-5.4，每5h的限制都是 `20-100` 个 msg***
+
+
+
 [大佬们每天codex蹬多少token？ - 搞七捻三 - LINUX DO](https://linux.do/t/topic/1974341)
 
 
@@ -371,3 +379,16 @@ https://github.com/lxf746/any-auto-register
 
 
 [codex team额度再次大砍！ - 搞七捻三 - LINUX DO](https://linux.do/t/topic/1963609/3)
+
+[不要再买任何GPT 5X 20X PRO，已经掉了 - 开发调优 / 开发调优, Lv2 - LINUX DO](https://linux.do/t/topic/1981777/10)
+
+
+---
+
+[别再被骗了！谁才是真正的 Coding 之神？实测 GPT-5.4/Claude 4.6等大模型，百字人话开发 B 站首页（新范式|深横评|实机测）_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV196PxzREHe/)
+
+***[别再被平台速率标注骗了！实测 9 大 Coding 套餐挑战 100/1k/10k/100K 上下文速率（新范式|深横评|实机测）_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV14E9EBhEvT/)***
+
+
+
+

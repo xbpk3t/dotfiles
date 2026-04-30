@@ -8,7 +8,7 @@
   flow ? "xtls-rprx-vision",
   fingerprint ? "chrome",
   packetEncoding ? "xudp",
-  hy2Password,
+  password,
   flyingbirdPassword,
 }: let
   baseLabel = s:
@@ -19,7 +19,7 @@
     else if s ? tag
     then s.tag
     else s.server;
-  mkTag = proto: s: "${proto}-${baseLabel s}";
+  mkTag = proto: s: "${baseLabel s}-${proto}";
   addIf = cond: attrs:
     if cond
     then attrs
@@ -53,6 +53,47 @@
     else base // {packet_encoding = packetEncoding;};
 
   vlessOuts = map toVlessOutbound servers;
+
+  toVmessOutbound = s:
+    if !(s ? vmessWs)
+    then null
+    else let
+      vmess = s.vmessWs;
+      domain = vmess.domain or null;
+      port = vmess.port or null;
+      path = vmess.path or null;
+    in
+      if domain == null || port == null || path == null
+      then throw "singbox: servers.*.vmessWs.{domain,port,path} are required"
+      else {
+        type = "vmess";
+        tag = mkTag "vmess" s;
+        server = s.server;
+        server_port = port;
+        uuid = uuid;
+        security = "auto";
+        alter_id = 0;
+        global_padding = false;
+        authenticated_length = false;
+        tls = {
+          enabled = true;
+          server_name = domain;
+          utls = {
+            enabled = true;
+            fingerprint = fingerprint;
+          };
+        };
+        transport = {
+          type = "ws";
+          path = path;
+          headers = {
+            Host = [domain];
+          };
+        };
+      };
+
+  vmessOuts = lib.lists.filter (o: o != null) (map toVmessOutbound servers);
+
   toHy2Outbound = s:
     if !(s ? hy2)
     then null
@@ -69,7 +110,7 @@
           tag = mkTag "hy2" s;
           server = s.server;
           server_port = port;
-          password = hy2Password;
+          password = password;
           tls = {
             enabled = true;
             server_name = domain;
@@ -81,11 +122,71 @@
 
   hy2Outs = lib.lists.filter (o: o != null) (map toHy2Outbound servers);
 
+  toTuicOutbound = s:
+    if !(s ? tuic)
+    then null
+    else let
+      tuic = s.tuic;
+      domain = tuic.domain or null;
+      port = tuic.port or null;
+      congestionControl = tuic.congestionControl or "bbr";
+    in
+      if domain == null || port == null
+      then throw "singbox: servers.*.tuic.{domain,port} are required"
+      else {
+        type = "tuic";
+        tag = mkTag "tuic" s;
+        server = s.server;
+        server_port = port;
+        inherit uuid password;
+        congestion_control = congestionControl;
+        udp_relay_mode = "native";
+        zero_rtt_handshake = false;
+        heartbeat = "10s";
+        tls = {
+          enabled = true;
+          server_name = domain;
+          alpn = ["h3"];
+        };
+      };
+
+  tuicOuts = lib.lists.filter (o: o != null) (map toTuicOutbound servers);
+
+  toAnytlsOutbound = s:
+    if !(s ? anytls)
+    then null
+    else let
+      anytls = s.anytls;
+      domain = anytls.domain or null;
+      port = anytls.port or null;
+      alpn = anytls.alpn or ["h2" "http/1.1"];
+    in
+      if domain == null || port == null
+      then throw "singbox: servers.*.anytls.{domain,port} are required"
+      else {
+        type = "anytls";
+        tag = mkTag "anytls" s;
+        server = s.server;
+        server_port = port;
+        inherit password;
+        tls = {
+          enabled = true;
+          server_name = domain;
+          inherit alpn;
+          utls = {
+            enabled = true;
+            fingerprint = fingerprint;
+          };
+        };
+      };
+
+  anytlsOuts = lib.lists.filter (o: o != null) (map toAnytlsOutbound servers);
+
   # 用来存别人（比如机场）的nodes
   extraOutbounds = [
   ];
 
-  outs = vlessOuts ++ hy2Outs ++ extraOutbounds;
+  outs = vlessOuts ++ vmessOuts ++ hy2Outs ++ tuicOuts ++ anytlsOuts ++ extraOutbounds;
 in
   # 这里 builtins.seq 的写法是为了避免 deadnix 报错 unused var
   builtins.seq flyingbirdPassword (outs

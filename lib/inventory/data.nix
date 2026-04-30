@@ -90,6 +90,19 @@ in {
           domain = "hy2-nixos-vps-dev.lucc.dev";
           port = 8500;
         };
+        vmessWs = {
+          domain = "vmess-nixos-vps-dev.lucc.dev";
+          port = 9443;
+          path = "/vmess";
+        };
+        tuic = {
+          domain = "tuic-nixos-vps-dev.lucc.dev";
+          port = 10443;
+        };
+        anytls = {
+          domain = "anytls-nixos-vps-dev.lucc.dev";
+          port = 11443;
+        };
       };
     };
 
@@ -135,6 +148,19 @@ in {
         hy2 = {
           domain = "hy2-nixos-vps-svc.lucc.dev";
           port = 8500;
+        };
+        vmessWs = {
+          domain = "vmess-nixos-vps-svc.lucc.dev";
+          port = 9443;
+          path = "/vmess";
+        };
+        tuic = {
+          domain = "tuic-nixos-vps-svc.lucc.dev";
+          port = 10443;
+        };
+        anytls = {
+          domain = "anytls-nixos-vps-svc.lucc.dev";
+          port = 11443;
         };
       };
     };

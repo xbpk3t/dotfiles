@@ -122,6 +122,15 @@
       websocat
 
       # iperf3
+
+      # https://github.com/GyulyVGC/sniffnet
+      # https://mynixos.com/nixpkgs/package/sniffnet
+      # https://mynixos.com/nixpkgs/options/programs.sniffnet
+      # 仅作记录，暂不打算安装。
+      # what: Sniffnet 是个GUI，“网络仪表盘”，侧重易用的可视化监控、地理位置识别和应用进程关联。
+      # programs.sniffnet 必须放到 modules/nixos 里，因为依赖了 NixOS 特有的 security.wrappers 机制来分配内核特权
+      # 还有什么我可能不知道的相关点？1. NixOS 下可能因沙盒限制看不到进程名；2. 它支持导出 .pcap 配合 Wireshark 联动；3. Rust GUI 可能存在字体渲染导致的“豆腐块”报错。
+      # sniffnet
     ]
     # Linux-only tools; Darwin 上直接跳过，避免 hostPlatform 不可用的求值错误
     ++ lib.optionals stdenv.isLinux [

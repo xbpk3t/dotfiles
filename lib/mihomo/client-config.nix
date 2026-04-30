@@ -29,13 +29,13 @@ with lib; let
     uuid = config.sops.placeholder.SINGBOX_UUID;
     publicKey = config.sops.placeholder.SINGBOX_PUB_KEY;
     shortId = config.sops.placeholder.SINGBOX_ID;
-    hy2Password = config.sops.placeholder.SINGBOX_HY2_PWD;
+    password = config.sops.placeholder.SINGBOX_PWD;
     clashSecret = config.sops.placeholder.SINGBOX_CLASH_SK;
   };
 
   outbounds = import ./outbounds.nix {
     inherit servers lib;
-    inherit (secrets) uuid publicKey shortId hy2Password;
+    inherit (secrets) uuid publicKey shortId password;
   };
 
   # 参考 iKuuu_V2.yaml / 雷霆.yaml 的静态模板结构

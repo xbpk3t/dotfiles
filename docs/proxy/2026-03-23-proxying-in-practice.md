@@ -2,6 +2,7 @@
 title: 网络代理使用总结
 date: 2026-03-23
 isOriginal: true
+unlisted: true
 tags:
   - sing-box
 ---
@@ -15,10 +16,9 @@ tags:
 目前方案的设计是基于以下场景（需求&约束）：
 
 - 个人使用，不需要多人使用的附加功能
-
 - 多端使用，不只是单机
 - 既有 macOS / NixOS 差异
-- 想减少 GUI 客户端依赖
+- 想减少 GUI 客户端依赖（也就是直接裸核使用）
 - 需要可维护、可迁移、可自动更新
 - 未来可能同时覆盖 client / server
 
@@ -637,7 +637,7 @@ Vision 和 uTLS 也经常和它一起出现，但三者不是一回事：
 
 
 
-
+[(1) 小墨同学 on X: "DMIT涨价之后，我把搬瓦工所有优化套餐翻了一遍" / X](https://x.com/legacyvps/status/2046803202792951931)
 
 
 
@@ -687,3 +687,17 @@ Vision 和 uTLS 也经常和它一起出现，但三者不是一回事：
 - https://github.com/xykt/NetQuality
 
 ## 总结
+
+
+
+```yaml
+- topic: 【技术选型】代理协议
+  qs:
+
+    - TUN模式 #增强模式创建了 TUN 虚拟网卡（需要 root 权限，macOS 下可以通过 HelperTools 的方式处理，比如 ClashX-Pro 的 Helper 文件位于 /Library/PrivilegedHelperTools/com.west2online.ClashXPro.ProxyConfigHelper），并配置路由表，目的是将数据转发到TUN设备上，但是由于TUN模式处于网络层，需要通过gVisor/System网络栈来获取传输层的数据，经过本地端处理后，将数据转发到服务节点。不过由于使用了 TUN 模式，一般需要设置本地的 DNS 服务器，目的是使用 FakeIP 地址......具体的细节可以看 clash 源码 :)
+
+    - 【Trojan-killer】GFW 流量探测的具体原理？ # [XTLS/Trojan-killer: Detect TLS in TLS.](https://github.com/XTLS/Trojan-killer)
+    - 【原生IP】啥是 原生IP? 怎么判断某个IP是否是原生IP? # [Hurricane Electric BGP Toolkit](https://bgp.he.net/) 原生 IP 就是指该 IP 的注册地址和服务器机房所在的国家一致的 IP，反之，非原生 IP 就是指 IP 的注册地址与服务器机房所在地不一致的 IP，也就是常说的这个 IP 是被广播过去的。
+
+
+```

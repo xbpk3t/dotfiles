@@ -17,51 +17,110 @@ with lib; let
   hy2Domain = singbox.hy2.domain;
   # mihomo 不像 singbox 支持单端口协议复用，HY2 必须用独立端口
   hy2Port = singbox.hy2.port or 8500;
+  vmessEnabled = singbox ? vmessWs;
+  vmessDomain = attrByPath ["vmessWs" "domain"] null singbox;
+  vmessPort = attrByPath ["vmessWs" "port"] null singbox;
+  vmessPath = attrByPath ["vmessWs" "path"] null singbox;
+  tuicEnabled = singbox ? tuic;
+  tuicDomain = attrByPath ["tuic" "domain"] null singbox;
+  tuicPort = attrByPath ["tuic" "port"] null singbox;
+  tuicCongestionControl = attrByPath ["tuic" "congestionControl"] "bbr" singbox;
+  anytlsEnabled = singbox ? anytls;
+  anytlsDomain = attrByPath ["anytls" "domain"] null singbox;
+  anytlsPort = attrByPath ["anytls" "port"] null singbox;
+  needsStaticMihomoUser = hy2Enabled || vmessEnabled || tuicEnabled || anytlsEnabled;
   mail = userMeta.mail;
 
   serverConfig = builtins.toJSON {
     mode = "rule";
     log-level = "info";
 
-    inbounds = [
-      {
-        type = "vless";
-        tag = "vless-reality";
-        listen = "::";
-        listen_port = port;
-        users = [
-          {
-            uuid = config.sops.placeholder.SINGBOX_UUID;
-            flow = "xtls-rprx-vision";
-          }
-        ];
-        reality-config = {
-          dest = "${handshakeServer}:443";
-          private-key = config.sops.placeholder.SINGBOX_PRI_KEY;
-          short-id = [
-            config.sops.placeholder.SINGBOX_ID
+    inbounds =
+      [
+        {
+          type = "vless";
+          tag = "vless-reality";
+          listen = "::";
+          listen_port = port;
+          users = [
+            {
+              uuid = config.sops.placeholder.SINGBOX_UUID;
+              flow = "xtls-rprx-vision";
+            }
           ];
-          server-names = [
-            handshakeServer
+          reality-config = {
+            dest = "${handshakeServer}:443";
+            private-key = config.sops.placeholder.SINGBOX_PRI_KEY;
+            short-id = [
+              config.sops.placeholder.SINGBOX_ID
+            ];
+            server-names = [
+              handshakeServer
+            ];
+          };
+        }
+        {
+          type = "hysteria2";
+          tag = "hy2-in";
+          listen = "::";
+          listen_port = hy2Port;
+          users = [
+            {
+              password = config.sops.placeholder.SINGBOX_PWD;
+            }
           ];
-        };
-      }
-      {
-        type = "hysteria2";
-        tag = "hy2-in";
-        listen = "::";
-        listen_port = hy2Port;
-        users = [
-          {
-            password = config.sops.placeholder.SINGBOX_HY2_PWD;
-          }
-        ];
-        tls = {
-          certificate_path = "/var/lib/acme/${hy2Domain}/fullchain.pem";
-          key_path = "/var/lib/acme/${hy2Domain}/key.pem";
-        };
-      }
-    ];
+          tls = {
+            certificate_path = "/var/lib/acme/${hy2Domain}/fullchain.pem";
+            key_path = "/var/lib/acme/${hy2Domain}/key.pem";
+          };
+        }
+      ]
+      ++ lib.optionals vmessEnabled [
+        {
+          name = "vmess-ws-tls";
+          type = "vmess";
+          listen = "::";
+          port = vmessPort;
+          users = [
+            {
+              username = "1";
+              uuid = config.sops.placeholder.SINGBOX_UUID;
+              alterId = 0;
+            }
+          ];
+          ws-path = vmessPath;
+          certificate = "/var/lib/acme/${vmessDomain}/fullchain.pem";
+          private-key = "/var/lib/acme/${vmessDomain}/key.pem";
+        }
+      ]
+      ++ lib.optionals tuicEnabled [
+        {
+          name = "tuic-v5";
+          type = "tuic";
+          listen = "::";
+          port = tuicPort;
+          users = {
+            "${config.sops.placeholder.SINGBOX_UUID}" = config.sops.placeholder.SINGBOX_PWD;
+          };
+          certificate = "/var/lib/acme/${tuicDomain}/fullchain.pem";
+          private-key = "/var/lib/acme/${tuicDomain}/key.pem";
+          congestion-controller = tuicCongestionControl;
+          alpn = ["h3"];
+        }
+      ]
+      ++ lib.optionals anytlsEnabled [
+        {
+          name = "anytls";
+          type = "anytls";
+          listen = "::";
+          port = anytlsPort;
+          users = {
+            default = config.sops.placeholder.SINGBOX_PWD;
+          };
+          certificate = "/var/lib/acme/${anytlsDomain}/fullchain.pem";
+          private-key = "/var/lib/acme/${anytlsDomain}/key.pem";
+        }
+      ];
 
     outbounds = [
       {
@@ -94,10 +153,12 @@ in {
         configFile = config.sops.templates."mihomo-server.json".path;
       };
 
-      networking.firewall.allowedTCPPorts = [port];
-      networking.firewall.allowedUDPPorts = lib.optionals hy2Enabled [hy2Port];
+      networking.firewall.allowedTCPPorts = [port] ++ lib.optionals vmessEnabled [vmessPort] ++ lib.optionals anytlsEnabled [anytlsPort];
+      networking.firewall.allowedUDPPorts =
+        lib.optionals hy2Enabled [hy2Port]
+        ++ lib.optionals tuicEnabled [tuicPort];
     }
-    (mkIf hy2Enabled {
+    (mkIf needsStaticMihomoUser {
       # 创建静态用户/组，确保在 ACME 签发证书前已存在
       # nixpkgs 的 services.mihomo 默认使用 DynamicUser，但动态用户
       # 在 ACME 运行时不存在，会导致证书权限设置失败 (217/USER)。
@@ -127,6 +188,36 @@ in {
 
       security.acme.acceptTerms = mkDefault true;
       security.acme.certs."${hy2Domain}" = {
+        email = mail;
+        dnsProvider = "cloudflare";
+        environmentFile = config.sops.secrets.ACME_CF_ENV.path;
+        group = "mihomo";
+        reloadServices = ["mihomo.service"];
+      };
+    })
+    (mkIf vmessEnabled {
+      security.acme.acceptTerms = mkDefault true;
+      security.acme.certs."${vmessDomain}" = {
+        email = mail;
+        dnsProvider = "cloudflare";
+        environmentFile = config.sops.secrets.ACME_CF_ENV.path;
+        group = "mihomo";
+        reloadServices = ["mihomo.service"];
+      };
+    })
+    (mkIf tuicEnabled {
+      security.acme.acceptTerms = mkDefault true;
+      security.acme.certs."${tuicDomain}" = {
+        email = mail;
+        dnsProvider = "cloudflare";
+        environmentFile = config.sops.secrets.ACME_CF_ENV.path;
+        group = "mihomo";
+        reloadServices = ["mihomo.service"];
+      };
+    })
+    (mkIf anytlsEnabled {
+      security.acme.acceptTerms = mkDefault true;
+      security.acme.certs."${anytlsDomain}" = {
         email = mail;
         dnsProvider = "cloudflare";
         environmentFile = config.sops.secrets.ACME_CF_ENV.path;
