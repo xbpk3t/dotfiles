@@ -138,3 +138,10 @@ tasks:
         msg: dig not found
     cmds:
       - dig -x {{.IP}} +noall +answer
+
+  # [mr-karan/doggo: :dog: Command-line DNS Client for Humans. Written in Golang](https://github.com/mr-karan/doggo)
+  doggo:
+    # score: 2 — recommend: internal, doggo DNS 查询，有 dig 就够了
+    desc: Query DNS with doggo
+    summary: "task -g nz:doggo [CLI_ARGS]"
+    cmd: doggo {{.CLI_ARGS}}
