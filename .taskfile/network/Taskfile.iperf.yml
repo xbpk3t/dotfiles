@@ -70,19 +70,19 @@ tasks:
     cmds:
       - iperf3 -c {{.HOST}} -P {{.STREAMS}} -t {{.DURATION}} -p {{.PORT}}
 
-  bidir:
-    # score: 2 — recommend: internal, 双向吞吐测试，场景窄
-    desc: Run iperf3 bidirectional TCP throughput test
-    summary: "task -g throughput:bidir HOST=<host> [DURATION=10] [PORT=5201]"
-    platforms: [linux, darwin]
-    requires:
-      vars: [HOST]
-    vars:
-      HOST: '{{.HOST | default ""}}'
-      DURATION: '{{.DURATION | default "10"}}'
-      PORT: '{{.PORT | default "5201"}}'
-    preconditions:
-      - sh: command -v iperf3 >/dev/null 2>&1
-        msg: iperf3 not found
-    cmds:
-      - iperf3 -c {{.HOST}} -d -t {{.DURATION}} -p {{.PORT}}
+#  bidir:
+#    # score: 2 — recommend: internal, 双向吞吐测试，场景窄
+#    desc: Run iperf3 bidirectional TCP throughput test
+#    summary: "task -g throughput:bidir HOST=<host> [DURATION=10] [PORT=5201]"
+#    platforms: [linux, darwin]
+#    requires:
+#      vars: [HOST]
+#    vars:
+#      HOST: '{{.HOST | default ""}}'
+#      DURATION: '{{.DURATION | default "10"}}'
+#      PORT: '{{.PORT | default "5201"}}'
+#    preconditions:
+#      - sh: command -v iperf3 >/dev/null 2>&1
+#        msg: iperf3 not found
+#    cmds:
+#      - iperf3 -c {{.HOST}} -d -t {{.DURATION}} -p {{.PORT}}

@@ -6,16 +6,16 @@ vars:
 
 tasks:
   # 1. 主机发现
-  host-discovery:
-    # score: 2 — recommend: internal, 菜单位置导航，不执行实际扫描
-    desc: 主机发现相关任务
-    summary: "task -g host-discovery"
-    cmds:
-      - "echo \"选择主机发现方式:\""
-      - "echo \"1. ping-scan - ICMP ping扫描\""
-      - "echo \"2. arp-scan - ARP扫描(局域网)\""
-      - "echo \"3. no-ping - 跳过主机发现直接扫描\""
-      - "echo \"使用: task nmap:host-discovery ping-scan -- <target>\""
+#  host-discovery:
+#    # score: 2 — recommend: internal, 菜单位置导航，不执行实际扫描
+#    desc: 主机发现相关任务
+#    summary: "task -g host-discovery"
+#    cmds:
+#      - "echo \"选择主机发现方式:\""
+#      - "echo \"1. ping-scan - ICMP ping扫描\""
+#      - "echo \"2. arp-scan - ARP扫描(局域网)\""
+#      - "echo \"3. no-ping - 跳过主机发现直接扫描\""
+#      - "echo \"使用: task nmap:host-discovery ping-scan -- <target>\""
 
   ping-scan:
     # score: 3 — recommend: public, ICMP 存活探测，网段扫描有用
@@ -37,29 +37,6 @@ tasks:
       - sh: test -n "{{.CLI_ARGS}}"
         msg: "请提供目标地址，例如: task nmap:arp-scan -- 192.168.1.0/24"
 
-  no-ping:
-    # score: 3 — recommend: public, 跳过主机发现，防火墙环境有用
-    desc: 跳过主机发现直接扫描
-    summary: "task -g no-ping"
-    cmds:
-      - "{{.NMAP}} -Pn {{.CLI_ARGS}}"
-    preconditions:
-      - sh: test -n "{{.CLI_ARGS}}"
-        msg: "请提供目标地址，例如: task nmap:no-ping -- 192.168.1.1"
-
-  # 2. 端口扫描
-  port-scan:
-    # score: 2 — recommend: internal, 菜单位置导航
-    desc: 端口扫描相关任务
-    summary: "task -g port-scan"
-    cmds:
-      - "echo \"选择端口扫描方式:\""
-      - "echo \"1. syn-scan - SYN半开扫描\""
-      - "echo \"2. tcp-scan - TCP全连接扫描\""
-      - "echo \"3. udp-scan - UDP端口扫描\""
-      - "echo \"4. port-range - 指定端口范围扫描\""
-      - "echo \"使用: task nmap:port-scan syn-scan -- <target>\""
-
   syn-scan:
     # score: 4 — recommend: public, SYN 半开扫描，端口扫描最常用模式
     desc: SYN半开扫描（默认）
@@ -70,213 +47,268 @@ tasks:
       - sh: test -n "{{.CLI_ARGS}}"
         msg: "请提供目标地址，例如: task nmap:syn-scan -- 192.168.1.1"
 
-  tcp-scan:
-    # score: 3 — recommend: public, TCP 全连接扫描，SYN 被禁时备用
-    desc: TCP全连接扫描
-    summary: "task -g tcp-scan"
-    cmds:
-      - "{{.NMAP}} -sT {{.CLI_ARGS}}"
-    preconditions:
-      - sh: test -n "{{.CLI_ARGS}}"
-        msg: "请提供目标地址，例如: task nmap:tcp-scan -- 192.168.1.1"
 
-  udp-scan:
-    # score: 3 — recommend: public, UDP 端口扫描，特定场景
-    desc: UDP端口扫描
-    summary: "task -g udp-scan"
-    cmds:
-      - "{{.NMAP}} -sU {{.CLI_ARGS}}"
-    preconditions:
-      - sh: test -n "{{.CLI_ARGS}}"
-        msg: "请提供目标地址，例如: task nmap:udp-scan -- 192.168.1.1"
+#  no-ping:
+#    # score: 3 — recommend: public, 跳过主机发现，防火墙环境有用
+#    desc: 跳过主机发现直接扫描
+#    summary: "task -g no-ping"
+#    cmds:
+#      - "{{.NMAP}} -Pn {{.CLI_ARGS}}"
+#    preconditions:
+#      - sh: test -n "{{.CLI_ARGS}}"
+#        msg: "请提供目标地址，例如: task nmap:no-ping -- 192.168.1.1"
 
-  port-range:
-    # score: 3 — recommend: public, 指定端口范围，灵活扫描
-    desc: 指定端口范围扫描
-    summary: "task -g port-range"
-    cmds:
-      - "{{.NMAP}} -p {{.CLI_ARGS}}"
-    preconditions:
-      - sh: test -n "{{.CLI_ARGS}}"
-        msg: "请提供端口和目标地址，例如: task nmap:port-range -- 80,443,22 192.168.1.1"
+  # 2. 端口扫描
+#  port-scan:
+#    # score: 2 — recommend: internal, 菜单位置导航
+#    desc: 端口扫描相关任务
+#    summary: "task -g port-scan"
+#    cmds:
+#      - "echo \"选择端口扫描方式:\""
+#      - "echo \"1. syn-scan - SYN半开扫描\""
+#      - "echo \"2. tcp-scan - TCP全连接扫描\""
+#      - "echo \"3. udp-scan - UDP端口扫描\""
+#      - "echo \"4. port-range - 指定端口范围扫描\""
+#      - "echo \"使用: task nmap:port-scan syn-scan -- <target>\""
+
+
+#  tcp-scan:
+#    # score: 3 — recommend: public, TCP 全连接扫描，SYN 被禁时备用
+#    desc: TCP全连接扫描
+#    summary: "task -g tcp-scan"
+#    cmds:
+#      - "{{.NMAP}} -sT {{.CLI_ARGS}}"
+#    preconditions:
+#      - sh: test -n "{{.CLI_ARGS}}"
+#        msg: "请提供目标地址，例如: task nmap:tcp-scan -- 192.168.1.1"
+#
+#  udp-scan:
+#    # score: 3 — recommend: public, UDP 端口扫描，特定场景
+#    desc: UDP端口扫描
+#    summary: "task -g udp-scan"
+#    cmds:
+#      - "{{.NMAP}} -sU {{.CLI_ARGS}}"
+#    preconditions:
+#      - sh: test -n "{{.CLI_ARGS}}"
+#        msg: "请提供目标地址，例如: task nmap:udp-scan -- 192.168.1.1"
+#
+#  port-range:
+#    # score: 3 — recommend: public, 指定端口范围，灵活扫描
+#    desc: 指定端口范围扫描
+#    summary: "task -g port-range"
+#    cmds:
+#      - "{{.NMAP}} -p {{.CLI_ARGS}}"
+#    preconditions:
+#      - sh: test -n "{{.CLI_ARGS}}"
+#        msg: "请提供端口和目标地址，例如: task nmap:port-range -- 80,443,22 192.168.1.1"
 
   # 3. 服务与系统识别
-  fingerprint:
-    # score: 2 — recommend: internal, 菜单位置导航
-    desc: 服务与系统识别相关任务
-    summary: "task -g fingerprint"
-    cmds:
-      - "echo \"选择识别方式:\""
-      - "echo \"1. version-detect - 服务版本探测\""
-      - "echo \"2. os-detect - 操作系统检测\""
-      - "echo \"3. aggressive - 综合扫描模式\""
-      - "echo \"使用: task nmap:fingerprint version-detect -- <target>\""
+#  fingerprint:
+#    # score: 2 — recommend: internal, 菜单位置导航
+#    desc: 服务与系统识别相关任务
+#    summary: "task -g fingerprint"
+#    cmds:
+#      - "echo \"选择识别方式:\""
+#      - "echo \"1. version-detect - 服务版本探测\""
+#      - "echo \"2. os-detect - 操作系统检测\""
+#      - "echo \"3. aggressive - 综合扫描模式\""
+#      - "echo \"使用: task nmap:fingerprint version-detect -- <target>\""
 
-  version-detect:
-    # score: 4 — recommend: public, 服务版本探测，信息收集核心
-    desc: 服务版本探测
-    summary: "task -g version-detect"
-    cmds:
-      - "{{.NMAP}} -sV {{.CLI_ARGS}}"
-    preconditions:
-      - sh: test -n "{{.CLI_ARGS}}"
-        msg: "请提供目标地址，例如: task nmap:version-detect -- 192.168.1.1"
+#  version-detect:
+#    # score: 4 — recommend: public, 服务版本探测，信息收集核心
+#    desc: 服务版本探测
+#    summary: "task -g version-detect"
+#    cmds:
+#      - "{{.NMAP}} -sV {{.CLI_ARGS}}"
+#    preconditions:
+#      - sh: test -n "{{.CLI_ARGS}}"
+#        msg: "请提供目标地址，例如: task nmap:version-detect -- 192.168.1.1"
 
-  os-detect:
-    # score: 3 — recommend: public, 操作系统检测，信息收集
-    desc: 操作系统检测
-    summary: "task -g os-detect"
-    cmds:
-      - "{{.NMAP}} -O {{.CLI_ARGS}}"
-    preconditions:
-      - sh: test -n "{{.CLI_ARGS}}"
-        msg: "请提供目标地址，例如: task nmap:os-detect -- 192.168.1.1"
+#  os-detect:
+#    # score: 3 — recommend: public, 操作系统检测，信息收集
+#    desc: 操作系统检测
+#    summary: "task -g os-detect"
+#    cmds:
+#      - "{{.NMAP}} -O {{.CLI_ARGS}}"
+#    preconditions:
+#      - sh: test -n "{{.CLI_ARGS}}"
+#        msg: "请提供目标地址，例如: task nmap:os-detect -- 192.168.1.1"
 
-  aggressive:
-    # score: 4 — recommend: public, 综合扫描，快速全面评估
-    desc: 综合扫描模式（OS检测+版本探测+脚本扫描）
-    summary: "task -g aggressive"
-    cmds:
-      - "{{.NMAP}} -A {{.CLI_ARGS}}"
-    preconditions:
-      - sh: test -n "{{.CLI_ARGS}}"
-        msg: "请提供目标地址，例如: task nmap:aggressive -- 192.168.1.1"
+#  aggressive:
+#    # score: 4 — recommend: public, 综合扫描，快速全面评估
+#    desc: 综合扫描模式（OS检测+版本探测+脚本扫描）
+#    summary: "task -g aggressive"
+#    cmds:
+#      - "{{.NMAP}} -A {{.CLI_ARGS}}"
+#    preconditions:
+#      - sh: test -n "{{.CLI_ARGS}}"
+#        msg: "请提供目标地址，例如: task nmap:aggressive -- 192.168.1.1"
 
   # 4. 脚本扫描（NSE）
-  script-scan:
-    # score: 2 — recommend: internal, 菜单位置导航
-    desc: 脚本扫描相关任务
-    summary: "task -g script-scan"
-    cmds:
-      - "echo \"选择脚本扫描方式:\""
-      - "echo \"1. default-script - 默认安全脚本扫描\""
-      - "echo \"2. vuln-scan - 漏洞检测脚本\""
-      - "echo \"3. ssl-cert - TLS证书信息提取\""
-      - "echo \"使用: task nmap:script-scan default-script -- <target>\""
+#  script-scan:
+#    # score: 2 — recommend: internal, 菜单位置导航
+#    desc: 脚本扫描相关任务
+#    summary: "task -g script-scan"
+#    cmds:
+#      - "echo \"选择脚本扫描方式:\""
+#      - "echo \"1. default-script - 默认安全脚本扫描\""
+#      - "echo \"2. vuln-scan - 漏洞检测脚本\""
+#      - "echo \"3. ssl-cert - TLS证书信息提取\""
+#      - "echo \"使用: task nmap:script-scan default-script -- <target>\""
 
-  default-script:
-    # score: 3 — recommend: public, 默认 NSE 脚本扫描，信息收集补充
-    desc: 默认安全脚本扫描
-    summary: "task -g default-script"
-    cmds:
-      - "{{.NMAP}} --script default {{.CLI_ARGS}}"
-    preconditions:
-      - sh: test -n "{{.CLI_ARGS}}"
-        msg: "请提供目标地址，例如: task nmap:default-script -- 192.168.1.1"
+#  default-script:
+#    # score: 3 — recommend: public, 默认 NSE 脚本扫描，信息收集补充
+#    desc: 默认安全脚本扫描
+#    summary: "task -g default-script"
+#    cmds:
+#      - "{{.NMAP}} --script default {{.CLI_ARGS}}"
+#    preconditions:
+#      - sh: test -n "{{.CLI_ARGS}}"
+#        msg: "请提供目标地址，例如: task nmap:default-script -- 192.168.1.1"
 
-  vuln-scan:
-    # score: 2 — recommend: internal, NSE 漏洞扫描，时间长且场景少
-    desc: 漏洞检测脚本
-    summary: "task -g vuln-scan"
-    cmds:
-      - "{{.NMAP}} --script vuln {{.CLI_ARGS}}"
-    preconditions:
-      - sh: test -n "{{.CLI_ARGS}}"
-        msg: "请提供目标地址，例如: task nmap:vuln-scan -- 192.168.1.1"
+#  vuln-scan:
+#    # score: 2 — recommend: internal, NSE 漏洞扫描，时间长且场景少
+#    desc: 漏洞检测脚本
+#    summary: "task -g vuln-scan"
+#    cmds:
+#      - "{{.NMAP}} --script vuln {{.CLI_ARGS}}"
+#    preconditions:
+#      - sh: test -n "{{.CLI_ARGS}}"
+#        msg: "请提供目标地址，例如: task nmap:vuln-scan -- 192.168.1.1"
 
-  ssl-cert:
-    # score: 3 — recommend: public, TLS 证书提取，和安全相关的信息收集
-    desc: TLS证书信息提取
-    summary: "task -g ssl-cert"
-    cmds:
-      - "{{.NMAP}} --script ssl-cert {{.CLI_ARGS}}"
-    preconditions:
-      - sh: test -n "{{.CLI_ARGS}}"
-        msg: "请提供目标地址，例如: task nmap:ssl-cert -- 192.168.1.1"
+#  ssl-cert:
+#    # score: 3 — recommend: public, TLS 证书提取，和安全相关的信息收集
+#    desc: TLS证书信息提取
+#    summary: "task -g ssl-cert"
+#    cmds:
+#      - "{{.NMAP}} --script ssl-cert {{.CLI_ARGS}}"
+#    preconditions:
+#      - sh: test -n "{{.CLI_ARGS}}"
+#        msg: "请提供目标地址，例如: task nmap:ssl-cert -- 192.168.1.1"
 
   # 5. 输出与性能优化
-  output-options:
-    # score: 1 — recommend: remove, 菜单位置导航，纯 help 无执行价值
-    desc: 输出与性能优化相关任务
-    summary: "task -g output-options"
-    cmds:
-      - "echo \"选择输出方式:\""
-      - "echo \"1. output-normal - 保存结果到文本文件\""
-      - "echo \"2. output-xml - 保存结果到XML文件\""
-      - "echo \"3. fast-scan - 加速扫描\""
-      - "echo \"使用: task nmap:output-options output-normal -- <target>\""
+#  output-options:
+#    # score: 1 — recommend: remove, 菜单位置导航，纯 help 无执行价值
+#    desc: 输出与性能优化相关任务
+#    summary: "task -g output-options"
+#    cmds:
+#      - "echo \"选择输出方式:\""
+#      - "echo \"1. output-normal - 保存结果到文本文件\""
+#      - "echo \"2. output-xml - 保存结果到XML文件\""
+#      - "echo \"3. fast-scan - 加速扫描\""
+#      - "echo \"使用: task nmap:output-options output-normal -- <target>\""
 
-  output-normal:
-    # score: 2 — recommend: internal, 保存 nmap 结果到文件，重定向即可替代
-    desc: 保存结果到文本文件
-    summary: "task -g output-normal"
-    cmds:
-      - "{{.NMAP}} -oN result.txt {{.CLI_ARGS}}"
-    preconditions:
-      - sh: test -n "{{.CLI_ARGS}}"
-        msg: "请提供目标地址，例如: task nmap:output-normal -- 192.168.1.1"
+#  output-normal:
+#    # score: 2 — recommend: internal, 保存 nmap 结果到文件，重定向即可替代
+#    desc: 保存结果到文本文件
+#    summary: "task -g output-normal"
+#    cmds:
+#      - "{{.NMAP}} -oN result.txt {{.CLI_ARGS}}"
+#    preconditions:
+#      - sh: test -n "{{.CLI_ARGS}}"
+#        msg: "请提供目标地址，例如: task nmap:output-normal -- 192.168.1.1"
 
-  output-xml:
-    # score: 1 — recommend: remove, 保存到 XML，几乎不用
-    desc: 保存结果到XML文件
-    summary: "task -g output-xml"
-    cmds:
-      - "{{.NMAP}} -oX result.xml {{.CLI_ARGS}}"
-    preconditions:
-      - sh: test -n "{{.CLI_ARGS}}"
-        msg: "请提供目标地址，例如: task nmap:output-xml -- 192.168.1.1"
+#  output-xml:
+#    # score: 1 — recommend: remove, 保存到 XML，几乎不用
+#    desc: 保存结果到XML文件
+#    summary: "task -g output-xml"
+#    cmds:
+#      - "{{.NMAP}} -oX result.xml {{.CLI_ARGS}}"
+#    preconditions:
+#      - sh: test -n "{{.CLI_ARGS}}"
+#        msg: "请提供目标地址，例如: task nmap:output-xml -- 192.168.1.1"
 
-  fast-scan:
-    # score: 3 — recommend: public, T4 加速扫描，快速端口探测
-    desc: 加速扫描（T4速度）
-    summary: "task -g fast-scan"
-    cmds:
-      - "{{.NMAP}} -T4 {{.CLI_ARGS}}"
-    preconditions:
-      - sh: test -n "{{.CLI_ARGS}}"
-        msg: "请提供目标地址，例如: task nmap:fast-scan -- 192.168.1.1"
+#  fast-scan:
+#    # score: 3 — recommend: public, T4 加速扫描，快速端口探测
+#    desc: 加速扫描（T4速度）
+#    summary: "task -g fast-scan"
+#    cmds:
+#      - "{{.NMAP}} -T4 {{.CLI_ARGS}}"
+#    preconditions:
+#      - sh: test -n "{{.CLI_ARGS}}"
+#        msg: "请提供目标地址，例如: task nmap:fast-scan -- 192.168.1.1"
 
   # 6. 隐蔽扫描技巧
-  stealth-scan:
-    # score: 1 — recommend: remove, 菜单位置导航
-    desc: 隐蔽扫描技巧相关任务
-    summary: "task -g stealth-scan"
-    cmds:
-      - "echo \"选择隐蔽扫描方式:\""
-      - "echo \"1. fragment - 分片数据包发送\""
-      - "echo \"2. decoy - 诱饵IP混淆来源\""
-      - "echo \"3. source-port - 伪造源端口\""
-      - "echo \"使用: task nmap:stealth-scan fragment -- <target>\""
+#  stealth-scan:
+#    # score: 1 — recommend: remove, 菜单位置导航
+#    desc: 隐蔽扫描技巧相关任务
+#    summary: "task -g stealth-scan"
+#    cmds:
+#      - "echo \"选择隐蔽扫描方式:\""
+#      - "echo \"1. fragment - 分片数据包发送\""
+#      - "echo \"2. decoy - 诱饵IP混淆来源\""
+#      - "echo \"3. source-port - 伪造源端口\""
+#      - "echo \"使用: task nmap:stealth-scan fragment -- <target>\""
 
-  fragment:
-    # score: 1 — recommend: remove, 分片绕过检测，几乎用不到
-    desc: 分片数据包发送
-    summary: "task -g fragment"
-    cmds:
-      - "{{.NMAP}} -f {{.CLI_ARGS}}"
-    preconditions:
-      - sh: test -n "{{.CLI_ARGS}}"
-        msg: "请提供目标地址，例如: task nmap:fragment -- 192.168.1.1"
-
-  decoy:
-    # score: 1 — recommend: remove, 诱饵扫描，几乎用不到
-    desc: 诱饵IP混淆来源
-    summary: "task -g decoy"
-    cmds:
-      - "{{.NMAP}} -D {{.CLI_ARGS}}"
-    preconditions:
-      - sh: test -n "{{.CLI_ARGS}}"
-        msg: "请提供诱饵IP和目标地址，例如: task nmap:decoy -- 192.168.1.5,192.168.1.6 192.168.1.1"
-
-  source-port:
-    # score: 1 — recommend: remove, 伪造源端口，几乎用不到
-    desc: 伪造源端口
-    summary: "task -g source-port"
-    cmds:
-      - "{{.NMAP}} --source-port 53 {{.CLI_ARGS}}"
-    preconditions:
-      - sh: test -n "{{.CLI_ARGS}}"
-        msg: "请提供目标地址，例如: task nmap:source-port -- 192.168.1.1"
+#  fragment:
+#    # score: 1 — recommend: remove, 分片绕过检测，几乎用不到
+#    desc: 分片数据包发送
+#    summary: "task -g fragment"
+#    cmds:
+#      - "{{.NMAP}} -f {{.CLI_ARGS}}"
+#    preconditions:
+#      - sh: test -n "{{.CLI_ARGS}}"
+#        msg: "请提供目标地址，例如: task nmap:fragment -- 192.168.1.1"
+#
+#  decoy:
+#    # score: 1 — recommend: remove, 诱饵扫描，几乎用不到
+#    desc: 诱饵IP混淆来源
+#    summary: "task -g decoy"
+#    cmds:
+#      - "{{.NMAP}} -D {{.CLI_ARGS}}"
+#    preconditions:
+#      - sh: test -n "{{.CLI_ARGS}}"
+#        msg: "请提供诱饵IP和目标地址，例如: task nmap:decoy -- 192.168.1.5,192.168.1.6 192.168.1.1"
+#
+#  source-port:
+#    # score: 1 — recommend: remove, 伪造源端口，几乎用不到
+#    desc: 伪造源端口
+#    summary: "task -g source-port"
+#    cmds:
+#      - "{{.NMAP}} --source-port 53 {{.CLI_ARGS}}"
+#    preconditions:
+#      - sh: test -n "{{.CLI_ARGS}}"
+#        msg: "请提供目标地址，例如: task nmap:source-port -- 192.168.1.1"
 
   # 实用组合命令
-  quick-web-scan:
-    # score: 2 — recommend: internal, 快速 Web 服务扫描，组合命令可手动替代
-    desc: 快速扫描网段存活主机并探测Web服务
-    summary: "task -g quick-web-scan"
-    cmds:
-      - "echo \"快速扫描网段存活主机并探测Web服务\""
-      - "echo \"使用示例: task nmap:quick-web-scan -- 192.168.1.0/24\""
-      - "{{.NMAP}} -sn {{.CLI_ARGS}} && {{.NMAP}} -sV -p 80,443 {{.CLI_ARGS}}"
+#  quick-web-scan:
+#    # score: 2 — recommend: internal, 快速 Web 服务扫描，组合命令可手动替代
+#    desc: 快速扫描网段存活主机并探测Web服务
+#    summary: "task -g quick-web-scan"
+#    cmds:
+#      - "echo \"快速扫描网段存活主机并探测Web服务\""
+#      - "echo \"使用示例: task nmap:quick-web-scan -- 192.168.1.0/24\""
+#      - "{{.NMAP}} -sn {{.CLI_ARGS}} && {{.NMAP}} -sV -p 80,443 {{.CLI_ARGS}}"
+#    preconditions:
+#      - sh: test -n "{{.CLI_ARGS}}"
+#        msg: "请提供目标网段，例如: task nmap:quick-web-scan -- 192.168.1.0/24"
+
+
+  naabu:
+    # score: 3 — recommend: public, 快速端口扫描，比 nmap 轻量，特定场景有用
+    desc: naabu port scan
+    summary: "task -g default HOSTS=<hosts> [PORTS=1-65535] [RATE=1000]"
+    platforms: [linux, darwin]
+    requires:
+      vars: [HOSTS]
+    vars:
+      PORTS: '{{.PORTS | default "1-65535"}}'
+      # RATE 为每秒发送包数（packets per second）
+      RATE: '{{.RATE | default "1000"}}'
+      HOSTS: ''
     preconditions:
-      - sh: test -n "{{.CLI_ARGS}}"
-        msg: "请提供目标网段，例如: task nmap:quick-web-scan -- 192.168.1.0/24"
+      - sh: command -v naabu
+        msg: naabu not found
+    cmds:
+      - naabu -host {{.HOSTS}} -p {{.PORTS}} -rate {{.RATE}}
+
+#  list:
+#    # score: 1 — recommend: remove, 仅列出网卡接口，有 ip link 就够了
+#    desc: naabu list network interfaces
+#    summary: "task -g list"
+#    platforms: [linux, darwin]
+#    preconditions:
+#      - sh: command -v naabu
+#        msg: naabu not found
+#    cmds:
+#      - naabu -iflist

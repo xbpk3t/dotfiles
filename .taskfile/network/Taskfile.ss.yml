@@ -126,41 +126,41 @@ tasks:
     cmds:
       - ss -tan "state {{.STATE}}"
 
-  state:count:
-    # score: 2 — recommend: internal, 按状态计数，有 wc -l 就够了
-    desc: Count TCP connections in given STATE
-    summary: "task -g state:count STATE=TIME-WAIT"
-    vars:
-      STATE: '{{.STATE | default ""}}'
-      COUNT:
-        sh: ss -tan "state {{.STATE}}" | sed '1d' | wc -l
-    requires:
-      vars: [STATE]
-    preconditions:
-      - sh: test -n "{{.STATE}}"
-        msg: "Usage: task state:count STATE=TIME-WAIT"
-    cmds:
-      - "echo {{.STATE}} connections: {{.COUNT}}"
+#  state:count:
+#    # score: 2 — recommend: internal, 按状态计数，有 wc -l 就够了
+#    desc: Count TCP connections in given STATE
+#    summary: "task -g state:count STATE=TIME-WAIT"
+#    vars:
+#      STATE: '{{.STATE | default ""}}'
+#      COUNT:
+#        sh: ss -tan "state {{.STATE}}" | sed '1d' | wc -l
+#    requires:
+#      vars: [STATE]
+#    preconditions:
+#      - sh: test -n "{{.STATE}}"
+#        msg: "Usage: task state:count STATE=TIME-WAIT"
+#    cmds:
+#      - "echo {{.STATE}} connections: {{.COUNT}}"
 
-  timewait:count:
-    # score: 2 — recommend: internal, TIME-WAIT 计数，单一场景
-    desc: Count TIME-WAIT TCP connections
-    summary: "task -g timewait:count"
-    vars:
-      COUNT:
-        sh: ss -tan "state TIME-WAIT" | sed '1d' | wc -l
-    cmds:
-      - "echo TIME-WAIT connections: {{.COUNT}}"
+#  timewait:count:
+#    # score: 2 — recommend: internal, TIME-WAIT 计数，单一场景
+#    desc: Count TIME-WAIT TCP connections
+#    summary: "task -g timewait:count"
+#    vars:
+#      COUNT:
+#        sh: ss -tan "state TIME-WAIT" | sed '1d' | wc -l
+#    cmds:
+#      - "echo TIME-WAIT connections: {{.COUNT}}"
 
-  closewait:count:
-    # score: 2 — recommend: internal, CLOSE-WAIT 计数，特定场景
-    desc: Count CLOSE-WAIT TCP connections (may indicate app not closing sockets)
-    summary: "task -g closewait:count"
-    vars:
-      COUNT:
-        sh: ss -tan "state CLOSE-WAIT" | sed '1d' | wc -l
-    cmds:
-      - "echo CLOSE-WAIT connections: {{.COUNT}}"
+#  closewait:count:
+#    # score: 2 — recommend: internal, CLOSE-WAIT 计数，特定场景
+#    desc: Count CLOSE-WAIT TCP connections (may indicate app not closing sockets)
+#    summary: "task -g closewait:count"
+#    vars:
+#      COUNT:
+#        sh: ss -tan "state CLOSE-WAIT" | sed '1d' | wc -l
+#    cmds:
+#      - "echo CLOSE-WAIT connections: {{.COUNT}}"
 
   # ---------------- 按端口 / IP ----------------
 
@@ -244,50 +244,50 @@ tasks:
     cmds:
       - ss -xln
 
-  unix:proc:
-    # score: 2 — recommend: internal, UNIX socket+进程信息，unix 的超集
-    desc: Show UNIX domain sockets with process info
-    summary: "task -g unix:proc"
-    cmds:
-      - ss -xlnp
+#  unix:proc:
+#    # score: 2 — recommend: internal, UNIX socket+进程信息，unix 的超集
+#    desc: Show UNIX domain sockets with process info
+#    summary: "task -g unix:proc"
+#    cmds:
+#      - ss -xlnp
 
   # ---------------- fzf 交互增强 ----------------
 
-  fzf:listen:
-    # score: 2 — recommend: internal, fzf 交互式浏览监听端口，依赖 fzf
-    desc: Browse listening sockets via fzf (ss -ltnp | fzf)
-    summary: "task -g fzf:listen"
-    interactive: true
-    preconditions:
-      - sh: command -v fzf
-        msg: "fzf is not installed or not in PATH"
-    cmds:
-      - ss -ltnp | fzf --header='Listening sockets (ss -ltnp) — ESC 退出, 回车输出选中行' || true
+#  fzf:listen:
+#    # score: 2 — recommend: internal, fzf 交互式浏览监听端口，依赖 fzf
+#    desc: Browse listening sockets via fzf (ss -ltnp | fzf)
+#    summary: "task -g fzf:listen"
+#    interactive: true
+#    preconditions:
+#      - sh: command -v fzf
+#        msg: "fzf is not installed or not in PATH"
+#    cmds:
+#      - ss -ltnp | fzf --header='Listening sockets (ss -ltnp) — ESC 退出, 回车输出选中行' || true
 
-  fzf:tcp:
-    # score: 1 — recommend: remove, fzf 选连接看详情，过于花哨且依赖 fzf
-    desc: Pick a TCP connection via fzf, then show detailed info (ss -tin)
-    summary: "task -g fzf:tcp"
-    interactive: true
-    preconditions:
-      - sh: command -v fzf
-        msg: "fzf is not installed or not in PATH"
-    vars:
-      LINE:
-        sh: ss -tanp | sed '1d' | fzf --header='Pick a TCP connection (ss -tanp)' || true
-      SRC:
-        sh: echo "{{.LINE}}" | awk '{print $4}'
-      DST:
-        sh: echo "{{.LINE}}" | awk '{print $5}'
-    cmds:
-      - |
-        if [ -z "{{.LINE}}" ]; then
-          echo "No connection selected."
-          exit 0
-        fi
-        echo "Selected connection:"
-        echo "  {{.SRC}} -> {{.DST}}"
-        echo
-        echo "Detailed info (ss -tin):"
-        echo "--------------------------------"
-        ss -tin "src {{.SRC}} dst {{.DST}}"
+#  fzf:tcp:
+#    # score: 1 — recommend: remove, fzf 选连接看详情，过于花哨且依赖 fzf
+#    desc: Pick a TCP connection via fzf, then show detailed info (ss -tin)
+#    summary: "task -g fzf:tcp"
+#    interactive: true
+#    preconditions:
+#      - sh: command -v fzf
+#        msg: "fzf is not installed or not in PATH"
+#    vars:
+#      LINE:
+#        sh: ss -tanp | sed '1d' | fzf --header='Pick a TCP connection (ss -tanp)' || true
+#      SRC:
+#        sh: echo "{{.LINE}}" | awk '{print $4}'
+#      DST:
+#        sh: echo "{{.LINE}}" | awk '{print $5}'
+#    cmds:
+#      - |
+#        if [ -z "{{.LINE}}" ]; then
+#          echo "No connection selected."
+#          exit 0
+#        fi
+#        echo "Selected connection:"
+#        echo "  {{.SRC}} -> {{.DST}}"
+#        echo
+#        echo "Detailed info (ss -tin):"
+#        echo "--------------------------------"
+#        ss -tin "src {{.SRC}} dst {{.DST}}"

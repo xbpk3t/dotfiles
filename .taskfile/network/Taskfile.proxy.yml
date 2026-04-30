@@ -3,7 +3,9 @@ version: '3'
 
 
 tasks:
-  darwin:
+
+  # MAYBE: [2026-04-30] 之后把 darwin & linux 各自拆成两个 internal task，这个 task 只用来做if到不同 platforms 即可
+  sb:
     # score: 2 — recommend: internal, 仅 mac 上重启 singbox 用，场景极窄
     platforms: [darwin]
     summary: "task -g singbox:darwin"

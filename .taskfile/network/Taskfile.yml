@@ -7,16 +7,8 @@ includes:
   throughput: ./Taskfile.iperf.yml
   dns: ./Taskfile.DNS.yml
   ping: ./Taskfile.ping.yml
-  traceroute: ./Taskfile.traceroute.yml
-  nz: ./Taskfile.z.yml
-  ip: ./Taskfile.iproute2.yml
-  nping: ./Taskfile.nping.yml
-  firewall: ./Taskfile.firewall.yml
-  bpftool: ./Taskfile.BPF.yml
-  bpftrace: ./Taskfile.BPF.yml
+  ip: ./Taskfile.IP.yml
+  fw: ./Taskfile.firewall.yml
   nmap: ./Taskfile.nmap.yml
-  naabu: ./Taskfile.naabu.yml
-  arping: ./Taskfile.arping.yml
   curl: ./Taskfile.curl.yml
-  sb: ./Taskfile.singbox.yml
-  ssh: ./Taskfile.ssh.yml
+  proxy: ./Taskfile.proxy.yml

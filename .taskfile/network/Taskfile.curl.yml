@@ -85,18 +85,18 @@ tasks:
           --data '{{.DATA}}' \
           {{.URL}}
 
-  download:
-    # score: 2 — recommend: internal, 下载文件有 wget/aria2，curl download 很少单独用
-    desc: Download a URL to a local file
-    summary: "task -g curl:download URL=<url> OUT=<path>"
-    vars:
-      OUT: '{{.OUT | default ""}}'
-      URL: '{{.URL | default ""}}'
-    platforms: [linux, darwin]
-    requires:
-      vars: [URL, OUT]
-    preconditions:
-      - sh: command -v curl >/dev/null 2>&1
-        msg: curl not found
-    cmds:
-      - curl -fL -o {{.OUT}} {{.URL}}
+#  download:
+#    # score: 2 — recommend: internal, 下载文件有 wget/aria2，curl download 很少单独用
+#    desc: Download a URL to a local file
+#    summary: "task -g curl:download URL=<url> OUT=<path>"
+#    vars:
+#      OUT: '{{.OUT | default ""}}'
+#      URL: '{{.URL | default ""}}'
+#    platforms: [linux, darwin]
+#    requires:
+#      vars: [URL, OUT]
+#    preconditions:
+#      - sh: command -v curl >/dev/null 2>&1
+#        msg: curl not found
+#    cmds:
+#      - curl -fL -o {{.OUT}} {{.URL}}
