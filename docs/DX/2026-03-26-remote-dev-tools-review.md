@@ -90,6 +90,48 @@ thin:
 
 
 
+```yaml
+        - date: 2026-01-07
+          des: |
+            - 【技术选型】目前的几个主流远程开发方案（jetbrains, zed, vscode的GUI和web）里，为啥vscode desktop 是最优方案？
+            - 从底层实现出发，能否给我解释一下为啥 vscode remote 远程开发，比 Jetbrains 的好用？注意找主要矛盾，然后再由此去发散具体现象
+
+            【基本认知】接入方式、运行载体、环境描述
+
+        - date: 2026-01-22
+          des: |
+            系统性梳理相关tools，并移除【mise】、【devbox】
+
+            目前有三条路线 mise, devbox, devenv，抽丝剥茧地得到该问题的最优解：
+
+            1、为啥在NixOS下推荐使用 devbox，而非mise?
+            2、为啥说“devbox和direnv天然互补”？
+            3、为啥选择 devenv 而非 devbox?
+
+            ---
+
+            1、mise更通用，但是在NixOS下不如后两个，mise的本质是 版本管理+env+tasks 这3个核心feats的组合。这三项能力我们逐项拆解，
+              - 版本管理（安装不同version的lang）：是其核心能力，但nix天生就是干这个的，是其上位替代。
+              - env：又被direnv上位替代了（并且 mise跟direnv的hook机制冲突，只能二选一）。
+              - tasks（类似makefile）：在这三项feats里，本身就是个添头，肯定不如taskfile/justfile之类的。
+              - DevContainer 落地方式：在 DevContainer 工作流里，devbox/devenv 更像“从环境描述直接产出 .devcontainer/ 的产物链路”，而 mise 更常被用作“容器里的工具安装器（先装 mise，再在容器内装工具链）”；因此在 NixOS 下想减少体系叠加、让环境成为单一来源时，更倾向 devbox/devenv 而非 mise。
+            总之相较之下，nix这套工具流的一致性更强，可以把nix作为 single source of truth，更简单易用的同时，也可以避免很多工程中实际遇到的麻烦。
+            2、direnv 负责“自动切环境”，devbox 负责“定义环境”——组合天然互补。另外，devbox 还天然集成direnv。
+            3、因为devenv更pure nix，devbox 用 JSON 作为 DSL，把 Nix 隐藏起来。而devenv则直接写nix，表达力更强。并且二者也都天然集成direnv和DevContainer，生态接近。另外，devenv相比devbox更强大，可以覆盖完整开发流程（从开发、测试、CICD到上线）。对于nix熟手来说，更推荐devenv。
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
 ```markdown
 
 ~/Desktop/docs  main [✘»!+?⇡] via  v24.14.0

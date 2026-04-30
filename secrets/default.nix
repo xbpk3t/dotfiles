@@ -102,7 +102,7 @@ in {
       SINGBOX_PRI_KEY = mkRootSecret "singbox/pri_key";
       SINGBOX_PUB_KEY = mkRootSecret "singbox/pub_key";
       SINGBOX_ID = mkRootSecret "singbox/id";
-      SINGBOX_HY2_PWD = mkRootSecret "singbox/hy2_pwd";
+      SINGBOX_PWD = mkRootSecret "singbox/pwd";
       SINGBOX_FLYINGBIRD = mkRootSecret "singbox/flyingbird";
       SINGBOX_CLASH_SK = mkRootSecret "singbox/clash_secret";
 

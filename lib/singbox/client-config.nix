@@ -38,7 +38,7 @@ with lib; let
       shortId = config.sops.placeholder.SINGBOX_ID;
       clashSecret = config.sops.placeholder.SINGBOX_CLASH_SK;
       flyingbirdPassword = config.sops.placeholder.SINGBOX_FLYINGBIRD;
-      hy2Password = config.sops.placeholder.SINGBOX_HY2_PWD;
+      password = config.sops.placeholder.SINGBOX_PWD;
     }
     else {
       uuid = {
@@ -56,8 +56,8 @@ with lib; let
       flyingbirdPassword = {
         _secret = config.sops.secrets.SINGBOX_FLYINGBIRD.path;
       };
-      hy2Password = {
-        _secret = config.sops.secrets.SINGBOX_HY2_PWD.path;
+      password = {
+        _secret = config.sops.secrets.SINGBOX_PWD.path;
       };
     };
 
@@ -71,7 +71,7 @@ with lib; let
     publicKey = secrets.publicKey;
     shortId = secrets.shortId;
     flyingbirdPassword = secrets.flyingbirdPassword;
-    hy2Password = secrets.hy2Password;
+    password = secrets.password;
   };
   # config.nix requires pkgs for external_ui plus outbounds/ruleSets
   configJson = import ./config.nix {

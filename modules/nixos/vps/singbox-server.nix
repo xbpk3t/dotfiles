@@ -16,6 +16,18 @@ with lib; let
   hy2Enabled = singbox ? hy2;
   hy2Domain = singbox.hy2.domain;
   hy2Port = singbox.hy2.port or 8500;
+  vmessEnabled = singbox ? vmessWs;
+  vmessDomain = attrByPath ["vmessWs" "domain"] null singbox;
+  vmessPort = attrByPath ["vmessWs" "port"] null singbox;
+  vmessPath = attrByPath ["vmessWs" "path"] null singbox;
+  tuicEnabled = singbox ? tuic;
+  tuicDomain = attrByPath ["tuic" "domain"] null singbox;
+  tuicPort = attrByPath ["tuic" "port"] null singbox;
+  tuicCongestionControl = attrByPath ["tuic" "congestionControl"] "bbr" singbox;
+  anytlsEnabled = singbox ? anytls;
+  anytlsDomain = attrByPath ["anytls" "domain"] null singbox;
+  anytlsPort = attrByPath ["anytls" "port"] null singbox;
+  anytlsAlpn = attrByPath ["anytls" "alpn"] ["h2" "http/1.1"] singbox;
   mail = userMeta.mail;
 in {
   options.services.singbox-server = {
@@ -80,6 +92,34 @@ in {
                 };
               }
             ]
+            ++ lib.optionals vmessEnabled [
+              {
+                type = "vmess";
+                tag = "vmess-ws-tls";
+                listen = "::";
+                listen_port = vmessPort;
+
+                users = [
+                  {
+                    name = "default";
+                    uuid = {_secret = config.sops.secrets.SINGBOX_UUID.path;};
+                    alterId = 0;
+                  }
+                ];
+
+                tls = {
+                  enabled = true;
+                  server_name = vmessDomain;
+                  certificate_path = "/var/lib/acme/${vmessDomain}/fullchain.pem";
+                  key_path = "/var/lib/acme/${vmessDomain}/key.pem";
+                };
+
+                transport = {
+                  type = "ws";
+                  path = vmessPath;
+                };
+              }
+            ]
             ++ lib.optionals hy2Enabled [
               {
                 type = "hysteria2";
@@ -89,7 +129,7 @@ in {
 
                 users = [
                   {
-                    password = {_secret = config.sops.secrets.SINGBOX_HY2_PWD.path;};
+                    password = {_secret = config.sops.secrets.SINGBOX_PWD.path;};
                   }
                 ];
 
@@ -99,6 +139,56 @@ in {
                   alpn = ["h3"];
                   certificate_path = "/var/lib/acme/${hy2Domain}/fullchain.pem";
                   key_path = "/var/lib/acme/${hy2Domain}/key.pem";
+                };
+              }
+            ]
+            ++ lib.optionals tuicEnabled [
+              {
+                type = "tuic";
+                tag = "tuic";
+                listen = "::";
+                listen_port = tuicPort;
+
+                users = [
+                  {
+                    name = "default";
+                    uuid = {_secret = config.sops.secrets.SINGBOX_UUID.path;};
+                    password = {_secret = config.sops.secrets.SINGBOX_PWD.path;};
+                  }
+                ];
+
+                congestion_control = tuicCongestionControl;
+                zero_rtt_handshake = false;
+                heartbeat = "10s";
+                tls = {
+                  enabled = true;
+                  server_name = tuicDomain;
+                  alpn = ["h3"];
+                  certificate_path = "/var/lib/acme/${tuicDomain}/fullchain.pem";
+                  key_path = "/var/lib/acme/${tuicDomain}/key.pem";
+                };
+              }
+            ]
+            ++ lib.optionals anytlsEnabled [
+              {
+                type = "anytls";
+                tag = "anytls";
+                listen = "::";
+                listen_port = anytlsPort;
+
+                users = [
+                  {
+                    name = "default";
+                    password = {_secret = config.sops.secrets.SINGBOX_PWD.path;};
+                  }
+                ];
+
+                tls = {
+                  enabled = true;
+                  server_name = anytlsDomain;
+                  alpn = anytlsAlpn;
+                  certificate_path = "/var/lib/acme/${anytlsDomain}/fullchain.pem";
+                  key_path = "/var/lib/acme/${anytlsDomain}/key.pem";
                 };
               }
             ];
@@ -119,8 +209,10 @@ in {
       };
 
       # 放行端口
-      networking.firewall.allowedTCPPorts = [port];
-      networking.firewall.allowedUDPPorts = lib.optionals hy2Enabled [hy2Port];
+      networking.firewall.allowedTCPPorts = [port] ++ lib.optionals vmessEnabled [vmessPort] ++ lib.optionals anytlsEnabled [anytlsPort];
+      networking.firewall.allowedUDPPorts =
+        lib.optionals hy2Enabled [hy2Port]
+        ++ lib.optionals tuicEnabled [tuicPort];
     }
     (mkIf hy2Enabled {
       security.acme.acceptTerms = mkDefault true;
@@ -130,6 +222,36 @@ in {
         environmentFile = config.sops.secrets.ACME_CF_ENV.path;
         group = "sing-box";
         # 证书更新后自动 reload，避免 HY2 继续使用旧证书
+        reloadServices = ["sing-box.service"];
+      };
+    })
+    (mkIf vmessEnabled {
+      security.acme.acceptTerms = mkDefault true;
+      security.acme.certs."${vmessDomain}" = {
+        email = mail;
+        dnsProvider = "cloudflare";
+        environmentFile = config.sops.secrets.ACME_CF_ENV.path;
+        group = "sing-box";
+        reloadServices = ["sing-box.service"];
+      };
+    })
+    (mkIf tuicEnabled {
+      security.acme.acceptTerms = mkDefault true;
+      security.acme.certs."${tuicDomain}" = {
+        email = mail;
+        dnsProvider = "cloudflare";
+        environmentFile = config.sops.secrets.ACME_CF_ENV.path;
+        group = "sing-box";
+        reloadServices = ["sing-box.service"];
+      };
+    })
+    (mkIf anytlsEnabled {
+      security.acme.acceptTerms = mkDefault true;
+      security.acme.certs."${anytlsDomain}" = {
+        email = mail;
+        dnsProvider = "cloudflare";
+        environmentFile = config.sops.secrets.ACME_CF_ENV.path;
+        group = "sing-box";
         reloadServices = ["sing-box.service"];
       };
     })
