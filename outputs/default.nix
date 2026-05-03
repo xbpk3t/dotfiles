@@ -143,7 +143,7 @@ in {
     specialArgs = genSpecialArgs system;
     pkgs = specialArgs.pkgs;
     architectureOutput = architectureOutputs.${system};
-    libChecks = import ../lib/tests {
+    libChecks = import ../tests {
       inherit pkgs;
       lib = pkgs.lib;
     };

@@ -1,8 +1,8 @@
 {lib ? import <nixpkgs/lib>}: let
-  mylib = import ../default.nix {inherit lib;};
+  mylib = import ../lib/default.nix {inherit lib;};
 
   # 使用当前仓库里真实存在、并且确实通过 `scanPaths` 聚合 imports 的目录。
-  baseModulesPath = ./../../modules/nixos/base;
+  baseModulesPath = ../modules/nixos/base;
 
   # 使用真实的 scanPaths 函数
   scanResult = mylib.scanPaths baseModulesPath;
