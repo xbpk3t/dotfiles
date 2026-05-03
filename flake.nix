@@ -149,7 +149,7 @@ rec {
     # 决策：用在机器多且硬件差异大、想“一份配置跑全场”的场景；单机或少量固定硬件则直接 generate-config 就够。
     nixos-facter = {
       url = "github:nix-community/nixos-facter";
-      inputs.nixpkgs.follows = "nixpkgs";
+      # inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # deploy-rs - Multi-profile deployment tool

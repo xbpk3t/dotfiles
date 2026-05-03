@@ -1,10 +1,11 @@
 name: flake-check
 
 on:
-  pull_request:
-  push:
-    branches:
-      - main
+#  pull_request:
+#  push:
+#    branches:
+#      - main
+  workflow_dispatch:
 
 concurrency:
   # 避免同一分支上的旧任务继续占用 runner。

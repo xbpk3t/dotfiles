@@ -24,7 +24,7 @@
     }
   ];
 
-  singboxOutbounds = import ../singbox/outbounds.nix {
+  singboxOutbounds = import ../lib/singbox/outbounds.nix {
     inherit lib servers;
     uuid = "00000000-0000-0000-0000-000000000001";
     publicKey = "pubkey";
@@ -33,7 +33,7 @@
     flyingbirdPassword = "unused";
   };
 
-  mihomoOutbounds = import ../mihomo/outbounds.nix {
+  mihomoOutbounds = import ../lib/mihomo/outbounds.nix {
     inherit lib servers;
     uuid = "00000000-0000-0000-0000-000000000001";
     publicKey = "pubkey";
