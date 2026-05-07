@@ -24,7 +24,7 @@ includes:
   # kernel
   kernel:
     taskfile: kernel/Taskfile.yml
-    flatten: true
+    # flatten: true
 
   # mac
   macos:
@@ -58,5 +58,14 @@ tasks:
     cmd: task --list
 
   count:
-    desc: "task count (注意只有 public task)"
-    cmd: task --list --json | jq '.tasks | length'
+    desc: "task count per domain"
+    silent: true
+    cmd: |
+      {
+        for f in */Taskfile.yml; do
+          [ -f "$f" ] || continue
+          echo "$(basename "$(dirname "$f")") $(task --list --json -t "$f" 2>/dev/null | jq '.tasks | length')"
+        done
+      } | column -t
+#    - for: [ devops, k8s, kernel, langs, mac, network, nix, works ]
+#      cmd: echo "{{.ITEM}} -> $(task --list --json -t {{.ITEM}}/Taskfile.yml 2>/dev/null | jq '.tasks | length')"

@@ -52,23 +52,23 @@ tasks:
     cmds:
       - iperf3 -u -c {{.HOST}} -b {{.BANDWIDTH}} -t {{.DURATION}} -p {{.PORT}}
 
-  parallel:
-    # score: 3 — recommend: public, 多流并发压测，高级场景
-    desc: Run iperf3 multi-stream TCP throughput test
-    summary: "task -g throughput:parallel HOST=<host> [STREAMS=8] [DURATION=10] [PORT=5201]"
-    platforms: [linux, darwin]
-    requires:
-      vars: [HOST]
-    vars:
-      HOST: '{{.HOST | default ""}}'
-      STREAMS: '{{.STREAMS | default "8"}}'
-      DURATION: '{{.DURATION | default "10"}}'
-      PORT: '{{.PORT | default "5201"}}'
-    preconditions:
-      - sh: command -v iperf3 >/dev/null 2>&1
-        msg: iperf3 not found
-    cmds:
-      - iperf3 -c {{.HOST}} -P {{.STREAMS}} -t {{.DURATION}} -p {{.PORT}}
+#  parallel:
+#    # score: 3 — recommend: public, 多流并发压测，高级场景
+#    desc: Run iperf3 multi-stream TCP throughput test
+#    summary: "task -g throughput:parallel HOST=<host> [STREAMS=8] [DURATION=10] [PORT=5201]"
+#    platforms: [linux, darwin]
+#    requires:
+#      vars: [HOST]
+#    vars:
+#      HOST: '{{.HOST | default ""}}'
+#      STREAMS: '{{.STREAMS | default "8"}}'
+#      DURATION: '{{.DURATION | default "10"}}'
+#      PORT: '{{.PORT | default "5201"}}'
+#    preconditions:
+#      - sh: command -v iperf3 >/dev/null 2>&1
+#        msg: iperf3 not found
+#    cmds:
+#      - iperf3 -c {{.HOST}} -P {{.STREAMS}} -t {{.DURATION}} -p {{.PORT}}
 
 #  bidir:
 #    # score: 2 — recommend: internal, 双向吞吐测试，场景窄

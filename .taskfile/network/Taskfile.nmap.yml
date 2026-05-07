@@ -287,7 +287,7 @@ tasks:
   naabu:
     # score: 3 — recommend: public, 快速端口扫描，比 nmap 轻量，特定场景有用
     desc: naabu port scan
-    summary: "task -g default HOSTS=<hosts> [PORTS=1-65535] [RATE=1000]"
+    summary: "task -g nmap:naabu HOSTS=<hosts> [PORTS=1-65535] [RATE=1000]"
     platforms: [linux, darwin]
     requires:
       vars: [HOSTS]
