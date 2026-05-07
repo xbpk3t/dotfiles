@@ -10,7 +10,35 @@
 
       mosh
       fping
-      inetutils
+
+      # https://mynixos.com/nixpkgs/package/inetutils
+      # 提供了 ftp(d), hostname, ifconfig, inetd, logger, ping, rcp, rexec(d), rlogin(d), rsh(d), syslogd, talk(d), telnet(d), tftp(d), traceroute, uucpd, and whois 这些cli
+      # [2026-04-30] 注释掉该pkgs
+      #  1. 大部分工具对你来说是废物甚至包袱
+      #
+      #  inetutils 提供的一堆东西里：
+      #
+      #  - ftp(d), telnet(d), rsh(d), rcp, rexec(d), talk(d), uucpd — 全是不安全/过时的协议，不该用
+      #  - syslogd, inetd — macOS 用 launchd，不是这俩
+      #  - hostname, ifconfig, logger, ping, whois — macOS 有原生 BSD 版，且行为更贴合 Darwin
+      #
+      #  为了一个 traceroute 拉了一堆几乎用不到的东西进来。
+      #
+      #  2. 在 macOS 上没带来额外价值
+      #
+      #  macOS 原生 /usr/sbin/traceroute 已经存在。inetutils 的 GNU   traceroute实现反而更弱（功能子集），你没有任何理由用它的版本覆盖系统原生。
+      #
+      #  3. 造成二进制冲突，锁死其他选择
+      #
+      #  如果以后想装独立的 traceroute 包（nixpkgs 那个），会和 inetu bin/traceroute 上冲突。Nix bu对这种同名冲突是直接报错的，两者不能共存。
+      #
+      #  4. Linux 侧已有更好的替代
+      #
+      #  你 Linux-only 段已经装了 iputils（提供 tracepath），加上独立traceroute 包也比 inetutils 的 traceroute 完善得多。
+      #
+      #  ---
+      #  结论：删掉 inetutils，把 traceroute 加到 Linux-only 段。
+      # inetutils
 
       # https://mynixos.com/nixpkgs/package/dig
       # https://mynixos.com/nixpkgs/package/dnslookup
@@ -216,4 +244,7 @@
 
   #**总结：**
   #CLI 版本适合“临时测一下”，而 **Service 版本** 则是为了把服务器变成一个“永久的测试基准点”。对于需要频繁排查网络问题的运维人员来说，这几乎是标配。
+
+  # https://mynixos.com/nixpkgs/package/traceroute
+  # https://mynixos.com/nixpkgs/option/programs.traceroute.enable
 }
