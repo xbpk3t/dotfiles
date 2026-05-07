@@ -64,7 +64,7 @@ tasks:
   default:
     # score: 5 — recommend: public, ICMP echo 最基础连通性检查，高频
     desc: ICMP echo (IPv4)
-    summary: "task -g default HOST=<host> [COUNT=5] [SIZE=56] [INTERVAL=1]"
+    summary: "task -g ping HOST=<host> [COUNT=5] [SIZE=56] [INTERVAL=1]"
     platforms: [linux]
     requires:
       vars: [HOST]
@@ -78,27 +78,27 @@ tasks:
     cmds:
       - ping -c {{.COUNT}} -s {{.SIZE}} -i {{.INTERVAL}} {{.HOST}}
 
-  v6:
-    # score: 3 — recommend: public, IPv6 ping，场景明确但非最高频
-    desc: ICMP echo (IPv6)
-    summary: "task -g v6 HOST=<host> [COUNT=5] [SIZE=56] [INTERVAL=1]"
-    platforms: [linux]
-    requires:
-      vars: [HOST]
-    vars:
-      COUNT: '{{.COUNT | default "5"}}'
-      # SIZE 是 payload（bytes），不含 IPv6+ICMPv6 头
-      SIZE: '{{.SIZE | default "56"}}'
-      # INTERVAL 单位为秒（seconds）
-      INTERVAL: '{{.INTERVAL | default "1"}}'
-      HOST: ''
-    cmds:
-      - ping -6 -c {{.COUNT}} -s {{.SIZE}} -i {{.INTERVAL}} {{.HOST}}
+#  v6:
+#    # score: 3 — recommend: public, IPv6 ping，场景明确但非最高频
+#    desc: ICMP echo (IPv6)
+#    summary: "task -g v6 HOST=<host> [COUNT=5] [SIZE=56] [INTERVAL=1]"
+#    platforms: [linux]
+#    requires:
+#      vars: [HOST]
+#    vars:
+#      COUNT: '{{.COUNT | default "5"}}'
+#      # SIZE 是 payload（bytes），不含 IPv6+ICMPv6 头
+#      SIZE: '{{.SIZE | default "56"}}'
+#      # INTERVAL 单位为秒（seconds）
+#      INTERVAL: '{{.INTERVAL | default "1"}}'
+#      HOST: ''
+#    cmds:
+#      - ping -6 -c {{.COUNT}} -s {{.SIZE}} -i {{.INTERVAL}} {{.HOST}}
 
   pmtu:
     # score: 3 — recommend: public, PMTU 探测，特定场景有用
     desc: IPv4 DF ping for PMTU probing
-    summary: "task -g pmtu HOST=<host> [SIZE=1472] [COUNT=3]"
+    summary: "task -g ping:pmtu HOST=<host> [SIZE=1472] [COUNT=3]"
     platforms: [linux]
     requires:
       vars: [HOST]
@@ -110,28 +110,28 @@ tasks:
     cmds:
       - ping -M do -s {{.SIZE}} -c {{.COUNT}} {{.HOST}}
 
-  darwin:
-    # score: 3 — recommend: public, macOS 上 ping，参数不同单独处理
-    desc: ICMP echo (IPv4, darwin)
-    summary: "task -g darwin HOST=<host> [COUNT=30] [SIZE=56] [INTERVAL=1]"
-    platforms: [darwin]
-    interactive: true
-    requires:
-      vars: [HOST]
-    vars:
-      COUNT: '{{.COUNT | default "30"}}'
-      # SIZE 是 payload（bytes），不含 IPv4+ICMP 头
-      SIZE: '{{.SIZE | default "56"}}'
-      # INTERVAL 单位为秒（seconds）
-      INTERVAL: '{{.INTERVAL | default "1"}}'
-      HOST: ''
-    cmds:
-      - ping -c {{.COUNT}} -s {{.SIZE}} -i {{.INTERVAL}} {{.HOST}}
+#  darwin:
+#    # score: 3 — recommend: public, macOS 上 ping，参数不同单独处理
+#    desc: ICMP echo (IPv4, darwin)
+#    summary: "task -g darwin HOST=<host> [COUNT=30] [SIZE=56] [INTERVAL=1]"
+#    platforms: [darwin]
+#    interactive: true
+#    requires:
+#      vars: [HOST]
+#    vars:
+#      COUNT: '{{.COUNT | default "30"}}'
+#      # SIZE 是 payload（bytes），不含 IPv4+ICMP 头
+#      SIZE: '{{.SIZE | default "56"}}'
+#      # INTERVAL 单位为秒（seconds）
+#      INTERVAL: '{{.INTERVAL | default "1"}}'
+#      HOST: ''
+#    cmds:
+#      - ping -c {{.COUNT}} -s {{.SIZE}} -i {{.INTERVAL}} {{.HOST}}
 
   batch:
     # score: 3 — recommend: public, 批量 host probe，fping 替代方案特定场景
     desc: Batch host probe via fping
-    summary: "task -g batch HOSTS='<hosts>' [COUNT=5]"
+    summary: "task -g ping:batch HOSTS='<hosts>' [COUNT=5]"
     platforms: [linux]
     requires:
       vars: [HOSTS]
@@ -165,7 +165,7 @@ tasks:
   path:
     # score: 4 — recommend: public, mtr 路径质量报告，排查丢包/抖动高频
     desc: Path quality report via mtr (IPv4)
-    summary: "task -g path HOST=<host> [COUNT=50]"
+    summary: "task -g ping:path HOST=<host> [COUNT=50]"
     platforms: [linux]
     requires:
       vars: [HOST]
@@ -204,7 +204,7 @@ tasks:
     # - 关注“这个 IP 在这个二层上能不能回应 ARP”。
     # score: 3 — recommend: public, 二层可达性排查，特定场景有用但非日常
     desc: arping (L2 reachability)
-    summary: "task -g default HOST=<host> [COUNT=5] [IFACE=<iface>]"
+    summary: "task -g ping:arping HOST=<host> [COUNT=5] [IFACE=<iface>]"
     platforms: [linux]
     requires:
       vars: [HOST]
@@ -221,30 +221,30 @@ tasks:
 
 
   # [jsdelivr/globalping-cli: A simple CLI tool to run networking commands remotely from hundreds of globally distributed servers](https://github.com/jsdelivr/globalping-cli)
-  global-ping:
-    # score: 3 — recommend: public, 全球分布式节点探测，特定场景有用
-    desc: Run globalping ping from distributed probes
-    summary: "task -g nz:global-ping [CLI_ARGS]"
-    cmd: globalping ping {{.CLI_ARGS}}
+#  global-ping:
+#    # score: 3 — recommend: public, 全球分布式节点探测，特定场景有用
+#    desc: Run globalping ping from distributed probes
+#    summary: "task -g nz:global-ping [CLI_ARGS]"
+#    cmd: globalping ping {{.CLI_ARGS}}
 
 
-  nping:
-    # score: 3 — recommend: public, PMTU 探测专用，场景明确但非高频
-    desc: nping ICMP for PMTU probing
-    summary: "task -g pmtu HOST=<host> [SIZE=1472]"
-    platforms: [linux]
-    requires:
-      vars: [HOST]
-    vars:
-      # SIZE 是 payload，1472 = 1500 - 20(IPv4) - 8(ICMP)
-      SIZE: '{{.SIZE | default "1472"}}'
-      HOST: ''
-    preconditions:
-      - sh: command -v nping
-        msg: nping not found
-    cmds:
-      # PMTU probing 默认不额外限制 count，适合手动观察反馈
-      - sudo nping --icmp {{.HOST}} --data-length {{.SIZE}}
+#  nping:
+#    # score: 3 — recommend: public, PMTU 探测专用，场景明确但非高频
+#    desc: nping ICMP for PMTU probing
+#    summary: "task -g pmtu HOST=<host> [SIZE=1472]"
+#    platforms: [linux]
+#    requires:
+#      vars: [HOST]
+#    vars:
+#      # SIZE 是 payload，1472 = 1500 - 20(IPv4) - 8(ICMP)
+#      SIZE: '{{.SIZE | default "1472"}}'
+#      HOST: ''
+#    preconditions:
+#      - sh: command -v nping
+#        msg: nping not found
+#    cmds:
+#      # PMTU probing 默认不额外限制 count，适合手动观察反馈
+#      - sudo nping --icmp {{.HOST}} --data-length {{.SIZE}}
 
       # score: 3 — recommend: public, nping ICMP probe，有 ping 可替代但提供额外数据长度控制
       # --icmp: ICMP probe, --data-length: payload bytes
@@ -267,7 +267,7 @@ tasks:
   traceroute:
     # score: 5 — recommend: public, 路径探测最基础入口，排障高频
     desc: traceroute (IPv4)
-    summary: "task -g default HOST=<host>"
+    summary: "task -g ping:traceroute HOST=<host>"
     vars:
       HOST: ''
     platforms: [linux]
@@ -279,7 +279,7 @@ tasks:
   icmp:
     # score: 4 — recommend: public, ICMP 模式 traceroute，默认 UDP 不通时备用
     desc: traceroute (ICMP mode)
-    summary: "task -g icmp HOST=<host>"
+    summary: "task -g ping:icmp HOST=<host>"
     vars:
       HOST: ''
     platforms: [linux]
@@ -292,7 +292,7 @@ tasks:
   tcp:
     # score: 4 — recommend: public, TCP SYN 模式 traceroute，防火墙环境替代方案
     desc: traceroute (TCP SYN)
-    summary: "task -g tcp HOST=<host> [PORT=443]"
+    summary: "task -g ping:tcp HOST=<host> [PORT=443]"
     platforms: [linux]
     requires:
       vars: [HOST]

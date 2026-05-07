@@ -5,7 +5,7 @@ tasks:
   default:
     # score: 3 — recommend: public, 偶尔看一眼当前拥塞控制算法
     desc: "default 任务"
-    summary: "task -g default"
+    summary: "task -g tcp"
     platforms: [linux]
     cmds:
       # 拥塞控制算法

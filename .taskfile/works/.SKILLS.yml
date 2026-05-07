@@ -342,6 +342,9 @@ vars:
     # DESIGN.md
     # https://getdesign.md/
     # https://x.com/vikingmute/status/2042229353245978673
+    # https://x.com/stitchbygoogle/status/2046624729403142320
+    # https://x.com/vikingmute/status/2046877125836517484
+    # https://x.com/shao__meng/status/2046758188834267480
 
     # GEO-SEO
     # https://x.com/gkxspace/status/2042211862557688318
@@ -353,10 +356,82 @@ vars:
 
     # https://github.com/forrestchang/andrej-karpathy-skills
     # https://x.com/axiaisacat/status/2044260023161831620
-    # https://x.com/Jason23818126/status/2045735027447898357
 
 
     # n8n skills
     # https://github.com/czlonkowski/n8n-skills
 
-    # [(1) Jason Zhu on X: "38k 星，Matt Pocock 把工程师级 Skill 全开源了，专治 Claude Code vibe coding" / X](https://x.com/GoSailGlobal/status/2049336319286063302) 这个算是他自用的一些 skills，开源掉了。不是类似 superpower 这种提供完整 SDD方案的，相当于一些专门用来做 patch的skills
+    # cloudflare skills
+    # https://github.com/cloudflare/skills
+
+    # sentry skill-writer
+    # https://x.com/shao__meng/status/2045843744801603894
+
+
+
+    # https://x.com/GitHub_Daily/status/2046438828332998755
+    # https://github.com/addyosmani/agent-skills
+    # 提供 7 个触发命令，比如 /spec 写需求、/plan 拆任务、/build 写代码、/test 跑测试、/ship 部署，每个命令会自动调用相关技能。
+
+
+    # [(1) 无颜 on X: "Claude Code 值得安装的几个skills都整理好了 1、Claude Mem - 给 Claude 装记忆，不用重复描述需求 https://t.co/AnMHRBKzP1 2、Obsidian Skills - 让 Claude 真正理解你的上下文 https://t.co/1WHGK7rn0h 3、GSD - 让 Claude 真正干活，不是瞎扯 https://t.co/UgjhAIMjtu 4、LightRAG - https://t.co/YR0tHVExoa" / X](https://x.com/WY_mask/status/2048537609308344658)
+    #1、Claude Mem - 给 Claude 装记忆，不用重复描述需求
+    #https://github.com/thedotmack/claude-mem
+    #2、Obsidian Skills - 让 Claude 真正理解你的上下文
+    #https://github.com/kepano/obsidian-skills
+    #3、GSD - 让 Claude 真正干活，不是瞎扯
+    #https://github.com/gsd-build/get-shit-done
+    #4、LightRAG - 知识图谱，Claude 秒变专家
+    #https://github.com/hkuds/lightrag
+    #5、Superpowers - 给 Claude 装上超能力
+    #https://github.com/obra/superpowers
+    #6、Everything Claude Code - 你需要的功能都在这
+    #https://github.com/affaan-m/everything-claude-code
+    #7、n8n-MCP - Claude 接入自动化，一个提示词搞定整个流程
+    #https://github.com/czlonkowski/n8n-mcp
+    #8、UI UX Pro Max - 设计审美直接拉满，告别废于界面
+    #https://github.com/nextlevelbuilder/ui-ux-pro-max-skill
+
+    # [(1) 爱丽丝呀！ on X: "别再给 Claude Code 乱装 Skill 了，这 5 个才是真正值得必装的 1. Repomix 把整个仓库打包成一个文件丢给 Claude，一次性读懂项目结构。 不然你还在一段一段喂代码，纯浪费时间。 https://t.co/vOUo1tDOe0 2. ccusage 实时显示 Token 消耗。 装了之后你才会意识到：Prompt 写得烂 = 在烧钱。 https://t.co/SLSFzWiOvU" / X](https://x.com/BTCqzy1/status/2048628785793425837)
+    #1. Repomix
+    #
+    #把整个仓库打包成一个文件丢给 Claude，一次性读懂项目结构。
+    #
+    #不然你还在一段一段喂代码，纯浪费时间。
+    #
+    #https://github.com/yamadashy/repomix
+    #
+    #2. ccusage
+    #
+    #实时显示 Token 消耗。
+    #
+    #装了之后你才会意识到：Prompt 写得烂 = 在烧钱。
+    #
+    #https://github.com/ryoppippi/ccusage
+    #
+    #3. frontend-design
+    #
+    #官方出的前端设计 Skill。
+    #
+    #一句话直接出有设计感的 UI，不是那种“工程味很重”的页面。
+    #
+    #https://github.com/anthropics/claude-code/tree/main/plugins/frontend-design
+    #
+    #4. claude-mem
+    #
+    #给 Claude 加“长期记忆”。
+    #
+    #项目偏好、架构决策都能记住，不用每次从零解释一遍。
+    #
+    #https://github.com/thedotmack/claude-mem
+    #
+    #5. Superpowers
+    #
+    #最稳的全流程增强包。
+    #
+    #从任务规划 → 代码审查 → 测试 → 调试，一套全包。
+    #
+    #https://github.com/obra/superpowers
+    #
+    #这 5 个刚好覆盖了 Claude Code 的几个核心短板：
+    #上下文、记忆、成本、UI 产出、工程流程。

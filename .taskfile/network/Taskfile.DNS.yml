@@ -124,24 +124,24 @@ tasks:
     cmds:
       - dig {{.HOST}} {{.TYPE}} +trace
 
-  reverse:
-    # score: 3 — recommend: public, IP 反向查询，偶尔排查用
-    desc: Reverse lookup for an IP
-    summary: "task -g dns:reverse IP=<ip>"
-    platforms: [linux, darwin]
-    requires:
-      vars: [IP]
-    vars:
-      IP: '{{.IP | default ""}}'
-    preconditions:
-      - sh: command -v dig >/dev/null 2>&1
-        msg: dig not found
-    cmds:
-      - dig -x {{.IP}} +noall +answer
+#  reverse:
+#    # score: 3 — recommend: public, IP 反向查询，偶尔排查用
+#    desc: Reverse lookup for an IP
+#    summary: "task -g dns:reverse IP=<ip>"
+#    platforms: [linux, darwin]
+#    requires:
+#      vars: [IP]
+#    vars:
+#      IP: '{{.IP | default ""}}'
+#    preconditions:
+#      - sh: command -v dig >/dev/null 2>&1
+#        msg: dig not found
+#    cmds:
+#      - dig -x {{.IP}} +noall +answer
 
   # [mr-karan/doggo: :dog: Command-line DNS Client for Humans. Written in Golang](https://github.com/mr-karan/doggo)
-  doggo:
-    # score: 2 — recommend: internal, doggo DNS 查询，有 dig 就够了
-    desc: Query DNS with doggo
-    summary: "task -g nz:doggo [CLI_ARGS]"
-    cmd: doggo {{.CLI_ARGS}}
+#  doggo:
+#    # score: 2 — recommend: internal, doggo DNS 查询，有 dig 就够了
+#    desc: Query DNS with doggo
+#    summary: "task -g nz:doggo [CLI_ARGS]"
+#    cmd: doggo {{.CLI_ARGS}}
