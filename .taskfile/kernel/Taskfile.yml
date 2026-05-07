@@ -1,9 +1,446 @@
 ---
 version: "3"
 
-includes:
-  linux: ./Taskfile.linux.yml
-  monitor: ./Taskfile.monitor.yml
-  shell: ./Taskfile.shell.yml
-  power: ./Taskfile.power.yml
-  proc: ./proc/default.yml
+
+
+
+
+  # - sar <type> <type-param> <interval> <count> # Only type parameter is required, others are optional. Types: e.g. CPU, memory, network. Type parameters: some types have parameters, some don't. DEV here represents monitoring network card information. Time interval represents how many seconds to sample data, 1 here means 1 second. Count represents the number of samples. For example, if time interval is 3 and sample count is 4, the sar command will block for 12 seconds
+  # - sar -q # CPU load
+  # - sar -I # CPU interrupts
+  # - sar -w # CPU context switches
+  # - sar -S # Swap partition
+  # - sar -v # Kernel usage
+  # - sar -B # Memory paging
+  # - sar -d # Equivalent to iostat
+  #
+  # - netstat - Display network connections, routing tables, and network interface information
+  # - iostat - View Linux IO load
+  # - vmstat - Display real-time network traffic and packet count
+  # - numastat - NUMA statistics
+
+
+  # - topic: linux performance monitoring commands
+  #   qs:
+  #   - "***kernel performance issue troubleshooting checklist (uptime, dmesg | tail, vmstat, mpstat -P ALL, pidstat, iostat -xz, free -m, sar -n DEV, sar -n TCP,ETCP)***" # [Linux Performance Issue Troubleshooting 60s - MySpace](https://www.hitzhangjie.pro/blog/2023-09-08-linux%E6%80%A7%E8%83%BD%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A560s/)
+  #   - What is the overall system-wide CPU load? How about CPU usage? Usage of individual CPUs?
+  #   - How concurrent is the CPU load? Is it single-threaded? How many threads?
+  #   - Which application is using the CPU and how much?
+  #   - Which kernel thread is using the CPU and how much?
+  #   - How much CPU usage is due to interrupts?
+  #   - What are the user space and kernel space CPU calling paths?
+  #   - What types of stall cycles are encountered?
+  #
+  #   - linux, top, metrics. How to use sar? # top (CPU(us, sy, ni, id, wa, hi, si, st) process(PRI, NI, VIRT, RES, SHR, S, %CPU, %MEM, TIME+))
+  #
+  #   - "***What metrics does top return? What does each metric mean?***"
+  #   # Overview column CPU data:
+  #   #
+  #   # - us(user cpu time) Percentage of CPU time spent in user space
+  #   # - sy(system cpu time) Percentage of CPU time spent in kernel space
+  #   # - ni(nice cpu time) Percentage of CPU time spent on user processes with adjusted priority
+  #   # - id(idle) Percentage of idle CPU time
+  #   # - wa(iowait) Percentage of CPU time waiting for I/O
+  #   # - hi(hardware irq) Hardware interrupts
+  #   # - si(software irq) Software interrupts
+  #   # - st(steal time) Steal time
+  #   #
+  #   # Table parameters:
+  #   #
+  #   # - PRI: Process priority
+  #   # - NI(NICE): Process priority value, default is 0, can be adjusted
+  #   # - VIRT: Virtual memory used by the process
+  #   # - RES(resident size): Physical memory used by the process
+  #   # - SHR: Shared memory used by the process
+  #   # - S: Process running status (WSRZ) R means running, S means sleeping, waiting to be awakened, Z means zombie state
+  #   # - %CPU: CPU usage of the process
+  #   # - %MEM: Percentage of physical memory and total memory used by the process
+  #   # - TIME+: Total CPU time used by the process since startup
+  #
+  #   - What do high sy or cs values in the top command represent? # If sy is too high, it may be due to `context switching and interrupts` being too frequent. sy = sys time System CPU time. This refers to the time the CPU spends executing system calls or kernel code. If the sy value is high, it may mean that system calls are very frequent, which may be due to context switching and interrupts. Context switching occurs when a process or thread switches from running state to ready state or vice versa, while interrupts are CPU state changes caused by external events (such as hardware device service requests) or internal events (such as timer expiration). 2. If cs is too high, then `too many threads or processes` are running. cs = context switch Number of context switches. This refers to the number of times the operating system switches execution rights between processes or threads. If the cs value is high, it usually means that there are a large number of processes or threads running, which may cause the operating system to frequently perform context switching, thus affecting system performance.
+#
+#   - free, with swap, obviously free > available; without swap available > free # [A memory monitoring guess - jame_xhs's blog](https://www.jxhs.me/2022/04/10/%E4%B8%80%E6%AC%A1%E7%9B%91%E6%8E%A7%E5%86%85%E5%AD%98%E7%9A%84%E7%8C%9C%E6%83%B3/) Official Linux memory definition description, free will calculate part of swap, but available does not calculate swap.
+
+
+
+tasks:
+  default:
+    desc: "sysinfo 任务"
+    summary: "task -g kernel"
+    platforms: [linux]
+    cmds:
+      - uname -a
+      - cat /etc/os-release
+      # CPU型号
+      - lscpu
+      # CPU核心数
+      - nproc
+      - cat /proc/cpuinfo
+      - cat /proc/stat
+      - grep 'cpu ' /proc/stat
+      - uptime
+      # 物理内存 + swap（统一复用 memory 模块）
+      - task: mem
+      - df -h
+
+      # TCP连接数
+      - ss -t | wc -l
+      # UDP连接数
+      - ss -u | wc -l
+
+      # 默认队列算法
+      - sysctl -n net.core.default_qdisc
+
+      - curl -s --max-time 5 ipinfo.io
+
+      # DNS（nameserver 列表）
+      - cat /etc/resolv.conf
+
+      # 时区
+      - timedatectl show -p Timezone --value
+
+
+
+
+  # Process management tasks
+  #  ps:
+  #    desc: Report a snapshot of current processes
+  #    summary: "task -g ps"
+  #    cmd: ps aux
+
+
+  #  # 优先优雅退出（推荐）
+  #  kill -TERM $(lsof -ti :8080)
+  #  # 仍不退出再强杀（谨慎）
+  #  kill -KILL $(lsof -ti :8080)
+  #  # 优雅杀（推荐）
+  #  fuser -k 8080/tcp
+  #  # 或者明确用 TERM
+  #  fuser -k -TERM 8080/tcp
+  kp:
+    desc: Kill process listening on a TCP port (cross-platform)
+    summary: "task -g kernel:kp"
+    vars:
+      port: '{{.port | default 8080}}'
+      signal: '{{.signal | default "TERM"}}'
+    cmds:
+      - task: _kp:linux
+        vars: {port: "{{.port}}", signal: "{{.signal}}"}
+      - task: _kp:darwin
+        vars: {port: "{{.port}}", signal: "{{.signal}}"}
+
+  _kp:linux:
+    desc: Linux implementation (fuser)
+    platforms: [linux]
+    vars:
+      port: '{{.port | default 8080}}'
+      signal: '{{.signal | default "TERM"}}'
+    preconditions:
+      - sh: command -v fuser >/dev/null 2>&1
+        msg: "fuser not found. Install psmisc (e.g. nix profile install nixpkgs#psmisc / add pkgs.psmisc)."
+    cmds:
+      # fuser 在端口空闲时会返回非 0，所以这里用 ignore_error
+      - cmd: sudo fuser -k -{{.signal}} {{.port}}/tcp
+        ignore_error: true
+    internal: true
+    silent: true
+    interactive: true
+
+  _kp:darwin:
+    desc: Darwin implementation (lsof)
+    platforms: [darwin]
+    vars:
+      port: '{{.port | default 8080}}'
+      signal: '{{.signal | default "TERM"}}'
+    cmds:
+      # 没有监听者时：lsof 退出码非 0；我们用 ignore_error + status 来避免 kill 空参数
+      - cmd: sudo lsof -nP -tiTCP:{{.port}} -sTCP:LISTEN | xargs -r sudo kill -{{.signal}}
+        ignore_error: true
+    internal: true
+    silent: true
+    interactive: true
+
+  #  top-words:
+  #    desc: Show the top 10 most frequent words in a file
+  #    summary: "task -g top-words"
+  #    cmd: cat {{.filename}} | sort | uniq -c | sort -k1,1nr | head -10
+  #    vars:
+  #      filename: '{{.filename | default "output.txt"}}'
+
+  # - history - Show recent commands
+  # - history -20 -1 # Display the last 20 commands
+  # - history 1 20 # Display the first 20 commands
+  # - history 1 # Display all commands (from first to last)
+  # - history 10600 # Display from n to last
+  # - history -E # With timestamp format # 1  25.8.2025 09:55  touch .zshrc
+  # - history -i # With timestamp format #  1  2025-08-25 09:55  touch .zshrc
+  #  history:
+  #    desc: "history 任务"
+  #    summary: "task -g history"
+  #    vars:
+  #      str: ''
+  #    cmd: history -i ｜ grep {{.str}}
+
+  #  tree:
+  #    desc: "tree 任务"
+  #    summary: "task -g tree"
+  #    cmd: tree -L 1
+  #    dir: '{{.USER_WORKING_DIR}}'
+  #    interactive: true
+
+  #- 如果某个url需要auth才能访问，怎么在curl中添加token? # curl -H "X-Auth-Token: " url
+  #- "***怎么在本地执行远程 vps 上的远程脚本（curl 方式执行 shell 脚本时如何传参（不具名参数和具名参数分别怎么传参））？***" # [通过命令下载执行恶意代码](https://juejin.cn/post/6950955375931686942) 由于直接调用了bash命令，因此在远程脚本需要传递具名参数时，为了区分是bash命令的参数还是远程脚本的，可以使用--作为区分，可以理解为分割线，--前面的比如-s属于bash，后面的-x abc -y xyz属于远程脚本的参数. curl -L <url> | bash -s -- -x abc -y xyz
+  # curl:
+
+
+
+
+  # Other commands that don't need individual tasks:
+  # - alias - Create aliases for commands
+  # - unalias - Remove aliases
+  # - setenv - Set environment variables
+  # - tar - Manipulate tar archives
+  # - gzip - Compress/uncompress files
+  # - zip - Package and compress files
+  # - ln - Make links between files
+  # - curl - Transfer data from or to a server
+  # - transfer files (ffff, xxx, zzz) - File transfer utilities
+  # - wget - Non-interactive network downloader
+  # - rsync - Remote file synchronization
+  # - scp - Secure copy files
+  # - sort - Sort lines of text files
+  # - uniq - Report or omit repeated lines
+  # - awk - Pattern scanning and processing language
+  # - read file (cat/head/tail/more/less) - File reading utilities
+
+  # - systemctl list-unit-files | grep enable # View all auto-start items, or use systemctl list-unit-files | grep <service> to check if a specific service auto-starts
+
+  # - open command:
+  # - open -t <filename> # Open file with default editor
+  # - open -e <filename> # Open file with "Text Editor"
+  # - open -a <editor> <filename> # Open file with "specified application", e.g. open -a goland to open file with goland
+  #
+  # - Type command to check if a command is a built-in system command # type <command>
+  #
+  # - ip=$(ifconfig en0 | grep 'inet .*'  | sed 's/^.*inet//g' | sed 's/ netmask.*//g') && echo $ip
+  # - echo -e "$(cmd)" # Use `echo -e`+double quotes to avoid special character issues (ensure special characters are not lost)
+  # - echo -n # Echo without newline, use echo -n to prevent strings from being wrapped
+  # - sed -n '1w <output-file>' <input-file> # Write the first line of input-file to output-file
+
+
+
+
+  # MAYBE[2026-03-31]: 这个task有问题，但是从来没用过，需要用的时候再fix吧
+  #  rename:
+  #    desc: Rename files (and optionally directories recursively) by replacing a pattern with a new string (task rename [--recursive] <old> <new>, task rename-undo)
+  #    summary: "task -g linux:rename [--recursive] old new"
+  #    cmds:
+  #      - |
+  #        if [ "{{.RECURSIVE}}" = "true" ]; then
+  #          rnr regex -f -r -D -x "{{.PATTERN}}" "{{.REPLACEMENT}}" ./
+  #        else
+  #          rnr regex -f "{{.PATTERN}}" "{{.REPLACEMENT}}" ./*
+  #        fi
+  #    vars:
+  #      PATTERN:
+  #        sh: echo "{{.CLI_ARGS | default 'file renamed'}}" | awk '{print $1}'
+  #      REPLACEMENT:
+  #        sh: echo "{{.CLI_ARGS | default 'file renamed'}}" | awk '{print $2}'
+  #      RECURSIVE:
+  #        sh: echo "{{.CLI_ARGS}}" | grep -w -- "--recursive" > /dev/null && echo "true" || echo "false"
+  #    silent: true
+  #
+  #    # 回滚操作
+  #    rename-undo:
+  #      desc: Undo a previous rename operation using the latest dump file
+  #      cmds:
+  #        - |
+  #          DUMP_FILE=$(ls -t rnr-*.json | head -n 1)
+  #          if [ -z "$DUMP_FILE" ]; then
+  #            echo "No dump file found for undo operation."
+  #            exit 1
+  #          fi
+  #          rnr from-file -f -u "$DUMP_FILE"
+  #      silent: true
+
+
+
+
+
+  #  用途：跟踪某个应用程序的文件访问行为。
+  #  分析：
+  #  使用 strace 工具跟踪指定应用（{{.app}}）的文件相关系统调用，结合参数（{{.args}}）。
+  #  过滤掉无关路径（如 /nix/store、/newroot、/proc），提取并整理访问的文件路径（去重并排序）。
+  #  使用场景：调试或分析程序的文件依赖，检查哪些文件被程序实际访问（例如，排查配置缺失或权限问题）。
+  #  示例：运行 trace-access app=notepad args="--file test.txt" 可以查看 Notepad 访问了哪些文件。
+  #  trace-access:
+  #    desc: "跟踪文件访问"
+  #    summary: 'task -g linux:trace-access app=cmd [args="--file test.txt"]'
+  #    vars:
+  #      app: '{{.app}}'
+  #      args: '{{.args | default ""}}'
+  #    requires:
+  #      vars: [app]
+  #    cmds:
+  #      - strace -f -t -e trace=file {{.app}} {{.args}} | complete | grep -v -E "(/nix/store|/newroot|/proc)" | grep -o '"(/.*)"' | sort | uniq
+
+  #  用途：查看指定进程的环境变量。
+  #  分析：
+  #
+  #  通过读取 /proc/{{.pid}}/environ 文件，获取指定进程 ID（{{.pid}}）的环境变量，并将结果格式化（将空字符 \0 替换为换行符 \n）。
+  #  需要 sudo 权限以访问 /proc 下的文件。
+  #  使用场景：调试进程运行环境，检查环境变量是否正确设置（例如，排查 PATH 或自定义变量问题）。
+  #  示例：运行 penvof pid=1234 可以列出 PID 为 1234 的进程的所有环境变量。
+  #  penvof:
+  #    desc: "查看进程环境变量"
+  #    summary: "task -g linux:penvof pid=1234"
+  #    vars:
+  #      pid: '{{.pid}}'
+  #    requires:
+  #      vars: [pid]
+  #    cmds:
+  #      - sudo cat "/proc/{{.pid}}/environ" | tr '\0' '\n'
+
+
+
+
+  mem:
+    desc: "memory default"
+    summary: "task -g kernel:mem"
+    platforms: [linux]
+    cmds:
+      - task: _summary
+      - task: _swap
+
+
+  # 内存/Swap 模块化任务（可被 sysinfo/monitor 复用）
+  # 注意：这类任务仅查询，不做写操作
+  _summary:
+    platforms: [linux]
+    internal: true
+    cmds:
+      # 物理内存总览（bytes）
+      - free -b
+      # 物理内存 + swap 总览（MB）
+      - free -m
+
+  _swap:
+    platforms: [linux]
+    internal: true
+    cmds:
+      - echo -e "\n===== Swap Devices ====="
+      # swapon 是用户态视角（推荐）
+      - swapon --show
+      # /proc/swaps 是内核视角（更底层）
+      - cat /proc/swaps
+      - echo -e "\n===== Swap In/Out (vmstat) ====="
+      # si/so: swap in/out（单位：KB/s），快速判断是否发生 swap 抖动
+      - vmstat 1 5
+
+
+#  _detail:
+#    desc: "memory detail"
+#    summary: "task -g detail"
+#    platforms: [linux]
+#    internal: true
+#    cmds:
+#      # /proc/meminfo 关键字段（更详细）
+#      - cat /proc/meminfo | grep -E 'MemTotal|MemFree|MemAvailable|Buffers|Cached|SwapTotal|SwapFree|SwapCached'
+
+
+
+
+
+  # 完整诊断套件 (默认任务)
+  monitor:
+    desc: 执行完整的60秒快速诊断
+    summary: "task -g kernel:monitor"
+    interactive: true
+    silent: true
+    cmds:
+      - task: _basic
+      - task: _cpu
+      - task: _disk
+      # - task: _memory
+      - task: _network
+      - task: _top
+
+  # 基础系统状态检查
+  _basic:
+    internal: true
+    desc: "basic 任务"
+    summary: "task -g monitor:_basic"
+    cmds:
+      - echo "===== 基础系统状态 ====="
+      - uptime
+      - echo -e "\n===== 最近系统日志 ====="
+      - dmesg | tail -10
+
+  # CPU和进程分析
+  _cpu:
+    internal: true
+    desc: "cpu 任务"
+    summary: "task -g monitor:_cpu"
+    cmds:
+      - echo -e "\n===== CPU统计 (每1秒刷新，共5次) ====="
+      - vmstat 1 5
+      - echo -e "\n===== 各CPU核心利用率 ====="
+      - mpstat -P ALL 1 5
+      - echo -e "\n===== 进程级CPU统计 ====="
+      - pidstat 1 5
+
+  # 磁盘I/O分析
+  _disk:
+    internal: true
+    desc: "disk 任务"
+    summary: "task -g monitor:_disk"
+    cmds:
+      - echo -e "\n===== 磁盘I/O统计 ====="
+      - iostat -xz 1 5
+
+  # 网络分析
+  _network:
+    internal: true
+    desc: "network 任务"
+    summary: "task -g monitor:_network"
+    cmds:
+      - echo -e "\n===== 网络设备统计 ====="
+      - sar -n DEV 1 5
+      - echo -e "\n===== TCP连接统计 ====="
+      - sar -n TCP,ETCP 1 5
+
+  # 综合监控
+  _top:
+    internal: true
+    desc: "top 任务"
+    summary: "task -g monitor:_top"
+    cmds:
+      - echo -e "\n===== 实时进程监控 ====="
+      - top -b -n 1 -o %CPU | head -20
+
+
+
+#  # System performance monitoring tasks
+#  sar-cpu:
+#    desc: Monitor CPU utilization
+#    summary: "task -g sar-cpu"
+#    cmd: sar -u {{.interval}} {{.count}}
+#    vars:
+#      interval: '{{.interval | default "1"}}'
+#      count: '{{.count | default "5"}}'
+#
+#  sar-memory:
+#    desc: Monitor memory utilization
+#    summary: "task -g sar-memory"
+#    cmd: sar -r {{.interval}} {{.count}}
+#    vars:
+#      interval: '{{.interval | default "1"}}'
+#      count: '{{.count | default "5"}}'
+#
+#  sar-network:
+#    desc: Monitor network device statistics
+#    summary: "task -g sar-network"
+#    cmd: sar -n DEV {{.interval}} {{.count}}
+#    vars:
+#      interval: '{{.interval | default "1"}}'
+#      count: '{{.count | default "5"}}'
