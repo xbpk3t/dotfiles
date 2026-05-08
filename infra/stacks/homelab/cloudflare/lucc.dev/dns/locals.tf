@@ -16,7 +16,7 @@ locals {
       # 开启cf橙云代理
       proxied  = true
       priority = null
-      comment  = "metapi"
+      comment  = "AxonHub"
     }
 
     grafana = {
