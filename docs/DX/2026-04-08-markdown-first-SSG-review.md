@@ -356,3 +356,35 @@ isOriginal: true
 ***目前 最主流的 Markdown flavor 是 GFM***
 
 GFM 是 CommonMark 的严格超集，添加了表格、任务列表、删除线、自动链接等最常用的实用扩展，同时保持了很好的兼容性。
+
+
+
+
+
+
+## 补充部分 md-as-SSG 工具 [2026-05-01]
+
+
+
+```yaml
+- 工具: Retype
+  适合: 文档站、知识库、项目 docs
+  是否真接近“只要 md”: 很接近
+  备注: 官方说 “All you need is a single `.md` file”，在有 Markdown 的目录里跑 `retype start` 就能出站点；可选 `retype.yml` 配置。
+- 工具: Marmite
+  适合: blog、notes、简单文章站
+  是否真接近“只要 md”: 很接近
+  备注: Rust 写的，zero-config；官方描述就是读目录里的 `.md`，生成每页 HTML。它还明确支持“folder with markdown files”。
+- 工具: Eleventy / 11ty
+  适合: 通用静态站、blog、docs
+  是否真接近“只要 md”: 接近
+  备注: 默认 zero-config，支持 Markdown `.md`；不过它是 Node 工具，真正做漂亮文档站通常会加 layout/CSS。
+- 工具: docsify
+  适合: 快速文档站
+  是否真接近“只要 md”: 内容只写 md，但需要入口 `index.html`
+  备注: 它不 build 静态 HTML，而是在浏览器里动态加载 Markdown；官方 quick start 仍然要求创建一个 `index.html`
+- 工具: HonKit / GitBook legacy 风格
+  适合: book/docs
+  是否真接近“只要 md”: 接近 mdBook
+  备注: 用 Markdown/AsciiDoc 构建 book/docs，可输出 website；一般会有 `README.md` / `SUMMARY.md` 这类约定文件。
+```
