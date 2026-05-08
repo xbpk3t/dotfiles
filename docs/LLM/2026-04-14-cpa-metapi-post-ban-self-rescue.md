@@ -388,7 +388,3 @@ https://github.com/lxf746/any-auto-register
 [别再被骗了！谁才是真正的 Coding 之神？实测 GPT-5.4/Claude 4.6等大模型，百字人话开发 B 站首页（新范式|深横评|实机测）_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV196PxzREHe/)
 
 ***[别再被平台速率标注骗了！实测 9 大 Coding 套餐挑战 100/1k/10k/100K 上下文速率（新范式|深横评|实机测）_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV14E9EBhEvT/)***
-
-
-
-

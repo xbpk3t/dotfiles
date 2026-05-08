@@ -7,9 +7,14 @@ services:
     ports:
       - "80:80"
       - "443:443"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - ./data:/data
       - ./config:/config
+    networks:
+      - edge
+
+networks:
+  edge:
+    name: edge
+    external: true
