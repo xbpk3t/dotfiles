@@ -21,6 +21,7 @@
       kube-linter
 
       # https://github.com/ahmetb/kubectx 用来快速切换context
+      # 上下文切换
       kubectx
       # https://github.com/sbstp/kubie
       kubie
@@ -46,6 +47,10 @@
       kubebuilder
       # 该项目脱胎于 mergeKubeConfig 项目，最早写该项目的目的是在一堆杂乱无章的 kubeconfig 中自由的切换。随着需要操作的 k8s 集群越来越多，在不同的集群之间切换也越来越麻烦，而操作 k8s 集群的本质不过是通过 kubeconfig 访问 k8s 集群的 API Server，以操作 k8s 的各种资源，而 kubeconfig 不过是一个 YAML 文件，用来保存访问集群的密钥，最早的 mergeKubeConfig 不过是一个操作 YAML 文件的 Python 脚本。而随着 Go 学习的深入，也就动了重写这个项目的念头，就这样 kubecm 诞生了。
       kubecm
+
+      # https://mynixos.com/nixpkgs/package/kubecfg
+      # kubecfg is a CLI tool for managing Kubernetes kubeconfig files with fast context switching, namespace management, and multi-config merging through an interactive TUI
+      kubecfg
     ]
     ++ [
       # 分类2：Kubernetes 节点依赖说明与 Kustomize 工具
@@ -141,8 +146,7 @@
 
       # 多 Pod 日志查看
       stern
-      # 上下文切换
-      kubectx
+
       # 命名空间切换：kubens 由 kubectx 包提供（二进制同包）
     ]
     ++ [
