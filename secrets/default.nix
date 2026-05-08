@@ -73,6 +73,7 @@ in {
     secrets = {
       # Me
       # me_pwgen = mkUserSecret "me/pwgen";
+      ME_SK = mkUserSecret "me/sk";
 
       # Cloudflare
       CF_ACCOUNT = mkUserSecret "cf/account_id";
@@ -93,9 +94,7 @@ in {
       SSH_RACKNERD = mkUserSecret "ssh/RN";
 
       # LLM
-      LLM_MetAPI = mkUserSecret "LLM/MetAPI";
       LLM_AxonHub = mkUserSecret "LLM/AxonHub";
-      LLM_DEEPSEEK = mkUserSecret "LLM/deepseek";
 
       # singbox
       SINGBOX_UUID = mkRootSecret "singbox/UUID";

@@ -74,6 +74,14 @@ in {
           rmcp_client = true;
           unified_exec = true;
           view_image_tool = true;
+
+          # 目前codex会默认开启 fast mode，而 fast会带来很多非必要的token开销
+          # 也就是 service_tier，默认fast，这里设置为 flex (=false)
+          # 可以用 codex --enable fast_mode -c 'service_tier="fast"' 来 override 配置，临时开启 fast mode
+          fast_mode = false;
+
+          # ralph loop
+          goals = true;
         };
         # 声明式 trusted projects：避免首次进入仓库时反复询问 trust。
         projects = {
@@ -92,18 +100,11 @@ in {
         # 这样 settings.servers.<name>.tools.*.approval_mode 可以原样进入 Codex 的 mcp_servers。
         mcp_servers = mcpServersForCodex;
 
-        # model_provider = "metapi";
+        model_provider = "axonhub";
         model_providers = {
-          metapi = {
-            name = "metapi";
-            base_url = "https://api.lucc.dev/v1";
-            env_key = "LLM_MetAPI";
-            wire_api = "responses";
-          };
-
           axonhub = {
             name = "axonhub";
-            base_url = "http://127.0.0.1:8090/v1";
+            base_url = "https://api.lucc.dev/v1";
             env_key = "LLM_AxonHub";
             wire_api = "responses";
           };
@@ -111,11 +112,6 @@ in {
 
         # [2026-04-14] profiles 是用来创建可切换的命名方案。因为把所有provider都由 MetAPI管理，所以不再需要了
         profiles = {
-          metapi = {
-            model_provider = "metapi";
-            model = "gpt-5.4";
-          };
-
           axonhub = {
             model_provider = "axonhub";
             model = "gpt-5.4";
@@ -133,11 +129,7 @@ in {
         # For Context7 MCP
         CONTEXT7_API_KEY = "$(cat ${config.sops.secrets.API_CONTEXT7.path})";
 
-        LLM_MetAPI = "$(cat ${config.sops.secrets.LLM_MetAPI.path})";
-
         LLM_AxonHub = "$(cat ${config.sops.secrets.LLM_AxonHub.path})";
-
-        DEEPSEEK_API_KEY = "$(cat ${config.sops.secrets.LLM_DEEPSEEK.path})";
       };
       shellAliases = {
         # 每次启动 codex 时动态注入 GitHub PAT，避免把 token 写入静态配置。

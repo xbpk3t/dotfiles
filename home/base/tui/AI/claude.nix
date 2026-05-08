@@ -151,42 +151,140 @@ in {
               "~/Desktop/docs"
             ];
 
+            # 规则优先级是 deny -> ask -> allow
+
             # plan 模式：默认先规划、你批准、再执行。方案层面的审批保留不动。
-            defaultMode = "auto";
+            # [2026-04-30] 修改为auto模式
+            # Auto mode: 用 Claude Code 的后台 safety classifier 自动批准大多数 tool calls，
+            # 减少每步手动 approve；不是 bypassPermissions / --dangerously-skip-permissions。
+            # 显式 ask/deny 规则仍优先命中。若账号/模型/provider 不满足要求，auto 会显示 unavailable。
+            # [2026-05-01] 修改为 bypassPermissions，因为配置为auto证明并不能自动approve，查了一下文档，auto模式只在使用claude自家model才生效，其他model会自动退化到default (Read Only)
+            # https://code.claude.com/docs/en/permission-modes#eliminate-prompts-with-auto-mode
+            # [2026-05-08] bypassPermissions -> plan
+            defaultMode = "plan";
 
             # 显式放行的常见安全操作（分类器之上的双保险）
+            # auto 模式下先不维护大 allowlist，避免和 classifier 策略冲突。
             allow = [
-              "Bash(git:diff*)"
-              "Bash(git:log*)"
-              "Bash(git:status*)"
-              "Bash(git:branch*)"
-              "Bash(git:stash*)"
-              "Bash(git:add*)"
-              "Bash(git:commit*)"
-              "Bash(ls:*)"
-              "Bash(cat:*)"
-              "Bash(find:*)"
-              "Bash(grep:*)"
-              "Bash(nix:*)"
-              "Bash(npm:*)"
-              "Bash(pnpm:*)"
-              "Bash(tree:*)"
-              "Bash(which:*)"
-              "Bash(wc:*)"
-              "Bash(head:*)"
-              "Bash(tail:*)"
-              "WebFetch(*)"
-              "WebSearch(*)"
-              "MCP(*)"
+              # Git / GitHub
+              "Bash(git *)"
+              "Bash(gh *)"
+
+              # Nix / Home Manager / flakes
+              "Bash(nix *)"
+              "Bash(home-manager *)"
+              "Bash(nh *)"
+              "Bash(nixpkgs-fmt *)"
+              "Bash(alejandra *)"
+              "Bash(statix *)"
+              "Bash(deadnix *)"
+
+              # 常见开发命令
+              "Bash(make *)"
+              "Bash(just *)"
+              "Bash(task *)"
+              "Bash(cmake *)"
+              "Bash(ninja *)"
+              "Bash(pre-commit run *)"
+
+              # JS / TS
+              "Bash(node *)"
+              "Bash(npm *)"
+              "Bash(npx *)"
+              "Bash(pnpm *)"
+              "Bash(yarn *)"
+              "Bash(corepack *)"
+
+              # Python
+              "Bash(python *)"
+              "Bash(python3 *)"
+              "Bash(pytest *)"
+              "Bash(uv *)"
+              "Bash(poetry *)"
+              "Bash(ruff *)"
+              "Bash(black *)"
+              "Bash(mypy *)"
+
+              # Rust / Go / Swift / JVM
+              "Bash(cargo *)"
+              "Bash(rustc *)"
+              "Bash(go *)"
+              "Bash(swift *)"
+              "Bash(mvn *)"
+              "Bash(gradle *)"
+              "Bash(./gradlew *)"
+
+              # Shell / text / inspection
+              "Bash(bash *)"
+              "Bash(sh *)"
+              "Bash(zsh *)"
+              "Bash(jq *)"
+              "Bash(yq *)"
+              "Bash(sed *)"
+              "Bash(awk *)"
+              "Bash(xargs *)"
+              "Bash(sort *)"
+              "Bash(uniq *)"
+
+              # 读/查类命令，很多其实默认只读已允许，但显式写也没坏处
+              "Bash(ls *)"
+              "Bash(ll *)"
+              "Bash(la *)"
+              "Bash(pwd)"
+              "Bash(tree *)"
+              "Bash(find *)"
+              "Bash(fd *)"
+              "Bash(rg *)"
+              "Bash(grep *)"
+              "Bash(cat *)"
+              "Bash(bat *)"
+              "Bash(head *)"
+              "Bash(tail *)"
+              "Bash(wc *)"
+              "Bash(diff *)"
+              "Bash(stat *)"
+              "Bash(du *)"
+              "Bash(df *)"
+              "Bash(file *)"
+              "Bash(which *)"
+              "Bash(type *)"
+              "Bash(command -v *)"
+
+              # 本地进程/端口查看
+              "Bash(ps *)"
+              "Bash(pgrep *)"
+              "Bash(lsof *)"
+              "Bash(ss *)"
+              "Bash(netstat *)"
+              "Bash(timeout *)"
+
+              # 部署/云/容器
+              "Bash(docker *)"
+              "Bash(podman *)"
+              "Bash(kubectl *)"
+              "Bash(terraform *)"
+              "Bash(tofu *)"
+              "Bash(aws *)"
+              "Bash(gcloud *)"
+              "Bash(az *)"
+              "Bash(fly deploy *)"
+              "Bash(vercel deploy *)"
             ];
 
             # 高风险操作仍需确认
             ask = [
-              "Bash(git push:*)"
-              "Bash(rm:*)"
-              "Bash(sudo:*)"
-              "Bash(curl:*)"
-              "Bash(wget:*)"
+              "Bash(git push *)"
+              "Bash(rm *)"
+              "Bash(sudo *)"
+              "Bash(curl *)"
+              "Bash(wget *)"
+
+              # 网络/远程执行
+              "Bash(curl *)"
+              "Bash(wget *)"
+              "Bash(ssh *)"
+              "Bash(scp *)"
+              "Bash(rsync *)"
             ];
 
             deny = [];
@@ -201,17 +299,17 @@ in {
           #  # API 认证令牌 - 使用 sops 管理，通过 cat 命令读取文件内容
           #  ANTHROPIC_AUTH_TOKEN = "$(cat ${config.sops.secrets.API_GLM.path})";
 
-          # ANTHROPIC_BASE_URL = "https://api.lucc.dev";
-          # ANTHROPIC_AUTH_TOKEN = "$(cat ${config.sops.secrets.LLM_MetAPI.path})";
-
-          ANTHROPIC_BASE_URL = "http://127.0.0.1:8090";
+          ANTHROPIC_BASE_URL = "https://api.lucc.dev";
           ANTHROPIC_AUTH_TOKEN = "$(cat ${config.sops.secrets.LLM_AxonHub.path})";
         };
         shellAliases = {
           # 默认 alias 保持权限模型生效，避免和 settings.permissions.defaultMode 冲突。
           cc = "CODEX_GITHUB_PERSONAL_ACCESS_TOKEN=$(gh auth token) claude";
+
+          # [2026-05-01] 注释掉了，默认cc直接bypassPermissions
           # 兜底逃生开关：仅在明确需要跳过权限确认时手动使用。
-          cc-unsafe = "CODEX_GITHUB_PERSONAL_ACCESS_TOKEN=$(gh auth token) claude --dangerously-skip-permissions";
+          # cc-unsafe = "CODEX_GITHUB_PERSONAL_ACCESS_TOKEN=$(gh auth token) claude --dangerously-skip-permissions";
+
           ccr = "claude-code-router"; # Alias for claude-code-router
         };
       };
