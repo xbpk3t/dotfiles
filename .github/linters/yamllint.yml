@@ -41,9 +41,10 @@ rules:
     max-end: 9
     max-start: 0
 
-# 忽略文件夹，yamllint需要在配置文件中配置，命令行没有该参数
-# invalid config: ignore should contain file patterns
-#ignore:
-#  - "/node_modules/*"
-# 直接从.gitignore中读取ignore文件
-ignore-from-file: .gitignore
+ignore: |
+  node_modules/
+  .pnpm/
+  .tms/node_modules/
+  .tms/.e2e/
+  .e2e/
+  **/pnpm-lock.yaml

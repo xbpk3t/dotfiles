@@ -1,0 +1,76 @@
+version: "3"
+
+tasks:
+  install:
+    desc: Install workspace dependencies
+    dir: "{{.TASKFILE_DIR}}"
+    cmds:
+      - pnpm install
+
+  verify:
+    desc: Run all workspace checks
+    dir: "{{.TASKFILE_DIR}}"
+    cmds:
+      - pnpm verify
+
+  build:
+    desc: Build all userscripts
+    dir: "{{.TASKFILE_DIR}}"
+    cmds:
+      - pnpm build
+
+  build:flomo:
+    desc: Build the flomo-cleaner userscript
+    dir: "{{.TASKFILE_DIR}}/packages/flomo-cleaner"
+    cmds:
+      - pnpm build
+
+  dev:flomo:
+    desc: Start the flomo cleaner userscript dev server
+    dir: "{{.TASKFILE_DIR}}/packages/flomo-cleaner"
+    cmds:
+      - pnpm dev
+
+  verify:flomo:
+    desc: Verify only the flomo-cleaner package
+    dir: "{{.TASKFILE_DIR}}/packages/flomo-cleaner"
+    cmds:
+      - pnpm verify
+
+  e2e:flomo:
+    desc: Run Playwright E2E for flomo-cleaner
+    dir: "{{.TASKFILE_DIR}}"
+    cmds:
+      - pnpm exec playwright test
+
+  e2e:flomo:headed:
+    desc: Run Playwright E2E for flomo-cleaner headed
+    dir: "{{.TASKFILE_DIR}}"
+    cmds:
+      - pnpm exec playwright test --headed
+
+  e2e:flomo:run:
+    desc: Run destructive Playwright E2E for flomo-cleaner
+    dir: "{{.TASKFILE_DIR}}"
+    cmds:
+      - FLOMO_CLEANER_ALLOW_DESTRUCTIVE=1 pnpm exec playwright test -g destructive
+
+  setup:flomo-profile:
+    desc: Open the shared Chrome profile for first-time flomo login and userscript setup
+    dir: "{{.TASKFILE_DIR}}"
+    cmds:
+      - pnpm run setup:flomo-profile
+
+  open:flomo-userscript:
+    desc: Open the built flomo-cleaner userscript for Tampermonkey install/update
+    dir: "{{.TASKFILE_DIR}}"
+    deps:
+      - build:flomo
+    cmds:
+      - open packages/flomo-cleaner/dist/flomo-cleaner.user.js
+
+  clean:
+    desc: Remove generated build output
+    dir: "{{.TASKFILE_DIR}}"
+    cmds:
+      - rm -rf packages/*/dist .e2e/playwright-report .e2e/chrome-profile test-results playwright-report
