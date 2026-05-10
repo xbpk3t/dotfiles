@@ -66,12 +66,18 @@ repos:
 #      - id: shellcheck
 #        types: [shell]
 #
-#  - repo: https://github.com/pre-commit/mirrors-eslint
-#    rev: v9.29.0
-#    hooks:
-#      - id: eslint
-#        files: \.[jt]sx?$  # *.js, *.jsx, *.ts and *.tsx
-#        types: [file]
+  - repo: https://github.com/pre-commit/mirrors-eslint
+    rev: v9.29.0
+    hooks:
+      - id: eslint
+        files: ^\.tms/.*\.[jt]sx?$ # *.js, *.jsx, *.ts and *.tsx under .tms
+        types: [file]
+        args:
+          - --config
+          - .tms/eslint.config.mjs
+        additional_dependencies:
+          - "eslint@9.29.0"
+          - "@typescript-eslint/parser@8.46.1"
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
     rev: v0.48.0
@@ -89,7 +95,8 @@ repos:
     hooks:
       - id: yamllint
         name: Lint YAML files
-        entry: yamllint -c .github/linters/yamllint.yml .
+        entry: yamllint -c .github/linters/yamllint.yml
+        exclude: (^|/)(node_modules|\\.pnpm|\\.tms/node_modules|\\.tms/\\.e2e|\\.e2e)/|.*pnpm-lock\\.yaml$
         types: [yaml]
         language: python
 
@@ -144,11 +151,12 @@ repos:
       - id: golangci-lint-full
         args: ["-c", ".github/linters/golangci-lint.yml"]
 
-#  - repo: https://github.com/pre-commit/mirrors-prettier
-#    rev: v4.0.0-alpha.8
-#    hooks:
-#      - id: prettier
-#        files: ^docs/
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v4.0.0-alpha.8
+    hooks:
+      - id: prettier
+        files: ^\.tms/
+        exclude: \.md$ # 禁止 prettier 格式化MD文件
 
 
 
