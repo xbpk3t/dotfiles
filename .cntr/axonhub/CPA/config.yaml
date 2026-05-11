@@ -1,0 +1,46 @@
+host: ""
+port: 8317
+auth-dir: "/root/.cli-proxy-api"
+# 下游客户端访问 CPA（/v1 等 OpenAI-compatible API）时使用的鉴权 key。
+# 典型调用方是 AxonHub / LiteLLM 等网关；不是 OAuth 的上游账号密钥。
+api-keys:
+  - "__CPA_API_KEY__"
+remote-management:
+  # 仅允许本机访问管理接口；配合内网部署降低暴露面。
+  allow-remote: true
+  # 管理面（/v0/management）密钥，和 api-keys 作用域不同。
+  # 建议使用 bcrypt 哈希值（$2a$...）；若填明文，CPA 启动时会自动哈希并回写配置。
+  # htpasswd -nbB "" "DEFAULT_SK" 2>&1
+  # htpasswd -nbBC 10 "" "DEFAULT_SK"
+  secret-key: "$2y$10$vUkIWcGbPz.hVFmrr50rGOeEPYSZoHmPlLPS.Q0yjj8.N2gCwphhK"
+# 启用 pprof 诊断端口（仅绑定 localhost），便于排查性能问题。
+pprof:
+  enable: true
+  addr: "127.0.0.1:8316"
+# 单请求失败后的重试轮数。1 表示失败后最多再尝试一轮。
+request-retry: 1
+# 单个失败请求最多切换尝试的凭据数量，避免一次请求打穿整个账号池。
+max-retry-credentials: 2
+# 等待冷却凭据恢复的最大秒数；超过后按重试策略继续。
+max-retry-interval: 5
+# 是否禁用全局冷却调度。false 表示保留冷却机制，避免持续打失败凭据。
+disable-cooling: false
+routing:
+  # 正常请求在多个凭据间轮询，均匀分摊流量。
+  strategy: round-robin
+  # 启用会话粘性：同一会话尽量绑定同一凭据，减少上下文漂移。
+  session-affinity: true
+  # 会话到凭据绑定的保留时长。
+  session-affinity-ttl: "1h"
+# 写文件日志，便于排障与审计。
+logging-to-file: true
+# 日志目录总容量上限（MB）。达到上限会自动清理最旧日志。
+logs-max-total-size-mb: 1024
+# 错误日志文件最多保留数量，避免长期堆积。
+error-logs-max-files: 20
+# 为 cpa-usage-keeper 提供 usage 队列事件；若为 false，Keeper 将无统计数据可消费。
+usage-statistics-enabled: true
+# 是否透传上游响应头到下游。默认关闭，降低兼容性噪音和信息暴露。
+passthrough-headers: false
+# 非流式请求的 keepalive 间隔秒数；0 表示关闭。
+nonstream-keepalive-interval: 0

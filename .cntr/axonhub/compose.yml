@@ -10,11 +10,11 @@ services:
       - ./config.yml:/app/config.yml:ro
       - axonhub_data:/app/data
     environment:
-      - AXONHUB_SERVER_PORT=8090
-      - AXONHUB_DB_DIALECT=postgres
-      - AXONHUB_DB_DSN=postgres://axonhub:${DB_PWD}@postgres:5432/axonhub?sslmode=disable
-      - AXONHUB_LOG_LEVEL=warn
-      - AXONHUB_LOG_OUTPUT=console
+      AXONHUB_SERVER_PORT: 8090
+      AXONHUB_DB_DIALECT: postgres
+      AXONHUB_DB_DSN: "postgres://axonhub:${DEFAULT_SK}@postgres:5432/axonhub?sslmode=disable"
+      AXONHUB_LOG_LEVEL: warn
+      AXONHUB_LOG_OUTPUT: console
     depends_on:
       postgres:
         condition: service_healthy
@@ -43,11 +43,12 @@ services:
         max-file: "5"
 
   postgres:
-    image: postgres:18-alpine
+    # [2026-05-11] 尝试迁移到 18-alpine 未果，麻烦事太多，潜在收益也不大，所以不再处理
+    image: postgres:15-alpine
     environment:
-      - POSTGRES_DB=axonhub
-      - POSTGRES_USER=axonhub
-      - POSTGRES_PASSWORD=${DB_PWD}
+      POSTGRES_DB: axonhub
+      POSTGRES_USER: axonhub
+      POSTGRES_PASSWORD: ${DEFAULT_SK}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
@@ -61,6 +62,70 @@ services:
       options:
         max-size: "20m"
         max-file: "5"
+
+
+#  cpa:
+#    image: eceasy/cli-proxy-api:latest
+#    container_name: cli-proxy-api
+#    ports:
+#      - "${TAILSCALE_IPV4:?TAILSCALE_IPV4 is required}:8317:8317"
+#    volumes:
+#      # 注释掉ro，为了可以在CPA面板修改后，直接同步到本地配置（符合我的本地使用需求，因为我连 ak和sk都没配置）
+#      - ./CPA/config.yaml:/CLIProxyAPI/config.yaml # :ro
+#      - ./CPA/auth-dir:/root/.cli-proxy-api
+#    restart: unless-stopped
+#    healthcheck:
+#      test:
+#        [
+#          "CMD",
+#          "wget",
+#          "--no-verbose",
+#          "--tries=1",
+#          "--spider",
+#          "http://localhost:8317/health"
+#        ]
+#      interval: 30s
+#      timeout: 10s
+#      retries: 3
+#      start_period: 20s
+#    logging:
+#      driver: json-file
+#      options:
+#        max-size: "20m"
+#        max-file: "5"
+#
+#  cpa-usage-keeper:
+#    image: ghcr.io/willxup/cpa-usage-keeper:latest
+#    container_name: cpa-usage-keeper
+#    depends_on:
+#      cpa:
+#        condition: service_started
+#    ports:
+#      - "${TAILSCALE_IPV4:?TAILSCALE_IPV4 is required}:8080:8080"
+#    environment:
+#      TZ: ${TZ:-Asia/Shanghai}
+#      CPA_BASE_URL: http://cpa:8317
+#      # Keeper 这里需要的是 management 密钥的明文，不是 bcrypt 哈希串。
+#      CPA_MANAGEMENT_KEY: ${DEFAULT_SK}
+#      REDIS_QUEUE_ADDR: cpa:8317
+#      AUTH_ENABLED: true
+#      LOGIN_PASSWORD: ${DEFAULT_SK}
+#      APP_PORT: 8080
+#      WORK_DIR: /data
+#      LOG_LEVEL: info
+#      LOG_FILE_ENABLED: true
+#      BACKUP_ENABLED: ${BACKUP_ENABLED:-true}
+#      BACKUP_INTERVAL: ${BACKUP_INTERVAL:-24h}
+#      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-7}
+#    volumes:
+#      - ./CPA/keeper-data:/data
+#    restart: unless-stopped
+#    logging:
+#      driver: json-file
+#      options:
+#        max-size: "20m"
+#        max-file: "5"
+
 
 networks:
   edge:
