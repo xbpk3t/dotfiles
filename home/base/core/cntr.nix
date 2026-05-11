@@ -11,6 +11,7 @@
   };
 
   home.sessionVariables = {
-    DB_PWD = "$(cat ${config.sops.secrets.ME_SK.path})";
+    DEFAULT_SK = "$(cat ${config.sops.secrets.ME_SK.path})";
+    TAILSCALE_IPV4 = "$(tailscale ip -4 | head -n 1)";
   };
 }
