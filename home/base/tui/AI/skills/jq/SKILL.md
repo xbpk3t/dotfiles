@@ -1,6 +1,10 @@
 ---
 name: jq
 description: JSON processor for filtering, transforming, and extracting data
+trigger_keywords:
+  - jq
+  - JSON filter
+  - JSON transform
 ---
 # jq
 

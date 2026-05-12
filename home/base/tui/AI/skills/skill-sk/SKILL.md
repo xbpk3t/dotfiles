@@ -1,6 +1,10 @@
 ---
 name: skill-sk
 description: 编写与维护 skills 的流程与规范。当用户要求创建/更新/优化 skill、讨论 SKILL.md、best practices、gotchas、schema、触发条件、目录结构或需要可复用 workflow 时必须使用。也用于把已有说明整理成结构化的 skill 资产（SKILL.md + references/）。
+trigger_keywords:
+  - skill creation
+  - SKILL.md
+  - skill update
 ---
 
 # Skill SK

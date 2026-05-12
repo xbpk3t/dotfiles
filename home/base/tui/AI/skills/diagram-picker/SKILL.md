@@ -1,6 +1,10 @@
 ---
 name: diagram-picker
 description: Pick diagram type -> tool, then generate source + SVG in .diagram with fixed naming rules
+trigger_keywords:
+  - diagram
+  - visualize
+  - chart
 ---
 
 # diagram-picker

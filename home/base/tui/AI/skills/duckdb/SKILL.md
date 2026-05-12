@@ -1,6 +1,10 @@
 ---
 name: duckdb
 description: Fast in-process analytical database for SQL queries on DataFrames, CSV, Parquet, JSON files, and more. Use when user wants to perform SQL analytics on data files or Python DataFrames (pandas, Polars), run complex aggregations, joins, or window functions, or query external data sources without loading into memory. Best for analytical workloads, OLAP queries, and data exploration.
+trigger_keywords:
+  - duckdb
+  - SQL analytics
+  - OLAP
 ---
 
 # DuckDB

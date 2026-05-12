@@ -1,6 +1,10 @@
 ---
 name: slidev-overlay
 description: Slidev 进阶 overlay 补充指引，适用于在官方 slidev skill 之外补充选型理由、metadata、语法高亮、speaker notes、具名插槽、Tailwind、主题、Monaco、部署与复用等问题。
+trigger_keywords:
+  - slidev
+  - presentation
+  - slides
 ---
 
 # Slidev Overlay

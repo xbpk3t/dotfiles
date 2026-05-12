@@ -1,6 +1,10 @@
 ---
 name: docker-best-practices
 description: Comprehensive Docker best practices for images, containers, and production deployments
+trigger_keywords:
+  - docker
+  - container
+  - Dockerfile
 ---
 
 ## CRITICAL GUIDELINES
