@@ -1,6 +1,10 @@
 ---
 name: wiki
 description: "Persistent topic-centered research skill for Codex. Trigger on any explicit $wiki intent to start, resume, pause, summarize, restart, reference material, or save-turn/st for a topic, while writing directly to wiki/english-topic-slug state files."
+trigger_keywords:
+  - wiki
+  - research
+  - $wiki
 ---
 
 # Wiki Topic Research

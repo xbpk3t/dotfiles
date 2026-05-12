@@ -1,6 +1,10 @@
 ---
 name: taskfile-best-practices
 description: Taskfile(go-task) 最佳实践与模式，适用于新增/修改 Taskfile.yml、设计任务结构、保证幂等与可维护性、使用 vars/status/preconditions/summary/wildcard 等特性。遇到 Taskfile 设计、重构或排错时使用。
+trigger_keywords:
+  - taskfile
+  - go-task
+  - Taskfile.yml
 ---
 
 # Taskfile Best Practices
