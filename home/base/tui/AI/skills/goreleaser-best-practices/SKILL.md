@@ -1,6 +1,10 @@
 ---
 name: goreleaser-best-practices
 description: GoReleaser OSS 配置与发布最佳实践，适用于梳理 top-level keys、发布平台支持、CI 触发链路、metadata/hooks 使用与常见坑。
+trigger_keywords:
+  - goreleaser
+  - Go release
+  - .goreleaser.yml
 ---
 
 # GoReleaser OSS Best Practices

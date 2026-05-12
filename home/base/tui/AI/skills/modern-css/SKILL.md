@@ -1,6 +1,10 @@
 ---
 name: modern-css
 description: Specialized knowledge for writing modern high-quality CSS. Trigger this skill when starting a new CSS project/file, when the user asks about new CSS features (e.g. Masonry, View Transitions, Container Queries, Scroll-driven animations), or requests refactoring of legacy styles to modern standards.
+trigger_keywords:
+  - modern CSS
+  - container queries
+  - view transitions
 ---
 
 # Modern CSS
