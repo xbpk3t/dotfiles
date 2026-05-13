@@ -48,7 +48,7 @@ repos:
       - id: gitlint-ci
 
   - repo: https://github.com/commitizen-tools/commitizen
-    rev: v4.13.9
+    rev: v4.16.0
     hooks:
       - id: commitizen
         stages: [commit-msg]
@@ -66,18 +66,20 @@ repos:
 #      - id: shellcheck
 #        types: [shell]
 #
-  - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v9.29.0
-    hooks:
-      - id: eslint
-        files: ^\.tms/.*\.[jt]sx?$ # *.js, *.jsx, *.ts and *.tsx under .tms
-        types: [file]
-        args:
-          - --config
-          - .tms/eslint.config.mjs
-        additional_dependencies:
-          - "eslint@9.29.0"
-          - "@typescript-eslint/parser@8.46.1"
+
+# 报错 Cannot find package '@typescript-eslint/parser' 需要本地安装
+#  - repo: https://github.com/pre-commit/mirrors-eslint
+#    rev: v10.3.0
+#    hooks:
+#      - id: eslint
+#        files: ^\.tms/.*\.[jt]sx?$ # *.js, *.jsx, *.ts and *.tsx under .tms
+#        types: [file]
+#        args:
+#          - --config
+#          - .tms/eslint.config.mjs
+#        additional_dependencies:
+#          - "eslint@9.29.0"
+#          - "@typescript-eslint/parser@8.46.1"
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
     rev: v0.48.0
@@ -102,7 +104,7 @@ repos:
 
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.8
+    rev: v0.15.12
     hooks:
       - id: ruff
         types: [python]
@@ -140,7 +142,7 @@ repos:
 
 
   - repo: https://github.com/golangci/golangci-lint
-    rev: v2.11.4
+    rev: v2.12.2
     hooks:
       - id: golangci-lint-config-verify
         args: ["-c", ".github/linters/golangci-lint.yml"]
@@ -259,7 +261,7 @@ repos:
       - id: kdlfmt-format
 
   - repo: https://github.com/thibaudcolas/pre-commit-stylelint
-    rev: v17.6.0
+    rev: v17.11.0
     hooks:
       - id: stylelint
         args: ["--config", ".github/linters/stylelint.config.cjs"]

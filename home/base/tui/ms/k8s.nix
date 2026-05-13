@@ -54,7 +54,7 @@
     ]
     ++ [
       # 分类2：Kubernetes 节点依赖说明与 Kustomize 工具
-      # [Kubernetes 基础环境要求 – 陈少文的网站](https://www.chenshaowen.com/blog/kubernetes-base-environment-requirements.html)
+      # ***[Kubernetes 基础环境要求 – 陈少文的网站](https://www.chenshaowen.com/blog/kubernetes-base-environment-requirements.html)***
       #
       #
       #

@@ -166,125 +166,43 @@ in {
             # 显式放行的常见安全操作（分类器之上的双保险）
             # auto 模式下先不维护大 allowlist，避免和 classifier 策略冲突。
             allow = [
-              # Git / GitHub
-              "Bash(git *)"
-              "Bash(gh *)"
-
-              # Nix / Home Manager / flakes
-              "Bash(nix *)"
-              "Bash(home-manager *)"
-              "Bash(nh *)"
-              "Bash(nixpkgs-fmt *)"
-              "Bash(alejandra *)"
-              "Bash(statix *)"
-              "Bash(deadnix *)"
-
-              # 常见开发命令
-              "Bash(make *)"
-              "Bash(just *)"
-              "Bash(task *)"
-              "Bash(cmake *)"
-              "Bash(ninja *)"
-              "Bash(pre-commit run *)"
-
-              # JS / TS
-              "Bash(node *)"
-              "Bash(npm *)"
-              "Bash(npx *)"
-              "Bash(pnpm *)"
-              "Bash(yarn *)"
-              "Bash(corepack *)"
-
-              # Python
-              "Bash(python *)"
-              "Bash(python3 *)"
-              "Bash(pytest *)"
-              "Bash(uv *)"
-              "Bash(poetry *)"
-              "Bash(ruff *)"
-              "Bash(black *)"
-              "Bash(mypy *)"
-
-              # Rust / Go / Swift / JVM
-              "Bash(cargo *)"
-              "Bash(rustc *)"
-              "Bash(go *)"
-              "Bash(swift *)"
-              "Bash(mvn *)"
-              "Bash(gradle *)"
-              "Bash(./gradlew *)"
-
-              # Shell / text / inspection
-              "Bash(bash *)"
-              "Bash(sh *)"
-              "Bash(zsh *)"
-              "Bash(jq *)"
-              "Bash(yq *)"
-              "Bash(sed *)"
-              "Bash(awk *)"
-              "Bash(xargs *)"
-              "Bash(sort *)"
-              "Bash(uniq *)"
-
-              # 读/查类命令，很多其实默认只读已允许，但显式写也没坏处
-              "Bash(ls *)"
-              "Bash(ll *)"
-              "Bash(la *)"
-              "Bash(pwd)"
-              "Bash(tree *)"
-              "Bash(find *)"
-              "Bash(fd *)"
-              "Bash(rg *)"
-              "Bash(grep *)"
-              "Bash(cat *)"
-              "Bash(bat *)"
-              "Bash(head *)"
-              "Bash(tail *)"
-              "Bash(wc *)"
-              "Bash(diff *)"
-              "Bash(stat *)"
-              "Bash(du *)"
-              "Bash(df *)"
-              "Bash(file *)"
-              "Bash(which *)"
-              "Bash(type *)"
-              "Bash(command -v *)"
-
-              # 本地进程/端口查看
-              "Bash(ps *)"
-              "Bash(pgrep *)"
-              "Bash(lsof *)"
-              "Bash(ss *)"
-              "Bash(netstat *)"
-              "Bash(timeout *)"
-
-              # 部署/云/容器
-              "Bash(docker *)"
-              "Bash(podman *)"
-              "Bash(kubectl *)"
-              "Bash(terraform *)"
-              "Bash(tofu *)"
-              "Bash(aws *)"
-              "Bash(gcloud *)"
-              "Bash(az *)"
-              "Bash(fly deploy *)"
-              "Bash(vercel deploy *)"
+              "Bash(*)"
+              "Read(*)"
+              "Edit(*)"
+              "Write(*)"
             ];
 
             # 高风险操作仍需确认
             ask = [
               "Bash(git push *)"
+              "Bash(git reset *)"
+              "Bash(git clean *)"
+
               "Bash(rm *)"
               "Bash(sudo *)"
-              "Bash(curl *)"
-              "Bash(wget *)"
+              "Bash(chmod *)"
+              "Bash(chown *)"
+              "Bash(dd *)"
 
-              # 网络/远程执行
               "Bash(curl *)"
               "Bash(wget *)"
               "Bash(ssh *)"
               "Bash(scp *)"
               "Bash(rsync *)"
+
+              "Bash(npm publish *)"
+              "Bash(pnpm publish *)"
+              "Bash(cargo publish *)"
+
+              "Bash(terraform apply *)"
+              "Bash(terraform destroy *)"
+              "Bash(tofu apply *)"
+              "Bash(tofu destroy *)"
+
+              "Bash(kubectl delete *)"
+              "Bash(docker rm *)"
+              "Bash(docker rmi *)"
+              "Bash(docker system prune *)"
             ];
 
             deny = [];

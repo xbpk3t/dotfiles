@@ -159,6 +159,15 @@
       # programs.sniffnet 必须放到 modules/nixos 里，因为依赖了 NixOS 特有的 security.wrappers 机制来分配内核特权
       # 还有什么我可能不知道的相关点？1. NixOS 下可能因沙盒限制看不到进程名；2. 它支持导出 .pcap 配合 Wireshark 联动；3. Rust GUI 可能存在字体渲染导致的“豆腐块”报错。
       # sniffnet
+
+      # MAYBE: [2026-05-12] 这个 rustnet 完全是 sniffnet 的上位替代。但是目前没有 nixpkgs，我懒得自己打，所以等等看
+      # 如果基于以下这些coder更常用的需求，且想要TUI而非GUI，应该直接选择rustnet
+      # 想按进程、连接状态、SNI、协议、端口精细过滤
+      # 想分析 TCP 重传、乱序、连接生命周期
+      # 想导出带进程上下文的 PCAP 再进 Wireshark
+
+      # [Vincent Logic | 信号＞噪音 on X: "发现个终端里的网络监控神器！ RustNet，在终端里就能实时监控所有网络连接，哪个进程在偷偷传数据、服务器被谁连了，一眼看清。 最爽的是能看到每个连接对应的应用程序，这点 Wireshark 都做不到。SSH 连服务器直接看，不用搞 X11 转发。 界面分四块： - 总览：所有连接列表 + 实时流量 - https://t.co/l4GGKuJuXv" / X](https://x.com/VincentLogic/status/2053454574888071242)
+      # https://github.com/domcyrus/rustnet
     ]
     # Linux-only tools; Darwin 上直接跳过，避免 hostPlatform 不可用的求值错误
     ++ lib.optionals stdenv.isLinux [
