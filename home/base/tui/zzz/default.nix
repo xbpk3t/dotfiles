@@ -71,4 +71,17 @@
       extractor.base-directory = "~/Downloads";
     };
   };
+
+  #programs.gallery-dl = {
+  #enable = true;
+  #settings = {
+  #  extractor.base-directory = "./";
+  #  extractor.directory = ["{manga}" "{manga} c{chapter} - {title}"];
+  #  extractor.mangadex = {
+  #        lang = ["fa" "en"];
+  #        postprocessors = {
+  #    "name" = "zip";
+  #    "compression" = "lzma";
+  #    "extension" = "cbz";
+  #};
 }
