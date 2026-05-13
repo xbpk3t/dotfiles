@@ -4,3 +4,30 @@ version: "3"
 includes:
   mac: ./Taskfile.mac.yml
   brew: ./Taskfile.brew.yml
+
+vars:
+  BZ_SCRIPT: '{{.TASKFILE_DIR}}/scripts/bz/run.nu'
+
+tasks:
+  bz:
+    desc: Bilibili subtitle batch pipeline
+    summary: "task -t .taskfile/mac/Taskfile.yml bz [CMD=all|status|failed|failed-urls] [URLS=urls.txt] [WORKDIR=/tmp/bz-YYYY-MM-DD] [COOKIES_FROM_BROWSER=chrome] [COOKIES=/path/to/cookies.txt]"
+    dir: '{{.USER_WORKING_DIR}}'
+    vars:
+      CMD: '{{.CMD | default "all"}}'
+      URLS: '{{.URLS | default "urls.txt"}}'
+      WORKDIR: '{{.WORKDIR | default ""}}'
+      COOKIES_FROM_BROWSER: '{{.COOKIES_FROM_BROWSER | default "chrome"}}'
+      COOKIES: '{{.COOKIES | default ""}}'
+    preconditions:
+      - sh: test -f "{{.BZ_SCRIPT}}"
+        msg: "{{.BZ_SCRIPT}} not found"
+      - sh: command -v nu
+      - sh: command -v yt-dlp
+      - sh: command -v pysubs2
+    cmds:
+      - cmd: >-
+          nu "{{.BZ_SCRIPT}}" "{{.CMD}}"
+          {{if or (eq .CMD "all") (eq .CMD "init")}}"{{.URLS}}"{{end}}
+          {{if .WORKDIR}} --workdir "{{.WORKDIR}}"{{end}}
+          {{if .COOKIES}} --cookies "{{.COOKIES}}"{{else if or (eq .CMD "all") (eq .CMD "fetch")}} --cookies-from-browser "{{.COOKIES_FROM_BROWSER}}"{{end}}
