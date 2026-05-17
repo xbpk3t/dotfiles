@@ -11,7 +11,7 @@ vars:
 tasks:
   bz:
     desc: Bilibili subtitle batch pipeline
-    summary: "task -t .taskfile/mac/Taskfile.yml bz [CMD=all|status|failed|failed-urls] [URLS=urls.txt] [WORKDIR=/tmp/bz-YYYY-MM-DD] [COOKIES_FROM_BROWSER=chrome] [COOKIES=/path/to/cookies.txt]"
+    summary: "task -t .taskfile/mac/Taskfile.yml bz [CMD=all|init|fetch|transcript|summarize|summary-status|summary-failed|status|failed|failed-urls] [URLS=urls.txt] [WORKDIR=/tmp/bz-YYYY-MM-DD] [COOKIES_FROM_BROWSER=chrome] [COOKIES=/path/to/cookies.txt] [RUNNER=...] [TRANSCRIPT_DIR=...]"
     dir: '{{.USER_WORKING_DIR}}'
     vars:
       CMD: '{{.CMD | default "all"}}'
@@ -19,15 +19,25 @@ tasks:
       WORKDIR: '{{.WORKDIR | default ""}}'
       COOKIES_FROM_BROWSER: '{{.COOKIES_FROM_BROWSER | default "chrome"}}'
       COOKIES: '{{.COOKIES | default ""}}'
+      RUNNER: '{{.RUNNER | default ""}}'
+      TRANSCRIPT_DIR: '{{.TRANSCRIPT_DIR | default ""}}'
     preconditions:
       - sh: test -f "{{.BZ_SCRIPT}}"
         msg: "{{.BZ_SCRIPT}} not found"
       - sh: command -v nu
-      - sh: command -v yt-dlp
-      - sh: command -v pysubs2
+      - sh: |-
+          {{if or (eq .CMD "summarize") (eq .CMD "summary-status") (eq .CMD "summary-failed")}}true{{else}}command -v yt-dlp{{end}}
+        msg: yt-dlp is required for non-summary commands
+      - sh: |-
+          {{if or (eq .CMD "summarize") (eq .CMD "summary-status") (eq .CMD "summary-failed")}}true{{else}}command -v pysubs2{{end}}
+        msg: pysubs2 is required for transcript command
     cmds:
       - cmd: >-
           nu "{{.BZ_SCRIPT}}" "{{.CMD}}"
           {{if or (eq .CMD "all") (eq .CMD "init")}}"{{.URLS}}"{{end}}
           {{if .WORKDIR}} --workdir "{{.WORKDIR}}"{{end}}
-          {{if .COOKIES}} --cookies "{{.COOKIES}}"{{else if or (eq .CMD "all") (eq .CMD "fetch")}} --cookies-from-browser "{{.COOKIES_FROM_BROWSER}}"{{end}}
+          {{if and .COOKIES (or (eq .CMD "all") (eq .CMD "fetch"))}} --cookies "{{.COOKIES}}"{{else if and (or (eq .CMD "all") (eq .CMD "fetch")) (not .COOKIES)}} --cookies-from-browser "{{.COOKIES_FROM_BROWSER}}"{{end}}
+          {{if eq .CMD "summarize"}}
+            {{if .RUNNER}} --runner "{{.RUNNER}}"{{end}}
+            {{if .TRANSCRIPT_DIR}} --transcript-dir "{{.TRANSCRIPT_DIR}}"{{end}}
+          {{end}}
