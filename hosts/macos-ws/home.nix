@@ -13,6 +13,7 @@
     alacritty.enable = false;
     ghostty.enable = false;
     kitty.enable = false;
+    cmux.enable = true;
 
     zed.enable = false;
     vscode.enable = false;

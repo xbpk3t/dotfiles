@@ -6,6 +6,81 @@
 }:
 with lib; let
   cfg = config.modules.desktop.ghostty;
+  cmuxCfg = config.modules.desktop.cmux;
+
+  ghosttySettings = {
+    # ── Passthrough ──────────────────────────────────────────────────
+    # 允许转义序列直通终端。tmux-agent-sidebar 的 overlay 依赖此特性。
+    allow-passthrough = true;
+
+    # ── Scrollback ──────────────────────────────────────────────────
+    # 滚动缓冲区行数。agent 输出较长时保证能回滚查看。
+    scrollback-limit = 10000;
+
+    # ── Window ──────────────────────────────────────────────────────
+    # 关闭窗口时不确认。tmux/cmux 场景下避免频繁弹窗。
+    confirm-close-surface = false;
+
+    # 背景透明度 (0.0~1.0)。用 string 避免 toString float 产生尾随零。
+    background-opacity = "0.8";
+
+    # 窗口左右内边距（px）。避免文字紧贴窗口边缘。
+    window-padding-x = 4;
+
+    # ── Clipboard ───────────────────────────────────────────────────
+    # 允许应用读取/写入/粘贴系统剪贴板。
+    clipboard-read = "allow";
+    clipboard-write = "allow";
+    clipboard-paste = "allow";
+
+    # 选中文本自动复制到系统剪贴板，而非仅选区（primary selection）。
+    copy-on-select = "clipboard";
+
+    # ── Cursor ──────────────────────────────────────────────────────
+    # 光标样式：bar（竖线）| block（方块）| underline（下划线）。
+    cursor-style = "bar";
+
+    # 光标闪烁，便于在多 pane 场景下快速定位焦点。
+    cursor-style-blink = true;
+
+    # ── 待定（注释掉供参考）─────────────────────────────────────────
+    # background = "black";
+    # window-padding-color = "background";
+    # font-family = "0xProto";
+    # font-size = 10;
+    # mouse-hide-while-typing = true;
+    # auto-update = "off";
+    # gtk-titlebar = false;
+    # shell-integration = "none";
+    # linux-cgroup = "always";
+    # resize-overlay = "never";
+
+    # ── Keybind ─────────────────────────────────────────────────────
+    # NOTE(ghostty): not using ghostty for splits or tabs so nearly
+    # all default binds conflict Hypr, nvim, or zellij.
+    keybind = [
+      # ── 调试 ──
+      "ctrl+shift+d=inspector:toggle"
+
+      # ── 剪贴板 ──
+      "ctrl+shift+c=copy_to_clipboard"
+      "ctrl+shift+v=paste_from_clipboard"
+
+      # 修复 fixterm 与 zsh ^[ 的冲突
+      # https://github.com/ghostty-org/ghostty/discussions/5071
+      "ctrl+left_bracket=text:\\x1b"
+
+      # ── 字号 ──
+      "ctrl+shift+minus=decrease_font_size:1"
+      "ctrl+shift+plus=increase_font_size:1"
+      "ctrl+shift+0=reset_font_size"
+
+      # ── 屏蔽默认快捷键（与 tmux/zellij 冲突）────────────────────
+      "ctrl+shift+e=unbind" # new_split   → 被 tmux split 取代
+      "ctrl+shift+n=unbind" # new_window  → 由 tmux/zellij 管理
+      "ctrl+shift+t=unbind" # new_tab     → 由 tmux/zellij 管理
+    ];
+  };
 in {
   options.modules.desktop.ghostty = {
     enable = mkEnableOption "ghostty terminal";
@@ -15,79 +90,59 @@ in {
   #
   # why?
   #
-  # ***偶发进入 alternate screen（备用屏） 后，备用屏没有 scrollback，Ghostty（以及很多终端）会把“滚轮滚动”翻译成“↑/↓”来“让不支持鼠标的 TUI 也能滚动/导航”，结果在 shell 里就变成“翻历史/触发 atuin”。***
+  # ***偶发进入 alternate screen（备用屏） 后，备用屏没有 scrollback，Ghostty（以及很多终端）会把"滚轮滚动"翻译成"↑/↓"来"让不支持鼠标的 TUI 也能滚动/导航"，结果在 shell 里就变成"翻历史/触发 atuin"。***
+  #
   #
   #
   #
   # 那其他terminal是否会遇到类似问题？
   #
-  # 这类问题不是 Ghostty 独有，而是“终端生态里一个很常见的交互坑”，只是在不同 terminal 上触发条件/表现/可配置项不一样。
-  # - 有的终端明确提供开关：比如 iTerm2 有“滚轮在 alternate screen 时发送方向键”的选项，开了就很容易出现你这种现象。
-  # - 有的终端默认更“保守”：比如 kitty 通常更倾向于保持滚轮是滚动 scrollback（除非进入某些鼠标报告模式/你自己做了 mouse_map），所以更不容易踩到“滚轮=↑”。
-  # - 有的终端遇到备用屏会更激进地“把滚轮喂给应用”：这样 TUI 的滚动体验更统一，但一旦状态没退出干净，就会在 shell 里造成“滚轮变按键”。
+  # 这类问题不是 Ghostty 独有，而是"终端生态里一个很常见的交互坑"，只是在不同 terminal 上触发条件/表现/可配置项不一样。
+  # - 有的终端明确提供开关：比如 iTerm2 有"滚轮在 alternate screen 时发送方向键"的选项，开了就很容易出现你这种现象。
+  # - 有的终端默认更"保守"：比如 kitty 通常更倾向于保持滚轮是滚动 scrollback（除非进入某些鼠标报告模式/你自己做了 mouse_map），所以更不容易踩到"滚轮=↑"。
+  # - 有的终端遇到备用屏会更激进地"把滚轮喂给应用"：这样 TUI 的滚动体验更统一，但一旦状态没退出干净，就会在 shell 里造成"滚轮变按键"。
   #
   #
   #
   #
   # htu?
   # 在ghostty执行Reset操作（重置终端状态，常用于退出卡住的 alternate screen 状态）
-  #
-  #
-  config = mkIf cfg.enable {
-    # https://mynixos.com/home-manager/options/programs.ghostty
-    # https://mynixos.com/nixpkgs/package/ghostty
-    programs.ghostty = {
-      # https://github.com/NixOS/nixpkgs/issues/388984
-      enable = pkgs.stdenv.isLinux;
-      # !!! On macOS the nixpkgs derivation is unsupported; allow Homebrew Cask to supply the app.
-      # 注意 darwin 下直接使用brew安装ghostty，但是如果要做条件化判断，会比较麻烦，所以直接写到 brew.nix 里
-      # 注意mac上使用brew（因为hm不支持）安装 ghostty，而非 alacritty
-      package = pkgs.ghostty;
 
-      installVimSyntax = true;
-      installBatSyntax = true;
-      enableZshIntegration = true;
-
-      settings = {
-        scrollback-limit = 10000;
-        #NOTE(ghostty): not using ghostty for splits or tabs so nearly all default binds conflict Hypr, nvim, or zellij
-
-        confirm-close-surface = false;
-        background-opacity = 0.8;
-        window-padding-x = 4;
-        clipboard-read = "allow";
-        clipboard-write = "allow";
-        clipboard-paste = "allow";
-        copy-on-select = "clipboard";
-
-        # background = "black";
-        # window-padding-color = "background";
-        # font-family = "0xProto";
-        # font-size = 10;
-        # mouse-hide-while-typing = true;
-        # auto-update = "off";
-        # gtk-titlebar = false;
-        # shell-integration = "none";
-        # linux-cgroup = "always";
-        # resize-overlay = "never";
-
-        keybind = [
-          "ctrl+shift+d=inspector:toggle"
-          "ctrl+shift+c=copy_to_clipboard"
-          "ctrl+shift+v=paste_from_clipboard"
-          # Fix fixterm conflict with zsh ^[ character https://github.com/ghostty-org/ghostty/discussions/5071
-          "ctrl+left_bracket=text:\\x1b"
-          "ctrl+shift+minus=decrease_font_size:1"
-          "ctrl+shift+plus=increase_font_size:1"
-          "ctrl+shift+0=reset_font_size"
-          #
-          # ========== UNBIND ==========
-          #
-          "ctrl+shift+e=unbind" # new_split
-          "ctrl+shift+n=unbind" # new_window
-          "ctrl+shift+t=unbind" # new_tab
-        ];
+  # ghostty 或 cmux 任一启用即可触发 Ghostty 配置部署：
+  #   - macOS: brew 管理 Ghostty.app，Nix 管理配置文件（供 cmux 共享）
+  #   - Linux: programs.ghostty 完整管理（包 + 配置 + shell 集成）
+  config = mkIf (cfg.enable || (cmuxCfg.enable && pkgs.stdenv.isDarwin)) (mkMerge [
+    # ─── macOS ──────────────────────────────────────────────
+    # Ghostty 配置格式为 key=value（类似 env），直接用 generators.toKeyValue 渲染。
+    # cmux (libghostty) 也读取同一份配置，见 cmux.nix。
+    (mkIf pkgs.stdenv.isDarwin {
+      # https://mynixos.com/home-manager/options/programs.ghostty
+      # !!! macOS 上 nixpkgs 的 ghostty 包不受支持，通过 Brew Cask 安装。
+      #     但配置文件通过 Nix 统一管理（ghostty 和 cmux 共享）。
+      xdg.configFile."ghostty/config" = {
+        force = true;
+        text =
+          generators.toKeyValue {
+            listsAsDuplicateKeys = true;
+          }
+          ghosttySettings;
       };
-    };
-  };
+    })
+
+    # ─── Linux ──────────────────────────────────────────────
+    # Nixpkgs 支持 Linux 上直接管理 Ghostty 包。
+    # programs.ghostty.settings 自动写入 ~/.config/ghostty/config。
+    (mkIf pkgs.stdenv.isLinux {
+      # https://mynixos.com/nixpkgs/package/ghostty
+      programs.ghostty = {
+        # https://github.com/NixOS/nixpkgs/issues/388984
+        enable = true;
+        package = pkgs.ghostty;
+        installVimSyntax = true;
+        installBatSyntax = true;
+        enableZshIntegration = true;
+        settings = ghosttySettings;
+      };
+    })
+  ]);
 }
