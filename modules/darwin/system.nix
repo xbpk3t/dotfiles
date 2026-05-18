@@ -275,13 +275,14 @@ in {
 
     # 内置 Hearing功能
     # Hearing 目前在ControlCenter里不支持，所以需要通过 activationScript 来实现
-    activationScripts.controlCenterHearing.text = ''
-      # 先确认一下：切 UI 之后一般可以在这里看到对应 key
-      # /usr/bin/defaults -currentHost read com.apple.controlcenter | /usr/bin/grep -i hearing || true
-
-      # 常见：18=显示在菜单栏，24=隐藏（和 Sound / AirDrop 一致）
-      /usr/bin/defaults -currentHost write com.apple.controlcenter Hearing -int 18
-    '';
+    # [2026-05-18] 做了hs的 HearingToggle.spoon，不再需要在MenuBar添加该button
+    #  activationScripts.controlCenterHearing.text = ''
+    #    # 先确认一下：切 UI 之后一般可以在这里看到对应 key
+    #    # /usr/bin/defaults -currentHost read com.apple.controlcenter | /usr/bin/grep -i hearing || true
+    #
+    #    # 常见：18=显示在菜单栏，24=隐藏（和 Sound / AirDrop 一致）
+    #    /usr/bin/defaults -currentHost write com.apple.controlcenter Hearing -int 18
+    #  '';
 
     # https://github.com/nix-darwin/nix-darwin/issues/1421
     # https://ss64.com/mac/pmset.html

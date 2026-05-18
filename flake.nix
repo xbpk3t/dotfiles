@@ -84,54 +84,6 @@ rec {
       inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
 
-    #============= skills ==============#
-    ast-grep-agent-skill = {
-      url = "github:ast-grep/agent-skill";
-      flake = false;
-    };
-
-    antfu-skills = {
-      url = "github:antfu/skills";
-      flake = false;
-    };
-
-    anthropic-skills = {
-      url = "github:anthropics/skills";
-      flake = false;
-    };
-
-    wshobson-agents = {
-      url = "github:wshobson/agents";
-      flake = false;
-    };
-
-    hashicorp-agent-skills = {
-      url = "github:hashicorp/agent-skills";
-      flake = false;
-    };
-
-    cxuu-golang-skills = {
-      url = "github:cxuu/golang-skills";
-      flake = false;
-    };
-
-    sanyuan-skills = {
-      url = "github:sanyuan0704/sanyuan-skills";
-      flake = false;
-    };
-
-    # https://x.com/vikingmute/status/2036043855594975485
-    obra-superpowers = {
-      url = "github:obra/superpowers";
-      flake = false;
-    };
-
-    ce-codex = {
-      url = "github:xbpk3t/ce-codex";
-      flake = false;
-    };
-    #============= skills ==============#
-
     # nixos-cli - Modern NixOS management CLI
     # https://github.com/nix-community/nixos-cli
     nixos-cli = {
