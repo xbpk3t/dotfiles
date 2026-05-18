@@ -21,7 +21,7 @@ isOriginal: false
 
 ---
 
-最终的效果具体去看 [flomo-cleaner/README.md](../../.tms/packages/flomo-cleaner/README.md)
+最终的效果具体去看 [flomo-cleaner/README.md](https://github.com/xbpk3t/dotfiles/blob/main/.tms/packages/flomo-cleaner/README.md)
 
 :::
 
