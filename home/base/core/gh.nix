@@ -1,4 +1,8 @@
-{editorMeta, ...}: {
+{
+  editorMeta,
+  config,
+  ...
+}: {
   # MAYBE: gh-stack
   # https://github.github.com/gh-stack/getting-started/quick-start/
 
@@ -78,5 +82,10 @@
     #    ghc = "gh repo clone";
     #    # 查看当前仓库状态
     #    ghs = "gh status";
+  };
+
+  home.sessionVariables = {
+    # For xbpk3t/docs rss2newsletter
+    RESEND_TOKEN = "$(cat ${config.sops.secrets.RESEND_TOKEN.path})";
   };
 }
