@@ -1,0 +1,323 @@
+{
+  "$schema": "https://raw.githubusercontent.com/manaflow-ai/cmux/main/web/data/cmux.schema.json",
+  "schemaVersion": 1,
+
+  "app": {
+    // agent 有通知时，把对应 workspace 提到更显眼的位置。
+    // 你的核心需求是“不漏掉哪个 agent 在等我”，所以建议开启。
+    "reorderOnNotification": true,
+
+    // 跟随系统浅色/深色模式。
+    "appearance": "system",
+
+    // 不启用极简模式；你需要 sidebar 信息，所以不要隐藏太多 UI。
+    "minimalMode": false,
+
+    // 不只放到 menu bar；cmux 对你来说是 agent cockpit，需要正常窗口。
+    "menuBarOnly": false,
+
+    // 新 workspace 放在当前 workspace 后面，保持上下文连续。
+    "newWorkspacePlacement": "afterCurrent",
+
+    // 多 agent / 多 worktree 时，我建议 false：
+    // 避免新 workspace 继承上一个 agent 的 cwd，导致 Codex/Claude 跑错 repo。
+    // 如果你更喜欢“从当前 repo 快速开新 agent”，可以改成 true。
+    "workspaceInheritWorkingDirectory": false,
+
+    // 多 session 时，Command Palette 能跨所有 surfaces 搜索。
+    // 适合快速跳到某个 agent。
+    "commandPaletteSearchesAllSurfaces": true,
+
+    // 关闭最后一个 surface 时仍保留 workspace。
+    // 防止你误关掉某个 agent workspace 后上下文直接消失。
+    "keepWorkspaceOpenWhenClosingLastSurface": true,
+
+    // 关 tab 前确认，避免误关 agent。
+    "warnBeforeClosingTab": true,
+
+    // 退出 cmux 前确认，避免一次性杀掉多个 agent session。
+    "warnBeforeQuit": true,
+
+    // 不让 cmux 抢 GoLand 的工作：支持文件仍交给系统/GoLand。
+    "openSupportedFilesInCmux": false,
+
+    // Markdown 也不默认用 cmux viewer；你主要还是 GoLand/Zed/Ghostty。
+    "openMarkdownInCmuxViewer": false,
+
+    // 不发送匿名 telemetry。不是必须，但我会这样设。
+    "sendAnonymousTelemetry": false
+  },
+
+  "terminal": {
+    // 显示滚动条。agent 输出很长时，视觉上更好判断位置。
+    "showScrollBar": true,
+
+    // 初期建议 false。
+    // cmux 可以恢复 layout/cwd/scrollback，但不 checkpoint 任意 live process。
+    // 自动恢复 agent session 依赖各 agent 的 native resume；你之前担心稳定性，所以先别让它自动重启 agent。
+    // 稳定使用一段时间后，如果你喜欢恢复 Codex/Claude session，可以改成 true。
+    "autoResumeAgentSessions": false
+  },
+
+  "notifications": {
+    // agent 通知时 pane 闪一下。
+    "paneFlash": true,
+
+    // 全局 hooks 和项目 hooks 追加执行。
+    // 项目 .cmux/cmux.json 里可以再加项目级过滤/通知逻辑。
+    "hooksMode": "append",
+
+    // dock badge 显示未读通知数。
+    "dockBadge": true,
+
+    // 使用系统默认通知声音。
+    // 如果觉得太吵，可以改成 "none"。
+    "sound": "default",
+
+    // menu bar 显示通知状态，适合 cmux 不在前台时看一眼。
+    "showInMenuBar": true,
+
+    // 未读 pane 显示 ring，是你要的“哪个 agent 需要看”的核心视觉提示。
+    "unreadPaneRing": true,
+
+    // 自定义声音文件路径；不用就空着。
+    "customSoundFilePath": "",
+
+    // 自定义通知命令；不用就空着。
+    // 之后如果你想转发到 ntfy/Slack/脚本，可以填这里。
+    "command": "",
+
+    // 先不加全局 notification filter hook。
+    // cmux hooks 机制可以接收每条通知策略 JSON 并返回修改后的 JSON；
+    // 但初期不建议过早复杂化。
+    "hooks": []
+  },
+
+  "sidebar": {
+    // sidebar 显示 branch + directory。
+    // 每个 agent 一个 worktree 时，这是核心信息。
+    "showBranchDirectory": true,
+
+    // 显示监听端口。agent 启了 dev server 时能直接看到。
+    "showPorts": true,
+
+    // PR 链接用 cmux 内置 browser 打开。
+    // 如果你强偏好外部浏览器，可以改成 false。
+    "openPullRequestLinksInCmuxBrowser": true,
+
+    // PR 信息可点击。
+    "makePullRequestsClickable": true,
+
+    // 显示 SSH 信息；如果你之后用 remote agent 有用。
+    "showSSH": true,
+
+    // sidebar 显示最新 notification 文本。
+    // 这是你判断“哪个 agent 完成/等待 approve”的核心。
+    "showNotificationMessage": true,
+
+    // 显示自定义 metadata。
+    // 后续可以用 cmux CLI set-status/log/progress 写入 sidebar。
+    "showCustomMetadata": true,
+
+    // 端口链接用 cmux 内置 browser 打开。
+    // 做前端/dev server 验证时有用。
+    "openPortLinksInCmuxBrowser": true,
+
+    // 显示 workspace 描述。
+    // 适合你手动给 workspace 写“payment retry / auth refactor”。
+    "showWorkspaceDescription": true,
+
+    // 不隐藏所有详情。
+    "hideAllDetails": false,
+
+    // 显示 PR 状态/编号。
+    "showPullRequests": true,
+
+    // branch 信息垂直布局；多 worktree 可读性更好。
+    "branchLayout": "vertical",
+
+    // 显示 progress。
+    // 之后脚本或 agent 可以用 cmux set-progress 写进 sidebar。
+    "showProgress": true,
+
+    // 显示 log。
+    // 之后脚本或 agent 可以用 cmux log 写进 sidebar。
+    "showLog": true
+  },
+
+  "workspaceColors": {
+    // notification badge 使用默认颜色。
+    "notificationBadgeColor": null,
+
+    // workspace 可选颜色。
+    // 这里沿用官方模板颜色，不做强个性化。
+    "colors": {
+      "Crimson": "#922B21",
+      "Teal": "#006B6B",
+      "Green": "#196F3D",
+      "Olive": "#4A5C18",
+      "Orange": "#A04000",
+      "Aqua": "#0E6B8C",
+      "Blue": "#1565C0",
+      "Navy": "#1A5276",
+      "Indigo": "#283593",
+      "Brown": "#7B3F00",
+      "Amber": "#7D6608",
+      "Rose": "#880E4F",
+      "Charcoal": "#3E4B5E",
+      "Magenta": "#AD1457",
+      "Red": "#C0392B",
+      "Purple": "#6A1B9A"
+    },
+
+    // 选中 workspace 使用默认 selection color。
+    "selectionColor": null,
+
+    // 左侧 rail 风格最像“状态指示器”，适合 agent cockpit。
+    "indicatorStyle": "leftRail"
+  },
+
+  "sidebarAppearance": {
+    // sidebar tint 基础色。
+    "tintColor": "#000000",
+
+    // 不完全匹配 terminal background，保留 sidebar 层次。
+    "matchTerminalBackground": false,
+
+    // 浅色模式用默认 tint。
+    "lightModeTintColor": null,
+
+    // 深色模式用默认 tint。
+    "darkModeTintColor": null,
+
+    // sidebar tint 透明度。
+    // 这个值接近官方模板，视觉上不会太重。
+    "tintOpacity": 0.18
+  },
+
+  "automation": {
+    // Claude binary path 留空，让 cmux 从 PATH 找。
+    // 如果你通过 nix/homebrew/asdf 管理路径且 cmux 找不到，再填绝对路径。
+    "claudeBinaryPath": "",
+
+    // socket 不设密码。默认 cmuxOnly 已经限制为 cmux 内进程。
+    "socketPassword": "",
+
+    // 你当前核心不是 Gemini，所以先关掉。
+    "geminiIntegration": false,
+
+    // 安全默认：只有 cmux-spawned process 能控制 socket。
+    // 不建议一开始用 allowAll。
+    "socketControlMode": "cmuxOnly",
+
+    // cmux automation port 起点，沿用默认。
+    "portBase": 9100,
+
+    // 你重度用 Claude Code，开启。
+    "claudeCodeIntegration": true,
+
+    // automation port range，沿用默认。
+    "portRange": 10,
+
+    // 你不用 Cursor，关闭。
+    "cursorIntegration": false
+  },
+
+  "browser": {
+    // 本地 dev server 默认用 cmux embedded browser 打开。
+    // 如果你只想用外部浏览器，可以设为空数组。
+    "hostsToOpenInEmbeddedBrowser": [
+      "localhost",
+      "*.localhost",
+      "127.0.0.1",
+      "0.0.0.0",
+      "*.localtest.me"
+    ],
+
+    // 永远外部打开的 URL；先不设。
+    "urlsToAlwaysOpenExternally": [],
+
+    // 允许内置 browser 打开这些 insecure HTTP host。
+    // 主要用于本地 dev server。
+    "insecureHttpHostsAllowedInEmbeddedBrowser": [
+      "localhost",
+      "*.localhost",
+      "127.0.0.1",
+      "::1",
+      "0.0.0.0",
+      "*.localtest.me"
+    ],
+
+    // react-grab 版本，沿用官方模板。
+    "reactGrabVersion": "0.1.29",
+
+    // 地址栏显示搜索建议。
+    "showSearchSuggestions": true,
+
+    // browser 跟随系统主题。
+    "theme": "system",
+
+    // 空白 browser tab 上显示 import hint。
+    "showImportHintOnBlankTabs": true,
+
+    // 默认搜索引擎。
+    "defaultSearchEngine": "google",
+
+    // terminal 里的链接用 cmux browser 打开。
+    "openTerminalLinksInCmuxBrowser": true,
+
+    // 拦截 terminal 里的 open 命令到 cmux browser。
+    // 如果你希望 `open http://...` 仍然走系统默认浏览器，可改成 false。
+    "interceptTerminalOpenCommandInCmuxBrowser": true
+  },
+
+  "shortcuts": {
+    "bindings": {
+      // 快速跳到 workspace。
+      "goToWorkspace": "cmd+p",
+
+      // 打开通知面板。
+      "showNotifications": "cmd+i",
+
+      // 跳到最近未读 workspace。
+      // 这是你要的“哪个 agent 需要我处理”的最关键快捷键。
+      "jumpToUnread": "cmd+shift+u",
+
+      // 标记最旧未读并跳到下一个。
+      "markOldestUnreadAndJumpNext": "cmd+ctrl+u",
+
+      // 开 Command Palette。
+      "commandPalette": "cmd+shift+p",
+
+      // 重新加载 cmux.json。
+      "reloadConfiguration": "cmd+shift+,",
+
+      // 新 workspace。
+      "newTab": "cmd+n",
+
+      // 新 surface。
+      "newSurface": "cmd+t",
+
+      // 关闭当前 tab/surface。
+      "closeTab": "cmd+w",
+
+      // 关闭 workspace。
+      "closeWorkspace": "cmd+shift+w",
+
+      // 右分屏。
+      "splitRight": "cmd+d",
+
+      // 下分屏。
+      "splitDown": "cmd+shift+d",
+
+      // 打开 browser。
+      "openBrowser": "cmd+shift+l",
+
+      // 打开设置。
+      "openSettings": "cmd+,",
+
+      // 切换 sidebar。
+      "toggleSidebar": "cmd+b"
+    }
+  }
+}

@@ -59,12 +59,21 @@ in {
               };
             };
             # what: 社区 LSP 插件集合市场（含 nixd 等）
+            # https://github.com/Piebald-AI/claude-code-lsps
             "claude-code-lsps" = {
               source = {
                 source = "github";
                 repo = "Piebald-AI/claude-code-lsps";
               };
             };
+            # what: tmux-agent-sidebar — 本地路径 marketplace
+            # TPM 安装插件到 ~/.tmux/plugins/，用绝对路径避免 ~ 展开问题
+            #  "hiroppy" = {
+            #    source = {
+            #      source = "directory";
+            #      path = "${config.home.homeDirectory}/.tmux/plugins/tmux-agent-sidebar";
+            #    };
+            #  };
           };
 
           # 插件启用清单（键格式：plugin-name@marketplace-name）
@@ -78,11 +87,16 @@ in {
 
             # what: ClaudeClaw（扩展命令和工作流能力）
             "claudeclaw@claudeclaw" = true;
-            # what: nixd LSP（Nix 语言服务）
-            "nixd@claude-code-lsps" = true;
+
             # what: Swift LSP（来自官方 marketplace）
             # note: `claude-plugins-official` 为官方内置 marketplace，无需 extraKnownMarketplaces 再声明
-            "swift-lsp@claude-plugins-official" = true;
+            # "swift-lsp@claude-plugins-official" = true;
+
+            "ralph-loop@claude-plugins-official" = true;
+
+            # what: tmux-agent-sidebar（在 tmux 中显示 Claude Code 状态的 sidebar）
+            # 由 tmux.nix 的 modules.desktop.tmux.agentSidebar.enable 统一控制
+            #  "tmux-agent-sidebar@hiroppy" = config.modules.desktop.tmux.agentSidebar.enable;
           };
 
           env = {
@@ -116,7 +130,7 @@ in {
             # 官方说 effort 会影响响应里的所有 token 消耗，包括文本解释、tool calls/function arguments、extended thinking；max 是“absolute maximum capability with no constraints on token spending”。但“多多少”没有固定倍数。原因是 effort 不是硬 token budget，而是行为信号；同一个任务可能只多一点，也可能因为更频繁思考、更多 tool call、更长分析链路而多很多。官方也明确说 max 适合最深推理，但可能收益递减、容易 overthinking，建议在采用为默认前测试。
             # 建议 claude --effort max 临时开启，或者在 prompt 里说 ultrathink。官方也提到 ultrathink 是单 turn 的 in-context 指令，不会改变 API effort level。
             # [2026-04-29] 从 max -> xhigh，避免耗费太多token
-            CLAUDE_CODE_EFFORT_LEVEL = "xhigh";
+            CLAUDE_CODE_EFFORT_LEVEL = "max";
 
             # 可选：通过 gateway 时，减少系统 prompt 中客户端归因头变化，有助于 gateway 层 prompt cache 命中
             CLAUDE_CODE_ATTRIBUTION_HEADER = "0";
@@ -170,6 +184,7 @@ in {
               "Read(*)"
               "Edit(*)"
               "Write(*)"
+              "WebSearch"
             ];
 
             # 高风险操作仍需确认
@@ -184,11 +199,11 @@ in {
               "Bash(chown *)"
               "Bash(dd *)"
 
-              "Bash(curl *)"
-              "Bash(wget *)"
-              "Bash(ssh *)"
-              "Bash(scp *)"
-              "Bash(rsync *)"
+              # "Bash(curl *)"
+              # "Bash(wget *)"
+              # "Bash(ssh *)"
+              # "Bash(scp *)"
+              # "Bash(rsync *)"
 
               "Bash(npm publish *)"
               "Bash(pnpm publish *)"
