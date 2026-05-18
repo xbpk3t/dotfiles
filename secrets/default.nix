@@ -113,6 +113,8 @@ in {
       # spotifyClientId = mkUserSecret "spotify/client_id";
       # spotifyClientSecret = mkUserSecret "spotify/client_secret";
 
+      RESEND_TOKEN = mkUserSecret "resend/pwd";
+
       API_CONTEXT7 = mkUserSecret "API/context7";
 
       # Atuin

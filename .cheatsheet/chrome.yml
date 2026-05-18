@@ -20,7 +20,7 @@
     - cmd: CMD + Shift + R # 或者 Shift + 点击刷新button （因为后者就相当于 CMD+R）
       des: 深度刷新（强制重新加载/清除缓存）
 
-    - divider: true
+
     - cmd: 空格键
       des: 向下滚动网页
     - cmd: Shift + 空格键
@@ -30,7 +30,7 @@
     - cmd: CMD + ↓
       des: 滚动到页面底部
 
-    - divider: true
+
     - cmd: Fn + ←
       des: 滚动到顶部（= Home键）
     - cmd: Fn + →
@@ -42,7 +42,7 @@
     - cmd: Fn + CMD + F
       des: 全屏切换
 
-    - divider: true
+
     - cmd: CMD + d
       des: 保存到书签
 
@@ -53,13 +53,13 @@
     - cmd: CMD + Shift + T
       des: 重新打开最近关闭的标签页（支持连续恢复多次关闭） # 相当于 `CMD + Option + ←/→`
 
-    - divider: true
+
     - cmd: CMD + N
       des: 新建窗口
     - cmd: CMD + Shift + N
       des: 新建隐身窗口（隐私浏览）
 
-    - divider: true
+
     - cmd: CMD + Shift + [/]
       des: 切换tab # 相当于 `CMD + Option + ←/→`
     - cmd: CMD + W

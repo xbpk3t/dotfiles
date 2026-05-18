@@ -235,7 +235,9 @@
           #          "$HOME/.orbstack/bin"
           "$HOME/go/bin"
           "$HOME/.bun/bin"
-          "$PNPM_HOME"
+          # [2026-05-16] pnpm >= 11 的 global-bin-dir 默认为 $PNPM_HOME/bin，不再放在 $PNPM_HOME 根目录
+          # 不加上 /bin 的话 pnpm install -g 会报 "global bin directory is not in PATH"
+          "$PNPM_HOME/bin"
           "$HOME/.local/bin" # rofi shells
 
           "$PATH" # 注意放到最后，且不要删除
