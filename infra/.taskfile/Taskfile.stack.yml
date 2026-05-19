@@ -2,7 +2,7 @@
 version: "3"
 
 vars:
-  # 当前 Taskfile 位于 infra/.task，下一级是 infra/，再上一级才是 repo root。
+  # 当前 Taskfile 位于 infra/taskfiles，下一级是 infra/，再上一级才是 repo root。
   INFRA_DIR: "{{.TASKFILE_DIR}}/.."
 
 tasks:

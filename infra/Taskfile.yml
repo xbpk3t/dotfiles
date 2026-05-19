@@ -3,9 +3,9 @@ version: "3"
 
 includes:
   stack:
-    taskfile: ./.task/Taskfile.stack.yml
+    taskfile: ./.taskfile/Taskfile.stack.yml
   cf:
-    taskfile: ./.task/Taskfile.cf.yml
+    taskfile: ./.taskfile/Taskfile.cf.yml
 
 tasks:
   default:
