@@ -1,5 +1,10 @@
 {...}: {
-  modules.ssh = {
+  modules.infra = {
+    nh.enable = true;
+    networking.enable = true;
+  };
+
+  modules.devops.ssh = {
     enable = true;
     hosts = {
       # github.enable = true;

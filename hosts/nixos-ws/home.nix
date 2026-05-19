@@ -1,4 +1,9 @@
 {...}: {
+  modules.infra = {
+    nh.enable = true;
+    networking.enable = true;
+  };
+
   modules.desktop = {
     gnome.enable = true;
 
@@ -11,7 +16,7 @@
     firefox.enable = true;
   };
 
-  modules.ssh = {
+  modules.devops.ssh = {
     enable = true;
     hosts = {
       github.enable = true;

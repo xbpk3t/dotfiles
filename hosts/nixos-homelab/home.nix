@@ -1,4 +1,9 @@
 {...}: {
+  modules.infra = {
+    nh.enable = true;
+    networking.enable = true;
+  };
+
   modules.extra = {
     zed-remote.enable = true;
   };
@@ -8,7 +13,7 @@
     skills.enable = false;
   };
 
-  modules.ssh = {
+  modules.devops.ssh = {
     enable = true;
     hosts = {
       # github.enable = true;

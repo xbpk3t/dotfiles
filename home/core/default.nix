@@ -3,9 +3,8 @@
   pkgs,
   ...
 }: {
-  imports = [../init.nix] ++ mylib.scanPaths ./.;
+  imports = mylib.scanPaths ./.;
 
-  # 注意之前这部分在 modules/base 里，以供darwin, nixos 复用。但是实际上应该挪到home里，同样来复用这些pkg
   home.packages = with pkgs;
     [
       # Basic utilities
