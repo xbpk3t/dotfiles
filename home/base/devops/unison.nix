@@ -4,14 +4,14 @@
   pkgs,
   ...
 }: let
-  cfg = config.modules.sync.unison;
+  cfg = config.modules.devops.unison;
   isLinux = pkgs.stdenv.hostPlatform.isLinux;
 in {
   # MAYBE: [2026-04-06] 考虑用 mutagen or unison
   # 目前使用 unison 而非更好用的 mutagen 就是因为 unison本身提供了hm支持，但是 unison 的hm只支持linux（本质仍然是hm只处理了systemd，不兼容launchd），darwin仍然需要自己手动处理，之后再看怎么处理。
   # 目前处理方案有3种：
   #  1. 保持现在这版
-  #     只在 Linux host 启用 modules.sync.unison。
+  #     只在 Linux host 启用 modules.devops.unison。
   #     这是最省事、最稳的方案。
   #  2. Darwin 上只装包，不做 service
   #     也就是 macOS 机器装 pkgs.unison，但不通过 HM services.unison 管理。
@@ -40,7 +40,7 @@ in {
   # 4. remote endpoint 推荐写成 ssh://user@host//absolute/path，避免相对路径歧义。
   #
   # host 侧调用示例：
-  # modules.sync.unison = {
+  # modules.devops.unison = {
   #   enable = true;
   #   pairs.goland-scratches = {
   #     roots = [
@@ -62,7 +62,7 @@ in {
   # https://mynixos.com/nixpkgs/package/mutagen
   # https://mynixos.com/nixpkgs/package/mutagen-compose
   # https://github.com/mutagen-io/mutagen
-  options.modules.sync.unison = with lib; {
+  options.modules.devops.unison = with lib; {
     enable = mkEnableOption "Declarative Unison sync pairs";
 
     pairs = mkOption {

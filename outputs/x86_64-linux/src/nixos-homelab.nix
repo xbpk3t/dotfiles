@@ -35,8 +35,8 @@
     home-modules = map mylib.relativeToRoot [
       "secrets/default.nix"
       "hosts/${name}/home.nix"
-      "home/base/core"
-      "home/base/tui"
+      "home/core"
+      "home/base"
       "home/nixos"
       "home/extra/jetbrains-remote.nix"
       "home/extra/zed-remote.nix"
