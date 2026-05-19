@@ -27,6 +27,7 @@
     home-modules = map mylib.relativeToRoot [
       "secrets/default.nix"
       "hosts/${name}/home.nix"
+      "home/core"
       "home/base"
       "home/darwin"
     ];

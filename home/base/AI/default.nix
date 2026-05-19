@@ -1,4 +1,8 @@
-{...}: {
+{
+  inputs,
+  pkgs,
+  ...
+}: {
   imports = [
     ./mcp.nix
     ./codex.nix
@@ -18,4 +22,9 @@
   # 2) 当前仓库已通过 programs.claude-code.settings 声明式管理 ~/.claude/settings.json，叠加 rtk init -g 产物会造成双源配置与行为冲突。
   # 3) hook 脚本需要长期跟踪 upstream 变更，维护和排障成本高于普通静态配置文件。
   # 4) 在没有明确收益数据前，先保持 AI 工具链行为可预测，避免引入全局命令改写副作用。
+
+  home.packages = with inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}; [
+    # https://github.com/microsoft/apm
+    apm
+  ];
 }

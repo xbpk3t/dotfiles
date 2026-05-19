@@ -17,12 +17,6 @@
         flavor = "codex";
       }
     ).config.settings.servers;
-  codexPrompts = pkgs.runCommandLocal "codex-prompts" {} ''
-    mkdir -p "$out"
-
-    cp -R ${inputs.ce-codex}/prompts/. "$out"/
-    cp -R ${./prompts}/. "$out"/
-  '';
 in {
   # codex resume   打开可恢复的会话列表
   # codex resume --last 直接恢复当前工作目录下最近一次会话
@@ -82,6 +76,9 @@ in {
 
           # ralph loop
           goals = true;
+
+          # For Trellis (to approve the Trellis UserPromptSubmit hook)
+          hooks = true;
         };
         # 声明式 trusted projects：避免首次进入仓库时反复询问 trust。
         projects = {
@@ -104,7 +101,8 @@ in {
         model_providers = {
           axonhub = {
             name = "axonhub";
-            base_url = "https://api.lucc.dev/v1";
+            # base_url = "https://api.lucc.dev/v1";
+            base_url = "http://localhost:8090/v1";
             env_key = "LLM_AxonHub";
             wire_api = "responses";
           };
@@ -143,7 +141,7 @@ in {
     home.file.".codex/config.toml".force = true;
 
     home.file.".codex/prompts" = {
-      source = codexPrompts;
+      source = ./prompts;
       recursive = true;
       force = true;
     };

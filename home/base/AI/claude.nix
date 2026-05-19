@@ -29,8 +29,16 @@ in {
         settings = {
           theme = "dark";
           outputStyle = "Explanatory";
-          includeCoAuthoredBy = false;
           cleanupPeriodDays = 7;
+
+          # 文件2建议：plan accept 页显示 clear context 按钮
+          showClearContextOnPlanAccept = true;
+
+          # 文件2建议：关掉离开 session 后的 recap，配合低噪音风格
+          awaySummaryEnabled = false;
+
+          # 文件2建议：真正关闭内置 auto memory（之前只禁了 claude-mem 插件，未关内置 auto memory）
+          autoMemoryEnabled = false;
 
           # 走 Claude 原生插件生态：
           # 1) 先声明第三方 marketplace 来源（官方 marketplace 不需要声明）
@@ -95,8 +103,11 @@ in {
             "ralph-loop@claude-plugins-official" = true;
 
             # what: tmux-agent-sidebar（在 tmux 中显示 Claude Code 状态的 sidebar）
-            # 由 tmux.nix 的 modules.desktop.tmux.agentSidebar.enable 统一控制
-            #  "tmux-agent-sidebar@hiroppy" = config.modules.desktop.tmux.agentSidebar.enable;
+            # 由 tmux.nix 的 modules.devops.tmux.agentSidebar.enable 统一控制
+            #  "tmux-agent-sidebar@hiroppy" = config.modules.devops.tmux.agentSidebar.enable;
+
+            # 扫描你的项目并推荐：hooks → skills → MCP servers → subagents → automations 并做自动配置（感觉可以替代掉vercel/skills里的 find-skills了）
+            "claude-code-setup@claude-plugins-official" = true;
           };
 
           env = {
@@ -113,8 +124,13 @@ in {
             # 关闭 “How is Claude doing?” 这种 session quality survey 弹窗/调查。官方也说如果设置了 DISABLE_TELEMETRY 或 CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC，survey 也会被关掉。
             CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY = "1";
 
-            # 建议新增：Nix 管 Claude Code 包版本，不需要它自己更新
+            # 文件2建议：隐藏购买额外用量命令，纯 UI 清理
+            DISABLE_EXTRA_USAGE_COMMAND = "1";
+
+            # 文件2建议：Nix 管 Claude Code 包版本，不需要它自己更新
             DISABLE_AUTOUPDATER = "1";
+            # 文件2建议：不自动改终端 tab/window title
+            CLAUDE_CODE_DISABLE_TERMINAL_TITLE = "1";
             # 建议新增：你用了 ANTHROPIC_BASE_URL 代理时，ToolSearch 默认会被关掉
             # | 值        | 行为                         | 我的判断                  |
             #| -------- | -------------------------- | --------------------- |
@@ -122,7 +138,8 @@ in {
             #| `auto`   | 工具占上下文不大时 upfront，否则 defer | 比较稳                   |
             #| `auto:5` | 超过 5% context 才 defer      | 更保守，适合 gateway        |
             #| `false`  | 全部 upfront load            | 最兼容，但 MCP 多时吃 context |
-            ENABLE_TOOL_SEARCH = "true";
+            # 文件2建议：true 太激进，auto:5 更保守（超过 5% context 才 defer），适合 gateway 环境
+            ENABLE_TOOL_SEARCH = "auto:5";
 
             # [DS-V4-Pro， max模式很强，直接跳过high effort - 开发调优 - LINUX DO](https://linux.do/t/topic/2060808)
             # 关键：不要写 effortLevel = "max"，用 env 持久化 max
@@ -179,12 +196,23 @@ in {
 
             # 显式放行的常见安全操作（分类器之上的双保险）
             # auto 模式下先不维护大 allowlist，避免和 classifier 策略冲突。
+            #
+            # 注意：以下规则补齐了之前未覆盖的工具类型——WebFetch/Skill/MCP 插件
+            # 如果不加这些，Claude 在 plan 模式下会对这类工具弹窗询问。
             allow = [
               "Bash(*)"
               "Read(*)"
               "Edit(*)"
               "Write(*)"
-              "WebSearch"
+              "WebSearch(*)"
+              # WebFetch: 独立于 WebSearch 的工具，用于拉取 URL 内容
+              "WebFetch(*)"
+              # Skill: 用于调用 /blog-social-science 等技能
+              "Skill(*)"
+              # chrome-devtools 插件：浏览器操作（导航、截图、点击等）
+              "mcp__plugin_claude-code-home-manager_chrome-devtools__*"
+              # github 插件：仓库操作（拉取 commits、创建 PR 等）
+              "mcp__plugin_claude-code-home-manager_github__*"
             ];
 
             # 高风险操作仍需确认
@@ -232,7 +260,7 @@ in {
           #  # API 认证令牌 - 使用 sops 管理，通过 cat 命令读取文件内容
           #  ANTHROPIC_AUTH_TOKEN = "$(cat ${config.sops.secrets.API_GLM.path})";
 
-          ANTHROPIC_BASE_URL = "https://api.lucc.dev";
+          ANTHROPIC_BASE_URL = "http://localhost:8090/";
           ANTHROPIC_AUTH_TOKEN = "$(cat ${config.sops.secrets.LLM_AxonHub.path})";
         };
         shellAliases = {
@@ -244,6 +272,9 @@ in {
           # cc-unsafe = "CODEX_GITHUB_PERSONAL_ACCESS_TOKEN=$(gh auth token) claude --dangerously-skip-permissions";
 
           ccr = "claude-code-router"; # Alias for claude-code-router
+
+          # 文件2建议：复杂任务时临时开最高 effort，日常用 cc 保持 auto
+          ccmax = "CODEX_GITHUB_PERSONAL_ACCESS_TOKEN=$(gh auth token) claude --effort max";
         };
       };
 

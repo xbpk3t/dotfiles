@@ -6,9 +6,9 @@
 }:
 with lib; let
   isDarwin = pkgs.stdenv.isDarwin;
-  cfg = config.modules.desktop.tmux;
+  cfg = config.modules.devops.tmux;
 in {
-  options.modules.desktop.tmux = {
+  options.modules.devops.tmux = {
     agentSidebar = {
       enable = mkEnableOption "tmux-agent-sidebar integration";
     };
@@ -21,7 +21,7 @@ in {
   #  Zellij (zz) 不受影响，仍然可用。
   # ──────────────────────────────────────────────
 
-  config = {
+  config = lib.mkIf cfg.enable {
     programs.tmux = {
       enable = true;
 
