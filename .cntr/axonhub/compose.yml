@@ -4,8 +4,8 @@
 services:
   axonhub:
     image: looplj/axonhub:latest
-    expose:
-      - "8090"
+    ports:
+      - "127.0.0.1:8090:8090"
     volumes:
       - ./config.yml:/app/config.yml:ro
       - axonhub_data:/app/data
@@ -130,7 +130,10 @@ services:
 networks:
   edge:
     name: edge
-    external: true
+    # 在 VPS 上，edge 网络由 Caddy compose 外部创建，需设 EDGE_NETWORK_EXTERNAL=true
+    # 在本地，compose 自动创建该网络（默认值 false）
+    # goland报错，但是已用 docker compose config 验证可用
+    external: ${EDGE_NETWORK_EXTERNAL:-false}
 
 volumes:
   axonhub_data:
