@@ -1,41 +1,45 @@
+# Common Ignore
 .idea/
 .DS_Store
 /node_modules
+/.cache/
+/.worktrees/
+
+# AI
+.codex/
+.claude/
+.qwen/
 
 # Nix store paths
 /store/
 
 # nix secrets
-secrets/age.key
 *.age.key
-secrets/secrets_temp.yaml
 
-.cache/
-/.worktrees/
-
-.codex/
-.claude/
-.qwen/
-/.claude/
+# Dev
 .direnv/
-specs/
 
+# Build artifacts
 result
 result-*
 
-/PaaS
-/nixos-k3s
-/k3s-nix
-
-# Local scratch files
-/z/
-/zzzzz.md
-
 # For Taskfile checksum etc...
-/.task
-mac-*.md
-wake-*.sh
+# 使用 **/ 而非 / 前缀，因为 Taskfile 会在任意子目录（如 .taskfile/nix/、infra/ 等）
+# 运行时生成 .task/ 目录（存放 checksum、任务缓存等运行时产物），
+# 这些不应进入版本控制
+**/.task/
+
+# 所有 logs/ 目录，递归匹配
+#（容器日志如 .cntr/axonhub/logs/、.cntr/new-api/logs/ 等）
+**/logs/
 
 # ignore 本项目里所有 checksum folder
 # 主要针对 taskfile checksum
 checksum/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Ruff cache
+.ruff_cache/
