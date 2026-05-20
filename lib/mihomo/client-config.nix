@@ -3,6 +3,7 @@
   pkgs,
   lib,
   mylib,
+  wildUrl,
   ...
 }:
 with lib; let
@@ -39,7 +40,9 @@ with lib; let
   };
 
   # 参考 iKuuu_V2.yaml / 雷霆.yaml 的静态模板结构
-  # 动态部分只有 proxies，其余 DNS / proxy-groups / rules 是固定的
+  # 节点不再硬编码进 proxies，而是拆成两个 provider：
+  #   self —— file provider，由 selfProviderContent 渲染到 providers/self.yaml
+  #   wild —— http provider，mihomo 周期性从 Sub-Store 拉取
   configAttrset = {
     mode = "rule";
     log-level = "info";
@@ -87,21 +90,59 @@ with lib; let
       };
     };
 
-    proxies = outbounds.proxies;
+    proxy-providers = {
+      self = {
+        type = "file";
+        # 相对 -d /var/lib/mihomo；mihomo 文档允许相对路径
+        path = "providers/self.yaml";
+        health-check = {
+          enable = true;
+          url = "https://cp.cloudflare.com/generate_204";
+          interval = 300;
+        };
+      };
+      wild = {
+        type = "http";
+        # wildUrl 是模板字符串，其中 __ADMIN_PATH__ 在 sops template 渲染阶段
+        # 由 sops-nix 自动替换成 ME_SK 的真实值（与 axonhub DEFAULT_SK 同源）。
+        # 这样 admin path 永不进 /nix/store。
+        url = lib.replaceStrings ["__ADMIN_PATH__"] [config.sops.placeholder.ME_SK] wildUrl;
+        path = "providers/wild.yaml";
+        interval = 1800;
+        health-check = {
+          enable = true;
+          url = "https://cp.cloudflare.com/generate_204";
+          interval = 600;
+        };
+      };
+    };
 
     proxy-groups = [
       {
-        name = "Proxy";
+        name = "Manual";
         type = "select";
-        proxies = ["auto"] ++ outbounds.tags;
+        proxies = ["Self" "Wild" "Auto" "DIRECT"];
       }
       {
-        name = "auto";
+        name = "Self";
         type = "url-test";
-        proxies = outbounds.tags;
-        url = "http://www.gstatic.com/generate_204";
-        interval = 1800;
-        tolerance = 50;
+        use = ["self"];
+        url = "https://cp.cloudflare.com/generate_204";
+        interval = 300;
+      }
+      {
+        name = "Wild";
+        type = "url-test";
+        use = ["wild"];
+        url = "https://cp.cloudflare.com/generate_204";
+        interval = 600;
+      }
+      {
+        name = "Auto";
+        type = "fallback";
+        proxies = ["Self" "Wild" "DIRECT"];
+        url = "https://cp.cloudflare.com/generate_204";
+        interval = 300;
       }
     ];
 
@@ -122,18 +163,18 @@ with lib; let
       ]
       ++ (map (s: "IP-CIDR,${s.server}/32,DIRECT,no-resolve") servers)
       ++ [
-        # 必须代理的站点
-        "DOMAIN-SUFFIX,openai.com,Proxy"
-        "DOMAIN-SUFFIX,chatgpt.com,Proxy"
-        "DOMAIN-SUFFIX,github.com,Proxy"
-        "DOMAIN-SUFFIX,githubusercontent.com,Proxy"
-        "DOMAIN-SUFFIX,githubassets.com,Proxy"
-        "DOMAIN-SUFFIX,google.com,Proxy"
-        "DOMAIN-SUFFIX,youtube.com,Proxy"
-        "DOMAIN-SUFFIX,ytimg.com,Proxy"
-        "DOMAIN-SUFFIX,twimg.com,Proxy"
-        "DOMAIN-SUFFIX,docker.com,Proxy"
-        "DOMAIN-SUFFIX,cache.nixos.org,Proxy"
+        # 必须代理的站点（统一走 Manual，由用户在 UI 上选 Self/Wild/Auto）
+        "DOMAIN-SUFFIX,openai.com,Manual"
+        "DOMAIN-SUFFIX,chatgpt.com,Manual"
+        "DOMAIN-SUFFIX,github.com,Manual"
+        "DOMAIN-SUFFIX,githubusercontent.com,Manual"
+        "DOMAIN-SUFFIX,githubassets.com,Manual"
+        "DOMAIN-SUFFIX,google.com,Manual"
+        "DOMAIN-SUFFIX,youtube.com,Manual"
+        "DOMAIN-SUFFIX,ytimg.com,Manual"
+        "DOMAIN-SUFFIX,twimg.com,Manual"
+        "DOMAIN-SUFFIX,docker.com,Manual"
+        "DOMAIN-SUFFIX,cache.nixos.org,Manual"
 
         # CN 域名直连
         "DOMAIN-SUFFIX,cn,DIRECT"
@@ -158,12 +199,18 @@ with lib; let
         "DOMAIN-SUFFIX,local,DIRECT"
         "DOMAIN-SUFFIX,lan,DIRECT"
 
-        # 兜底代理
-        "MATCH,Proxy"
+        # 兜底
+        "MATCH,Manual"
       ];
   };
 
   templatesContent = builtins.toJSON configAttrset;
+
+  # self provider 文件由调用方写到 providers/sub-store 风格的 yaml 中
+  # 这里只导出 proxies 列表，结构同 ClashMeta provider 规范
+  selfProviderContent = builtins.toJSON {
+    proxies = outbounds.proxies;
+  };
 in {
-  inherit templatesContent;
+  inherit templatesContent selfProviderContent;
 }
