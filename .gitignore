@@ -32,6 +32,7 @@ result-*
 # 所有 logs/ 目录，递归匹配
 #（容器日志如 .cntr/axonhub/logs/、.cntr/new-api/logs/ 等）
 **/logs/
+**/data/
 
 # ignore 本项目里所有 checksum folder
 # 主要针对 taskfile checksum
