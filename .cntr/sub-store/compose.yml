@@ -1,0 +1,52 @@
+---
+# 【配置 sub-store】本地优先实施版本
+# 历史选型背景参考下述文档（已删除 subconverter/subweb，统一用 Sub-Store 完成转换 + 聚合）：
+# - https://github.com/sub-store-org/Sub-Store
+# - https://zelikk.blogspot.com/2025/05/docker-sub-store-http-meta-gist.html
+# - https://linux.do/t/topic/660141  懒人配置
+#
+# 部署模式：
+#   本地（macOS）：直连 127.0.0.1:3001，绕过 Caddy；EDGE_NETWORK_EXTERNAL 缺省为 false。
+#   VPS 生产：删除 ports 暴露 + 设 EDGE_NETWORK_EXTERNAL=true，走 Caddy edge network。
+# 密钥模式参考 .cntr/axonhub/compose.yml:15 的 ${DEFAULT_SK}：本地从 .env 注入，生产走 sops + sessionVariables。
+
+name: sub-store
+
+services:
+  sub-store:
+    image: xream/sub-store:latest
+    restart: unless-stopped
+    # 本地直接暴露到 127.0.0.1，绕过 Caddy；生产时改走 edge network（删除 ports 段）
+    ports:
+      - "127.0.0.1:3001:3001"
+    environment:
+      # admin 入口路径（不可猜路径作为第一道防线，必须显式提供）
+      SUB_STORE_FRONTEND_BACKEND_PATH: /${DEFAULT_SK:?DEFAULT_SK is required}
+      # 自动备份 cron（凌晨 4:17 错峰）。若 base 镜像不自带 cron 守护进程，
+      # 切换到 xream/sub-store-with-cron 即可（实施时按官方 README 验证）
+      SUB_STORE_BACKEND_UPLOAD_CRON: "17 4 * * *"
+      # download cron 不开启，仅灾难恢复手动执行
+    volumes:
+      - ./data:/opt/app/data
+    networks:
+      - default
+      - edge
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3001"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+networks:
+  edge:
+    name: edge
+    # 本地 false：compose 自动创建（仅服务于本 compose）
+    # VPS true：使用 Caddy compose 外部创建的 edge
+    # 参考 .cntr/axonhub/compose.yml:130-136
+    external: ${EDGE_NETWORK_EXTERNAL:-false}
