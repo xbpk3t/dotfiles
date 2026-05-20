@@ -2,22 +2,44 @@
 # 注意：{{ branch | sanitize }} 会把 "/" 转成 "-"，防止路径非法
 worktree-path = "{{ repo_path }}/.worktrees/{{ branch | sanitize }}"
 
-[post-create]
-# 每次创建新 worktree 后执行自定义 step
-# 注意：依赖你本地已定义 `wt step copy-ignored`
+# [post-create] → [post-start] — 新版 Worktrunk 的 hook 体系里，post-create 已废弃。post-start 在后台运行且失败不会阻塞 wt switch，不会像刚才那样 worktree 已创建但被 hook 判为失败。
+[post-start]
+# 创建新 worktree 后在后台复制 ignored 文件；失败不会阻塞 wt switch
 copy = "wt step copy-ignored"
 
-[commit]
-# stage = "all" 会在 merge/squash 流程里自动 add 所有改动
-# 如果你希望更保守，可改为 "tracked" 或 "none"
-stage = "all"
+[step.copy-ignored]
+# 避免复制临时图片、缓存、构建产物等不稳定/易缺失的文件
+exclude = [
+  "docs-images/.temp/",
+  ".cache/",
+  ".turbo/",
+  ".next/",
+  "dist/",
+  "build/",
+]
 
+[commit]
+# tracked：只 stage 已跟踪文件的改动，避免误把 untracked 文件也加入 commit
+# 可选值："all"（含 untracked）、"tracked"（仅已跟踪）、"none"（仅已暂存）
+stage = "tracked"
+
+
+
+# wt生成commit msg有两种方式（判断当前是否有 changes）：
+## 1、如果有未commit的changes，那么自动执行。配置了下面这个 commit.generation 之后就会在 wt merge main时自动生成。本身是个hook操作。但是如果command有问题，那么就会产生一个 null 的 commit msg
+## 2、如果changes区是干净的（也就是我们手动commit了）。那么就不会触发这个hook。我之前一直都是这么操作的。
 [commit.generation]
-# LLM commit message 生成命令（使用 Codex CLI）
-# 关键点：必须从 stdin 读取 prompt（结尾 `-`），否则 wt 传入内容不会生效
-# 关键点：`--json | jq` 只提取最终 agent_message，避免事件流污染 commit message
-# 关键点：`--sandbox read-only` 只生成文本，不执行写操作，更安全
-command = "codex exec --json --sandbox read-only --skip-git-repo-check -m gpt-5.4-mini -c model_reasoning_effort='low' - | jq -sr '[.[] | select(.type == \"item.completed\" and .item.type == \"agent_message\")] | last.item.text'"
+# LLM commit message 生成（Claude CLI 纯 API 模式）
+# CLAUDECODE=          关闭 Claude Code 扩展，纯 API 调用（否则会加载插件/settings/CLAUDE.md）
+# MAX_THINKING_TOKENS=0  禁用 extended thinking，commit message 不需要深度推理
+# -p                    print 模式：从 stdin 读 prompt，结果输出到 stdout（非交互）
+# --no-session-persistence  不保存会话历史
+# --model               AxonHub 代理上实际存在的模型（deepseek-v4-flash 更快更省）
+# --tools ''            禁用所有工具（无需文件访问）
+# --disable-slash-commands  禁用 skills/slash commands
+# --setting-sources ''  不加载任何 settings 文件，避免侧信道干扰
+# --system-prompt ''    清空系统提示词，完全由 Worktrunk 的 prompt 模板驱动
+command = "CLAUDECODE= MAX_THINKING_TOKENS=0 claude -p --no-session-persistence --model deepseek-v4-flash --tools '' --disable-slash-commands --setting-sources '' --system-prompt ''"
 
 [list]
 # 在 `wt list` 中显示 summary（会触发 commit.generation）
@@ -35,3 +57,14 @@ commit = true
 rebase = true
 remove = true
 verify = true
+
+# 默认为 true；rebase 后本身就是 fast-forward，显式声明避免歧义
+ff = true
+
+[remove]
+# 默认为 true；remove worktree 时同步删除对应分支
+delete-branch = true
+
+[switch]
+# 默认为 true；wt switch 后自动 cd 到新 worktree 目录
+cd = true
