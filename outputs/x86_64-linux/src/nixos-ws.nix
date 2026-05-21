@@ -31,6 +31,7 @@
       "secrets/default.nix"
       # Host-specific home configuration
       "hosts/${name}/home.nix"
+      "home/core"
       "home/base"
       "home/nixos"
     ];
