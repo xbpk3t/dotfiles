@@ -15,6 +15,8 @@
   };
 
   modules.desktop = {
+    stylix.enable = true;
+
     alacritty.enable = false;
     ghostty.enable = false;
     kitty.enable = false;

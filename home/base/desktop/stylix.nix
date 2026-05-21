@@ -1,24 +1,32 @@
 {
   pkgs,
   lib,
+  config,
   inputs,
   ...
-}: let
+}:
+with lib; let
   isLinux = pkgs.stdenv.isLinux;
+  cfg = config.modules.desktop.stylix;
 in {
   imports = [
     inputs.stylix.homeModules.stylix
   ];
 
-  # 显式采用 HM 新默认，避免 legacy default warning。
-  gtk.gtk4.theme = null;
+  options.modules.desktop.stylix = {
+    enable = mkEnableOption "stylix theming";
+  };
 
-  stylix = {
-    enable = lib.mkDefault true;
+  config = mkIf cfg.enable {
+    # 显式采用 HM 新默认，避免 legacy default warning。
+    gtk.gtk4.theme = null;
 
-    autoEnable = lib.mkDefault true;
-    enableReleaseChecks = false;
-    overlays.enable = false;
+    stylix = {
+      enable = mkDefault true;
+
+      autoEnable = mkDefault true;
+      enableReleaseChecks = false;
+      overlays.enable = false;
     # NOTE:
     # 当 HM 使用 useGlobalPkgs=true 时，stylix overlays 会写入 nixpkgs.overlays，
     # 触发 "nixpkgs.config/overlays with useGlobalPkgs" 警告。
@@ -113,7 +121,7 @@ in {
         # 配置 Firefox profile names 以避免 stylix warning
         firefox.profileNames = ["default"];
       }
-      // lib.optionalAttrs isLinux {
+      // optionalAttrs isLinux {
         qt = {
           enable = true;
           platform = "qtct";
@@ -129,17 +137,18 @@ in {
     #      #      name = "macOS-BigSur-White";
     #      #      size = 14;
     #    };
+    };
+
+    home.packages = with pkgs;
+      [
+      ]
+      ++ optionals isLinux [
+        # https://mynixos.com/nixpkgs/package/bibata-cursors
+        bibata-cursors
+
+        # https://github.com/ful1e5/apple_cursor
+        # https://mynixos.com/nixpkgs/package/apple-cursor
+        apple-cursor
+      ];
   };
-
-  home.packages = with pkgs;
-    [
-    ]
-    ++ lib.optionals isLinux [
-      # https://mynixos.com/nixpkgs/package/bibata-cursors
-      bibata-cursors
-
-      # https://github.com/ful1e5/apple_cursor
-      # https://mynixos.com/nixpkgs/package/apple-cursor
-      apple-cursor
-    ];
 }
