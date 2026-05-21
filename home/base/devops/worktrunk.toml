@@ -1,3 +1,8 @@
+# CHANGELOG
+# 2026-05-21: 切换为 PR-first 工作流
+#   - commit.stage: "tracked" → "none"（PR-first 推荐：自己显式 git add / git add -p 后，再 wt step commit）
+#   - merge.commit: true → false（wt merge 不再自动提交 dirty changes）
+
 # Worktree 存放到 repo 内部，避免散落到同级目录
 # 注意：{{ branch | sanitize }} 会把 "/" 转成 "-"，防止路径非法
 worktree-path = "{{ repo_path }}/.worktrees/{{ branch | sanitize }}"
@@ -21,7 +26,7 @@ exclude = [
 [commit]
 # tracked：只 stage 已跟踪文件的改动，避免误把 untracked 文件也加入 commit
 # 可选值："all"（含 untracked）、"tracked"（仅已跟踪）、"none"（仅已暂存）
-stage = "tracked"
+stage = "none"
 
 
 
@@ -42,8 +47,9 @@ stage = "tracked"
 command = "CLAUDECODE= MAX_THINKING_TOKENS=0 claude -p --no-session-persistence --model deepseek-v4-flash --tools '' --disable-slash-commands --setting-sources '' --system-prompt ''"
 
 [list]
-# 在 `wt list` 中显示 summary（会触发 commit.generation）
-summary = true
+# true: 在 `wt list` 中显示 summary（会触发 commit.generation）
+# [2026-05-21] 改为false, 避免调用LLM，浪费token
+summary = false
 
 [merge]
 # 推荐默认安全合并策略：先 rebase、合并后自动 remove worktree、执行 hooks
@@ -51,7 +57,7 @@ summary = true
 # 把当前 worktree 分支上 从 main 分出来之后的所有 commit，全部 squash（压扁）成一条新 commit
 # [2026-04-16] 修改为false，因为我需要在merge后，仍然保留worktree上的commit，而非合并为一个commit
 squash = false
-commit = true
+commit = false
 
 # 设置为true，否则会在merge时，会产生一个 Merge Commit
 rebase = true
