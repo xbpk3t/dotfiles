@@ -28,6 +28,7 @@
       "hosts/${name}/home.nix"
       "secrets/default.nix"
       "home/core"
+      "home/base/devops/rclone.nix"
     ];
   };
 
