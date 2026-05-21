@@ -33,8 +33,8 @@ in {
               Minute = 10;
             }
           ];
-          RunAtLoad = true;
           ThrottleInterval = 86400;
+          Nice = 5;
 
           StandardOutPath = "/Users/${username}/Library/Logs/nix-prune-generations.log";
           StandardErrorPath = "/Users/${username}/Library/Logs/nix-prune-generations.log";

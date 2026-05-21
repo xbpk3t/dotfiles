@@ -17,6 +17,28 @@ with lib; let
       pkgs
       ;
     inherit (cfg) wildUrl;
+    selfProviderTemplateName = "mihomo-self-provider.yaml";
+  };
+  configPath = config.sops.templates."mihomo-client.yaml".path;
+  # writeShellApplication 会把 runtimeInputs 列出来的所有 derivation 通过 PATH
+  # 前置注入，且整体打包成一个 store path。launchd plist 只引用 launcher 一个
+  # store path，运行时闭包（mihomo + coreutils + bash）由 launcher derivation
+  # 自动维护，不会出现"plist 引 N 个 path、任一被 GC 即挂"的 race。
+  #
+  # Why 显式列 coreutils：launcher 里用到 mkdir / rm，虽然 launchd plist PATH
+  # 也带了 /bin，但显式列出来让 nix 帮忙做 hermetic check（writeShellApplication
+  # 内部跑 shellcheck），出现未声明命令时 build 阶段就会报错而不是 runtime。
+  mihomoLauncher = pkgs.writeShellApplication {
+    name = "mihomo-tun-launcher";
+    runtimeInputs = with pkgs; [mihomo coreutils];
+    text = ''
+      mkdir -p /var/lib/mihomo/providers
+      # Layer 4 之前的旧 launcher 会把 self provider 拷到这里；现在 self 直接
+      # 从 /run/secrets/rendered/ 读，这份 self.yaml 是死文件。主动清理，避免
+      # 未来 rollback 到旧 generation 时 mihomo 读到 stale 内容。
+      rm -f /var/lib/mihomo/providers/self.yaml
+      exec mihomo -d /var/lib/mihomo -f "$1"
+    '';
   };
 in {
   options.modules.networking.mihomo = {
@@ -34,45 +56,36 @@ in {
   };
 
   config = mkIf cfg.enable {
-    # sops 渲染含 secret 的 JSON config，不进 /nix/store
-    sops.templates."mihomo-client.json".content = client.templatesContent;
-    # self provider 也含 secret（uuid / pubkey 等），同样走 sops template
-    sops.templates."mihomo-self-provider.json".content = client.selfProviderContent;
+    # sops 渲染含 secret 的 YAML config，不进 /nix/store
+    sops.templates."mihomo-client.yaml".content = client.templatesContent;
+    sops.templates."mihomo-self-provider.yaml".content = client.selfProviderContent;
 
-    # 单 daemon：启动时将 sops 渲染的两份 JSON 分别转 YAML 落盘，然后 exec mihomo
+    # config 已在构建时转为 YAML，sops 渲染后由 launcher 直接 exec mihomo
     # Metacubexd 作为 Web UI 通过 external-controller 端口管理配置
     launchd.daemons.mihomo-tun = {
       serviceConfig = {
         Label = "local.mihomo.tun";
         ProgramArguments = [
-          "${pkgs.bash}/bin/bash"
-          "-c"
-          ''
-            src="${config.sops.templates."mihomo-client.json".path}"
-            src_self="${config.sops.templates."mihomo-self-provider.json".path}"
-            dst="/var/lib/mihomo/config.yaml"
-            dst_self="/var/lib/mihomo/providers/self.yaml"
-            mkdir -p /var/lib/mihomo/providers
-            if [ -f "$src" ]; then
-              ${pkgs.yq-go}/bin/yq -P -o yaml <"$src" >"$dst"
-            fi
-            if [ -f "$src_self" ]; then
-              ${pkgs.yq-go}/bin/yq -P -o yaml <"$src_self" >"$dst_self"
-            fi
-            exec ${pkgs.mihomo}/bin/mihomo -d /var/lib/mihomo -f "$dst"
-          ''
+          "${mihomoLauncher}/bin/mihomo-tun-launcher"
+          configPath
         ];
         RunAtLoad = true;
         KeepAlive = {
           SuccessfulExit = false;
-          NetworkState = true;
         };
+        ThrottleInterval = 10;
         WorkingDirectory = "/var/lib/mihomo";
         StandardOutPath = "/Users/${username}/Library/Logs/mihomo.log";
         StandardErrorPath = "/Users/${username}/Library/Logs/mihomo.log";
         EnvironmentVariables = {
-          PATH = "/etc/profiles/per-user/${username}/bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
-          SAFE_PATHS = "${pkgs.metacubexd}";
+          # daemon 以 root 跑，不需要 per-user profile；保持系统级 PATH 即可。
+          # writeShellApplication 内部还会前置注入 runtimeInputs，所以这里只作
+          # 兜底（保证 launcher 自己能被 launchd exec 起来）。
+          PATH = "/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
+          # mihomo 默认只允许 working dir / homedir / SAFE_PATHS 下的路径作为
+          # file provider 源或 external-ui 来源。把 metacubexd（UI）和
+          # sops 渲染目录都加进来。
+          SAFE_PATHS = "${pkgs.metacubexd}:/run/secrets/rendered";
         };
       };
     };
