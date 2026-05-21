@@ -43,6 +43,7 @@ services:
         max-file: "5"
 
   postgres:
+    container_name: postgres
     # [2026-05-11] 尝试迁移到 18-alpine 未果，麻烦事太多，潜在收益也不大，所以不再处理
     image: postgres:15-alpine
     environment:
@@ -51,6 +52,9 @@ services:
       POSTGRES_PASSWORD: ${DEFAULT_SK}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - default
+      - axonhub-internal
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U axonhub -d axonhub"]
@@ -134,6 +138,11 @@ networks:
     # 在本地，compose 自动创建该网络（默认值 false）
     # goland报错，但是已用 docker compose config 验证可用
     external: ${EDGE_NETWORK_EXTERNAL:-false}
+  axonhub-internal:
+    name: axonhub-internal
+    # 在 VPS 上若由其他 compose 外部创建，设 AXONHUB_INTERNAL_NETWORK_EXTERNAL=true
+    # 在本地，compose 自动创建该网络（默认 false）
+    external: ${AXONHUB_INTERNAL_NETWORK_EXTERNAL:-false}
 
 volumes:
   axonhub_data:
