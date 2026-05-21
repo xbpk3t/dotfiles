@@ -1,8 +1,0 @@
----
-
-- feat: 在把某个tab归入里面时，该tab group 会自动展开，怎么才能不让他展开？是否有这个配置项？
-  scope: tab group
-  url:
-    - https://issues.chromium.org/issues/41495932
-  isFix: false
-  score: 4 # 非必要，但是每次都要手动去expand就很烦
