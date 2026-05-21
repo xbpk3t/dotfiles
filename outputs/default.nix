@@ -158,6 +158,39 @@ in {
         && builtins.hasAttr currentSystem inputs."deploy-rs".lib
       then inputs."deploy-rs".lib.${currentSystem}.deployChecks deployCurrent
       else {};
+
+    # Host evaluation 契约检查：保证当前 system 下注册的每个
+    # nixosConfigurations / darwinConfigurations 都能被完整求值。
+    #
+    # 为什么必须存在：
+    #   `nix flake check` 默认 *不会* 触发 `nixosConfigurations.*` 的求值；
+    #   它只检查 `checks.<system>.*` / `packages.<system>.*` / `apps.<system>.*`。
+    #   于是像 `home.stateVersion` 未定义、`home/base` 误注释这种问题，
+    #   只在 `nix run .#deploy-rs -- .#<host>` 真去 deploy 时才会爆，
+    #   构成了「绿色 CI + 红色 deploy」的盲区。
+    #
+    # 工作机制（轻量但严格）：
+    #   - `toString cfg.config.system.build.toplevel.drvPath` 触发 host
+    #     的完整 module evaluation（求 .drv hash 必须 eval 所有 option）。
+    #   - `toString` 同时 strip 掉 string context，导致 runCommand 看到的
+    #     是字面量 path，*不会* 把 toplevel 列为 build dependency。
+    #   - 结果：check 失败 ⇔ eval 失败；check pass *不* 触发 host build，
+    #     成本接近 0，但能挡住 stateVersion / option collision / 缺 import
+    #     等所有静态可发现的 deploy-time eval error。
+    #
+    # 命名约定：
+    #   `host-eval-<hostname>`，便于 `nix flake check` 输出中肉眼定位。
+    hostEvalChecks = let
+      arch = architectureOutput;
+      allHosts = (arch.nixosConfigurations or {}) // (arch.darwinConfigurations or {});
+      mkHostEval = name: cfg:
+        pkgs.runCommandLocal "host-eval-${name}" {
+          drvPath = toString cfg.config.system.build.toplevel.drvPath;
+        } ''echo "$drvPath" > $out'';
+    in
+      lib.mapAttrs'
+      (name: cfg: lib.nameValuePair "host-eval-${name}" (mkHostEval name cfg))
+      allHosts;
   in {
     # flake apps:
     # - deploy-rs: 统一部署入口
@@ -181,8 +214,9 @@ in {
       };
 
     # 注意：`checks` 是仓库默认质量闸门的统一入口。
-    # deploy-rs checks 负责 deployment safety，libChecks 负责仓库内的基础回归测试。
-    checks = deployChecks // libChecks;
+    # deploy-rs checks 负责 deployment safety，libChecks 负责仓库内的基础回归测试，
+    # hostEvalChecks 负责「flake 输出的每个 host 都能完整求值」的契约。
+    checks = deployChecks // libChecks // hostEvalChecks;
 
     # `nix fmt` / flake formatter 的统一入口。
     formatter = pkgs.nixfmt;
