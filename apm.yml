@@ -1,0 +1,11 @@
+name: dotfiles-agent-config
+version: 0.1.0
+description: APM manifest for dotfiles (NixOS/nix-darwin/home-manager fleet management)
+author: luck
+license: MIT
+targets:
+  - claude
+includes: auto
+compilation:
+  exclude:
+    - apm_modules/**
