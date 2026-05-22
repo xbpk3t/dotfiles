@@ -16,45 +16,76 @@ with lib; let
       lib
       pkgs
       ;
+    inherit (cfg) wildUrl;
+    selfProviderTemplateName = "mihomo-self-provider.yaml";
+  };
+  configPath = config.sops.templates."mihomo-client.yaml".path;
+  # writeShellApplication 会把 runtimeInputs 列出来的所有 derivation 通过 PATH
+  # 前置注入，且整体打包成一个 store path。launchd plist 只引用 launcher 一个
+  # store path，运行时闭包（mihomo + coreutils + bash）由 launcher derivation
+  # 自动维护，不会出现"plist 引 N 个 path、任一被 GC 即挂"的 race。
+  #
+  # Why 显式列 coreutils：launcher 里用到 mkdir / rm，虽然 launchd plist PATH
+  # 也带了 /bin，但显式列出来让 nix 帮忙做 hermetic check（writeShellApplication
+  # 内部跑 shellcheck），出现未声明命令时 build 阶段就会报错而不是 runtime。
+  mihomoLauncher = pkgs.writeShellApplication {
+    name = "mihomo-tun-launcher";
+    runtimeInputs = with pkgs; [mihomo coreutils];
+    text = ''
+      mkdir -p /var/lib/mihomo/providers
+      # Layer 4 之前的旧 launcher 会把 self provider 拷到这里；现在 self 直接
+      # 从 /run/secrets/rendered/ 读，这份 self.yaml 是死文件。主动清理，避免
+      # 未来 rollback 到旧 generation 时 mihomo 读到 stale 内容。
+      rm -f /var/lib/mihomo/providers/self.yaml
+      exec mihomo -d /var/lib/mihomo -f "$1"
+    '';
   };
 in {
   options.modules.networking.mihomo = {
     enable = mkEnableOption "mihomo TUN proxy daemon";
+    wildUrl = mkOption {
+      type = lib.types.str;
+      description = ''
+        Sub-Store wild provider subscription URL 模板。
+
+        URL 中可使用 __ADMIN_PATH__ 占位符，在 sops template 渲染阶段会被
+        替换成 config.sops.placeholder.ME_SK 的实值（与 axonhub DEFAULT_SK 同源）。
+        admin path 永不进 /nix/store。
+      '';
+    };
   };
 
   config = mkIf cfg.enable {
-    # sops 渲染含 secret 的 JSON config，不进 /nix/store
-    sops.templates."mihomo-client.json".content = client.templatesContent;
+    # sops 渲染含 secret 的 YAML config，不进 /nix/store
+    sops.templates."mihomo-client.yaml".content = client.templatesContent;
+    sops.templates."mihomo-self-provider.yaml".content = client.selfProviderContent;
 
-    # 单 daemon：启动时将 sops 渲染的 JSON 转 YAML，然后 exec mihomo
+    # config 已在构建时转为 YAML，sops 渲染后由 launcher 直接 exec mihomo
     # Metacubexd 作为 Web UI 通过 external-controller 端口管理配置
     launchd.daemons.mihomo-tun = {
       serviceConfig = {
         Label = "local.mihomo.tun";
         ProgramArguments = [
-          "${pkgs.bash}/bin/bash"
-          "-c"
-          ''
-            src="${config.sops.templates."mihomo-client.json".path}"
-            dst="/var/lib/mihomo/config.yaml"
-            mkdir -p /var/lib/mihomo
-            if [ -f "$src" ]; then
-              ${pkgs.yq-go}/bin/yq -P -o yaml <"$src" >"$dst"
-            fi
-            exec ${pkgs.mihomo}/bin/mihomo -d /var/lib/mihomo -f "$dst"
-          ''
+          "${mihomoLauncher}/bin/mihomo-tun-launcher"
+          configPath
         ];
         RunAtLoad = true;
         KeepAlive = {
           SuccessfulExit = false;
-          NetworkState = true;
         };
+        ThrottleInterval = 10;
         WorkingDirectory = "/var/lib/mihomo";
         StandardOutPath = "/Users/${username}/Library/Logs/mihomo.log";
         StandardErrorPath = "/Users/${username}/Library/Logs/mihomo.log";
         EnvironmentVariables = {
-          PATH = "/etc/profiles/per-user/${username}/bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
-          SAFE_PATHS = "${pkgs.metacubexd}";
+          # daemon 以 root 跑，不需要 per-user profile；保持系统级 PATH 即可。
+          # writeShellApplication 内部还会前置注入 runtimeInputs，所以这里只作
+          # 兜底（保证 launcher 自己能被 launchd exec 起来）。
+          PATH = "/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
+          # mihomo 默认只允许 working dir / homedir / SAFE_PATHS 下的路径作为
+          # file provider 源或 external-ui 来源。把 metacubexd（UI）和
+          # sops 渲染目录都加进来。
+          SAFE_PATHS = "${pkgs.metacubexd}:/run/secrets/rendered";
         };
       };
     };

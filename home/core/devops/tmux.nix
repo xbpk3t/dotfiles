@@ -9,6 +9,7 @@ with lib; let
   cfg = config.modules.devops.tmux;
 in {
   options.modules.devops.tmux = {
+    enable = mkEnableOption "tmux";
     agentSidebar = {
       enable = mkEnableOption "tmux-agent-sidebar integration";
     };

@@ -7,12 +7,32 @@ services:
     ports:
       - "80:80"
       - "443:443"
+    environment:
+      # sub-store basic_auth 用：把 DEFAULT_SK（由 cntr.nix 注入）的 bcrypt hash
+      # 当作 password。entrypoint 启动时现场算一次写到 BASIC_AUTH_HASH 再 caddy run，
+      # 这样 Caddyfile 只引 env、sops 只多管一个 ME_SK secret。
+      DEFAULT_SK: ${DEFAULT_SK:?DEFAULT_SK is required}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - ./data:/data
       - ./config:/config
     networks:
       - edge
+    # entrypoint wrapper：算 hash + 启动 caddy
+    # 这种写法保留官方镜像不动；wrapper 用 sh -c 写在 command 里
+    command:
+      - sh
+      - -c
+      - |
+        export BASIC_AUTH_HASH="$$(caddy hash-password --plaintext "$$DEFAULT_SK")"
+        # 输出到容器日志便于排查（hash 不是 secret）
+        echo "[entrypoint] BASIC_AUTH_HASH generated, starting caddy..."
+        exec caddy run --config /etc/caddy/Caddyfile --adapter caddyfile
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
 
 networks:
   edge:

@@ -231,11 +231,14 @@ repos:
         pass_filenames: false
         entry: caddy fmt --diff .cntr/caddy/Caddyfile --overwrite
 
-      - id: caddy-validate
-        name: caddy-validate
+      - id: caddy-adapt
+        name: caddy-adapt
         language: system
         pass_filenames: false
-        entry: caddy validate --config .cntr/caddy/Caddyfile
+        # pre-commit 只做静态语法/结构检查（Caddyfile → JSON）。
+        # 完整 `caddy validate` 会跑模块 Provision()，对 basic_auth 等需要 runtime secret
+        # 的指令会因 env 为空报错。runtime 校验留给真实 compose/CI 环境。
+        entry: caddy adapt --config .cntr/caddy/Caddyfile
 
 
   - repo: https://github.com/astro/deadnix
