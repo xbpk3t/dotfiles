@@ -1,3 +1,4 @@
+# MAYBE: [2026-05-21](shell-to-nushell) eval 是否有必要把dotfiles所有shell -> nushll. 暂时来说没必要，因为看了一下大部分都是 shell 都与 k3s 相关，暂时搁置。到时候处理k3s时，作为优化，捎带手处理掉。
 if ! ${pkgs.iproute2}/bin/ip link show cni0 >/dev/null 2>&1; then
   exit 0
 fi
