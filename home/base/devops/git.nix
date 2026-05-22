@@ -1,8 +1,65 @@
 {
   pkgs,
   lib,
+  userMeta,
+  editorMeta,
   ...
-}: {
+}: let
+  mail = userMeta.mail;
+in {
+  programs.git = {
+    enable = true;
+    lfs.enable = true;
+    signing.format = null;
+
+    ignores = [
+      "*~"
+      ".DS_Store"
+      "*.log"
+      ".gitkeep"
+      ".idea"
+    ];
+
+    settings = {
+      alias = {
+        br = "branch --sort=-committerdate";
+        co = "checkout";
+        df = "diff";
+        com = "commit -a";
+        gs = "stash";
+        gp = "pull";
+        lg = "log --graph --pretty=format:'%Cred%h%Creset - %C(yellow)%d%Creset %s %C(green)(%cr)%C(bold blue) <%an>%Creset' --abbrev-commit";
+        st = "status";
+      };
+      user = {
+        name = "xbpk3t";
+        email = mail;
+      };
+
+      core = {
+        autocrlf = "input";
+        filemode = false;
+        editor = editorMeta.command;
+      };
+      init = {
+        defaultBranch = "main";
+      };
+
+      pull = {
+        rebase = true;
+      };
+
+      push.default = "simple";
+      credential.helper = "cache --timeout=7200";
+      merge.conflictStyle = "diff3";
+
+      log = {
+        decorate = "full";
+        date = "iso";
+      };
+    };
+  };
+
   home.packages = with pkgs;
     [
       # 分类1：Git 核心操作与协作流程
