@@ -5,3 +5,4 @@ includes:
   sec: ./Taskfile.sec.yml
   skills: ./Taskfile.skills.yml
   img: ./Taskfile.img.yml
+  apm: ./Taskfile.apm.yml
