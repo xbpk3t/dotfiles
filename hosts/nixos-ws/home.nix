@@ -5,6 +5,8 @@
   };
 
   modules.desktop = {
+    stylix.enable = true;
+
     gnome.enable = true;
 
     zed.enable = false;

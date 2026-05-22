@@ -70,9 +70,11 @@ in {
         RunAtLoad = true;
         KeepAlive = {
           SuccessfulExit = false;
-          # Why：只有在 network state 可用时才拉起 daemon，减少开机早期无网络的噪音失败。
-          NetworkState = true;
         };
+        # Why ThrottleInterval=10：launchd 默认即是 10s，这里写出来是契约化——
+        # 如果未来 sing-box 崩溃恢复变慢导致重启风暴，先把这个值调大到 30/60，
+        # 比修代码、加 PID 文件、加 lockfile 都简单。与 mihomo 模块保持一致。
+        ThrottleInterval = 10;
         # Why：把 runtime artifact 固定到 /var/lib/sing-box，避免落到 /tmp 后被系统清理。
         WorkingDirectory = "/var/lib/sing-box";
         StandardOutPath = "/Users/${username}/Library/Logs/sing-box.log";

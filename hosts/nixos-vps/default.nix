@@ -99,6 +99,14 @@ in {
     mihomo-server.enable = false;
   };
 
+  services.cron = {
+    enable = true;
+    mailto = "";
+    systemCronJobs = [
+      "0 3 * * * luck nu /home/luck/.cntr/backup-pgsql.nu axonhub"
+    ];
+  };
+
   # k3s agent：VPS 统一作为 worker 节点
   modules.extra.k3s = {
     enable = false;

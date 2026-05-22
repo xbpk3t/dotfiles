@@ -1,5 +1,5 @@
 ---
-title: mihomo
+title: mihomo-setup
 date: 2026-04-30
 isOriginal: false
 ---
