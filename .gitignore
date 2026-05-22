@@ -9,6 +9,7 @@
 .codex/
 .claude/
 .qwen/
+CLAUDE.md
 
 # Nix store paths
 /store/

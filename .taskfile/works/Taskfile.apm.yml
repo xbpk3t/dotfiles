@@ -1,0 +1,59 @@
+---
+version: "3"
+
+# APM (Agent Package Manager)
+# 入口文件: apm.yml，定义 packages / scripts / targets 等
+#
+# 日常 workflow:
+#   task apm          → compile + install（默认全流程）
+#   task apm:info     → 查看项目状态（targets / outdated / scripts）
+#   task apm:update   → 刷新依赖
+#
+# 以下临时查询/操作直接用 CLI 更方便:
+#   apm search <query>    搜索 marketplace
+#   apm view <pkg>        查看包元数据
+#   apm cache             管理本地缓存 (clear/list/info)
+#   apm mcp               管理 MCP servers
+
+tasks:
+  _check:
+    internal: true
+    preconditions:
+      - sh: command -v apm >/dev/null && test -f apm.yml
+        msg: apm CLI 或 apm.yml 不存在
+
+  default:
+    desc: 默认任务，编译并安装所有 APM skills
+    deps: [_check, compile]
+    cmds:
+      - apm install
+
+  compile:
+    desc: 编译 instructions → CLAUDE.md + AGENTS.md
+    deps: [_check]
+    cmd: apm compile --target claude,codex
+
+  # compile + validate 不建议合并
+  # 虽然底层都是 apm compile，但 validate 的语义是"不改文件，仅校验"。合到一个 task 会丢失 task apm:validate 的可发现性，收益不大。
+  validate:
+    desc: 仅校验 primitives，不写入文件
+    deps: [_check]
+    cmd: apm compile --validate --local-only
+
+  update:
+    desc: 更新依赖并清理冗余包
+    deps: [_check]
+    cmds:
+      - apm update
+      - apm prune
+
+  info:
+    desc: 查看项目状态（targets + outdated + scripts）
+    deps: [_check]
+    cmds:
+      - echo "==> Targets"
+      - apm targets
+      - echo "==> Outdated"
+      - 'apm outdated || true'
+      - echo "==> Scripts"
+      - 'apm list || true'
