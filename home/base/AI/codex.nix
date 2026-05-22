@@ -101,8 +101,7 @@ in {
         model_providers = {
           axonhub = {
             name = "axonhub";
-            # base_url = "https://api.lucc.dev/v1";
-            base_url = "http://localhost:8090/v1";
+            base_url = "https://api.lucc.dev/v1";
             env_key = "LLM_AxonHub";
             wire_api = "responses";
           };
