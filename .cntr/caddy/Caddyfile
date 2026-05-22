@@ -1,3 +1,21 @@
 api.lucc.dev {
 	reverse_proxy axonhub:8090
 }
+
+# Sub-Store 反代
+# - admin path 已经是 unguessable secret（ME_SK 长度 48+ hex），是第一道防线
+# - basic_auth 用户 `luck` + DEFAULT_SK 的 bcrypt hash，是第二道防线
+#   hash 由 caddy compose entrypoint 启动时现场算出注入到 {env.BASIC_AUTH_HASH}
+# - access log 走 stdout，由 docker logging driver 收（max-size 20m / 5 files）
+sub.lucc.dev {
+	basic_auth {
+		luck {env.BASIC_AUTH_HASH}
+	}
+
+	reverse_proxy sub-store:3001
+
+	log {
+		output stdout
+		format console
+	}
+}
