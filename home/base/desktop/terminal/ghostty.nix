@@ -22,7 +22,12 @@ with lib; let
     confirm-close-surface = false;
 
     # 背景透明度 (0.0~1.0)。用 string 避免 toString float 产生尾随零。
-    background-opacity = "0.8";
+    # [2026-05-20] 背景透明度。1 = 完全不透明；低于 1 会让 cmux/ghostty terminal 背景透明。
+    background-opacity = "1";
+    # 禁用背景模糊；避免未来不小心把 opacity 调低后出现毛玻璃。
+    background-blur = false;
+    # 禁用非焦点 split pane 的淡化效果。
+    unfocused-split-opacity = "1";
 
     # 窗口左右内边距（px）。避免文字紧贴窗口边缘。
     window-padding-x = 4;
