@@ -1,0 +1,6 @@
+# linear cli
+# https://github.com/schpet/linear-cli
+
+workspace = "luckzzz"
+team_id = "LUC"
+issue_sort = "priority"

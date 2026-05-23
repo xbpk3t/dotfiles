@@ -159,13 +159,10 @@ in {
         };
 
         # https://linear.app/downloads/mcp
-        # NOTE: settings.servers 的 env 不支持 shell 展开，所以用 bash -c wrapper 先读密钥再 exec。
+        #   把 LINEAR_API_KEY 提到 home.sessionVariables 后，MCP server 和 linear CLI都从同一个环境变量取值，消除了之前 bash -c wrapper 的冗余层。这遵循了 Nix管理凭据的标准模式——$(cat ${config.sops.secrets.XXX.path}) 在 shell启动时展开一次，所有子进程继承。
         "linear" = {
-          command = "${pkgs.bash}/bin/bash";
-          args = [
-            "-c"
-            "LINEAR_API_KEY=\"$(cat ${config.sops.secrets.API_LINEAR.path})\" exec pnpm dlx @mseep/linear-mcp"
-          ];
+          command = "pnpm";
+          args = ["dlx" "@mseep/linear-mcp"];
           default_tools_approval_mode = "approve";
         };
 
@@ -220,11 +217,10 @@ in {
       };
     };
 
-    #    home = {
-    #      sessionVariables = {
-    #        # For Context7 MCP
-    #        CONTEXT7_API_KEY = "$(cat ${config.sops.secrets.API_CONTEXT7.path})";
-    #      };
-    #    };
+    # Share API keys with MCP servers and CLI tools.
+    # sessionVariables are sourced by the shell; MCP server subprocess inherits them.
+    home.sessionVariables = {
+      LINEAR_API_KEY = "$(cat ${config.sops.secrets.API_LINEAR.path})";
+    };
   };
 }

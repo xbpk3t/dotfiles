@@ -28,5 +28,11 @@ in {
         enableAll = true;
       };
     };
+
+    # APM 全局 skill manifest — 声明式管理，Nix 负责放置，APM 负责安装
+    home.file.".apm/apm.yml" = {
+      source = ./apm.yml;
+      force = true;
+    };
   };
 }
