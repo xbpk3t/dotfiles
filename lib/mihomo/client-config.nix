@@ -55,7 +55,7 @@ with lib; let
   #   wild —— http provider，mihomo 周期性从 Sub-Store 拉取
   configAttrset = {
     mode = "rule";
-    log-level = "info";
+    log-level = "warning";
     ipv6 = true;
     external-controller = "0.0.0.0:9090";
     secret = secrets.clashSecret;
@@ -137,21 +137,21 @@ with lib; let
         type = "url-test";
         use = ["self"];
         url = "https://cp.cloudflare.com/generate_204";
-        interval = 300;
+        interval = 1800;
       }
       {
         name = "Wild";
         type = "url-test";
         use = ["wild"];
         url = "https://cp.cloudflare.com/generate_204";
-        interval = 600;
+        interval = 3600;
       }
       {
         name = "Auto";
         type = "fallback";
         proxies = ["Self" "Wild" "DIRECT"];
         url = "https://cp.cloudflare.com/generate_204";
-        interval = 300;
+        interval = 1800;
       }
     ];
 
@@ -175,6 +175,7 @@ with lib; let
         # 必须代理的站点（统一走 Manual，由用户在 UI 上选 Self/Wild/Auto）
         "DOMAIN-SUFFIX,openai.com,Manual"
         "DOMAIN-SUFFIX,chatgpt.com,Manual"
+        "DOMAIN-SUFFIX,grok.com,Manual"
         "DOMAIN-SUFFIX,github.com,Manual"
         "DOMAIN-SUFFIX,githubusercontent.com,Manual"
         "DOMAIN-SUFFIX,githubassets.com,Manual"
