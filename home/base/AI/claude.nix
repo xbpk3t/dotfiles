@@ -225,6 +225,8 @@ in {
               "mcp__plugin_claude-code-home-manager_chrome-devtools__*"
               # github 插件：仓库操作（拉取 commits、创建 PR 等）
               "mcp__plugin_claude-code-home-manager_github__*"
+              # linear 插件：issue 管理、sprint 操作、团队协作
+              "mcp__plugin_claude-code-home-manager_linear__*"
             ];
 
             # 高风险操作仍需确认

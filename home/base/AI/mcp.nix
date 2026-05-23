@@ -158,6 +158,17 @@ in {
           default_tools_approval_mode = "approve";
         };
 
+        # https://linear.app/downloads/mcp
+        # NOTE: settings.servers 的 env 不支持 shell 展开，所以用 bash -c wrapper 先读密钥再 exec。
+        "linear" = {
+          command = "${pkgs.bash}/bin/bash";
+          args = [
+            "-c"
+            "LINEAR_API_KEY=\"$(cat ${config.sops.secrets.API_LINEAR.path})\" exec pnpm dlx @mseep/linear-mcp"
+          ];
+          default_tools_approval_mode = "approve";
+        };
+
         # https://docs.devin.ai/work-with-devin/deepwiki-mcp
         # deepwiki 偏repo/wiki/远程 MCP 知识访问
         # mcp-remote 代理模式: 本地 stdio <-> 远端 MCP over HTTP。
