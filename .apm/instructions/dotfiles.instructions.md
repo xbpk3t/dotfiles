@@ -124,6 +124,9 @@ outputs/               # flake-parts outputs 子模块
 4. **不修改 docs/ 内容**：`docs/` 中的文档由 docs monorepo 管理，dotfiles 侧只读
 5. **修改配置后运行检查**：改完 `.nix` 文件后至少执行 `nix flake check` 确保不破坏评估
 6. **不自动 commit/push**：等待用户确认后再提交
+7. **Linear 驱动开发**：开始任务前先检查是否有对应 Linear issue；较大任务先创建 issue 再开工。
+8. **issue 状态管理**：开始 → In Progress，阻塞 → comment 说明，完成 → Done + 总结。
+9. **分支命名**：`luc-{ISSUE_KEY}-{short-slug}`，PR 标题和 body 包含 issue key 触发自动关联。
 
 ## 其他提醒
 
