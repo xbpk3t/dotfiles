@@ -24,12 +24,21 @@ in {
   homebrew = {
     enable = true;
 
+    taps = [
+      "joa23/linear-cli"
+    ];
+
     brews = [
       # https://github.com/gruntwork-io/fetch
       "fetch"
 
       # https://github.com/tw93/Mole
       "mole"
+
+      # https://github.com/schpet/linear-cli
+      # "schpet/tap/linear"
+      # https://github.com/joa23/linear-cli
+      "linear-cli"
     ];
 
     # 以下casks根据重要性排序
