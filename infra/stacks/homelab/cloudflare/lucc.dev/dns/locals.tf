@@ -11,7 +11,7 @@ locals {
       id      = null
       name    = "api.lucc.dev"
       type    = "A"
-      content = "142.171.154.61"
+      content = "192.129.183.26"
       ttl     = 1
       # 开启cf橙云代理
       proxied  = true
@@ -23,7 +23,7 @@ locals {
       id       = "0a78e1bf7e0d58ac35378f3c7e117625"
       name     = "g.lucc.dev"
       type     = "A"
-      content  = "142.171.154.61"
+      content  = "192.129.183.26"
       ttl      = 1
       proxied  = true
       comment  = "PAG- Grafana Dashboard"
@@ -33,7 +33,7 @@ locals {
       id       = "c159ba2bf018bcf724084f6db32b8f41"
       name     = "k3s.lucc.dev"
       type     = "A"
-      content  = "142.171.154.61"
+      content  = "192.129.183.26"
       ttl      = 1
       proxied  = true
       comment  = null
@@ -43,7 +43,7 @@ locals {
       id       = "1eb043e1ffe747891513e47be11b0a6f"
       name     = "rsshub.lucc.dev"
       type     = "A"
-      content  = "142.171.154.61"
+      content  = "192.129.183.26"
       ttl      = 1
       proxied  = true
       comment  = "rsshub deploy by k3s"
