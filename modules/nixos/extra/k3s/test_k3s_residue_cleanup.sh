@@ -56,8 +56,8 @@ cat > "${FAKE_BIN}/iptables" <<'EOF'
 #!/usr/bin/env bash
 if [[ "${1:-}" == "-t" && "${2:-}" == "nat" && "${3:-}" == "-S" && "${4:-}" == "KUBE-SERVICES" ]]; then
   cat <<'OUT'
--A KUBE-SERVICES -d 142.171.154.61/32 -p tcp -m comment --comment "networking/traefik:web external IP" -m tcp --dport 80 -j KUBE-EXT-FCOZJUKMQRACOVLH
--A KUBE-SERVICES -d 142.171.154.61/32 -p tcp -m comment --comment "networking/traefik:websecure external IP" -m tcp --dport 443 -j KUBE-EXT-WX5JHK7DACYWTMQQ
+-A KUBE-SERVICES -d 192.129.183.26/32 -p tcp -m comment --comment "networking/traefik:web external IP" -m tcp --dport 80 -j KUBE-EXT-FCOZJUKMQRACOVLH
+-A KUBE-SERVICES -d 192.129.183.26/32 -p tcp -m comment --comment "networking/traefik:websecure external IP" -m tcp --dport 443 -j KUBE-EXT-WX5JHK7DACYWTMQQ
 OUT
   exit 0
 fi
@@ -104,7 +104,7 @@ assert_contains "${kill_output}" '-TERM 27200 27054'
 assert_contains "${kill_output}" '-KILL 27200 27054'
 
 iptables_output="$(cat "${IPTABLES_LOG}")"
-assert_contains "${iptables_output}" '-t nat -D KUBE-SERVICES -d 142.171.154.61/32 -p tcp -m comment --comment networking/traefik:web external IP -m tcp --dport 80 -j KUBE-EXT-FCOZJUKMQRACOVLH'
-assert_contains "${iptables_output}" '-t nat -D KUBE-SERVICES -d 142.171.154.61/32 -p tcp -m comment --comment networking/traefik:websecure external IP -m tcp --dport 443 -j KUBE-EXT-WX5JHK7DACYWTMQQ'
+assert_contains "${iptables_output}" '-t nat -D KUBE-SERVICES -d 192.129.183.26/32 -p tcp -m comment --comment networking/traefik:web external IP -m tcp --dport 80 -j KUBE-EXT-FCOZJUKMQRACOVLH'
+assert_contains "${iptables_output}" '-t nat -D KUBE-SERVICES -d 192.129.183.26/32 -p tcp -m comment --comment networking/traefik:websecure external IP -m tcp --dport 443 -j KUBE-EXT-WX5JHK7DACYWTMQQ'
 
 printf 'ok\n'
