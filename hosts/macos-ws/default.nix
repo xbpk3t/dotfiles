@@ -3,13 +3,7 @@
 in {
   modules.networking = {
     singbox.enable = false;
-    mihomo = {
-      enable = true;
-      # __ADMIN_PATH__ 在 sops template 渲染时由 sops-nix 自动替换为 ME_SK 实值
-      # （与 axonhub compose.yml 复用同一 sops secret，跟 home/core/devops/cntr.nix 同源）。
-      # admin path 永不进 /nix/store；本地/生产同一表达式。
-      wildUrl = "http://127.0.0.1:3001/__ADMIN_PATH__/download/collection/wild?target=ClashMeta";
-    };
+    mihomo.enable = true;
   };
 
   # https://mynixos.com/nix-darwin/options/launchd

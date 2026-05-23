@@ -22,8 +22,10 @@ in {
     enable = mkEnableOption "mihomo proxy service";
     wildUrl = mkOption {
       type = lib.types.str;
+      default = "http://${mylib.inventory."nixos-vps"."nixos-vps-dev".tailscale.ip}:3001/admin/download/collection/wild?target=ClashMeta";
       description = ''
-        Sub-Store wild provider subscription URL. 与 darwin 模块同义。
+        Sub-Store wild provider subscription URL。
+        默认指向 nixos-vps-dev 的 sub-store（tailscale 内网，admin path 固定 /admin）。
       '';
     };
   };
