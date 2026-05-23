@@ -45,12 +45,10 @@ in {
     enable = mkEnableOption "mihomo TUN proxy daemon";
     wildUrl = mkOption {
       type = lib.types.str;
+      default = "http://${mylib.inventory."nixos-vps"."nixos-vps-dev".tailscale.ip}:3001/admin/download/collection/wild?target=ClashMeta";
       description = ''
-        Sub-Store wild provider subscription URL 模板。
-
-        URL 中可使用 __ADMIN_PATH__ 占位符，在 sops template 渲染阶段会被
-        替换成 config.sops.placeholder.ME_SK 的实值（与 axonhub DEFAULT_SK 同源）。
-        admin path 永不进 /nix/store。
+        Sub-Store wild provider subscription URL。
+        默认指向 nixos-vps-dev 的 sub-store（tailscale 内网，admin path 固定 /admin）。
       '';
     };
   };
