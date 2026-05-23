@@ -81,8 +81,8 @@ in {
         }
         // lib.optionalAttrs cfg.hosts.LA.enable {
           # RN机器
-          "142.171.154.61" = {
-            hostname = "142.171.154.61";
+          "192.129.183.26" = {
+            hostname = "192.129.183.26";
             user = "luck";
             port = 22;
             identityFile = config.sops.secrets.SSH_RACKNERD.path;
