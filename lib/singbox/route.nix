@@ -29,7 +29,7 @@
     # [2026-01-09] 自建节点后，无法通过ssh连接到节点VPS。之前通过 ip_cidr 解决该问题。但是直接设置 protocol 是更好的方案
     #
     #
-    # [2026-01-23] 发现即使有这个rule，ssh连接还是没有走direct，导致SSH 流量仍然被 sing-box 接管（SSH 流量 实际上是经由 sing-box 的hysteria2 inbound 再回环到 142.171.154.61:22），NixOS 切换时停掉 sing-box = SSH 立刻断开。发现是 sniff跟这条rule的顺序问题。
+    # [2026-01-23] 发现即使有这个rule，ssh连接还是没有走direct，导致SSH 流量仍然被 sing-box 接管（SSH 流量 实际上是经由 sing-box 的hysteria2 inbound 再回环到 192.129.183.26:22），NixOS 切换时停掉 sing-box = SSH 立刻断开。发现是 sniff跟这条rule的顺序问题。
     #
     # 依赖 sniff：protocol 识别需要 sniff 先执行，否则可能不命中
     {
