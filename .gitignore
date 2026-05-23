@@ -45,3 +45,7 @@ __pycache__/
 
 # Ruff cache
 .ruff_cache/
+
+
+# APM dependencies
+apm_modules/

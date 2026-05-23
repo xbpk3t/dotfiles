@@ -1,0 +1,17 @@
+# APM global skill manifest — managed by Nix (home.file)
+# Run `apm install -g` after rebuild to sync dependencies.
+# ~/.apm/apm.lock is APM's runtime artifact; not managed here.
+
+name: apm-global
+version: 0.1.0
+description: Global APM skill manifest for cross-project agent capabilities
+author: luck
+license: MIT
+
+targets:
+  - agent-skills
+  - claude
+
+dependencies:
+  apm:
+    - git: https://github.com/schpet/linear-cli.git

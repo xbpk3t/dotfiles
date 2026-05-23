@@ -5,4 +5,6 @@ includes:
   sec: ./Taskfile.sec.yml
   skills: ./Taskfile.skills.yml
   img: ./Taskfile.img.yml
-  apm: ./Taskfile.apm.yml
+  apm:
+    taskfile: ./Taskfile.apm.yml
+    dir: '{{.USER_WORKING_DIR}}'
