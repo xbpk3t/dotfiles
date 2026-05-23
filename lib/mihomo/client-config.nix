@@ -112,10 +112,7 @@ with lib; let
       };
       wild = {
         type = "http";
-        # wildUrl 是模板字符串，其中 __ADMIN_PATH__ 在 sops template 渲染阶段
-        # 由 sops-nix 自动替换成 ME_SK 的真实值（与 axonhub DEFAULT_SK 同源）。
-        # 这样 admin path 永不进 /nix/store。
-        url = lib.replaceStrings ["__ADMIN_PATH__"] [config.sops.placeholder.ME_SK] wildUrl;
+        url = wildUrl;
         path = "providers/wild.yaml";
         interval = 1800;
         health-check = {

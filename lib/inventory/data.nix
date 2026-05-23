@@ -79,7 +79,7 @@ in {
         nodeName = hostName;
       };
       tailscale = {
-        ip = "100.105.38.30";
+        ip = "100.101.189.7";
         derpDomain = "derp-nixos-vps-dev.lucc.dev";
       };
       singbox = {
