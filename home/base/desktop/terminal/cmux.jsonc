@@ -7,6 +7,8 @@
     // 你的核心需求是“不漏掉哪个 agent 在等我”，所以建议开启。
     "reorderOnNotification": true,
 
+    "language": "system",
+
     // 跟随系统浅色/深色模式。
     "appearance": "system",
 
@@ -52,11 +54,11 @@
     // 显示滚动条。agent 输出很长时，视觉上更好判断位置。
     "showScrollBar": true,
 
-    // 初期建议 false。
+    // [2026-05-20] 非常实用且重要的配置项。今天在
+    // 已开启：agent session 跟随 cmux 自动恢复（依赖各 agent 的 native resume）。
     // cmux 可以恢复 layout/cwd/scrollback，但不 checkpoint 任意 live process。
-    // 自动恢复 agent session 依赖各 agent 的 native resume；你之前担心稳定性，所以先别让它自动重启 agent。
-    // 稳定使用一段时间后，如果你喜欢恢复 Codex/Claude session，可以改成 true。
-    "autoResumeAgentSessions": false
+    // 如果以后某个 agent 的 resume 不稳定，可以回退到 false。
+    "autoResumeAgentSessions": true
   },
 
   "notifications": {
@@ -200,15 +202,14 @@
     // 如果你通过 nix/homebrew/asdf 管理路径且 cmux 找不到，再填绝对路径。
     "claudeBinaryPath": "",
 
-    // socket 不设密码。默认 cmuxOnly 已经限制为 cmux 内进程。
-    "socketPassword": "",
-
     // 你当前核心不是 Gemini，所以先关掉。
     "geminiIntegration": false,
 
-    // 安全默认：只有 cmux-spawned process 能控制 socket。
-    // 不建议一开始用 allowAll。
+    // [2026-05-20] GUI 改为 off，完全禁用 socket 控制；如需 cmux automation 再改回 cmuxOnly。off 比 cmuxOnly 更严：连 cmux 自己 spawn 的 process 也无法走 socket。
+    // [2026-05-20] 重新改回 cmuxOnly，否则发不出来notification（cmux notify --title ... --body ... 通过 notification API 创建通知）
     "socketControlMode": "cmuxOnly",
+    // socket 不设密码。默认 cmuxOnly 已经限制为 cmux 内进程。
+    "socketPassword": "",
 
     // cmux automation port 起点，沿用默认。
     "portBase": 9100,
@@ -251,24 +252,23 @@
     // react-grab 版本，沿用官方模板。
     "reactGrabVersion": "0.1.29",
 
-    // 地址栏显示搜索建议。
-    "showSearchSuggestions": true,
+    // [2026-05-20] 改为false: 地址栏不显示搜索建议（保持安静、不外发查询字符串到搜索引擎）。
+    "showSearchSuggestions": false,
 
     // browser 跟随系统主题。
     "theme": "system",
 
-    // 空白 browser tab 上显示 import hint。
-    "showImportHintOnBlankTabs": true,
+    // [2026-05-20] 改为false: 空白 browser tab 不显示 import hint。
+    "showImportHintOnBlankTabs": false,
 
     // 默认搜索引擎。
     "defaultSearchEngine": "google",
 
-    // terminal 里的链接用 cmux browser 打开。
-    "openTerminalLinksInCmuxBrowser": true,
+    // [2026-05-20] 改为false: terminal 里的链接走系统默认浏览器（不劫持到 cmux 内置 browser）。
+    "openTerminalLinksInCmuxBrowser": false,
 
-    // 拦截 terminal 里的 open 命令到 cmux browser。
-    // 如果你希望 `open http://...` 仍然走系统默认浏览器，可改成 false。
-    "interceptTerminalOpenCommandInCmuxBrowser": true
+    // [2026-05-20] 改为false: terminal 里 `open http://...` 走系统默认浏览器，不拦截到 cmux browser。
+    "interceptTerminalOpenCommandInCmuxBrowser": false
   },
 
   "shortcuts": {
