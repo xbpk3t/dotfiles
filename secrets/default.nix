@@ -116,6 +116,7 @@ in {
       RESEND_TOKEN = mkUserSecret "resend/pwd";
 
       API_CONTEXT7 = mkUserSecret "API/context7";
+      API_LINEAR = mkUserSecret "API/linear";
 
       # Atuin
       AUTIN_KEY = mkUserSecret "atuin/key";
