@@ -24,8 +24,9 @@ exclude = [
 ]
 
 [commit]
-# tracked：只 stage 已跟踪文件的改动，避免误把 untracked 文件也加入 commit
-# 可选值："all"（含 untracked）、"tracked"（仅已跟踪）、"none"（仅已暂存）
+# all默认：git add -A（所有变化，包括 untracked）
+# tracked只 stage 已跟踪文件的修改（git add -u）
+# none不 staging，只提交当前已 staged 的内容
 stage = "none"
 
 
