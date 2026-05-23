@@ -4,6 +4,7 @@ version: "3"
 includes:
   mac: ./Taskfile.mac.yml
   brew: ./Taskfile.brew.yml
+  scratches: ./Taskfile.scratches.yml
 
 vars:
   BZ_SCRIPT: '{{.TASKFILE_DIR}}/scripts/bz/run.nu'
