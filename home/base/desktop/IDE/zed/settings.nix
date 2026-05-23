@@ -510,6 +510,13 @@ in {
       language_servers = [
         "nil"
       ];
+      format_on_save = "on";
+      formatter = {
+        external = {
+          command = "alejandra";
+          arguments = ["--quiet"];
+        };
+      };
     };
 
     YAML = {
