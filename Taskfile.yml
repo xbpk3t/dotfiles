@@ -6,3 +6,5 @@ includes:
     taskfile: ./infra/Taskfile.yml
   nix:
     taskfile: ./.taskfile/nix/Taskfile.yml
+  mac:
+    taskfile: ./.taskfile/mac/Taskfile.yml
