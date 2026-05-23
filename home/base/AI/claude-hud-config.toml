@@ -1,0 +1,91 @@
+# claude-hud 插件配置文件
+# 由 Nix home-manager 管理，部署时 via builtins.fromTOML → toJSON → ~/.claude/plugins/claude-hud/config.json
+
+# 布局风格："expanded" 展开所有元素，"compact" 紧凑分组
+lineLayout = "expanded"
+# 元素之间是否显示分隔符
+showSeparators = false
+# 项目路径显示的目录层级数
+pathLevels = 1
+
+[gitStatus]
+# 是否显示 Git 状态（分支、脏状态、ahead/behind）
+enabled = true
+# 工作区有未提交更改时显示指示符
+showDirty = true
+# 显示与远程跟踪分支的 commits 差异
+showAheadBehind = true
+# 显示文件变更统计（增/改/删）
+showFileStats = false
+
+[display]
+# 显示当前 AI 模型名称
+showModel = true
+# 显示当前项目名
+showProject = true
+# 显示上下文窗口使用量的可视化进度条
+showContextBar = true
+# 上下文值显示方式："percent"、"tokens"、"remaining"、"both"
+contextValue = "both"
+# 显示启用的配置元素计数（hooks、skills、MCP 等）
+showConfigCounts = false
+# 显示会话已用时长
+showDuration = true
+# 显示 API 费用估算
+showCost = true
+# 显示 token 处理速度
+showSpeed = true
+# 显示会话总 token 数
+showSessionTokens = true
+# 显示输入/输出 token 分解
+showTokenBreakdown = true
+# 显示 token 用量信息
+showUsage = true
+# 启用图形化用量条
+usageBarEnabled = true
+# 显示当前激活的工具
+showTools = true
+# 显示运行中的 sub-agents
+showAgents = true
+# 显示待处理/进行中的 todo
+showTodos = true
+# 显示会话名称
+showSessionName = false
+# 显示 Claude Code CLI 版本
+showClaudeCodeVersion = false
+# 显示进程内存占用
+showMemoryUsage = false
+# 自动压缩上下文："enabled" / "disabled"
+autocompactBuffer = "enabled"
+# token 用量阈值（百分比），超过后显示视觉提示
+usageThreshold = 0
+# 7 天滚动窗口 token 用量阈值（百分比）
+sevenDayThreshold = 80
+# 环境变量数量警告阈值
+environmentThreshold = 0
+# 状态行末尾追加的自定义文本
+customLine = ""
+
+[colors]
+# 上下文窗口用量指示色
+context = "green"
+# token 用量数值色
+usage = "brightBlue"
+# 通用警告色
+warning = "yellow"
+# 用量警告色
+usageWarning = "brightMagenta"
+# 严重/错误指示色
+critical = "red"
+# 模型名称标签色
+model = "cyan"
+# 项目名显示色
+project = "yellow"
+# Git 信息色
+git = "magenta"
+# Git 分支名色
+gitBranch = "cyan"
+# 标签文本色（dim 用于视觉层级）
+label = "dim"
+# 自定义内容色
+custom = "brightCyan"

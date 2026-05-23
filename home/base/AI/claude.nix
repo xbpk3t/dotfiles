@@ -149,6 +149,12 @@ in {
             # [2026-04-29] 从 max -> xhigh，避免耗费太多token
             CLAUDE_CODE_EFFORT_LEVEL = "max";
 
+            # AnyRouter 的 claude-opus-4-7 已绑定 1M context，Claude Code 客户端必须通过 [1m] 后缀告知启用 1M 模式，
+            # 否则请求会被 AnyRouter 拒绝（报 "1m 上下文已经全量可用，请启用 1m 上下文后重试"）。
+            # [1m] 后缀在发往 provider 前会被 Claude Code 自动剥离，不影响上游模型名匹配。
+            # 设置为默认model后，cc 默认使用这个model。需要用 --model去走自定义model
+            ANTHROPIC_DEFAULT_OPUS_MODEL = "claude-opus-4-7[1m]";
+
             # 可选：通过 gateway 时，减少系统 prompt 中客户端归因头变化，有助于 gateway 层 prompt cache 命中
             CLAUDE_CODE_ATTRIBUTION_HEADER = "0";
 
@@ -156,6 +162,11 @@ in {
             # 实验功能：多 Claude Code session 协作。会显著增加 token，用时再开。
             # CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
           };
+
+          # statusLine = {
+          #   type = "command";
+          #   command = "${pkgs.nushell}/bin/nu ${./claude-hud-wrapper.nu}";
+          # };
 
           editor = {
             lineNumbers = true;
@@ -204,6 +215,7 @@ in {
               "Read(*)"
               "Edit(*)"
               "Write(*)"
+
               "WebSearch(*)"
               # WebFetch: 独立于 WebSearch 的工具，用于拉取 URL 内容
               "WebFetch(*)"
@@ -260,7 +272,7 @@ in {
           #  # API 认证令牌 - 使用 sops 管理，通过 cat 命令读取文件内容
           #  ANTHROPIC_AUTH_TOKEN = "$(cat ${config.sops.secrets.API_GLM.path})";
 
-          ANTHROPIC_BASE_URL = "http://localhost:8090/";
+          ANTHROPIC_BASE_URL = "https://api.lucc.dev";
           ANTHROPIC_AUTH_TOKEN = "$(cat ${config.sops.secrets.LLM_AxonHub.path})";
         };
         shellAliases = {
@@ -281,11 +293,28 @@ in {
       home.packages = with pkgs; [
         # https://mynixos.com/nixpkgs/package/claude-code-router
         # claude-code-router
+
+        # claude-run: Claude Code 历史 Web viewer，文件1推荐
+        # 不在 nixpkgs 中，用 npx wrapper 提供 claude-run 命令
+        # 这种写法是否在每次rebuild时，都要重新安装？
+        ## rebuild 不会触发重装：脚本本身是几字节的 Nix store 文件，npm 包只在首次执行时
+        ## 下载到 ~/.npm/_npx/，之后走 npx cache；npm cache 和 Nix store 互不干扰
+        # (writeShellApplication {
+        #   name = "claude-run";
+        #   runtimeInputs = [nodejs_20];
+        #   text = ''
+        #     exec npx --yes claude-run@0.3.0 "$@"
+        #   '';
+        # })
       ];
 
       # Claude HUD 的独立配置文件：
       # 插件会在 ~/.claude/plugins/claude-hud/config.json 读取行为和显示项。
-      home.file.".claude/plugins/claude-hud/config.json".source = ./claude-hud-config.json;
+      # TOML 源码可自由使用 # 注释；部署时 fromTOML → toJSON 纯 eval 转换。
+      # home.file.".claude/plugins/claude-hud/config.json" = {
+      #   force = true;
+      #   text = builtins.toJSON (builtins.fromTOML (builtins.readFile ./claude-hud-config.toml));
+      # };
 
       programs.agent-skills = {
         # Claude 和 Codex 复用同一份 skills 发布管道，避免两边手工维护两套分发逻辑。
