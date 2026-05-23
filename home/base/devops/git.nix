@@ -30,6 +30,11 @@ in {
         gp = "pull";
         lg = "log --graph --pretty=format:'%Cred%h%Creset - %C(yellow)%d%Creset %s %C(green)(%cr)%C(bold blue) <%an>%Creset' --abbrev-commit";
         st = "status";
+        # 选中历史 commit → --fixup → 自动 autosquash rebase，全程零交互（EDITOR=true 跳过编辑器）
+        # fixup = ''!f() { TARGET=$(git rev-parse "$1"); git commit --fixup=$TARGET ''${@:2} && EDITOR=true git rebase -i --autostash --autosquash $TARGET^; }; f'';
+
+        # 提交中断后直接用上次的 message 重来（复用 .git/COMMIT_EDITMSG）
+        # commit-reuse-message = ''!git commit --edit --file "$(git rev-parse --git-dir)"/COMMIT_EDITMSG'';
       };
       user = {
         name = "xbpk3t";
@@ -49,7 +54,13 @@ in {
         rebase = true;
       };
 
-      push.default = "simple";
+      push = {
+        default = "simple";
+        # 新分支首次 push 自动设置 upstream，不用手动 -u
+        autoSetupRemote = true;
+      };
+      # rebase 前自动 stash 未提交修改，rebase 后自动 pop
+      rebase.autostash = true;
       credential.helper = "cache --timeout=7200";
       merge.conflictStyle = "diff3";
 
@@ -207,23 +218,6 @@ in {
       # https://github.com/sinclairtarget/git-who 一个开源的命令行工具，显示 Git 仓库的提交者统计。
       # tags(desc): 贡献分析 > 统计可视化 > Git历史
       git-who
-
-      # 换到zed之后，不支持 git commit history，需要用TUI工具补充该feat
-      #
-      #
-      # 终端提交拓扑图浏览器：把 commit graph 渲染得更清晰，主打看分支关系。
-      #
-      # https://mynixos.com/nixpkgs/package/serie
-      # https://github.com/lusingander/serie
-      # tags(desc): 可视化浏览 > 提交拓扑 > TUI
-      serie
-      #
-      # 终端 Git 历史浏览器：看提交列表、选中即看 diff，可当 git pager。
-      #
-      # https://mynixos.com/nixpkgs/package/tig
-      # https://github.com/jonas/tig
-      # tags(desc): 可视化浏览 > 历史查看 > TUI
-      tig
     ];
 
   # https://mynixos.com/home-manager/options/services.git-sync
