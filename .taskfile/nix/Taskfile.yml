@@ -4,6 +4,7 @@ version: "3"
 includes:
   deploy: ./Taskfile.deploy.yml
   flake: ./Taskfile.flake.yml
+  gc: ./Taskfile.gc.yml
   nixos-anywhere: ./Taskfile.nixos-anywhere.yml
   nixos-container: ./Taskfile.nixos-container.yml
   rollback: ./Taskfile.rollback.yml
