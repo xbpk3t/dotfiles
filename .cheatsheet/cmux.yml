@@ -8,7 +8,7 @@
 # 1、Custom Rename Workspace
 # 2、给workspace添加 color，用来标识不同状态（比如说我现在就红绿两种：绿色代表重要但是暂时处理不了。红色代表urgent task需要立即处理。）
 # 3、默认split window. 比如说需要两个agent 分别作为 builder和reviewer时会很有用，很直观。至于tab则用来执行各自agent的相应操作。
-# 
+#
 # 4、暂时不建议使用 browser功能。有些bug，会导致cmux直接hang住。
 
 

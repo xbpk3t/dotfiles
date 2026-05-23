@@ -156,6 +156,85 @@ def --env setup-project [] {
 }
 ```
 
+
+## Advanced Script Patterns
+
+### Configuration Extraction Pattern (Config Record)
+
+当一个自定义命令需要大量重复的初始化逻辑（路径、容器名、凭证、默认值等）时，**必须提取**到一个独立的 `get-xxx-config` 函数，返回 record。
+
+```nu
+def get-project-config [
+    project: string
+    --container: string
+    --db-name: string
+    --db-user: string
+    --bucket: string
+]: nothing -> record {
+    let env_file = $'.cntr/($project)/.env'
+
+    {
+        env_file: $env_file,
+        container: (if ($container | is-empty) { find-pg-container $project } else { $container }),
+        db_name: (if ($db_name | is-empty) { $project } else { $db_name }),
+        password: (read-db-password $env_file),
+    }
+}
+```
+
+**规则**：
+- 任何超过 **2-3 个重复计算**的逻辑都应提取为 `get-xxx-config`。
+- 主函数中先获取 config，再分 `dry-run` / 真实执行。
+- 这能极大减少代码重复，提高可测试性。
+
+### Dry-run Support Pattern
+
+所有具有副作用的脚本**必须**支持 `--dry-run` 标志，且 dry-run 输出应**完整、一致**。
+
+```nu
+def print-dry-run [
+    action: string
+    config: record
+    extra?: record
+]: nothing -> nothing {
+    print '--- dry-run ---'
+    print $' action: ($action)'
+    print $' project: ($config.project)'
+    if $extra != null { $extra | items {|k, v| print $' ($k): ($v)' } }
+}
+
+# Usage
+if $dry_run {
+    print-dry-run "backup" $config { filename: $filename, retention: $retention }
+    return
+}
+```
+
+**要求**：
+- dry-run 必须打印**即将执行的所有外部命令**（包括 cleanup、delete 等）。
+- 优先使用统一的 `print-dry-run` 辅助函数。
+
+### Helper Functions & Library Patterns
+
+- 纯工具函数（如 `find-pg-container`、`read-db-password`）应放在文件顶部或独立 `lib/` 模块。
+- 命名统一使用 `find-xxx`、`read-xxx`、`get-xxx`、`build-xxx` 前缀。
+- 复杂脚本推荐结构：
+
+```nu
+#!/usr/bin/env nu
+# ── Helpers ──
+def find-xxx [] { ... }
+def get-config [] { ... }
+
+# ── Core Logic ──
+def run-backup [] { ... }
+def run-restore [] { ... }
+
+# ── CLI Entry ──
+def main [] { ... }
+def "main backup" [] { ... }
+```
+
 ## Data Manipulation Patterns
 
 ### Working with records
@@ -554,6 +633,16 @@ if ($user_dir | path type) == 'dir' {
     rm -r $user_dir
 }
 ```
+
+### External Command Best Practices
+
+- 始终使用 `^command` 防止 Nushell 未来内置同名命令。
+- 优先使用工具自带的高效选项（而非在 pipeline 中二次处理）：
+  - `rclone lsjson --sorted` 代替 `| from json | sort-by`
+  - `rclone delete --min-age` 等
+- 流式处理时优先保持 pipeline（`rclone cat | gunzip | docker exec -i`），避免不必要的中间文件。
+- 复杂命令可提取为 `build-backup-pipeline`、`execute-pipeline` 等函数。
+
 
 ## Script Review Checklist
 
