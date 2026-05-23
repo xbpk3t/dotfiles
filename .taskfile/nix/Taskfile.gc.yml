@@ -1,0 +1,24 @@
+---
+# GC 维护任务（跨平台）
+#   - dry-run 预览可回收的旧 generations
+#   - 执行 store GC + 旧 generations 清理
+
+version: '3'
+
+tasks:
+  default:
+    desc: "dry-run 预览可回收的旧 generations"
+    summary: "task nix:gc"
+    cmds:
+      - echo "/nix/store usage: $(du -sh /nix/store | cut -f1)"
+      - echo ""
+      - nix-collect-garbage --delete-older-than 30d -d 2>&1 || true
+
+  run:
+    desc: "执行清理：store GC + 裁剪 30d 前的 generations"
+    summary: "task nix:gc:run"
+    cmds:
+      - echo "[nix:gc] cleaning generations older than 30d..."
+      - nix-collect-garbage --delete-older-than 30d
+      - echo "[nix:gc] complete"
+      - echo "/nix/store usage: $(du -sh /nix/store | cut -f1)"
