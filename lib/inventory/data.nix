@@ -49,7 +49,7 @@ in {
   nixos-vps = {
     nixos-vps-dev = rec {
       hostName = "nixos-vps-dev";
-      primaryIp = "142.171.154.61";
+      primaryIp = "192.129.183.26";
       acmeEmail = "yyzw@live.com";
       user = commonUser;
       time = commonTime;
