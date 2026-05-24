@@ -39,6 +39,9 @@ in {
       # "schpet/tap/linear"
       # https://github.com/joa23/linear-cli
       "linear-cli"
+
+      # https://github.com/rochacbruno/marmite
+      "marmite"
     ];
 
     # 以下casks根据重要性排序

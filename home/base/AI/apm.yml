@@ -12,6 +12,8 @@ targets:
   - agent-skills
   - claude
 
+includes: auto
+
 dependencies:
   apm:
     - git: https://github.com/schpet/linear-cli.git
