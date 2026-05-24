@@ -5,9 +5,10 @@ version: "3"
 # 入口文件: apm.yml，定义 packages / scripts / targets 等
 #
 # 日常 workflow:
-#   task apm          → compile + install（默认全流程）
+#   task apm          → 全流程: info → compile → update → prune → install
 #   task apm:info     → 查看项目状态（targets / outdated / scripts）
-#   task apm:update   → 刷新依赖
+#   task apm:update   → 刷新依赖锁文件
+#   task apm:prune    → 清理孤立 skills/prompts/agents
 #
 # 以下临时查询/操作直接用 CLI 更方便:
 #   apm search <query>    搜索 marketplace
@@ -16,39 +17,71 @@ version: "3"
 #   apm mcp               管理 MCP servers
 
 tasks:
+  # default 全流程工作流
+  #
+  # 执行顺序（各步骤不可合并，每步有独立语义）:
+  #   1. _check     → 前置校验（apm CLI + apm.yml 是否存在）
+  #   2. _info      → 查看当前项目状态（targets / outdated / scripts）
+  #   3. _compile   → 编译 instructions → CLAUDE.md + AGENTS.md
+  #   4. _update    → 刷新依赖锁文件（apm update，更新 apm.lock）
+  #   5. _prune     → 清理 apm.yml 中已移除的孤立 skills/prompts/agents
+  #   6. apm install → 安装/部署所有 skills 到 target 目录
+  #
+  # deps 只放 _check（前置校验），不放其他 task。
+  # 若将 _compile 放入 deps，它会在 _info 之前执行，破坏"先看状态再编译"的顺序，
+  # 且 deps + cmds 中重复声明会导致同一 task 执行两次。
+  #
+  # 等价裸命令流:
+  #   apm targets && apm outdated        # 查看状态
+  #   apm compile --target claude,codex  # 编译
+  #   apm update                         # 刷新锁文件
+  #   apm prune                          # 清理孤立文件
+  #   apm install                        # 安装
+  default:
+    desc: 默认任务，编译并安装所有 APM skills
+    deps: [_check]
+    cmds:
+      - task: _info
+      - task: _compile
+      - task: _update
+      - task: _prune
+      - apm install
+
+  # compile + validate 不建议合并
+  # 虽然底层都是 apm compile，但 validate 的语义是"不改文件，仅校验"。合到一个 task 会丢失 task apm:validate 的可发现性，收益不大。
+#  validate:
+#    desc: 仅校验 primitives，不写入文件
+#    deps: [ _check ]
+#    cmd: apm compile --validate --local-only
+
   _check:
     internal: true
     preconditions:
       - sh: command -v apm >/dev/null && test -f apm.yml
         msg: apm CLI 或 apm.yml 不存在
 
-  default:
-    desc: 默认任务，编译并安装所有 APM skills
-    deps: [_check, compile]
-    cmds:
-      - apm install
-
-  compile:
+  _compile:
     desc: 编译 instructions → CLAUDE.md + AGENTS.md
+    internal: true
     deps: [_check]
     cmd: apm compile --target claude,codex
 
-  # compile + validate 不建议合并
-  # 虽然底层都是 apm compile，但 validate 的语义是"不改文件，仅校验"。合到一个 task 会丢失 task apm:validate 的可发现性，收益不大。
-  validate:
-    desc: 仅校验 primitives，不写入文件
+  _update:
+    desc: 更新依赖锁文件
+    internal: true
     deps: [_check]
-    cmd: apm compile --validate --local-only
+    cmd: apm update
 
-  update:
-    desc: 更新依赖并清理冗余包
+  # 注意之所以需要prune，因为APM不支持symlink（只有copy），所以我们修改了apm.yml后重新install，那么“只增不减”，之前的skills并不会被删除，所以需要先prune，移除掉之前的所有skills才能保证一致性
+  _prune:
+    desc: 清理 apm.yml 中已移除的孤立 skills/prompts/agents
+    internal: true
     deps: [_check]
-    cmds:
-      - apm update
-      - apm prune
+    cmd: apm prune
 
-  info:
+  _info:
     desc: 查看项目状态（targets + outdated + scripts）
+    internal: true
     deps: [_check]
     cmds:
       - echo "==> Targets"
