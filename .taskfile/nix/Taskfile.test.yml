@@ -11,6 +11,17 @@ tasks:
     summary: "task -g syntax-verify"
     cmd: nix flake check --accept-flake-config
 
+  quick:
+    desc: "快速验证当前 host 的 Nix 配置（仅评估，不下载无关依赖）"
+    summary: "task -g quick"
+    vars:
+      CONFIG_TYPE:
+        sh: '[ "{{OS}}" = darwin ] && echo darwinConfigurations || echo nixosConfigurations'
+      HOST:
+        sh: '[ "{{OS}}" = darwin ] && echo macos-ws || hostname'
+    cmds:
+      - nix eval --impure ".#{{.CONFIG_TYPE}}.{{.HOST}}.config.system.build.toplevel.drvPath"
+
 
   # 从 Justfile 移植的通用 Nix 任务
 #  test:
