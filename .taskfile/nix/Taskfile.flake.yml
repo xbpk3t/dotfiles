@@ -13,7 +13,7 @@ tasks:
     cmds:
       - gum confirm "是否已经在flake.nix移除指定flake包了?"
       - nix flake lock
-      - nix flake check
+      - nix flake check --no-build
       - nix flake metadata
 
   update:

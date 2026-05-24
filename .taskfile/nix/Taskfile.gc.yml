@@ -3,11 +3,13 @@ version: '3'
 
 tasks:
   default:
-    desc: "执行清理：store GC + 裁剪 30d 前的 generations"
+    desc: "执行清理：store GC + 裁剪 7d 前的 generations"
     summary: "task nix:gc"
     cmds:
-      - echo "[pre-cleanup:du] $(du -sh /nix/store | cut -f1)"
-      - echo "[nix:gc] cleaning generations older than 30d..."
-      - nix-collect-garbage --delete-older-than 30d
-      - echo "[nix:gc] complete"
-      - echo "[usage] $(du -sh /nix/store | cut -f1)"
+      - task: _size
+      # 这个sudo 很重要，否则无法执行
+      - sudo nix-collect-garbage --delete-older-than 7d
+      - task: _size
+
+  _size:
+    cmd: echo "[usage] $(du -sh /nix/store)"
