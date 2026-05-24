@@ -221,12 +221,16 @@ in {
               "WebFetch(*)"
               # Skill: 用于调用 /blog-social-science 等技能
               "Skill(*)"
+
+              # 之前这里的写法类似于 "mcp__plugin_claude-code-home-manager_codegraph__*"，home-manager MCP 集成本质上是 plugin 桥接：programs.claude-code.enableMcpIntegration 会把 programs.mcp 里定义的所有 MCP server 注入为一个 Claude Code plugin（名为 claude-code-home-manager），工具 ID 前缀就变成了mcp__plugin_claude-code-home-manager_<server>__。这和官方文档里用户直接在 settings.json 手写 MCP server 产生的 mcp__<server>__ 前缀是两条不同的注册路径。
               # chrome-devtools 插件：浏览器操作（导航、截图、点击等）
-              "mcp__plugin_claude-code-home-manager_chrome-devtools__*"
+              "mcp__*_chrome-devtools__*"
               # github 插件：仓库操作（拉取 commits、创建 PR 等）
-              "mcp__plugin_claude-code-home-manager_github__*"
+              "mcp__*_github__*"
               # linear 插件：issue 管理、sprint 操作、团队协作
-              "mcp__plugin_claude-code-home-manager_linear__*"
+              "mcp__*_linear__*"
+              # codegraph 插件：代码知识图谱搜索、探索、调用者分析、影响分析
+              "mcp__*_codegraph__*"
             ];
 
             # 高风险操作仍需确认

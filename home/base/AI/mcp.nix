@@ -166,6 +166,16 @@ in {
           default_tools_approval_mode = "approve";
         };
 
+        # https://github.com/colbymchenry/codegraph
+        # CodeGraph: 基于 Tree-sitter 的代码知识图谱，构建本地 SQLite 索引后通过 MCP 工具暴露
+        # search/explore/callers/impact 等能力给 AI agent 使用。
+        # 二进制由 pnpm 全局安装管理 (~/.local/share/pnpm/bin/codegraph)，已包含在 PATH 中。
+        "codegraph" = {
+          command = "codegraph";
+          args = ["serve" "--mcp"];
+          default_tools_approval_mode = "approve";
+        };
+
         # https://docs.devin.ai/work-with-devin/deepwiki-mcp
         # deepwiki 偏repo/wiki/远程 MCP 知识访问
         # mcp-remote 代理模式: 本地 stdio <-> 远端 MCP over HTTP。

@@ -34,5 +34,13 @@ in {
       source = ./apm.yml;
       force = true;
     };
+
+    # 全局 APM instructions — APM includes:auto 自动发现并编译到 CLAUDE.md
+    # 新增 instruction 只需往 global-instructions/ 目录丢 .md 文件即可
+    home.file.".apm/instructions" = {
+      source = ./global-instructions;
+      recursive = true;
+      force = true;
+    };
   };
 }
