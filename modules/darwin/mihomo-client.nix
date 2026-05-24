@@ -30,13 +30,14 @@ with lib; let
   # 内部跑 shellcheck），出现未声明命令时 build 阶段就会报错而不是 runtime。
   mihomoLauncher = pkgs.writeShellApplication {
     name = "mihomo-tun-launcher";
-    runtimeInputs = with pkgs; [mihomo coreutils];
+    runtimeInputs = with pkgs; [mihomo coreutils curl];
     text = ''
       mkdir -p /var/lib/mihomo/providers
-      # Layer 4 之前的旧 launcher 会把 self provider 拷到这里；现在 self 直接
-      # 从 /run/secrets/rendered/ 读，这份 self.yaml 是死文件。主动清理，避免
-      # 未来 rollback 到旧 generation 时 mihomo 读到 stale 内容。
       rm -f /var/lib/mihomo/providers/self.yaml
+      # HTTP provider 在 macOS TUN 下会环路 i/o timeout，改由外部 curl 拉取。
+      # 这里预拉取确保 mihomo 启动时 provider 数据已就绪。
+      curl -sfLo /var/lib/mihomo/providers/wild-fetched.yaml \
+        "${cfg.wildUrl}"
       exec mihomo -d /var/lib/mihomo -f "$1"
     '';
   };
@@ -85,6 +86,26 @@ in {
           # sops 渲染目录都加进来。
           SAFE_PATHS = "${pkgs.metacubexd}:/run/secrets/rendered";
         };
+      };
+    };
+
+    # 独立 user agent：定期 curl 拉取 wild provider 数据。
+    # 不和 mihomo-tun daemon（system 级）混在一起的原因：
+    # - curl 不需要 root 权限
+    # - 独立 agent 出问题不会影响 TUN daemon 的重启逻辑
+    # - launcher 已做首次预拉取，agent 的 StartInterval 负责后续周期性更新
+    launchd.agents.mihomo-wild-updater = {
+      serviceConfig = {
+        Label = "local.mihomo.wild-updater";
+        ProgramArguments = [
+          "${pkgs.curl}/bin/curl"
+          "-sfLo"
+          "/var/lib/mihomo/providers/wild-fetched.yaml"
+          cfg.wildUrl
+        ];
+        StartInterval = 1800;
+        StandardOutPath = "/Users/${username}/Library/Logs/mihomo-wild-updater.log";
+        StandardErrorPath = "/Users/${username}/Library/Logs/mihomo-wild-updater.log";
       };
     };
   };

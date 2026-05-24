@@ -3,7 +3,6 @@
   pkgs,
   lib,
   mylib,
-  wildUrl,
   selfProviderTemplateName ? "mihomo-self-provider.yaml",
   ...
 }:
@@ -52,7 +51,7 @@ with lib; let
   # 参考 iKuuu_V2.yaml / 雷霆.yaml 的静态模板结构
   # 节点不再硬编码进 proxies，而是拆成两个 provider：
   #   self —— file provider，由 selfProviderContent 渲染到 providers/self.yaml
-  #   wild —— http provider，mihomo 周期性从 Sub-Store 拉取
+  #   wild —— file provider，由外部 daemon 定期 curl 拉取到 providers/wild-fetched.yaml
   configAttrset = {
     mode = "rule";
     log-level = "warning";
@@ -111,10 +110,8 @@ with lib; let
         };
       };
       wild = {
-        type = "http";
-        url = wildUrl;
-        path = "providers/wild.yaml";
-        interval = 1800;
+        type = "file";
+        path = "/var/lib/mihomo/providers/wild-fetched.yaml";
         health-check = {
           enable = true;
           url = "https://cp.cloudflare.com/generate_204";
