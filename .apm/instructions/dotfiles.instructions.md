@@ -20,7 +20,7 @@ task nix:rollback          # 回滚当前机器到上一代配置
 # Flake 维护
 task nix:flake:update      # 更新所有 flake inputs (nix flake update)
 task nix:flake:rm          # 移除 flake 包后的清理流程（lock → check → metadata）
-task nix:test:check        # Nix 语法/评估校验 (nix flake check)
+task nix:test:quick        # 快速验证当前 host 配置 (targeted nix eval)
 
 # SOPS 密钥
 task nix:sk:edit           # 编辑加密的 secrets 文件
@@ -34,7 +34,6 @@ task tf:apply              # Terraform apply
 task tf:validate           # Terraform validate
 ```
 
-常用裸 nix 命令：`nix flake check`、`nix flake update`、`nix flake show`、`nix eval --impure .#deploy.nodes --apply 'x: builtins.attrNames x'`。
 
 ## 架构与重要决策
 
@@ -103,13 +102,14 @@ outputs/               # flake-parts outputs 子模块
 
 ### 部署前检查
 
-1. `task nix:test:check` — 确保 flake 评估通过
+1. `task nix:test:quick` — 确保当前 host 配置评估通过（日常）；`nix flake check` 用于 CI/全量验证
 2. 确认 `flake.lock` 已提交（避免部署未锁定的版本）
 3. `task nix:deploy` — 交互式选择目标节点，deploy-rs 会跳过内建 checks 并用 `--impure` 评估
 
 ### 测试策略
 
-- `nix flake check` 验证语法和基础评估
+- `task nix:test:quick` 验证当前 host 的 module evaluation（仅评估，不触发构建/下载）
+- `nix flake check`（不加 `--no-build`）用于 CI 或提交前的全量 fleet 验证
 - `tests/` 目录包含 nix-unit 测试
 
 ### 回滚
@@ -122,7 +122,7 @@ outputs/               # flake-parts outputs 子模块
 2. **保守改动**：Nix 改动影响面广（可能影响多台机器），修改模块时考虑跨平台兼容性
 3. **不自动部署**：绝对不要在未经用户明确确认的情况下执行 `task nix:deploy` 或任何部署命令
 4. **不修改 docs/ 内容**：`docs/` 中的文档由 docs monorepo 管理，dotfiles 侧只读
-5. **修改配置后运行检查**：改完 `.nix` 文件后至少执行 `nix flake check` 确保不破坏评估
+5. **修改配置后运行检查**：改完 `.nix` 文件后至少执行 `task nix:test:quick` 确保当前 host 配置评估通过
 6. **不自动 commit/push**：等待用户确认后再提交
 7. **Linear 驱动开发**：开始任务前先检查是否有对应 Linear issue；较大任务先创建 issue 再开工。
 8. **issue 状态管理**：开始 → In Progress，阻塞 → comment 说明，完成 → Done + 总结。
