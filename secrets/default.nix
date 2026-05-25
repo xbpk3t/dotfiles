@@ -108,7 +108,6 @@ in {
       # Shared API tokens
       # youtubeApiKey = mkUserSecret "youtube/api_key";
       # yuqueToken = mkUserSecret "yuque/token";
-      # githubAccessToken = mkUserSecret "github/access_token";
       # pixivRefreshToken = mkUserSecret "pixiv/refresh_token";
       # spotifyClientId = mkUserSecret "spotify/client_id";
       # spotifyClientSecret = mkUserSecret "spotify/client_secret";
@@ -117,6 +116,7 @@ in {
 
       API_CONTEXT7 = mkUserSecret "API/context7";
       API_LINEAR = mkUserSecret "API/linear";
+      GITHUB_TOKEN = mkUserSecret "API/github";
 
       # Atuin
       AUTIN_KEY = mkUserSecret "atuin/key";
