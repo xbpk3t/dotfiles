@@ -31,6 +31,7 @@
     claude.enable = true;
     skills.enable = true;
     opencode.enable = false;
+    mcp.isDesktop = true;
   };
 
   modules.langs = {

@@ -189,7 +189,6 @@ in {
             commit = "";
             pr = "";
           };
-
         };
       };
 
@@ -312,8 +311,8 @@ in {
       programs.claude-code.settings.permissions = {
         defaultMode = "bypassPermissions";
         additionalDirectories = [
-          "~/agent/dotfiles"
-          "~/agent/docs"
+          "~/Desktop/dotfiles"
+          "~/Desktop/docs"
         ];
         allow = [
           "Bash(*)"
