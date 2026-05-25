@@ -66,12 +66,8 @@ tasks:
       - git-quick-stats --detailed-git-stats
       - echo "================ 贡献者排名 ================"
       - git-quick-stats --contributors
-      - echo "================ 代码所有权分析 ================"
-      - git who table -l -n 10 | head -n 15
-      - echo "================ 目录责任分布 ================"
-      - git who tree -d 2 | head -n 30
-      - echo "================ 历史贡献趋势 ================"
-      - git who hist -n 5 | head -n 20
+      - echo "================ 文件活跃度分析 ================"
+      - git effort --stale
       - echo "✅ Git仓库分析报告完成！"
 
       # https://github.com/hellodigua/code996
@@ -82,24 +78,36 @@ tasks:
   # 怎么修改（上一次commit的，以及指定commit的） commit message? # git rebase -i：修改某次 commit 的 message。
 
 
-  # https://github.com/newren/git-filter-repo
   rewrite:
-    desc: 怎么压缩 git 项目？
-    summary: "task -g rewrite FILES=<path>"
+    desc: 从历史中彻底删除指定路径 (git-extras git obliterate)
+    summary: “task -g rewrite FILES=<path>”
     vars:
       FILES: ''
     cmds:
-      # - git rev-list --objects --all | grep "$(git verify-pack -v .git/objects/pack/*.idx | sort -k 3 -n | tail -10 | awk '{print$1}')"
-
-      # --path: 指定要操作的路径
-      # --invert-paths: 反转选择，即“删除这些路径，保留其他所有”
-      # --force: 强制运行（因为filter-repo默认在非全新克隆的仓库上运行会提示风险）
-      - git filter-repo --path {{.FILES}} --invert-paths --force
-
-      # 推送到远程（因为历史已经改变，必须强制推送）
+      - git obliterate {{.FILES}}
+      # git obliterate 自动处理本地重写；远程需强制推送
       - git push origin --force --all
     requires:
       vars: [FILES]
+
+  # 组合 git-extras 命令替代 git-trim。
+  # 覆盖范围（~80%）：
+  #   - git delete-merged-branches   ✅ 删除已合并分支
+  #   - git delete-squashed-branches ✅ 删除已 squash 分支
+  #   - git remote prune origin      ✅ 清理远端已删除的 ref
+  # 不覆盖（git-trim 专属，约 20%）：
+  #   - 远端 tracking ref 的智能检测（git-trim 会检查远端是否还有这个分支，
+  #     而非简单 prune；但日常场景下差异很小）
+  #   - 一条命令搞定所有（clean 要跑三条，但 gc 也一并做了）
+  clean:
+    desc: 清理已合并/已 squash 的分支并 GC
+    summary: "task -g clean"
+    cmds:
+      - git delete-merged-branches
+      - git delete-squashed-branches
+      - git remote prune origin
+      - git gc
+    dir: '{{.USER_WORKING_DIR}}'
 
 
 

@@ -116,12 +116,6 @@ in {
       # tags(desc): 变更回滚 > 交互CLI > Git操作
       ugit
 
-      # 自动清理 Git 分支
-      # Automatically trims your branches whose tracking remote refs are merged or gone
-      # It's really useful when you work on a project for a long time.
-      # tags(desc): 仓库维护 > 分支清理 > 自动化
-      git-trim
-
       # gitlab-cli
       # https://mynixos.com/nixpkgs/package/glab
       # https://gitlab.com/gitlab-org/cli
@@ -204,20 +198,12 @@ in {
 
       # tags(desc): 安全扫描 > 密钥泄漏 > 仓库安全
       gitleaks
-
-      # Git 大文件清理工具
-      # tags(desc): 历史清理 > 大文件治理 > 仓库瘦身
-      bfg-repo-cleaner
     ]
     ++ [
       # 分类3：分析与可视化
       # https://github.com/git-quick-stats/git-quick-stats
       # tags(desc): 统计分析 > 仓库指标 > Git历史
       git-quick-stats
-
-      # https://github.com/sinclairtarget/git-who 一个开源的命令行工具，显示 Git 仓库的提交者统计。
-      # tags(desc): 贡献分析 > 统计可视化 > Git历史
-      git-who
     ];
 
   # https://mynixos.com/home-manager/options/services.git-sync
