@@ -17,4 +17,33 @@
     # https://github.com/bgreenwell/doxx
     doxx
   ];
+
+  ## zk: 被 Yazi 完全替代，暂注释保留
+  # programs.zk = {
+  #   enable = true;
+  #   settings = {
+  #     notebook.dir = "~/notes";
+  #     note = {
+  #       language = "zh";
+  #       default-title = "Untitled";
+  #       filename = "{{format-date now '20060102'}} {{title}}";
+  #       extension = "md";
+  #       template = "default.md";
+  #       id-charset = "hex";
+  #       id-length = 8;
+  #       id-case = "lower";
+  #     };
+  #     extra.author = "luck";
+  #     format.markdown.hashtags = true;
+  #     alias.zkn = ''zk new --title "$*"'';
+  #   };
+  # };
+
+  # Yazi 作为 ~/scratches 的笔记浏览器
+  home.shellAliases = {
+    ysc = "yazi ~/scratches";
+  };
+
+  # 确保 ~/notes 目录存在
+  home.file."notes/.keep".text = "";
 }
