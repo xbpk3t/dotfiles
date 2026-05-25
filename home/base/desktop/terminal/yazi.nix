@@ -1,4 +1,5 @@
 {
+  lib,
   pkgs,
   editorMeta,
   ...
@@ -41,26 +42,25 @@ in {
         image_delay = 30;
         image_filter = "triangle";
         image_quality = 75;
-        sixel_fraction = 15;
         ueberzug_scale = 1;
         ueberzug_offset = [0 0 0 0];
       };
       opener = {
         edit = [
           {
-            run = ''${yaziEditWrapper}/bin/yazi-open-editor "$@"'';
+            run = ''${yaziEditWrapper}/bin/yazi-open-editor %s'';
             desc = "Open with \$EDITOR (fallback ${editorMeta.command})";
             block = true;
             for = "unix";
           }
           {
-            run = "code %*";
+            run = "code %S";
             orphan = true;
             desc = "code";
             for = "windows";
           }
           {
-            run = "code -w %*";
+            run = "code -w %S";
             block = true;
             desc = "code (block)";
             for = "windows";
@@ -68,51 +68,51 @@ in {
         ];
         open = [
           {
-            run = ''xdg-open "$1"'';
+            run = "xdg-open %s1";
             desc = "Open";
             for = "linux";
           }
           {
-            run = ''open "$@"'';
+            run = "open %S";
             desc = "Open";
             for = "macos";
           }
           {
-            run = ''start "" "%1"'';
+            run = ''start "" %s1'';
             orphan = true;
             desc = "Open";
             for = "windows";
           }
           {
-            run = ''termux-open "$1"'';
+            run = "termux-open %s1";
             desc = "Open";
             for = "android";
           }
         ];
         reveal = [
           {
-            run = ''xdg-open "$(dirname "$1")"'';
+            run = "xdg-open %d1";
             desc = "Reveal";
             for = "linux";
           }
           {
-            run = ''open -R "$1"'';
+            run = "open -R %s1";
             desc = "Reveal";
             for = "macos";
           }
           {
-            run = ''explorer /select,"%1"'';
+            run = ''explorer /select,%s1'';
             orphan = true;
             desc = "Reveal";
             for = "windows";
           }
           {
-            run = ''termux-open "$(dirname "$1")"'';
+            run = "termux-open %d1";
             desc = "Reveal";
             for = "android";
           }
           {
-            run = ''exiftool "$1"; echo "Press enter to exit"; read _'';
+            run = ''exiftool %s1; echo "Press enter to exit"; read _'';
             block = true;
             desc = "Show EXIF";
             for = "unix";
@@ -120,29 +120,29 @@ in {
         ];
         extract = [
           {
-            run = ''ya pub extract --list "$@"'';
+            run = "ya pub extract --list %S";
             desc = "Extract here";
             for = "unix";
           }
           {
-            run = "ya pub extract --list %*";
+            run = "ya pub extract --list %S";
             desc = "Extract here";
             for = "windows";
           }
         ];
         play = [
           {
-            run = ''mpv --force-window "$@"'';
+            run = "mpv --force-window %S";
             orphan = true;
             for = "unix";
           }
           {
-            run = "mpv --force-window %*";
+            run = "mpv --force-window %S";
             orphan = true;
             for = "windows";
           }
           {
-            run = ''mediainfo "$1"; echo "Press enter to exit"; read _'';
+            run = ''mediainfo %s; echo "Press enter to exit"; read _'';
             block = true;
             desc = "Show media info";
             for = "unix";
@@ -163,7 +163,7 @@ in {
       open = {
         rules = [
           {
-            name = "*/";
+            url = "*/";
             use = ["edit" "open" "reveal"];
           }
           {
@@ -199,7 +199,7 @@ in {
             use = ["edit" "reveal"];
           }
           {
-            name = "*";
+            url = "*";
             use = ["open" "reveal"];
           }
         ];
@@ -216,14 +216,26 @@ in {
         fetchers = [
           {
             id = "mime";
-            name = "*";
-            run = "mime";
+            url = "*/";
+            run = "mime.dir";
+            prio = "high";
+          }
+          {
+            id = "mime";
+            url = "local://*";
+            run = "mime.local";
+            prio = "high";
+          }
+          {
+            id = "mime";
+            url = "remote://*";
+            run = "mime.local";
             prio = "high";
           }
         ];
         spotters = [
           {
-            name = "*/";
+            url = "*/";
             run = "folder";
           }
           {
@@ -247,7 +259,7 @@ in {
             run = "video";
           }
           {
-            name = "*";
+            url = "*";
             run = "file";
           }
         ];
@@ -279,7 +291,7 @@ in {
         ];
         previewers = [
           {
-            name = "*/";
+            url = "*/";
             run = "folder";
             sync = true;
           }
@@ -320,7 +332,7 @@ in {
             run = "archive";
           }
           {
-            name = "*.{AppImage,appimage}";
+            url = "*.{AppImage,appimage}";
             run = "archive";
           }
           {
@@ -332,7 +344,7 @@ in {
             run = "archive";
           }
           {
-            name = "*.{img,fat,ext,ext2,ext3,ext4,squashfs,ntfs,hfs,hfsx}";
+            url = "*.{img,fat,ext,ext2,ext3,ext4,squashfs,ntfs,hfs,hfsx}";
             run = "archive";
           }
           {
@@ -348,19 +360,19 @@ in {
             run = "empty";
           }
           {
-            name = "*";
+            url = "*";
             run = "file";
           }
         ];
         prepend_fetchers = [
           {
             id = "git";
-            name = "*";
+            url = "*";
             run = "git";
           }
           {
             id = "git";
-            name = "*/";
+            url = "*/";
             run = "git";
           }
         ];
@@ -1019,9 +1031,8 @@ in {
     '';
   };
 
-  # alacritty support for yazi
-  # https://yazi-rs.github.io/docs/image-preview/
-  # 用imv不支持上下键切换图片，所以处理成yazi内嵌图片preview
-  # 而 alacritty 没有内置images render，所以需要ueberzugpp
-  home.packages = with pkgs; [ueberzugpp];
+  # ueberzugpp 仅用于 Linux 上不带 Kitty 协议的终端（如 Alacritty）
+  # Ghostty / Kitty 终端使用原生图像协议，不需要 ueberzugpp
+  home.packages = with pkgs;
+    lib.optionals stdenv.hostPlatform.isLinux [ueberzugpp];
 }
