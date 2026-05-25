@@ -9,6 +9,15 @@
 in {
   options.modules.AI.claude = with lib; {
     enable = mkEnableOption "Enable Claude Code";
+    permissionMode = mkOption {
+      type = types.enum ["default" "yolo"];
+      default = "default";
+      description = ''
+        Permission model for Claude Code:
+        - "default": Interactive mode with fine-grained allow/ask/deny rules (workstation)
+        - "yolo":    Headless/daemon mode with bypassPermissions (container agent)
+      '';
+    };
   };
 
   # https://github.com/AddG0/nix-config/blob/main/home/common/optional/development/ai/claude-code/default.nix
@@ -181,93 +190,6 @@ in {
             pr = "";
           };
 
-          #  behavior = {
-          #    autoSave = true;
-          #    confirmOnExit = false;
-          #    showLineNumbers = true;
-          #  };
-          permissions = {
-            # 尽量与 codex 的 trusted projects 对齐，避免给到过宽目录。
-            additionalDirectories = [
-              "~/Desktop/dotfiles"
-              "~/Desktop/docs"
-            ];
-
-            # 规则优先级是 deny -> ask -> allow
-
-            # plan 模式：默认先规划、你批准、再执行。方案层面的审批保留不动。
-            # [2026-04-30] 修改为auto模式
-            # Auto mode: 用 Claude Code 的后台 safety classifier 自动批准大多数 tool calls，
-            # 减少每步手动 approve；不是 bypassPermissions / --dangerously-skip-permissions。
-            # 显式 ask/deny 规则仍优先命中。若账号/模型/provider 不满足要求，auto 会显示 unavailable。
-            # [2026-05-01] 修改为 bypassPermissions，因为配置为auto证明并不能自动approve，查了一下文档，auto模式只在使用claude自家model才生效，其他model会自动退化到default (Read Only)
-            # https://code.claude.com/docs/en/permission-modes#eliminate-prompts-with-auto-mode
-            # [2026-05-08] bypassPermissions -> plan
-            defaultMode = "plan";
-
-            # 显式放行的常见安全操作（分类器之上的双保险）
-            # auto 模式下先不维护大 allowlist，避免和 classifier 策略冲突。
-            #
-            # 注意：以下规则补齐了之前未覆盖的工具类型——WebFetch/Skill/MCP 插件
-            # 如果不加这些，Claude 在 plan 模式下会对这类工具弹窗询问。
-            allow = [
-              "Bash(*)"
-              "Read(*)"
-              "Edit(*)"
-              "Write(*)"
-
-              "WebSearch(*)"
-              # WebFetch: 独立于 WebSearch 的工具，用于拉取 URL 内容
-              "WebFetch(*)"
-              # Skill: 用于调用 /blog-social-science 等技能
-              "Skill(*)"
-
-              # 之前这里的写法类似于 "mcp__plugin_claude-code-home-manager_codegraph__*"，home-manager MCP 集成本质上是 plugin 桥接：programs.claude-code.enableMcpIntegration 会把 programs.mcp 里定义的所有 MCP server 注入为一个 Claude Code plugin（名为 claude-code-home-manager），工具 ID 前缀就变成了mcp__plugin_claude-code-home-manager_<server>__。这和官方文档里用户直接在 settings.json 手写 MCP server 产生的 mcp__<server>__ 前缀是两条不同的注册路径。
-              # chrome-devtools 插件：浏览器操作（导航、截图、点击等）
-              "mcp__*_chrome-devtools__*"
-              # github 插件：仓库操作（拉取 commits、创建 PR 等）
-              "mcp__*_github__*"
-              # linear 插件：issue 管理、sprint 操作、团队协作
-              "mcp__*_linear__*"
-              # codegraph 插件：代码知识图谱搜索、探索、调用者分析、影响分析
-              "mcp__*_codegraph__*"
-            ];
-
-            # 高风险操作仍需确认
-            ask = [
-              "Bash(git push *)"
-              "Bash(git reset *)"
-              "Bash(git clean *)"
-
-              "Bash(rm *)"
-              "Bash(sudo *)"
-              "Bash(chmod *)"
-              "Bash(chown *)"
-              "Bash(dd *)"
-
-              # "Bash(curl *)"
-              # "Bash(wget *)"
-              # "Bash(ssh *)"
-              # "Bash(scp *)"
-              # "Bash(rsync *)"
-
-              "Bash(npm publish *)"
-              "Bash(pnpm publish *)"
-              "Bash(cargo publish *)"
-
-              "Bash(terraform apply *)"
-              "Bash(terraform destroy *)"
-              "Bash(tofu apply *)"
-              "Bash(tofu destroy *)"
-
-              "Bash(kubectl delete *)"
-              "Bash(docker rm *)"
-              "Bash(docker rmi *)"
-              "Bash(docker system prune *)"
-            ];
-
-            deny = [];
-          };
         };
       };
 
@@ -331,6 +253,80 @@ in {
           dest = ".claude/skills";
           structure = "link";
         };
+      };
+    })
+    # 模式：default — 工作站交互式审批
+    (lib.mkIf (cfg.enable && cfg.permissionMode == "default") {
+      programs.claude-code.settings.permissions = {
+        defaultMode = "plan";
+        additionalDirectories = [
+          "~/Desktop/dotfiles"
+          "~/Desktop/docs"
+        ];
+        allow = [
+          "Bash(*)"
+          "Read(*)"
+          "Edit(*)"
+          "Write(*)"
+
+          "WebSearch(*)"
+          "WebFetch(*)"
+          "Skill(*)"
+
+          "mcp__*_chrome-devtools__*"
+          "mcp__*_github__*"
+          "mcp__*_linear__*"
+          "mcp__*_codegraph__*"
+        ];
+        ask = [
+          "Bash(git push *)"
+          "Bash(git reset *)"
+          "Bash(git clean *)"
+
+          "Bash(rm *)"
+          "Bash(sudo *)"
+          "Bash(chmod *)"
+          "Bash(chown *)"
+          "Bash(dd *)"
+
+          "Bash(npm publish *)"
+          "Bash(pnpm publish *)"
+          "Bash(cargo publish *)"
+
+          "Bash(terraform apply *)"
+          "Bash(terraform destroy *)"
+          "Bash(tofu apply *)"
+          "Bash(tofu destroy *)"
+
+          "Bash(kubectl delete *)"
+          "Bash(docker rm *)"
+          "Bash(docker rmi *)"
+          "Bash(docker system prune *)"
+        ];
+        deny = [];
+      };
+    })
+
+    # 模式：yolo — 无值守 daemon 模式（容器 agent）
+    (lib.mkIf (cfg.enable && cfg.permissionMode == "yolo") {
+      programs.claude-code.settings.permissions = {
+        defaultMode = "bypassPermissions";
+        additionalDirectories = [
+          "~/agent/dotfiles"
+          "~/agent/docs"
+        ];
+        allow = [
+          "Bash(*)"
+          "Read(*)"
+          "Edit(*)"
+          "Write(*)"
+          "WebSearch(*)"
+          "WebFetch(*)"
+          "Skill(*)"
+          "mcp__*__*"
+        ];
+        ask = [];
+        deny = [];
       };
     })
   ];
