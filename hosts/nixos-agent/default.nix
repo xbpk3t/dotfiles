@@ -28,6 +28,16 @@ in {
     # 容器使用私有网桥网络（NAT），由宿主机 nixos-containers 自动分配 IP
   };
 
+  # [2026-05-25] 容器 DNS：boot.isContainer 环境下 resolvconf 会生成 127.0.0.53
+  # （systemd-resolved stub），但容器内 resolved 已禁用且网络命名空间隔离无法
+  # 访问宿主机 stub。关闭 resolvconf，直接硬写 resolv.conf。
+  networking.resolvconf.enable = false;
+  environment.etc."resolv.conf".text = lib.mkForce ''
+    nameserver 119.29.29.29
+    nameserver 223.5.5.5
+    options edns0 trust-ad
+  '';
+
   # 容器首次激活时 /home/luck 可能未创建（user-group.nix 的 isNormalUser 和
   # home-manager 激活脚本的时序不确定），导致 sops-nix 写 ~/.config/systemd 失败。
   # activationScript 在 NixOS switch 期间同步执行（deps 保证在 users 创建后），
