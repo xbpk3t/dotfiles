@@ -41,14 +41,13 @@ in {
         image_delay = 30;
         image_filter = "triangle";
         image_quality = 75;
-        sixel_fraction = 15;
         ueberzug_scale = 1;
         ueberzug_offset = [0 0 0 0];
       };
       opener = {
         edit = [
           {
-            run = ''${yaziEditWrapper}/bin/yazi-open-editor "$@"'';
+            run = ''${yaziEditWrapper}/bin/yazi-open-editor %s'';
             desc = "Open with \$EDITOR (fallback ${editorMeta.command})";
             block = true;
             for = "unix";
@@ -163,7 +162,7 @@ in {
       open = {
         rules = [
           {
-            name = "*/";
+            url = "*/";
             use = ["edit" "open" "reveal"];
           }
           {
@@ -199,7 +198,7 @@ in {
             use = ["edit" "reveal"];
           }
           {
-            name = "*";
+            url = "*";
             use = ["open" "reveal"];
           }
         ];
@@ -216,14 +215,26 @@ in {
         fetchers = [
           {
             id = "mime";
-            name = "*";
-            run = "mime";
+            url = "*/";
+            run = "mime.dir";
+            prio = "high";
+          }
+          {
+            id = "mime";
+            url = "local://*";
+            run = "mime.local";
+            prio = "high";
+          }
+          {
+            id = "mime";
+            url = "remote://*";
+            run = "mime.local";
             prio = "high";
           }
         ];
         spotters = [
           {
-            name = "*/";
+            url = "*/";
             run = "folder";
           }
           {
@@ -247,7 +258,7 @@ in {
             run = "video";
           }
           {
-            name = "*";
+            url = "*";
             run = "file";
           }
         ];
@@ -279,7 +290,7 @@ in {
         ];
         previewers = [
           {
-            name = "*/";
+            url = "*/";
             run = "folder";
             sync = true;
           }
@@ -320,7 +331,7 @@ in {
             run = "archive";
           }
           {
-            name = "*.{AppImage,appimage}";
+            url = "*.{AppImage,appimage}";
             run = "archive";
           }
           {
@@ -332,7 +343,7 @@ in {
             run = "archive";
           }
           {
-            name = "*.{img,fat,ext,ext2,ext3,ext4,squashfs,ntfs,hfs,hfsx}";
+            url = "*.{img,fat,ext,ext2,ext3,ext4,squashfs,ntfs,hfs,hfsx}";
             run = "archive";
           }
           {
@@ -348,19 +359,19 @@ in {
             run = "empty";
           }
           {
-            name = "*";
+            url = "*";
             run = "file";
           }
         ];
         prepend_fetchers = [
           {
             id = "git";
-            name = "*";
+            url = "*";
             run = "git";
           }
           {
             id = "git";
-            name = "*/";
+            url = "*/";
             run = "git";
           }
         ];

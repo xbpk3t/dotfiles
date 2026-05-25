@@ -165,6 +165,27 @@ in {
       };
     };
   };
+  nixos-agent = {
+    nixos-agent = {
+      hostName = "nixos-agent";
+      # What：容器 IP（宿主机 ve-nixos-agent 网桥地址）。
+      # Why：NixOS 容器默认分配 10.233.0.0/16 段地址，首个容器为 10.233.0.2。
+      # Note：容器创建后若 IP 不符，在此覆写。
+      primaryIp = "10.233.0.2";
+      # What：SSH 通过 VPS 跳板机（ProxyJump）访问容器内部的 bridge IP。
+      # Why：容器在 VPS bridge（10.233.0.0/16）内，外部无法直连。
+      #       deploy-rs 是 push-mode，走 SSH ProxyJump 穿透到容器。
+      # Note：若走 tailscale 内网，可改用 opts = ["-J" "root@100.101.189.7"]。
+      ssh = {
+        user = "root";
+        opts = ["-J" "root@192.129.183.26"];
+      };
+      user = commonUser;
+      time = commonTime;
+      editor = commonEditor;
+    };
+  };
+
   nixos-homelab = {
     nixos-homelab = rec {
       hostName = "nixos-homelab";
