@@ -114,5 +114,20 @@ in {
     # serverIP 由 inventory 注入，避免多处重复维护
     serverPort = 6443;
   };
+  # 启用 nixos-container 容器支持（nixos-agent 等）
+  boot.enableContainers = true;
+
+  # [2026-05-25] sops-nix age key：宿主机的 keys.txt 只读挂入 nixos-agent 容器。
+  # 容器通过 deploy-rs 独立部署，但 sops 解密发生在容器激活阶段（非构建阶段）。
+  # 若容器内无 age 私钥，所有 sops secret（GITHUB_TOKEN 等）解密失败。
+  # bind mount 让宿主机和容器共用同一份 age key，无需在容器内手动维护。
+  containers.nixos-agent = {
+    bindMounts."sops-age-key" = {
+      hostPath = "/home/luck/.config/sops/age/keys.txt";
+      mountPoint = "/home/luck/.config/sops/age/keys.txt";
+      isReadOnly = true;
+    };
+  };
+
   system.stateVersion = "24.11";
 }

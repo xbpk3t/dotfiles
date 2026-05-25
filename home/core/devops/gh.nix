@@ -1,6 +1,7 @@
 {
   editorMeta,
   config,
+  lib,
   ...
 }: {
   # MAYBE: gh-stack
@@ -85,6 +86,10 @@
   };
 
   home.sessionVariables = {
+    # headless 环境下 gh auth login 不可用，通过 sops secret 注入 token
+    # mkForce：覆盖 zsh.nix 中 GITHUB_TOKEN="$(gh auth token)" 的动态获取（容器无 gh auth 登录态）
+    GITHUB_TOKEN = lib.mkForce "$(cat ${config.sops.secrets.GITHUB_TOKEN.path})";
+
     # For xbpk3t/docs rss2newsletter
     RESEND_TOKEN = "$(cat ${config.sops.secrets.RESEND_TOKEN.path})";
   };
