@@ -1,7 +1,6 @@
 {
   lib,
   globals,
-  userMeta,
   ...
 }: let
   inherit (globals.networking) nameservers;
@@ -26,25 +25,31 @@ in {
     hostName = lib.mkDefault "nixos-agent";
     useDHCP = false;
     nameservers = nameservers;
-    # 容器默认使用宿主网络命名空间，无需额外配置
+    # 容器使用私有网桥网络（NAT），由宿主机 nixos-containers 自动分配 IP
   };
 
+  # 容器首次激活时 /home/luck 可能未创建（user-group.nix 的 isNormalUser 和
+  # home-manager 激活脚本的时序不确定），导致 sops-nix 写 ~/.config/systemd 失败。
+  # activationScript 在 NixOS switch 期间同步执行（deps 保证在 users 创建后），
+  # 比 systemd-tmpfiles（异步 service）更可靠。
+  # 注意：chown 不能 -R，sops age keys.txt 通过 bind mount 挂载为只读。
+  system.activationScripts.ensureHomeDir = {
+    text = ''
+      chown luck:users /home/luck
+      mkdir -p /home/luck/.config/systemd
+      chown luck:users /home/luck/.config /home/luck/.config/systemd
+    '';
+    deps = ["users" "groups"];
+  };
+
+  # [2026-05-25] NixOS 容器通过宿主机 /etc/resolv.conf 解析 DNS，
+  # 启用 systemd-resolved 会触发断言失败（"Using host resolv.conf is not supported"）。
+  # 容器内 DNS 由宿主机接管，无需额外配置。
   # 基本网络服务
-  services.resolved = {
-    enable = true;
-    settings.Resolve.FallbackDNS = nameservers;
-  };
-
-  # Nix 配置（容器共享宿主机 Nix daemon）
-  nix = {
-    # 容器内直接使用宿主机的 nix-daemon socket
-    settings = {
-      substituters = [
-        "https://cache.nixos.org"
-      ];
-      trusted-users = [userMeta.username];
-    };
-  };
+  # services.resolved = {
+  #   enable = true;
+  #   settings.Resolve.FallbackDNS = nameservers;
+  # };
 
   system.stateVersion = "24.11";
 }

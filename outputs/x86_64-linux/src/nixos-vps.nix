@@ -72,9 +72,41 @@
       defaultSshUser = ssh-user;
       remoteBuild = true;
     };
+
+    # 从 host nixosConfig 复用容器 eval 结果生成 deploy node。
+    # Why: nixos-agent.nix 单独调 mylib.nixosSystem 会导致相同模块重复求值
+    #      （host 求值已包含 containers.nixos-agent.config 的完整 eval）。
+    #      这里直接复用 host eval 中已求值的容器 config，避免二次 eval。
+    containerConfig = nixosConfig.config.containers.nixos-agent or null;
+    containerDeployLib = inputs."deploy-rs".lib.${baseModules.system};
+    containerDeploy =
+      if containerConfig != null
+      then let
+        containerNode = mylib.inventory."nixos-agent"."nixos-agent" or null;
+      in
+        if containerNode != null
+        then {
+          "nixos-agent" = mylib.inventory.deployRsNode {
+            name = "nixos-agent";
+            node = containerNode;
+            # containerConfig.config 是容器子模块求值后的 raw merged config（有 .system.build.toplevel），
+            # 而非 evalModules 结果（有 .config.system.build.toplevel）。
+            # deployLib.activate.nixos 期望后者，所以用 { config = ...; } 包裹一层。
+            nixosConfiguration = {config = containerConfig.config;};
+            deployLib = containerDeployLib;
+            defaultSshUser = "root";
+            remoteBuild = true;
+          };
+        }
+        else {}
+      else {};
   in {
     nixosConfigurations.${name} = nixosConfig;
-    deploy.nodes.${name} = deployNode;
+    deploy.nodes =
+      {
+        ${name} = deployNode;
+      }
+      // containerDeploy;
   };
 
   nodeRoles = builtins.attrValues (builtins.mapAttrs mkNodeRole nodes);
