@@ -53,7 +53,7 @@ in {
 
       "wechat"
 
-      "tailscale-app"
+      #"tailscale-app"
 
       # [2026-01-17] 在mac上我选择用chrome，而非firefox。因为
       "google-chrome"

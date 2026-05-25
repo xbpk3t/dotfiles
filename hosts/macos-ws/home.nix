@@ -22,7 +22,7 @@
     kitty.enable = false;
     cmux.enable = true;
 
-    zed.enable = true;
+    zed.enable = false;
     vscode.enable = false;
   };
 
