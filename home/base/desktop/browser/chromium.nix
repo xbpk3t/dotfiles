@@ -1,11 +1,16 @@
-_: let
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: let
   cfg = config.modules.desktop.chromium;
 in {
   # https://mynixos.com/nixpkgs/options/programs.chromium
   # https://mynixos.com/home-manager/options/programs.chromium
 
-  options.modules.desktop.firefox = with lib; {
-    enable = mkEnableOption "Firefox Enable";
+  options.modules.desktop.chromium = with lib; {
+    enable = mkEnableOption "Chromium Enable";
   };
 
   config = lib.mkIf cfg.enable {
