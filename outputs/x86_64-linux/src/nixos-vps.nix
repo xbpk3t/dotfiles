@@ -22,6 +22,7 @@
         "secrets/default.nix"
         "modules/nixos/base"
         "modules/nixos/vps"
+        "modules/nixos/cntr/nixos-agent.nix"
         "modules/nixos/extra/k3s/default.nix"
       ];
     home-modules = map mylib.relativeToRoot [
