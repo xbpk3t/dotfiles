@@ -8,6 +8,7 @@
   mcpEnabled =
     config.modules.AI.codex.enable
     || config.modules.AI.claude.enable;
+  cfg = config.modules.AI.mcp;
 in {
   # [2026-04-03] https://mynixos.com/home-manager/options/programs.mcp 最终是生成 $HOME/mcp/mcp.json 这么一个 mcp.json，跟目前所有cli都不一致（比如说 codex 的MCP的目标path就在config.toml, cc是 ~/.claude.json, cursor则是 $HOME/.cursor/mcp.json），所以没意义
   # [2026-04-03] 把mcp server由 mcp-servers-nix 管理，优势在于可以让 codex/cc 等所有cli复用一份mcp配置。带来的问题是 msn只有 command, args, env, url, headers 等通用字段，不支持codex的 approve 操作。
@@ -17,6 +18,10 @@ in {
   imports = [
     inputs.mcp-servers-nix.homeManagerModules.default
   ];
+
+  options.modules.AI.mcp = with lib; {
+    isDesktop = mkEnableOption "desktop-only MCP servers (browser/GUI)";
+  };
 
   # MAYBE: [2026-04-03](excalidraw-mcp)
   # https://github.com/excalidraw/excalidraw-mcp Excalidraw MCP，这个更适合拿来想事情，尤其是流程图、系统结构这类内容，靠文字说不清的时候，画一下会快很多。
@@ -147,11 +152,16 @@ in {
         # - 这个仓库已经有自维护 `pkgs/` 入口，适合把常用 MCP server 纳入 declarative 管理；
         # - upstream npm tarball 已经带预编译产物，直接打包发布物比每次运行时走 npx 下载更稳，也更符合当前仓库的打包选型；
         # - 版本升级统一交给 nvfetcher，避免 MCP 启动时再发生隐式在线更新。
-        "chrome-devtools" = {
+        # Desktop-only MCPs: require browser/GUI environment.
+        # Add new desktop-only servers inside this mkIf block.
+        "chrome-devtools" = lib.mkIf cfg.isDesktop {
           command = "${pkgs.chrome-devtools-mcp}/bin/chrome-devtools-mcp";
           args = [];
           default_tools_approval_mode = "approve";
         };
+        # Future desktop-only entries (uncomment and add here):
+        # "playwright" = lib.mkIf cfg.isDesktop { ... };   # needs browser
+        # "bb-browser" = lib.mkIf cfg.isDesktop { ... };   # needs browser + login state
 
         # context7 偏库/框架文档
         context7 = {
