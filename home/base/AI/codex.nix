@@ -6,6 +6,32 @@
   ...
 }: let
   cfg = config.modules.AI.codex;
+  linearHookCommand = hookPath: "${pkgs.nushell}/bin/nu --stdin -c 'source ${config.home.homeDirectory}/.claude/hooks/${hookPath}'";
+  linearHookHandler = hookPath: statusMessage: {
+    type = "command";
+    command = linearHookCommand hookPath;
+    inherit statusMessage;
+  };
+  linearCodexHooks = {
+    hooks = {
+      SessionStart = [
+        {
+          matcher = "";
+          hooks = [
+            (linearHookHandler "session-start/linear-session-start.nu" "Detecting Linear issue")
+          ];
+        }
+      ];
+      PostToolUse = [
+        {
+          matcher = "ExitPlanMode";
+          hooks = [
+            (linearHookHandler "post-tool-use/linear-plan.nu" "Posting Linear plan")
+          ];
+        }
+      ];
+    };
+  };
   mcpServersForCodex =
     (
       inputs.mcp-servers-nix.lib.evalModule pkgs {
@@ -138,6 +164,14 @@ in {
 
     # Allow Home Manager to overwrite ~/.codex/config.toml without backups/prompts
     home.file.".codex/config.toml".force = true;
+
+    # Codex discovers lifecycle hooks from ~/.codex/hooks.json. Keep this out of
+    # programs.codex.settings because the Home Manager module currently drops
+    # nested hook tables when rendering config.toml.
+    home.file.".codex/hooks.json" = {
+      force = true;
+      text = builtins.toJSON linearCodexHooks;
+    };
 
     home.file.".codex/prompts" = {
       source = ./prompts;

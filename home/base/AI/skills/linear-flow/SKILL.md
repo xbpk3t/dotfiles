@@ -62,24 +62,37 @@ git commit -m "feat(scope): description (<ISSUE_KEY>)"
 
 Run project-specific checks (e.g., `task y2m:check`, `nix flake check`, test suite).
 
-### Step 5: Post insights to Linear
+### Step 5: Finalize the Linear review
 
 ```bash
-cat > /tmp/linear-insights.md <<'EOF'
-## Changes
-- file1 — what changed
-- file2 — what changed
+cat <<'EOF' | linear-finalize --agent claude-code
+## Plan
 
-## Key decisions
+- final plan summary
+
+## Key Decisions
+
 - decision 1
 - decision 2
 
+## Insights
+
+- insight 1
+
+## Implementation
+
+- change 1
+- change 2
+
 ## Verification
+
 - check 1: pass
 - check 2: pass
-EOF
 
-linear issue comment <ISSUE_KEY> --body-file /tmp/linear-insights.md
+## Open Risks / Follow-ups
+
+- risk or follow-up, if any
+EOF
 ```
 
 ### Step 6: Push and create PR
@@ -96,7 +109,7 @@ gh pr create --title "feat: <summary> (<ISSUE_KEY>)" --body "Closes <ISSUE_KEY>"
 - Never start implementation without `linear issue start` first — the branch name is the contract with Linear's GitHub integration.
 - Always include the issue key in commit messages and PR body — this triggers automatic status transitions.
 - If a worktree was created, clean it up after merge: `git worktree remove ../<ISSUE_KEY>-worktree`.
-- Post insights BEFORE creating the PR so reviewers have context.
+- Run `linear-finalize` BEFORE creating the PR so reviewers have context.
 
 ---
 
@@ -107,6 +120,6 @@ gh pr create --title "feat: <summary> (<ISSUE_KEY>)" --body "Closes <ISSUE_KEY>"
 linear issue start LUC-16                    # Step 1
 git worktree add ../LUC-16-worktree luc/LUC-16-slug && cd ../LUC-16-worktree  # Step 2
 # ... implement, commit, verify ...           # Steps 3-4
-linear issue comment LUC-16 --body-file /tmp/insights.md  # Step 5
+linear-finalize --issue LUC-16 --agent claude-code < /tmp/review.md  # Step 5
 git push -u origin HEAD && gh pr create --body "Closes LUC-16"  # Step 6
 ```
