@@ -8,6 +8,51 @@
 let input = ($in | from json)
 let hook_event = ($input.hook_event_name? | default '')
 
+def read-env [name: string, fallback: string = '']: nothing -> string {
+    let value = ($env | get --optional $name)
+    if $value == null { $fallback } else { $value | into string }
+}
+
+def read-current-branch []: nothing -> string {
+    try { ^git rev-parse --abbrev-ref HEAD err> /dev/null } catch { '' } | str trim
+}
+
+def issue-from-branch [branch: string]: nothing -> string {
+    if ($branch | is-empty) or $branch == 'HEAD' {
+        ''
+    } else {
+        let key = ($branch | parse -r '(?i)(LUC-\d+)' | get 0.capture0?)
+        if $key == null { '' } else { $key | str upcase }
+    }
+}
+
+def log-hook-error [event: string, issue_key: string, message: string]: nothing -> nothing {
+    let now = (date now | format date '%Y-%m-%d %H:%M:%S')
+    let log_file = (read-env 'LINEAR_HOOK_LOG' '/tmp/linear-agent-hooks.log')
+    let clean_message = ($message | str trim | str replace --all "\n" ' ')
+    do -i { $"($now)\t($event)\tissue=($issue_key)\t($clean_message)\n" | save --append $log_file }
+}
+
+def post-linear-comment [issue_key: string, body: string, event: string]: nothing -> int {
+    let result = (try {
+        ^linear issues comment $issue_key --body $body | complete
+    } catch {|err|
+        {
+            exit_code: 127
+            stderr: ($err.msg? | default 'linear command failed')
+            stdout: ''
+        }
+    })
+
+    if $result.exit_code != 0 {
+        let stderr = ($result.stderr | default '' | str trim)
+        let message = if ($stderr | is-empty) { $'linear exited with code ($result.exit_code)' } else { $stderr }
+        log-hook-error $event $issue_key $message
+    }
+
+    $result.exit_code
+}
+
 if $hook_event == 'Stop' {
     exit 0
 }
@@ -19,16 +64,13 @@ if ($cwd | path exists) {
     exit 0
 }
 
-let branch = (try { ^git rev-parse --abbrev-ref HEAD err> /dev/null } catch { '' } | str trim)
+let branch = (read-current-branch)
 
 # Detect Linear issue key: env first, then git branch (Codex fallback)
 let issue_key = if (not ($env.CLAUDE_LINEAR_ISSUE? | default '' | is-empty)) {
     $env.CLAUDE_LINEAR_ISSUE?
 } else {
-    if ($branch | is-empty) or $branch == 'HEAD' { '' } else {
-        let key = ($branch | parse -r '(?i)(LUC-\d+)' | get 0.capture0?)
-        if $key == null { '' } else { $key | str upcase }
-    }
+    issue-from-branch $branch
 }
 
 if ($issue_key | is-empty) {
@@ -40,19 +82,6 @@ if ($issue_key | is-empty) {
 let commits = (try { ^git log origin/main..HEAD --oneline err> /dev/null } catch { '' } | str trim)
 
 let diff_stat = (try { ^git diff HEAD --stat err> /dev/null } catch { '' } | str trim)
-
-# ── Session notes (from /linear-note skill) ──
-
-let notes_file = $"/tmp/linear-session-notes-($issue_key).md"
-let legacy_notes_file = '/tmp/linear-session-notes.md'
-
-let notes = if ($notes_file | path exists) {
-    open --raw $notes_file | into string | str trim
-} else if ($legacy_notes_file | path exists) {
-    open --raw $legacy_notes_file | into string | str trim
-} else {
-    ''
-}
 
 # ── Insights from transcript ──
 
@@ -87,9 +116,8 @@ let insights = if ($transcript_path | is-empty) or (not ($transcript_path | path
 let has_insights = (not ($insights | is-empty))
 let has_commits = (not ($commits | is-empty))
 let has_stat = (not ($diff_stat | is-empty))
-let has_notes = (not ($notes | is-empty))
 
-if (not $has_insights) and (not $has_commits) and (not $has_stat) and (not $has_notes) {
+if (not $has_insights) and (not $has_commits) and (not $has_stat) {
     exit 0
 }
 
@@ -97,8 +125,11 @@ if (not $has_insights) and (not $has_commits) and (not $has_stat) and (not $has_
 
 let now = (date now | format date '%Y-%m-%d %H:%M')
 let session_id = ($input.session_id? | default 'unknown')
-let model = ($input.model? | default 'unknown')
-let agent = if (not ($env.CLAUDE_LINEAR_ISSUE? | default '' | is-empty)) or (not ($env.CLAUDE_ENV_FILE? | default '' | is-empty)) {
+let model = ($input.model? | default ($env.LINEAR_MODEL? | default 'unknown'))
+let configured_agent = ($env.LINEAR_AGENT? | default '')
+let agent = if (not ($configured_agent | is-empty)) {
+    $configured_agent
+} else if (not ($env.CLAUDE_LINEAR_ISSUE? | default '' | is-empty)) or (not ($env.CLAUDE_ENV_FILE? | default '' | is-empty)) {
     'claude-code'
 } else if $model != 'unknown' {
     'codex'
@@ -122,12 +153,6 @@ let stat_section = if $has_stat {
     $"\n**Uncommitted changes**:\n```\n($diff_stat)\n```\n"
 } else { '' }
 
-let notes_section = if $has_notes {
-    $"\n**Session notes**:\n($notes)\n"
-} else { '' }
+let comment = $"($header)($insights_section)($commits_section)($stat_section)"
 
-let comment = $"($header)($insights_section)($commits_section)($stat_section)($notes_section)"
-
-do -i {
-    ^linear issues comment $issue_key --body $comment
-}
+let _exit_code = (post-linear-comment $issue_key $comment 'session-checkpoint-comment')

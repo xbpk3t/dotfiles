@@ -6,7 +6,44 @@
   ...
 }: let
   cfg = config.modules.AI.codex;
-  linearHookCommand = hookPath: "${pkgs.nushell}/bin/nu --stdin -c 'source ${config.home.homeDirectory}/.claude/hooks/${hookPath}'";
+  codexDefaultModel = "gpt-5.4";
+  linearHookRuntimePath = lib.concatStringsSep ":" [
+    (lib.makeBinPath [
+      pkgs.coreutils
+      pkgs.git
+      pkgs.nushell
+    ])
+    "/opt/homebrew/bin"
+    "/opt/homebrew/sbin"
+    "/usr/local/bin"
+    "/usr/bin"
+    "/bin"
+    "${config.home.homeDirectory}/.nix-profile/bin"
+    "/etc/profiles/per-user/${config.home.username}/bin"
+  ];
+  linearHookCommand = hookPath: let
+    script = ''
+      export HOME=${lib.escapeShellArg config.home.homeDirectory}
+      export PATH=${lib.escapeShellArg linearHookRuntimePath}:''${PATH:-}
+      if [ -z "''${LINEAR_AGENT:-}" ]; then
+        export LINEAR_AGENT=codex
+      fi
+
+      if [ -z "''${LINEAR_MODEL:-}" ] && [ -n "''${CODEX_MODEL:-}" ]; then
+        export LINEAR_MODEL="$CODEX_MODEL"
+      fi
+      if [ -z "''${LINEAR_MODEL:-}" ]; then
+        export LINEAR_MODEL=${lib.escapeShellArg codexDefaultModel}
+      fi
+
+      if [ -z "''${LINEAR_API_KEY:-}" ] && [ -r ${lib.escapeShellArg config.sops.secrets.API_LINEAR.path} ]; then
+        LINEAR_API_KEY="$(${pkgs.coreutils}/bin/cat ${lib.escapeShellArg config.sops.secrets.API_LINEAR.path})"
+        export LINEAR_API_KEY
+      fi
+
+      exec ${pkgs.nushell}/bin/nu --stdin -c ${lib.escapeShellArg "source ${config.home.homeDirectory}/.claude/hooks/${hookPath}"}
+    '';
+  in "${pkgs.bash}/bin/bash -c ${lib.escapeShellArg script}";
   linearHookHandler = hookPath: statusMessage: {
     type = "command";
     command = linearHookCommand hookPath;
@@ -25,6 +62,12 @@
       PostToolUse = [
         {
           matcher = "ExitPlanMode";
+          hooks = [
+            (linearHookHandler "post-tool-use/linear-plan.nu" "Posting Linear plan")
+          ];
+        }
+        {
+          matcher = "update_plan";
           hooks = [
             (linearHookHandler "post-tool-use/linear-plan.nu" "Posting Linear plan")
           ];
@@ -69,7 +112,7 @@ in {
       # https://developers.openai.com/codex/config-reference
       settings = {
         # 默认模型；可被命令行 `-m` 临时覆盖。
-        model = "gpt-5.4";
+        model = codexDefaultModel;
 
         # on-request: 默认命令先在 sandbox 内执行，超权限时再请求批准。
         # [2026-04-08] 我原本的需求是：现在切换到 mcp-servers-nix 之后，无法默认approve全部这些MCP操作，所以想要通过该配置进行配置。事实证明该配置项无法实现该需求。
@@ -137,7 +180,7 @@ in {
         profiles = {
           axonhub = {
             model_provider = "axonhub";
-            model = "gpt-5.4";
+            model = codexDefaultModel;
           };
         };
       };

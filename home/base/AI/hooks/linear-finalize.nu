@@ -20,6 +20,10 @@ def read-file-if-exists [path: string]: nothing -> string {
     }
 }
 
+def read-current-branch []: nothing -> string {
+    try { ^git rev-parse --abbrev-ref HEAD err> /dev/null } catch { '' } | str trim
+}
+
 def issue-from-branch [branch: string]: nothing -> string {
     if ($branch | is-empty) or $branch == 'HEAD' {
         ''
@@ -27,6 +31,42 @@ def issue-from-branch [branch: string]: nothing -> string {
         let key = ($branch | parse -r '(?i)(LUC-\d+)' | get 0.capture0?)
         if $key == null { '' } else { $key | str upcase }
     }
+}
+
+def log-hook-error [event: string, issue_key: string, message: string]: nothing -> nothing {
+    let now = (date now | format date '%Y-%m-%d %H:%M:%S')
+    let log_file = (read-env 'LINEAR_HOOK_LOG' '/tmp/linear-agent-hooks.log')
+    let clean_message = ($message | str trim | str replace --all "\n" ' ')
+    do -i { $"($now)\t($event)\tissue=($issue_key)\t($clean_message)\n" | save --append $log_file }
+}
+
+def post-linear-comment [
+    issue_key: string
+    body: string
+    event: string
+    --stderr-prefix: string = ''
+]: nothing -> int {
+    let result = (try {
+        ^linear issues comment $issue_key --body $body | complete
+    } catch {|err|
+        {
+            exit_code: 127
+            stderr: ($err.msg? | default 'linear command failed')
+            stdout: ''
+        }
+    })
+
+    if $result.exit_code != 0 {
+        let stderr = ($result.stderr | default '' | str trim)
+        let message = if ($stderr | is-empty) { $'linear exited with code ($result.exit_code)' } else { $stderr }
+        log-hook-error $event $issue_key $message
+
+        if not ($stderr_prefix | str trim | is-empty) {
+            print --stderr $'($stderr_prefix): ($message)'
+        }
+    }
+
+    $result.exit_code
 }
 
 def section [title: string, body: string]: nothing -> string {
@@ -42,7 +82,7 @@ if (not ($cwd | is-empty)) and ($cwd | path exists) {
     cd $cwd
 }
 
-let branch = (try { ^git rev-parse --abbrev-ref HEAD err> /dev/null } catch { '' } | str trim)
+let branch = (read-current-branch)
 let issue_key = if (not (read-env 'LINEAR_FINALIZE_ISSUE' '' | is-empty)) {
     read-env 'LINEAR_FINALIZE_ISSUE' '' | str upcase
 } else {
@@ -55,9 +95,9 @@ if ($issue_key | is-empty) {
 }
 
 let now = (date now | format date '%Y-%m-%d %H:%M')
-let agent = (read-env 'LINEAR_FINALIZE_AGENT' 'agent')
-let model = (read-env 'LINEAR_FINALIZE_MODEL' 'unknown')
-let session_id = (read-env 'LINEAR_FINALIZE_SESSION_ID' 'unknown')
+let agent = (read-env 'LINEAR_FINALIZE_AGENT' (read-env 'LINEAR_AGENT' 'agent'))
+let model = (read-env 'LINEAR_FINALIZE_MODEL' (read-env 'LINEAR_MODEL' 'unknown'))
+let session_id = (read-env 'LINEAR_FINALIZE_SESSION_ID' (read-env 'LINEAR_SESSION_ID' 'unknown'))
 let transcript_path = (read-env 'LINEAR_FINALIZE_TRANSCRIPT_PATH' '')
 let body_file = (read-env 'LINEAR_FINALIZE_BODY_FILE' '')
 let base_ref = (read-env 'LINEAR_FINALIZE_BASE' 'origin/main')
@@ -71,17 +111,9 @@ let review_body = if (not ($body_file | is-empty)) {
 }
 
 let plan_file = $"/tmp/linear-session-plan-($issue_key).md"
-let notes_file = $"/tmp/linear-session-notes-($issue_key).md"
-let legacy_notes_file = '/tmp/linear-session-notes.md'
 let finalized_marker_file = $"/tmp/linear-session-finalized-($issue_key)"
 
 let captured_plans = (read-file-if-exists $plan_file)
-let session_notes = (read-file-if-exists $notes_file)
-let legacy_session_notes = if ($session_notes | is-empty) {
-    read-file-if-exists $legacy_notes_file
-} else {
-    ''
-}
 
 let commits = (try { ^git log $"($base_ref)..HEAD" --oneline err> /dev/null } catch { '' } | str trim)
 let diff_stat = (try { ^git diff HEAD --stat err> /dev/null } catch { '' } | str trim)
@@ -94,8 +126,6 @@ let review_section = if ($review_body | is-empty) {
 }
 
 let plans_section = section 'Captured Plans' $captured_plans
-let notes_body = ([$session_notes $legacy_session_notes] | where {|note| not ($note | is-empty) } | str join "\n\n")
-let notes_section = section 'Session Notes' $notes_body
 
 let commits_section = if ($commits | is-empty) {
     ''
@@ -118,20 +148,19 @@ let status_section = if ($status | is-empty) {
 let git_section_body = $"($commits_section)($diff_section)($status_section)"
 let git_section = section 'Git Facts' $git_section_body
 
-let comment = $"**Agent Review** -- ($issue_key)\n\nMetadata:\n- agent: ($agent)\n- model: ($model)\n- session_id: ($session_id)\n- cwd: (pwd)\n- branch: ($branch)\n- transcript_path: ($transcript_path)\n- trigger: manual-finalize\n- generated_at: ($now)\n($review_section)($plans_section)($notes_section)($git_section)"
+let comment = $"**Agent Review** -- ($issue_key)\n\nMetadata:\n- agent: ($agent)\n- model: ($model)\n- session_id: ($session_id)\n- cwd: (pwd)\n- branch: ($branch)\n- transcript_path: ($transcript_path)\n- trigger: manual-finalize\n- generated_at: ($now)\n($review_section)($plans_section)($git_section)"
 
 if $dry_run {
     print $comment
     exit 0
 }
 
-^linear issues comment $issue_key --body $comment
+let exit_code = (post-linear-comment $issue_key $comment 'finalize-comment' --stderr-prefix 'linear-finalize')
+if $exit_code != 0 {
+    exit $exit_code
+}
 
 if (not $keep_checkpoints) {
     do -i { $now | save --force $finalized_marker_file }
     if ($plan_file | path exists) { do -i { rm $plan_file } }
-    if ($notes_file | path exists) { do -i { rm $notes_file } }
-    if (($session_notes | is-empty) and (not ($legacy_session_notes | is-empty)) and ($legacy_notes_file | path exists)) {
-        do -i { rm $legacy_notes_file }
-    }
 }
