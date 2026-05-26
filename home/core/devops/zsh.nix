@@ -411,6 +411,11 @@
           style = "bold #82AAFF";
         };
 
+        jj_branch = {
+          # format = "on [$symbol[$change_id]($style) ]($style)";
+          format = "on [$symbol$branch]($style) ";
+        };
+
         #      env_var = {
         #        all_proxy = {
         #          variable = "all_proxy";

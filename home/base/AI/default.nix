@@ -43,6 +43,7 @@ in {
         runtimeInputs = [
           pkgs.coreutils
           pkgs.git
+          pkgs.jujutsu
           pkgs.nushell
         ];
         text = ''
@@ -167,6 +168,7 @@ in {
         runtimeInputs = [
           pkgs.coreutils
           pkgs.git
+          pkgs.jujutsu
           pkgs.nushell
         ];
         text = ''

@@ -2,7 +2,7 @@
 
 # PostToolUse hook: when ExitPlanMode is called, post the plan content
 # as a real-time comment on the linked Linear issue.
-# Works on both Claude Code (CLAUDE_LINEAR_ISSUE env) and Codex (git branch fallback).
+# Works on both Claude Code (CLAUDE_LINEAR_ISSUE env) and Codex (git/jj context fallback).
 
 let input = ($in | from json)
 
@@ -15,12 +15,40 @@ def read-current-branch []: nothing -> string {
     try { ^git rev-parse --abbrev-ref HEAD err> /dev/null } catch { '' } | str trim
 }
 
-def issue-from-branch [branch: string]: nothing -> string {
-    if ($branch | is-empty) or $branch == 'HEAD' {
+def issue-from-text [text: string]: nothing -> string {
+    let keys = (
+        $text
+        | parse -r '(?i)(LUC-\d+)'
+        | get capture0?
+        | default []
+        | each {|key| $key | str upcase }
+        | uniq
+    )
+
+    # Avoid guessing if one context accidentally mentions multiple Linear issues.
+    if ($keys | length) == 1 { $keys.0 } else { '' }
+}
+
+def read-jj-bookmarks []: nothing -> string {
+    # jj bookmarks usually point at an ancestor of @, not the mutable working-copy
+    # commit itself, so look for the nearest bookmarked ancestors. --ignore-working-copy
+    # keeps hooks read-only and avoids surprise snapshots during agent lifecycle events.
+    try {
+        ^jj log --ignore-working-copy -r 'heads(::@ & bookmarks())' --no-graph --template 'bookmarks ++ "\n"' err> /dev/null
+    } catch { '' } | str trim
+}
+
+def issue-from-context [branch: string]: nothing -> string {
+    let branch_issue = if ($branch | is-empty) or $branch == 'HEAD' {
         ''
     } else {
-        let key = ($branch | parse -r '(?i)(LUC-\d+)' | get 0.capture0?)
-        if $key == null { '' } else { $key | str upcase }
+        issue-from-text $branch
+    }
+
+    if not ($branch_issue | is-empty) {
+        $branch_issue
+    } else {
+        issue-from-text (read-jj-bookmarks)
     }
 }
 
@@ -104,7 +132,7 @@ let branch = (read-current-branch)
 let issue_key = if (not ($env.CLAUDE_LINEAR_ISSUE? | default '' | is-empty)) {
     $env.CLAUDE_LINEAR_ISSUE?
 } else {
-    issue-from-branch $branch
+    issue-from-context $branch
 }
 
 if ($issue_key | is-empty) {

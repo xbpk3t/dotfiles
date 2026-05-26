@@ -64,7 +64,12 @@ tasks:
     desc: 编译 instructions → CLAUDE.md + AGENTS.md
     internal: true
     deps: [_check]
-    cmd: apm compile --target claude,codex
+    cmds:
+      # 用于解析 frontmatter 和结构但不写文件
+      - apm compile --validate
+      # 会打印每个 skill 会被放到哪里
+      - apm compile --dry-run
+      - apm compile --target claude,codex
 
   _update:
     desc: 更新依赖锁文件
