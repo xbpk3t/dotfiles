@@ -6,6 +6,56 @@
   ...
 }: let
   cfg = config.modules.AI.claude;
+  claudeDefaultModel = "claude-opus-4-7[1m]";
+  linearHookRuntimePath = lib.concatStringsSep ":" [
+    (lib.makeBinPath [
+      pkgs.coreutils
+      pkgs.git
+      pkgs.nushell
+    ])
+    "/opt/homebrew/bin"
+    "/opt/homebrew/sbin"
+    "/usr/local/bin"
+    "/usr/bin"
+    "/bin"
+    "${config.home.homeDirectory}/.nix-profile/bin"
+    "/etc/profiles/per-user/${config.home.username}/bin"
+  ];
+  linearHookCommand = hookPath: let
+    modelFallback = lib.concatStringsSep "\n" (
+      (map (envName: let
+        shellValue = "$" + envName;
+        shellFallback = "$" + "{" + envName + ":-}";
+      in ''
+        if [ -z "''${LINEAR_MODEL:-}" ] && [ -n "${shellFallback}" ]; then
+          export LINEAR_MODEL="${shellValue}"
+        fi
+      '') ["CLAUDE_CODE_MODEL" "ANTHROPIC_DEFAULT_OPUS_MODEL"])
+      ++ [
+        ''
+          if [ -z "''${LINEAR_MODEL:-}" ]; then
+            export LINEAR_MODEL=${lib.escapeShellArg claudeDefaultModel}
+          fi
+        ''
+      ]
+    );
+    script = ''
+      export HOME=${lib.escapeShellArg config.home.homeDirectory}
+      export PATH=${lib.escapeShellArg linearHookRuntimePath}:''${PATH:-}
+      if [ -z "''${LINEAR_AGENT:-}" ]; then
+        export LINEAR_AGENT=claude-code
+      fi
+
+      ${modelFallback}
+
+      if [ -z "''${LINEAR_API_KEY:-}" ] && [ -r ${lib.escapeShellArg config.sops.secrets.API_LINEAR.path} ]; then
+        LINEAR_API_KEY="$(${pkgs.coreutils}/bin/cat ${lib.escapeShellArg config.sops.secrets.API_LINEAR.path})"
+        export LINEAR_API_KEY
+      fi
+
+      exec ${pkgs.nushell}/bin/nu --stdin -c ${lib.escapeShellArg "source ${config.home.homeDirectory}/.claude/hooks/${hookPath}"}
+    '';
+  in "${pkgs.bash}/bin/bash -c ${lib.escapeShellArg script}";
 in {
   options.modules.AI.claude = with lib; {
     enable = mkEnableOption "Enable Claude Code";
@@ -162,7 +212,7 @@ in {
             # 否则请求会被 AnyRouter 拒绝（报 "1m 上下文已经全量可用，请启用 1m 上下文后重试"）。
             # [1m] 后缀在发往 provider 前会被 Claude Code 自动剥离，不影响上游模型名匹配。
             # 设置为默认model后，cc 默认使用这个model。需要用 --model去走自定义model
-            ANTHROPIC_DEFAULT_OPUS_MODEL = "claude-opus-4-7[1m]";
+            ANTHROPIC_DEFAULT_OPUS_MODEL = claudeDefaultModel;
 
             # 可选：通过 gateway 时，减少系统 prompt 中客户端归因头变化，有助于 gateway 层 prompt cache 命中
             CLAUDE_CODE_ATTRIBUTION_HEADER = "0";
@@ -287,7 +337,7 @@ in {
               hooks = [
                 {
                   type = "command";
-                  command = "${pkgs.nushell}/bin/nu --stdin -c 'source ${config.home.homeDirectory}/.claude/hooks/session-start/linear-session-start.nu'";
+                  command = linearHookCommand "session-start/linear-session-start.nu";
                 }
               ];
             }
@@ -298,7 +348,7 @@ in {
               hooks = [
                 {
                   type = "command";
-                  command = "${pkgs.nushell}/bin/nu --stdin -c 'source ${config.home.homeDirectory}/.claude/hooks/post-tool-use/linear-plan.nu'";
+                  command = linearHookCommand "post-tool-use/linear-plan.nu";
                 }
               ];
             }
@@ -309,7 +359,7 @@ in {
               hooks = [
                 {
                   type = "command";
-                  command = "${pkgs.nushell}/bin/nu --stdin -c 'source ${config.home.homeDirectory}/.claude/hooks/session-end/linear-sync.nu'";
+                  command = linearHookCommand "session-end/linear-sync.nu";
                 }
               ];
             }
