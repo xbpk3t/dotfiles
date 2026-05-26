@@ -8,6 +8,8 @@
     else inventory;
   inventory = nodesOrEmpty inventoryData;
   groupOrEmpty = name: inventory.${name} or {};
+  nodesForContainerHost = group: hostName:
+    lib.filterAttrs (_: node: (node.containerHost or null) == hostName) (groupOrEmpty group);
   # Why：inventory 是纯数据（分组内节点结构），可能同时提供 primaryIp/ip/ips/ssh.host。
   # What：按优先级挑一个“主机地址”作为部署/连接默认值。
   primaryHostForNode = name: node: let
@@ -33,9 +35,10 @@
       server = singbox.server or primaryHostForNode name node;
     };
 in {
-  inherit primaryHostForNode;
+  inherit primaryHostForNode nodesForContainerHost;
   # 分组入口（简化调用）：mylib.inventory.<group>
   "nixos-avf" = groupOrEmpty "nixos-avf";
+  "nixos-agent" = groupOrEmpty "nixos-agent";
   "nixos-vps" = groupOrEmpty "nixos-vps";
   "nixos-homelab" = groupOrEmpty "nixos-homelab";
   "nixos-ws" = groupOrEmpty "nixos-ws";
@@ -60,7 +63,8 @@ in {
     host = ssh.host or (primaryHostForNode name node);
     sshUser = ssh.user or defaultSshUser;
     sshPort = ssh.port or defaultSshPort;
-    sshOpts = lib.optionals (sshPort != null) ["-p" (toString sshPort)];
+    extraOpts = ssh.opts or [];
+    sshOpts = extraOpts ++ lib.optionals (sshPort != null) ["-p" (toString sshPort)];
   in {
     # What：部署目标地址（IP/域名/别名）。
     # Why：由 inventory 的 primaryIp/ip/ips/ssh.host 统一推导，避免重复填部署字段。
