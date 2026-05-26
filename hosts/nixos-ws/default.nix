@@ -2,6 +2,7 @@
   globals,
   config,
   lib,
+  stateVersion,
   ...
 }:
 #############################################################
@@ -93,8 +94,8 @@ in {
   # NOTE: nixpkgs.config.allowUnfree is already set in genSpecialArgs (outputs/default.nix)
   # Do NOT set it here when using specialArgs.pkgs as it will be ignored and cause warnings
 
-  # Set system state version
-  system.stateVersion = "24.11";
+  # system.stateVersion 由 inventory 注入，统一管理升级锚点
+  system.stateVersion = lib.mkDefault stateVersion;
 
   modules = {
     hardware = {

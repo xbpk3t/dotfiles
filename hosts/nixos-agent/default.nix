@@ -1,6 +1,7 @@
 {
   lib,
   globals,
+  stateVersion,
   ...
 }: let
   inherit (globals.networking) nameservers;
@@ -61,5 +62,5 @@ in {
   #   settings.Resolve.FallbackDNS = nameservers;
   # };
 
-  system.stateVersion = "24.11";
+  system.stateVersion = lib.mkDefault stateVersion;
 }

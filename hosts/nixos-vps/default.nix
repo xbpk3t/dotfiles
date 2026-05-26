@@ -5,6 +5,7 @@
   hostMeta,
   mylib,
   userMeta,
+  stateVersion,
   ...
 }: let
   inherit (globals.networking) nameservers;
@@ -152,5 +153,5 @@ in {
     };
   };
 
-  system.stateVersion = "24.11";
+  system.stateVersion = lib.mkDefault stateVersion;
 }

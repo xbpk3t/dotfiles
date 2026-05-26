@@ -18,6 +18,7 @@ in {
   nixos-avf = {
     nixos-avf = {
       hostName = "nixos-avf";
+      stateVersion = "25.11";
       user = commonUser;
       time = commonTime;
       editor = commonEditor;
@@ -27,6 +28,7 @@ in {
   nixos-ws = {
     nixos-ws = {
       hostName = "nixos-ws";
+      stateVersion = "24.11";
       primaryIp = "192.168.234.194";
       ssh.user = "luck";
       user = commonUser;
@@ -38,6 +40,7 @@ in {
   macos-ws = {
     macos-ws = {
       hostName = "macos-ws";
+      stateVersion = "24.11";
       primaryIp = "127.0.0.1";
       ssh.user = "luck";
       user = commonUser;
@@ -49,6 +52,7 @@ in {
   nixos-vps = {
     nixos-vps-dev = rec {
       hostName = "nixos-vps-dev";
+      stateVersion = "24.11";
       primaryIp = "192.129.183.26";
       acmeEmail = "yyzw@live.com";
       user = commonUser;
@@ -112,6 +116,7 @@ in {
 
     nixos-vps-svc = rec {
       hostName = "nixos-vps-svc";
+      stateVersion = "24.11";
       primaryIp = "103.85.224.63";
       acmeEmail = "yyzw@live.com";
       user = commonUser;
@@ -172,6 +177,7 @@ in {
   nixos-agent = {
     nixos-agent = {
       hostName = "nixos-agent";
+      stateVersion = "24.11";
       # 该容器节点归属的 VPS inventory node。
       containerHost = "nixos-vps-dev";
       # What：容器 IP（宿主机 ve-nixos-agent 网桥地址）。
@@ -187,6 +193,7 @@ in {
   nixos-homelab = {
     nixos-homelab = rec {
       hostName = "nixos-homelab";
+      stateVersion = "24.11";
       # What：部署/连接默认地址。
       # Why：homelab 走 tailnet，避免依赖公网/NAT。
       primaryIp = "100.81.204.63";

@@ -1,4 +1,9 @@
-{userMeta, ...}: let
+{
+  userMeta,
+  lib,
+  stateVersion,
+  ...
+}: let
   hostName = "nixos-avf";
 in {
   # why this? 把Android手机作为个人项目的开发机remote server使用
@@ -19,7 +24,5 @@ in {
     enableGraphics = true;
   };
 
-  # 说明：这是全新 profile，直接使用当前代际的 stateVersion。
-  # stateVersion 影响 stateful data migration，后续不要随意改动。
-  system.stateVersion = "25.11";
+  system.stateVersion = lib.mkDefault stateVersion;
 }

@@ -1,6 +1,7 @@
 {
   globals,
   lib,
+  stateVersion,
   ...
 }: let
   hostName = "nixos-homelab";
@@ -95,6 +96,6 @@ in {
     };
   };
 
-  # system.stateVersion 保持当前主版本
-  system.stateVersion = "24.11";
+  # system.stateVersion 由 inventory 注入，统一管理升级锚点
+  system.stateVersion = lib.mkDefault stateVersion;
 }
