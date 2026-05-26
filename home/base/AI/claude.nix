@@ -6,6 +6,56 @@
   ...
 }: let
   cfg = config.modules.AI.claude;
+  claudeDefaultModel = "claude-opus-4-7[1m]";
+  linearHookRuntimePath = lib.concatStringsSep ":" [
+    (lib.makeBinPath [
+      pkgs.coreutils
+      pkgs.git
+      pkgs.nushell
+    ])
+    "/opt/homebrew/bin"
+    "/opt/homebrew/sbin"
+    "/usr/local/bin"
+    "/usr/bin"
+    "/bin"
+    "${config.home.homeDirectory}/.nix-profile/bin"
+    "/etc/profiles/per-user/${config.home.username}/bin"
+  ];
+  linearHookCommand = hookPath: let
+    modelFallback = lib.concatStringsSep "\n" (
+      (map (envName: let
+        shellValue = "$" + envName;
+        shellFallback = "$" + "{" + envName + ":-}";
+      in ''
+        if [ -z "''${LINEAR_MODEL:-}" ] && [ -n "${shellFallback}" ]; then
+          export LINEAR_MODEL="${shellValue}"
+        fi
+      '') ["CLAUDE_CODE_MODEL" "ANTHROPIC_DEFAULT_OPUS_MODEL"])
+      ++ [
+        ''
+          if [ -z "''${LINEAR_MODEL:-}" ]; then
+            export LINEAR_MODEL=${lib.escapeShellArg claudeDefaultModel}
+          fi
+        ''
+      ]
+    );
+    script = ''
+      export HOME=${lib.escapeShellArg config.home.homeDirectory}
+      export PATH=${lib.escapeShellArg linearHookRuntimePath}:''${PATH:-}
+      if [ -z "''${LINEAR_AGENT:-}" ]; then
+        export LINEAR_AGENT=claude-code
+      fi
+
+      ${modelFallback}
+
+      if [ -z "''${LINEAR_API_KEY:-}" ] && [ -r ${lib.escapeShellArg config.sops.secrets.API_LINEAR.path} ]; then
+        LINEAR_API_KEY="$(${pkgs.coreutils}/bin/cat ${lib.escapeShellArg config.sops.secrets.API_LINEAR.path})"
+        export LINEAR_API_KEY
+      fi
+
+      exec ${pkgs.nushell}/bin/nu --stdin -c ${lib.escapeShellArg "source ${config.home.homeDirectory}/.claude/hooks/${hookPath}"}
+    '';
+  in "${pkgs.bash}/bin/bash -c ${lib.escapeShellArg script}";
 in {
   options.modules.AI.claude = with lib; {
     enable = mkEnableOption "Enable Claude Code";
@@ -162,7 +212,7 @@ in {
             # 否则请求会被 AnyRouter 拒绝（报 "1m 上下文已经全量可用，请启用 1m 上下文后重试"）。
             # [1m] 后缀在发往 provider 前会被 Claude Code 自动剥离，不影响上游模型名匹配。
             # 设置为默认model后，cc 默认使用这个model。需要用 --model去走自定义model
-            ANTHROPIC_DEFAULT_OPUS_MODEL = "claude-opus-4-7[1m]";
+            ANTHROPIC_DEFAULT_OPUS_MODEL = claudeDefaultModel;
 
             # 可选：通过 gateway 时，减少系统 prompt 中客户端归因头变化，有助于 gateway 层 prompt cache 命中
             CLAUDE_CODE_ATTRIBUTION_HEADER = "0";
@@ -189,6 +239,131 @@ in {
             commit = "";
             pr = "";
           };
+
+          #  behavior = {
+          #    autoSave = true;
+          #    confirmOnExit = false;
+          #    showLineNumbers = true;
+          #  };
+          permissions = {
+            # 尽量与 codex 的 trusted projects 对齐，避免给到过宽目录。
+            additionalDirectories = [
+              "~/Desktop/dotfiles"
+              "~/Desktop/docs"
+            ];
+
+            # 规则优先级是 deny -> ask -> allow
+
+            # plan 模式：默认先规划、你批准、再执行。方案层面的审批保留不动。
+            # [2026-04-30] 修改为auto模式
+            # Auto mode: 用 Claude Code 的后台 safety classifier 自动批准大多数 tool calls，
+            # 减少每步手动 approve；不是 bypassPermissions / --dangerously-skip-permissions。
+            # 显式 ask/deny 规则仍优先命中。若账号/模型/provider 不满足要求，auto 会显示 unavailable。
+            # [2026-05-01] 修改为 bypassPermissions，因为配置为auto证明并不能自动approve，查了一下文档，auto模式只在使用claude自家model才生效，其他model会自动退化到default (Read Only)
+            # https://code.claude.com/docs/en/permission-modes#eliminate-prompts-with-auto-mode
+            # [2026-05-08] bypassPermissions -> plan
+            defaultMode = "plan";
+
+            # 显式放行的常见安全操作（分类器之上的双保险）
+            # auto 模式下先不维护大 allowlist，避免和 classifier 策略冲突。
+            #
+            # 注意：以下规则补齐了之前未覆盖的工具类型——WebFetch/Skill/MCP 插件
+            # 如果不加这些，Claude 在 plan 模式下会对这类工具弹窗询问。
+            allow = [
+              "Bash(*)"
+              "Read(*)"
+              "Edit(*)"
+              "Write(*)"
+
+              "WebSearch(*)"
+              # WebFetch: 独立于 WebSearch 的工具，用于拉取 URL 内容
+              "WebFetch(*)"
+              # Skill: 用于调用 /blog-social-science 等技能
+              "Skill(*)"
+
+              # 之前这里的写法类似于 "mcp__plugin_claude-code-home-manager_codegraph__*"，home-manager MCP 集成本质上是 plugin 桥接：programs.claude-code.enableMcpIntegration 会把 programs.mcp 里定义的所有 MCP server 注入为一个 Claude Code plugin（名为 claude-code-home-manager），工具 ID 前缀就变成了mcp__plugin_claude-code-home-manager_<server>__。这和官方文档里用户直接在 settings.json 手写 MCP server 产生的 mcp__<server>__ 前缀是两条不同的注册路径。
+              # chrome-devtools 插件：浏览器操作（导航、截图、点击等）
+              "mcp__*_chrome-devtools__*"
+              # github 插件：仓库操作（拉取 commits、创建 PR 等）
+              "mcp__*_github__*"
+              # linear 插件：issue 管理、sprint 操作、团队协作
+              "mcp__*_linear__*"
+              # codegraph 插件：代码知识图谱搜索、探索、调用者分析、影响分析
+              "mcp__*_codegraph__*"
+            ];
+
+            # 高风险操作仍需确认
+            ask = [
+              "Bash(git push *)"
+              "Bash(git reset *)"
+              "Bash(git clean *)"
+
+              "Bash(rm *)"
+              "Bash(sudo *)"
+              "Bash(chmod *)"
+              "Bash(chown *)"
+              "Bash(dd *)"
+
+              # "Bash(curl *)"
+              # "Bash(wget *)"
+              # "Bash(ssh *)"
+              # "Bash(scp *)"
+              # "Bash(rsync *)"
+
+              "Bash(npm publish *)"
+              "Bash(pnpm publish *)"
+              "Bash(cargo publish *)"
+
+              "Bash(terraform apply *)"
+              "Bash(terraform destroy *)"
+              "Bash(tofu apply *)"
+              "Bash(tofu destroy *)"
+
+              "Bash(kubectl delete *)"
+              "Bash(docker rm *)"
+              "Bash(docker rmi *)"
+              "Bash(docker system prune *)"
+            ];
+
+            deny = [];
+          };
+          # LUC-48: Linear issue checkpoint hooks.
+          # SessionStart: detect LUC-XXX from git branch -> CLAUDE_ENV_FILE.
+          # PostToolUse: post plan to Linear when ExitPlanMode is called.
+          # SessionEnd: post a lightweight checkpoint only; final reviews use `linear-finalize`.
+          hooks.SessionStart = [
+            {
+              matcher = "";
+              hooks = [
+                {
+                  type = "command";
+                  command = linearHookCommand "session-start/linear-session-start.nu";
+                }
+              ];
+            }
+          ];
+          hooks.PostToolUse = [
+            {
+              matcher = "ExitPlanMode";
+              hooks = [
+                {
+                  type = "command";
+                  command = linearHookCommand "post-tool-use/linear-plan.nu";
+                }
+              ];
+            }
+          ];
+          hooks.SessionEnd = [
+            {
+              matcher = "";
+              hooks = [
+                {
+                  type = "command";
+                  command = linearHookCommand "session-end/linear-sync.nu";
+                }
+              ];
+            }
+          ];
         };
       };
 
@@ -214,6 +389,23 @@ in {
 
           # 文件2建议：复杂任务时临时开最高 effort，日常用 cc 保持 auto
           ccmax = "CODEX_GITHUB_PERSONAL_ACCESS_TOKEN=$(gh auth token) claude --effort max";
+        };
+        file = {
+          ".claude/hooks/session-start/linear-session-start.nu" = {
+            executable = true;
+            force = true;
+            source = ./hooks/linear-session-start.nu;
+          };
+          ".claude/hooks/post-tool-use/linear-plan.nu" = {
+            executable = true;
+            force = true;
+            source = ./hooks/linear-plan.nu;
+          };
+          ".claude/hooks/session-end/linear-sync.nu" = {
+            executable = true;
+            force = true;
+            source = ./hooks/linear-sync.nu;
+          };
         };
       };
 
