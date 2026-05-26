@@ -116,7 +116,7 @@
     - cmd: s
       des: 通过fd按名称搜索文件
     - cmd: S
-      des: 通过ripgrep按内容搜索文件
+      des: 通过ripgrep按内容搜索文件 # yazi本身是否支持在某个folder下的所有文件里搜索某个关键字？
     - cmd: f
       des: 过滤文件
     - cmd: /

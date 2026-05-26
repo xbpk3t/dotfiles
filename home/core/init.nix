@@ -23,6 +23,7 @@
   pkgs,
   lib,
   userMeta,
+  stateVersion,
   ...
 }: let
   username = userMeta.username;
@@ -34,7 +35,7 @@ in {
       then "/Users/${username}"
       else "/home/${username}"
     );
-    stateVersion = lib.mkDefault "24.11";
+    stateVersion = lib.mkDefault stateVersion;
   };
 
   programs.home-manager.enable = true;
