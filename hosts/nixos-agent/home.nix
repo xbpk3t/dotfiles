@@ -34,40 +34,76 @@
     tcpdump
     # ClaudeClaw daemon 运行时（bun run src/index.ts start）
     bun
+    # ClaudeClaw 的 OGG 转换 helper 需要 Node.js（独立于 bun）
+    nodejs_22
   ];
 
   # [2026-05-25] ClaudeClaw heartbeat daemon 自启动
   # 容器 reboot 后自动拉起 daemon，无需手动 SSH 进来 /claudeclaw:start。
-  # daemon 启动时从 ~/.claude/plugins/cache 自动发现最新版本路径，
-  # 首次启动时若插件尚未同步（Claude 未 run 过），会每 30 秒重试直到成功。
-  systemd.user.services.claudeclaw-daemon = {
-    Unit = {
-      Description = "ClaudeClaw heartbeat daemon";
-      After = ["network-online.target"];
-      Wants = ["network-online.target"];
-    };
-    Service = {
-      Type = "simple";
-      WorkingDirectory = "%h/Desktop/docs";
-      ExecStart = pkgs.writeShellScript "claudeclaw-daemon-start" ''
-        CACHE="$HOME/.claude/plugins/cache/claudeclaw/claudeclaw"
-        if [ ! -d "$CACHE" ]; then
-          echo "claudeclaw plugin not yet synced, retrying later..."
-          exit 1
-        fi
-        LATEST=$(ls -d "$CACHE"/*/ 2>/dev/null | sort -V | tail -1)
-        if [ -z "$LATEST" ]; then
-          echo "no plugin version found in $CACHE"
-          exit 1
-        fi
-        echo "Starting ClaudeClaw daemon from $LATEST"
-        exec ${pkgs.bun}/bin/bun run "$LATEST/src/index.ts" start
-      '';
-      Restart = "on-failure";
-      RestartSec = 30;
-    };
-    Install = {
-      WantedBy = ["default.target"];
-    };
-  };
+  # daemon 启动时从 ~/.claude/plugins/cache 自动发现最新版本路径。
+  #
+  # 鸡生蛋问题：ClaudeClaw 插件缓存是 Claude Code 首次运行时的异步同步产物。
+  # 全新容器或缓存目录存在但为空（上一次同步被中断）时，systemd daemon 会
+  # 因为插件入口缺失而永久重启死循环——没有任何东西会替它跑第一次 claude。
+  # 解决：检测到插件入口（src/index.ts）缺失时，先跑一次 headless claude
+  # --print 触发完整插件同步（30s 超时兜底），确保就绪后再启动 daemon。
+  # 注意：不能只判目录存在（空目录可能被前次中断的同步留下），必须判入口文件。
+  # [2026-05-26] ClaudeClaw 的setup有点复杂，应该手动去跑，而非自启动，所以注释掉了。仅供参考。
+  #  systemd.user.services.claudeclaw-daemon = {
+  #    Unit = {
+  #      Description = "ClaudeClaw heartbeat daemon";
+  #      After = ["network-online.target"];
+  #      Wants = ["network-online.target"];
+  #    };
+  #    Service = {
+  #      Type = "simple";
+  #      WorkingDirectory = "%h/Desktop/docs";
+  #      ExecStart = "${pkgs.writeShellApplication {
+  #        name = "claudeclaw-daemon-start";
+  #        runtimeInputs = with pkgs; [findutils coreutils bun util-linux];
+  #        text = ''
+  #          CACHE="$HOME/.claude/plugins/cache/claudeclaw/claudeclaw"
+  #
+  #          latest() {
+  #            find "$CACHE" -maxdepth 1 -mindepth 1 -type d 2>/dev/null \
+  #              | sort -V | tail -1
+  #          }
+  #
+  #          LATEST=$(latest)
+  #          if [ -z "$LATEST" ] || [ ! -f "$LATEST/src/index.ts" ]; then
+  #            echo "claudeclaw plugin entry not found, bootstrapping via headless Claude..."
+  #            # systemd user service 不继承 home.sessionVariables，
+  #            # Claude Code 所需的 ANTHROPIC_* 和 GITHUB_TOKEN 必须显式注入。
+  #            #
+  #            # 设计说明：为什么 ANTHROPIC_BASE_URL 用公网 URL 而非本地 Docker IP？
+  #            #   （同上，见前面注释块）
+  #            ANTHROPIC_BASE_URL="https://api.lucc.dev"
+  #            export ANTHROPIC_BASE_URL
+  #            ANTHROPIC_AUTH_TOKEN="$(cat ${config.sops.secrets.LLM_AxonHub.path})"
+  #            export ANTHROPIC_AUTH_TOKEN
+  #            GITHUB_TOKEN="$(cat ${config.sops.secrets.GITHUB_TOKEN.path})"
+  #            export GITHUB_TOKEN
+  #            # Claude Code 在无 TTY 环境下（systemd service）不会完成完整的
+  #            # 插件初始化流程，导致缓存被标记为 .orphaned_at。用 script(1) 提供
+  #            # 伪终端，确保插件同步（GitHub 下载）等异步初始化能完整执行。
+  #            CLAUDE="${config.programs.claude-code.package}/bin/claude"
+  #            script -q -c "timeout 120 $CLAUDE --print hello --permission-mode bypassPermissions" /dev/null 2>&1 || true
+  #            LATEST=$(latest)
+  #          fi
+  #
+  #          if [ -z "$LATEST" ] || [ ! -f "$LATEST/src/index.ts" ]; then
+  #            echo "plugin entry still missing after bootstrap"
+  #            exit 1
+  #          fi
+  #          echo "Starting ClaudeClaw daemon from $LATEST"
+  #          exec bun run "$LATEST/src/index.ts" start
+  #        '';
+  #      }}/bin/claudeclaw-daemon-start";
+  #      Restart = "on-failure";
+  #      RestartSec = 30;
+  #    };
+  #    Install = {
+  #      WantedBy = ["default.target"];
+  #    };
+  #  };
 }
