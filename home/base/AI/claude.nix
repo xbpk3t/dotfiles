@@ -11,6 +11,7 @@
     (lib.makeBinPath [
       pkgs.coreutils
       pkgs.git
+      pkgs.jujutsu
       pkgs.nushell
     ])
     "/opt/homebrew/bin"

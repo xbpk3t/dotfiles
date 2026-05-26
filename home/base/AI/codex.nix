@@ -11,6 +11,7 @@
     (lib.makeBinPath [
       pkgs.coreutils
       pkgs.git
+      pkgs.jujutsu
       pkgs.nushell
     ])
     "/opt/homebrew/bin"
@@ -216,11 +217,11 @@ in {
       text = builtins.toJSON linearCodexHooks;
     };
 
-    home.file.".codex/prompts" = {
-      source = ./prompts;
-      recursive = true;
-      force = true;
-    };
+    #  home.file.".codex/prompts" = {
+    #    source = ./prompts;
+    #    recursive = true;
+    #    force = true;
+    #  };
 
     programs.agent-skills = {
       # 注意这个 targets 是用来把 skills folder 放到不同cli工具的folder，以实现skills的复用。所以所有这里配置了的 targets 里的 skills 都是完全一致的。

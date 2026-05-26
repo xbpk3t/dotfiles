@@ -51,3 +51,4 @@ __pycache__/
 
 # APM dependencies
 apm_modules/
+apm.lock.yaml
