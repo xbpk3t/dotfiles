@@ -2,10 +2,15 @@
   config,
   lib,
   globals,
+  hostMeta,
+  mylib,
   userMeta,
   ...
 }: let
   inherit (globals.networking) nameservers;
+  agentNodes = mylib.inventory.nodesForContainerHost "nixos-agent" hostMeta.hostName;
+  agentEnabled = agentNodes != {};
+  agentExternalInterface = lib.attrByPath ["networking" "externalInterface"] null hostMeta;
   diskDevice = lib.attrByPath ["disko" "devices" "disk" "vda" "device"] "/dev/vda" config;
 in {
   imports = [
@@ -57,7 +62,25 @@ in {
     useDHCP = true;
     nameservers = nameservers;
     useHostResolvConf = lib.mkForce false;
+
+    # [2026-05-25] nixos-agent 容器使用 privateNetwork（10.233.0.0/24）。
+    # 只有 inventory 中归属到当前 VPS 的 agent 节点存在时才开启 NAT，
+    # 并限制到目标机确认过的公网出口。
+    nat = lib.mkIf agentEnabled ({
+        enable = true;
+        internalInterfaces = ["ve-nixos-agent"];
+      }
+      // lib.optionalAttrs (agentExternalInterface != null) {
+        externalInterface = agentExternalInterface;
+      });
   };
+
+  assertions = [
+    {
+      assertion = !agentEnabled || agentExternalInterface != null;
+      message = "nixos-agent container host requires hostMeta.networking.externalInterface.";
+    }
+  ];
 
   services.resolved = {
     enable = true;
@@ -114,14 +137,14 @@ in {
     # serverIP 由 inventory 注入，避免多处重复维护
     serverPort = 6443;
   };
-  # 启用 nixos-container 容器支持（nixos-agent 等）
-  boot.enableContainers = true;
+  # 启用 nixos-container 容器支持（当前仅 nixos-agent 使用）。
+  boot.enableContainers = lib.mkIf agentEnabled true;
 
   # [2026-05-25] sops-nix age key：宿主机的 keys.txt 只读挂入 nixos-agent 容器。
   # 容器通过 deploy-rs 独立部署，但 sops 解密发生在容器激活阶段（非构建阶段）。
   # 若容器内无 age 私钥，所有 sops secret（GITHUB_TOKEN 等）解密失败。
   # bind mount 让宿主机和容器共用同一份 age key，无需在容器内手动维护。
-  containers.nixos-agent = {
+  containers.nixos-agent = lib.mkIf agentEnabled {
     bindMounts."sops-age-key" = {
       hostPath = "/home/luck/.config/sops/age/keys.txt";
       mountPoint = "/home/luck/.config/sops/age/keys.txt";
