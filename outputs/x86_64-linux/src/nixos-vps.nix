@@ -22,6 +22,7 @@
         "secrets/default.nix"
         "modules/nixos/base"
         "modules/nixos/vps"
+        "modules/nixos/cntr/nixos-agent.nix"
         "modules/nixos/extra/k3s/default.nix"
       ];
     home-modules = map mylib.relativeToRoot [
@@ -52,7 +53,9 @@
     };
 
   mkNodeRole = name: node: let
+    hostName = node.hostName or name;
     nodeModule = mkNodeModule name node;
+    agentNodes = mylib.inventory.nodesForContainerHost "nixos-agent" hostName;
     modules =
       baseModules
       // {
@@ -72,9 +75,50 @@
       defaultSshUser = ssh-user;
       remoteBuild = true;
     };
+
+    # 从当前 VPS node 拥有的 agent inventory nodes 生成容器 deploy nodes。
+    # Why: 容器系统配置已经在宿主 nixosConfig.containers.<name>.config 中求值，
+    #      这里复用该结果并从宿主 inventory 自动派生 SSH ProxyJump。
+    containerDeployLib = inputs."deploy-rs".lib.${baseModules.system};
+    containerDeploy = let
+      hostAddress = mylib.inventory.primaryHostForNode name node;
+      mkContainerDeploy = agentName: agentNode: let
+        containerConfig = nixosConfig.config.containers.${agentName} or null;
+        ssh = agentNode.ssh or {};
+        deployAgentNode =
+          agentNode
+          // {
+            ssh =
+              ssh
+              // {
+                opts = (ssh.opts or []) ++ ["-J" "${ssh-user}@${hostAddress}"];
+              };
+          };
+      in
+        if containerConfig != null
+        then {
+          ${agentName} = mylib.inventory.deployRsNode {
+            name = agentName;
+            node = deployAgentNode;
+            # containerConfig.config 是容器子模块求值后的 raw merged config（有 .system.build.toplevel），
+            # 而非 evalModules 结果（有 .config.system.build.toplevel）。
+            # deployLib.activate.nixos 期望后者，所以用 { config = ...; } 包裹一层。
+            nixosConfiguration = {config = containerConfig.config;};
+            deployLib = containerDeployLib;
+            defaultSshUser = "root";
+            remoteBuild = true;
+          };
+        }
+        else {};
+    in
+      lib.attrsets.mergeAttrsList (lib.mapAttrsToList mkContainerDeploy agentNodes);
   in {
     nixosConfigurations.${name} = nixosConfig;
-    deploy.nodes.${name} = deployNode;
+    deploy.nodes =
+      {
+        ${name} = deployNode;
+      }
+      // containerDeploy;
   };
 
   nodeRoles = builtins.attrValues (builtins.mapAttrs mkNodeRole nodes);

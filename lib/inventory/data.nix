@@ -54,6 +54,10 @@ in {
       user = commonUser;
       time = commonTime;
       editor = commonEditor;
+      networking = {
+        # 目标机默认公网出口，由 `ip -o route show default` 确认为 ens3。
+        externalInterface = "ens3";
+      };
       hardware = {
         cpuCores = 5;
         memGiB = 6;
@@ -165,6 +169,21 @@ in {
       };
     };
   };
+  nixos-agent = {
+    nixos-agent = {
+      hostName = "nixos-agent";
+      # 该容器节点归属的 VPS inventory node。
+      containerHost = "nixos-vps-dev";
+      # What：容器 IP（宿主机 ve-nixos-agent 网桥地址）。
+      # Why：NixOS 容器默认分配 10.233.0.0/16 段地址，首个容器为 10.233.0.2。
+      # Note：容器创建后若 IP 不符，在此覆写。
+      primaryIp = "10.233.0.2";
+      user = commonUser;
+      time = commonTime;
+      editor = commonEditor;
+    };
+  };
+
   nixos-homelab = {
     nixos-homelab = rec {
       hostName = "nixos-homelab";
