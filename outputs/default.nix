@@ -53,9 +53,8 @@
       inherit hostMeta;
       userMeta = hostMeta.user;
       timeMeta = hostMeta.time;
-      # Why: outputs/default.nix 只负责把 host metadata 分发给模块，
-      # 不再在 wiring 层硬编码 editor 偏好值；editor 的真实来源固定为 hostMeta.editor。
       editorMeta = hostMeta.editor;
+      stateVersion = hostMeta.stateVersion or "24.11";
     };
 
   # 传给 outputs/<system>/src/*.nix 的公共参数。

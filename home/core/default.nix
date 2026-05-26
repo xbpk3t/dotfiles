@@ -26,11 +26,6 @@
       #- Kulala nvim
       #- Posting
 
-      tree
-
-      zip
-      unzip
-
       # System utilities
       screen
 
