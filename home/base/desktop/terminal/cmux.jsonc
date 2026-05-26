@@ -214,7 +214,8 @@
     // cmux automation port 起点，沿用默认。
     "portBase": 9100,
 
-    // 你重度用 Claude Code，开启。
+    // 保留 cmux Claude Code 集成，用于 desktop notification / workspace status。
+    // Linear hooks 由 Claude Code 原生 settings 管理，并与 cmux 注入的 --settings additive 合并。
     "claudeCodeIntegration": true,
 
     // automation port range，沿用默认。

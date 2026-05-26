@@ -268,6 +268,43 @@ in {
 
             deny = [];
           };
+          # LUC-48: Linear issue checkpoint hooks.
+          # SessionStart: detect LUC-XXX from git branch -> CLAUDE_ENV_FILE.
+          # PostToolUse: post plan to Linear when ExitPlanMode is called.
+          # SessionEnd: post a lightweight checkpoint only; final reviews use `linear-finalize`.
+          hooks.SessionStart = [
+            {
+              matcher = "";
+              hooks = [
+                {
+                  type = "command";
+                  command = "${pkgs.nushell}/bin/nu --stdin -c 'source ${config.home.homeDirectory}/.claude/hooks/session-start/linear-session-start.nu'";
+                }
+              ];
+            }
+          ];
+          hooks.PostToolUse = [
+            {
+              matcher = "ExitPlanMode";
+              hooks = [
+                {
+                  type = "command";
+                  command = "${pkgs.nushell}/bin/nu --stdin -c 'source ${config.home.homeDirectory}/.claude/hooks/post-tool-use/linear-plan.nu'";
+                }
+              ];
+            }
+          ];
+          hooks.SessionEnd = [
+            {
+              matcher = "";
+              hooks = [
+                {
+                  type = "command";
+                  command = "${pkgs.nushell}/bin/nu --stdin -c 'source ${config.home.homeDirectory}/.claude/hooks/session-end/linear-sync.nu'";
+                }
+              ];
+            }
+          ];
         };
       };
 
@@ -293,6 +330,23 @@ in {
 
           # 文件2建议：复杂任务时临时开最高 effort，日常用 cc 保持 auto
           ccmax = "CODEX_GITHUB_PERSONAL_ACCESS_TOKEN=$(gh auth token) claude --effort max";
+        };
+        file = {
+          ".claude/hooks/session-start/linear-session-start.nu" = {
+            executable = true;
+            force = true;
+            source = ./hooks/linear-session-start.nu;
+          };
+          ".claude/hooks/post-tool-use/linear-plan.nu" = {
+            executable = true;
+            force = true;
+            source = ./hooks/linear-plan.nu;
+          };
+          ".claude/hooks/session-end/linear-sync.nu" = {
+            executable = true;
+            force = true;
+            source = ./hooks/linear-sync.nu;
+          };
         };
       };
 
