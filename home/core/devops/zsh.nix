@@ -8,6 +8,7 @@
   home = {
     packages = with pkgs; [
       zsh-completions
+      carapace
 
       # https://github.com/andreafrancia/trash-cli
       # trash-list
@@ -214,6 +215,12 @@
         # - completionInit / compinit: 570
         # - autosuggestions: 700
         # 因此这里显式卡在中间，避免被 programs.zsh.plugins 的更晚 source 顺序破坏。
+
+        # carapace: 多 shell 补全引擎，增强 zsh tab 补全数据源
+        (lib.mkOrder 600 ''
+          source <(${pkgs.carapace}/bin/carapace _carapace zsh)
+        '')
+
         (lib.mkOrder 650 ''
           source ${pkgs.zsh-fzf-tab}/share/fzf-tab/fzf-tab.plugin.zsh
         '')
