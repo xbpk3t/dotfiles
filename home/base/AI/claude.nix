@@ -9,6 +9,15 @@
 in {
   options.modules.AI.claude = with lib; {
     enable = mkEnableOption "Enable Claude Code";
+    permissionMode = mkOption {
+      type = types.enum ["default" "yolo"];
+      default = "default";
+      description = ''
+        Permission model for Claude Code:
+        - "default": Interactive mode with fine-grained allow/ask/deny rules (workstation)
+        - "yolo":    Headless/daemon mode with bypassPermissions (container agent)
+      '';
+    };
   };
 
   # https://github.com/AddG0/nix-config/blob/main/home/common/optional/development/ai/claude-code/default.nix
@@ -385,6 +394,80 @@ in {
           dest = ".claude/skills";
           structure = "link";
         };
+      };
+    })
+    # 模式：default — 工作站交互式审批
+    (lib.mkIf (cfg.enable && cfg.permissionMode == "default") {
+      programs.claude-code.settings.permissions = {
+        defaultMode = "plan";
+        additionalDirectories = [
+          "~/Desktop/dotfiles"
+          "~/Desktop/docs"
+        ];
+        allow = [
+          "Bash(*)"
+          "Read(*)"
+          "Edit(*)"
+          "Write(*)"
+
+          "WebSearch(*)"
+          "WebFetch(*)"
+          "Skill(*)"
+
+          "mcp__*_chrome-devtools__*"
+          "mcp__*_github__*"
+          "mcp__*_linear__*"
+          "mcp__*_codegraph__*"
+        ];
+        ask = [
+          "Bash(git push *)"
+          "Bash(git reset *)"
+          "Bash(git clean *)"
+
+          "Bash(rm *)"
+          "Bash(sudo *)"
+          "Bash(chmod *)"
+          "Bash(chown *)"
+          "Bash(dd *)"
+
+          "Bash(npm publish *)"
+          "Bash(pnpm publish *)"
+          "Bash(cargo publish *)"
+
+          "Bash(terraform apply *)"
+          "Bash(terraform destroy *)"
+          "Bash(tofu apply *)"
+          "Bash(tofu destroy *)"
+
+          "Bash(kubectl delete *)"
+          "Bash(docker rm *)"
+          "Bash(docker rmi *)"
+          "Bash(docker system prune *)"
+        ];
+        deny = [];
+      };
+    })
+
+    # 模式：yolo — 无值守 daemon 模式（容器 agent）
+    (lib.mkIf (cfg.enable && cfg.permissionMode == "yolo") {
+      programs.claude-code.settings.permissions = {
+        defaultMode = "bypassPermissions";
+        additionalDirectories = [
+          "~/Desktop/dotfiles"
+          "~/Desktop/docs"
+        ];
+        allow = [
+          "Bash(*)"
+          "Read(*)"
+          "Edit(*)"
+          "Write(*)"
+          "WebSearch(*)"
+          "WebFetch(*)"
+          "Skill(*)"
+          "mcp__*__*"
+        ];
+        ask = [];
+        deny = [];
       };
     })
   ];
