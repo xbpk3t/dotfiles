@@ -202,8 +202,52 @@ def state-for-event-type [event_type: string] {
     }
 }
 
+def events-with-id []: list -> list {
+    $in
+    | where {|event| ($event.id? | default null) != null }
+}
+
+def summary-state-for-event-type [event_type: string] {
+    match $event_type {
+        "summary_task_created" => "pending"
+        "summary_started" => "in_progress"
+        "summary_ready" => "ready"
+        "summary_failed" => "failed"
+        "summary_skipped" => "skipped"
+        _ => "pending"
+    }
+}
+
+def derive-summary-task-states [events: list] {
+    let summary_events = (
+        $events
+        | events-with-id
+        | where type in [summary_task_created summary_started summary_ready summary_failed summary_skipped]
+    )
+
+    let task_ids = (
+        $summary_events
+        | where type == "summary_task_created"
+        | get id
+        | uniq
+    )
+
+    $task_ids
+    | each {|id|
+        let rows = ($summary_events | where id == $id)
+        let last_event = ($rows | last)
+        {
+            id: $id
+            state: (summary-state-for-event-type $last_event.type)
+            last_event: $last_event
+        }
+    }
+    | sort-by id
+}
+
 def derive-task-states [events: list] {
     $events
+    | events-with-id
     | group-by id
     | items {|id, rows|
         let last_event = ($rows | last)
@@ -881,6 +925,8 @@ def "main all" [
 # ---------------------------------------------------------------------------
 
 const default_summary_prompt_version = "single_video_v1"
+const default_summary_concurrency = 20
+const default_codex_runner = "codex --ask-for-approval never exec --model gpt-5.5 --ephemeral --sandbox read-only --skip-git-repo-check --color never"
 
 const summary_schema_json = '{
   "overall_score": "0.0-5.0",
@@ -1043,34 +1089,15 @@ def discover-summary-tasks [workdir: string transcript_dir: string] {
 
 def summary-tasks-to-process [workdir: string force: bool] {
     let events = (load-events $workdir)
+    let states = (derive-summary-task-states $events)
 
-    let task_ids = (
-        $events
-        | where type == "summary_task_created"
-        | get id
-        | uniq
-    )
-
-    mut result = []
-
-    for id in $task_ids {
-        if $force {
-            $result = ($result | append $id)
-        } else {
-            let item_path = (summary-item-path $workdir $id)
-            let has_ready = (
-                $events
-                | where type == "summary_ready" and id == $id
-                | length
-            ) > 0
-
-            if not $has_ready {
-                $result = ($result | append $id)
-            }
-        }
+    if $force {
+        return ($states | get id)
     }
 
-    $result
+    $states
+    | where {|row| $row.state != "ready" or not (file-exists (summary-item-path $workdir $row.id)) }
+    | get id
 }
 
 def build-summary-prompt [workdir: string transcript_file: string external_prompt?: string] {
@@ -1098,16 +1125,118 @@ def build-summary-prompt [workdir: string transcript_file: string external_promp
     | str replace "{{transcript}}" $body
 }
 
-def invoke-runner [runner_cmd: string prompt_text: string log_file: string raw_file: string] {
-    # Write prompt to a temp file
-    let prompt_file = ($log_file | path dirname | path join ($log_file | path parse | get stem | $in + ".prompt.txt"))
-    $prompt_text | save -f $prompt_file
+def normalize-runner-agent [agent?: string runner_cmd?: string] {
+    let explicit_agent = if $agent == null { null } else { $agent | str trim | str downcase }
+
+    if $explicit_agent != null and not ($explicit_agent | is-empty) {
+        return $explicit_agent
+    }
+
+    if $runner_cmd == null or ($runner_cmd | str trim | is-empty) {
+        return null
+    }
+
+    let trimmed = ($runner_cmd | str trim)
+    if ($trimmed == "codex") or ($trimmed | str starts-with "codex ") {
+        "codex"
+    } else if ($trimmed == "claude") or ($trimmed | str starts-with "claude ") or ($trimmed == "cc") or ($trimmed | str starts-with "cc ") {
+        "claude"
+    } else {
+        "claude"
+    }
+}
+
+def normalize-runner-command [runner_cmd: string] {
+    let trimmed = ($runner_cmd | str trim)
+    if $trimmed == "cc" {
+        "claude"
+    } else if ($trimmed | str starts-with "cc ") {
+        $trimmed | str replace -r '^cc(\s+)' 'claude${1}'
+    } else {
+        $trimmed
+    }
+}
+
+def resolve-runner-config [agent?: string runner_cmd?: string] {
+    let selected_agent = (normalize-runner-agent $agent $runner_cmd)
+
+    if $selected_agent == null {
+        error make {msg: "Missing AI runner. Use --agent codex, or pass --runner with --agent claude|custom."}
+    }
+
+    if $selected_agent not-in [codex claude custom] {
+        error make {msg: $'Unsupported --agent: ($selected_agent). Expected codex, claude, or custom.'}
+    }
+
+    let explicit_runner = if $runner_cmd == null { null } else { normalize-runner-command $runner_cmd }
+    let selected_runner = if $explicit_runner != null and not ($explicit_runner | is-empty) {
+        $explicit_runner
+    } else if $selected_agent == "codex" {
+        $default_codex_runner
+    } else if $selected_agent == "claude" {
+        "claude"
+    } else {
+        null
+    }
+
+    if $selected_runner == null {
+        error make {msg: "Missing --runner for --agent custom."}
+    }
+
+    {agent: $selected_agent, runner: $selected_runner}
+}
+
+def runner-command-name [runner_cmd: string] {
+    let tokens = (
+        $runner_cmd
+        | str trim
+        | split row " "
+        | where {|token| not ($token | str trim | is-empty) }
+    )
+
+    for token in $tokens {
+        if not ($token | str contains "=") {
+            return $token
+        }
+    }
+
+    null
+}
+
+def runner-prompt-arg [agent: string] {
+    match $agent {
+        "codex" => "-"
+        "claude" => "-p"
+        "custom" => ""
+    }
+}
+
+def build-runner-shell-command [agent: string runner_cmd: string prompt_file: string log_file: string raw_file: string] {
     let quoted_prompt = (quote-arg $prompt_file)
     let log_quoted = (quote-arg $log_file)
     let raw_quoted = (quote-arg $raw_file)
-    # Run: cat prompt | runner -p (non-interactive mode), save stdout to raw_file, stderr to log
-    # Note: some runners (e.g. claude -p) exit with code 1 even on success; check stdout instead of exit code
-    let wrapped = $'cat ($quoted_prompt) | ($runner_cmd) -p >($raw_quoted) 2>($log_quoted)'
+    let prompt_arg = (runner-prompt-arg $agent)
+
+    if $agent == "codex" {
+        let runner_invocation = $'($runner_cmd) --output-last-message ($raw_quoted) ($prompt_arg)'
+        return $'cat ($quoted_prompt) | ($runner_invocation) >($log_quoted) 2>&1'
+    }
+
+    let runner_invocation = if ($prompt_arg | is-empty) {
+        $runner_cmd
+    } else {
+        $'($runner_cmd) ($prompt_arg)'
+    }
+
+    $'cat ($quoted_prompt) | ($runner_invocation) >($raw_quoted) 2>($log_quoted)'
+}
+
+def invoke-runner [runner_config: record prompt_text: string log_file: string raw_file: string] {
+    # Write prompt to a temp file
+    let prompt_file = ($log_file | path dirname | path join ($log_file | path parse | get stem | $in + ".prompt.txt"))
+    $prompt_text | save -f $prompt_file
+    # Some runners exit non-zero even on success; downstream checks stdout instead of exit code.
+    let wrapped = (build-runner-shell-command $runner_config.agent $runner_config.runner $prompt_file $log_file $raw_file)
     ^bash -lc $wrapped | complete
 }
 
@@ -1200,6 +1329,145 @@ def validate-summary-json [json_str: string] {
     }
 
     {ok: true, data: $parsed}
+}
+
+def process-summary-task [config: record task_events: list id: string] {
+    let effective_workdir = $config.workdir
+    let prompt = $config.prompt
+    let prompt_version = $config.prompt_version
+    let runner_config = $config.runner_config
+    let force = $config.force
+    let task_event = ($task_events | where id == $id | first | default null)
+
+    if $task_event == null {
+        let event = {
+            type: "summary_failed"
+            id: $id
+            error_type: "unknown"
+            error_detail: "no summary_task_created event found"
+            log_path: (relative-to-workdir $effective_workdir (summary-log-path $effective_workdir $id))
+            at: (now-iso)
+        }
+        return {id: $id, events: [$event], failed_item: {id: $id, error_type: "unknown", error_detail: "no task event"}}
+    }
+
+    let source_path = ($task_event.source_path? | default null)
+    if $source_path == null or not (file-exists $source_path) {
+        let event = {
+            type: "summary_failed"
+            id: $id
+            error_type: "source_not_found"
+            error_detail: $'transcript file not found: ($source_path)'
+            log_path: (relative-to-workdir $effective_workdir (summary-log-path $effective_workdir $id))
+            at: (now-iso)
+        }
+        return {id: $id, events: [$event], failed_item: {id: $id, error_type: "source_not_found"}}
+    }
+
+    let item_path = (summary-item-path $effective_workdir $id)
+    let log_path = (summary-log-path $effective_workdir $id)
+    let log_rel = (relative-to-workdir $effective_workdir $log_path)
+    let raw_file = (summary-raw-output-path $effective_workdir $id)
+
+    if not $force and (file-exists $item_path) {
+        print ([$"[summarize] " $id " skipped (cached)"] | str join)
+        let event = {
+            type: "summary_ready"
+            id: $id
+            summary_item_path: (relative-to-workdir $effective_workdir $item_path)
+            prompt_version: $prompt_version
+            runner: $runner_config.runner
+            agent: $runner_config.agent
+            reason: "cached"
+            at: (now-iso)
+        }
+        return {id: $id, events: [$event], failed_item: null}
+    }
+
+    print $'[summarize] ($id) ...'
+
+    let started_event = {
+        type: "summary_started"
+        id: $id
+        at: (now-iso)
+    }
+
+    let prompt_text = (build-summary-prompt $effective_workdir $source_path $prompt)
+    let result = (invoke-runner $runner_config $prompt_text $log_path $raw_file)
+    let raw_content = (if (file-exists $raw_file) { open $raw_file --raw | decode utf-8 } else { "" })
+    let stdout_str = ($raw_content | str trim)
+
+    if ($stdout_str | is-empty) {
+        let event = {
+            type: "summary_failed"
+            id: $id
+            error_type: "runner_failed"
+            error_detail: "runner produced no output"
+            log_path: $log_rel
+            at: (now-iso)
+        }
+        print ([$"[summarize] " $id " failed (no output)"] | str join)
+        return {id: $id, events: [$started_event $event], failed_item: {id: $id, error_type: "runner_failed"}}
+    }
+
+    let validation = (validate-summary-json $stdout_str)
+    if not $validation.ok {
+        let event = {
+            type: "summary_failed"
+            id: $id
+            error_type: $validation.error
+            error_detail: $validation.detail
+            log_path: $log_rel
+            at: (now-iso)
+        }
+        print $'[summarize] ($id) failed (($validation.error))'
+        return {id: $id, events: [$started_event $event], failed_item: {id: $id, error_type: $validation.error}}
+    }
+
+    let fm = (parse-frontmatter $source_path)
+    let enriched = ($validation.data | merge {
+        id: $fm.id
+        title: ($fm.title | default $fm.id)
+        url: ($fm.url | default "")
+        uploader: ($fm.uploader | default "")
+        duration_seconds: ($fm.duration | default null)
+    })
+
+    let write_result = (
+        try {
+            ensure-dir (summary-items-dir $effective_workdir)
+            $enriched | to json | save -f $item_path
+            {ok: true}
+        } catch {
+            {ok: false}
+        }
+    )
+
+    if not $write_result.ok {
+        let event = {
+            type: "summary_failed"
+            id: $id
+            error_type: "summary_write_failed"
+            error_detail: "failed to write summary item JSON"
+            log_path: $log_rel
+            at: (now-iso)
+        }
+        print $'[summarize] ($id) failed (write error)'
+        return {id: $id, events: [$started_event $event], failed_item: {id: $id, error_type: "summary_write_failed"}}
+    }
+
+    let ready_event = {
+        type: "summary_ready"
+        id: $id
+        summary_item_path: (relative-to-workdir $effective_workdir $item_path)
+        prompt_version: $prompt_version
+        runner: $runner_config.runner
+        agent: $runner_config.agent
+        at: (now-iso)
+    }
+
+    print $'[summarize] ($id) ok'
+    {id: $id, events: [$started_event $ready_event], failed_item: null}
 }
 
 def recommend-zh [value: string] {
@@ -1417,14 +1685,20 @@ def "main summarize" [
     --transcript-dir: string
     --out: string
     --runner: string
+    --agent: string
     --prompt: string
+    --concurrency: int = 20
     --force
 ] {
-    if $runner == null {
-        error make {msg: "Missing --runner.\nExample:\n  nu run.nu summarize --transcript-dir ./transcript --runner \"cc --model=deepseek-v4-flash --effort high\""}
+    if $concurrency < 1 {
+        error make {msg: "--concurrency must be >= 1"}
     }
 
-    check-deps "yt-dlp"
+    let runner_config = (resolve-runner-config $agent $runner)
+    let runner_command = (runner-command-name $runner_config.runner)
+    if $runner_command != null {
+        check-deps $runner_command
+    }
 
     let effective_workdir = (resolve-workdir $workdir)
     let transcript_dir = (if $transcript_dir != null { $transcript_dir } else { $effective_workdir | path join "transcript" })
@@ -1458,146 +1732,29 @@ def "main summarize" [
         $default_summary_prompt_text | save -f $prompt_file_path
     }
 
-    mut failed_items = []
+    let summary_config = {
+        workdir: $effective_workdir
+        prompt: $prompt
+        prompt_version: $prompt_version
+        runner_config: $runner_config
+        force: ($force | default false)
+    }
 
-    for id in $to_process {
-        let task_event = ($task_events | where id == $id | first | default null)
-
-        if $task_event == null {
-            append-event $effective_workdir {
-                type: "summary_failed"
-                id: $id
-                error_type: "unknown"
-                error_detail: "no summary_task_created event found"
-                log_path: (relative-to-workdir $effective_workdir (summary-log-path $effective_workdir $id))
-                at: (now-iso)
-            }
-            $failed_items = ($failed_items | append {id: $id, error_type: "unknown", error_detail: "no task event"})
-            continue
+    let results = (
+        $to_process
+        | par-each --threads $concurrency {|id|
+            process-summary-task $summary_config $task_events $id
         }
+    )
 
-        let source_path = ($task_event.source_path? | default null)
-        if $source_path == null or not (file-exists $source_path) {
-            append-event $effective_workdir {
-                type: "summary_failed"
-                id: $id
-                error_type: "source_not_found"
-                error_detail: $'transcript file not found: ($source_path)'
-                log_path: (relative-to-workdir $effective_workdir (summary-log-path $effective_workdir $id))
-                at: (now-iso)
-            }
-            $failed_items = ($failed_items | append {id: $id, error_type: "source_not_found"})
-            continue
-        }
+    let failed_items = (
+        $results
+        | get failed_item
+        | compact
+    )
 
-        # Check cache
-        let item_path = (summary-item-path $effective_workdir $id)
-        if not ($force | default false) and (file-exists $item_path) {
-            append-event $effective_workdir {
-                type: "summary_skipped"
-                id: $id
-                reason: "cached"
-                at: (now-iso)
-            }
-            print $'[summarize] ($id) skipped (cached)'
-            continue
-        }
-
-        print $'[summarize] ($id) ...'
-
-        append-event $effective_workdir {
-            type: "summary_started"
-            id: $id
-            at: (now-iso)
-        }
-
-        let prompt_text = (build-summary-prompt $effective_workdir $source_path $prompt)
-        let log_path = (summary-log-path $effective_workdir $id)
-        let log_rel = (relative-to-workdir $effective_workdir $log_path)
-        let raw_file = (summary-raw-output-path $effective_workdir $id)
-
-        # Invoke runner (saves stdout to raw_file, stderr to log_path)
-        let result = (invoke-runner $runner $prompt_text $log_path $raw_file)
-
-        # Read raw output; check if file has content (don't rely on exit code)
-        let raw_content = (if (file-exists $raw_file) { open $raw_file --raw | decode utf-8 } else { "" })
-        let stdout_str = ($raw_content | str trim)
-
-        if ($stdout_str | is-empty) {
-            append-event $effective_workdir {
-                type: "summary_failed"
-                id: $id
-                error_type: "runner_failed"
-                error_detail: "runner produced no output"
-                log_path: $log_rel
-                at: (now-iso)
-            }
-            $failed_items = ($failed_items | append {id: $id, error_type: "runner_failed"})
-            print ([$"[summarize] " $id " failed (no output)"] | str join)
-            continue
-        }
-
-        # Validate JSON (handles markdown-wrapped output)
-        let validation = (validate-summary-json $stdout_str)
-        if not $validation.ok {
-            append-event $effective_workdir {
-                type: "summary_failed"
-                id: $id
-                error_type: $validation.error
-                error_detail: $validation.detail
-                log_path: $log_rel
-                at: (now-iso)
-            }
-            $failed_items = ($failed_items | append {id: $id, error_type: $validation.error})
-            print $'[summarize] ($id) failed (($validation.error))'
-            continue
-        }
-
-        # Enrich with frontmatter fields
-        let fm = (parse-frontmatter $source_path)
-        let enriched = ($validation.data | merge {
-            id: $fm.id
-            title: ($fm.title | default $fm.id)
-            url: ($fm.url | default "")
-            uploader: ($fm.uploader | default "")
-            duration_seconds: ($fm.duration | default null)
-        })
-
-        # Write item JSON
-        let write_result = (
-            try {
-                ensure-dir (summary-items-dir $effective_workdir)
-                $enriched | to json | save -f $item_path
-                {ok: true}
-            } catch {
-                {ok: false}
-            }
-        )
-
-        if not $write_result.ok {
-            append-event $effective_workdir {
-                type: "summary_failed"
-                id: $id
-                error_type: "summary_write_failed"
-                error_detail: "failed to write summary item JSON"
-                log_path: $log_rel
-                at: (now-iso)
-            }
-            $failed_items = ($failed_items | append {id: $id, error_type: "summary_write_failed"})
-            print $'[summarize] ($id) failed (write error)'
-            continue
-        }
-
-        append-event $effective_workdir {
-            type: "summary_ready"
-            id: $id
-            summary_item_path: (relative-to-workdir $effective_workdir $item_path)
-            prompt_version: $prompt_version
-            runner: $runner
-            at: (now-iso)
-        }
-
-        print $'[summarize] ($id) ok'
+    for event in ($results | get events | flatten) {
+        append-event $effective_workdir $event
     }
 
     # Assemble final summary.md
@@ -1675,40 +1832,13 @@ def "main summary-status" [
     ensure-workdir-structure $effective_workdir
 
     let events = (load-events $effective_workdir)
+    let states = (derive-summary-task-states $events)
 
-    let task_ids = (
-        $events
-        | where type == "summary_task_created"
-        | get id
-        | uniq
-    )
-
-    let ready_ids = (
-        $events
-        | where type == "summary_ready"
-        | get id
-        | uniq
-    )
-
-    let failed_ids = (
-        $events
-        | where type == "summary_failed"
-        | get id
-        | uniq
-    )
-
-    let skipped_ids = (
-        $events
-        | where type == "summary_skipped"
-        | get id
-        | uniq
-    )
-
-    let total = ($task_ids | length)
-    let ready = ($ready_ids | length)
-    let failed = ($failed_ids | length)
-    let skipped = ($skipped_ids | length)
-    let pending = ($total - $ready - $failed)
+    let total = ($states | length)
+    let ready = (count-state $states "ready")
+    let failed = (count-state $states "failed")
+    let skipped = (count-state $states "skipped")
+    let pending = (count-state $states "pending")
 
     let out = (summary-ensemble-path $effective_workdir)
 
@@ -1744,9 +1874,17 @@ def "main summary-failed" [
     ensure-workdir-structure $effective_workdir
 
     let events = (load-events $effective_workdir)
+    let failed_ids = (
+        derive-summary-task-states $events
+        | where state == "failed"
+        | get id
+    )
     let failed_events = (
         $events
         | where type == "summary_failed"
+        | where id in $failed_ids
+        | group-by id
+        | items {|id, rows| $rows | last }
         | each {|e|
             {
                 id: $e.id
@@ -1778,7 +1916,7 @@ def main [] {
     print "  nu run.nu init urls.txt [--workdir <path>]"
     print "  nu run.nu fetch [--workdir <path>] [--cookies-from-browser <browser>] [--cookies <path>]"
     print "  nu run.nu transcript [--workdir <path>]"
-    print "  nu run.nu summarize [--workdir <path>] [--transcript-dir <path>] [--out <path>] --runner <cmd> [--prompt <path>] [--force]"
+    print "  nu run.nu summarize [--workdir <path>] [--transcript-dir <path>] [--out <path>] [--agent codex|claude|custom] [--runner <cmd>] [--concurrency <n>] [--prompt <path>] [--force]"
     print "  nu run.nu status [--workdir <path>]"
     print "  nu run.nu summary-status [--workdir <path>]"
     print "  nu run.nu failed [--workdir <path>]"
