@@ -7,56 +7,6 @@
 }: let
   cfg = config.modules.AI.claude;
   claudeDefaultModel = "claude-opus-4-7[1m]";
-  linearHookRuntimePath = lib.concatStringsSep ":" [
-    (lib.makeBinPath [
-      pkgs.coreutils
-      pkgs.git
-      pkgs.jujutsu
-      pkgs.nushell
-    ])
-    "/opt/homebrew/bin"
-    "/opt/homebrew/sbin"
-    "/usr/local/bin"
-    "/usr/bin"
-    "/bin"
-    "${config.home.homeDirectory}/.nix-profile/bin"
-    "/etc/profiles/per-user/${config.home.username}/bin"
-  ];
-  linearHookCommand = hookPath: let
-    modelFallback = lib.concatStringsSep "\n" (
-      (map (envName: let
-        shellValue = "$" + envName;
-        shellFallback = "$" + "{" + envName + ":-}";
-      in ''
-        if [ -z "''${LINEAR_MODEL:-}" ] && [ -n "${shellFallback}" ]; then
-          export LINEAR_MODEL="${shellValue}"
-        fi
-      '') ["CLAUDE_CODE_MODEL" "ANTHROPIC_DEFAULT_OPUS_MODEL"])
-      ++ [
-        ''
-          if [ -z "''${LINEAR_MODEL:-}" ]; then
-            export LINEAR_MODEL=${lib.escapeShellArg claudeDefaultModel}
-          fi
-        ''
-      ]
-    );
-    script = ''
-      export HOME=${lib.escapeShellArg config.home.homeDirectory}
-      export PATH=${lib.escapeShellArg linearHookRuntimePath}:''${PATH:-}
-      if [ -z "''${LINEAR_AGENT:-}" ]; then
-        export LINEAR_AGENT=claude-code
-      fi
-
-      ${modelFallback}
-
-      if [ -z "''${LINEAR_API_KEY:-}" ] && [ -r ${lib.escapeShellArg config.sops.secrets.API_LINEAR.path} ]; then
-        LINEAR_API_KEY="$(${pkgs.coreutils}/bin/cat ${lib.escapeShellArg config.sops.secrets.API_LINEAR.path})"
-        export LINEAR_API_KEY
-      fi
-
-      exec ${pkgs.nushell}/bin/nu --stdin -c ${lib.escapeShellArg "source ${config.home.homeDirectory}/.claude/hooks/${hookPath}"}
-    '';
-  in "${pkgs.bash}/bin/bash -c ${lib.escapeShellArg script}";
 in {
   options.modules.AI.claude = with lib; {
     enable = mkEnableOption "Enable Claude Code";
@@ -249,7 +199,7 @@ in {
           permissions = {
             # 尽量与 codex 的 trusted projects 对齐，避免给到过宽目录。
             additionalDirectories = [
-              "~/Desktop/dotfiles"
+              "~/Desktop/docs/dotfiles"
               "~/Desktop/docs"
             ];
 
@@ -328,43 +278,6 @@ in {
 
             deny = [];
           };
-          # LUC-48: Linear issue checkpoint hooks.
-          # SessionStart: detect LUC-XXX from git branch -> CLAUDE_ENV_FILE.
-          # PostToolUse: post plan to Linear when ExitPlanMode is called.
-          # SessionEnd: post a lightweight checkpoint only; final reviews use `linear-finalize`.
-          hooks.SessionStart = [
-            {
-              matcher = "";
-              hooks = [
-                {
-                  type = "command";
-                  command = linearHookCommand "session-start/linear-session-start.nu";
-                }
-              ];
-            }
-          ];
-          hooks.PostToolUse = [
-            {
-              matcher = "ExitPlanMode";
-              hooks = [
-                {
-                  type = "command";
-                  command = linearHookCommand "post-tool-use/linear-plan.nu";
-                }
-              ];
-            }
-          ];
-          hooks.SessionEnd = [
-            {
-              matcher = "";
-              hooks = [
-                {
-                  type = "command";
-                  command = linearHookCommand "session-end/linear-sync.nu";
-                }
-              ];
-            }
-          ];
         };
       };
 
@@ -390,23 +303,6 @@ in {
 
           # 文件2建议：复杂任务时临时开最高 effort，日常用 cc 保持 auto
           ccmax = "claude --effort max";
-        };
-        file = {
-          ".claude/hooks/session-start/linear-session-start.nu" = {
-            executable = true;
-            force = true;
-            source = ./hooks/linear-session-start.nu;
-          };
-          ".claude/hooks/post-tool-use/linear-plan.nu" = {
-            executable = true;
-            force = true;
-            source = ./hooks/linear-plan.nu;
-          };
-          ".claude/hooks/session-end/linear-sync.nu" = {
-            executable = true;
-            force = true;
-            source = ./hooks/linear-sync.nu;
-          };
         };
       };
 

@@ -64,8 +64,8 @@ Run project-specific checks (e.g., `task y2m:check`, `nix flake check`, test sui
 
 ### Step 5: Finalize the Linear review
 
-```bash
-cat <<'EOF' | linear-finalize --agent claude-code
+```nushell
+'
 ## Plan
 
 - final plan summary
@@ -92,7 +92,7 @@ cat <<'EOF' | linear-finalize --agent claude-code
 ## Open Risks / Follow-ups
 
 - risk or follow-up, if any
-EOF
+' | nu --stdin ~/.claude/skills/linear-note/scripts/linear.nu end --agent claude-code
 ```
 
 ### Step 6: Push and create PR
@@ -109,7 +109,7 @@ gh pr create --title "feat: <summary> (<ISSUE_KEY>)" --body "Closes <ISSUE_KEY>"
 - Never start implementation without `linear issue start` first — the branch name is the contract with Linear's GitHub integration.
 - Always include the issue key in commit messages and PR body — this triggers automatic status transitions.
 - If a worktree was created, clean it up after merge: `git worktree remove ../<ISSUE_KEY>-worktree`.
-- Run `linear-finalize` BEFORE creating the PR so reviewers have context.
+- Run `linear-note` end mode BEFORE creating the PR so reviewers have context.
 
 ---
 
@@ -120,6 +120,6 @@ gh pr create --title "feat: <summary> (<ISSUE_KEY>)" --body "Closes <ISSUE_KEY>"
 linear issue start LUC-16                    # Step 1
 git worktree add ../LUC-16-worktree luc/LUC-16-slug && cd ../LUC-16-worktree  # Step 2
 # ... implement, commit, verify ...           # Steps 3-4
-linear-finalize --issue LUC-16 --agent claude-code < /tmp/review.md  # Step 5
+open /tmp/review.md | nu --stdin ~/.claude/skills/linear-note/scripts/linear.nu end --issue LUC-16 --agent claude-code  # Step 5
 git push -u origin HEAD && gh pr create --body "Closes LUC-16"  # Step 6
 ```

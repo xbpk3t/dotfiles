@@ -24,7 +24,7 @@ in {
     # Pi 的配置入口是 JSON 文件。settings.json 控制主 provider、theme 以及插件路径。
     home.file.".pi/agent/settings.json".text = builtins.toJSON {
       defaultProvider = "axonhub";
-      defaultModel = "gpt5.5";
+      defaultModel = "gpt-5.5";
       theme = "dark";
 
       # packages 声明 Pi package spec（npm:、git:、本地路径），
@@ -49,16 +49,19 @@ in {
       #  ];
     };
 
-    # models.json 声明所有 provider，包括默认 axonhub 和本地 Ollama。
-    # 与 codex/claude 走同一组 API（api.lucc.dev）和密钥（LLM_AxonHub）。
+    # models.json 声明 axonhub provider，与 codex/claude 共用 API 和密钥。
     home.file.".pi/agent/models.json".text = builtins.toJSON {
       providers = {
         axonhub = {
           baseUrl = "https://api.lucc.dev/v1";
           api = "openai-responses";
-          apiKey = "$LLM_AxonHub";
+          # Pi 的 resolveConfigValue 会把值当 env var 名查，找不到才作字面量
+          apiKey = "LLM_AxonHub";
           models = [
+            {id = "gpt-5.5";}
             {id = "gpt-5.4";}
+            {id = "deepseek-v4-pro";}
+            {id = "deepseek-v4-flash";}
           ];
         };
       };

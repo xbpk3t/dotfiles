@@ -1,9 +1,20 @@
 ---
 name: linear-note
-description: Deprecated alias for linear-latest-post. Use when the user types /linear-note, but immediately post via linear-latest-post instead of saving temp notes.
+description: Post explicit agent notes or final issue reviews to the current Linear issue. Use for /linear-note, linear-note latest/end, sending the latest response to Linear, final reviews, issue retrospectives, 收口, 复盘, or 刷入 Linear.
 trigger_keywords:
   - /linear-note
   - linear-note
+  - linear note
+  - linear latest
+  - linear end
+  - linear finalize
+  - final review
+  - issue retrospective
+  - 刷到 Linear
+  - 发到 Linear
+  - 写入 Linear
+  - 收口
+  - 复盘
 allowed-tools:
   - Bash
   - Read
@@ -11,14 +22,42 @@ allowed-tools:
 
 # Linear Note
 
-`linear-note` is kept only as a compatibility alias. Do not write temporary note files.
+Post one explicit note or final review to the Linear issue linked by the current branch.
+Use the bundled script as a black-box publishing helper; do not recreate Linear API calls in prompts.
 
-When the user asks for `/linear-note <content>`, treat it as `linear-latest-post <content>` and post immediately to the current Linear issue.
+## Modes
 
-```bash
-cat <<'EOF' | linear-latest-post --agent codex
-<content>
-EOF
+- `latest` (default): post the selected latest response, decision, or user-provided note.
+- `end`: post the final issue review/retrospective with git facts.
+
+## Workflow
+
+1. Decide the mode from the user's wording:
+   - Use `latest` for `/linear-note`, “刷到 Linear”, “发到 Linear”, “post latest”, or an explicit note.
+   - Use `end` for “finalize”, “final review”, “收口”, “复盘”, or issue retrospective.
+2. Prepare the body yourself before calling the script:
+   - For `latest`, keep it short and factual. If the target body is ambiguous, ask what to post.
+   - For `end`, include plan, decisions, implementation, verification, and open risks/follow-ups.
+3. Pipe the body into `scripts/linear.nu`.
+
+Codex example:
+
+```nushell
+'<body to post>' | nu --stdin ~/.codex/skills/linear-note/scripts/linear.nu latest --issue LUC-48 --agent codex
 ```
 
-Use `--agent claude-code` when running from Claude Code. If no content is provided, ask what should be posted instead of guessing.
+Claude Code example:
+
+```nushell
+'<final review body>' | nu --stdin ~/.claude/skills/linear-note/scripts/linear.nu end --issue LUC-48 --agent claude-code
+```
+
+Omit `--issue` only when the current git branch or jj bookmark contains exactly one `LUC-123` key.
+
+## Rules
+
+- Do not use lifecycle hooks or wait for session end.
+- Do not write temporary note/checkpoint files.
+- Do not duplicate metadata headers; the script adds them.
+- Do not post private chain-of-thought. Post conclusions, decisions, facts, and user-approved summaries only.
+- Use `--dry-run` when previewing or validating formatting before posting.
