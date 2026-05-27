@@ -73,10 +73,8 @@ in {
           unified_exec = true;
           view_image_tool = true;
 
-          # 目前codex会默认开启 fast mode，而 fast会带来很多非必要的token开销
-          # 也就是 service_tier，默认fast，这里设置为 flex (=false)
-          # 可以用 codex --enable fast_mode -c 'service_tier="fast"' 来 override 配置，临时开启 fast mode
-          fast_mode = false;
+          # fast_mode 对应 service_tier=fast；当前默认开启，按需用 CLI/config 临时覆盖。
+          fast_mode = true;
 
           # ralph loop
           goals = true;
@@ -94,8 +92,8 @@ in {
           };
         };
 
-        # 默认不声明 model_provider，让 Codex 继续走本地 ChatGPT OAuth 登录态。否则会报错 Error: Model provider `` not found
-        # 只有显式使用 `--profile metapi` 时，才切换到对应第三方 provider。
+        # 默认 provider 固定为 axonhub，和当前 workstation/provider 事实保持一致。
+        # 如需临时回到 Codex 官方登录态或其他 provider，用 CLI/profile 覆盖，不把它写成默认路径。
 
         # [2026-04-18] 直接注入 mcp-servers-nix 的 codex flavor server 配置。
         # 这样 settings.servers.<name>.tools.*.approval_mode 可以原样进入 Codex 的 mcp_servers。
@@ -111,7 +109,7 @@ in {
           };
         };
 
-        # [2026-04-14] profiles 是用来创建可切换的命名方案。因为把所有provider都由 MetAPI管理，所以不再需要了
+        # profiles 用于显式切换/覆盖；默认路径本身也指向 axonhub。
         profiles = {
           axonhub = {
             model_provider = "axonhub";
@@ -151,16 +149,8 @@ in {
         enable = true;
         # dest = ".agents/skills";
         dest = ".codex/skills";
-        # 技术要点：copy-tree 避免 symlink 在部分工具/环境中失效
-        #        structure = "copy-tree";
-        # structure = "link";
-        # structure = "symlink-tree";
-        # link: home.file symlinks
-        # symlink-tree and copy-tree run in home.activation.
-        # symlink-tree: rsync -a --delete (preserve symlinks)
-        # copy-tree: rsync -aL --delete (dereference symlinks).
-        # [2026-03-07] 遇到了个问题，默认link，codex无法读取skills，所以改为 copy-tree
-        # structure = "copy-tree";
+        # link keeps the local skills catalog single-sourced through ASN.
+        # If Codex skill discovery regresses on symlinks, switch this target to copy-tree and document the repro.
         structure = "link";
       };
     };
