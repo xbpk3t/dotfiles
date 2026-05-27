@@ -189,7 +189,7 @@ in {
         # 验证顺序：先临时移除默认 axonhub provider、走 Codex 官方默认 provider；若仍失败，
         # 再升级 Codex 并复测。不是 CodeGraph server 本身的接入配置问题。
         #
-        # FIXME: [2026-05-26] 目前codegraph不支持nix，等支持后用codegraph再扫一次本项目，并做优化
+        # MAYBE: [2026-05-26] 目前codegraph不支持nix，等支持后用codegraph再扫一次本项目，并做优化
         # [feat: add Nix language support by uxtechie · Pull Request #330 · colbymchenry/codegraph](https://github.com/colbymchenry/codegraph/pull/330)
         "codegraph" = {
           command = "codegraph";

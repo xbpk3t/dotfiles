@@ -63,7 +63,6 @@
       # https://mynixos.com/home-manager/options/programs.gh-dash
       # "gh-dash"  # 如果你想使用 gh-dash 扩展
     ];
-
   };
 
   # 添加 gh 相关的 shell 别名

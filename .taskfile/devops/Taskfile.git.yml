@@ -17,18 +17,8 @@ dir: '{{.USER_WORKING_DIR}}'
 #- git rebase -i HEAD~n # 合并前n个commit。需要注意的是，编辑时把pick改为s即可，记得第一个不要修改（需要父commit）
 
 
-
-# PLAN: [2026-03-07] 这种涉及实际命令执行的，不应该放到taskfile级别的vars里（1、把这条加到 taskfile-BP 的 skills里。2、处理本taskfile的问题）
-#  COMMIT_HASH:
-#    sh: |
-#      if [ -d .git ] || git rev-parse --git-dir > /dev/null 2>&1; then
-#        git rev-parse HEAD
-#      else
-#        echo ""
-#      fi
-#    msg: commit hash not found
-
-
+# COMMIT_HASH
+# git rev-parse --short --verify -q HEAD 2>/dev/null || true
 
 tasks:
   # default:
