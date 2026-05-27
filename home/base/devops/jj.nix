@@ -187,6 +187,7 @@ in {
     pkgs.difftastic
     pkgs.lazyjj
     pkgs.jj-fzf
+    pkgs.jj-starship
     jjui-wrapped
   ];
 

@@ -7,7 +7,6 @@
       "--vimgrep" # 输出包含 行/列 的格式，便于跳转
       "--hyperlink-format=file://{path}:{line}:{column}" # 生成带行列的超链接
       "-e TODO:"
-      "-e FIXME:"
       "-e PLAN:"
       "-e MAYBE:"
       "." # 搜索起点（当前工作区根目录）

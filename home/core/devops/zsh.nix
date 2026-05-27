@@ -361,6 +361,7 @@
 
         format = lib.concatStrings [
           "$all"
+          "\${custom.jj}"
           "$character"
         ];
 
@@ -405,9 +406,18 @@
           style = "bold #82AAFF";
         };
 
-        jj_branch = {
-          # format = "on [$symbol[$change_id]($style) ]($style)";
-          format = "on [$symbol$branch]($style) ";
+        custom.jj = {
+          description = "Display the current jj change and bookmarks";
+          command = "prompt";
+          when = "jj root --ignore-working-copy >/dev/null 2>&1";
+          shell = [
+            "jj-starship"
+            "--no-color"
+            "--no-jj-prefix"
+            "--strip-bookmark-prefix"
+            "luck/"
+          ];
+          format = "[$output](bold #82AAFF) ";
         };
 
         #      env_var = {
