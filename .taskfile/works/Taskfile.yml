@@ -7,4 +7,4 @@ includes:
   img: ./Taskfile.img.yml
   apm:
     taskfile: ./Taskfile.apm.yml
-    dir: '{{.USER_WORKING_DIR}}'
+    dir: '{{.TASKFILE_DIR}}/../..'
