@@ -24,13 +24,7 @@
         # 通用配置
         # EDITOR = editorMeta.command;
         # BROWSER = "chromium-browser";
-        GITHUB_TOKEN = "$(gh auth token)";
         PNPM_HOME = "$HOME/.local/share/pnpm";
-
-        # GitHub API rate limit fix
-        # Commented out because it causes GitHub API 401 errors
-        # See: https://discourse.nixos.org/t/nix-commands-fail-github-requests-401-without-sudo/30038
-        NIX_CONFIG = "access-tokens = github.com=$(gh auth token)";
 
         # Locale
         LANG = "en_US.UTF-8";
