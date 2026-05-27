@@ -64,10 +64,6 @@
       # "gh-dash"  # 如果你想使用 gh-dash 扩展
     ];
 
-    # 环境变量
-    # env = {
-    #   GH_TOKEN = "your_token";  # 通常通过 gh auth login 设置
-    # };
   };
 
   # 添加 gh 相关的 shell 别名
@@ -86,11 +82,22 @@
   };
 
   home.sessionVariables = {
-    # headless 环境下 gh auth login 不可用，通过 sops secret 注入 token
-    # mkForce：覆盖 zsh.nix 中 GITHUB_TOKEN="$(gh auth token)" 的动态获取（容器无 gh auth 登录态）
+    # GitHub PAT is managed by sops and exported for gh, MCP servers, agents, and nix fetches.
     GITHUB_TOKEN = lib.mkForce "$(cat ${config.sops.secrets.GITHUB_TOKEN.path})";
 
     # For xbpk3t/docs rss2newsletter
     RESEND_TOKEN = "$(cat ${config.sops.secrets.RESEND_TOKEN.path})";
   };
+
+  home.sessionVariablesExtra = lib.mkAfter ''
+    # Keep GITHUB_TOKEN as the single secret source, then derive compatibility names
+    # after hm-session-vars.sh has exported it. Putting these in home.sessionVariables
+    # would be order-sensitive because Home Manager emits attrs alphabetically.
+    if [ -n "$GITHUB_TOKEN" ]; then
+      export GH_TOKEN="$GITHUB_TOKEN"
+      export CODEX_GITHUB_PERSONAL_ACCESS_TOKEN="$GITHUB_TOKEN"
+      export GITHUB_PERSONAL_ACCESS_TOKEN="$GITHUB_TOKEN"
+      export NIX_CONFIG="access-tokens = github.com=$GITHUB_TOKEN"
+    fi
+  '';
 }
