@@ -1,5 +1,5 @@
 ```yaml
-# FIXME: 学习一下tf的基本用法，就可以删掉了
+# TODO: TF 基本用法学习结论已在下文归档；Anton Putra 仓库保留为 benchmark/infra case 参考
 #- url: https://github.com/antonputra/tutorials
 #  des: 就是antonputra视频对应的代码，也就是通过tf实现各种 kafka vs rabbitMQ, pgsql vs mysql 之类的对比
 
@@ -12,7 +12,7 @@
 
 
 
-# FIXME: 比较istio和linkerd的CPU benchmark，怎么设计具体测试流程？ # [Istio和Linkerd的CPU基准测试报告](https://mp.weixin.qq.com/s/bry4g11lacH1eyuh5uVcHw)
+# TODO: 比较istio和linkerd的CPU benchmark，怎么设计具体测试流程？ # [Istio和Linkerd的CPU基准测试报告](https://mp.weixin.qq.com/s/bry4g11lacH1eyuh5uVcHw)
 
 ```
 
