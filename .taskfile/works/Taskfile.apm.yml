@@ -1,14 +1,21 @@
 ---
 version: "3"
 
+vars:
+  APM_PROJECT_DIR: '{{.TASKFILE_DIR}}/../..'
+
+dir: '{{.APM_PROJECT_DIR}}'
+
 # APM (Agent Package Manager)
 # 入口文件: apm.yml，定义 packages / scripts / targets 等
 #
 # 日常 workflow:
-#   task apm          → 全流程: info → compile → update → prune → install
-#   task apm:info     → 查看项目状态（targets / outdated / scripts）
-#   task apm:update   → 刷新依赖锁文件
-#   task apm:prune    → 清理孤立 skills/prompts/agents
+#   task apm          → 维护/同步入口: info → update → prune → install
+#   task apm:check    → 非破坏性检查: info → compile validate → audit
+#
+# 设计约定:
+#   - default 代表 deploy-first 的维护主线，不混入 compile 写入
+#   - check 负责观察 compile lane 和部署状态的信号，但不改 repo 状态
 #
 # 以下临时查询/操作直接用 CLI 更方便:
 #   apm search <query>    搜索 marketplace
@@ -17,81 +24,98 @@ version: "3"
 #   apm mcp               管理 MCP servers
 
 tasks:
-  # default 全流程工作流
+  # default 维护/同步工作流
   #
   # 执行顺序（各步骤不可合并，每步有独立语义）:
   #   1. _check     → 前置校验（apm CLI + apm.yml 是否存在）
-  #   2. _info      → 查看当前项目状态（targets / outdated / scripts）
-  #   3. _compile   → 编译 instructions → CLAUDE.md + AGENTS.md
-  #   4. _update    → 刷新依赖锁文件（apm update，更新 apm.lock）
-  #   5. _prune     → 清理 apm.yml 中已移除的孤立 skills/prompts/agents
-  #   6. apm install → 安装/部署所有 skills 到 target 目录
+  #   2. _info      → 查看当前 APM target 解析结果
+  #   3. _update    → 刷新依赖锁文件（apm update，更新 apm.lock.yaml）
+  #   4. _prune     → 清理 apm.yml 中已移除的孤立 skills/prompts/agents
+  #   5. _install   → 将 manifest/lock 描述的结果同步到 runtime 目标目录
   #
-  # deps 只放 _check（前置校验），不放其他 task。
-  # 若将 _compile 放入 deps，它会在 _info 之前执行，破坏"先看状态再编译"的顺序，
-  # 且 deps + cmds 中重复声明会导致同一 task 执行两次。
+  # 注意 default 故意不混入 compile lane。
+  # 这个仓库当前更像 deploy-first 项目：manifest + lockfile + deployed files 是主线，
+  # compile 的 validate / dry-run 更适合作为 check 信号，而不是默认维护入口的一部分。
   #
   # 等价裸命令流:
-  #   apm targets && apm outdated        # 查看状态
-  #   apm compile --target claude,codex  # 编译
+  #   apm targets                        # 查看状态
   #   apm update                         # 刷新锁文件
   #   apm prune                          # 清理孤立文件
   #   apm install                        # 安装
   default:
-    desc: 默认任务，编译并安装所有 APM skills
+    desc: 默认维护任务，刷新锁文件并同步 APM 部署结果
+    summary: "task -t .taskfile/works/Taskfile.yml apm"
+    dir: '{{.APM_PROJECT_DIR}}'
     deps: [_check]
     cmds:
       - task: _info
-      - task: _compile
       - task: _update
       - task: _prune
-      - apm install
+      - task: _install
 
-  # compile + validate 不建议合并
-  # 虽然底层都是 apm compile，但 validate 的语义是"不改文件，仅校验"。合到一个 task 会丢失 task apm:validate 的可发现性，收益不大。
-#  validate:
-#    desc: 仅校验 primitives，不写入文件
-#    deps: [ _check ]
-#    cmd: apm compile --validate --local-only
+  # check 是独立的只读入口，用来看 compile/audit 等诊断信号。
+  # 它不刷新 lockfile，也不写入 runtime 输出目录。
+  # 作为只读检查入口：info -> compile --validate -> audit --ci
+  check:
+    desc: 非破坏性检查 APM 解析、compile 输入和部署状态
+    summary: "task -t .taskfile/works/Taskfile.yml apm:check"
+    dir: '{{.APM_PROJECT_DIR}}'
+    deps: [_check]
+    cmds:
+      - task: _info
+      - task: _compile_validate
+      - task: _audit
 
   _check:
     internal: true
+    dir: '{{.APM_PROJECT_DIR}}'
     preconditions:
-      - sh: command -v apm >/dev/null && test -f apm.yml
-        msg: apm CLI 或 apm.yml 不存在
+      - sh: command -v apm >/dev/null
+        msg: apm CLI 不存在或不在 PATH 中
+      - sh: test -f "{{.APM_PROJECT_DIR}}/apm.yml"
+        msg: apm.yml 不存在（请在 APM 项目根目录运行）
 
-  _compile:
-    desc: 编译 instructions → CLAUDE.md + AGENTS.md
+  _compile_validate:
+    desc: 校验 compile lane 的 instruction 输入是否合法
     internal: true
+    dir: '{{.APM_PROJECT_DIR}}'
     deps: [_check]
-    cmds:
-      # 用于解析 frontmatter 和结构但不写文件
-      - apm compile --validate
-      # 会打印每个 skill 会被放到哪里
-      - apm compile --dry-run
-      - apm compile --target claude,codex
+    cmd: apm compile --validate
 
   _update:
     desc: 更新依赖锁文件
     internal: true
+    dir: '{{.APM_PROJECT_DIR}}'
     deps: [_check]
     cmd: apm update
+
+  _install:
+    desc: 同步 manifest/lock 描述的部署结果到 runtime 目标目录
+    internal: true
+    dir: '{{.APM_PROJECT_DIR}}'
+    deps: [_check]
+    cmd: apm install
+
+  _audit:
+    desc: 检查 lockfile、drift 和 policy 状态
+    internal: true
+    dir: '{{.APM_PROJECT_DIR}}'
+    deps: [_check]
+    cmd: apm audit --ci
 
   # 注意之所以需要prune，因为APM不支持symlink（只有copy），所以我们修改了apm.yml后重新install，那么“只增不减”，之前的skills并不会被删除，所以需要先prune，移除掉之前的所有skills才能保证一致性
   _prune:
     desc: 清理 apm.yml 中已移除的孤立 skills/prompts/agents
     internal: true
+    dir: '{{.APM_PROJECT_DIR}}'
     deps: [_check]
     cmd: apm prune
 
   _info:
-    desc: 查看项目状态（targets + outdated + scripts）
+    desc: 查看当前 APM target 解析结果
     internal: true
+    dir: '{{.APM_PROJECT_DIR}}'
     deps: [_check]
     cmds:
       - echo "==> Targets"
       - apm targets
-      - echo "==> Outdated"
-      - 'apm outdated || true'
-      - echo "==> Scripts"
-      - 'apm list || true'
