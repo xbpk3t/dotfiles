@@ -137,7 +137,7 @@ def build-end-comment [
 
 def post-linear-comment [issue_key: string, body: string]: nothing -> int {
     let result = (try {
-        ^linear issues comment $issue_key --body $body | complete
+        $body | ^linear issues comment $issue_key | complete
     } catch {|err|
         {
             exit_code: 127
@@ -189,7 +189,7 @@ def main [
     }
 
     if $dry_run {
-        print --stderr $'dry-run: ^linear issues comment ($issue_key) --body <generated comment>'
+        print --stderr $'dry-run: <generated comment> | ^linear issues comment ($issue_key)'
         print $comment
         exit 0
     }
