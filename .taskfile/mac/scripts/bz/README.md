@@ -22,8 +22,11 @@ echo "https://www.bilibili.com/video/BV1XX..." > urls.txt
 # 2. 一键走完 init → fetch → transcript
 task bz
 
-# 3. 用 AI 生成结构化摘要（需先配置 runner）
-task bz CMD=summarize RUNNER="cc --model=deepseek-v4-flash"
+# 3. 用 Codex 生成结构化摘要（默认模型 gpt-5.5，默认 20 并发）
+task bz CMD=summarize AGENT=codex
+
+# 或使用 Claude Code；runner 写基础命令，脚本会自动追加 -p
+task bz CMD=summarize AGENT=claude RUNNER="claude --model=deepseek-v4-flash"
 
 # 查看管线状态
 task bz CMD=status
@@ -58,7 +61,9 @@ task bz CMD=summary-status
 
 ### summarize 参数
 
-- `--runner <cmd>` — AI runner 命令，如 `cc --model=deepseek-v4-flash`
+- `--agent <codex|claude|custom>` — AI runner 类型；`codex` 默认调用 `codex exec --model gpt-5.5`
+- `--runner <cmd>` — 覆盖 AI runner 基础命令；不要包含 Codex 的 `-` 或 Claude 的 `-p`，脚本会按 `--agent` 自动追加
+- `--concurrency <n>` — 摘要并发数，默认 `20`
 - `--transcript-dir <path>` — 转录稿目录，默认 `<workdir>/transcript`
 - `--out <path>` — 最终摘要输出路径，默认 `<workdir>/summary.md`
 - `--prompt <path>` — 自定义 prompt 文件路径

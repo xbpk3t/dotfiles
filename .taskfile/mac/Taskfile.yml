@@ -4,7 +4,6 @@ version: "3"
 includes:
   mac: ./Taskfile.mac.yml
   brew: ./Taskfile.brew.yml
-  scratches: ./Taskfile.scratches.yml
 
 vars:
   BZ_SCRIPT: '{{.TASKFILE_DIR}}/scripts/bz/run.nu'
@@ -12,7 +11,7 @@ vars:
 tasks:
   bz:
     desc: Bilibili subtitle batch pipeline
-    summary: "task -t .taskfile/mac/Taskfile.yml bz [CMD=all|init|fetch|transcript|summarize|summary-status|summary-failed|status|failed|failed-urls] [URLS=urls.txt] [WORKDIR=/tmp/bz-YYYY-MM-DD] [COOKIES_FROM_BROWSER=chrome] [COOKIES=/path/to/cookies.txt] [RUNNER=...] [TRANSCRIPT_DIR=...]"
+    summary: "task -t .taskfile/mac/Taskfile.yml bz [CMD=all|init|fetch|transcript|summarize|summary-status|summary-failed|status|failed|failed-urls] [URLS=urls.txt] [WORKDIR=/tmp/bz-YYYY-MM-DD] [COOKIES_FROM_BROWSER=chrome] [COOKIES=/path/to/cookies.txt] [AGENT=codex|claude|custom] [RUNNER=...] [TRANSCRIPT_DIR=...] [CONCURRENCY=20]"
     dir: '{{.USER_WORKING_DIR}}'
     vars:
       CMD: '{{.CMD | default "all"}}'
@@ -20,8 +19,10 @@ tasks:
       WORKDIR: '{{.WORKDIR | default ""}}'
       COOKIES_FROM_BROWSER: '{{.COOKIES_FROM_BROWSER | default "chrome"}}'
       COOKIES: '{{.COOKIES | default ""}}'
+      AGENT: '{{.AGENT | default ""}}'
       RUNNER: '{{.RUNNER | default ""}}'
       TRANSCRIPT_DIR: '{{.TRANSCRIPT_DIR | default ""}}'
+      CONCURRENCY: '{{.CONCURRENCY | default ""}}'
     preconditions:
       - sh: test -f "{{.BZ_SCRIPT}}"
         msg: "{{.BZ_SCRIPT}} not found"
@@ -39,6 +40,8 @@ tasks:
           {{if .WORKDIR}} --workdir "{{.WORKDIR}}"{{end}}
           {{if and .COOKIES (or (eq .CMD "all") (eq .CMD "fetch"))}} --cookies "{{.COOKIES}}"{{else if and (or (eq .CMD "all") (eq .CMD "fetch")) (not .COOKIES)}} --cookies-from-browser "{{.COOKIES_FROM_BROWSER}}"{{end}}
           {{if eq .CMD "summarize"}}
+            {{if .AGENT}} --agent "{{.AGENT}}"{{end}}
             {{if .RUNNER}} --runner "{{.RUNNER}}"{{end}}
             {{if .TRANSCRIPT_DIR}} --transcript-dir "{{.TRANSCRIPT_DIR}}"{{end}}
+            {{if .CONCURRENCY}} --concurrency "{{.CONCURRENCY}}"{{end}}
           {{end}}
