@@ -10,7 +10,6 @@ license: MIT
 
 targets:
   - agent-skills
-  - claude
 
 includes: auto
 

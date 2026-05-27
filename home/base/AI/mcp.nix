@@ -23,24 +23,6 @@ in {
     isDesktop = mkEnableOption "desktop-only MCP servers (browser/GUI)";
   };
 
-  # MAYBE: [2026-04-03](excalidraw-mcp)
-  # https://github.com/excalidraw/excalidraw-mcp Excalidraw MCP，这个更适合拿来想事情，尤其是流程图、系统结构这类内容，靠文字说不清的时候，画一下会快很多。
-
-  # MAYBE: [2026-03-04](neo4j-mcp) 等别人发 neo4j-mcp 了。官方3个方案：binary install, docker, 自己打包nixpkg. 前两种我不选，第三种嫌麻烦。当然mac上可以直接brew安装，但是不通用所以我也不选。
-  # https://github.com/neo4j/mcp
-  # https://neo4j.com/docs/mcp/current/
-
-  # MAYBE: [2026-04-03](stitch MCP)
-  # https://linux.do/t/topic/1832590
-  # https://github.com/davideast/stitch-mcp
-  # https://stitch.withgoogle.com/docs/mcp/setup
-  # https://x.com/yangyi/status/2040272305277079728
-  # https://github.com/VoltAgent/awesome-design-md
-
-  # 面向 win 的逆向分析MCP
-  # https://linux.do/t/topic/1918792
-  # https://github.com/Last-emo-boy/rikune
-
   # https://developers.openai.com/codex/mcp
   config = lib.mkIf mcpEnabled {
     programs.mcp.enable = true;
@@ -252,6 +234,8 @@ in {
     # sessionVariables are sourced by the shell; MCP server subprocess inherits them.
     home.sessionVariables = {
       LINEAR_API_KEY = "$(cat ${config.sops.secrets.API_LINEAR.path})";
+      TAVILY_API_KEY = "$(cat ${config.sops.secrets.API_TAVILY.path})";
+      EXA_API_KEY = "$(cat ${config.sops.secrets.API_EXA.path})";
     };
   };
 }
