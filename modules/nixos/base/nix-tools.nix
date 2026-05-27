@@ -50,10 +50,7 @@ in {
     extraOptions = ''
       experimental-features = nix-command flakes
       # GitHub API rate limit fix
-      # To avoid API rate limits, set GITHUB_TOKEN environment variable
-      # The token will be read from gh CLI if available
-      # Usage: export GITHUB_TOKEN=$(gh auth token)
-      # Or add to your shell profile for persistence
+      # To avoid API rate limits, export the sops-managed GITHUB_TOKEN in the shell.
     '';
 
     # 定时GC

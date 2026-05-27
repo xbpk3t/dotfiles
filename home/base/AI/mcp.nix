@@ -84,9 +84,6 @@ in {
         # https://mynixos.com/nixpkgs/package/github-mcp-server
         github = {
           enable = true;
-          passwordCommand = {
-            GITHUB_PERSONAL_ACCESS_TOKEN = ["gh" "auth" "token"];
-          };
         };
 
         context7 = {

@@ -380,16 +380,16 @@ in {
         };
         shellAliases = {
           # 默认 alias 保持权限模型生效，避免和 settings.permissions.defaultMode 冲突。
-          cc = "CODEX_GITHUB_PERSONAL_ACCESS_TOKEN=$(gh auth token) claude";
+          cc = "claude";
 
           # [2026-05-01] 注释掉了，默认cc直接bypassPermissions
           # 兜底逃生开关：仅在明确需要跳过权限确认时手动使用。
-          # cc-unsafe = "CODEX_GITHUB_PERSONAL_ACCESS_TOKEN=$(gh auth token) claude --dangerously-skip-permissions";
+          # cc-unsafe = "claude --dangerously-skip-permissions";
 
           ccr = "claude-code-router"; # Alias for claude-code-router
 
           # 文件2建议：复杂任务时临时开最高 effort，日常用 cc 保持 auto
-          ccmax = "CODEX_GITHUB_PERSONAL_ACCESS_TOKEN=$(gh auth token) claude --effort max";
+          ccmax = "claude --effort max";
         };
         file = {
           ".claude/hooks/session-start/linear-session-start.nu" = {

@@ -199,10 +199,6 @@ in {
         LLM_AxonHub = "$(cat ${config.sops.secrets.LLM_AxonHub.path})";
       };
       shellAliases = {
-        # 每次启动 codex 时动态注入 GitHub PAT，避免把 token 写入静态配置。
-        # codex = "CODEX_GITHUB_PERSONAL_ACCESS_TOKEN=$(gh auth token) command codex";
-
-        # 按需切换第三方 provider；不影响默认的 ChatGPT OAuth 登录态。
       };
     };
 
