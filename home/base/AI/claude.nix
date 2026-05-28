@@ -283,6 +283,7 @@ in {
           "mcp__*_github__*"
           "mcp__*_linear__*"
           "mcp__*_codegraph__*"
+          "mcp__*_deepwiki__*"
         ];
         ask = [
           "Bash(git push *)"
