@@ -125,6 +125,10 @@ in {
         # 允许 no-sandbox 模式运行。仅建议在可信本机环境使用。
         CODEX_UNSAFE_ALLOW_NO_SANDBOX = 1;
 
+        OPENAI_API_KEY = "$(cat ${config.sops.secrets.LLM_AxonHub.path})";
+        OPENAI_BASE_URL = "https://api.lucc.dev/v1";
+        OPENAI_MODEL = "";
+
         # For Context7 MCP
         CONTEXT7_API_KEY = "$(cat ${config.sops.secrets.API_CONTEXT7.path})";
 

@@ -180,19 +180,17 @@ in {
         };
 
         # https://docs.devin.ai/work-with-devin/deepwiki-mcp
-        # deepwiki 偏repo/wiki/远程 MCP 知识访问
-        # mcp-remote 代理模式: 本地 stdio <-> 远端 MCP over HTTP。
-        # 暂不显式配置 tools：先保持默认 prompt。
-        # 原因是远端 tool 清单可能随服务端变化，后续可在 `codex mcp get deepwiki` 后再精确补全。
-        # MAYBE: [2026-04-19] 因为是remote mcp，在init时很耗时，所以注释掉
-        #  deepwiki = {
-        #    command = "npx";
-        #    args = [
-        #      "-y"
-        #      "mcp-remote"
-        #      "https://mcp.deepwiki.com/mcp"
-        #    ];
-        #  };
+        # [2026-04-19] 因为是remote mcp，在init时很耗时
+        # [2026-05-28] 重新添加了，确实很有用
+        # deepwiki 偏公开 repo/wiki/远程 MCP 知识访问；现有 fetch/github/context7/codegraph 不能完全替代。
+        # 使用直接 streamable HTTP，避免 npx + mcp-remote 的本地代理启动开销。
+        # 远端网络/服务延迟仍然存在；如果之后启动体验明显变差，再改为按需启用。
+        deepwiki = {
+          type = "http";
+          url = "https://mcp.deepwiki.com/mcp";
+          startup_timeout_sec = 100;
+          default_tools_approval_mode = "approve";
+        };
 
         # https://github.com/epiral/bb-browser
         # bb-browser: 复用真实 Chrome 登录态的浏览器 MCP。

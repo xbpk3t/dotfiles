@@ -9,8 +9,6 @@
 in {
   imports = [inputs.nixos-cli.nixosModules.nixos-cli];
 
-  # MAYBE: https://github.com/triton/triton/blob/master/pkgs/all-pkgs/s/systemd/default.nix 这个配置太牛逼了，之后学着搞下
-
   # Additional Nix management tools
   environment.systemPackages = with pkgs; [
     # NOTE: `pkgs.system` 是别名，已被上游标记弃用；改为 hostPlatform.system。
