@@ -99,6 +99,15 @@ in {
 
       # https://mynixos.com/nix-darwin/option/system.defaults.CustomUserPreferences
       CustomUserPreferences = {
+        # Date format (Language -> Date and number formats)
+        # 默认 Date format 是 Year/Month-Day，这里修改为 Year-Month-Day
+        # nix-darwin does not expose this under NSGlobalDomain, so write it as a raw user default.
+        "NSGlobalDomain" = {
+          AppleICUDateFormatStrings = {
+            "1" = "y-MM-dd";
+          };
+        };
+
         # 禁用 Siri
         # https://apple.stackexchange.com/questions/462525/disable-siri-fully-via-terminal-ventura
         "com.apple.assistant.support" = {
@@ -283,13 +292,7 @@ in {
     #    # 常见：18=显示在菜单栏，24=隐藏（和 Sound / AirDrop 一致）
     #    /usr/bin/defaults -currentHost write com.apple.controlcenter Hearing -int 18
     #  '';
-
-    # https://github.com/nix-darwin/nix-darwin/issues/1421
-    # https://ss64.com/mac/pmset.html
-    activationScripts.pmset.text = builtins.readFile ./pmset.sh;
   };
-
-  # MAYBE: Date format (Language -> Date and number formats) -> Year-Month-Day (other than Year/Month-Day). 查了一下目前确实没有这个配置项，用来修改默认 date format
 
   # https://github.com/smudge/nightlight
   # https://mynixos.com/nixpkgs/package/nightlight

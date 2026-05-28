@@ -30,7 +30,6 @@
     codex.enable = true;
     claude.enable = true;
     skills.enable = true;
-    opencode.enable = false;
     pi-agent.enable = true;
     mcp.isDesktop = true;
   };
