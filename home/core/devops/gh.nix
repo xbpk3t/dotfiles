@@ -2,11 +2,9 @@
   editorMeta,
   config,
   lib,
+  pkgs,
   ...
 }: {
-  # MAYBE: gh-stack
-  # https://github.github.com/gh-stack/getting-started/quick-start/
-
   programs.gh = {
     enable = true;
 
@@ -57,11 +55,24 @@
       };
     };
 
-    # 扩展配置
-    extensions = [
-      # https://github.com/dlvhdr/gh-dash
-      # https://mynixos.com/home-manager/options/programs.gh-dash
-      # "gh-dash"  # 如果你想使用 gh-dash 扩展
+    # gh extensions are package values; Home Manager links them under gh/extensions.
+    extensions = with pkgs; [
+      # gh-stack: stacked PR workflow.
+      # 用于把大改动拆成多层依赖 PR：底层 PR base=main，上层 PR base=前一层分支。
+      # 适合 agent/人工把复杂任务切成可 review 的小 PR；不用时只是多一个 gh stack 子命令。
+      gh-stack
+
+      # gh-dash: terminal dashboard for PRs and issues.
+      # 用来集中扫 assigned/review-requested PR、issue 和状态，比反复 gh pr list / 浏览器切页更高效。
+      gh-dash
+
+      # gh-f: fzf-powered GitHub picker.
+      # 用模糊搜索选择 repo/issue/PR 等对象，减少手输编号和 URL，和现有 gh aliases 互补。
+      gh-f
+
+      # gh-poi: safely clean up local branches after PRs are merged or closed.
+      # 适合多 repo/多分支工作流，降低本地分支堆积；比手写 git branch 清理脚本更稳。
+      gh-poi
     ];
   };
 

@@ -21,7 +21,7 @@ tasks:
       CF_ACCOUNT_ID: "{{.CF_ACCOUNT}}"
       CF_ZONE_ID: "{{.CF_ZONE}}"
     cmds:
-      - scripts/cloudflare-inventory.sh {{.DATE}}
+      - nu .taskfile/cloudflare-inventory.nu {{.DATE}}
 
   list:
     desc: "列出 Cloudflare 相关 stacks"
