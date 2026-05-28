@@ -6,7 +6,7 @@
   # Nix/NixOS 开发与调试常用 CLI
   home.packages = with pkgs;
     [
-      # 分类1：Nix 检索与打包源管理
+      # 分类1：Nix 打包
       # https://github.com/nix-community/noogle
       # https://noogle.dev/
       # nix search nixpkgs noogle
@@ -26,6 +26,10 @@
       # 注意：它不是 builder，本质上是 source update generator。
       # tags(desc): 打包辅助 > 源更新 > 自动化
       nvfetcher
+
+      # https://github.com/ipetkov/crane
+      # 用来打包 rust项目的nixpkgs
+      crane
     ]
     ++ [
       # 分类2：代码质量与测试
@@ -50,9 +54,6 @@
     ]
     ++ [
       # 分类3：依赖与构建分析
-
-      # 交互式生成 nix 包模板
-      # nix-init
 
       # === 依赖/构建分析 ===
       # 从 derivation 提取源码/补丁等
