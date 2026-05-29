@@ -30,15 +30,33 @@ with lib; let
   # 内部跑 shellcheck），出现未声明命令时 build 阶段就会报错而不是 runtime。
   mihomoLauncher = pkgs.writeShellApplication {
     name = "mihomo-tun-launcher";
-    runtimeInputs = with pkgs; [mihomo coreutils curl];
+    runtimeInputs = with pkgs; [mihomo coreutils];
     text = ''
       mkdir -p /var/lib/mihomo/providers
       rm -f /var/lib/mihomo/providers/self.yaml
-      # HTTP provider 在 macOS TUN 下会环路 i/o timeout，改由外部 curl 拉取。
-      # 这里预拉取确保 mihomo 启动时 provider 数据已就绪。
-      curl -sfLo /var/lib/mihomo/providers/wild-fetched.yaml \
-        "${cfg.wildUrl}"
       exec mihomo -d /var/lib/mihomo -f "$1"
+    '';
+  };
+
+  wildUpdater = pkgs.writeShellApplication {
+    name = "mihomo-wild-updater";
+    runtimeInputs = with pkgs; [coreutils curl];
+    text = ''
+      mkdir -p /var/lib/mihomo/providers
+      tmp="$(mktemp /var/lib/mihomo/providers/wild-fetched.yaml.XXXXXX)"
+      trap 'rm -f "$tmp"' EXIT
+
+      if curl -fsSLo "$tmp" --connect-timeout 15 --max-time 60 "${cfg.wildUrl}"; then
+        if [ -s "$tmp" ]; then
+          chmod 0644 "$tmp"
+          mv "$tmp" /var/lib/mihomo/providers/wild-fetched.yaml
+          trap - EXIT
+          exit 0
+        fi
+        echo "wild provider fetch returned empty content" >&2
+      fi
+
+      exit 1
     '';
   };
 in {
@@ -89,21 +107,18 @@ in {
       };
     };
 
-    # 独立 user agent：定期 curl 拉取 wild provider 数据。
-    # 不和 mihomo-tun daemon（system 级）混在一起的原因：
-    # - curl 不需要 root 权限
-    # - 独立 agent 出问题不会影响 TUN daemon 的重启逻辑
-    # - launcher 已做首次预拉取，agent 的 StartInterval 负责后续周期性更新
-    launchd.agents.mihomo-wild-updater = {
+    # 独立 system daemon：后台 best-effort 拉取 wild provider 数据。
+    # 不和 mihomo-tun 启动路径混在一起，避免 Tailscale 内网 URL 不可达时阻塞 TUN。
+    # 成功时原子替换缓存；失败只留下日志/exit code，保留旧缓存并不影响 mihomo。
+    launchd.daemons.mihomo-wild-updater = {
       serviceConfig = {
         Label = "local.mihomo.wild-updater";
         ProgramArguments = [
-          "${pkgs.curl}/bin/curl"
-          "-sfLo"
-          "/var/lib/mihomo/providers/wild-fetched.yaml"
-          cfg.wildUrl
+          "${wildUpdater}/bin/mihomo-wild-updater"
         ];
+        RunAtLoad = true;
         StartInterval = 1800;
+        WorkingDirectory = "/var/lib/mihomo";
         StandardOutPath = "/Users/${username}/Library/Logs/mihomo-wild-updater.log";
         StandardErrorPath = "/Users/${username}/Library/Logs/mihomo-wild-updater.log";
       };
