@@ -1,6 +1,7 @@
 {
   pkgs,
   mylib,
+  config,
   ...
 }: {
   home.packages = with pkgs;
@@ -128,6 +129,11 @@
       #- rsync -avzP --rsync-path="sudo rsync" /local/file user@remote:/protected/path/ # 远端使用 sudo 写入受保护目录
       #- rsync -avz --delete --progress -e # taskfile 中的不完整命令
       rsync
+
+      # 压缩工具
+      ouch
+      xz
+      zstd
     ]
     ++ [
       # 分类4：媒体处理与可视化工具
@@ -172,6 +178,10 @@
       # tags(desc): 网络工具 > IP规划 > 子网计算
       ipcalc
     ];
+
+  home.sessionVariables = {
+    TAILSCALE_API_KEY = "$(cat ${config.sops.secrets.TAILSCALE_API_KEY.path})";
+  };
 
   imports = mylib.scanPaths ./.;
 }

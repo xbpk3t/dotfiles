@@ -279,11 +279,7 @@ in {
           "WebFetch(*)"
           "Skill(*)"
 
-          "mcp__*_chrome-devtools__*"
-          "mcp__*_github__*"
-          "mcp__*_linear__*"
-          "mcp__*_codegraph__*"
-          "mcp__*_deepwiki__*"
+          "mcp__*"
         ];
         ask = [
           "Bash(git push *)"
