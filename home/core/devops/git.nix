@@ -63,6 +63,10 @@ in {
       rebase.autostash = true;
       credential.helper = "cache --timeout=7200";
       merge.conflictStyle = "diff3";
+      # 自动记录并重放合并冲突解决模式，减少重复处理同类冲突
+      rerere.enabled = true;
+      # git branch 默认按最近提交时间降序排列，非字母序
+      branch.sort = "-committerdate";
 
       log = {
         decorate = "full";

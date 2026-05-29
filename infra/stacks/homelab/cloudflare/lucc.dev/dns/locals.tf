@@ -59,6 +59,26 @@ locals {
       comment  = "tailscale"
       priority = null
     }
+    derp-svc = {
+      id       = null
+      name     = "derp-nixos-vps-svc.lucc.dev"
+      type     = "A"
+      content  = "103.85.224.63"
+      ttl      = 1
+      proxied  = false
+      comment  = "Tailscale DERP (HK)"
+      priority = null
+    }
+    derp-dev = {
+      id       = null
+      name     = "derp-nixos-vps-dev.lucc.dev"
+      type     = "A"
+      content  = "192.129.183.26"
+      ttl      = 1
+      proxied  = false
+      comment  = "Tailscale DERP (LA)"
+      priority = null
+    }
 
     blog = {
       id       = "442d7dbf738b136ce33fea1048c4331c"

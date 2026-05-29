@@ -81,6 +81,7 @@ in {
         # Keep it as a regular client; enables subnet/exit-node routing only when needed.
         useRoutingFeatures = "client";
         openFirewall = true;
+        authKeyFile = config.sops.secrets.TAILSCALE_AUTH_KEY.path;
       };
 
       environment.shellAliases = {
