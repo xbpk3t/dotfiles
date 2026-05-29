@@ -4,6 +4,7 @@
   globals,
   hostMeta,
   mylib,
+  pkgs,
   userMeta,
   stateVersion,
   ...
@@ -47,6 +48,21 @@ in {
   programs.command-not-found.enable = lib.mkDefault false;
 
   fonts.fontconfig.enable = lib.mkDefault false;
+
+  # VPS 使用 stable package set，但 NixOS module system 仍来自 rolling。
+  # rolling 的 all-terminfo 列表可能引用 stable 中已移除的包（例如 termite），
+  # 所以服务器只安装实际需要的常用终端 terminfo。
+  environment = {
+    enableAllTerminfo = lib.mkForce false;
+    systemPackages = [
+      pkgs.ghostty.terminfo
+      pkgs.kitty.terminfo
+      pkgs.tmux.terminfo
+      pkgs.wezterm.terminfo
+      pkgs.alacritty.terminfo
+      pkgs.foot.terminfo
+    ];
+  };
 
   xdg = {
     # 这些 freedesktop/XDG 组件主要服务桌面环境；在 server 上默认关闭更符合角色语义。
