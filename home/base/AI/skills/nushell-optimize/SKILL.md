@@ -1,5 +1,5 @@
 ---
-name: nushell-best-practices
+name: nushell-optimize
 trigger_keywords:
   - nushell
   - nu script

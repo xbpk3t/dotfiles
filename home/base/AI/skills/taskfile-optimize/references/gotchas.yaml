@@ -31,5 +31,3 @@ gotchas:
     fix: 明确 deps 的前置边界，复用逻辑用显式 task 或模板 task
     links:
       - https://github.com/go-task/task/issues/860
-
-...

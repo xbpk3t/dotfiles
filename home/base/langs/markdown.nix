@@ -39,9 +39,9 @@
   #   };
   # };
 
-  # Yazi 作为 ~/scratches 的笔记浏览器
+  # Yazi 作为 ~/notes 的笔记浏览器
   home.shellAliases = {
-    sc = "hx ~/scratches";
+    sc = "hx ~/notes";
   };
 
   # 确保 ~/notes 目录存在
