@@ -10,12 +10,12 @@ dir: '{{.APM_PROJECT_DIR}}'
 # 入口文件: apm.yml，定义 packages / scripts / targets 等
 #
 # 日常 workflow:
-#   task apm          → 维护/同步入口: info → update → prune → install
-#   task apm:check    → 非破坏性检查: info → compile validate → audit
+#   task apm          → 日常维护入口: info → compile → update → prune → install
+#   task apm:check    → 只读问诊入口: info → compile validate → audit
 #
 # 设计约定:
-#   - default 代表 deploy-first 的维护主线，不混入 compile 写入
-#   - check 负责观察 compile lane 和部署状态的信号，但不改 repo 状态
+#   - default 的职责不是“只装依赖”，而是把这个仓库自己维护的 instruction 和 APM 管理的部署结果一起收敛到最新
+#   - check 的职责不是“替 default 做一遍”，而是只看信号，回答“现在 source / compile / audit 这几层健不健康”
 #
 # 以下临时查询/操作直接用 CLI 更方便:
 #   apm search <query>    搜索 marketplace
@@ -24,31 +24,39 @@ dir: '{{.APM_PROJECT_DIR}}'
 #   apm mcp               管理 MCP servers
 
 tasks:
-  # default 维护/同步工作流
+  # default 日常维护工作流
   #
   # 执行顺序（各步骤不可合并，每步有独立语义）:
   #   1. _check     → 前置校验（apm CLI + apm.yml 是否存在）
   #   2. _info      → 查看当前 APM target 解析结果
-  #   3. _update    → 刷新依赖锁文件（apm update，更新 apm.lock.yaml）
-  #   4. _prune     → 清理 apm.yml 中已移除的孤立 skills/prompts/agents
-  #   5. _install   → 将 manifest/lock 描述的结果同步到 runtime 目标目录
+  #   3. _compile   → 依据 apm.yml target 编译本地 instructions 到 runtime 产物
+  #   4. _update    → 刷新依赖锁文件（apm update，更新 apm.lock.yaml）
+  #   5. _prune     → 清理 apm.yml 中已移除的孤立 skills/prompts/agents
+  #   6. _install   → 将 manifest/lock 描述的结果同步到 runtime 目标目录
   #
-  # 注意 default 故意不混入 compile lane。
-  # 这个仓库当前更像 deploy-first 项目：manifest + lockfile + deployed files 是主线，
-  # compile 的 validate / dry-run 更适合作为 check 信号，而不是默认维护入口的一部分。
+  # 为什么 default 里要包含 compile：
+  # 1. 对这个仓库来说，instructions 不是旁路资产，而是项目自己维护的源码；日常维护时它们也应该被同步。
+  # 2. 如果 default 只做 update/prune/install，那其实只是在收敛“依赖和部署状态”，没有收敛“本地规则产物”。
+  # 3. compile 放在前面，先把本地规则落出来；这样后面的 update/prune/install 就是在最新上下文上继续收敛，而不是带着旧产物往后走。
+  #
+  # 为什么 check 只保留 validate：
+  # - check 的目标是问诊，不是收敛状态；它应该告诉我们 compile lane 是否健康，但不应该真的写 CLAUDE.md 或其他运行时产物。
+  # - 换句话说，validate 解决的是“输入有没有问题”，compile 解决的是“结果有没有被刷新”；这两件事要分开。
   #
   # 等价裸命令流:
   #   apm targets                        # 查看状态
+  #   apm compile                        # 生成/更新当前 target 的 instruction 产物
   #   apm update                         # 刷新锁文件
   #   apm prune                          # 清理孤立文件
   #   apm install                        # 安装
   default:
-    desc: 默认维护任务，刷新锁文件并同步 APM 部署结果
+    desc: 默认维护任务，收敛本地 instruction 产物和 APM 部署结果
     summary: "task -t .taskfile/works/Taskfile.yml apm"
     dir: '{{.APM_PROJECT_DIR}}'
     deps: [_check]
     cmds:
       - task: _info
+      - task: _compile
       - task: _update
       - task: _prune
       - task: _install
@@ -56,8 +64,10 @@ tasks:
   # check 是独立的只读入口，用来看 compile/audit 等诊断信号。
   # 它不刷新 lockfile，也不写入 runtime 输出目录。
   # 作为只读检查入口：info -> compile --validate -> audit --ci
+  # 这里故意不用真正的 apm compile，因为“能不能生成产物”和“这次要不要真的写产物”是两件不同的事。
+  # default 负责收敛结果，check 负责提前发现问题。
   check:
-    desc: 非破坏性检查 APM 解析、compile 输入和部署状态
+    desc: 只读检查 APM 解析、compile 输入和部署状态
     summary: "task -t .taskfile/works/Taskfile.yml apm:check"
     dir: '{{.APM_PROJECT_DIR}}'
     deps: [_check]
@@ -76,11 +86,18 @@ tasks:
         msg: apm.yml 不存在（请在 APM 项目根目录运行）
 
   _compile_validate:
-    desc: 校验 compile lane 的 instruction 输入是否合法
+    desc: 只检查 compile 输入是否合法，不刷新运行时产物
     internal: true
     dir: '{{.APM_PROJECT_DIR}}'
     deps: [_check]
     cmd: apm compile --validate
+
+  _compile:
+    desc: 真正把本地 instruction 源落到当前 target 的运行时产物上
+    internal: true
+    dir: '{{.APM_PROJECT_DIR}}'
+    deps: [_check]
+    cmd: apm compile
 
   _update:
     desc: 更新依赖锁文件
@@ -90,7 +107,7 @@ tasks:
     cmd: apm update
 
   _install:
-    desc: 同步 manifest/lock 描述的部署结果到 runtime 目标目录
+    desc: 把 manifest/lock 描述的部署结果同步到 runtime 目标目录
     internal: true
     dir: '{{.APM_PROJECT_DIR}}'
     deps: [_check]
@@ -103,7 +120,9 @@ tasks:
     deps: [_check]
     cmd: apm audit --ci
 
-  # 注意之所以需要prune，因为APM不支持symlink（只有copy），所以我们修改了apm.yml后重新install，那么“只增不减”，之前的skills并不会被删除，所以需要先prune，移除掉之前的所有skills才能保证一致性
+  # 为什么这里需要 prune：
+  # APM 当前是 copy 语义，不是 symlink 语义。
+  # 只做 install 时，新内容会进来，但旧内容不一定自动消失；先 prune 再 install，才能把部署结果真正收敛到 apm.yml 当前声明的状态。
   _prune:
     desc: 清理 apm.yml 中已移除的孤立 skills/prompts/agents
     internal: true
@@ -112,7 +131,7 @@ tasks:
     cmd: apm prune
 
   _info:
-    desc: 查看当前 APM target 解析结果
+    desc: 先看 APM 当前把这个仓库解析成什么 target 形态
     internal: true
     dir: '{{.APM_PROJECT_DIR}}'
     deps: [_check]
