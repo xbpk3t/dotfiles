@@ -42,13 +42,6 @@
       file
       which
 
-      # 压缩工具
-      zip
-      unzip
-      p7zip
-      xz
-      zstd
-
       gnupg
       # 挪到base里，因为darwin和nixos都需要使用sops-nix
       sops

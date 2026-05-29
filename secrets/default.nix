@@ -129,6 +129,10 @@ in {
 
       # k3s
       K3S_TOKEN = mkRootSecret "k3s/token";
+
+      # Tailscale
+      TAILSCALE_AUTH_KEY = mkRootSecret "tailscale/auth_key";
+      TAILSCALE_API_KEY = mkUserSecret "tailscale/access_key";
     };
   };
 }

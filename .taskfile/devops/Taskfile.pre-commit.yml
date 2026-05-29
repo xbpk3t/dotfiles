@@ -76,13 +76,29 @@ tasks:
       SELECTED:
         sh: gum choose {{.HOOKS | join " "}}
 
-  # 新增维护任务
+  # 维护任务：clean + gc + 重装 hook wrapper + 重装工具环境 + autoupdate
+  #
+  # [2026-05-28] 添加 pre-commit install
+  # 背景：Nix GC（nix-collect-garbage）会清除旧 generation 的 store 路径，
+  # 而 pre-commit install 会将当前 Nix store 的绝对路径硬编码写入
+  # .git/hooks/pre-commit 和 .git/hooks/pre-push（包括 shebang 和 exec 行）。
+  # GC 后这些路径变死链接 → git push 报错 "cannot exec .git/hooks/pre-push"。
+  #
+  # 注意 install 和 install-hooks 的区别：
+  #   - install:      写 .git/hooks/ 下的 wrapper script（修复的就是这个）
+  #   - install-hooks: 安装 hook 工具本身到 cache（lint 等），不碰 wrapper
+  # 两者缺一不可，都放在 maintain 里。
+  #
+  # 另外，pre-commit install 默认只装 pre-commit hook type，
+  # 当前仓库配置了 default_stages: [pre-commit, pre-push]，
+  # 所以需要 --hook-type pre-commit --hook-type pre-push 两个都显式指定。
   maintain:
     desc: 对全局Pre-commit的hook进行 clean+gc+重装 操作
     summary: "task -g pc:maintain"
     cmds:
       - pre-commit clean  # 清理缓存
       - pre-commit gc     # 垃圾回收
-      - pre-commit install-hooks  # 重装钩子
-      - pre-commit autoupdate  # 重装钩子
-    dir: '{{.USER_WORKING_DIR}}' # 更新远程仓库版本
+      - pre-commit install --hook-type pre-commit --hook-type pre-push  # 重装 hook wrapper script（修复 Nix GC 后死路径）
+      - pre-commit install-hooks  # 重新安装 hook 工具环境
+      - pre-commit autoupdate  # 更新 hook 版本
+    dir: '{{.USER_WORKING_DIR}}'
