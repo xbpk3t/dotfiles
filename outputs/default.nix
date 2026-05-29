@@ -17,14 +17,13 @@
   globals = config.globals;
   customPkgsOverlay = import ../pkgs/overlay.nix;
 
-  # 单通道 rolling pkgs：作为系统构建与 Home Manager 的主 pkgs 实例。
+  # pkgs 构造策略统一收口在这里，避免各 host 重复写 import 配置。
   # 注意：
   # - overlays 统一在这里注入，避免各 host 重复写。
   # - allowUnfree / allowBroken 等策略也统一收口在这里。
-  # - 当前仓库只保留一套 pkgs，避免“名义双通道，实际同源”的虚假抽象。
-  # - 分支策略统一交给 flake inputs；这里不再重复制造 stable/unstable 概念。
-  mkPkgs = system:
-    import inputs.nixpkgs {
+  # - 默认使用 rolling；需要 stable 的 host 通过 hostMeta.nixpkgsChannel 显式声明。
+  mkPkgsFrom = nixpkgsInput: system:
+    import nixpkgsInput {
       inherit system;
       config.allowUnfree = true;
       config.nvidia.acceptLicense = true;
@@ -37,9 +36,26 @@
       overlays = [customPkgsOverlay];
     };
 
+  mkPkgs = mkPkgsFrom inputs.nixpkgs;
+
+  # host-level channel policy：这里只切 package set，不切 NixOS module system。
+  # NixOS modules 仍来自主 inputs.nixpkgs；HM 通过 useGlobalPkgs 复用同一套 pkgs。
+  mkPkgsForHost = system: hostMeta: let
+    channel = hostMeta.nixpkgsChannel or "rolling";
+    hostName = hostMeta.hostName or "unknown";
+    inputsByChannel = {
+      rolling = inputs.nixpkgs;
+      stable = inputs.nixpkgs-stable;
+    };
+    nixpkgsInput =
+      if builtins.hasAttr channel inputsByChannel
+      then inputsByChannel.${channel}
+      else throw "Unsupported nixpkgsChannel '${channel}' for host '${hostName}'";
+  in
+    mkPkgsFrom nixpkgsInput system;
+
   # 共享给 nixos/darwin/home modules 的基础 specialArgs。
-  # 注意：这里只透传一套 pkgs。
-  # Why: 仓库当前明确采用单通道模型，模块侧不再接触第二套 pkgs 入口。
+  # 注意：这里是默认 rolling pkgs；NixOS host 会在 mkSpecialArgs 中按 host metadata 覆写。
   genSpecialArgs = system: {
     inherit inputs mylib globals;
     pkgs = mkPkgs system;
@@ -55,6 +71,7 @@
       timeMeta = hostMeta.time;
       editorMeta = hostMeta.editor;
       stateVersion = hostMeta.stateVersion or "24.11";
+      pkgs = mkPkgsForHost system hostMeta;
     };
 
   # 传给 outputs/<system>/src/*.nix 的公共参数。

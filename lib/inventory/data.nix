@@ -49,10 +49,12 @@ in {
     };
   };
 
+  # 公网 VPS 使用 stable package set，降低 rolling 更新风险。
   nixos-vps = {
     nixos-vps-dev = rec {
       hostName = "nixos-vps-dev";
       stateVersion = "24.11";
+      nixpkgsChannel = "stable";
       primaryIp = "192.129.183.26";
       acmeEmail = "yyzw@live.com";
       user = commonUser;
@@ -117,6 +119,7 @@ in {
     nixos-vps-svc = rec {
       hostName = "nixos-vps-svc";
       stateVersion = "24.11";
+      nixpkgsChannel = "stable";
       primaryIp = "103.85.224.63";
       acmeEmail = "yyzw@live.com";
       user = commonUser;
