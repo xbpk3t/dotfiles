@@ -9,10 +9,6 @@ with lib; let
   cmuxCfg = config.modules.desktop.cmux;
 
   ghosttySettings = {
-    # ── Passthrough ──────────────────────────────────────────────────
-    # 允许转义序列直通终端。tmux-agent-sidebar 的 overlay 依赖此特性。
-    allow-passthrough = true;
-
     # ── Scrollback ──────────────────────────────────────────────────
     # 滚动缓冲区行数。agent 输出较长时保证能回滚查看。
     scrollback-limit = 10000;
@@ -32,11 +28,16 @@ with lib; let
     # 窗口左右内边距（px）。避免文字紧贴窗口边缘。
     window-padding-x = 4;
 
+    # ── macOS Tab ──────────────────────────────────────────────────
+    # macOS 原生 tab bar 显示在窗口左侧，视觉上接近 IDE 侧栏风格。
+    # 替代默认的顶部 tab 条，多 tab 场景下更易读。
+    # 选项: left | bottom | hidden
+    macos-tab-sidebar = "left";
+
     # ── Clipboard ───────────────────────────────────────────────────
     # 允许应用读取/写入/粘贴系统剪贴板。
     clipboard-read = "allow";
     clipboard-write = "allow";
-    clipboard-paste = "allow";
 
     # 选中文本自动复制到系统剪贴板，而非仅选区（primary selection）。
     copy-on-select = "clipboard";

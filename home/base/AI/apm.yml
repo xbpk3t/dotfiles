@@ -9,18 +9,25 @@ author: luck
 license: MIT
 
 targets:
-  - agent-skills
+  - claude
+  - codex
 
 includes: auto
 
 dependencies:
   apm:
-    - git: https://github.com/schpet/linear-cli.git
 
-  agent-skills:
     - git: https://github.com/jackwener/opencli.git
     # Provides
     # Run `npx skills add jackwener/opencli` to install after apm sync
       skills:
         - opencli-usage # 命令快速参考，用来插命令
         - opencli-browser # opencli browser 命令（驱动chrome做交互式操作）
+
+  claude:
+    - git: https://github.com/joa23/linear-cli.git
+      path: .claude/skills
+      skills:
+        - deps
+        - triage
+        - cycle-plan
