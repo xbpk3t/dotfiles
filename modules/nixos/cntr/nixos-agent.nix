@@ -15,6 +15,7 @@
   agentUserMeta = agentNode.user or userMeta;
   agentTimeMeta = agentNode.time or timeMeta;
   agentEditorMeta = agentNode.editor or editorMeta;
+  agentStateVersion = agentNode.stateVersion or "24.11";
 in
   lib.mkIf agentEnabled {
     containers.nixos-agent = {
@@ -28,6 +29,7 @@ in
         userMeta = agentUserMeta;
         timeMeta = agentTimeMeta;
         editorMeta = agentEditorMeta;
+        stateVersion = agentStateVersion;
       };
       config = {
         nixpkgs.config.allowUnfree = true;
@@ -47,6 +49,7 @@ in
               userMeta = agentUserMeta;
               timeMeta = agentTimeMeta;
               editorMeta = agentEditorMeta;
+              stateVersion = agentStateVersion;
             };
             home-manager.users.luck.imports =
               map mylib.relativeToRoot [
