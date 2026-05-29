@@ -48,6 +48,11 @@ with lib; let
     inherit (secrets) uuid publicKey shortId password;
   };
 
+  localDnsServers = [
+    "223.5.5.5"
+    "119.29.29.29"
+  ];
+
   # 参考 iKuuu_V2.yaml / 雷霆.yaml 的静态模板结构
   # 节点不再硬编码进 proxies，而是拆成两个 provider：
   #   self —— file provider，由 selfProviderContent 渲染到 providers/self.yaml
@@ -79,11 +84,21 @@ with lib; let
       fake-ip-filter = [
         "*.lan"
         "*.local"
+        # Mirrors the sing-box DNS rule: keep Tailscale control-plane names
+        # out of FakeIP so tailscaled does not register through 198.18.x.x.
+        "tailscale.com"
+        "*.tailscale.com"
+        "tailscale.io"
+        "*.tailscale.io"
+        "ts.net"
+        "*.ts.net"
       ];
-      default-nameserver = [
-        "223.5.5.5"
-        "119.29.29.29"
-      ];
+      nameserver-policy = {
+        "+.tailscale.com" = localDnsServers;
+        "+.tailscale.io" = localDnsServers;
+        "+.ts.net" = localDnsServers;
+      };
+      default-nameserver = localDnsServers;
       nameserver = [
         "https://doh.pub/dns-query"
         "https://dns.alidns.com/dns-query"
@@ -112,6 +127,7 @@ with lib; let
       wild = {
         type = "file";
         path = "/var/lib/mihomo/providers/wild-fetched.yaml";
+        interval = 1800;
         health-check = {
           enable = true;
           url = "https://cp.cloudflare.com/generate_204";
