@@ -14,6 +14,8 @@
     };
   };
 
+  modules.tui.nvim.enable = true;
+
   modules.desktop = {
     stylix.enable = true;
 

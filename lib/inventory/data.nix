@@ -10,9 +10,9 @@ let
     # Why: 编辑器相关配置会被 shell、git、gh、xdg、lazygit 等多个模块共同消费。
     # 把它放到 host metadata 源头层，可以和 user/time 一样由 specialArgs 统一透传，
     # 避免在 outputs/default.nix 或各模块里重复写死同一组 editor 常量。
-    command = "hx";
-    desktopEntry = "Helix.desktop";
-    lazygitPreset = "helix";
+    command = "nvim";
+    desktopEntry = "nvim.desktop";
+    lazygitPreset = "nvim";
   };
 in {
   nixos-avf = {
@@ -49,12 +49,10 @@ in {
     };
   };
 
-  # 公网 VPS 使用 stable package set，降低 rolling 更新风险。
   nixos-vps = {
     nixos-vps-dev = rec {
       hostName = "nixos-vps-dev";
       stateVersion = "24.11";
-      nixpkgsChannel = "stable";
       primaryIp = "192.129.183.26";
       acmeEmail = "yyzw@live.com";
       user = commonUser;
@@ -119,7 +117,6 @@ in {
     nixos-vps-svc = rec {
       hostName = "nixos-vps-svc";
       stateVersion = "24.11";
-      nixpkgsChannel = "stable";
       primaryIp = "103.85.224.63";
       acmeEmail = "yyzw@live.com";
       user = commonUser;
