@@ -14,7 +14,7 @@ in {
   };
 
   config = mkIf cfg.enable {
-    home.file.".config/nvim/lua" = {
+    home.file.".config/nvf/lua" = {
       source = ./lua;
       recursive = true;
     };
@@ -85,12 +85,6 @@ in {
             desc = "Live grep";
           }
           {
-            key = "<leader>fe";
-            mode = ["n"];
-            action = "<cmd>lua YaziProjectRoot()<cr>";
-            desc = "Explorer (yazi)";
-          }
-          {
             key = "<leader>fr";
             mode = ["n"];
             action = "<cmd>lua __nvf_open_oldfiles()<cr>";
@@ -102,12 +96,7 @@ in {
             action = "<cmd>DeleteCurrentFile<cr>";
             desc = "Delete file";
           }
-          {
-            key = "<leader>fp";
-            mode = ["n"];
-            action = "<cmd>Telescope projects<cr>";
-            desc = "Projects";
-          }
+
           {
             key = "<leader>fs";
             mode = ["n"];
@@ -193,26 +182,6 @@ in {
             desc = "Next diagnostic";
           }
 
-          # ── Terminal (<leader>t) ─────────────────
-          {
-            key = "<leader>tt";
-            mode = ["n"];
-            action = ":ToggleTerm direction=vertical<CR>";
-            desc = "Terminal";
-          }
-          {
-            key = "<leader>tg";
-            mode = ["n"];
-            action = ":lua ToggleTermLazygit()<CR>";
-            desc = "Lazygit";
-          }
-          {
-            key = "<leader>tf";
-            mode = ["n"];
-            action = ":lua ToggleTermFocus()<CR>";
-            desc = "Focus terminal";
-          }
-
           # ── Misc ─────────────────────────────────
           {
             key = "<leader>nh";
@@ -283,9 +252,9 @@ in {
         visuals = {
           nvim-web-devicons.enable = true;
           nvim-cursorline.enable = true;
-          cinnamon-nvim.enable = true;
+          cinnamon-nvim.enable = false;
           fidget-nvim.enable = true;
-          highlight-undo.enable = true;
+          highlight-undo.enable = false;
           indent-blankline.enable = true;
         };
 
@@ -312,21 +281,21 @@ in {
           gitsigns.codeActions.enable = false;
         };
 
-        projects.project-nvim.enable = true;
+        projects.project-nvim.enable = false;
 
         dashboard.dashboard-nvim.enable = false;
 
         filetree.neo-tree.enable = false;
 
         notify = {
-          nvim-notify.enable = true;
+          nvim-notify.enable = false;
           nvim-notify.setupOpts.background_colour = "#f38ba8";
         };
 
         utility = {
           ccc.enable = false;
           vim-wakatime.enable = false;
-          icon-picker.enable = true;
+          icon-picker.enable = false;
           surround.enable = false;
           diffview-nvim.enable = true;
 
@@ -342,7 +311,7 @@ in {
 
         ui = {
           borders.enable = true;
-          noice.enable = true;
+          noice.enable = false;
           colorizer.enable = true;
           illuminate.enable = true;
 
@@ -359,7 +328,7 @@ in {
         };
 
         session = {
-          nvim-session-manager.enable = true;
+          nvim-session-manager.enable = false;
         };
 
         comments = {
@@ -367,210 +336,88 @@ in {
         };
 
         lazy = {
-          plugins =
-            with pkgs.vimPlugins; {
-              "monokai-pro.nvim" = {
-                package = monokai-pro-nvim;
-                lazy = false;
-                priority = 1000;
-                after = ''require("config.monokai").setup()'';
-              };
-              "auto-save.nvim" = {
-                package = auto-save-nvim;
-                lazy = false;
-                after = ''
-                  require("auto-save").setup({})
-                '';
-              };
-
-              "nvim-spectre" = {
-                package = nvim-spectre;
-                cmd = ["Spectre"];
-                keys = [
-                  {
-                    key = "<leader>sr";
-                    mode = ["n"];
-                    action = ":lua require('spectre').open()<CR>";
-                    desc = "Project replace (Spectre)";
-                  }
-                ];
-                after = ''require("config.spectre").setup()'';
-              };
-
-              "nvim-dap" = {
-                package = nvim-dap;
-                keys = [
-                  {
-                    key = "<F5>";
-                    mode = ["n"];
-                    action = ":lua require('dap').continue()<CR>";
-                    desc = "Debug continue";
-                  }
-                  {
-                    key = "<F10>";
-                    mode = ["n"];
-                    action = ":lua require('dap').step_over()<CR>";
-                    desc = "Debug step over";
-                  }
-                  {
-                    key = "<F11>";
-                    mode = ["n"];
-                    action = ":lua require('dap').step_into()<CR>";
-                    desc = "Debug step into";
-                  }
-                  {
-                    key = "<F12>";
-                    mode = ["n"];
-                    action = ":lua require('dap').step_out()<CR>";
-                    desc = "Debug step out";
-                  }
-                  {
-                    key = "<leader>b";
-                    mode = ["n"];
-                    action = ":lua require('dap').toggle_breakpoint()<CR>";
-                    desc = "Toggle breakpoint";
-                  }
-                ];
-              };
-
-              "nvim-dap-ui" = {
-                package = nvim-dap-ui;
-                keys = [
-                  {
-                    key = "<leader>du";
-                    mode = ["n"];
-                    action = ":lua require('dapui').toggle()<CR>";
-                    desc = "Toggle DAP UI";
-                  }
-                ];
-                after = ''require("config.dap-ui").setup()'';
-              };
-
-              "vim-dadbod" = {
-                package = vim-dadbod;
-                lazy = true;
-                cmd = [
-                  "DB"
-                  "DBUI"
-                  "DBUIToggle"
-                  "DBUIAddConnection"
-                ];
-              };
-
-              "vim-dadbod-ui" = {
-                package = vim-dadbod-ui;
-                cmd = [
-                  "DBUI"
-                  "DBUIToggle"
-                ];
-                keys = [
-                  {
-                    key = "<leader>D";
-                    mode = ["n"];
-                    action = ":DBUIToggle<CR>";
-                    desc = "Toggle Database UI";
-                  }
-                ];
-                after = ''
-                  vim.g.db_ui_use_nerd_fonts = 1
-                  vim.g.db_ui_show_database_icon = 1
-                '';
-              };
-
-              "vim-dadbod-completion" = {
-                package = vim-dadbod-completion;
-                lazy = true;
-              };
-
-              "plenary.nvim" = {
-                package = plenary-nvim;
-                lazy = true;
-              };
-
-              "nui.nvim" = {
-                package = nui-nvim;
-                lazy = true;
-              };
-
-              "nvim-surround" = {
-                package = nvim-surround;
-                event = [
-                  {
-                    event = "User";
-                    pattern = "LazyFile";
-                  }
-                ];
-                after = ''
-                  require("nvim-surround").setup({})
-                '';
-              };
-
-              "nvim-scrollview" = {
-                package = nvim-scrollview;
-                event = ["BufWinEnter"];
-              };
-
-              "toggleterm.nvim" = {
-                package = toggleterm-nvim;
-                cmd = ["ToggleTerm"];
-                keys = [
-                  {
-                    key = "<leader>tt";
-                    mode = ["n"];
-                    action = ":ToggleTerm direction=vertical<CR>";
-                    desc = "Vertical terminal";
-                  }
-                  {
-                    key = "<leader>tg";
-                    mode = ["n"];
-                    action = ":lua ToggleTermLazygit()<CR>";
-                    desc = "Lazygit";
-                  }
-                  {
-                    key = "<leader>tf";
-                    mode = ["n"];
-                    action = ":lua ToggleTermFocus()<CR>";
-                    desc = "Focus terminal";
-                  }
-                ];
-                after = ''require("config.toggleterm").setup()'';
-              };
-
-              "nvim-autopairs" = {
-                package = nvim-autopairs;
-                event = ["InsertEnter"];
-                after = ''require("config.autopairs").setup()'';
-              };
-              "yazi.nvim" = {
-                package = pkgs.vimPlugins."yazi-nvim";
-                cmd = ["Yazi"];
-                keys = [
-                  {
-                    key = "<leader>fe";
-                    mode = ["n"];
-                    action = ":lua YaziProjectRoot()<CR>";
-                    desc = "Explorer (yazi)";
-                  }
-                ];
-                after = ''
-                  require("yazi").setup({
-                    open_for_directories = false,
-                    open_multiple_tabs = false,
-                    floating_window_scaling_factor = 0.92,
-                    change_neovim_cwd_on_close = false,
-                    highlight_hovered_buffers_in_same_directory = true,
-                    future_features = { use_cwd_file = false },
-                  })
-                '';
-              };
+          plugins = with pkgs.vimPlugins; {
+            "monokai-pro.nvim" = {
+              package = monokai-pro-nvim;
+              lazy = false;
+              priority = 1000;
+              after = ''require("config.monokai").setup()'';
             };
+            "auto-save.nvim" = {
+              package = auto-save-nvim;
+              lazy = false;
+              after = ''
+                require("auto-save").setup({})
+              '';
+            };
+
+            "vim-dadbod-ui" = {
+              package = vim-dadbod-ui;
+              cmd = [
+                "DBUI"
+                "DBUIToggle"
+              ];
+              keys = [
+                {
+                  key = "<leader>D";
+                  mode = ["n"];
+                  action = ":DBUIToggle<CR>";
+                  desc = "Toggle Database UI";
+                }
+              ];
+              after = ''
+                vim.g.db_ui_use_nerd_fonts = 1
+                vim.g.db_ui_show_database_icon = 1
+              '';
+            };
+
+            "nvim-surround" = {
+              package = nvim-surround;
+              event = [
+                {
+                  event = "User";
+                  pattern = "LazyFile";
+                }
+              ];
+              after = ''
+                require("nvim-surround").setup({})
+              '';
+            };
+
+            "nvim-autopairs" = {
+              package = nvim-autopairs;
+              event = ["InsertEnter"];
+              after = ''require("config.autopairs").setup()'';
+            };
+            "yazi.nvim" = {
+              package = pkgs.vimPlugins."yazi-nvim";
+              cmd = ["Yazi"];
+              keys = [
+                {
+                  key = "<leader>fe";
+                  mode = ["n"];
+                  action = ":lua YaziProjectRoot()<CR>";
+                  desc = "Explorer (yazi)";
+                }
+              ];
+              after = ''
+                require("yazi").setup({
+                  open_for_directories = false,
+                  open_multiple_tabs = false,
+                  floating_window_scaling_factor = 0.92,
+                  change_neovim_cwd_on_close = false,
+                  highlight_hovered_buffers_in_same_directory = true,
+                  future_features = { use_cwd_file = false },
+                })
+              '';
+            };
+          };
         };
 
         luaConfigRC = {
           delete-current-file = ''require("config.delete-file").setup()'';
           telescope-helpers = ''require("config.telescope-helpers").setup()'';
           telescope-setup = entryAfter ["pluginConfigs"] ''require("config.telescope").setup()'';
-          lsp-setup = ''require("config.lsp").setup()'';
           yazi-project = ''require("config.yazi").setup()'';
         };
       };
