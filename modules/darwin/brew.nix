@@ -49,7 +49,7 @@ in {
       "alfred"
       "hammerspoon"
 
-      "goland"
+      # "goland"
 
       "wechat"
 
