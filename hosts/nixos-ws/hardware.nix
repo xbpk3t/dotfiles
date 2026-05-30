@@ -4,9 +4,11 @@
   modulesPath,
   mylib,
   ...
-}: let
+}:
+let
   facterReport = mylib.facter.reportPathForHost "nixos-ws";
-in {
+in
+{
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
   ];
@@ -22,10 +24,13 @@ in {
 
     fsType = "vfat";
 
-    options = ["fmask=0077" "dmask=0077"];
+    options = [
+      "fmask=0077"
+      "dmask=0077"
+    ];
   };
 
-  swapDevices = [];
+  swapDevices = [ ];
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
 

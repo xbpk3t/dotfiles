@@ -14,7 +14,8 @@ let
     desktopEntry = "nvim.desktop";
     lazygitPreset = "nvim";
   };
-in {
+in
+{
   nixos-avf = {
     nixos-avf = {
       hostName = "nixos-avf";
@@ -79,7 +80,7 @@ in {
         # Why：VPS 具备公网能力，保留 ExternalIP 便于对外展示/诊断。
         nodeExternalIP = primaryIp;
         # 业务角色（用于 node-role.kubernetes.io/<role>=true）
-        roles = ["dev"];
+        roles = [ "dev" ];
         # 拓扑标签：region=NA，zone=LA
         region = "NA";
         zone = "LA";
@@ -139,7 +140,7 @@ in {
         # Why：VPS 具备公网能力，保留 ExternalIP 便于对外展示/诊断。
         nodeExternalIP = primaryIp;
         # 业务角色（用于 node-role.kubernetes.io/<role>=true）
-        roles = ["svc"];
+        roles = [ "svc" ];
         # 拓扑标签：region=APAC，zone=HK
         region = "APAC";
         zone = "HK";

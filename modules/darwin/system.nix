@@ -2,10 +2,12 @@
   userMeta,
   timeMeta,
   ...
-}: let
+}:
+let
   username = userMeta.username;
   timeZone = timeMeta.timeZone;
-in {
+in
+{
   # Shared macOS system preferences with default values
   # Host-specific configurations can override these defaults
   # 不需要去查什么Darwin的SystemPreferences，只需要去查nix-darwin的文档即可。因为并非所有配置项，都提供了nix配置项。
@@ -28,7 +30,7 @@ in {
         autohide-delay = 0.0;
         autohide-time-modifier = 0.0;
         show-recents = false;
-        persistent-apps = [];
+        persistent-apps = [ ];
         static-only = false;
         launchanim = false;
 

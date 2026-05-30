@@ -4,10 +4,12 @@
   mylib,
   pkgs,
   ...
-}: let
+}:
+let
   cacheSettings = mylib.nixCacheSettings;
-in {
-  imports = [inputs.nixos-cli.nixosModules.nixos-cli];
+in
+{
+  imports = [ inputs.nixos-cli.nixosModules.nixos-cli ];
 
   # Additional Nix management tools
   environment.systemPackages = with pkgs; [
@@ -26,7 +28,7 @@ in {
       # 构建过程中磁盘空间低于阈值时，临时触发 GC，直到回到 max-free
       min-free = 128000000;
       max-free = 1000000000;
-      trusted-users = ["@wheel"];
+      trusted-users = [ "@wheel" ];
       substituters = cacheSettings.substituters;
       trusted-public-keys = cacheSettings.trustedPublicKeys;
       # 允许非 trusted user 也可使用这些 cache（减少 untrusted substituter 警告）
@@ -139,12 +141,12 @@ in {
         ];
 
         # Information and query
-        opt = ["option"];
+        opt = [ "option" ];
         opts = [
           "option"
           "--non-interactive"
         ];
-        man = ["manual"];
+        man = [ "manual" ];
       };
 
       # https://nix-community.github.io/nixos-cli/settings.html#apply

@@ -3,10 +3,12 @@
   lib,
   stateVersion,
   ...
-}: let
+}:
+let
   hostName = "nixos-homelab";
   inherit (globals.networking) nameservers;
-in {
+in
+{
   imports = [
     ./hardware.nix
   ];

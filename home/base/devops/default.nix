@@ -3,8 +3,10 @@
   mylib,
   config,
   ...
-}: {
-  home.packages = with pkgs;
+}:
+{
+  home.packages =
+    with pkgs;
     [
       # 分类1：质量检查与规范化
       # 用nix的mkOutOfStoreSymlink代替了

@@ -3,9 +3,11 @@
   modulesPath,
   mylib,
   ...
-}: let
+}:
+let
   facterReport = mylib.facter.reportPathForHost "nixos-homelab";
-in {
+in
+{
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
   ];
@@ -20,10 +22,13 @@ in {
   fileSystems."/boot" = {
     device = "/dev/disk/by-uuid/2229-EDEE";
     fsType = "vfat";
-    options = ["fmask=0077" "dmask=0077"];
+    options = [
+      "fmask=0077"
+      "dmask=0077"
+    ];
   };
 
-  swapDevices = [];
+  swapDevices = [ ];
   networking.useDHCP = lib.mkForce true;
   nixpkgs.hostPlatform = "x86_64-linux";
   services.fstrim.enable = true;

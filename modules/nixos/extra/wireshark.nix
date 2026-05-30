@@ -3,11 +3,13 @@
   lib,
   userMeta,
   ...
-}: let
+}:
+let
   inherit (lib) mkEnableOption mkIf;
   cfg = config.modules.extra.wireshark;
   username = userMeta.username;
-in {
+in
+{
   options.modules.extra.wireshark = {
     enable = mkEnableOption "Wireshark capture capability on NixOS";
   };
@@ -29,7 +31,9 @@ in {
       usbmon.enable = false;
     };
 
-    users.groups = {wireshark = {};};
-    users.users."${username}".extraGroups = ["wireshark"];
+    users.groups = {
+      wireshark = { };
+    };
+    users.users."${username}".extraGroups = [ "wireshark" ];
   };
 }

@@ -3,17 +3,19 @@
   lib,
   pkgs,
   ...
-}: let
+}:
+let
   cfg = config.modules.extra.wireshark;
-in {
+in
+{
   options.modules.extra.wireshark = with lib; {
     enable = mkEnableOption "Wireshark user-space tools";
   };
 
   config = lib.mkIf cfg.enable {
-    home.packages =
-      lib.optionals pkgs.stdenv.isLinux
-      (with pkgs; [
+    home.packages = lib.optionals pkgs.stdenv.isLinux (
+      with pkgs;
+      [
         # https://mynixos.com/nixpkgs/package/wireshark
         # https://www.wireshark.org/
         # 正如 modules/wireshark 所说，在 darwin/nixos 拆分安装 wireshark
@@ -87,6 +89,7 @@ in {
         #  只有你明确有 pcap 回放需求时再加。
         #- netsniff-ng
         #  更偏专用网络工具，不是 Wireshark 主线工作流必需。
-      ]);
+      ]
+    );
   };
 }

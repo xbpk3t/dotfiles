@@ -3,10 +3,12 @@
   lib,
   pkgs,
   ...
-}: let
+}:
+let
   cfg = config.modules.devops.unison;
   isLinux = pkgs.stdenv.hostPlatform.isLinux;
-in {
+in
+{
   # host 侧调用示例：
   # modules.devops.unison = {
   #   enable = true;
@@ -26,7 +28,7 @@ in {
 
     pairs = mkOption {
       type = with types; attrsOf attrs;
-      default = {};
+      default = { };
       description = "Direct passthrough to Home Manager services.unison.pairs.";
     };
   };

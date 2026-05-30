@@ -1,4 +1,5 @@
-{mail, ...}: {
+{ mail, ... }:
+{
   programs.gpg = {
     enable = false;
     settings = {

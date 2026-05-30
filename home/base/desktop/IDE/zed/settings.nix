@@ -1,4 +1,5 @@
-_: let
+_:
+let
   # OpenType Feature tags
   # 连字符相关配置
   # https://learn.microsoft.com/en-us/typography/opentype/spec/featurelist
@@ -18,7 +19,8 @@ _: let
   };
 
   exts = import ./extensions.nix;
-in {
+in
+{
   # https://zed.dev/blog/hidden-gems-part-2
 
   # 可供参考的zed配置
@@ -513,8 +515,7 @@ in {
       format_on_save = "on";
       formatter = {
         external = {
-          command = "alejandra";
-          arguments = ["--quiet"];
+          command = "nixfmt";
         };
       };
     };

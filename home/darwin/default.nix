@@ -3,8 +3,9 @@
   pkgs,
   lib,
   ...
-}: {
-  imports = [../base] ++ mylib.scanPaths ./.;
+}:
+{
+  imports = [ ../base ] ++ mylib.scanPaths ./.;
 
   home.packages = with pkgs; [
     # （用来替代smctemp）

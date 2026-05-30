@@ -6,7 +6,8 @@
   userMeta,
   ...
 }:
-with lib; let
+with lib;
+let
   cfg = config.modules.networking.singbox;
   username = userMeta.username;
   client = import ../../lib/singbox/client-config.nix {
@@ -18,7 +19,8 @@ with lib; let
       ;
   };
   clientConfigPath = client.clientConfigPath;
-in {
+in
+{
   options.modules.networking.singbox = {
     enable = mkEnableOption "sing-box service";
   };

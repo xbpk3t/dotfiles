@@ -5,10 +5,12 @@
   pkgs,
   ...
 }:
-with lib; let
+with lib;
+let
   inherit (inputs.nvf.lib.nvim.dag) entryAfter;
   cfg = config.modules.tui.nvim;
-in {
+in
+{
   options.modules.tui.nvim = {
     enable = lib.mkEnableOption "Enable NVF (for Vim)";
   };
@@ -42,31 +44,31 @@ in {
           # ── Insert Mode ──────────────────────────
           {
             key = "jk";
-            mode = ["i"];
+            mode = [ "i" ];
             action = "<ESC>";
             desc = "Exit insert mode";
           }
           {
             key = "<C-h>";
-            mode = ["i"];
+            mode = [ "i" ];
             action = "<Left>";
             desc = "Move left in insert mode";
           }
           {
             key = "<C-j>";
-            mode = ["i"];
+            mode = [ "i" ];
             action = "<Down>";
             desc = "Move down in insert mode";
           }
           {
             key = "<C-k>";
-            mode = ["i"];
+            mode = [ "i" ];
             action = "<Up>";
             desc = "Move up in insert mode";
           }
           {
             key = "<C-l>";
-            mode = ["i"];
+            mode = [ "i" ];
             action = "<Right>";
             desc = "Move right in insert mode";
           }
@@ -74,32 +76,32 @@ in {
           # ── Files (<leader>f) ────────────────────
           {
             key = "<leader>ff";
-            mode = ["n"];
+            mode = [ "n" ];
             action = "<cmd>Telescope find_files<cr>";
             desc = "Find files";
           }
           {
             key = "<leader>fg";
-            mode = ["n"];
+            mode = [ "n" ];
             action = "<cmd>Telescope live_grep<cr>";
             desc = "Live grep";
           }
           {
             key = "<leader>fr";
-            mode = ["n"];
+            mode = [ "n" ];
             action = "<cmd>lua __nvf_open_oldfiles()<cr>";
             desc = "Recent files";
           }
           {
             key = "<leader>fd";
-            mode = ["n"];
+            mode = [ "n" ];
             action = "<cmd>DeleteCurrentFile<cr>";
             desc = "Delete file";
           }
 
           {
             key = "<leader>fs";
-            mode = ["n"];
+            mode = [ "n" ];
             action = "<cmd>lua __nvf_lsp_document_symbols()<cr>";
             desc = "Document symbols";
           }
@@ -107,19 +109,19 @@ in {
           # ── Buffer (<leader>b) ───────────────────
           {
             key = "<leader>bn";
-            mode = ["n"];
+            mode = [ "n" ];
             action = "<cmd>bnext<cr>";
             desc = "Next buffer";
           }
           {
             key = "<leader>bp";
-            mode = ["n"];
+            mode = [ "n" ];
             action = "<cmd>bprevious<cr>";
             desc = "Previous buffer";
           }
           {
             key = "<leader>bd";
-            mode = ["n"];
+            mode = [ "n" ];
             action = "<cmd>bdelete<cr>";
             desc = "Close buffer";
           }
@@ -127,43 +129,43 @@ in {
           # ── LSP ──────────────────────────────────
           {
             key = "gd";
-            mode = ["n"];
+            mode = [ "n" ];
             action = "<cmd>lua vim.lsp.buf.definition()<cr>";
             desc = "Go to definition";
           }
           {
             key = "gD";
-            mode = ["n"];
+            mode = [ "n" ];
             action = "<cmd>lua vim.lsp.buf.declaration()<cr>";
             desc = "Go to declaration";
           }
           {
             key = "gI";
-            mode = ["n"];
+            mode = [ "n" ];
             action = "<cmd>lua vim.lsp.buf.implementation()<cr>";
             desc = "Go to implementation";
           }
           {
             key = "gr";
-            mode = ["n"];
+            mode = [ "n" ];
             action = "<cmd>lua vim.lsp.buf.references()<cr>";
             desc = "List references";
           }
           {
             key = "K";
-            mode = ["n"];
+            mode = [ "n" ];
             action = "<cmd>lua vim.lsp.buf.hover()<cr>";
             desc = "Hover";
           }
           {
             key = "<leader>lr";
-            mode = ["n"];
+            mode = [ "n" ];
             action = "<cmd>lua vim.lsp.buf.rename()<cr>";
             desc = "Rename";
           }
           {
             key = "<leader>la";
-            mode = ["n"];
+            mode = [ "n" ];
             action = "<cmd>lua vim.lsp.buf.code_action()<cr>";
             desc = "Code action";
           }
@@ -171,13 +173,13 @@ in {
           # ── Diagnostics ──────────────────────────
           {
             key = "[d";
-            mode = ["n"];
+            mode = [ "n" ];
             action = "<cmd>lua vim.diagnostic.goto_prev()<cr>";
             desc = "Previous diagnostic";
           }
           {
             key = "]d";
-            mode = ["n"];
+            mode = [ "n" ];
             action = "<cmd>lua vim.diagnostic.goto_next()<cr>";
             desc = "Next diagnostic";
           }
@@ -185,31 +187,31 @@ in {
           # ── Misc ─────────────────────────────────
           {
             key = "<leader>nh";
-            mode = ["n"];
+            mode = [ "n" ];
             action = ":nohl<CR>";
             desc = "Clear highlights";
           }
           {
             key = "<leader>ua";
-            mode = ["n"];
+            mode = [ "n" ];
             action = "<cmd>ASToggle<cr>";
             desc = "Toggle auto-save";
           }
           {
             key = "ss";
-            mode = ["n"];
+            mode = [ "n" ];
             action = "\"_dd";
             desc = "Delete without yank";
           }
           {
             key = "<leader>q";
-            mode = ["n"];
+            mode = [ "n" ];
             action = "<cmd>qa<CR>";
             desc = "Quit";
           }
           {
             key = "<leader>Q";
-            mode = ["n"];
+            mode = [ "n" ];
             action = "<cmd>qa!<CR>";
             desc = "Force quit";
           }
@@ -238,8 +240,13 @@ in {
           enableTreesitter = true;
           enableExtraDiagnostics = true;
 
-          nix.enable = true;
+          nix = {
+            enable = true;
+            format.type = [ "nixfmt" ];
+          };
           go.enable = true;
+          rust.enable = true;
+          zig.enable = true;
           lua.enable = true;
           clang.enable = true;
           python.enable = true;
@@ -247,6 +254,12 @@ in {
           typescript.enable = true;
           html.enable = true;
           yaml.enable = true;
+          bash.enable = true;
+          docker.enable = true;
+          terraform.enable = true;
+          helm.enable = true;
+          tex.enable = true;
+          toml.enable = true;
         };
 
         visuals = {
@@ -360,7 +373,7 @@ in {
               keys = [
                 {
                   key = "<leader>D";
-                  mode = ["n"];
+                  mode = [ "n" ];
                   action = ":DBUIToggle<CR>";
                   desc = "Toggle Database UI";
                 }
@@ -386,16 +399,16 @@ in {
 
             "nvim-autopairs" = {
               package = nvim-autopairs;
-              event = ["InsertEnter"];
+              event = [ "InsertEnter" ];
               after = ''require("config.autopairs").setup()'';
             };
             "yazi.nvim" = {
               package = pkgs.vimPlugins."yazi-nvim";
-              cmd = ["Yazi"];
+              cmd = [ "Yazi" ];
               keys = [
                 {
                   key = "<leader>fe";
-                  mode = ["n"];
+                  mode = [ "n" ];
                   action = ":lua YaziProjectRoot()<CR>";
                   desc = "Explorer (yazi)";
                 }
@@ -417,7 +430,7 @@ in {
         luaConfigRC = {
           delete-current-file = ''require("config.delete-file").setup()'';
           telescope-helpers = ''require("config.telescope-helpers").setup()'';
-          telescope-setup = entryAfter ["pluginConfigs"] ''require("config.telescope").setup()'';
+          telescope-setup = entryAfter [ "pluginConfigs" ] ''require("config.telescope").setup()'';
           yazi-project = ''require("config.yazi").setup()'';
         };
       };

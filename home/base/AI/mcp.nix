@@ -4,12 +4,12 @@
   lib,
   pkgs,
   ...
-}: let
-  mcpEnabled =
-    config.modules.AI.codex.enable
-    || config.modules.AI.claude.enable;
+}:
+let
+  mcpEnabled = config.modules.AI.codex.enable || config.modules.AI.claude.enable;
   cfg = config.modules.AI.mcp;
-in {
+in
+{
   # [2026-04-03] https://mynixos.com/home-manager/options/programs.mcp 最终是生成 $HOME/mcp/mcp.json 这么一个 mcp.json，跟目前所有cli都不一致（比如说 codex 的MCP的目标path就在config.toml, cc是 ~/.claude.json, cursor则是 $HOME/.cursor/mcp.json），所以没意义
   # [2026-04-03] 把mcp server由 mcp-servers-nix 管理，优势在于可以让 codex/cc 等所有cli复用一份mcp配置。带来的问题是 msn只有 command, args, env, url, headers 等通用字段，不支持codex的 approve 操作。
   # [2026-04-18] https://github.com/natsukium/mcp-servers-nix/issues/420 其实 MSN 是支持 approve 操作的，所以修改相应配置
@@ -54,7 +54,7 @@ in {
         # [2026-04-18] codex/cc 本身都可以通过 --add-dir 实现类似功能。但是其实我真正不想要的就是这个 --add-dir，会很麻烦，谁都跑到一半了，会因为没有某个folder的access权限，退出，然后重新resume+ add-dir进入？并且你说的也不对，设置home是有必要的，因为很多时候要搜索和操作的文件，也并不总是在上面这些path，我不可能为了以防万一加一堆path在这，懂吗？所以保留 filesystem，我需要保留这个全局默认可用的 $home 访问能力。
         filesystem = {
           enable = true;
-          args = [config.home.homeDirectory];
+          args = [ config.home.homeDirectory ];
         };
 
         fetch.enable = true;
@@ -71,7 +71,10 @@ in {
         context7 = {
           enable = true;
           passwordCommand = {
-            CONTEXT7_API_KEY = ["cat" config.sops.secrets.API_CONTEXT7.path];
+            CONTEXT7_API_KEY = [
+              "cat"
+              config.sops.secrets.API_CONTEXT7.path
+            ];
           };
         };
 
@@ -135,7 +138,7 @@ in {
         # Add new desktop-only servers inside this mkIf block.
         "chrome-devtools" = lib.mkIf cfg.isDesktop {
           command = "${pkgs.chrome-devtools-mcp}/bin/chrome-devtools-mcp";
-          args = [];
+          args = [ ];
           default_tools_approval_mode = "approve";
         };
         # Future desktop-only entries (uncomment and add here):
@@ -149,11 +152,11 @@ in {
 
         # https://linear.app/downloads/mcp
         #   把 LINEAR_API_KEY 提到 home.sessionVariables 后，MCP server 和 linear CLI都从同一个环境变量取值，消除了之前 bash -c wrapper 的冗余层。这遵循了 Nix管理凭据的标准模式——$(cat ${config.sops.secrets.XXX.path}) 在 shell启动时展开一次，所有子进程继承。
-        "linear" = {
-          command = "pnpm";
-          args = ["dlx" "@mseep/linear-mcp"];
-          default_tools_approval_mode = "approve";
-        };
+        # [2026-05-30] 注释掉该MCP，但要说明之前配置有问题 ① pnpm dlx 每次创建独立缓存。pnpm dlx 的 cache key 会根据当前项目目录的 package.json 算 hash。Claude 每次在不同工作目录（不同 worktree）启动 session，hash 不同 → 生成不同 cache 目录。即使 hash 相同，pnpm dlx 仍然 spawn 新的 node 进程。
+        # "linear" = {
+        #  command = ["linear-mcp"];
+        #  default_tools_approval_mode = "approve";
+        # };
 
         # https://github.com/colbymchenry/codegraph
         # CodeGraph: 基于 Tree-sitter 的代码知识图谱，构建本地 SQLite 索引后通过 MCP 工具暴露
@@ -175,7 +178,10 @@ in {
         # [feat: add Nix language support by uxtechie · Pull Request #330 · colbymchenry/codegraph](https://github.com/colbymchenry/codegraph/pull/330)
         "codegraph" = {
           command = "codegraph";
-          args = ["serve" "--mcp"];
+          args = [
+            "serve"
+            "--mcp"
+          ];
           default_tools_approval_mode = "approve";
         };
 

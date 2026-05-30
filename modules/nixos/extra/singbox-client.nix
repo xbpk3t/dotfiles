@@ -5,7 +5,8 @@
   mylib,
   ...
 }:
-with lib; let
+with lib;
+let
   cfg = config.modules.networking.singbox;
   client = import ../../../lib/singbox/client-config.nix {
     inherit
@@ -15,7 +16,8 @@ with lib; let
       pkgs
       ;
   };
-in {
+in
+{
   # https://mynixos.com/nixpkgs/options/services.sing-box
 
   # 只有desktop才需要引入singbox（因为所有VPS默认本身都不需要挂singbox），所以放在这里
@@ -42,7 +44,10 @@ in {
       enable = true;
       settings = {
         Resolve = {
-          DNS = ["1.1.1.1" "8.8.8.8"];
+          DNS = [
+            "1.1.1.1"
+            "8.8.8.8"
+          ];
           DNSOverTLS = "yes";
           FallbackDNS = mkDefault config.networking.nameservers;
         };
@@ -70,10 +75,13 @@ in {
     #
     # 以上这些问题都可以通过查看以上源码中，有所体现
     systemd.services.sing-box = {
-      after = ["systemd-networkd.service" "network-online.target"];
-      wants = ["network-online.target"];
-      partOf = ["systemd-networkd.service"];
-      bindsTo = ["systemd-networkd.service"];
+      after = [
+        "systemd-networkd.service"
+        "network-online.target"
+      ];
+      wants = [ "network-online.target" ];
+      partOf = [ "systemd-networkd.service" ];
+      bindsTo = [ "systemd-networkd.service" ];
     };
   };
 }

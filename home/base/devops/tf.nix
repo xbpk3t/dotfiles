@@ -1,4 +1,5 @@
-{pkgs, ...}: {
+{ pkgs, ... }:
+{
   # https://mynixos.com/nixpkgs/packages/terraform-providers
   # https://github.com/terranix/terranix
 

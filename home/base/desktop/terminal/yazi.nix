@@ -3,13 +3,15 @@
   pkgs,
   editorMeta,
   ...
-}: let
+}:
+let
   defaultEditor = editorMeta.command;
   yaziEditWrapper = pkgs.writeShellScriptBin "yazi-open-editor" ''
     editor="''${EDITOR:-${defaultEditor}}"
     exec "$editor" "$@"
   '';
-in {
+in
+{
   programs.yazi = {
     enable = true;
     enableZshIntegration = true;
@@ -20,7 +22,11 @@ in {
 
     settings = {
       mgr = {
-        ratio = [1 4 3];
+        ratio = [
+          1
+          4
+          3
+        ];
         sort_by = "alphabetical";
         sort_sensitive = false;
         sort_reverse = false;
@@ -30,7 +36,10 @@ in {
         show_hidden = false;
         show_symlink = true;
         scrolloff = 5;
-        mouse_events = ["click" "scroll"];
+        mouse_events = [
+          "click"
+          "scroll"
+        ];
         title_format = "Yazi: {cwd}";
       };
       preview = {
@@ -43,12 +52,17 @@ in {
         image_filter = "triangle";
         image_quality = 75;
         ueberzug_scale = 1;
-        ueberzug_offset = [0 0 0 0];
+        ueberzug_offset = [
+          0
+          0
+          0
+          0
+        ];
       };
       opener = {
         edit = [
           {
-            run = ''${yaziEditWrapper}/bin/yazi-open-editor %s'';
+            run = "${yaziEditWrapper}/bin/yazi-open-editor %s";
             desc = "Open with \$EDITOR (fallback ${editorMeta.command})";
             block = true;
             for = "unix";
@@ -101,7 +115,7 @@ in {
             for = "macos";
           }
           {
-            run = ''explorer /select,%s1'';
+            run = "explorer /select,%s1";
             orphan = true;
             desc = "Reveal";
             for = "windows";
@@ -158,17 +172,24 @@ in {
         #
         # Note: Removed imv external viewer as it doesn't support arrow key navigation
         # Yazi's built-in preview works with j/k or arrow keys to navigate between images
-        preview_image = [];
+        preview_image = [ ];
       };
       open = {
         rules = [
           {
             url = "*/";
-            use = ["edit" "open" "reveal"];
+            use = [
+              "edit"
+              "open"
+              "reveal"
+            ];
           }
           {
             mime = "text/*";
-            use = ["edit" "reveal"];
+            use = [
+              "edit"
+              "reveal"
+            ];
           }
           #          {
           #            mime = "image/*";
@@ -176,31 +197,53 @@ in {
           #          }
           {
             mime = "image/*";
-            use = ["preview_image" "open" "reveal"];
+            use = [
+              "preview_image"
+              "open"
+              "reveal"
+            ];
           }
           {
             mime = "{audio,video}/*";
-            use = ["play" "reveal"];
+            use = [
+              "play"
+              "reveal"
+            ];
           }
           {
             mime = "application/{zip,rar,7z*,tar,gzip,xz,zstd,bzip*,lzma,compress,archive,cpio,arj,xar,ms-cab*}";
-            use = ["extract" "reveal"];
+            use = [
+              "extract"
+              "reveal"
+            ];
           }
           {
             mime = "application/{json,ndjson}";
-            use = ["edit" "reveal"];
+            use = [
+              "edit"
+              "reveal"
+            ];
           }
           {
             mime = "*/javascript";
-            use = ["edit" "reveal"];
+            use = [
+              "edit"
+              "reveal"
+            ];
           }
           {
             mime = "inode/empty";
-            use = ["edit" "reveal"];
+            use = [
+              "edit"
+              "reveal"
+            ];
           }
           {
             url = "*";
-            use = ["open" "reveal"];
+            use = [
+              "open"
+              "reveal"
+            ];
           }
         ];
       };
@@ -209,7 +252,10 @@ in {
         macro_workers = 10;
         bizarre_retry = 3;
         image_alloc = 536870912;
-        image_bound = [0 0];
+        image_bound = [
+          0
+          0
+        ];
         suppress_preload = false;
       };
       plugin = {
@@ -381,46 +427,115 @@ in {
         cursor_blink = false;
         cd_title = "Change directory:";
         cd_origin = "top-center";
-        cd_offset = [0 2 50 3];
-        create_title = ["Create:" "Create (dir):"];
+        cd_offset = [
+          0
+          2
+          50
+          3
+        ];
+        create_title = [
+          "Create:"
+          "Create (dir):"
+        ];
         create_origin = "top-center";
-        create_offset = [0 2 50 3];
+        create_offset = [
+          0
+          2
+          50
+          3
+        ];
         rename_title = "Rename:";
         rename_origin = "hovered";
-        rename_offset = [0 1 50 3];
+        rename_offset = [
+          0
+          1
+          50
+          3
+        ];
         filter_title = "Filter:";
         filter_origin = "top-center";
-        filter_offset = [0 2 50 3];
-        find_title = ["Find next:" "Find previous:"];
+        filter_offset = [
+          0
+          2
+          50
+          3
+        ];
+        find_title = [
+          "Find next:"
+          "Find previous:"
+        ];
         find_origin = "top-center";
-        find_offset = [0 2 50 3];
+        find_offset = [
+          0
+          2
+          50
+          3
+        ];
         search_title = "Search via {n}:";
         search_origin = "top-center";
-        search_offset = [0 2 50 3];
-        shell_title = ["Shell:" "Shell (block):"];
+        search_offset = [
+          0
+          2
+          50
+          3
+        ];
+        shell_title = [
+          "Shell:"
+          "Shell (block):"
+        ];
         shell_origin = "top-center";
-        shell_offset = [0 2 50 3];
+        shell_offset = [
+          0
+          2
+          50
+          3
+        ];
       };
       confirm = {
         trash_title = "Trash {n} selected file{s}?";
         trash_origin = "center";
-        trash_offset = [0 0 70 20];
+        trash_offset = [
+          0
+          0
+          70
+          20
+        ];
         delete_title = "Permanently delete {n} selected file{s}?";
         delete_origin = "center";
-        delete_offset = [0 0 70 20];
+        delete_offset = [
+          0
+          0
+          70
+          20
+        ];
         overwrite_title = "Overwrite file?";
         overwrite_content = "Will overwrite the following file:";
         overwrite_origin = "center";
-        overwrite_offset = [0 0 50 15];
+        overwrite_offset = [
+          0
+          0
+          50
+          15
+        ];
         quit_title = "Quit?";
         quit_content = "The following tasks are still running, are you sure you want to quit?";
         quit_origin = "center";
-        quit_offset = [0 0 50 15];
+        quit_offset = [
+          0
+          0
+          50
+          15
+        ];
       };
       pick = {
         open_title = "Open with:";
         open_origin = "hovered";
-        open_offset = [0 1 50 7];
+        open_offset = [
+          0
+          1
+          50
+          7
+        ];
       };
       which = {
         sort_by = "none";
@@ -525,7 +640,10 @@ in {
           desc = "Move cursor down one page";
         }
         {
-          on = ["g" "g"];
+          on = [
+            "g"
+            "g"
+          ];
           run = "arrow top";
           desc = "Move cursor to the top";
         }
@@ -736,52 +854,82 @@ in {
           desc = "Jump to a file/directory via fzf";
         }
         {
-          on = ["m" "s"];
+          on = [
+            "m"
+            "s"
+          ];
           run = "linemode size";
           desc = "Linemode: size";
         }
         {
-          on = ["m" "p"];
+          on = [
+            "m"
+            "p"
+          ];
           run = "linemode permissions";
           desc = "Linemode: permissions";
         }
         {
-          on = ["m" "b"];
+          on = [
+            "m"
+            "b"
+          ];
           run = "linemode btime";
           desc = "Linemode: btime";
         }
         {
-          on = ["m" "m"];
+          on = [
+            "m"
+            "m"
+          ];
           run = "linemode mtime";
           desc = "Linemode: mtime";
         }
         {
-          on = ["m" "o"];
+          on = [
+            "m"
+            "o"
+          ];
           run = "linemode owner";
           desc = "Linemode: owner";
         }
         {
-          on = ["m" "n"];
+          on = [
+            "m"
+            "n"
+          ];
           run = "linemode none";
           desc = "Linemode: none";
         }
         {
-          on = ["c" "c"];
+          on = [
+            "c"
+            "c"
+          ];
           run = "copy path";
           desc = "Copy the file path";
         }
         {
-          on = ["c" "d"];
+          on = [
+            "c"
+            "d"
+          ];
           run = "copy dirname";
           desc = "Copy the directory path";
         }
         {
-          on = ["c" "f"];
+          on = [
+            "c"
+            "f"
+          ];
           run = "copy filename";
           desc = "Copy the filename";
         }
         {
-          on = ["c" "n"];
+          on = [
+            "c"
+            "n"
+          ];
           run = "copy name_without_ext";
           desc = "Copy the filename without extension";
         }
@@ -811,87 +959,156 @@ in {
           desc = "Goto the previous found";
         }
         {
-          on = ["," "m"];
-          run = ["sort mtime --reverse=no" "linemode mtime"];
+          on = [
+            ","
+            "m"
+          ];
+          run = [
+            "sort mtime --reverse=no"
+            "linemode mtime"
+          ];
           desc = "Sort by modified time";
         }
         {
-          on = ["," "M"];
-          run = ["sort mtime --reverse" "linemode mtime"];
+          on = [
+            ","
+            "M"
+          ];
+          run = [
+            "sort mtime --reverse"
+            "linemode mtime"
+          ];
           desc = "Sort by modified time (reverse)";
         }
         {
-          on = ["," "b"];
-          run = ["sort btime --reverse=no" "linemode btime"];
+          on = [
+            ","
+            "b"
+          ];
+          run = [
+            "sort btime --reverse=no"
+            "linemode btime"
+          ];
           desc = "Sort by birth time";
         }
         {
-          on = ["," "B"];
-          run = ["sort btime --reverse" "linemode btime"];
+          on = [
+            ","
+            "B"
+          ];
+          run = [
+            "sort btime --reverse"
+            "linemode btime"
+          ];
           desc = "Sort by birth time (reverse)";
         }
         {
-          on = ["," "e"];
+          on = [
+            ","
+            "e"
+          ];
           run = "sort extension --reverse=no";
           desc = "Sort by extension";
         }
         {
-          on = ["," "E"];
+          on = [
+            ","
+            "E"
+          ];
           run = "sort extension --reverse";
           desc = "Sort by extension (reverse)";
         }
         {
-          on = ["," "a"];
+          on = [
+            ","
+            "a"
+          ];
           run = "sort alphabetical --reverse=no";
           desc = "Sort alphabetically";
         }
         {
-          on = ["," "A"];
+          on = [
+            ","
+            "A"
+          ];
           run = "sort alphabetical --reverse";
           desc = "Sort alphabetically (reverse)";
         }
         {
-          on = ["," "n"];
+          on = [
+            ","
+            "n"
+          ];
           run = "sort natural --reverse=no";
           desc = "Sort naturally";
         }
         {
-          on = ["," "N"];
+          on = [
+            ","
+            "N"
+          ];
           run = "sort natural --reverse";
           desc = "Sort naturally (reverse)";
         }
         {
-          on = ["," "s"];
-          run = ["sort size --reverse=no" "linemode size"];
+          on = [
+            ","
+            "s"
+          ];
+          run = [
+            "sort size --reverse=no"
+            "linemode size"
+          ];
           desc = "Sort by size";
         }
         {
-          on = ["," "S"];
-          run = ["sort size --reverse" "linemode size"];
+          on = [
+            ","
+            "S"
+          ];
+          run = [
+            "sort size --reverse"
+            "linemode size"
+          ];
           desc = "Sort by size (reverse)";
         }
         {
-          on = ["," "r"];
+          on = [
+            ","
+            "r"
+          ];
           run = "sort random --reverse=no";
           desc = "Sort randomly";
         }
         {
-          on = ["g" "h"];
+          on = [
+            "g"
+            "h"
+          ];
           run = "cd ~";
           desc = "Go home";
         }
         {
-          on = ["g" "c"];
+          on = [
+            "g"
+            "c"
+          ];
           run = "cd ~/.config";
           desc = "Goto ~/.config";
         }
         {
-          on = ["g" "d"];
+          on = [
+            "g"
+            "d"
+          ];
           run = "cd ~/Downloads";
           desc = "Goto ~/Downloads";
         }
         {
-          on = ["g" "<Space>"];
+          on = [
+            "g"
+            "<Space>"
+          ];
           run = "cd --interactive";
           desc = "Jump interactively";
         }
@@ -983,7 +1200,10 @@ in {
       ];
       prepend_keymap = [
         {
-          on = ["g" "i"];
+          on = [
+            "g"
+            "i"
+          ];
           run = "plugin lazygit";
           desc = "run lazygit";
         }
@@ -1033,6 +1253,5 @@ in {
 
   # ueberzugpp 仅用于 Linux 上不带 Kitty 协议的终端（如 Alacritty）
   # Ghostty / Kitty 终端使用原生图像协议，不需要 ueberzugpp
-  home.packages = with pkgs;
-    lib.optionals stdenv.hostPlatform.isLinux [ueberzugpp];
+  home.packages = with pkgs; lib.optionals stdenv.hostPlatform.isLinux [ ueberzugpp ];
 }

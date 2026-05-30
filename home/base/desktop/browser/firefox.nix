@@ -3,9 +3,11 @@
   config,
   lib,
   ...
-}: let
+}:
+let
   cfg = config.modules.desktop.firefox;
-in {
+in
+{
   options.modules.desktop.firefox = with lib; {
     enable = mkEnableOption "Firefox Enable";
   };

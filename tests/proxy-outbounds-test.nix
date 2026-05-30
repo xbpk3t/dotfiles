@@ -1,4 +1,5 @@
-{lib}: let
+{ lib }:
+let
   servers = [
     {
       label = "LA-RN";
@@ -43,7 +44,8 @@
 
   singboxTags = map (o: o.tag) singboxOutbounds;
   mihomoTags = mihomoOutbounds.tags;
-in {
+in
+{
   assertion =
     builtins.all (tag: builtins.elem tag singboxTags) [
       "LA-RN-vless"

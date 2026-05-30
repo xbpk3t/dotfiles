@@ -2,10 +2,18 @@
   config,
   lib,
   ...
-}: let
-  inherit (lib) mkEnableOption mkIf mkOption mkDefault types;
+}:
+let
+  inherit (lib)
+    mkEnableOption
+    mkIf
+    mkOption
+    mkDefault
+    types
+    ;
   cfg = config.modules.hardware.nvidia;
-in {
+in
+{
   # ===============================================================================================
   # for Nvidia GPU
   # https://wiki.nixos.org/wiki/NVIDIA
@@ -69,7 +77,7 @@ in {
     ];
 
     # will install nvidia-vaapi-driver by default
-    services.xserver.videoDrivers = ["nvidia"];
+    services.xserver.videoDrivers = [ "nvidia" ];
 
     hardware.graphics = {
       enable = true;
@@ -79,9 +87,7 @@ in {
     hardware.nvidia = {
       open = cfg.open;
       package = mkDefault (
-        if cfg.package != null
-        then cfg.package
-        else config.boot.kernelPackages.nvidiaPackages.production
+        if cfg.package != null then cfg.package else config.boot.kernelPackages.nvidiaPackages.production
       );
 
       modesetting.enable = cfg.modesetting;

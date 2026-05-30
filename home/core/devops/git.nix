@@ -4,9 +4,11 @@
   userMeta,
   editorMeta,
   ...
-}: let
+}:
+let
   mail = userMeta.mail;
-in {
+in
+{
   programs.git = {
     enable = true;
     lfs.enable = true;
@@ -75,7 +77,8 @@ in {
     };
   };
 
-  home.packages = with pkgs;
+  home.packages =
+    with pkgs;
     [
       # 分类1：Git 核心操作与协作流程
       # tags(desc): 核心工具链 > 版本控制 > Git

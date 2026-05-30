@@ -2,7 +2,8 @@
   lib,
   timeMeta,
   ...
-}: {
+}:
+{
   # Set your time zone.
   time.timeZone = lib.mkDefault timeMeta.timeZone;
 

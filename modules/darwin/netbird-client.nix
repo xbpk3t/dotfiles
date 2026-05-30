@@ -4,9 +4,11 @@
   lib,
   ...
 }:
-with lib; let
+with lib;
+let
   cfg = config.modules.networking.netbird;
-in {
+in
+{
   options.modules.networking.netbird.enable =
     mkEnableOption "NetBird client (VPN mesh network) on this host";
 

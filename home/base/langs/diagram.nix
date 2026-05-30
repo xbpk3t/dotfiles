@@ -2,7 +2,8 @@
   lib,
   pkgs,
   ...
-}: {
+}:
+{
   home.packages =
     (with pkgs; [
       # https://github.com/mermaid-js/mermaid-cli

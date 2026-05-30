@@ -1,6 +1,8 @@
-{lib, ...}: let
+{ lib, ... }:
+let
   inherit (lib) mkEnableOption mkOption types;
-in {
+in
+{
   options.modules.security.enableHighLimits = mkEnableOption ''
     启用高 ulimit 档（基于 Linux-Optimizer）：放宽 nofile/stack 等资源限制，适合高并发/压测/调试。
     默认关闭以保持安全基线（core=0）。

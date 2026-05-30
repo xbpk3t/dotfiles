@@ -2,7 +2,8 @@
   pkgs,
   editorMeta,
   ...
-}: {
+}:
+{
   home.packages = with pkgs; [
     lazygit
     # 新增 delta 以支持 side-by-side diff

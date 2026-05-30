@@ -2,7 +2,8 @@
   lib,
   pkgs,
   ...
-}: {
+}:
+{
   boot.loader.systemd-boot = {
     # we use Git for version control, so we don't need to keep too many generations.
     configurationLimit = lib.mkDefault 10;

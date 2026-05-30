@@ -1,11 +1,13 @@
-{userMeta, ...}: let
+{ userMeta, ... }:
+let
   mail = userMeta.mail;
-in {
+in
+{
   # 启动菜单等待时间
   # boot.loader.timeout = lib.mkForce 10;
 
   # 1) 用内核 exFAT（非 fuse），保证 U 盘速度
-  boot.supportedFilesystems = ["exfat"];
+  boot.supportedFilesystems = [ "exfat" ];
 
   # 终端 sudo 兼容（kitty/wezterm/foot 等）
   security.sudo.keepTerminfo = true;

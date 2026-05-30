@@ -4,9 +4,11 @@
   pkgs,
   ...
 }:
-with lib; let
+with lib;
+let
   cfg = config.modules.desktop.kitty;
-in {
+in
+{
   options.modules.desktop.kitty = {
     enable = mkEnableOption "kitty terminal";
   };

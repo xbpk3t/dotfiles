@@ -1,5 +1,7 @@
-{pkgs, ...}: {
-  home.packages = with pkgs;
+{ pkgs, ... }:
+{
+  home.packages =
+    with pkgs;
     [
       # 分类1：Typst 核心工具
       # https://mynixos.com/nixpkgs/package/typst

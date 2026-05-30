@@ -4,9 +4,11 @@
   pkgs,
   ...
 }:
-with lib; let
+with lib;
+let
   cfg = config.modules.desktop.gnome;
-in {
+in
+{
   options.modules.desktop.gnome = {
     enable = mkEnableOption "GNOME desktop";
   };
@@ -97,8 +99,11 @@ in {
     # XDG portal 只保留 GNOME/GTK，避免与其他 compositor portal 冲突
     xdg.portal = {
       enable = true;
-      extraPortals = [pkgs.xdg-desktop-portal-gnome];
-      config.common.default = ["gnome" "gtk"];
+      extraPortals = [ pkgs.xdg-desktop-portal-gnome ];
+      config.common.default = [
+        "gnome"
+        "gtk"
+      ];
     };
 
     # KDE Connect 端口仅在 GNOME 桌面启用时开放

@@ -1,4 +1,5 @@
-{pkgs, ...}: {
+{ pkgs, ... }:
+{
   # https://developer.hashicorp.com/terraform/cli/config/config-file
   #  home.file.".terraformrc".text = ''
   #    plugin_cache_dir = "$HOME/.terraform.d/plugin-cache"

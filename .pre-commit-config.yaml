@@ -247,16 +247,14 @@ repos:
       - id: deadnix
         args: [--edit]
         exclude: pkgs/_sources/ # 这个文件不应该修改
-
-
-  - repo: https://github.com/kamadorueda/alejandra
-    rev: 4.0.0
+  - repo: local
     hooks:
-      # Requires Nix to be previously installed in the system
-      # - id: alejandra-nix
-      # Requires Alejandra to be previously installed in the system
-      - id: alejandra-system
-
+      - id: nixfmt
+        name: nixfmt
+        description: Format Nix files with nixfmt
+        entry: nixfmt
+        types: [nix]
+        language: system
 
   - repo: https://github.com/hougesen/kdlfmt
     rev: v0.1.6

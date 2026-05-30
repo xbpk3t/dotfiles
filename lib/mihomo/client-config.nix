@@ -6,22 +6,22 @@
   selfProviderTemplateName ? "mihomo-self-provider.yaml",
   ...
 }:
-with lib; let
+with lib;
+let
   inventory = mylib.inventory."nixos-vps";
   nodes = inventory;
   servers = lib.lists.filter (s: s != null) (
     lib.attrsets.mapAttrsToList (
       name: node:
-        if node ? singbox
-        then
-          node.singbox
-          // {
-            hostName = node.hostName or name;
-            server = node.singbox.server or (mylib.inventory.primaryHostForNode name node);
-          }
-        else null
-    )
-    nodes
+      if node ? singbox then
+        node.singbox
+        // {
+          hostName = node.hostName or name;
+          server = node.singbox.server or (mylib.inventory.primaryHostForNode name node);
+        }
+      else
+        null
+    ) nodes
   );
 
   # mihomo 只接受 configFile (路径)，不支持 native Nix settings。
@@ -34,7 +34,7 @@ with lib; let
   # 2) 不再有"先 toJSON、再 toFile、再 yq"三层 boilerplate；
   # 3) 输出 derivation 的依赖关系由 nixpkgs 维护，避免我们在 lib 层自己造轮子时
   #    把 metacubexd 这类 store path 的 GC 追踪搞断。
-  yamlFmt = pkgs.formats.yaml {};
+  yamlFmt = pkgs.formats.yaml { };
   secrets = {
     uuid = config.sops.placeholder.SINGBOX_UUID;
     publicKey = config.sops.placeholder.SINGBOX_PUB_KEY;
@@ -45,7 +45,12 @@ with lib; let
 
   outbounds = import ./outbounds.nix {
     inherit servers lib;
-    inherit (secrets) uuid publicKey shortId password;
+    inherit (secrets)
+      uuid
+      publicKey
+      shortId
+      password
+      ;
   };
 
   localDnsServers = [
@@ -73,7 +78,7 @@ with lib; let
       stack = "system";
       auto-route = true;
       auto-detect-interface = true;
-      dns-hijack = ["any:53"];
+      dns-hijack = [ "any:53" ];
     };
 
     dns = {
@@ -110,7 +115,7 @@ with lib; let
       fallback-filter = {
         geoip = true;
         geoip-code = "CN";
-        ipcidr = ["240.0.0.0/4"];
+        ipcidr = [ "240.0.0.0/4" ];
       };
     };
 
@@ -140,88 +145,96 @@ with lib; let
       {
         name = "Manual";
         type = "select";
-        proxies = ["Self" "Wild" "Auto" "DIRECT"];
+        proxies = [
+          "Self"
+          "Wild"
+          "Auto"
+          "DIRECT"
+        ];
       }
       {
         name = "Self";
         type = "url-test";
-        use = ["self"];
+        use = [ "self" ];
         url = "https://cp.cloudflare.com/generate_204";
         interval = 1800;
       }
       {
         name = "Wild";
         type = "url-test";
-        use = ["wild"];
+        use = [ "wild" ];
         url = "https://cp.cloudflare.com/generate_204";
         interval = 3600;
       }
       {
         name = "Auto";
         type = "fallback";
-        proxies = ["Self" "Wild" "DIRECT"];
+        proxies = [
+          "Self"
+          "Wild"
+          "DIRECT"
+        ];
         url = "https://cp.cloudflare.com/generate_204";
         interval = 1800;
       }
     ];
 
-    rules =
-      [
-        # 私网直连
-        "IP-CIDR,127.0.0.0/8,DIRECT"
-        "IP-CIDR,10.0.0.0/8,DIRECT"
-        "IP-CIDR,172.16.0.0/12,DIRECT"
-        "IP-CIDR,192.168.0.0/16,DIRECT"
-        "IP-CIDR,100.64.0.0/10,DIRECT"
-        "IP-CIDR,224.0.0.0/4,DIRECT"
+    rules = [
+      # 私网直连
+      "IP-CIDR,127.0.0.0/8,DIRECT"
+      "IP-CIDR,10.0.0.0/8,DIRECT"
+      "IP-CIDR,172.16.0.0/12,DIRECT"
+      "IP-CIDR,192.168.0.0/16,DIRECT"
+      "IP-CIDR,100.64.0.0/10,DIRECT"
+      "IP-CIDR,224.0.0.0/4,DIRECT"
 
-        # SSH 避免回环（mihomo TUN 下的 SSH 流量走代理会导致循环依赖）
-        "DST-PORT,22,DIRECT"
+      # SSH 避免回环（mihomo TUN 下的 SSH 流量走代理会导致循环依赖）
+      "DST-PORT,22,DIRECT"
 
-        # 代理节点 IP 直连（避免流量经代理再回连自己）
-      ]
-      ++ (map (s: "IP-CIDR,${s.server}/32,DIRECT,no-resolve") servers)
-      ++ [
-        # 必须代理的站点（统一走 Manual，由用户在 UI 上选 Self/Wild/Auto）
-        "DOMAIN-SUFFIX,openai.com,Manual"
-        "DOMAIN-SUFFIX,chatgpt.com,Manual"
-        "DOMAIN-SUFFIX,grok.com,Manual"
-        "DOMAIN-SUFFIX,github.com,Manual"
-        "DOMAIN-SUFFIX,githubusercontent.com,Manual"
-        "DOMAIN-SUFFIX,githubassets.com,Manual"
-        "DOMAIN-SUFFIX,google.com,Manual"
-        "DOMAIN-SUFFIX,youtube.com,Manual"
-        "DOMAIN-SUFFIX,ytimg.com,Manual"
-        "DOMAIN-SUFFIX,twimg.com,Manual"
-        "DOMAIN-SUFFIX,docker.com,Manual"
-        "DOMAIN-SUFFIX,cache.nixos.org,Manual"
+      # 代理节点 IP 直连（避免流量经代理再回连自己）
+    ]
+    ++ (map (s: "IP-CIDR,${s.server}/32,DIRECT,no-resolve") servers)
+    ++ [
+      # 必须代理的站点（统一走 Manual，由用户在 UI 上选 Self/Wild/Auto）
+      "DOMAIN-SUFFIX,openai.com,Manual"
+      "DOMAIN-SUFFIX,chatgpt.com,Manual"
+      "DOMAIN-SUFFIX,grok.com,Manual"
+      "DOMAIN-SUFFIX,github.com,Manual"
+      "DOMAIN-SUFFIX,githubusercontent.com,Manual"
+      "DOMAIN-SUFFIX,githubassets.com,Manual"
+      "DOMAIN-SUFFIX,google.com,Manual"
+      "DOMAIN-SUFFIX,youtube.com,Manual"
+      "DOMAIN-SUFFIX,ytimg.com,Manual"
+      "DOMAIN-SUFFIX,twimg.com,Manual"
+      "DOMAIN-SUFFIX,docker.com,Manual"
+      "DOMAIN-SUFFIX,cache.nixos.org,Manual"
 
-        # CN 域名直连
-        "DOMAIN-SUFFIX,cn,DIRECT"
-        "DOMAIN-KEYWORD,-cn,DIRECT"
+      # CN 域名直连
+      "DOMAIN-SUFFIX,cn,DIRECT"
+      "DOMAIN-KEYWORD,-cn,DIRECT"
 
-        # 国内大站直连
-        "DOMAIN-SUFFIX,baidu.com,DIRECT"
-        "DOMAIN-SUFFIX,bilibili.com,DIRECT"
-        "DOMAIN-SUFFIX,taobao.com,DIRECT"
-        "DOMAIN-SUFFIX,alipay.com,DIRECT"
-        "DOMAIN-SUFFIX,qq.com,DIRECT"
-        "DOMAIN-SUFFIX,weibo.com,DIRECT"
-        "DOMAIN-SUFFIX,zhihu.com,DIRECT"
-        "DOMAIN-SUFFIX,jd.com,DIRECT"
-        "DOMAIN-SUFFIX,163.com,DIRECT"
-        "DOMAIN-SUFFIX,netease.com,DIRECT"
+      # 国内大站直连
+      "DOMAIN-SUFFIX,baidu.com,DIRECT"
+      "DOMAIN-SUFFIX,bilibili.com,DIRECT"
+      "DOMAIN-SUFFIX,taobao.com,DIRECT"
+      "DOMAIN-SUFFIX,alipay.com,DIRECT"
+      "DOMAIN-SUFFIX,qq.com,DIRECT"
+      "DOMAIN-SUFFIX,weibo.com,DIRECT"
+      "DOMAIN-SUFFIX,zhihu.com,DIRECT"
+      "DOMAIN-SUFFIX,jd.com,DIRECT"
+      "DOMAIN-SUFFIX,163.com,DIRECT"
+      "DOMAIN-SUFFIX,netease.com,DIRECT"
 
-        # GEOIP CN 直连
-        "GEOIP,CN,DIRECT"
+      # GEOIP CN 直连
+      "GEOIP,CN,DIRECT"
 
-        # 本地域名直连
-        "DOMAIN-SUFFIX,local,DIRECT"
-        "DOMAIN-SUFFIX,lan,DIRECT"
+      # 本地域名直连
+      "DOMAIN-SUFFIX,local,DIRECT"
+      "DOMAIN-SUFFIX,lan,DIRECT"
 
-        # 兜底
-        "MATCH,Manual"
-      ];
+      # 兜底
+      "MATCH,Manual"
+    ];
   };
 
   # 这两段 readFile + yamlFmt.generate 仍然属于 IFD（import-from-derivation）：
@@ -233,15 +246,14 @@ with lib; let
   # - pkgs.formats.yaml 的 build 闭包稳定（remarshal/pyyaml 都在 cache 里）。
   # 如果未来需要恢复纯 eval 工作流，备选方案是回退到 Layer 1 风格——
   # 把 yq 调用塞回 mihomo-tun-launcher，由 launchd 启动时再做 JSON→YAML。
-  templatesContent = builtins.readFile (
-    yamlFmt.generate "mihomo-config.yaml" configAttrset
-  );
+  templatesContent = builtins.readFile (yamlFmt.generate "mihomo-config.yaml" configAttrset);
 
   selfProviderContent = builtins.readFile (
     yamlFmt.generate "mihomo-self-provider.yaml" {
       proxies = outbounds.proxies;
     }
   );
-in {
+in
+{
   inherit templatesContent selfProviderContent;
 }

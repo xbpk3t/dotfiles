@@ -1,4 +1,5 @@
-{pkgs, ...}: {
+{ pkgs, ... }:
+{
   home.packages = with pkgs; [
     # https://github.com/microsoft/markitdown
     # 把 microsoft office文档转成md

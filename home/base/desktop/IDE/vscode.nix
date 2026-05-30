@@ -3,9 +3,11 @@
   lib,
   pkgs,
   ...
-}: let
+}:
+let
   cfg = config.modules.desktop.vscode;
-in {
+in
+{
   options.modules.desktop.vscode = with lib; {
     enable = mkEnableOption "VSCode with opinionated defaults";
   };

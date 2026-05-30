@@ -2,8 +2,10 @@
   pkgs,
   lib,
   ...
-}: {
-  home.packages = with pkgs;
+}:
+{
+  home.packages =
+    with pkgs;
     [
       # 磁盘健康/检测
       # https://mynixos.com/nixpkgs/package/smartmontools

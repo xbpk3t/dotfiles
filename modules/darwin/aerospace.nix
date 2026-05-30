@@ -4,9 +4,11 @@
   config,
   ...
 }:
-with lib; let
+with lib;
+let
   cfg = config.services.desktop.aerospace;
-in {
+in
+{
   options.services.desktop.aerospace = {
     enable = mkEnableOption "Enable aerospace";
   };
@@ -22,10 +24,10 @@ in {
       # 细项配置，对应 services.aerospace.settings*
       settings = {
         # 登录后执行的命令列表（空数组=不执行）
-        after-login-command = [];
+        after-login-command = [ ];
 
         # 程序启动完成后执行的命令列表（空数组=不执行）
-        after-startup-command = [];
+        after-startup-command = [ ];
 
         # 自动扁平化嵌套容器，减少层级
         enable-normalization-flatten-containers = true;
@@ -38,7 +40,7 @@ in {
         default-root-container-orientation = "horizontal";
 
         # 切换聚焦显示器时，将鼠标移动到该屏幕中心
-        on-focused-monitor-changed = ["move-mouse monitor-lazy-center"];
+        on-focused-monitor-changed = [ "move-mouse monitor-lazy-center" ];
 
         # 聚焦时自动显示被隐藏的 macOS 应用
         automatically-unhide-macos-hidden-apps = true;
@@ -117,10 +119,16 @@ in {
           service = {
             binding = {
               # 退出 service 模式并重载配置
-              esc = ["reload-config" "mode main"];
+              esc = [
+                "reload-config"
+                "mode main"
+              ];
 
               # 重置布局并返回 main 模式
-              r = ["flatten-workspace-tree" "mode main"];
+              r = [
+                "flatten-workspace-tree"
+                "mode main"
+              ];
             };
           };
         };

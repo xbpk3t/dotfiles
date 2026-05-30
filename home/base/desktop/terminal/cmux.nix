@@ -4,9 +4,11 @@
   pkgs,
   ...
 }:
-with lib; let
+with lib;
+let
   cfg = config.modules.desktop.cmux;
-in {
+in
+{
   # ─────────────────────────────────────────────────────────────
   # Behavior matrix: ghostty config deployment triggers
   #

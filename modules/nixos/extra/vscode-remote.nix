@@ -4,15 +4,17 @@
   inputs,
   pkgs,
   ...
-}: let
+}:
+let
   cfg = config.modules.extra.vscode-remote;
-in {
+in
+{
   options.modules.extra.vscode-remote = with lib; {
     enable = mkEnableOption "Enable VSCode Server (remote SSH target)";
   };
 
   # 总是导入 upstream vscode-server 模块，避免在 imports 阶段引用 config 触发递归
-  imports = [inputs.vscode-server.nixosModules.default];
+  imports = [ inputs.vscode-server.nixosModules.default ];
 
   config = lib.mkIf cfg.enable {
     services.vscode-server = {
@@ -31,7 +33,11 @@ in {
       # - 当 enableFHS 开启时，它把这些包加入 FHS 容器，让 VS Code Server 及扩展能调用（如 git、bash、coreutils、语言运行时）。
       # - 当未开 FHS 时，这列表用于自动补丁 ELF 的 RPATH，把这些包的库路径注入VS Code Server 里的二进制，减少缺库问题。
       # - 实践上建议至少放 git、bashInteractive、coreutils；若某些扩展需要特定运行时（如 python311, nodejs、docker-cli），可加进去。
-      extraRuntimeDependencies = with pkgs; [git bashInteractive coreutils];
+      extraRuntimeDependencies = with pkgs; [
+        git
+        bashInteractive
+        coreutils
+      ];
       # 支持 stable 与 insiders 两个安装前缀
       # - VS Code Server 会按不同客户端通道写入不同目录：~/.vscode-server（Stable）、~/.vscode-server-insiders、~/.vscode-server-oss。
       #- 这个选项让你声明需要监控/修补的安装目录列表。用多个 VS Code 变体时，把对应路径都列上；只用 Stable 保持默认即可。
