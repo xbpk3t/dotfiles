@@ -5,7 +5,8 @@
   userMeta,
   editorMeta,
   ...
-}: let
+}:
+let
   cfg = config.modules.devops.jj;
   mail = userMeta.mail;
 
@@ -15,7 +16,8 @@
     "$left"
     "$right"
   ];
-in {
+in
+{
   options.modules.devops.jj = with lib; {
     enable = mkEnableOption "Enable jujutsu";
   };
@@ -144,7 +146,7 @@ in {
           ];
 
           # s: show 当前 change 的 diff
-          s = ["show"];
+          s = [ "show" ];
 
           # l: log 未 push 的本地变更（compared_to_trunk）
           l = [

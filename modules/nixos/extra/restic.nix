@@ -2,9 +2,11 @@
   config,
   userMeta,
   ...
-}: let
+}:
+let
   username = userMeta.username;
-in {
+in
+{
   # https://mynixos.com/nixpkgs/options/services.restic
   # 仅在 NixOS 端定时备份 docs-images 到 Cloudflare R2
 
@@ -20,13 +22,25 @@ in {
     passwordFile = config.sops.secrets.pwgenSk.path;
 
     # 备份路径（只关心 docs-images）
-    paths = ["/home/${username}/Desktop/docs-images"];
+    paths = [ "/home/${username}/Desktop/docs-images" ];
 
     # 排除规则：如需额外忽略，可在此追加
-    exclude = ["**/.cache" "*.tmp" "*.swp" "*.swx"];
+    exclude = [
+      "**/.cache"
+      "*.tmp"
+      "*.swp"
+      "*.swx"
+    ];
 
     # 保留策略：7 天日快照、4 周周快照、6 个月月快照
-    pruneOpts = ["--keep-daily" "7" "--keep-weekly" "4" "--keep-monthly" "6"];
+    pruneOpts = [
+      "--keep-daily"
+      "7"
+      "--keep-weekly"
+      "4"
+      "--keep-monthly"
+      "6"
+    ];
 
     # 定时：每日运行，掉电/关机期间的任务下次补跑
     timerConfig = {

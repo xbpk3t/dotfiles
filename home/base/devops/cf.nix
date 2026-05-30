@@ -1,4 +1,5 @@
-{config, ...}: {
+{ config, ... }:
+{
   home.sessionVariables = {
     # 保留短名字，方便手工排查或临时脚本使用。
     CF_ACCOUNT = "$(cat ${config.sops.secrets.CF_ACCOUNT.path})";

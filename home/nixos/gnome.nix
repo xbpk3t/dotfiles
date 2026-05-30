@@ -3,9 +3,11 @@
   config,
   pkgs,
   ...
-}: let
-  cfg = config.modules.desktop.gnome or {enable = false;};
-in {
+}:
+let
+  cfg = config.modules.desktop.gnome or { enable = false; };
+in
+{
   options.modules.desktop.gnome = {
     enable = lib.mkEnableOption "Home-layer tweaks for GNOME session";
   };
@@ -24,15 +26,18 @@ in {
     # XDG portal 只保留 GNOME/GTK，避免与其他 compositor portal 冲突
     xdg.portal = {
       enable = true;
-      extraPortals = [pkgs.xdg-desktop-portal-gnome];
-      config.common.default = ["gnome" "gtk"];
+      extraPortals = [ pkgs.xdg-desktop-portal-gnome ];
+      config.common.default = [
+        "gnome"
+        "gtk"
+      ];
     };
 
     # GNOME 体验调优（通过 dconf，集中常用手感项）
     dconf.settings = {
       # 键盘：Caps 变 Ctrl，保留其他布局选项
       "org/gnome/desktop/input-sources" = {
-        xkb-options = ["caps:ctrl_modifier"];
+        xkb-options = [ "caps:ctrl_modifier" ];
       };
 
       # 触控板：轻触和自然滚动
@@ -43,7 +48,7 @@ in {
 
       # 分数缩放试验特性（必要时可关）
       "org/gnome/mutter" = {
-        experimental-features = ["scale-monitor-framebuffer"];
+        experimental-features = [ "scale-monitor-framebuffer" ];
       };
 
       # 声明式启用 GNOME Shell 扩展

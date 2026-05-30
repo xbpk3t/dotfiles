@@ -1,7 +1,8 @@
 {
   lib,
   # 假设这个测试会在正确的 Nixpkgs 环境中运行
-}: let
+}:
+let
   # 导入我们要测试的 mylib
   # 测试数据：创建一个虚拟的目录结构来测试 scanPaths
   # 模拟 readDir 的结果
@@ -13,20 +14,21 @@
   };
 
   # 修改的 scanPaths 函数，使用模拟的 readDir
-  testScanPaths = path: let
-    dirContent = mockReadDir path;
-    filteredNames = builtins.attrNames (
-      lib.attrsets.filterAttrs (
-        name: type:
+  testScanPaths =
+    path:
+    let
+      dirContent = mockReadDir path;
+      filteredNames = builtins.attrNames (
+        lib.attrsets.filterAttrs (
+          name: type:
           (type == "directory") # include directories
           || (
             (name != "default.nix") # ignore default.nix
             && (lib.strings.hasSuffix ".nix" name)
           )
-      )
-      dirContent
-    );
-  in
+        ) dirContent
+      );
+    in
     builtins.map (name: path + "/${name}") filteredNames;
 
   # 注意：`builtins.attrNames` 会按字典序返回 key。
@@ -68,7 +70,8 @@
       && (builtins.elem "/test/path/subdir" actualPaths)
       && !(builtins.elem "/test/path/default.nix" actualPaths);
   };
-in {
+in
+{
   # 返回测试结果
   inherit testResults;
 

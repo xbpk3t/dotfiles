@@ -3,9 +3,11 @@
   lib,
   stateVersion,
   ...
-}: let
+}:
+let
   hostName = "nixos-avf";
-in {
+in
+{
   # why this? 把Android手机作为个人项目的开发机remote server使用
 
   networking.hostName = hostName;

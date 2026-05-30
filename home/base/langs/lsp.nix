@@ -4,9 +4,11 @@
   mylib,
   pkgs,
   ...
-}: let
+}:
+let
   cfg = config.modules.langs.lsp;
-in {
+in
+{
   options.modules.langs.lsp = with lib; {
     enable = mkEnableOption "Enable common LSP/toolchain packages";
 

@@ -1,4 +1,5 @@
-{pkgs, ...}: {
+{ pkgs, ... }:
+{
   # PipeWire 音频栈（含 Pulse/JACK 兼容）+ rtkit
   services.pipewire = {
     enable = true;

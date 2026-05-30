@@ -2,8 +2,10 @@
   lib,
   pkgs,
   ...
-}: {
-  home.packages = with pkgs;
+}:
+{
+  home.packages =
+    with pkgs;
     [
       # 分类1：Node.js/TypeScript 核心工具链
       # Node.js 生态

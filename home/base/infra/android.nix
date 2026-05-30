@@ -1,4 +1,5 @@
-{pkgs, ...}: {
+{ pkgs, ... }:
+{
   home.packages = with pkgs; [
     # https://mynixos.com/nixpkgs/package/fdroidcl
     # https://github.com/Hoverth/fdroidcl

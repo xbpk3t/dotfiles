@@ -1,4 +1,5 @@
-{pkgs, ...}: {
+{ pkgs, ... }:
+{
   # [2025-12-21] 注意之所以没有放到 nixos/base/i18n.nix 里，是因为fcitx5需要graphical支持。且desktop本身一定已经配置了input，并不需要minimal去配置input
 
   # 几点心得：

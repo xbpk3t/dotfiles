@@ -1,4 +1,5 @@
-{lib, ...}: {
+{ lib, ... }:
+{
   # Or disable the firewall altogether.
   # 默认开启（如果workstation等场景不需要时，则在hosts中overrides该配置）
   # 服务器建议开启防火墙，桌面可以依赖 NetworkManager 自动规则

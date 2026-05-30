@@ -1,4 +1,5 @@
-{...}: {
+{ ... }:
+{
   modules.infra = {
     nh.enable = true;
     networking.enable = true;
@@ -24,7 +25,7 @@
     kitty.enable = false;
     cmux.enable = true;
 
-    zed.enable = false;
+    zed.enable = true;
     vscode.enable = false;
   };
 

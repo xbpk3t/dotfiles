@@ -2,9 +2,11 @@
   config,
   lib,
   ...
-}: let
+}:
+let
   cfg = config.modules.systemd.manager.watchdog;
-in {
+in
+{
   options.modules.systemd.manager.watchdog = with lib; {
     enable = mkEnableOption ''
       启用 systemd Manager watchdog 基线。

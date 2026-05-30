@@ -3,9 +3,11 @@
   lib,
   pkgs,
   ...
-}: let
+}:
+let
   cfg = config.modules.ms.colima;
-in {
+in
+{
   options.modules.ms.colima = with lib; {
     enable = mkEnableOption "Colima container runtime service";
   };

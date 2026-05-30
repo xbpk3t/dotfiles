@@ -5,7 +5,8 @@
   mylib,
   ...
 }:
-with lib; let
+with lib;
+let
   cfg = config.modules.networking.mihomo;
   client = import ../../../lib/mihomo/client-config.nix {
     inherit
@@ -17,12 +18,15 @@ with lib; let
     inherit (cfg) wildUrl;
     selfProviderTemplateName = "mihomo-self-provider.yaml";
   };
-in {
+in
+{
   options.modules.networking.mihomo = {
     enable = mkEnableOption "mihomo proxy service";
     wildUrl = mkOption {
       type = lib.types.str;
-      default = "http://${mylib.inventory."nixos-vps"."nixos-vps-dev".tailscale.ip}:3001/admin/download/collection/wild?target=ClashMeta";
+      default = "http://${
+        mylib.inventory."nixos-vps"."nixos-vps-dev".tailscale.ip
+      }:3001/admin/download/collection/wild?target=ClashMeta";
       description = ''
         Sub-Store wild provider subscription URL。
         默认指向 nixos-vps-dev 的 sub-store（tailscale 内网，admin path 固定 /admin）。
@@ -42,7 +46,7 @@ in {
       isSystemUser = true;
       group = "mihomo";
     };
-    users.groups.mihomo = {};
+    users.groups.mihomo = { };
 
     # sops 默认 owner=root mode=0400，DynamicUser 或静态非 root 都读不到。
     # 显式声明 owner+group+mode 让模板对 mihomo 用户可读。group 0440 而非
@@ -70,10 +74,13 @@ in {
     # self provider 已在构建时转为 YAML 且使用绝对路径，无需拷贝。
     # services.mihomo 默认 WorkingDirectory 是 /var/lib/mihomo
     systemd.services.mihomo = {
-      after = ["systemd-networkd.service" "network-online.target"];
-      wants = ["network-online.target"];
-      partOf = ["systemd-networkd.service"];
-      bindsTo = ["systemd-networkd.service"];
+      after = [
+        "systemd-networkd.service"
+        "network-online.target"
+      ];
+      wants = [ "network-online.target" ];
+      partOf = [ "systemd-networkd.service" ];
+      bindsTo = [ "systemd-networkd.service" ];
       serviceConfig = {
         # 关掉 DynamicUser，与上面的静态 user 配套
         DynamicUser = lib.mkForce false;
@@ -92,7 +99,10 @@ in {
     services.resolved = {
       enable = true;
       settings.Resolve = {
-        DNS = ["1.1.1.1" "8.8.8.8"];
+        DNS = [
+          "1.1.1.1"
+          "8.8.8.8"
+        ];
         DNSOverTLS = "yes";
         FallbackDNS = mkDefault config.networking.nameservers;
       };

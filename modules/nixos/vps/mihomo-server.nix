@@ -6,7 +6,8 @@
   userMeta,
   ...
 }:
-with lib; let
+with lib;
+let
   cfg = config.services.mihomo-server;
   port = singbox.vlessPort or 8443;
   handshakeServer = "www.bing.com";
@@ -18,16 +19,16 @@ with lib; let
   # mihomo 不像 singbox 支持单端口协议复用，HY2 必须用独立端口
   hy2Port = singbox.hy2.port or 8500;
   vmessEnabled = singbox ? vmessWs;
-  vmessDomain = attrByPath ["vmessWs" "domain"] null singbox;
-  vmessPort = attrByPath ["vmessWs" "port"] null singbox;
-  vmessPath = attrByPath ["vmessWs" "path"] null singbox;
+  vmessDomain = attrByPath [ "vmessWs" "domain" ] null singbox;
+  vmessPort = attrByPath [ "vmessWs" "port" ] null singbox;
+  vmessPath = attrByPath [ "vmessWs" "path" ] null singbox;
   tuicEnabled = singbox ? tuic;
-  tuicDomain = attrByPath ["tuic" "domain"] null singbox;
-  tuicPort = attrByPath ["tuic" "port"] null singbox;
-  tuicCongestionControl = attrByPath ["tuic" "congestionControl"] "bbr" singbox;
+  tuicDomain = attrByPath [ "tuic" "domain" ] null singbox;
+  tuicPort = attrByPath [ "tuic" "port" ] null singbox;
+  tuicCongestionControl = attrByPath [ "tuic" "congestionControl" ] "bbr" singbox;
   anytlsEnabled = singbox ? anytls;
-  anytlsDomain = attrByPath ["anytls" "domain"] null singbox;
-  anytlsPort = attrByPath ["anytls" "port"] null singbox;
+  anytlsDomain = attrByPath [ "anytls" "domain" ] null singbox;
+  anytlsPort = attrByPath [ "anytls" "port" ] null singbox;
   needsStaticMihomoUser = hy2Enabled || vmessEnabled || tuicEnabled || anytlsEnabled;
   mail = userMeta.mail;
 
@@ -35,92 +36,91 @@ with lib; let
     mode = "rule";
     log-level = "info";
 
-    inbounds =
-      [
-        {
-          type = "vless";
-          tag = "vless-reality";
-          listen = "::";
-          listen_port = port;
-          users = [
-            {
-              uuid = config.sops.placeholder.SINGBOX_UUID;
-              flow = "xtls-rprx-vision";
-            }
+    inbounds = [
+      {
+        type = "vless";
+        tag = "vless-reality";
+        listen = "::";
+        listen_port = port;
+        users = [
+          {
+            uuid = config.sops.placeholder.SINGBOX_UUID;
+            flow = "xtls-rprx-vision";
+          }
+        ];
+        reality-config = {
+          dest = "${handshakeServer}:443";
+          private-key = config.sops.placeholder.SINGBOX_PRI_KEY;
+          short-id = [
+            config.sops.placeholder.SINGBOX_ID
           ];
-          reality-config = {
-            dest = "${handshakeServer}:443";
-            private-key = config.sops.placeholder.SINGBOX_PRI_KEY;
-            short-id = [
-              config.sops.placeholder.SINGBOX_ID
-            ];
-            server-names = [
-              handshakeServer
-            ];
-          };
-        }
-        {
-          type = "hysteria2";
-          tag = "hy2-in";
-          listen = "::";
-          listen_port = hy2Port;
-          users = [
-            {
-              password = config.sops.placeholder.SINGBOX_PWD;
-            }
+          server-names = [
+            handshakeServer
           ];
-          tls = {
-            certificate_path = "/var/lib/acme/${hy2Domain}/fullchain.pem";
-            key_path = "/var/lib/acme/${hy2Domain}/key.pem";
-          };
-        }
-      ]
-      ++ lib.optionals vmessEnabled [
-        {
-          name = "vmess-ws-tls";
-          type = "vmess";
-          listen = "::";
-          port = vmessPort;
-          users = [
-            {
-              username = "1";
-              uuid = config.sops.placeholder.SINGBOX_UUID;
-              alterId = 0;
-            }
-          ];
-          ws-path = vmessPath;
-          certificate = "/var/lib/acme/${vmessDomain}/fullchain.pem";
-          private-key = "/var/lib/acme/${vmessDomain}/key.pem";
-        }
-      ]
-      ++ lib.optionals tuicEnabled [
-        {
-          name = "tuic-v5";
-          type = "tuic";
-          listen = "::";
-          port = tuicPort;
-          users = {
-            "${config.sops.placeholder.SINGBOX_UUID}" = config.sops.placeholder.SINGBOX_PWD;
-          };
-          certificate = "/var/lib/acme/${tuicDomain}/fullchain.pem";
-          private-key = "/var/lib/acme/${tuicDomain}/key.pem";
-          congestion-controller = tuicCongestionControl;
-          alpn = ["h3"];
-        }
-      ]
-      ++ lib.optionals anytlsEnabled [
-        {
-          name = "anytls";
-          type = "anytls";
-          listen = "::";
-          port = anytlsPort;
-          users = {
-            default = config.sops.placeholder.SINGBOX_PWD;
-          };
-          certificate = "/var/lib/acme/${anytlsDomain}/fullchain.pem";
-          private-key = "/var/lib/acme/${anytlsDomain}/key.pem";
-        }
-      ];
+        };
+      }
+      {
+        type = "hysteria2";
+        tag = "hy2-in";
+        listen = "::";
+        listen_port = hy2Port;
+        users = [
+          {
+            password = config.sops.placeholder.SINGBOX_PWD;
+          }
+        ];
+        tls = {
+          certificate_path = "/var/lib/acme/${hy2Domain}/fullchain.pem";
+          key_path = "/var/lib/acme/${hy2Domain}/key.pem";
+        };
+      }
+    ]
+    ++ lib.optionals vmessEnabled [
+      {
+        name = "vmess-ws-tls";
+        type = "vmess";
+        listen = "::";
+        port = vmessPort;
+        users = [
+          {
+            username = "1";
+            uuid = config.sops.placeholder.SINGBOX_UUID;
+            alterId = 0;
+          }
+        ];
+        ws-path = vmessPath;
+        certificate = "/var/lib/acme/${vmessDomain}/fullchain.pem";
+        private-key = "/var/lib/acme/${vmessDomain}/key.pem";
+      }
+    ]
+    ++ lib.optionals tuicEnabled [
+      {
+        name = "tuic-v5";
+        type = "tuic";
+        listen = "::";
+        port = tuicPort;
+        users = {
+          "${config.sops.placeholder.SINGBOX_UUID}" = config.sops.placeholder.SINGBOX_PWD;
+        };
+        certificate = "/var/lib/acme/${tuicDomain}/fullchain.pem";
+        private-key = "/var/lib/acme/${tuicDomain}/key.pem";
+        congestion-controller = tuicCongestionControl;
+        alpn = [ "h3" ];
+      }
+    ]
+    ++ lib.optionals anytlsEnabled [
+      {
+        name = "anytls";
+        type = "anytls";
+        listen = "::";
+        port = anytlsPort;
+        users = {
+          default = config.sops.placeholder.SINGBOX_PWD;
+        };
+        certificate = "/var/lib/acme/${anytlsDomain}/fullchain.pem";
+        private-key = "/var/lib/acme/${anytlsDomain}/key.pem";
+      }
+    ];
 
     outbounds = [
       {
@@ -137,7 +137,8 @@ with lib; let
       ];
     };
   };
-in {
+in
+{
   options.services.mihomo-server = {
     enable = mkEnableOption "mihomo server (VLESS+Reality + Hysteria2 inbound)";
   };
@@ -153,10 +154,13 @@ in {
         configFile = config.sops.templates."mihomo-server.json".path;
       };
 
-      networking.firewall.allowedTCPPorts = [port] ++ lib.optionals vmessEnabled [vmessPort] ++ lib.optionals anytlsEnabled [anytlsPort];
+      networking.firewall.allowedTCPPorts = [
+        port
+      ]
+      ++ lib.optionals vmessEnabled [ vmessPort ]
+      ++ lib.optionals anytlsEnabled [ anytlsPort ];
       networking.firewall.allowedUDPPorts =
-        lib.optionals hy2Enabled [hy2Port]
-        ++ lib.optionals tuicEnabled [tuicPort];
+        lib.optionals hy2Enabled [ hy2Port ] ++ lib.optionals tuicEnabled [ tuicPort ];
     }
     (mkIf needsStaticMihomoUser {
       # 创建静态用户/组，确保在 ACME 签发证书前已存在
@@ -167,23 +171,27 @@ in {
         isSystemUser = true;
         group = "mihomo";
       };
-      users.groups.mihomo = {};
+      users.groups.mihomo = { };
 
       systemd.services.mihomo.serviceConfig = {
         DynamicUser = lib.mkForce false;
         User = "mihomo";
         Group = "mihomo";
         # DynamicUser 使用 /var/lib/private/mihomo，静态用户使用 /var/lib/mihomo
-        ExecStart = lib.mkForce (lib.concatStringsSep " " [
-          (lib.getExe config.services.mihomo.package)
-          "-d /var/lib/mihomo"
-          "-f \${CREDENTIALS_DIRECTORY}/config.yaml"
-          (lib.optionalString (config.services.mihomo.webui != null) "-ext-ui ${config.services.mihomo.webui}")
-          (lib.optionalString (config.services.mihomo.extraOpts != null) config.services.mihomo.extraOpts)
-        ]);
+        ExecStart = lib.mkForce (
+          lib.concatStringsSep " " [
+            (lib.getExe config.services.mihomo.package)
+            "-d /var/lib/mihomo"
+            "-f \${CREDENTIALS_DIRECTORY}/config.yaml"
+            (lib.optionalString (
+              config.services.mihomo.webui != null
+            ) "-ext-ui ${config.services.mihomo.webui}")
+            (lib.optionalString (config.services.mihomo.extraOpts != null) config.services.mihomo.extraOpts)
+          ]
+        );
         # ProtectSystem=strict 会把 /var 挂载为空 tmpfs，ACME 证书在 /var/lib/acme
         # 下会不可见。通过 ReadOnlyPaths 为证书目录创建只读 bind mount。
-        ReadOnlyPaths = ["/var/lib/acme"];
+        ReadOnlyPaths = [ "/var/lib/acme" ];
       };
 
       security.acme.acceptTerms = mkDefault true;
@@ -192,7 +200,7 @@ in {
         dnsProvider = "cloudflare";
         environmentFile = config.sops.secrets.ACME_CF_ENV.path;
         group = "mihomo";
-        reloadServices = ["mihomo.service"];
+        reloadServices = [ "mihomo.service" ];
       };
     })
     (mkIf vmessEnabled {
@@ -202,7 +210,7 @@ in {
         dnsProvider = "cloudflare";
         environmentFile = config.sops.secrets.ACME_CF_ENV.path;
         group = "mihomo";
-        reloadServices = ["mihomo.service"];
+        reloadServices = [ "mihomo.service" ];
       };
     })
     (mkIf tuicEnabled {
@@ -212,7 +220,7 @@ in {
         dnsProvider = "cloudflare";
         environmentFile = config.sops.secrets.ACME_CF_ENV.path;
         group = "mihomo";
-        reloadServices = ["mihomo.service"];
+        reloadServices = [ "mihomo.service" ];
       };
     })
     (mkIf anytlsEnabled {
@@ -222,7 +230,7 @@ in {
         dnsProvider = "cloudflare";
         environmentFile = config.sops.secrets.ACME_CF_ENV.path;
         group = "mihomo";
-        reloadServices = ["mihomo.service"];
+        reloadServices = [ "mihomo.service" ];
       };
     })
   ]);

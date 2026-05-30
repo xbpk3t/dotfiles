@@ -3,7 +3,8 @@
   inputs,
   lib,
   ...
-}: let
+}:
+let
   # 当前仓库明确支持的 target systems。
   # why: flake-parts 的 perSystem 会基于这里展开；这里是顶层支持矩阵的单一入口。
   supportedSystems = [
@@ -13,7 +14,7 @@
   ];
 
   # 仓库内自定义 lib，供 hosts/modules/home 共享。
-  mylib = import ../lib {inherit lib;};
+  mylib = import ../lib { inherit lib; };
   globals = config.globals;
   customPkgsOverlay = import ../pkgs/overlay.nix;
 
@@ -22,7 +23,8 @@
   # - overlays 统一在这里注入，避免各 host 重复写。
   # - allowUnfree / allowBroken 等策略也统一收口在这里。
   # - 默认使用 rolling；需要 stable 的 host 通过 hostMeta.nixpkgsChannel 显式声明。
-  mkPkgsFrom = nixpkgsInput: system:
+  mkPkgsFrom =
+    nixpkgsInput: system:
     import nixpkgsInput {
       inherit system;
       config.allowUnfree = true;
@@ -33,25 +35,28 @@
       config.enableParallelBuilding = true;
       config.buildManPages = false;
       config.buildDocs = false;
-      overlays = [customPkgsOverlay];
+      overlays = [ customPkgsOverlay ];
     };
 
   mkPkgs = mkPkgsFrom inputs.nixpkgs;
 
   # host-level channel policy：这里只切 package set，不切 NixOS module system。
   # NixOS modules 仍来自主 inputs.nixpkgs；HM 通过 useGlobalPkgs 复用同一套 pkgs。
-  mkPkgsForHost = system: hostMeta: let
-    channel = hostMeta.nixpkgsChannel or "rolling";
-    hostName = hostMeta.hostName or "unknown";
-    inputsByChannel = {
-      rolling = inputs.nixpkgs;
-      stable = inputs.nixpkgs-stable;
-    };
-    nixpkgsInput =
-      if builtins.hasAttr channel inputsByChannel
-      then inputsByChannel.${channel}
-      else throw "Unsupported nixpkgsChannel '${channel}' for host '${hostName}'";
-  in
+  mkPkgsForHost =
+    system: hostMeta:
+    let
+      channel = hostMeta.nixpkgsChannel or "rolling";
+      hostName = hostMeta.hostName or "unknown";
+      inputsByChannel = {
+        rolling = inputs.nixpkgs;
+        stable = inputs.nixpkgs-stable;
+      };
+      nixpkgsInput =
+        if builtins.hasAttr channel inputsByChannel then
+          inputsByChannel.${channel}
+        else
+          throw "Unsupported nixpkgsChannel '${channel}' for host '${hostName}'";
+    in
     mkPkgsFrom nixpkgsInput system;
 
   # 共享给 nixos/darwin/home modules 的基础 specialArgs。
@@ -63,7 +68,8 @@
 
   # host-aware specialArgs：在基础 specialArgs 之上补齐当前主机的身份信息。
   # why: user/time/networking 等主机差异数据不应散落在各模块里手写。
-  mkSpecialArgs = system: hostMeta:
+  mkSpecialArgs =
+    system: hostMeta:
     (genSpecialArgs system)
     // {
       inherit hostMeta;
@@ -87,44 +93,47 @@
   };
 
   # 加载某一架构目录下的 role outputs，并注入公共参数。
-  loadRoleOutputs = dir: extraArgs: let
-    outputFiles =
-      builtins.map (name: dir + "/${name}")
-      (builtins.filter
-        (name:
-          name
-          != "default.nix"
-          && lib.strings.hasSuffix ".nix" name)
-        (builtins.attrNames (builtins.readDir dir)));
-  in
+  loadRoleOutputs =
+    dir: extraArgs:
+    let
+      outputFiles = builtins.map (name: dir + "/${name}") (
+        builtins.filter (name: name != "default.nix" && lib.strings.hasSuffix ".nix" name) (
+          builtins.attrNames (builtins.readDir dir)
+        )
+      );
+    in
     map (path: import path (baseOutputArgs // extraArgs)) outputFiles;
 
   # 将同一架构下多个 output 文件合并为一份标准输出结构。
   mergeRoleOutputList = outputs: {
-    apps = lib.attrsets.mergeAttrsList (map (it: it.apps or {}) outputs);
+    apps = lib.attrsets.mergeAttrsList (map (it: it.apps or { }) outputs);
     darwinConfigurations = lib.attrsets.mergeAttrsList (
-      map (it: it.darwinConfigurations or {}) outputs
+      map (it: it.darwinConfigurations or { }) outputs
     );
     deploy = {
-      nodes = lib.attrsets.mergeAttrsList (map (it: it.deploy.nodes or {}) outputs);
+      nodes = lib.attrsets.mergeAttrsList (map (it: it.deploy.nodes or { }) outputs);
     };
-    nixosConfigurations = lib.attrsets.mergeAttrsList (
-      map (it: it.nixosConfigurations or {}) outputs
-    );
-    packages = lib.attrsets.mergeAttrsList (map (it: it.packages or {}) outputs);
+    nixosConfigurations = lib.attrsets.mergeAttrsList (map (it: it.nixosConfigurations or { }) outputs);
+    packages = lib.attrsets.mergeAttrsList (map (it: it.packages or { }) outputs);
   };
 
   # 三套架构分别收敛成统一输出。
   architectureOutputs = {
-    aarch64-darwin = mergeRoleOutputList (loadRoleOutputs ./aarch64-darwin/src {
-      system = "aarch64-darwin";
-    });
-    aarch64-linux = mergeRoleOutputList (loadRoleOutputs ./aarch64-linux/src {
-      system = "aarch64-linux";
-    });
-    x86_64-linux = mergeRoleOutputList (loadRoleOutputs ./x86_64-linux/src {
-      system = "x86_64-linux";
-    });
+    aarch64-darwin = mergeRoleOutputList (
+      loadRoleOutputs ./aarch64-darwin/src {
+        system = "aarch64-darwin";
+      }
+    );
+    aarch64-linux = mergeRoleOutputList (
+      loadRoleOutputs ./aarch64-linux/src {
+        system = "aarch64-linux";
+      }
+    );
+    x86_64-linux = mergeRoleOutputList (
+      loadRoleOutputs ./x86_64-linux/src {
+        system = "x86_64-linux";
+      }
+    );
   };
 
   architectureOutputValues = builtins.attrValues architectureOutputs;
@@ -133,111 +142,119 @@
   # deploy-rs 的 deployChecks 只对“当前求值系统”运行。
   # why: deploy-rs 的检查实现按 system 分发，跨系统强行求值没有收益，还会引入噪音。
   currentSystemValues =
-    if currentSystem != null && builtins.hasAttr currentSystem architectureOutputs
-    then [architectureOutputs.${currentSystem}]
-    else [];
+    if currentSystem != null && builtins.hasAttr currentSystem architectureOutputs then
+      [ architectureOutputs.${currentSystem} ]
+    else
+      [ ];
 
   # 仅收敛当前系统的 deploy nodes，供 deployChecks 使用。
   deployCurrent = {
-    nodes = lib.attrsets.mergeAttrsList (map (it: it.deploy.nodes or {}) currentSystemValues);
+    nodes = lib.attrsets.mergeAttrsList (map (it: it.deploy.nodes or { }) currentSystemValues);
   };
 
   # flake 顶层需要汇总后的 darwin/nixos/deploy outputs。
   mergedNixosConfigurations = lib.attrsets.mergeAttrsList (
-    map (it: it.nixosConfigurations or {}) architectureOutputValues
+    map (it: it.nixosConfigurations or { }) architectureOutputValues
   );
   mergedDarwinConfigurations = lib.attrsets.mergeAttrsList (
-    map (it: it.darwinConfigurations or {}) architectureOutputValues
+    map (it: it.darwinConfigurations or { }) architectureOutputValues
   );
   mergedDeployNodes = lib.attrsets.mergeAttrsList (
-    map (it: it.deploy.nodes or {}) architectureOutputValues
+    map (it: it.deploy.nodes or { }) architectureOutputValues
   );
-in {
+in
+{
   systems = supportedSystems;
 
-  perSystem = {system, ...}: let
-    specialArgs = genSpecialArgs system;
-    pkgs = specialArgs.pkgs;
-    architectureOutput = architectureOutputs.${system};
-    libChecks = import ../tests {
-      inherit pkgs;
-      lib = pkgs.lib;
-    };
+  perSystem =
+    { system, ... }:
+    let
+      specialArgs = genSpecialArgs system;
+      pkgs = specialArgs.pkgs;
+      architectureOutput = architectureOutputs.${system};
+      libChecks = import ../tests {
+        inherit pkgs;
+        lib = pkgs.lib;
+      };
 
-    # deploy-rs 官方推荐把 deployChecks 接到 flake checks。
-    # 注意：这里只在当前 system 上启用，避免无意义的跨系统检查。
-    deployChecks =
-      if
-        currentSystem
-        != null
-        && system == currentSystem
-        && builtins.hasAttr currentSystem inputs."deploy-rs".lib
-      then inputs."deploy-rs".lib.${currentSystem}.deployChecks deployCurrent
-      else {};
+      # deploy-rs 官方推荐把 deployChecks 接到 flake checks。
+      # 注意：这里只在当前 system 上启用，避免无意义的跨系统检查。
+      deployChecks =
+        if
+          currentSystem != null
+          && system == currentSystem
+          && builtins.hasAttr currentSystem inputs."deploy-rs".lib
+        then
+          inputs."deploy-rs".lib.${currentSystem}.deployChecks deployCurrent
+        else
+          { };
 
-    # Host evaluation 契约检查：保证当前 system 下注册的每个
-    # nixosConfigurations / darwinConfigurations 都能被完整求值。
-    #
-    # 为什么必须存在：
-    #   `nix flake check` 默认 *不会* 触发 `nixosConfigurations.*` 的求值；
-    #   它只检查 `checks.<system>.*` / `packages.<system>.*` / `apps.<system>.*`。
-    #   于是像 `home.stateVersion` 未定义、`home/base` 误注释这种问题，
-    #   只在 `nix run .#deploy-rs -- .#<host>` 真去 deploy 时才会爆，
-    #   构成了「绿色 CI + 红色 deploy」的盲区。
-    #
-    # 工作机制（轻量但严格）：
-    #   - `toString cfg.config.system.build.toplevel.drvPath` 触发 host
-    #     的完整 module evaluation（求 .drv hash 必须 eval 所有 option）。
-    #   - `toString` 同时 strip 掉 string context，导致 runCommand 看到的
-    #     是字面量 path，*不会* 把 toplevel 列为 build dependency。
-    #   - 结果：check 失败 ⇔ eval 失败；check pass *不* 触发 host build，
-    #     成本接近 0，但能挡住 stateVersion / option collision / 缺 import
-    #     等所有静态可发现的 deploy-time eval error。
-    #
-    # 命名约定：
-    #   `host-eval-<hostname>`，便于 `nix flake check` 输出中肉眼定位。
-    hostEvalChecks = let
-      arch = architectureOutput;
-      allHosts = (arch.nixosConfigurations or {}) // (arch.darwinConfigurations or {});
-      mkHostEval = name: cfg:
-        pkgs.runCommandLocal "host-eval-${name}" {
-          drvPath = toString cfg.config.system.build.toplevel.drvPath;
-        } ''echo "$drvPath" > $out'';
+      # Host evaluation 契约检查：保证当前 system 下注册的每个
+      # nixosConfigurations / darwinConfigurations 都能被完整求值。
+      #
+      # 为什么必须存在：
+      #   `nix flake check` 默认 *不会* 触发 `nixosConfigurations.*` 的求值；
+      #   它只检查 `checks.<system>.*` / `packages.<system>.*` / `apps.<system>.*`。
+      #   于是像 `home.stateVersion` 未定义、`home/base` 误注释这种问题，
+      #   只在 `nix run .#deploy-rs -- .#<host>` 真去 deploy 时才会爆，
+      #   构成了「绿色 CI + 红色 deploy」的盲区。
+      #
+      # 工作机制（轻量但严格）：
+      #   - `toString cfg.config.system.build.toplevel.drvPath` 触发 host
+      #     的完整 module evaluation（求 .drv hash 必须 eval 所有 option）。
+      #   - `toString` 同时 strip 掉 string context，导致 runCommand 看到的
+      #     是字面量 path，*不会* 把 toplevel 列为 build dependency。
+      #   - 结果：check 失败 ⇔ eval 失败；check pass *不* 触发 host build，
+      #     成本接近 0，但能挡住 stateVersion / option collision / 缺 import
+      #     等所有静态可发现的 deploy-time eval error。
+      #
+      # 命名约定：
+      #   `host-eval-<hostname>`，便于 `nix flake check` 输出中肉眼定位。
+      hostEvalChecks =
+        let
+          arch = architectureOutput;
+          allHosts = (arch.nixosConfigurations or { }) // (arch.darwinConfigurations or { });
+          mkHostEval =
+            name: cfg:
+            pkgs.runCommandLocal "host-eval-${name}" {
+              drvPath = toString cfg.config.system.build.toplevel.drvPath;
+            } ''echo "$drvPath" > $out'';
+        in
+        lib.mapAttrs' (name: cfg: lib.nameValuePair "host-eval-${name}" (mkHostEval name cfg)) allHosts;
     in
-      lib.mapAttrs'
-      (name: cfg: lib.nameValuePair "host-eval-${name}" (mkHostEval name cfg))
-      allHosts;
-  in {
-    # flake apps:
-    # - deploy-rs: 统一部署入口
-    # - nixos-facter: 直接暴露 fact collection CLI，便于 `nix run .#nixos-facter`
-    apps =
-      {
+    {
+      # flake apps:
+      # - deploy-rs: 统一部署入口
+      # - nixos-facter: 直接暴露 fact collection CLI，便于 `nix run .#nixos-facter`
+      apps = {
         deploy-rs = inputs."deploy-rs".apps.${system}.deploy-rs;
         default = inputs."deploy-rs".apps.${system}.default;
       }
       // architectureOutput.apps
-      // lib.optionalAttrs (
-        pkgs.stdenv.hostPlatform.isLinux
-        && builtins.hasAttr "packages" inputs.nixos-facter
-        && builtins.hasAttr system inputs.nixos-facter.packages
-        && builtins.hasAttr "default" inputs.nixos-facter.packages.${system}
-      ) {
-        nixos-facter = {
-          type = "app";
-          program = "${inputs.nixos-facter.packages.${system}.default}/bin/nixos-facter";
-        };
-      };
+      //
+        lib.optionalAttrs
+          (
+            pkgs.stdenv.hostPlatform.isLinux
+            && builtins.hasAttr "packages" inputs.nixos-facter
+            && builtins.hasAttr system inputs.nixos-facter.packages
+            && builtins.hasAttr "default" inputs.nixos-facter.packages.${system}
+          )
+          {
+            nixos-facter = {
+              type = "app";
+              program = "${inputs.nixos-facter.packages.${system}.default}/bin/nixos-facter";
+            };
+          };
 
-    # 注意：`checks` 是仓库默认质量闸门的统一入口。
-    # deploy-rs checks 负责 deployment safety，libChecks 负责仓库内的基础回归测试，
-    # hostEvalChecks 负责「flake 输出的每个 host 都能完整求值」的契约。
-    checks = deployChecks // libChecks // hostEvalChecks;
+      # 注意：`checks` 是仓库默认质量闸门的统一入口。
+      # deploy-rs checks 负责 deployment safety，libChecks 负责仓库内的基础回归测试，
+      # hostEvalChecks 负责「flake 输出的每个 host 都能完整求值」的契约。
+      checks = deployChecks // libChecks // hostEvalChecks;
 
-    # `nix fmt` / flake formatter 的统一入口。
-    formatter = pkgs.nixfmt;
-    packages = architectureOutput.packages;
-  };
+      # `nix fmt` / flake formatter 的统一入口。
+      formatter = pkgs.nixfmt;
+      packages = architectureOutput.packages;
+    };
 
   flake = {
     darwinConfigurations = mergedDarwinConfigurations;

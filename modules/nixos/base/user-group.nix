@@ -3,9 +3,11 @@
   pkgs,
   userMeta,
   ...
-}: let
+}:
+let
   username = userMeta.username;
-in {
+in
+{
   # Don't allow mutation of users outside the config.
   users.mutableUsers = false;
 
@@ -25,10 +27,10 @@ in {
   # };
 
   users.groups = {
-    "${username}" = {};
-    dialout = {};
+    "${username}" = { };
+    dialout = { };
     # for openocd (embedded system development)
-    plugdev = {};
+    plugdev = { };
   };
 
   # root's ssh key are mainly used for remote deployment
@@ -48,8 +50,7 @@ in {
     shell = pkgs.zsh;
 
     # !!! 需要添加该配置，否则无法使用 ssh luck@host 登录目标host
-    openssh.authorizedKeys.keys =
-      globals.auth.sshPublicKeys;
+    openssh.authorizedKeys.keys = globals.auth.sshPublicKeys;
 
     extraGroups = [
       username

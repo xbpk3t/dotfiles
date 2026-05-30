@@ -4,9 +4,11 @@
   config,
   ...
 }:
-with lib; let
+with lib;
+let
   cfg = config.modules.desktop.alacritty;
-in {
+in
+{
   options.modules.desktop.alacritty = {
     enable = mkEnableOption "alacritty terminal";
   };

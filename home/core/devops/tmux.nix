@@ -4,10 +4,12 @@
   pkgs,
   ...
 }:
-with lib; let
+with lib;
+let
   isDarwin = pkgs.stdenv.isDarwin;
   cfg = config.modules.devops.tmux;
-in {
+in
+{
   options.modules.devops.tmux = {
     enable = mkEnableOption "tmux";
     agentSidebar = {
@@ -125,7 +127,7 @@ in {
 
     # TPM 引导——首次运行或更新时克隆/拉取
     # 跟随 home/darwin/default-apps.nix 中 home.activation.setDefaultApps 的先例模式
-    home.activation.installTpm = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    home.activation.installTpm = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       TPM_DIR="$HOME/.tmux/plugins/tpm"
       if [ ! -d "$TPM_DIR/.git" ]; then
         $VERBOSE_ECHO "Cloning TPM..."

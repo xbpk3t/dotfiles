@@ -1,4 +1,5 @@
-{pkgs, ...}: {
+{ pkgs, ... }:
+{
   # https://mynixos.com/home-manager/options/services.remmina
 
   #  services.remmina = {

@@ -68,8 +68,8 @@
     # 这些请求对当前 TUN 代理没有价值，还会在异常态下持续刷 NXDOMAIN 日志。
     # 同样需要早于 clash_mode 规则，否则不会命中 reject。
     {
-      domain = ["wpad"];
-      domain_suffix = ["wpad"];
+      domain = [ "wpad" ];
+      domain_suffix = [ "wpad" ];
       action = "reject";
     }
 

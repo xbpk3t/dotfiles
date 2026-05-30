@@ -1,4 +1,5 @@
-{pkgs, ...}: {
+{ pkgs, ... }:
+{
   home.packages = with pkgs; [
     # https://mynixos.com/nixpkgs/package/bpftrace
     # bpftrace probe 列举，仅 linux 内核追踪场景

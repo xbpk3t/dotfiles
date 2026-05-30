@@ -2,7 +2,8 @@
   config,
   lib,
   ...
-}: {
+}:
+{
   options.modules.base.container = {
     enable = lib.mkEnableOption "Container optimization settings";
   };

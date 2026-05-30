@@ -2,9 +2,11 @@
   inputs,
   pkgs,
   ...
-}: {
+}:
+{
   # Nix/NixOS 开发与调试常用 CLI
-  home.packages = with pkgs;
+  home.packages =
+    with pkgs;
     [
       # 分类1：Nix 打包
       # https://github.com/nix-community/noogle
@@ -42,8 +44,10 @@
       deadnix
       # tags(desc): 代码质量 > 规则检查 > Nix
       statix # nix 风格与常见陷阱检查
+
       # tags(desc): 代码质量 > 格式化 > Nix
-      alejandra # nix 代码格式化
+      # nix 代码格式化
+      # alejandra
 
       # === nixpkgs开发 ===
       # 两套 Nix 单元测试工具都保留，便于分别试用/迁移。

@@ -1,4 +1,5 @@
-{modulesPath, ...}: {
+{ modulesPath, ... }:
+{
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
   ];
@@ -15,9 +16,9 @@
     "sd_mod"
   ];
 
-  boot.initrd.kernelModules = ["virtio_net"];
-  boot.kernelModules = [];
-  boot.extraModulePackages = [];
+  boot.initrd.kernelModules = [ "virtio_net" ];
+  boot.kernelModules = [ ];
+  boot.extraModulePackages = [ ];
 
   networking.useDHCP = true;
   nixpkgs.hostPlatform = "x86_64-linux";

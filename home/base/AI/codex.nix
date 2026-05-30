@@ -4,21 +4,20 @@
   lib,
   pkgs,
   ...
-}: let
+}:
+let
   cfg = config.modules.AI.codex;
   codexDefaultModel = "gpt-5.5";
   mcpServersForCodex =
-    (
-      inputs.mcp-servers-nix.lib.evalModule pkgs {
-        inherit
-          (config.mcp-servers)
-          programs
-          settings
-          ;
-        flavor = "codex";
-      }
-    ).config.settings.servers;
-in {
+    (inputs.mcp-servers-nix.lib.evalModule pkgs {
+      inherit (config.mcp-servers)
+        programs
+        settings
+        ;
+      flavor = "codex";
+    }).config.settings.servers;
+in
+{
   # codex resume   打开可恢复的会话列表
   # codex resume --last 直接恢复当前工作目录下最近一次会话
   # codex resume --all 把当前目录之外的会话也列出来

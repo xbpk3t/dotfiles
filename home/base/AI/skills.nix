@@ -3,9 +3,11 @@
   lib,
   inputs,
   ...
-}: let
+}:
+let
   cfg = config.modules.AI.skills;
-in {
+in
+{
   imports = [
     inputs.agent-skills.homeManagerModules.default
   ];

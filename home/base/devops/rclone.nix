@@ -2,7 +2,8 @@
   pkgs,
   config,
   ...
-}: {
+}:
+{
   # home.packages = with pkgs; [
   #   # https://mynixos.com/nixpkgs/package/baidupcs-go
   #   # https://github.com/qjfoidnh/BaiduPCS-Go

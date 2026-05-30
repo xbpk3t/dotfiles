@@ -6,7 +6,8 @@
   userMeta,
   ...
 }:
-with lib; let
+with lib;
+let
   cfg = config.modules.networking.mihomo;
   username = userMeta.username;
   client = import ../../lib/mihomo/client-config.nix {
@@ -30,7 +31,10 @@ with lib; let
   # 内部跑 shellcheck），出现未声明命令时 build 阶段就会报错而不是 runtime。
   mihomoLauncher = pkgs.writeShellApplication {
     name = "mihomo-tun-launcher";
-    runtimeInputs = with pkgs; [mihomo coreutils];
+    runtimeInputs = with pkgs; [
+      mihomo
+      coreutils
+    ];
     text = ''
       mkdir -p /var/lib/mihomo/providers
       rm -f /var/lib/mihomo/providers/self.yaml
@@ -40,7 +44,10 @@ with lib; let
 
   wildUpdater = pkgs.writeShellApplication {
     name = "mihomo-wild-updater";
-    runtimeInputs = with pkgs; [coreutils curl];
+    runtimeInputs = with pkgs; [
+      coreutils
+      curl
+    ];
     text = ''
       mkdir -p /var/lib/mihomo/providers
       tmp="$(mktemp /var/lib/mihomo/providers/wild-fetched.yaml.XXXXXX)"
@@ -59,12 +66,15 @@ with lib; let
       exit 1
     '';
   };
-in {
+in
+{
   options.modules.networking.mihomo = {
     enable = mkEnableOption "mihomo TUN proxy daemon";
     wildUrl = mkOption {
       type = lib.types.str;
-      default = "http://${mylib.inventory."nixos-vps"."nixos-vps-dev".tailscale.ip}:3001/admin/download/collection/wild?target=ClashMeta";
+      default = "http://${
+        mylib.inventory."nixos-vps"."nixos-vps-dev".tailscale.ip
+      }:3001/admin/download/collection/wild?target=ClashMeta";
       description = ''
         Sub-Store wild provider subscription URL。
         默认指向 nixos-vps-dev 的 sub-store（tailscale 内网，admin path 固定 /admin）。

@@ -3,9 +3,11 @@
   lib,
   pkgs,
   ...
-}: let
+}:
+let
   cfg = config.modules.infra.nh;
-in {
+in
+{
   options.modules.infra.nh.enable = lib.mkEnableOption "Nix helper tools (nh, nvd, comma)";
 
   config = lib.mkIf cfg.enable {

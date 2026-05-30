@@ -1,4 +1,5 @@
-{pkgs, ...}: {
+{ pkgs, ... }:
+{
   # 桌面特定：密钥/代理便捷功能
   # seahorse is a GUI App for GNOME Keyring.
   programs.seahorse.enable = true;

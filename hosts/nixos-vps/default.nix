@@ -8,13 +8,15 @@
   userMeta,
   stateVersion,
   ...
-}: let
+}:
+let
   inherit (globals.networking) nameservers;
   agentNodes = mylib.inventory.nodesForContainerHost "nixos-agent" hostMeta.hostName;
-  agentEnabled = agentNodes != {};
-  agentExternalInterface = lib.attrByPath ["networking" "externalInterface"] null hostMeta;
-  diskDevice = lib.attrByPath ["disko" "devices" "disk" "vda" "device"] "/dev/vda" config;
-in {
+  agentEnabled = agentNodes != { };
+  agentExternalInterface = lib.attrByPath [ "networking" "externalInterface" ] null hostMeta;
+  diskDevice = lib.attrByPath [ "disko" "devices" "disk" "vda" "device" ] "/dev/vda" config;
+in
+{
   imports = [
     ./disko.nix
     ./hardware.nix
@@ -83,13 +85,15 @@ in {
     # [2026-05-25] nixos-agent 容器使用 privateNetwork（10.233.0.0/24）。
     # 只有 inventory 中归属到当前 VPS 的 agent 节点存在时才开启 NAT，
     # 并限制到目标机确认过的公网出口。
-    nat = lib.mkIf agentEnabled ({
+    nat = lib.mkIf agentEnabled (
+      {
         enable = true;
-        internalInterfaces = ["ve-nixos-agent"];
+        internalInterfaces = [ "ve-nixos-agent" ];
       }
       // lib.optionalAttrs (agentExternalInterface != null) {
         externalInterface = agentExternalInterface;
-      });
+      }
+    );
   };
 
   assertions = [
