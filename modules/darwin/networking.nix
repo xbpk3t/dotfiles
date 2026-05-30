@@ -4,9 +4,11 @@
   lib,
   hostMeta,
   ...
-}: let
+}:
+let
   hostName = hostMeta.hostName;
-in {
+in
+{
   # Basic networking configuration
   # Note: macOS networking is mostly managed through System Preferences
   # These are the available nix-darwin networking options
@@ -33,10 +35,10 @@ in {
 
     # DNS configuration
     # 不强制公共 DNS，交给系统/路由或 TUN 下发，避免被拦截时解析失败。
-    dns = lib.mkDefault [];
+    dns = lib.mkDefault [ ];
 
     # DNS search domains（默认空）
-    search = lib.mkDefault [];
+    search = lib.mkDefault [ ];
 
     wakeOnLan = {
       enable = false;

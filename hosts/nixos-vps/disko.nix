@@ -1,4 +1,5 @@
-{...}: let
+{ ... }:
+let
   # 这个 disko.nix 是否必须？在什么情况下必须？何时非必须？对于VPS来说，是否可以移除？
   # disko.nix 不是 NixOS 必需文件；它是可选的“声明式分区/格式化方案”（依赖 disko 模块）。
   #- 何时“必须”用它：
@@ -22,8 +23,12 @@
   rootLabel = "NIXOS_ROOT";
   swapLabel = "NIXOS_SWAP";
   # 通用挂载参数：关闭 atime，降低写放大
-  mountOptions = ["noatime" "nodiratime"];
-in {
+  mountOptions = [
+    "noatime"
+    "nodiratime"
+  ];
+in
+{
   disko.devices = {
     disk.vda = {
       # 定义整块虚拟磁盘的分区方案
@@ -47,7 +52,10 @@ in {
               type = "filesystem";
               format = "vfat";
               mountpoint = "/boot/efi";
-              mountOptions = ["fmask=0077" "dmask=0077"];
+              mountOptions = [
+                "fmask=0077"
+                "dmask=0077"
+              ];
             };
           };
 
@@ -89,11 +97,14 @@ in {
     # UEFI 系统分区挂载点
     device = "/dev/disk/by-partlabel/${espLabel}";
     fsType = "vfat";
-    options = ["fmask=0077" "dmask=0077"];
+    options = [
+      "fmask=0077"
+      "dmask=0077"
+    ];
   };
 
   swapDevices = [
     # 指定 swap 分区供系统启用
-    {device = "/dev/disk/by-partlabel/${swapLabel}";}
+    { device = "/dev/disk/by-partlabel/${swapLabel}"; }
   ];
 }

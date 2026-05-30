@@ -1,4 +1,5 @@
-{config, ...}: {
+{ config, ... }:
+{
   # https://mynixos.com/nixpkgs/options/services.journald
   # journald / journalctl 日志策略
   services.journald = {
@@ -15,9 +16,7 @@
 
     # 仅当系统里启用了 rsyslog / syslog-ng 时才转发到 syslog
     # 这样最接近 NixOS 默认行为，也最不容易误伤现有日志链路
-    forwardToSyslog =
-      config.services.rsyslogd.enable
-      || config.services.syslog-ng.enable;
+    forwardToSyslog = config.services.rsyslogd.enable || config.services.syslog-ng.enable;
 
     # 每个 service 单独做速率限制
     # 30 秒一个窗口

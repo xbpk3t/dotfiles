@@ -4,7 +4,8 @@
   fetchurl,
   fetchFromGitHub,
   dockerTools,
-}: {
+}:
+{
   chrome-devtools-mcp = {
     pname = "chrome-devtools-mcp";
     version = "0.21.0";

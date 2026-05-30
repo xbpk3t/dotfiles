@@ -3,9 +3,11 @@
   globals,
   stateVersion,
   ...
-}: let
+}:
+let
   inherit (globals.networking) nameservers;
-in {
+in
+{
   #############################################################
   #
   #  nixos-agent - NixOS Container for ClaudeClaw
@@ -50,7 +52,10 @@ in {
       mkdir -p /home/luck/.config/systemd
       chown luck:users /home/luck/.config /home/luck/.config/systemd
     '';
-    deps = ["users" "groups"];
+    deps = [
+      "users"
+      "groups"
+    ];
   };
 
   # [2026-05-25] NixOS 容器通过宿主机 /etc/resolv.conf 解析 DNS，

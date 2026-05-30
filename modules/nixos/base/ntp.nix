@@ -1,4 +1,5 @@
-{lib, ...}: {
+{ lib, ... }:
+{
   # Network performance optimization
   # These are safe, widely-used network optimization parameters
   # that improve performance for both desktop and server environments

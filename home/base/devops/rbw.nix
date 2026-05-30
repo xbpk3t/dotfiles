@@ -1,4 +1,5 @@
-{...}: {
+{ ... }:
+{
   # https://mynixos.com/home-manager/options/programs.rbw
   # https://mynixos.com/nixpkgs/package/rbw
   # https://github.com/doy/rbw

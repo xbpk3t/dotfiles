@@ -2,9 +2,11 @@
   lib,
   pkgs,
   ...
-}: {
+}:
+{
   # https://github.com/nicolaka/netshoot 参考该repo提供的一些
-  home.packages = with pkgs;
+  home.packages =
+    with pkgs;
     [
       # 网络工具 (excluding wget/curl which are in minimal)
 

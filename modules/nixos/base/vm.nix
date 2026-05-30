@@ -3,10 +3,12 @@
   lib,
   userMeta,
   ...
-}: let
+}:
+let
   inherit (lib) mkIf mkMerge optionals;
   username = userMeta.username;
-in {
+in
+{
   ###################################################################################
   #
   #  Virtualisation - Libvirt(QEMU/KVM) / Docker / LXD / WayDroid
@@ -26,7 +28,7 @@ in {
 
   # https://get.docker.com/
 
-  boot.kernelModules = ["vfio-pci"];
+  boot.kernelModules = [ "vfio-pci" ];
 
   # https://mynixos.com/nixpkgs/options/virtualisation
   # https://mynixos.com/nixpkgs/options/virtualisation.docker
@@ -60,7 +62,7 @@ in {
       autoPrune = {
         enable = true;
         dates = "weekly";
-        flags = ["--all"];
+        flags = [ "--all" ];
       };
     };
 
@@ -82,15 +84,15 @@ in {
 
   # Service-scoped user/group wiring
   users.groups = mkMerge [
-    (mkIf config.virtualisation.docker.enable {docker = {};})
-    (mkIf config.virtualisation.podman.enable {podman = {};})
-    (mkIf config.virtualisation.libvirtd.enable {libvirtd = {};})
+    (mkIf config.virtualisation.docker.enable { docker = { }; })
+    (mkIf config.virtualisation.podman.enable { podman = { }; })
+    (mkIf config.virtualisation.libvirtd.enable { libvirtd = { }; })
   ];
 
   users.users."${username}".extraGroups =
-    optionals config.virtualisation.docker.enable ["docker"]
-    ++ optionals config.virtualisation.podman.enable ["podman"]
-    ++ optionals config.virtualisation.libvirtd.enable ["libvirtd"];
+    optionals config.virtualisation.docker.enable [ "docker" ]
+    ++ optionals config.virtualisation.podman.enable [ "podman" ]
+    ++ optionals config.virtualisation.libvirtd.enable [ "libvirtd" ];
 
   # 只在桌面模块中定义 containers，避免 VPS 场景占用磁盘
 

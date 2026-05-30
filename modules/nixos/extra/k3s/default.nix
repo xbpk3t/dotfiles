@@ -3,7 +3,8 @@
   lib,
   pkgs,
   ...
-}: let
+}:
+let
   inherit (lib) mkIf mkMerge;
   cfg = config.modules.extra.k3s;
   role = cfg.role;
@@ -12,24 +13,23 @@
   isAgent = role == "agent";
   validRole = isServer || isAgent;
   toInt = s: builtins.fromJSON s;
-  isTailnetIP = ip: let
-    parts = lib.splitString "." ip;
-  in
-    builtins.length parts
-    == 4
+  isTailnetIP =
+    ip:
+    let
+      parts = lib.splitString "." ip;
+    in
+    builtins.length parts == 4
     && lib.elemAt parts 0 == "100"
     && (
       let
         second = toInt (lib.elemAt parts 1);
       in
-        second >= 64 && second <= 127
+      second >= 64 && second <= 127
     );
   serverAddr = "https://${cfg.serverIP}:${toString cfg.serverPort}";
-  flannelIfaceIP =
-    if cfg.nodeIP != ""
-    then cfg.nodeIP
-    else cfg.serverIP;
-in {
+  flannelIfaceIP = if cfg.nodeIP != "" then cfg.nodeIP else cfg.serverIP;
+in
+{
   # https://mynixos.com/nixpkgs/options/services.k3s
   #
   # https://github.com/NixOS/nixpkgs/blob/master/pkgs/applications/networking/cluster/k3s/README.md
@@ -102,13 +102,13 @@ in {
 
     roles = mkOption {
       type = types.listOf types.str;
-      default = [];
+      default = [ ];
       description = "k3s node roles (node.kubernetes.io/role-<role>=true)";
     };
 
     extraLabels = mkOption {
       type = types.attrsOf types.str;
-      default = {};
+      default = { };
       description = "extra k3s node labels (key=value)";
     };
   };
@@ -155,7 +155,7 @@ in {
           ++ (lib.optional (cfg.zone != "") "--node-label=topology.kubernetes.io/zone=${cfg.zone}")
           # 业务角色标签：node.kubernetes.io/role-<role>=true
           # Why：kubelet 不允许通过 --node-labels 设置 node-role.kubernetes.io/*（会直接拒绝启动）。
-          ++ (lib.concatMap (roleName: ["--node-label=node.kubernetes.io/role-${roleName}=true"]) cfg.roles)
+          ++ (lib.concatMap (roleName: [ "--node-label=node.kubernetes.io/role-${roleName}=true" ]) cfg.roles)
           # 额外标签（需要时覆盖）
           ++ (lib.mapAttrsToList (key: value: "--node-label=${key}=${value}") cfg.extraLabels)
           # What：固定 flannel 走 tailscale0。
@@ -165,17 +165,16 @@ in {
       (mkIf isServer {
         # 共享 token：由 sops 管理（k3s/token）
         agentTokenFile = tokenPath;
-        extraFlags =
-          [
-            "--advertise-address=${cfg.serverIP}"
-            "--tls-san=${cfg.serverIP}"
-            # What：禁用 k3s 内置组件，交给 Flux 管理（避免与 HelmRelease 冲突）。
-            # Why：内置 coredns/metrics-server/local-storage/traefik 会抢占同名资源，导致 HelmRelease 失败。
-            "--disable=traefik,servicelb,metrics-server,local-storage,coredns"
-          ]
-          # What：当 nodeIP 未显式设置时，server 用 serverIP 作为 node-ip。
-          # Why：保证控制面节点至少有一个可用的固定节点地址。
-          ++ (lib.optional (cfg.nodeIP == "") "--node-ip=${cfg.serverIP}");
+        extraFlags = [
+          "--advertise-address=${cfg.serverIP}"
+          "--tls-san=${cfg.serverIP}"
+          # What：禁用 k3s 内置组件，交给 Flux 管理（避免与 HelmRelease 冲突）。
+          # Why：内置 coredns/metrics-server/local-storage/traefik 会抢占同名资源，导致 HelmRelease 失败。
+          "--disable=traefik,servicelb,metrics-server,local-storage,coredns"
+        ]
+        # What：当 nodeIP 未显式设置时，server 用 serverIP 作为 node-ip。
+        # Why：保证控制面节点至少有一个可用的固定节点地址。
+        ++ (lib.optional (cfg.nodeIP == "") "--node-ip=${cfg.serverIP}");
       })
       (mkIf isAgent {
         # agent 连接 homelab 控制面（Tailscale IP）
@@ -188,8 +187,8 @@ in {
     # Why：少数情况下 flannel 未自动写入主路由表，导致本机无法访问本机 Pod（CoreDNS 就绪探测超时）。
     systemd.services.k3s-cni-route = {
       description = "Ensure cni0 PodCIDR route exists";
-      after = ["k3s.service"];
-      wantedBy = ["multi-user.target"];
+      after = [ "k3s.service" ];
+      wantedBy = [ "multi-user.target" ];
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
@@ -209,10 +208,10 @@ in {
         ];
       }
       (mkIf isServer {
-        allowedTCPPorts = [cfg.serverPort];
+        allowedTCPPorts = [ cfg.serverPort ];
       })
       {
-        allowedUDPPorts = [cfg.flannelUdpPort];
+        allowedUDPPorts = [ cfg.flannelUdpPort ];
       }
     ];
   };

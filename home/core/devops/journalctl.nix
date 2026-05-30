@@ -1,4 +1,5 @@
-{pkgs, ...}: {
+{ pkgs, ... }:
+{
   # 为啥选择 lazyjournal？
   # 目前没有对标工具，systemctl-tui, lnav, journal-viewer, sysz 这些在 journaltcl 场景下都不如 lazyjournal
 

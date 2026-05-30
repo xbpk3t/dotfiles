@@ -3,9 +3,11 @@
   lib,
   ...
 }:
-with lib; let
+with lib;
+let
   cfg = config.modules.desktop.wezterm;
-in {
+in
+{
   options.modules.desktop.wezterm = {
     enable = mkEnableOption "wezterm terminal";
   };

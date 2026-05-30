@@ -2,7 +2,8 @@
   pkgs,
   mylib,
   ...
-}: {
+}:
+{
   # !!! 注意这里对于 taskfile 的设计。核心需求在于：可以同时保证在 tg 和 tgg 调用，具体来说：
   ## 1、保证 dotfiles 项目内的 .taskfile folder 独立可用
   ## 2、保证分发到 global taskfile之后，也可用

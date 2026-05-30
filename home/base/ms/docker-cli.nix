@@ -1,4 +1,5 @@
-{pkgs, ...}: {
+{ pkgs, ... }:
+{
   # Colima 本身负责创建和管理 docker context，这里只负责声明式启用默认 profile。
   # https://mynixos.com/home-manager/options/programs.docker-cli
   programs.docker-cli = {
@@ -24,7 +25,8 @@
     };
   };
 
-  home.packages = with pkgs;
+  home.packages =
+    with pkgs;
     [
       # Docker 基础 CLI
       # https://mynixos.com/nixpkgs/package/docker

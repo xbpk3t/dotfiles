@@ -1,4 +1,5 @@
-{...}: {
+{ ... }:
+{
   services.openssh.settings = {
     # VPS 不提供图形，关闭 X11 转发
     X11Forwarding = false;

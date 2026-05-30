@@ -1,6 +1,7 @@
 # https://mynixos.com/nixpkgs/options/fonts.fontconfig
 # 注意：本文件仅作为stylix的补充配置
-{pkgs, ...}: {
+{ pkgs, ... }:
+{
   # 修复 Chromium/Electron 应用字体模糊问题
   # 启用 stem darkening 以改善小字体在深色背景下的渲染
   # 参考: https://blog.aktsbot.in/no-more-blurry-fonts.html
@@ -82,7 +83,7 @@
           # 西文
           "JetBrains Mono"
         ];
-        emoji = ["Noto Color Emoji"];
+        emoji = [ "Noto Color Emoji" ];
       };
 
       # Chrome/Wayland 字体优化设置

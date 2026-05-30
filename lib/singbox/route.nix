@@ -1,5 +1,6 @@
 # https://sing-box.sagernet.org/configuration/route/
-{ruleSets}: {
+{ ruleSets }:
+{
   # TUN场景需要开启该配置，以减少路由回环风险
   auto_detect_interface = true;
 
@@ -76,7 +77,7 @@
     }
     # 强制 cache.nixos.org 走自建节点（默认会默认直连，很慢）
     {
-      domain_suffix = ["cache.nixos.org"];
+      domain_suffix = [ "cache.nixos.org" ];
       outbound = "select";
     }
 

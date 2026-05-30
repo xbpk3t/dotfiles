@@ -5,10 +5,12 @@
   userMeta,
   ...
 }:
-with lib; let
+with lib;
+let
   cfg = config.modules.networking.netbird;
   username = userMeta.username;
-in {
+in
+{
   # https://github.com/nukdokplex/ncaa/blob/master/nixos-modules/netbird-client.nix
   options.modules.networking.netbird = {
     enable = mkEnableOption "NetBird client (VPN mesh network) on this host";
@@ -52,7 +54,7 @@ in {
     ];
 
     # 添加用户组
-    users.users."${username}".extraGroups = ["netbird"];
+    users.users."${username}".extraGroups = [ "netbird" ];
 
     environment.shellAliases = {
       nbs = "netbird";

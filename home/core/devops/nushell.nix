@@ -2,7 +2,8 @@
   pkgs,
   editorMeta,
   ...
-}: {
+}:
+{
   # https://mynixos.com/home-manager/options/programs.nushell
 
   programs = {

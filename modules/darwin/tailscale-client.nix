@@ -2,7 +2,8 @@
   config,
   pkgs,
   ...
-}: {
+}:
+{
   # https://mynixos.com/nix-darwin/options/services.tailscale
 
   # Warning: client version "1.96.5" != tailscaled server version "1.96.5-t4ee448d3a-g74ffbefc2"

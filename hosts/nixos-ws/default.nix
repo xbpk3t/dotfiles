@@ -18,7 +18,8 @@ let
   # Network configuration from globals.networking
   inherit (globals.networking) nameservers;
   # NetworkManager 自动管理，不需要网关和静态IP配置
-in {
+in
+{
   imports = [
     # Include the results of the hardware scan
     ./hardware.nix

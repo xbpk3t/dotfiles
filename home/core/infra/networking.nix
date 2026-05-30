@@ -3,10 +3,13 @@
   lib,
   pkgs,
   ...
-}: let
+}:
+let
   cfg = config.modules.infra.networking;
-in {
-  options.modules.infra.networking.enable = lib.mkEnableOption "Networking diagnostic tools (tcpdump)";
+in
+{
+  options.modules.infra.networking.enable =
+    lib.mkEnableOption "Networking diagnostic tools (tcpdump)";
 
   config = lib.mkIf cfg.enable {
     home.packages = with pkgs; [

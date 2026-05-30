@@ -1,5 +1,8 @@
-{lib ? import <nixpkgs/lib>}: let
-  mylib = import ../lib/default.nix {inherit lib;};
+{
+  lib ? import <nixpkgs/lib>,
+}:
+let
+  mylib = import ../lib/default.nix { inherit lib; };
 
   # 使用当前仓库里真实存在、并且确实通过 `scanPaths` 聚合 imports 的目录。
   baseModulesPath = ../modules/nixos/base;
@@ -26,17 +29,23 @@
   containsCore = builtins.elem (baseModulesPath + "/core.nix") scanResult;
   containsSecurity = builtins.elem (baseModulesPath + "/security.nix") scanResult;
   containsDefault = builtins.elem (baseModulesPath + "/default.nix") scanResult;
-  notEmpty = scanResult != [];
+  notEmpty = scanResult != [ ];
   allTestsPass =
-    scanResult
-    != []
+    scanResult != [ ]
     && (builtins.elem (baseModulesPath + "/core.nix") scanResult)
     && (builtins.elem (baseModulesPath + "/security.nix") scanResult)
     && !(builtins.elem (baseModulesPath + "/default.nix") scanResult);
-in {
+in
+{
   # 返回测试结果
   testResults = {
-    inherit containsCore containsSecurity containsDefault notEmpty allTestsPass;
+    inherit
+      containsCore
+      containsSecurity
+      containsDefault
+      notEmpty
+      allTestsPass
+      ;
   };
 
   # 调试信息
@@ -45,7 +54,12 @@ in {
     shouldContain = shouldContain;
     shouldNotContain = shouldNotContain;
     baseModulesPath = toString baseModulesPath;
-    inherit containsCore containsSecurity containsDefault notEmpty;
+    inherit
+      containsCore
+      containsSecurity
+      containsDefault
+      notEmpty
+      ;
     allTestsPass = allTestsPass;
   };
 
@@ -59,11 +73,7 @@ in {
     Critical issues:
     - core.nix found: ${toString containsCore}
     - security.nix found: ${toString containsSecurity}
-    - Default.nix correctly excluded: ${toString (
-      if !containsDefault
-      then "true"
-      else "false"
-    )}
+    - Default.nix correctly excluded: ${toString (if !containsDefault then "true" else "false")}
     - Scan result not empty: ${toString notEmpty}
   '';
 
@@ -72,31 +82,11 @@ in {
     scanPaths function verification failed.
 
     Expected behavior:
-    - Should find core.nix: ${
-      if containsCore
-      then "✅"
-      else "❌"
-    }
-    - Should find security.nix: ${
-      if containsSecurity
-      then "✅"
-      else "❌"
-    }
-    - Should exclude default.nix: ${
-      if !containsDefault
-      then "✅"
-      else "❌"
-    }
-    - Should not be empty: ${
-      if notEmpty
-      then "✅"
-      else "❌"
-    }
+    - Should find core.nix: ${if containsCore then "✅" else "❌"}
+    - Should find security.nix: ${if containsSecurity then "✅" else "❌"}
+    - Should exclude default.nix: ${if !containsDefault then "✅" else "❌"}
+    - Should not be empty: ${if notEmpty then "✅" else "❌"}
 
-    This means your base modules ${
-      if allTestsPass
-      then "ARE"
-      else "are NOT"
-    } being imported correctly.
+    This means your base modules ${if allTestsPass then "ARE" else "are NOT"} being imported correctly.
   '';
 }

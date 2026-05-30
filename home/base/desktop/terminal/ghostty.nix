@@ -4,7 +4,8 @@
   pkgs,
   ...
 }:
-with lib; let
+with lib;
+let
   cfg = config.modules.desktop.ghostty;
   cmuxCfg = config.modules.desktop.cmux;
 
@@ -87,7 +88,8 @@ with lib; let
       "ctrl+shift+t=unbind" # new_tab     → 由 tmux/zellij 管理
     ];
   };
-in {
+in
+{
   options.modules.desktop.ghostty = {
     enable = mkEnableOption "ghostty terminal";
   };
@@ -127,11 +129,9 @@ in {
       #     但配置文件通过 Nix 统一管理（ghostty 和 cmux 共享）。
       xdg.configFile."ghostty/config" = {
         force = true;
-        text =
-          generators.toKeyValue {
-            listsAsDuplicateKeys = true;
-          }
-          ghosttySettings;
+        text = generators.toKeyValue {
+          listsAsDuplicateKeys = true;
+        } ghosttySettings;
       };
     })
 

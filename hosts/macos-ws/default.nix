@@ -1,6 +1,8 @@
-{userMeta, ...}: let
+{ userMeta, ... }:
+let
   username = userMeta.username;
-in {
+in
+{
   modules.networking = {
     singbox.enable = false;
     mihomo.enable = true;

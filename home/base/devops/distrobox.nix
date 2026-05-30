@@ -1,4 +1,5 @@
-{pkgs, ...}: {
+{ pkgs, ... }:
+{
   # https://wiki.nixos.org/wiki/Distrobox
   # https://mynixos.com/home-manager/options/programs.distrobox
 

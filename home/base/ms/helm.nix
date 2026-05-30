@@ -1,5 +1,7 @@
-{pkgs, ...}: {
-  home.packages = with pkgs;
+{ pkgs, ... }:
+{
+  home.packages =
+    with pkgs;
     [
       # 分类：Helm 工具链
       # https://github.com/komodorio/helm-dashboard/

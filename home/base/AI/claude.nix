@@ -4,14 +4,19 @@
   pkgs,
   inputs,
   ...
-}: let
+}:
+let
   cfg = config.modules.AI.claude;
   claudeDefaultModel = "claude-opus-4-7[1m]";
-in {
+in
+{
   options.modules.AI.claude = with lib; {
     enable = mkEnableOption "Enable Claude Code";
     permissionMode = mkOption {
-      type = types.enum ["default" "yolo"];
+      type = types.enum [
+        "default"
+        "yolo"
+      ];
       default = "default";
       description = ''
         Permission model for Claude Code:
@@ -323,7 +328,7 @@ in {
           "Bash(docker rmi *)"
           "Bash(docker system prune *)"
         ];
-        deny = [];
+        deny = [ ];
       };
     })
 
@@ -333,7 +338,7 @@ in {
         defaultMode = "bypassPermissions";
         # bypassPermissions is the permission profile; avoid carrying the
         # workstation allow/ask lists into container agents.
-        deny = [];
+        deny = [ ];
       };
     })
   ];

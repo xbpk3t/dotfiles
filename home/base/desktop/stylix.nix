@@ -5,10 +5,12 @@
   inputs,
   ...
 }:
-with lib; let
+with lib;
+let
   isLinux = pkgs.stdenv.isLinux;
   cfg = config.modules.desktop.stylix;
-in {
+in
+{
   imports = [
     inputs.stylix.homeModules.stylix
   ];
@@ -109,24 +111,23 @@ in {
         };
       };
 
-      targets =
-        {
-          rofi.enable = false;
-          zed.enable = false;
-          # helix本身有内置theme，比stylix提供的要好很多
-          helix.enable = false;
+      targets = {
+        rofi.enable = false;
+        zed.enable = false;
+        # helix本身有内置theme，比stylix提供的要好很多
+        helix.enable = false;
 
-          kitty.enable = false;
+        kitty.enable = false;
 
-          # 配置 Firefox profile names 以避免 stylix warning
-          firefox.profileNames = ["default"];
-        }
-        // optionalAttrs isLinux {
-          qt = {
-            enable = true;
-            platform = "qtct";
-          };
+        # 配置 Firefox profile names 以避免 stylix warning
+        firefox.profileNames = [ "default" ];
+      }
+      // optionalAttrs isLinux {
+        qt = {
+          enable = true;
+          platform = "qtct";
         };
+      };
       # 使用默认 cursor，但是改小size
       #    cursor = {
       ##      package = pkgs.bibata-cursors;
@@ -139,7 +140,8 @@ in {
       #    };
     };
 
-    home.packages = with pkgs;
+    home.packages =
+      with pkgs;
       [
       ]
       ++ optionals isLinux [

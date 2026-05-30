@@ -1,4 +1,5 @@
-{pkgs, ...}: {
+{ pkgs, ... }:
+{
   #
   # https://github.com/max-baz/dotfiles/blob/main/modules/common/helix.nix
   #
@@ -14,7 +15,7 @@
     enable = true;
     defaultEditor = true;
 
-    extraPackages = [pkgs.marksman];
+    extraPackages = [ pkgs.marksman ];
 
     settings = {
       # https://docs.helix-editor.com/master/themes.html
@@ -127,7 +128,7 @@
         {
           name = "rust";
           auto-format = true;
-          language-servers = ["rust-analyzer"];
+          language-servers = [ "rust-analyzer" ];
         }
       ];
       language-server.rust-analyzer.config.check = {

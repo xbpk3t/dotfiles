@@ -1,6 +1,23 @@
-{lib, ...}: let
-  regexMetaChars = ["\\" "." "+" "*" "?" "^" "$" "(" ")" "[" "]" "{" "}" "|"];
+{ lib, ... }:
+let
+  regexMetaChars = [
+    "\\"
+    "."
+    "+"
+    "*"
+    "?"
+    "^"
+    "$"
+    "("
+    ")"
+    "["
+    "]"
+    "{"
+    "}"
+    "|"
+  ];
   escapeRegex = lib.replaceStrings regexMetaChars (map (char: "\\${char}") regexMetaChars);
-in {
+in
+{
   mkExactNameRegex = names: "^(${lib.concatStringsSep "|" (map escapeRegex names)})$";
 }

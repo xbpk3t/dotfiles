@@ -3,7 +3,8 @@
   config,
   lib,
   ...
-}: let
+}:
+let
   cfg = config.modules.extra.jetbrains-remote;
   # 之前只用一个 packages 列表同时给 home.packages 和 ides，
   # 这会把“运行时 JDK”也塞进 ides（语义不对），并且 IDE 可能不带 JBR 导致远端自检失败。
@@ -18,7 +19,8 @@
     # https://mynixos.com/nixpkgs/package/jetbrains.jdk-no-jcef
     jetbrains.jdk-no-jcef
   ];
-in {
+in
+{
   options.modules.extra.jetbrains-remote = with lib; {
     enable = mkEnableOption "Jetbrains IDE Remote Development Enable";
   };

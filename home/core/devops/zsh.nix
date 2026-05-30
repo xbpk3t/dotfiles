@@ -4,7 +4,8 @@
   config,
   editorMeta,
   ...
-}: {
+}:
+{
   home = {
     packages = with pkgs; [
       zsh-completions
@@ -19,29 +20,28 @@
 
     # 环境变量
     # Note: Dynamic variables (those using command substitution) are set in zsh initContent
-    sessionVariables =
-      {
-        # 通用配置
-        # EDITOR = editorMeta.command;
-        # BROWSER = "chromium-browser";
-        PNPM_HOME = "$HOME/.local/share/pnpm";
+    sessionVariables = {
+      # 通用配置
+      # EDITOR = editorMeta.command;
+      # BROWSER = "chromium-browser";
+      PNPM_HOME = "$HOME/.local/share/pnpm";
 
-        # Locale
-        LANG = "en_US.UTF-8";
-        # LC_CTYPE = "en_US.UTF-8";
-        LC_CTYPE = "zh_CN.UTF-8";
-        LC_COLLATE = "C"; # Avoids locale lookup errors
-      }
-      // (lib.optionalAttrs pkgs.stdenv.isLinux {
-        WINEPREFIX = config.xdg.dataHome + "/wine";
-        LESSHISTFILE = config.xdg.cacheHome + "/less/history";
-        LESSKEY = config.xdg.configHome + "/less/lesskey";
-        DELTA_PAGER = "less -R";
-      })
-      // (lib.optionalAttrs pkgs.stdenv.isDarwin {
-        # 用来抑制 macOS 终端中显示的 "The default interactive shell is now zsh"
-        BASH_SILENCE_DEPRECATION_WARNING = "1";
-      });
+      # Locale
+      LANG = "en_US.UTF-8";
+      # LC_CTYPE = "en_US.UTF-8";
+      LC_CTYPE = "zh_CN.UTF-8";
+      LC_COLLATE = "C"; # Avoids locale lookup errors
+    }
+    // (lib.optionalAttrs pkgs.stdenv.isLinux {
+      WINEPREFIX = config.xdg.dataHome + "/wine";
+      LESSHISTFILE = config.xdg.cacheHome + "/less/history";
+      LESSKEY = config.xdg.configHome + "/less/lesskey";
+      DELTA_PAGER = "less -R";
+    })
+    // (lib.optionalAttrs pkgs.stdenv.isDarwin {
+      # 用来抑制 macOS 终端中显示的 "The default interactive shell is now zsh"
+      BASH_SILENCE_DEPRECATION_WARNING = "1";
+    });
   };
 
   programs = {
@@ -92,7 +92,7 @@
       autosuggestion = {
         enable = true;
         # 仅从历史里提示，避免与补全菜单冲突；若想更激进可加 "completion"
-        strategy = ["history"];
+        strategy = [ "history" ];
         highlight = "fg=cyans"; # 使用暗灰色，避免喧宾夺主
       };
 

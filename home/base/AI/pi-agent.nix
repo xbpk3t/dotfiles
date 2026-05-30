@@ -3,9 +3,11 @@
   lib,
   pkgs,
   ...
-}: let
+}:
+let
   cfg = config.modules.AI.pi-agent;
-in {
+in
+{
   options.modules.AI.pi-agent = with lib; {
     enable = mkEnableOption "Enable pi coding agent";
   };
@@ -29,7 +31,7 @@ in {
 
       # packages 声明 Pi package spec（npm:、git:、本地路径），
       # Pi 会在启动时自动安装/加载对应资源合集。
-      packages = [];
+      packages = [ ];
 
       # 以下四类路径声明插件的资源目录，Pi 会从中加载扩展能力
       extensions = [
@@ -58,10 +60,10 @@ in {
           # Pi 的 resolveConfigValue 会把值当 env var 名查，找不到才作字面量
           apiKey = "LLM_AxonHub";
           models = [
-            {id = "gpt-5.5";}
-            {id = "gpt-5.4";}
-            {id = "deepseek-v4-pro";}
-            {id = "deepseek-v4-flash";}
+            { id = "gpt-5.5"; }
+            { id = "gpt-5.4"; }
+            { id = "deepseek-v4-pro"; }
+            { id = "deepseek-v4-flash"; }
           ];
         };
       };

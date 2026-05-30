@@ -2,8 +2,10 @@
   lib,
   pkgs,
   ...
-}: {
-  home.packages = with pkgs;
+}:
+{
+  home.packages =
+    with pkgs;
     [
       # 信息收集
       # https://github.com/nmap/nmap

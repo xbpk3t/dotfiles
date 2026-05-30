@@ -1,4 +1,5 @@
-{lib, ...}: {
+{ lib, ... }:
+{
   # https://mynixos.com/home-manager/options/programs.lazydocker
 
   # https://github.com/jesseduffield/lazydocker/issues/4#issuecomment-3367900538
@@ -11,9 +12,12 @@
         scrollHeight = 2;
         language = "en";
         theme = {
-          activeBorderColor = ["green" "bold"];
-          inactiveBorderColor = ["white"];
-          optionsTextColor = ["blue"];
+          activeBorderColor = [
+            "green"
+            "bold"
+          ];
+          inactiveBorderColor = [ "white" ];
+          optionsTextColor = [ "blue" ];
         };
         border = "single";
 
@@ -60,7 +64,7 @@
             # docker inspect --format='{{.Name}} - {{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(docker ps -aq)
             # 查看所有容器IP地址
             command = "docker ps -aq | xargs -r docker inspect | jq -r '.[] | \"\\(.Name) - \\(.NetworkSettings.Networks | to_entries | map(.value.IPAddress) | join(\" \"))\"'";
-            serviceNames = [];
+            serviceNames = [ ];
           }
           {
             name = "exit-code (selected container)";
@@ -69,28 +73,28 @@
             # 检查容器退出码
             # docker inspect --format='{{.ExitCode}}' {{.CONTAINER}}
             command = "docker inspect {{ .Container.ID }} | jq -r '.[0].State.ExitCode'";
-            serviceNames = [];
+            serviceNames = [ ];
           }
           {
             name = "ctop";
             attach = true;
             shell = false;
             command = "ctop";
-            serviceNames = [];
+            serviceNames = [ ];
           }
           {
             name = "check-mem (selected container)";
             attach = true;
             shell = false;
             command = "docker stats --no-stream --format 'table {{\"{{\"}}.Name{{\"}}\"}}\\t{{\"{{\"}}.MemUsage{{\"}}\"}}\\t{{\"{{\"}}.MemPerc{{\"}}\"}}' {{ .Container.Name }}";
-            serviceNames = [];
+            serviceNames = [ ];
           }
           {
             name = "check-cpu (selected container)";
             attach = true;
             shell = false;
             command = "docker stats --no-stream --format 'table {{\"{{\"}}.Name{{\"}}\"}}\\t{{\"{{\"}}.CPUPerc{{\"}}\"}}' {{ .Container.Name }}";
-            serviceNames = [];
+            serviceNames = [ ];
           }
         ];
 
@@ -101,14 +105,14 @@
             attach = true;
             shell = false;
             command = "docker history {{ .Image.ID }}";
-            serviceNames = [];
+            serviceNames = [ ];
           }
           {
             name = "analyze (dive selected image)";
             attach = true;
             shell = false;
             command = "dive {{ .Image.ID }}";
-            serviceNames = [];
+            serviceNames = [ ];
           }
           {
             name = "verify (selected image size)";
@@ -117,7 +121,7 @@
 
             # docker inspect {{.IMAGE_NAME}}:{{.IMAGE_TAG}} --format='{{"{{.Size}}"}}' | numfmt --to=iec
             command = "docker image inspect {{ .Image.ID }} | jq -r '.[0].Size' | numfmt --to=iec";
-            serviceNames = [];
+            serviceNames = [ ];
           }
         ];
       };

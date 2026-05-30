@@ -77,7 +77,7 @@ outputs/               # flake-parts outputs 子模块
 
 ### Nix 格式化
 
-统一使用 alejandra 或 nixfmt 格式化。保持一致性，不要在同一文件中混用风格。
+统一使用  nixfmt 格式化。保持一致性，不要在同一文件中混用风格。
 
 ### 模块设计原则
 

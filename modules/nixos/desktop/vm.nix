@@ -2,7 +2,8 @@
   pkgs,
   globals,
   ...
-}: {
+}:
+{
   # 只在桌面下添加 nixos container. 否则在 VPS 里（即使不启用）也会占用磁盘
   # https://mynixos.com/nixpkgs/option/containers
   containers = {
@@ -22,7 +23,7 @@
         ];
 
         networking.hostName = "nixos-minimal";
-        networking.firewall.allowedTCPPorts = [22];
+        networking.firewall.allowedTCPPorts = [ 22 ];
 
         services.openssh = {
           enable = true;
@@ -32,8 +33,7 @@
           };
         };
 
-        users.users.root.openssh.authorizedKeys.keys =
-          globals.auth.sshPublicKeys;
+        users.users.root.openssh.authorizedKeys.keys = globals.auth.sshPublicKeys;
 
         system.stateVersion = "24.11";
       };

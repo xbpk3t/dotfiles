@@ -3,8 +3,10 @@
   config,
   lib,
   ...
-}: {
-  home.packages = with pkgs;
+}:
+{
+  home.packages =
+    with pkgs;
     [
       # 分类1：Go 核心工具链与语言服务
       # tags(desc): 核心工具链 > 语言运行时 > Go

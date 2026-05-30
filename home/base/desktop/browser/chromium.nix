@@ -3,9 +3,11 @@
   lib,
   pkgs,
   ...
-}: let
+}:
+let
   cfg = config.modules.desktop.chromium;
-in {
+in
+{
   # https://mynixos.com/nixpkgs/options/programs.chromium
   # https://mynixos.com/home-manager/options/programs.chromium
 
@@ -46,25 +48,25 @@ in {
       # Extensions (using extension IDs from Chrome Web Store)
       extensions = [
         # AdGuard AdBlocker
-        {id = "bgnkhhnnamicmpeenaelnjfhikgbkllg";}
+        { id = "bgnkhhnnamicmpeenaelnjfhikgbkllg"; }
 
         # Easy Scraper
-        {id = "cljbfnedccphacfneigoegkiieckjndh";}
+        { id = "cljbfnedccphacfneigoegkiieckjndh"; }
 
         # Immersive Translate
-        {id = "bpoadfkcbjbfhfodiogcnhhhpibjhbnh";}
+        { id = "bpoadfkcbjbfhfodiogcnhhhpibjhbnh"; }
 
         # OneTab
-        {id = "chphlpgkkbolifaimnlloiipkdnihall";}
+        { id = "chphlpgkkbolifaimnlloiipkdnihall"; }
 
         # Recent Tabs
-        {id = "ocllfmhjhfmogablefmibmjcodggknml";}
+        { id = "ocllfmhjhfmogablefmibmjcodggknml"; }
 
         # Wappalyzer
-        {id = "gppongmhjkpfnbhagpmjfkannfbllamg";}
+        { id = "gppongmhjkpfnbhagpmjfkannfbllamg"; }
 
         # Authenticator
-        {id = "bhghoamapcdpbohphigoooaddinpkbai";}
+        { id = "bhghoamapcdpbohphigoooaddinpkbai"; }
         # Vimium (vim-like navigation)
         #      {id = "dbepggeogbaibhgnhhndojpepiihcmeb";}
       ];

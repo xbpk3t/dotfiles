@@ -4,9 +4,11 @@
   pkgs,
   ...
 }:
-with lib; let
+with lib;
+let
   cfg = config.modules.networking.tailscale;
-in {
+in
+{
   # https://mynixos.com/nixpkgs/options/services.tailscale
   # https://nixos.wiki/wiki/Tailscale
 
@@ -101,7 +103,7 @@ in {
         }
       ];
 
-      users.groups.derper = {};
+      users.groups.derper = { };
       users.users.derper = {
         isSystemUser = true;
         group = "derper";
@@ -125,8 +127,8 @@ in {
       };
 
       # 端口映射：DERP TCP / STUN UDP
-      networking.firewall.allowedTCPPorts = [cfg.derper.port];
-      networking.firewall.allowedUDPPorts = [cfg.derper.stunPort];
+      networking.firewall.allowedTCPPorts = [ cfg.derper.port ];
+      networking.firewall.allowedUDPPorts = [ cfg.derper.stunPort ];
 
       security.acme.acceptTerms = mkDefault true;
 
@@ -139,7 +141,7 @@ in {
         # 注意这里
         # https://mynixos.com/nixpkgs/option/security.acme.certs.%3Cname%3E.environmentFile
         environmentFile = cfg.derper.acmeEnvironmentFile;
-        reloadServices = ["tailscale-derper.service"];
+        reloadServices = [ "tailscale-derper.service" ];
         postRun = ''
           install -d -m 0750 -o root -g derper ${cfg.derper.certDir}
           install -m 0640 -o root -g derper /var/lib/acme/${cfg.derper.domain}/fullchain.pem ${cfg.derper.certDir}/${cfg.derper.domain}.crt
@@ -178,8 +180,8 @@ in {
       };
 
       systemd.services.tailscale-derper = {
-        requires = ["acme-${cfg.derper.domain}.service"];
-        after = ["acme-${cfg.derper.domain}.service"];
+        requires = [ "acme-${cfg.derper.domain}.service" ];
+        after = [ "acme-${cfg.derper.domain}.service" ];
       };
     })
   ];

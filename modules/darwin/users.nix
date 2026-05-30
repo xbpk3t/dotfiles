@@ -7,10 +7,12 @@
   pkgs,
   userMeta,
   ...
-}: let
+}:
+let
   cacheSettings = mylib.nixCacheSettings;
   username = userMeta.username;
-in {
+in
+{
   # Default user configuration (can be overridden by host-specific settings)
   users.users = {
     # Main user configuration with defaults

@@ -3,9 +3,11 @@
   pkgs,
   config,
   ...
-}: let
+}:
+let
   cfg = config.modules.desktop.media.mpv;
-in {
+in
+{
   options.modules.desktop.media.mpv = with lib; {
     enable = mkEnableOption "mpv 播放器及快捷键配置";
   };
@@ -32,8 +34,8 @@ in {
         cache-default = 4000000;
       };
 
-      defaultProfiles = ["gpu-hq"];
-      scripts = [pkgs.mpvScripts.mpris];
+      defaultProfiles = [ "gpu-hq" ];
+      scripts = [ pkgs.mpvScripts.mpris ];
     };
   };
 }

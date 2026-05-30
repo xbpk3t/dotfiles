@@ -4,11 +4,12 @@
   lib,
   mylib,
   ...
-}: let
+}:
+let
   cfg = config.modules.extra.zed-remote;
-  lspPackages =
-    mylib.langs.lspPkgs pkgs;
-in {
+  lspPackages = mylib.langs.lspPkgs pkgs;
+in
+{
   options.modules.extra.zed-remote = {
     enable = lib.mkEnableOption "Enable zed remote server (headless)";
   };

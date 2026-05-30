@@ -2,7 +2,8 @@
   mylib,
   pkgs,
   ...
-}: {
+}:
+{
   imports = mylib.scanPaths ./.;
 
   # https://x.com/aehyok/status/2045021712060936343

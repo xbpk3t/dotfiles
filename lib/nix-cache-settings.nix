@@ -16,7 +16,8 @@ let
     "watersucks.cachix.org-1:6gadPC5R8iLWQ3EUtfu3GFrVY7X6I4Fwz/ihW25Jbv8="
     "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
   ];
-in {
+in
+{
   inherit substituters trustedPublicKeys;
 
   # 预渲染成 nix.conf 需要的空格分隔格式，避免在业务模块重复拼接字符串。
