@@ -131,9 +131,6 @@ rec {
     nixt.url = "github:nix-community/nixt";
     # https://github.com/nix-community/nix-unit
     nix-unit.url = "github:nix-community/nix-unit";
-
-    # jjui: TUI for jujutsu (jj) version control
-    jjui.url = "github:idursun/jjui";
   };
 
   outputs = inputs @ {flake-parts, ...}:
