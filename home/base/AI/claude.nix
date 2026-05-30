@@ -141,6 +141,19 @@ in {
             DISABLE_AUTOUPDATER = "1";
             # 文件2建议：不自动改终端 tab/window title
             CLAUDE_CODE_DISABLE_TERMINAL_TITLE = "1";
+
+            # 强制启用 auto mode 后台 agent 的 resume 能力。
+            #
+            # 背景：Agent View 中 resume 一个 --permission-mode auto 的 session 时会报：
+            #   "--bg with auto mode requires opting in first"
+            # 而 --permission-mode plan 的 session 不受影响。
+            #
+            # 根因：CC 的安全模型里，"后台无人值守" 和 "自动执行" 是两个独立的风险维度，
+            # 交叉时必须双重确认。Agent View 内部 resume 走 --bg 路径，CC 对 --bg +
+            # --permission-mode auto 的组合有硬性安全门禁，要求显式 opt-in。
+            # 设置该 env 即表示用户已知晓风险并允许此行为。
+            CLAUDE_AUTO_BACKGROUND_TASKS = "1";
+
             # 建议新增：你用了 ANTHROPIC_BASE_URL 代理时，ToolSearch 默认会被关掉
             # | 值        | 行为                         | 我的判断                  |
             #| -------- | -------------------------- | --------------------- |
@@ -279,7 +292,11 @@ in {
           "WebFetch(*)"
           "Skill(*)"
 
-          "mcp__*"
+          "mcp__*_chrome-devtools__*"
+          "mcp__*_github__*"
+          "mcp__*_linear__*"
+          "mcp__*_codegraph__*"
+          "mcp__*_deepwiki__*"
         ];
         ask = [
           "Bash(git push *)"
