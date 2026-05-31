@@ -87,7 +87,7 @@
   cmds:
     - cmd: ctrl+b, b
       score: 4
-      des: 显示/隐藏左侧 agent state sidebar（status: blocked/working/done/idle）
+      des: 显示/隐藏左侧 agent state sidebar # （status: blocked/working/done/idle）
     - cmd: 在 sidebar 中单击
       des: 跳转到对应 workspace/agent
     - cmd: herdr agent focus <target>
