@@ -20,11 +20,6 @@ in
       # https://mynixos.com/nixpkgs/package/zed-editor
       # [2026-01-21] 注释掉，因为 nixpkgs 跟 hm的pkgs的zed-editor冲突了
       # zed-editor
-
-      # https://mynixos.com/nixpkgs/package/nb
-      # https://github.com/xwmx/nb
-      # 在zed里用来补充 scratches 这个功能
-      nb
     ];
 
     # https://mynixos.com/home-manager/options/programs.zed-editor
