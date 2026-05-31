@@ -5,7 +5,7 @@
   ...
 }:
 let
-  defaultEditor = editorMeta.command;
+  defaultEditor = "${pkgs.helix}/bin/${editorMeta.command}";
   yaziEditWrapper = pkgs.writeShellScriptBin "yazi-open-editor" ''
     editor="''${EDITOR:-${defaultEditor}}"
     exec "$editor" "$@"
