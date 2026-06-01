@@ -49,15 +49,8 @@ in
 
     mcp-servers = {
       programs = {
-        # filesystem MCP: 授权范围是整个 Home 目录，AI tool 可读写此目录下文件。
-        # 如需最小权限，建议改成项目目录而不是 config.home.homeDirectory。
-        # [2026-04-18] codex/cc 本身都可以通过 --add-dir 实现类似功能。但是其实我真正不想要的就是这个 --add-dir，会很麻烦，谁都跑到一半了，会因为没有某个folder的access权限，退出，然后重新resume+ add-dir进入？并且你说的也不对，设置home是有必要的，因为很多时候要搜索和操作的文件，也并不总是在上面这些path，我不可能为了以防万一加一堆path在这，懂吗？所以保留 filesystem，我需要保留这个全局默认可用的 $home 访问能力。
-        filesystem = {
-          enable = true;
-          args = [ config.home.homeDirectory ];
-        };
-
-        fetch.enable = true;
+        # [2026-06-01] 移除 filesystem MCP：功能被内置 Read/Edit/Write/Bash 完全覆盖，51 个 MCP tools 导致模型选择瘫痪
+        # [2026-06-01] 移除 fetch MCP：功能被内置 WebFetch 完全覆盖
 
         # https://mynixos.com/nixpkgs/package/mcp-nixos
         # [2026-04-26] build 失败，所以改为false
@@ -97,17 +90,7 @@ in
       };
 
       settings.servers = {
-        # fetch 负责抓取页面内容
-        # ddg 负责搜索
-        # 严格说它们是上下游，不是同一个工具位；但从用户口径“帮我上网查资料”来看，它们经常服务同一个目标。也就是说，这组是工作流重叠，不是实现重叠。如果你偏向极简配置，这组也值得审视；但如果你希望“先搜索再打开”，保留两者是合理的。
-        fetch = {
-          default_tools_approval_mode = "approve";
-        };
-
-        # filesystem 可以列目录、读文件、搜索文件、读多文件、拿文件信息，甚至写改文件。filesystem 是通用文件系统能力。
-        filesystem = {
-          default_tools_approval_mode = "approve";
-        };
+        # [2026-06-01] 已移除 fetch 和 filesystem MCP 服务器，相关 settings 一起清理
 
         # https://github.com/johnhuang316/code-index-mcp
         # code-index 可以找文件、建索引、搜代码、拿 symbol body、文件摘要。code-index 是面向代码语义和索引的增强层。

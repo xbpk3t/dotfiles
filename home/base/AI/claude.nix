@@ -43,7 +43,8 @@ in
         # https://x.com/xiangxiang103/status/2043612207175602671 cc 稳定不降智的技巧：换稳定性：关掉超长上下文、adaptive thinking、auto memory，确实更像“固定档位”了。适合长任务复现，但一般会牺牲一点探索效率。
         settings = {
           theme = "dark";
-          outputStyle = "Explanatory";
+          # [2026-06-02] concise: 去除每 turn 的 Insight 框 + 原理展开，节省 30-50% 输出 token
+          outputStyle = "concise";
           cleanupPeriodDays = 7;
 
           # 文件2建议：plan accept 页显示 clear context 按钮
@@ -59,70 +60,10 @@ in
           # 1) 先声明第三方 marketplace 来源（官方 marketplace 不需要声明）
           # 2) 再用 enabledPlugins 启用具体插件
           extraKnownMarketplaces = {
-            # what: Claude HUD 状态栏增强插件市场
-            # [可视化插件] 可以实时显示运行Claude状态：包括上下文使用情况、激活的Tools、MCP、运行中的subAgents以及todo list
-            "claude-hud" = {
-              source = {
-                source = "github";
-                repo = "jarrodwatts/claude-hud";
-              };
-            };
-            # what: Claude-Mem 记忆插件市场
-            #  "thedotmack" = {
-            #    source = {
-            #      source = "github";
-            #      repo = "thedotmack/claude-mem";
-            #    };
-            #  };
-            # what: ClaudeClaw 插件市场
-            "claudeclaw" = {
-              source = {
-                source = "github";
-                repo = "moazbuilds/claudeclaw";
-              };
-            };
-            # what: 社区 LSP 插件集合市场（含 nixd 等）
-            # https://github.com/Piebald-AI/claude-code-lsps
-            "claude-code-lsps" = {
-              source = {
-                source = "github";
-                repo = "Piebald-AI/claude-code-lsps";
-              };
-            };
-            # what: tmux-agent-sidebar — 本地路径 marketplace
-            # TPM 安装插件到 ~/.tmux/plugins/，用绝对路径避免 ~ 展开问题
-            #  "hiroppy" = {
-            #    source = {
-            #      source = "directory";
-            #      path = "${config.home.homeDirectory}/.tmux/plugins/tmux-agent-sidebar";
-            #    };
-            #  };
           };
 
           # 插件启用清单（键格式：plugin-name@marketplace-name）
           enabledPlugins = {
-            # what: Claude HUD（显示模型/上下文/token/git/todo 等状态）
-            "claude-hud@claude-hud" = true;
-
-            # what: Claude-Mem（压缩并回注会话上下文）
-            # [2026-04-29] 注释掉，总是往 AGENTS.md 里加入 <claude-mem-context>，另外我在使用 Trellis，所以不需要这个
-            # "claude-mem@thedotmack" = true;
-
-            # what: ClaudeClaw（扩展命令和工作流能力）
-            "claudeclaw@claudeclaw" = true;
-
-            # what: Swift LSP（来自官方 marketplace）
-            # note: `claude-plugins-official` 为官方内置 marketplace，无需 extraKnownMarketplaces 再声明
-            # "swift-lsp@claude-plugins-official" = true;
-
-            "ralph-loop@claude-plugins-official" = true;
-
-            # what: tmux-agent-sidebar（在 tmux 中显示 Claude Code 状态的 sidebar）
-            # 由 tmux.nix 的 modules.devops.tmux.agentSidebar.enable 统一控制
-            #  "tmux-agent-sidebar@hiroppy" = config.modules.devops.tmux.agentSidebar.enable;
-
-            # 扫描你的项目并推荐：hooks → skills → MCP servers → subagents → automations 并做自动配置（感觉可以替代掉vercel/skills里的 find-skills了）
-            "claude-code-setup@claude-plugins-official" = true;
           };
 
           env = {
