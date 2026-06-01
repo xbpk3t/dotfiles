@@ -207,6 +207,7 @@ let
       "DOMAIN-SUFFIX,ytimg.com,Manual"
       "DOMAIN-SUFFIX,twimg.com,Manual"
       "DOMAIN-SUFFIX,docker.com,Manual"
+      "DOMAIN-SUFFIX,linux.do,Manual"
       "DOMAIN-SUFFIX,cache.nixos.org,Manual"
 
       # CN 域名直连

@@ -113,7 +113,7 @@
           key = "C"; # 选用大写 C 避免与原生快捷键冲突
           context = "files";
           command = "wt step commit";
-          subprocess = true; # 必须为 true 以便进入 wt 的交互式命令行
+          output = "terminal"; # 必须为 terminal 以便进入 wt 的交互式命令行
           loadingText = "Launching wt commit wizard...";
           description = "Run wt step commit for staged changes";
         }

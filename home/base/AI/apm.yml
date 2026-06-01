@@ -30,4 +30,3 @@ dependencies:
       skills:
         - deps
         - triage
-        - cycle-plan

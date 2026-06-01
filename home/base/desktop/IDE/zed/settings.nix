@@ -508,6 +508,9 @@ in
 
   # https://zed.dev/docs/languages
   languages = {
+    # 禁用LSP
+    # enable_language_server = false;
+
     Nix = {
       language_servers = [
         "nil"
