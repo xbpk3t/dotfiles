@@ -132,12 +132,6 @@ in
   systemd.services."nixos-upgrade".enable = lib.mkForce false;
   systemd.timers."nixos-upgrade".enable = lib.mkForce false;
 
-  # Avoid strict overcommit which caused nix-daemon forks to fail ("Cannot allocate memory").
-  boot.kernel.sysctl = {
-    "vm.overcommit_memory" = lib.mkForce 0;
-    "vm.overcommit_ratio" = lib.mkForce 100;
-  };
-
   services = {
     singbox-server.enable = true;
     mihomo-server.enable = false;
