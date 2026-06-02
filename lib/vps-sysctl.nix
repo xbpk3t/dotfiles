@@ -123,9 +123,6 @@ let
       shmall = shmmax / 4096;
       shmmni = max 4096 (ramGiB * 32);
 
-      # TCP 初始拥塞窗口：基于 RTT 的轻度动态估计
-      tcpInitCwnd = clamp 10 32 (rttMs / 20 + 10);
-
       # TCP 窗口广告缩放：高带宽场景更保守
       tcpAdvWinScale = if has10g then 1 else 2;
 
@@ -139,8 +136,6 @@ let
       # namespace 上限（容器场景参数，按内存增长并钳制）
       maxUserNamespaces = clamp 5000 30000 (ramGiB * 256);
 
-      # hugepage 数量：偏保守，避免在小内存下过度预留
-      nrHugepages = max 2 ((ramGiB * 156) / (cores + 1));
     in
     {
       # ################## KERNEL SETTINGS ############
@@ -153,13 +148,6 @@ let
       "kernel.sched_cfs_bandwidth_slice_us" = 3000;
       # RT 进程运行配额：留出 2% 给非 RT 任务，避免系统被 RT 压死
       "kernel.sched_rt_runtime_us" = 980000;
-      # 子进程优先运行：关闭可避免 fork/exec 频繁抢占父进程
-      "kernel.sched_child_runs_first" = 0;
-      # 调度粒度与延迟：平衡吞吐与响应（通用基线）
-      "kernel.sched_min_granularity_ns" = 10000;
-      "kernel.sched_wakeup_granularity_ns" = 15000;
-      "kernel.sched_latency_ns" = 60000;
-      "kernel.sched_migration_cost_ns" = 50000;
       # 自动分组调度：服务器场景通常关闭以减少不可控的优先级扰动
       "kernel.sched_autogroup_enabled" = 0;
 
@@ -190,9 +178,6 @@ let
       # perf 权限：限制普通用户访问内核性能事件
       "kernel.perf_event_paranoid" = 2;
       "kernel.core_uses_pid" = 1;
-
-      # tsc_reliable 不是所有内核都有此 sysctl，启用失败会被忽略
-      "kernel.tsc_reliable" = 1;
 
       # 容器密钥/命名空间上限（避免被滥用导致内核资源耗尽）
       "kernel.keys.root_maxkeys" = clamp 10000 2000000 (ramGiB * 4096);
@@ -227,20 +212,18 @@ let
       # 关闭 zone reclaim：多数 VPS 上会带来额外延迟
       "vm.zone_reclaim_mode" = 0;
 
-      # overcommit：脚本默认严格模式（0），如果 Nix 构建频繁失败可改为 1
-      "vm.overcommit_memory" = 0;
+      # overcommit：允许始终 overcommit，避免 Nix 构建 fork 时内存分配失败
+      "vm.overcommit_memory" = 1;
       "vm.overcommit_ratio" = 50;
 
       "vm.max_map_count" = 1048576;
       "vm.page-cluster" = 0;
       "vm.oom_kill_allocating_task" = 1;
-      "vm.panic_on_oom" = 1;
+      "vm.panic_on_oom" = 0;
 
-      # hugepage（部分内核不支持该 sysctl，可忽略失败）
-      "vm.nr_hugepages" = nrHugepages;
+      # 代理/VPS 场景不需要 hugepage，设为 0 避免锁内存
+      "vm.nr_hugepages" = 0;
       "vm.hugetlb_shm_group" = 0;
-      "vm.transparent_hugepage.enabled" = "madvise";
-      "vm.transparent_hugepage.defrag" = "never";
 
       # ################## NETWORK - CORE ############
 
@@ -266,8 +249,8 @@ let
       "net.core.somaxconn" = somaxconn;
 
       # busy poll/read：降低延迟但会占用 CPU
-      "net.core.busy_poll" = 50;
-      "net.core.busy_read" = 50;
+      "net.core.busy_poll" = 0;
+      "net.core.busy_read" = 0;
 
       # 队列算法：默认 fq，更稳妥；如需 cake 可在 inventory 覆盖
       "net.core.default_qdisc" = qdisc;
@@ -326,7 +309,6 @@ let
       "net.ipv4.tcp_stdurg" = 0;
       "net.ipv4.tcp_autocorking" = 0;
       "net.ipv4.tcp_delack_min" = 10;
-      "net.ipv4.tcp_init_cwnd" = tcpInitCwnd;
 
       # Keepalive：缩短空闲探测，加快失联识别
       "net.ipv4.tcp_keepalive_time" = 600;
@@ -341,10 +323,7 @@ let
       # PMTU 探测：0 表示启用（推荐）
       "net.ipv4.ip_no_pmtu_disc" = 0;
 
-      # 路由转发：默认关闭，需要做路由/网关时再启用
-      "net.ipv4.ip_forward" = 0;
-      "net.ipv4.conf.all.forwarding" = 0;
-      "net.ipv4.conf.default.forwarding" = 0;
+      # 路由转发：交由各功能模块（NAT、k3s）自行管理，baseline 不做默认
 
       # 邻居表回收策略
       "net.ipv4.neigh.default.gc_stale_time" = 120;
@@ -361,9 +340,9 @@ let
       "net.ipv4.icmp_echo_ignore_broadcasts" = 1;
       "net.ipv4.icmp_ignore_bogus_error_responses" = 1;
 
-      # 反向路径过滤（防 IP 欺骗；多宿主需谨慎）
-      "net.ipv4.conf.all.rp_filter" = 1;
-      "net.ipv4.conf.default.rp_filter" = 1;
+      # 反向路径过滤：改为 loose（2）以兼容 Tailscale、overlay 网络等非对称路由场景
+      "net.ipv4.conf.all.rp_filter" = 2;
+      "net.ipv4.conf.default.rp_filter" = 2;
 
       # ARP 宣告/忽略（减少 ARP 混乱与欺骗）
       "net.ipv4.conf.all.arp_filter" = 1;
