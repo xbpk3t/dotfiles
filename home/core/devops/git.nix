@@ -9,6 +9,7 @@ let
   mail = userMeta.mail;
 in
 {
+  # https://mynixos.com/nixpkgs/options/programs.git
   programs.git = {
     enable = true;
     lfs.enable = true;
@@ -47,6 +48,8 @@ in
         autocrlf = "input";
         filemode = false;
         editor = editorMeta.command;
+        # 是否忽略文件名大小写（linux默认区分，windows/macos默认不区分（也就是为true），所以需要显式声明false）
+        ignorecase = false;
       };
       init = {
         defaultBranch = "main";
