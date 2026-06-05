@@ -44,6 +44,9 @@ in
 
       # https://github.com/rochacbruno/marmite
       "marmite"
+
+      # https://github.com/vjeantet/alerter
+      "vjeantet/tap/alerter"
     ];
 
     # 以下casks根据重要性排序
