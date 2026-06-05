@@ -113,6 +113,7 @@ in
       API_CONTEXT7 = mkUserSecret "API/context7";
       API_LINEAR = mkUserSecret "API/linear";
       GITHUB_TOKEN = mkUserSecret "API/github";
+      DOCKER_HUB_TOKEN = mkUserSecret "API/docker_hub";
       API_TAVILY = mkUserSecret "API/tavily";
       API_EXA = mkUserSecret "API/exa";
 
