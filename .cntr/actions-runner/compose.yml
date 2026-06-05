@@ -1,0 +1,37 @@
+---
+# https://github.com/myoung34/docker-github-actions-runner
+#
+# 使用 myoung34/github-runner 镜像，通过 PAT（ACCESS_TOKEN）自动管理
+# short-lived runner token，无需手动注册/轮换。
+#
+# 依赖 host shell 环境中的 ACTIONS_RUNNER_TOKEN 变量（经由 sops +
+# home.sessionVariables 注入），不依赖 .env 文件。
+
+name: actions-runner
+
+services:
+  runner:
+    image: myoung34/github-runner:latest
+    container_name: actions-runner
+    restart: unless-stopped
+    environment:
+      TZ: Asia/Shanghai
+
+      # GitHub PAT（需 Administration: Write scope），由 host sessionVariables 传递
+      ACCESS_TOKEN: ${GITHUB_TOKEN}
+      # REPO_URL: 注册到 repo 级别 runner，只服务于该 repo 的 workflow。
+      #           若改为 org 级别（整个组织共享），注释掉 REPO_URL 改用:
+      #           ORG_NAME: xbpk3t
+      REPO_URL: https://github.com/xbpk3t/docs
+      RUNNER_NAME: docs-vps-runner
+      LABELS: self-hosted,linux,vps
+      # RUN_AS_ROOT: "true" → 容器内以 root 运行 runner 进程。
+      #   默认镜像会创建非 root runner 用户，设 true 后 CI step 可直接
+      #   执行 apt install / docker 等需要 root 的操作，避免权限问题。
+      #   自托管 VPS 是信任环境，开 true 省心；安全敏感场景建议关掉。
+      RUN_AS_ROOT: "true"
+    volumes:
+      - runner_data:/tmp/runner
+
+volumes:
+  runner_data:
