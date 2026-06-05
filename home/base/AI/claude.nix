@@ -132,6 +132,66 @@ in
             # CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
           };
 
+          hooks = {
+            Stop = [
+              {
+                hooks = [
+                  {
+                    type = "command";
+                    command = ''
+                      launchctl asuser "$(id -u)" alerter \
+                        --title "Claude Code" \
+                        --subtitle "$(basename "$(pwd -P)")" \
+                        --message "Task complete ✅" \
+                        --sound default \
+                        --ignore-dnd \
+                        --timeout 8 \
+                        --close-label "Dismiss"
+                    '';
+                  }
+                ];
+              }
+            ];
+            TaskCompleted = [
+              {
+                hooks = [
+                  {
+                    type = "command";
+                    command = ''
+                      launchctl asuser "$(id -u)" alerter \
+                        --title "Claude Code" \
+                        --subtitle "$(basename "$(pwd -P)")" \
+                        --message "Task complete ✅" \
+                        --sound default \
+                        --ignore-dnd \
+                        --timeout 8 \
+                        --close-label "Dismiss"
+                    '';
+                  }
+                ];
+              }
+            ];
+            Notification = [
+              {
+                hooks = [
+                  {
+                    type = "command";
+                    command = ''
+                      launchctl asuser "$(id -u)" alerter \
+                        --title "Claude Code" \
+                        --subtitle "$(basename "$(pwd -P)")" \
+                        --message "Needs your attention ⚠️" \
+                        --sound default \
+                        --ignore-dnd \
+                        --timeout 8 \
+                        --close-label "Dismiss"
+                    '';
+                  }
+                ];
+              }
+            ];
+          };
+
           # statusLine = {
           #   type = "command";
           #   command = "${pkgs.nushell}/bin/nu ${./claude-hud-wrapper.nu}";
