@@ -89,6 +89,9 @@ in
           "${config.home.homeDirectory}/Desktop/docs" = {
             trust_level = "trusted";
           };
+          "${config.home.homeDirectory}/Desktop/docs-alfred" = {
+            trust_level = "trusted";
+          };
         };
 
         # 默认 provider 固定为 axonhub，和当前 workstation/provider 事实保持一致。
