@@ -39,10 +39,10 @@ in
 
     # 全局 APM instructions — APM includes:auto 自动发现并编译到 CLAUDE.md
     # 新增 instruction 只需往 instructions/ 目录丢 .md 文件即可
-    home.file.".apm/instructions" = {
-      source = ./instructions;
-      recursive = true;
-      force = true;
-    };
+    #    home.file.".apm/instructions" = {
+    #      source = ./instructions;
+    #      recursive = true;
+    #      force = true;
+    #    };
   };
 }
