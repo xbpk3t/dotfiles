@@ -16,13 +16,11 @@ in
     home.packages = lib.optionals pkgs.stdenv.isLinux (
       with pkgs;
       [
-        # https://mynixos.com/nixpkgs/package/wireshark
         # https://www.wireshark.org/
         # 正如 modules/wireshark 所说，在 darwin/nixos 拆分安装 wireshark
         # wireshark
 
         # Wireshark-TUI
-        # https://mynixos.com/nixpkgs/package/termshark
         # https://github.com/gcla/termshark
         # [2026-04-08] 注释掉了，两方面：
         ## 1、【生态位尴尬】主力场景还是GUI，暂时没有 SSH上直接查看目标机器wireshark的需求。如果轻量场景直接用 tshark，复杂功能则传回workstation直接用 wireshark 查看。
@@ -31,7 +29,6 @@ in
         # termshark
 
         # wireshark-cli
-        # https://mynixos.com/nixpkgs/package/tshark
         # 本身就内置了以下命令
         #  - tshark
         #  - dumpcap
@@ -78,7 +75,6 @@ in
         #  - 想精确过滤字段、导出、统计 -> tshark
         #  - 想在终端里交互浏览 -> termshark
         #  - 想最完整地分析 -> wireshark
-        # https://mynixos.com/nixpkgs/package/ngrep
         ngrep
 
         #- zeek

@@ -74,7 +74,6 @@ in
       # 顶栏托盘图标（AppIndicator 支持）
       gnomeExtensions.appindicator
 
-      # https://mynixos.com/nixpkgs/package/gnomeExtensions.clipboard-indicator
       gnomeExtensions.clipboard-indicator
       # 将 Dash 变为 Dock，可自定义位置/自动隐藏
       # https://github.com/micheleg/dash-to-dock
@@ -84,14 +83,11 @@ in
       # 顶栏防休眠/防锁屏开关
       gnomeExtensions.caffeine
 
-      # https://mynixos.com/nixpkgs/package/gnomeExtensions.zed-search-provider
       # ???
 
       # 键盘重映射工具及配置
-      # https://mynixos.com/nixpkgs/package/xremap
       # xremap
       # xremap GNOME 扩展（Wayland 前台窗口名称查询）
-      # https://mynixos.com/nixpkgs/package/gnomeExtensions.xremap
       # gnomeExtensions.xremap
       # gnome-macos-remap-wayland
     ];

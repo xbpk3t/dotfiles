@@ -20,7 +20,6 @@
       source-serif-pro
       source-sans-pro
 
-      # https://mynixos.com/nixpkgs/package/inter-nerdfont
       inter-nerdfont
 
       # Monospace fonts (等宽字体)
@@ -39,8 +38,8 @@
       noto-fonts-cjk-serif # 思源宋体
       source-han-sans # Adobe 思源黑体
       lxgw-neoxihei # https://github.com/lxgw/LxgwNeoXiHei 霞鹜新晰
-      wqy_zenhei # 文泉驿正黑 https://mynixos.com/nixpkgs/package/wqy_zenhei
-      wqy_microhei # https://mynixos.com/nixpkgs/package/wqy_microhei
+      wqy_zenhei # 文泉驿正黑
+      wqy_microhei
 
       # Additional fonts for better rendering
       terminus_font

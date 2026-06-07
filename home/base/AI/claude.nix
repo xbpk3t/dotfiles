@@ -244,7 +244,6 @@ in
       };
 
       home.packages = with pkgs; [
-        # https://mynixos.com/nixpkgs/package/claude-code-router
         # claude-code-router
 
         # claude-run: Claude Code 历史 Web viewer，文件1推荐

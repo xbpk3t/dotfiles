@@ -1,7 +1,6 @@
 { config, ... }:
 {
   # https://github.com/yt-dlp/yt-dlp
-  # https://mynixos.com/nixpkgs/package/yt-dlp
   # https://mynixos.com/home-manager/options/programs.yt-dlp
   programs.yt-dlp = {
     enable = true;

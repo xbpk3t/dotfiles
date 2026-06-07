@@ -5,7 +5,6 @@
     tuptime
   ];
 
-  # https://mynixos.com/nixpkgs/package/tuptime
   # https://github.com/rfmoz/tuptime
   services.tuptime = {
     enable = true;

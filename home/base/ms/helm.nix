@@ -7,11 +7,9 @@
       # https://github.com/komodorio/helm-dashboard/
       helm-dashboard
       # https://github.com/mkubaczyk/helmsman
-      # https://mynixos.com/nixpkgs/package/helmsman
 
       # Kubernetes 相关工具
       kubernetes-helm
-      # https://mynixos.com/nixpkgs/package/helmfile
       helmfile
 
       # https://github.com/nix-community/nixhelm
@@ -27,7 +25,6 @@
     ++ (with pkgs.kubernetes-helmPlugins; [
       # https://mynixos.com/packages/kubernetes-helmPlugins
 
-      # https://mynixos.com/nixpkgs/package/kubernetes-helmPlugins.helm-diff
       # helm plugin install https://github.com/databus23/helm-diff
       helm-diff
     ]);

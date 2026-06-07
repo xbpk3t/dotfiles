@@ -16,7 +16,7 @@
 
     # https://github.com/Mic92/direnv-instant
 
-    devbox # [devbox - MyNixOS](https://mynixos.com/nixpkgs/package/devbox)
+    devbox
   ];
 
   # why: 见上面的 Darwin 构建回归说明；暂时整块禁用，避免 HM 拉入 pkgs.direnv。

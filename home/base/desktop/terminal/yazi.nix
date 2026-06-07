@@ -1222,17 +1222,14 @@ in
       # Ensure git.yazi is always present for inline status and blame info
       git = pkgs.yaziPlugins.git;
 
-      # https://mynixos.com/nixpkgs/package/yaziPlugins.lazygit
       lazygit = pkgs.yaziPlugins.lazygit;
       full-border = pkgs.yaziPlugins.full-border;
       smart-enter = pkgs.yaziPlugins.smart-enter;
       # used to preview archive
       ouch = pkgs.yaziPlugins.ouch;
 
-      # https://mynixos.com/nixpkgs/package/yaziPlugins.duckdb
       duckdb = pkgs.yaziPlugins.duckdb;
 
-      # https://mynixos.com/nixpkgs/package/yaziPlugins.wl-clipboard
       # https://github.com/orhnk/system-clipboard.yazi
       # https://github.com/Slackadays/ClipBoard
       # Yazi 自己默认只有「内部剪切板」，不会自动往系统剪贴板里写东西。

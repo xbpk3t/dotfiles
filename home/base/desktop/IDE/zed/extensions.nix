@@ -22,7 +22,6 @@
   "zig" = true;
 
   # https://github.com/zed-extensions/golangci-lint
-  # https://mynixos.com/nixpkgs/package/golangci-lint-langserver
   "golangci-lint" = true;
 
   # LSP for justfile

@@ -7,7 +7,6 @@
   imports = mylib.scanPaths ./.;
 
   home.packages = with pkgs; [
-    # https://mynixos.com/nixpkgs/package/devenv
     devenv
 
     # 其他语言
@@ -17,7 +16,6 @@
 
     lua
 
-    # https://mynixos.com/nixpkgs/package/stylua
     # https://github.com/johnnymorganz/stylua
     # lua formater
     stylua

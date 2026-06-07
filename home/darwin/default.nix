@@ -11,7 +11,6 @@
     # （用来替代smctemp）
     # powermetrics
     # 在M芯片之后，不再暴露传统的 SMC 温度传感器给 powermetrics，只展示不同level（nominal, fair, serious, critical）
-    # https://mynixos.com/nixpkgs/package/macmon
     # https://github.com/vladkens/macmon
     macmon
 

@@ -15,7 +15,6 @@ in
   config = lib.mkIf cfg.enable {
     home = {
       packages = [
-        # https://mynixos.com/nixpkgs/package/pi-coding-agent
         pkgs.pi-coding-agent
       ];
 
