@@ -64,8 +64,6 @@ rec {
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # https://github.com/numtide/flake-utils
-    utils.url = "github:numtide/flake-utils";
     nixos-hardware.url = "github:nixos/nixos-hardware";
 
     # https://github.com/nix-community/nix-index-database

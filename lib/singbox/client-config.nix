@@ -68,16 +68,16 @@ let
   outbounds = import ./outbounds.nix {
     inherit servers;
     inherit lib;
-    uuid = secrets.uuid;
-    publicKey = secrets.publicKey;
-    shortId = secrets.shortId;
-    flyingbirdPassword = secrets.flyingbirdPassword;
-    password = secrets.password;
+    inherit (secrets) uuid;
+    inherit (secrets) publicKey;
+    inherit (secrets) shortId;
+    inherit (secrets) flyingbirdPassword;
+    inherit (secrets) password;
   };
   # config.nix requires pkgs for external_ui plus outbounds/ruleSets
   configJson = import ./config.nix {
     inherit outbounds ruleSets pkgs;
-    clashSecret = secrets.clashSecret;
+    inherit (secrets) clashSecret;
   };
   clientConfigPath = config.sops.templates."singbox-client.json".path;
   templatesContent = builtins.toJSON configJson;

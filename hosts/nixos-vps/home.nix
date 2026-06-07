@@ -1,5 +1,4 @@
-{ ... }:
-{
+_: {
   modules.infra = {
     nh.enable = true;
     networking.enable = true;

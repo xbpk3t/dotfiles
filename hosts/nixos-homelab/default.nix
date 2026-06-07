@@ -62,9 +62,13 @@ in
 
   services.logind = {
     # NOTE: 旧字段已迁移到 settings.Login.*
-    settings.Login.HandleLidSwitch = "ignore";
-    settings.Login.HandleLidSwitchDocked = "ignore";
-    settings.Login.HandlePowerKey = "ignore";
+    settings = {
+      Login = {
+        HandleLidSwitch = "ignore";
+        HandleLidSwitchDocked = "ignore";
+        HandlePowerKey = "ignore";
+      };
+    };
   };
 
   modules = {

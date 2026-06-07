@@ -7,7 +7,7 @@
 let
   inherit (lib) mkEnableOption mkIf;
   cfg = config.modules.extra.wireshark;
-  username = userMeta.username;
+  inherit (userMeta) username;
 in
 {
   options.modules.extra.wireshark = {
@@ -21,7 +21,6 @@ in
   # 2. 为啥把 wireshark 相关配置拆分到 modules/home 两部分？而非都放到 home 或者 modules 里？
   ## 原因是显而易见的，不多说明。（抓包权限、wireshark 组、dumpcap wrapper 属于 NixOS system layer，因此保留在这里。）
   config = mkIf cfg.enable {
-    # https://mynixos.com/nixpkgs/options/programs.wireshark
     # https://mynixos.com/nixpkgs/package/wireshark
     programs.wireshark = {
       enable = true;

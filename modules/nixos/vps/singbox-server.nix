@@ -29,7 +29,7 @@ let
   anytlsDomain = attrByPath [ "anytls" "domain" ] null singbox;
   anytlsPort = attrByPath [ "anytls" "port" ] null singbox;
   anytlsAlpn = attrByPath [ "anytls" "alpn" ] [ "h2" "http/1.1" ] singbox;
-  mail = userMeta.mail;
+  inherit (userMeta) mail;
 in
 {
   options.services.singbox-server = {
@@ -48,7 +48,6 @@ in
       # !!!
       # 1. 注意里面的 `sops` + `_secret` 写法。先后尝试了几种写法（sops直接从 uuid = config.sops. 读取secret，但是这里不接受 filepath，只要明文secret，所以在evaluate时就失败。之后换成了 sops template写法和从 /run/secrets/xxx里直接 builtins.readFile（这个写法需要本地先有相应文件） ）
 
-      # https://mynixos.com/nixpkgs/options/services.sing-box
       services.sing-box = {
         enable = true;
         settings = {

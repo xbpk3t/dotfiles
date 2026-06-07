@@ -13,62 +13,62 @@ local ERROR_SOUND = "Basso"
 
 -- 私有函数：核心通知发送逻辑
 local function _sendNotification(title, text, withdrawAfter, soundName)
-    withdrawAfter = withdrawAfter or DEFAULT_WITHDRAW_AFTER
+  withdrawAfter = withdrawAfter or DEFAULT_WITHDRAW_AFTER
 
-    local notification = hs.notify.new({
-        title = title or "通知",
-        informativeText = text or "",
-        withdrawAfter = withdrawAfter
-    })
+  local notification = hs.notify.new({
+    title = title or "通知",
+    informativeText = text or "",
+    withdrawAfter = withdrawAfter,
+  })
 
-    if soundName then
-        notification:soundName(soundName)
-    end
+  if soundName then
+    notification:soundName(soundName)
+  end
 
-    local success = pcall(function()
-        notification:send()
-    end)
+  local success = pcall(function()
+    notification:send()
+  end)
 
-    if not success then
-        print("通知发送失败: " .. title .. " - " .. text)
-        print("📢 " .. title .. ": " .. text)
-    end
+  if not success then
+    print("通知发送失败: " .. title .. " - " .. text)
+    print("📢 " .. title .. ": " .. text)
+  end
 
-    return success
+  return success
 end
 
 -- 公共 API：发送基础通知（保留向后兼容性）
 function notifs.sendNotification(title, text, withdrawAfter, soundName)
-    return _sendNotification(title, text, withdrawAfter, soundName)
+  return _sendNotification(title, text, withdrawAfter, soundName)
 end
 
 -- 发送默认通知（使用默认的 withdrawAfter）
 function notifs.sendDefaultNotification(title, text, soundName)
-    return _sendNotification(title, text, DEFAULT_WITHDRAW_AFTER, soundName)
+  return _sendNotification(title, text, DEFAULT_WITHDRAW_AFTER, soundName)
 end
 
 -- 发送成功通知
 function notifs.sendSuccess(title, text, withdrawAfter)
-    return _sendNotification(title, text, withdrawAfter, SUCCESS_SOUND)
+  return _sendNotification(title, text, withdrawAfter, SUCCESS_SOUND)
 end
 
 -- 发送错误通知
 function notifs.sendError(title, text, withdrawAfter)
-    return _sendNotification(title, text, withdrawAfter, ERROR_SOUND)
+  return _sendNotification(title, text, withdrawAfter, ERROR_SOUND)
 end
 
 -- 发送信息通知（无声音）
 function notifs.sendInfo(title, text, withdrawAfter)
-    return _sendNotification(title, text, withdrawAfter, nil)
+  return _sendNotification(title, text, withdrawAfter, nil)
 end
 
 -- 获取默认配置（供其他模块使用）
 function notifs.getDefaults()
-    return {
-        withdrawAfter = DEFAULT_WITHDRAW_AFTER,
-        successSound = SUCCESS_SOUND,
-        errorSound = ERROR_SOUND
-    }
+  return {
+    withdrawAfter = DEFAULT_WITHDRAW_AFTER,
+    successSound = SUCCESS_SOUND,
+    errorSound = ERROR_SOUND,
+  }
 end
 
 return notifs

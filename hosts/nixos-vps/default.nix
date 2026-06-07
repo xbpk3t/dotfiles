@@ -79,7 +79,7 @@ in
     # hostName 由 inventory 注入；这里提供默认值，避免单机调试时为空
     hostName = lib.mkDefault "nixos-vps";
     useDHCP = true;
-    nameservers = nameservers;
+    inherit nameservers;
     useHostResolvConf = lib.mkForce false;
 
     # [2026-05-25] nixos-agent 容器使用 privateNetwork（10.233.0.0/24）。
@@ -103,26 +103,49 @@ in
     }
   ];
 
-  services.resolved = {
-    enable = true;
-    # NOTE: fallbackDns 已迁移到 settings.Resolve.FallbackDNS
-    settings.Resolve.FallbackDNS = nameservers;
-  };
-
-  modules.networking = {
-    tailscale = {
+  services = {
+    resolved = {
       enable = true;
-      derper = {
-        enable = true;
-        acmeEmail = userMeta.mail;
-      };
+      # NOTE: fallbackDns 已迁移到 settings.Resolve.FallbackDNS
+      settings.Resolve.FallbackDNS = nameservers;
+    };
+
+    singbox-server.enable = true;
+    mihomo-server.enable = false;
+
+    cron = {
+      enable = true;
+      mailto = "";
+      systemCronJobs = [
+        "0 3 * * * luck nu /home/luck/.cntr/backup-pgsql.nu axonhub"
+      ];
     };
   };
 
-  modules.systemd.manager.watchdog = {
-    # VPS 属于典型无人值守场景，默认启用 systemd Manager watchdog 兜底。
-    # 若后续某台机器的 hypervisor/watchdog 行为特殊，直接在对应 host 覆写即可。
-    enable = true;
+  modules = {
+    networking = {
+      tailscale = {
+        enable = true;
+        derper = {
+          enable = true;
+          acmeEmail = userMeta.mail;
+        };
+      };
+    };
+
+    systemd.manager.watchdog = {
+      # VPS 属于典型无人值守场景，默认启用 systemd Manager watchdog 兜底。
+      # 若后续某台机器的 hypervisor/watchdog 行为特殊，直接在对应 host 覆写即可。
+      enable = true;
+    };
+
+    # k3s agent：VPS 统一作为 worker 节点
+    extra.k3s = {
+      enable = false;
+      role = "agent";
+      # serverIP 由 inventory 注入，避免多处重复维护
+      serverPort = 6443;
+    };
   };
 
   hardware.enableRedistributableFirmware = lib.mkForce false;
@@ -132,26 +155,6 @@ in
   systemd.services."nixos-upgrade".enable = lib.mkForce false;
   systemd.timers."nixos-upgrade".enable = lib.mkForce false;
 
-  services = {
-    singbox-server.enable = true;
-    mihomo-server.enable = false;
-  };
-
-  services.cron = {
-    enable = true;
-    mailto = "";
-    systemCronJobs = [
-      "0 3 * * * luck nu /home/luck/.cntr/backup-pgsql.nu axonhub"
-    ];
-  };
-
-  # k3s agent：VPS 统一作为 worker 节点
-  modules.extra.k3s = {
-    enable = false;
-    role = "agent";
-    # serverIP 由 inventory 注入，避免多处重复维护
-    serverPort = 6443;
-  };
   # 启用 nixos-container 容器支持（当前仅 nixos-agent 使用）。
   boot.enableContainers = lib.mkIf agentEnabled true;
 

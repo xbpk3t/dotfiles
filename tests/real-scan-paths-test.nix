@@ -51,8 +51,8 @@ in
   # 调试信息
   debug = {
     scanResultLength = builtins.length scanResult;
-    shouldContain = shouldContain;
-    shouldNotContain = shouldNotContain;
+    inherit shouldContain;
+    inherit shouldNotContain;
     baseModulesPath = toString baseModulesPath;
     inherit
       containsCore
@@ -60,7 +60,7 @@ in
       containsDefault
       notEmpty
       ;
-    allTestsPass = allTestsPass;
+    inherit allTestsPass;
   };
 
   # 断言

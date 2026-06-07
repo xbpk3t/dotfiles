@@ -1,5 +1,4 @@
-{ ... }:
-{
+_: {
   # Zellij configuration using KDL format
   # Reference: https://github.com/zellij-org/awesome-zellij
   # Plugins: zjstatus, zellij-forgot, room

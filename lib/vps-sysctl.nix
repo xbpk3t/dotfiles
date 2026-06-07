@@ -47,7 +47,7 @@ let
   };
 
   # 将固定值包装为 mkDefault，方便下游覆盖
-  mkDefaultAttrs = attrs: lib.mapAttrs (_: v: mkDefault v) attrs;
+  mkDefaultAttrs = attrs: lib.mapAttrs (_: mkDefault) attrs;
 
   mkSysctl =
     {

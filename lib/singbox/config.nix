@@ -43,7 +43,7 @@ in
   dns = import ./dns.nix;
   # route.nix only accepts ruleSets; keep args aligned to avoid eval errors
   route = import ./route.nix { inherit ruleSets; };
-  outbounds = outbounds;
+  inherit outbounds;
 
   # https://sing-box.sagernet.org/configuration/inbound/
   inbounds = [

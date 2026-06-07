@@ -21,75 +21,75 @@ INFO_STYLE.fillColor = { red = 0.18, green = 0.18, blue = 0.22, alpha = 0.88 }
 
 -- 私有函数：核心 alert 显示逻辑
 local function _showAlert(text, duration, style, screen)
-    duration = duration
-    if duration == nil then
-        duration = DEFAULT_DURATION
-    end
+  duration = duration
+  if duration == nil then
+    duration = DEFAULT_DURATION
+  end
 
-    local ok, id = pcall(function()
-        return hs.alert.show(text or "", style or DEFAULT_STYLE, screen, duration)
-    end)
+  local ok, id = pcall(function()
+    return hs.alert.show(text or "", style or DEFAULT_STYLE, screen, duration)
+  end)
 
-    if not ok then
-        print("Alert 显示失败: " .. tostring(text))
-        print("⚠ " .. tostring(text))
-        return nil
-    end
+  if not ok then
+    print("Alert 显示失败: " .. tostring(text))
+    print("⚠ " .. tostring(text))
+    return nil
+  end
 
-    return id
+  return id
 end
 
 -- 公共 API：显示基础 alert
 function alerts.showAlert(text, duration, style, screen)
-    return _showAlert(text, duration, style, screen)
+  return _showAlert(text, duration, style, screen)
 end
 
 -- 显示默认 alert
 function alerts.showDefault(text, duration, screen)
-    return _showAlert(text, duration, DEFAULT_STYLE, screen)
+  return _showAlert(text, duration, DEFAULT_STYLE, screen)
 end
 
 -- 显示成功 alert
 function alerts.showSuccess(text, duration, screen)
-    return _showAlert(text, duration, SUCCESS_STYLE, screen)
+  return _showAlert(text, duration, SUCCESS_STYLE, screen)
 end
 
 -- 显示错误 alert
 function alerts.showError(text, duration, screen)
-    return _showAlert(text, duration, ERROR_STYLE, screen)
+  return _showAlert(text, duration, ERROR_STYLE, screen)
 end
 
 -- 显示信息 alert
 function alerts.showInfo(text, duration, screen)
-    return _showAlert(text, duration, INFO_STYLE, screen)
+  return _showAlert(text, duration, INFO_STYLE, screen)
 end
 
 -- 关闭指定 alert
 function alerts.closeSpecific(id)
-    if not id then
-        return
-    end
-    pcall(function()
-        hs.alert.closeSpecific(id)
-    end)
+  if not id then
+    return
+  end
+  pcall(function()
+    hs.alert.closeSpecific(id)
+  end)
 end
 
 -- 关闭全部 alert
 function alerts.closeAll()
-    pcall(function()
-        hs.alert.closeAll()
-    end)
+  pcall(function()
+    hs.alert.closeAll()
+  end)
 end
 
 -- 获取默认配置（供其他模块使用）
 function alerts.getDefaults()
-    return {
-        duration = DEFAULT_DURATION,
-        defaultStyle = DEFAULT_STYLE,
-        successStyle = SUCCESS_STYLE,
-        errorStyle = ERROR_STYLE,
-        infoStyle = INFO_STYLE
-    }
+  return {
+    duration = DEFAULT_DURATION,
+    defaultStyle = DEFAULT_STYLE,
+    successStyle = SUCCESS_STYLE,
+    errorStyle = ERROR_STYLE,
+    infoStyle = INFO_STYLE,
+  }
 end
 
 return alerts

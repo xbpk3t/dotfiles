@@ -6,7 +6,7 @@
 }:
 let
   inherit (lib) mkIf mkMerge optionals;
-  username = userMeta.username;
+  inherit (userMeta) username;
 in
 {
   ###################################################################################
@@ -32,7 +32,6 @@ in
 
   # https://mynixos.com/nixpkgs/options/virtualisation
   # https://mynixos.com/nixpkgs/options/virtualisation.docker
-  # https://mynixos.com/nixpkgs/options/virtualisation.podman
   virtualisation = {
     podman.enable = false;
     docker = {

@@ -12,16 +12,7 @@
   flyingbirdPassword,
 }:
 let
-  baseLabel =
-    s:
-    if s ? label then
-      s.label
-    else if s ? name then
-      s.name
-    else if s ? tag then
-      s.tag
-    else
-      s.server;
+  baseLabel = s: s.label or (s.name or (s.tag or s.server));
   mkTag = proto: s: "${baseLabel s}-${proto}";
   addIf = cond: attrs: if cond then attrs else { };
 
@@ -31,16 +22,16 @@ let
       base = {
         type = "vless";
         tag = mkTag "vless" s;
-        server = s.server;
+        inherit (s) server;
         server_port = s.vlessPort;
-        uuid = uuid;
-        flow = flow;
+        inherit uuid;
+        inherit flow;
         tls = {
           enabled = true;
           server_name = sni;
           utls = {
             enabled = true;
-            fingerprint = fingerprint;
+            inherit fingerprint;
           };
           reality = {
             enabled = true;
@@ -71,9 +62,9 @@ let
         {
           type = "vmess";
           tag = mkTag "vmess" s;
-          server = s.server;
+          inherit (s) server;
           server_port = port;
-          uuid = uuid;
+          inherit uuid;
           security = "auto";
           alter_id = 0;
           global_padding = false;
@@ -83,12 +74,12 @@ let
             server_name = domain;
             utls = {
               enabled = true;
-              fingerprint = fingerprint;
+              inherit fingerprint;
             };
           };
           transport = {
             type = "ws";
-            path = path;
+            inherit path;
             headers = {
               Host = [ domain ];
             };
@@ -103,7 +94,7 @@ let
       null
     else
       let
-        hy2 = s.hy2;
+        inherit (s) hy2;
         domain = hy2.domain or null;
         port = hy2.port or 8500;
       in
@@ -113,17 +104,17 @@ let
         {
           type = "hysteria2";
           tag = mkTag "hy2" s;
-          server = s.server;
+          inherit (s) server;
           server_port = port;
-          password = password;
+          inherit password;
           tls = {
             enabled = true;
             server_name = domain;
             alpn = [ "h3" ];
           };
         }
-        // (addIf (hy2 ? up_mbps) { up_mbps = hy2.up_mbps; })
-        // (addIf (hy2 ? down_mbps) { down_mbps = hy2.down_mbps; });
+        // (addIf (hy2 ? up_mbps) { inherit (hy2) up_mbps; })
+        // (addIf (hy2 ? down_mbps) { inherit (hy2) down_mbps; });
 
   hy2Outs = lib.lists.filter (o: o != null) (map toHy2Outbound servers);
 
@@ -133,7 +124,7 @@ let
       null
     else
       let
-        tuic = s.tuic;
+        inherit (s) tuic;
         domain = tuic.domain or null;
         port = tuic.port or null;
         congestionControl = tuic.congestionControl or "bbr";
@@ -144,7 +135,7 @@ let
         {
           type = "tuic";
           tag = mkTag "tuic" s;
-          server = s.server;
+          inherit (s) server;
           server_port = port;
           inherit uuid password;
           congestion_control = congestionControl;
@@ -166,7 +157,7 @@ let
       null
     else
       let
-        anytls = s.anytls;
+        inherit (s) anytls;
         domain = anytls.domain or null;
         port = anytls.port or null;
         alpn =
@@ -181,7 +172,7 @@ let
         {
           type = "anytls";
           tag = mkTag "anytls" s;
-          server = s.server;
+          inherit (s) server;
           server_port = port;
           inherit password;
           tls = {
@@ -190,7 +181,7 @@ let
             inherit alpn;
             utls = {
               enabled = true;
-              fingerprint = fingerprint;
+              inherit fingerprint;
             };
           };
         };

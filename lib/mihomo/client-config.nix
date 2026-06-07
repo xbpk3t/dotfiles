@@ -251,7 +251,7 @@ let
 
   selfProviderContent = builtins.readFile (
     yamlFmt.generate "mihomo-self-provider.yaml" {
-      proxies = outbounds.proxies;
+      inherit (outbounds) proxies;
     }
   );
 in

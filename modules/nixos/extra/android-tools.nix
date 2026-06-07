@@ -8,7 +8,7 @@
 let
   cfg = config.modules.extra.android-tools.enable;
   inherit (lib) mkEnableOption mkIf;
-  username = userMeta.username;
+  inherit (userMeta) username;
 in
 {
   options.modules.extra.android-tools.enable =

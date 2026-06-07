@@ -46,7 +46,7 @@ let
       modules.networking.tailscale.derper = {
         enable = true;
         domain = node.tailscale.derpDomain;
-        acmeEmail = node.acmeEmail;
+        inherit (node) acmeEmail;
       };
     }
     // lib.optionalAttrs (node ? k3s) {
@@ -107,7 +107,7 @@ let
                   # 而非 evalModules 结果（有 .config.system.build.toplevel）。
                   # deployLib.activate.nixos 期望后者，所以用 { config = ...; } 包裹一层。
                   nixosConfiguration = {
-                    config = containerConfig.config;
+                    inherit (containerConfig) config;
                   };
                   deployLib = containerDeployLib;
                   defaultSshUser = "root";

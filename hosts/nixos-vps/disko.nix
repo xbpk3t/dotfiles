@@ -1,4 +1,4 @@
-{ ... }:
+_:
 let
   # 这个 disko.nix 是否必须？在什么情况下必须？何时非必须？对于VPS来说，是否可以移除？
   # disko.nix 不是 NixOS 必需文件；它是可选的“声明式分区/格式化方案”（依赖 disko 模块）。
@@ -78,7 +78,7 @@ in
               type = "filesystem";
               format = "ext4";
               mountpoint = "/";
-              mountOptions = mountOptions;
+              inherit mountOptions;
             };
           };
         };

@@ -9,7 +9,6 @@ let
   cfg = config.modules.networking.tailscale;
 in
 {
-  # https://mynixos.com/nixpkgs/options/services.tailscale
   # https://nixos.wiki/wiki/Tailscale
 
   # Taildrop
@@ -113,7 +112,6 @@ in
       services.tailscale = {
         enable = true;
 
-        # https://mynixos.com/nixpkgs/options/services.tailscale.derper
         derper = {
           enable = true;
           domain = cfg.derper.domain;

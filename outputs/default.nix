@@ -15,7 +15,7 @@ let
 
   # 仓库内自定义 lib，供 hosts/modules/home 共享。
   mylib = import ../lib { inherit lib; };
-  globals = config.globals;
+  inherit (config) globals;
   customPkgsOverlay = import ../pkgs/overlay.nix;
 
   # pkgs 构造策略统一收口在这里，避免各 host 重复写 import 配置。
@@ -27,14 +27,16 @@ let
     nixpkgsInput: system:
     import nixpkgsInput {
       inherit system;
-      config.allowUnfree = true;
-      config.nvidia.acceptLicense = true;
-      # 默认禁止 broken packages。
-      # Why: broken package 应该是显式例外，而不是整仓默认吞掉风险信号。
-      config.allowBroken = false;
-      config.enableParallelBuilding = true;
-      config.buildManPages = false;
-      config.buildDocs = false;
+      config = {
+        allowUnfree = true;
+        nvidia.acceptLicense = true;
+        # 默认禁止 broken packages。
+        # Why: broken package 应该是显式例外，而不是整仓默认吞掉风险信号。
+        allowBroken = false;
+        enableParallelBuilding = true;
+        buildManPages = false;
+        buildDocs = false;
+      };
       overlays = [ customPkgsOverlay ];
     };
 
@@ -170,11 +172,11 @@ in
     { system, ... }:
     let
       specialArgs = genSpecialArgs system;
-      pkgs = specialArgs.pkgs;
+      inherit (specialArgs) pkgs;
       architectureOutput = architectureOutputs.${system};
       libChecks = import ../tests {
         inherit pkgs;
-        lib = pkgs.lib;
+        inherit (pkgs) lib;
       };
 
       # deploy-rs 官方推荐把 deployChecks 接到 flake checks。
@@ -251,9 +253,7 @@ in
       # hostEvalChecks 负责「flake 输出的每个 host 都能完整求值」的契约。
       checks = deployChecks // libChecks // hostEvalChecks;
 
-      # `nix fmt` / flake formatter 的统一入口。
-      formatter = pkgs.nixfmt;
-      packages = architectureOutput.packages;
+      inherit (architectureOutput) packages;
     };
 
   flake = {

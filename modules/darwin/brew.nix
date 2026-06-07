@@ -4,7 +4,7 @@
   ...
 }:
 let
-  username = userMeta.username;
+  inherit (userMeta) username;
 in
 {
   # 我们常说（对Nix来说） Docker是 escape hatch，其实在Nix里，brew也是 escape hatch

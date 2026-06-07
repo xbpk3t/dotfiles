@@ -1,5 +1,4 @@
-{ ... }:
-{
+_: {
   # https://mynixos.com/nixpkgs/options/services.logind
 
   # Keep a minimal set of local VTs ready on every NixOS machine.
