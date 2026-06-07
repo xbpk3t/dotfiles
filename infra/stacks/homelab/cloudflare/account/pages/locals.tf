@@ -254,53 +254,6 @@ locals {
 
   # 这组项目当前目标是“先收编进 state，再在下一轮删除”。
   pages_projects_pending_delete = {
-    nextflux = {
-      name              = "nextflux"
-      production_branch = "main"
-      build_config = {
-        build_caching       = null
-        build_command       = "npm run build"
-        destination_dir     = "dist"
-        root_dir            = ""
-        web_analytics_tag   = null
-        web_analytics_token = null
-      }
-      deployment_configs = {
-        preview = {
-          always_use_latest_compatibility_date = false
-          build_image_major_version            = 3
-          compatibility_date                   = "2025-11-18"
-          compatibility_flags                  = []
-          env_vars                             = null
-          fail_open                            = true
-        }
-        production = {
-          always_use_latest_compatibility_date = false
-          build_image_major_version            = 3
-          compatibility_date                   = "2025-11-18"
-          compatibility_flags                  = []
-          env_vars                             = null
-          fail_open                            = true
-        }
-      }
-      source = {
-        type = "github"
-        config = {
-          owner                          = "xbpk3t"
-          owner_id                       = "8591495"
-          repo_name                      = "nextflux"
-          repo_id                        = "1098920099"
-          production_branch              = "main"
-          pr_comments_enabled            = true
-          production_deployments_enabled = true
-          preview_deployment_setting     = "all"
-          preview_branch_includes        = ["*"]
-          preview_branch_excludes        = []
-          path_includes                  = ["*"]
-          path_excludes                  = []
-        }
-      }
-    }
   }
 
   pages_projects = merge(local.pages_projects_managed, local.pages_projects_pending_delete)

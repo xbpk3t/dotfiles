@@ -35,11 +35,6 @@ moved {
 }
 
 moved {
-  from = cloudflare_pages_project.nextflux
-  to   = cloudflare_pages_project.projects["nextflux"]
-}
-
-moved {
   from = cloudflare_pages_project.slides
   to   = cloudflare_pages_project.projects["slides"]
 }
