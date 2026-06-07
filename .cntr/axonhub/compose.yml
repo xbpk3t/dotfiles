@@ -4,6 +4,7 @@
 services:
   axonhub:
     image: looplj/axonhub:latest
+    container_name: axonhub
     ports:
       - "127.0.0.1:8090:8090"
     volumes:
@@ -45,6 +46,7 @@ services:
   postgres:
     # [2026-05-11] 尝试迁移到 18-alpine 未果，麻烦事太多，潜在收益也不大，所以不再处理
     image: postgres:15-alpine
+    container_name: axonhub-pgsql
     environment:
       POSTGRES_DB: axonhub
       POSTGRES_USER: axonhub
