@@ -15,7 +15,7 @@ obj.author = "Your Name <your.email@example.com>"
 obj.homepage = "https://github.com/your-repo/AudioControl.spoon"
 obj.license = "MIT - https://opensource.org/licenses/MIT"
 
-obj.logger = hs.logger.new('AudioControl')
+obj.logger = hs.logger.new("AudioControl")
 
 --- AudioControl.trustedSSIDs
 --- Variable
@@ -70,11 +70,17 @@ local notifs = dofile(hs.configdir .. "/Spoons/AudioControl.spoon/notifs.lua")
 local wifi = dofile(hs.configdir .. "/Spoons/shared_wifi.lua")
 
 local function shouldNotifySSIDUnavailable(details, force)
-  if force then return true end
-  if not obj.alertOnSSIDUnavailable then return false end
+  if force then
+    return true
+  end
+  if not obj.alertOnSSIDUnavailable then
+    return false
+  end
   local now = os.time()
-  if obj.lastSSIDUnavailableNotifyAt and
-     (now - obj.lastSSIDUnavailableNotifyAt) < obj.ssidUnavailableNotifyCooldownSeconds then
+  if
+    obj.lastSSIDUnavailableNotifyAt
+    and (now - obj.lastSSIDUnavailableNotifyAt) < obj.ssidUnavailableNotifyCooldownSeconds
+  then
     return false
   end
   -- 仅在 WiFi interface 已启用时提示，避免离线场景误报
@@ -82,11 +88,13 @@ local function shouldNotifySSIDUnavailable(details, force)
 end
 
 local function notifySSIDUnavailable(details, force)
-  if not shouldNotifySSIDUnavailable(details, force) then return end
+  if not shouldNotifySSIDUnavailable(details, force) then
+    return
+  end
   obj.lastSSIDUnavailableNotifyAt = os.time()
   hs.alert.show(
-    "AudioControl: Unable to read WiFi SSID.\nEnable Location Services for Hammerspoon in:\n" ..
-    wifi.locationServicesHint(),
+    "AudioControl: Unable to read WiFi SSID.\nEnable Location Services for Hammerspoon in:\n"
+      .. wifi.locationServicesHint(),
     4
   )
   obj.logger.w("SSID unavailable alert sent; check Hammerspoon Location Services permission")
@@ -95,7 +103,9 @@ end
 -- 检查当前 SSID 是否在受信任列表中
 local function isSSIDTrusted(ssid)
   ssid = wifi.normalizeSSID(ssid)
-  if not ssid then return false end
+  if not ssid then
+    return false
+  end
 
   for _, trustedSSID in ipairs(obj.trustedSSIDs) do
     if ssid == wifi.normalizeSSID(trustedSSID) then
@@ -108,13 +118,24 @@ end
 -- 检查是否连接了耳机
 local function isHeadphoneConnected()
   local currentDevice = hs.audiodevice.defaultOutputDevice()
-  if not currentDevice then return false end
+  if not currentDevice then
+    return false
+  end
 
   local deviceName = currentDevice:name()
   -- 检查设备名称是否包含耳机相关关键词
   local headphoneKeywords = {
-    "headphone", "headset", "earphone", "earbud", "airpods", "beats", "FreeBuds",
-    "耳机", "耳麦", "头戴", "入耳"
+    "headphone",
+    "headset",
+    "earphone",
+    "earbud",
+    "airpods",
+    "beats",
+    "FreeBuds",
+    "耳机",
+    "耳麦",
+    "头戴",
+    "入耳",
   }
 
   for _, keyword in ipairs(headphoneKeywords) do
@@ -232,14 +253,12 @@ end
 
 -- 处理系统睡眠/唤醒事件
 local function handleCaffeinateEvent(eventType)
-  if eventType == hs.caffeinate.watcher.systemWillSleep or
-     eventType == hs.caffeinate.watcher.screensDidSleep then
+  if eventType == hs.caffeinate.watcher.systemWillSleep or eventType == hs.caffeinate.watcher.screensDidSleep then
     -- 系统即将睡眠或屏幕即将关闭，保存当前音量并静音
     obj.preSleepVolume = hs.audiodevice.defaultOutputDevice():volume()
     setVolume(obj.untrustedVolume)
     obj.logger.i("System going to sleep or screen off, audio muted")
-  elseif eventType == hs.caffeinate.watcher.systemDidWake or
-         eventType == hs.caffeinate.watcher.screensDidWake then
+  elseif eventType == hs.caffeinate.watcher.systemDidWake or eventType == hs.caffeinate.watcher.screensDidWake then
     -- 系统唤醒或屏幕打开，恢复音频控制逻辑
     handleAudioControl()
     obj.logger.i("System wake or screen on, audio control restored")
@@ -359,15 +378,17 @@ function obj:bindHotkeys(mapping)
       device:setOutputMuted(not device:outputMuted())
       showVolumeIndicator()
     end,
-            show_status = function()
+    show_status = function()
       local currentSSID = (wifi.getCurrentSSID(obj.wifiInterface))
       local headphoneConnected = isHeadphoneConnected()
-      local status = string.format("WiFi(%s): %s | Headphone: %s",
+      local status = string.format(
+        "WiFi(%s): %s | Headphone: %s",
         obj.wifiInterface or "?",
         currentSSID or "None",
-        headphoneConnected and "Connected" or "Disconnected")
+        headphoneConnected and "Connected" or "Disconnected"
+      )
       notifs.statusInfo(status)
-    end
+    end,
   }
   hs.spoons.bindHotkeysToSpec(def, mapping)
   return self

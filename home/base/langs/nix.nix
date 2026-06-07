@@ -45,10 +45,6 @@
       # tags(desc): 代码质量 > 规则检查 > Nix
       statix # nix 风格与常见陷阱检查
 
-      # tags(desc): 代码质量 > 格式化 > Nix
-      # nix 代码格式化
-      # alejandra
-
       # === nixpkgs开发 ===
       # 两套 Nix 单元测试工具都保留，便于分别试用/迁移。
       # tags(desc): 测试框架 > 单元测试 > Nix表达式

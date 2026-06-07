@@ -27,7 +27,7 @@
   ...
 }:
 let
-  username = userMeta.username;
+  inherit (userMeta) username;
 in
 {
   home = {

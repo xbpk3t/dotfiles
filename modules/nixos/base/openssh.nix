@@ -7,7 +7,6 @@
   networking.firewall.enable = lib.mkDefault false;
 
   # Enable the OpenSSH daemon.
-  # https://mynixos.com/nixpkgs/options/services.openssh
   services.openssh = {
     enable = true;
     openFirewall = true;

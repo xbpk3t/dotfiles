@@ -95,6 +95,6 @@ let
   };
 in
 {
-  nixosConfigurations = merged.nixosConfigurations;
-  deploy = merged.deploy;
+  inherit (merged) nixosConfigurations;
+  inherit (merged) deploy;
 }

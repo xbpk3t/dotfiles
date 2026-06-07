@@ -18,19 +18,19 @@ set -Eeuo pipefail
 SCRIPT_VERSION="0.1.0"
 
 # Defaults
-MODE="full"             # full | quick
-LANG="zh"               # ecs language: zh|en
-NET_LANG="cn"           # NetQuality language: cn|en
-IP_LANG=""              # IPQuality language: empty = default (usually CN); or "en" etc.
-OUT_BASE=""             # if empty: auto choose
+MODE="full"   # full | quick
+LANG="zh"     # ecs language: zh|en
+NET_LANG="cn" # NetQuality language: cn|en
+IP_LANG=""    # IPQuality language: empty = default (usually CN); or "en" etc.
+OUT_BASE=""   # if empty: auto choose
 SKIP_ECS="false"
 SKIP_NET="false"
 SKIP_IP="false"
-NO_DEPS="false"         # if true: pass -n/-En to skip deps detection/install when supported
-AUTO_DEPS="true"        # if true: pass -y/-Ey to auto install deps when supported
-TIMEOUT_SECS="3600"     # per-tool hard timeout
-CONNECT_TIMEOUT="10"    # curl/wget connect timeout
-MAX_TIME="60"           # curl/wget per download max time
+NO_DEPS="false"            # if true: pass -n/-En to skip deps detection/install when supported
+AUTO_DEPS="true"           # if true: pass -y/-Ey to auto install deps when supported
+TIMEOUT_SECS="3600"        # per-tool hard timeout
+CONNECT_TIMEOUT="10"       # curl/wget connect timeout
+MAX_TIME="60"              # curl/wget per download max time
 ECS_INSTALL_FLAVOR="short" # short|raw|cdn|cnb
 ECS_ARGS_EXTRA=()
 NET_ARGS_EXTRA=()
@@ -45,14 +45,14 @@ err() { echo "[$(ts)] ERROR: $*" >&2; }
 have() { command -v "$1" >/dev/null 2>&1; }
 
 need_bash() {
-  if [[ -z "${BASH_VERSION:-}" ]]; then
+  if [[ -z ${BASH_VERSION:-} ]]; then
     err "This script requires bash."
     exit 1
   fi
 }
 
 as_root_prefix() {
-  if [[ "${EUID:-$(id -u)}" -eq 0 ]]; then
+  if [[ ${EUID:-$(id -u)} -eq 0 ]]; then
     echo ""
     return
   fi
@@ -83,7 +83,8 @@ download() {
 
 run_with_timeout() {
   # run_with_timeout <seconds> <cmd...>
-  local t="$1"; shift
+  local t="$1"
+  shift
   if have timeout; then
     timeout --preserve-status "${t}" "$@"
   else
@@ -94,7 +95,7 @@ run_with_timeout() {
 
 # ---- output dir ----
 pick_out_base() {
-  if [[ -n "$OUT_BASE" ]]; then
+  if [[ -n $OUT_BASE ]]; then
     echo "$OUT_BASE"
     return
   fi
@@ -167,37 +168,88 @@ EOF
 parse_args() {
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --full) MODE="full"; shift ;;
-      --quick) MODE="quick"; shift ;;
-      --out) OUT_BASE="${2:-}"; shift 2 ;;
-      --timeout) TIMEOUT_SECS="${2:-}"; shift 2 ;;
+    --full)
+      MODE="full"
+      shift
+      ;;
+    --quick)
+      MODE="quick"
+      shift
+      ;;
+    --out)
+      OUT_BASE="${2:-}"
+      shift 2
+      ;;
+    --timeout)
+      TIMEOUT_SECS="${2:-}"
+      shift 2
+      ;;
 
-      --skip-ecs) SKIP_ECS="true"; shift ;;
-      --skip-net) SKIP_NET="true"; shift ;;
-      --skip-ip)  SKIP_IP="true"; shift ;;
+    --skip-ecs)
+      SKIP_ECS="true"
+      shift
+      ;;
+    --skip-net)
+      SKIP_NET="true"
+      shift
+      ;;
+    --skip-ip)
+      SKIP_IP="true"
+      shift
+      ;;
 
-      --no-deps) NO_DEPS="true"; AUTO_DEPS="false"; shift ;;
-      --auto-deps) AUTO_DEPS="true"; NO_DEPS="false"; shift ;;
+    --no-deps)
+      NO_DEPS="true"
+      AUTO_DEPS="false"
+      shift
+      ;;
+    --auto-deps)
+      AUTO_DEPS="true"
+      NO_DEPS="false"
+      shift
+      ;;
 
-      --ecs-lang) LANG="${2:-}"; shift 2 ;;
-      --net-lang) NET_LANG="${2:-}"; shift 2 ;;
-      --ip-lang) IP_LANG="${2:-}"; shift 2 ;;
+    --ecs-lang)
+      LANG="${2:-}"
+      shift 2
+      ;;
+    --net-lang)
+      NET_LANG="${2:-}"
+      shift 2
+      ;;
+    --ip-lang)
+      IP_LANG="${2:-}"
+      shift 2
+      ;;
 
-      --ecs-install) ECS_INSTALL_FLAVOR="${2:-}"; shift 2 ;;
+    --ecs-install)
+      ECS_INSTALL_FLAVOR="${2:-}"
+      shift 2
+      ;;
 
-      --ecs-args)
-        # split by shell words (user provides quotes)
-        read -r -a ECS_ARGS_EXTRA <<< "${2:-}"
-        shift 2 ;;
-      --net-args)
-        read -r -a NET_ARGS_EXTRA <<< "${2:-}"
-        shift 2 ;;
-      --ip-args)
-        read -r -a IP_ARGS_EXTRA <<< "${2:-}"
-        shift 2 ;;
+    --ecs-args)
+      # split by shell words (user provides quotes)
+      read -r -a ECS_ARGS_EXTRA <<<"${2:-}"
+      shift 2
+      ;;
+    --net-args)
+      read -r -a NET_ARGS_EXTRA <<<"${2:-}"
+      shift 2
+      ;;
+    --ip-args)
+      read -r -a IP_ARGS_EXTRA <<<"${2:-}"
+      shift 2
+      ;;
 
-      -h|--help) usage; exit 0 ;;
-      *) err "Unknown arg: $1"; usage; exit 1 ;;
+    -h | --help)
+      usage
+      exit 0
+      ;;
+    *)
+      err "Unknown arg: $1"
+      usage
+      exit 1
+      ;;
     esac
   done
 }
@@ -206,18 +258,18 @@ parse_args() {
 ecs_install_cmd() {
   # ecs README lists multiple one-click commands (raw/cdn/cnb/short).:contentReference[oaicite:3]{index=3}
   case "$ECS_INSTALL_FLAVOR" in
-    raw)
-      echo 'curl -L https://raw.githubusercontent.com/oneclickvirt/ecs/master/goecs.sh -o goecs.sh'
-      ;;
-    cdn)
-      echo 'curl -L https://cdn.spiritlhl.net/https://raw.githubusercontent.com/oneclickvirt/ecs/master/goecs.sh -o goecs.sh'
-      ;;
-    cnb)
-      echo 'curl -L https://cnb.cool/oneclickvirt/ecs/-/git/raw/main/goecs.sh -o goecs.sh'
-      ;;
-    short|*)
-      echo 'curl -L https://bash.spiritlhl.net/goecs -o goecs.sh'
-      ;;
+  raw)
+    echo 'curl -L https://raw.githubusercontent.com/oneclickvirt/ecs/master/goecs.sh -o goecs.sh'
+    ;;
+  cdn)
+    echo 'curl -L https://cdn.spiritlhl.net/https://raw.githubusercontent.com/oneclickvirt/ecs/master/goecs.sh -o goecs.sh'
+    ;;
+  cnb)
+    echo 'curl -L https://cnb.cool/oneclickvirt/ecs/-/git/raw/main/goecs.sh -o goecs.sh'
+    ;;
+  short | *)
+    echo 'curl -L https://bash.spiritlhl.net/goecs -o goecs.sh'
+    ;;
   esac
 }
 
@@ -257,10 +309,10 @@ run_netquality() {
   local args_json=()
 
   # deps
-  if [[ "$NO_DEPS" == "true" ]]; then
+  if [[ $NO_DEPS == "true" ]]; then
     args_txt+=("-n")
     args_json+=("-n")
-  elif [[ "$AUTO_DEPS" == "true" ]]; then
+  elif [[ $AUTO_DEPS == "true" ]]; then
     args_txt+=("-y")
     args_json+=("-y")
   fi
@@ -270,7 +322,7 @@ run_netquality() {
   args_json+=("-l" "$NET_LANG")
 
   # quick mode: latency mode + low data mode.:contentReference[oaicite:7]{index=7}
-  if [[ "$MODE" == "quick" ]]; then
+  if [[ $MODE == "quick" ]]; then
     args_txt+=("-P" "-L")
     args_json+=("-P" "-L")
   fi
@@ -305,16 +357,16 @@ run_ipquality() {
   local args_json=("-Ej")
 
   # deps
-  if [[ "$NO_DEPS" == "true" ]]; then
+  if [[ $NO_DEPS == "true" ]]; then
     args_txt+=("-En")
     args_json+=("-En")
-  elif [[ "$AUTO_DEPS" == "true" ]]; then
+  elif [[ $AUTO_DEPS == "true" ]]; then
     args_txt+=("-Ey")
     args_json+=("-Ey")
   fi
 
   # language (optional)
-  if [[ -n "$IP_LANG" ]]; then
+  if [[ -n $IP_LANG ]]; then
     args_txt+=("-l" "$IP_LANG")
     # -Ej already includes -E semantics for json path in docs; keep -l too
     args_json+=("-l" "$IP_LANG")
@@ -362,7 +414,7 @@ write_summary() {
     echo "Notes:"
     echo "  - NetQuality docs: bash <(curl -Ls Net.Check.Place) ... (supports -j/-o/-P/-L/-S/-n/-y/-l)"
     echo "  - IPQuality docs:  bash <(curl -Ls https://IP.Check.Place) -E... (supports -Ej and -o file.json)"
-  } > "$f"
+  } >"$f"
 }
 
 main() {
@@ -374,20 +426,29 @@ main() {
 
   local failed=0
 
-  if [[ "$SKIP_ECS" != "true" ]]; then
-    run_ecs || { warn "ecs failed (see logs/ecs.log)"; failed=1; }
+  if [[ $SKIP_ECS != "true" ]]; then
+    run_ecs || {
+      warn "ecs failed (see logs/ecs.log)"
+      failed=1
+    }
   else
     log "==> [ecs] skipped"
   fi
 
-  if [[ "$SKIP_NET" != "true" ]]; then
-    run_netquality || { warn "NetQuality failed (see logs/netquality.log)"; failed=1; }
+  if [[ $SKIP_NET != "true" ]]; then
+    run_netquality || {
+      warn "NetQuality failed (see logs/netquality.log)"
+      failed=1
+    }
   else
     log "==> [NetQuality] skipped"
   fi
 
-  if [[ "$SKIP_IP" != "true" ]]; then
-    run_ipquality || { warn "IPQuality failed (see logs/ipquality.log)"; failed=1; }
+  if [[ $SKIP_IP != "true" ]]; then
+    run_ipquality || {
+      warn "IPQuality failed (see logs/ipquality.log)"
+      failed=1
+    }
   else
     log "==> [IPQuality] skipped"
   fi
@@ -397,7 +458,7 @@ main() {
   echo
   log "✅ Done. Open: $REPORT_DIR"
   log "   Summary: $REPORT_DIR/summary.txt"
-  [[ "$failed" -eq 0 ]] || warn "Some steps failed. Check logs in $REPORT_DIR/logs/"
+  [[ $failed -eq 0 ]] || warn "Some steps failed. Check logs in $REPORT_DIR/logs/"
 }
 
 main "$@"

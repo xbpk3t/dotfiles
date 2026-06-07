@@ -29,7 +29,7 @@ in
       min-free = 128000000;
       max-free = 1000000000;
       trusted-users = [ "@wheel" ];
-      substituters = cacheSettings.substituters;
+      inherit (cacheSettings) substituters;
       trusted-public-keys = cacheSettings.trustedPublicKeys;
       # 允许非 trusted user 也可使用这些 cache（减少 untrusted substituter 警告）
       trusted-substituters = cacheSettings.substituters;

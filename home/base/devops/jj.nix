@@ -8,7 +8,7 @@
 }:
 let
   cfg = config.modules.devops.jj;
-  mail = userMeta.mail;
+  inherit (userMeta) mail;
 
   diff-formatter = [
     (pkgs.lib.getExe pkgs.difftastic)

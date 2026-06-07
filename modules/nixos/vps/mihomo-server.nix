@@ -30,7 +30,7 @@ let
   anytlsDomain = attrByPath [ "anytls" "domain" ] null singbox;
   anytlsPort = attrByPath [ "anytls" "port" ] null singbox;
   needsStaticMihomoUser = hy2Enabled || vmessEnabled || tuicEnabled || anytlsEnabled;
-  mail = userMeta.mail;
+  inherit (userMeta) mail;
 
   serverConfig = builtins.toJSON {
     mode = "rule";
@@ -147,7 +147,6 @@ in
     {
       sops.templates."mihomo-server.json".content = serverConfig;
 
-      # https://mynixos.com/nixpkgs/options/services.mihomo
       services.mihomo = {
         enable = true;
         package = pkgs.mihomo;

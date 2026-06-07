@@ -6,10 +6,9 @@
   ...
 }:
 let
-  mail = userMeta.mail;
+  inherit (userMeta) mail;
 in
 {
-  # https://mynixos.com/nixpkgs/options/programs.git
   programs.git = {
     enable = true;
     lfs.enable = true;

@@ -5,15 +5,9 @@
   ...
 }:
 let
-  username = userMeta.username;
+  inherit (userMeta) username;
 in
 {
-  # Don't allow mutation of users outside the config.
-  users.mutableUsers = false;
-
-  # 设置系统默认用户 shell
-  # 这会影响新创建的用户和通过 users.defaultUserShell 设置的用户
-  users.defaultUserShell = pkgs.zsh;
   programs = {
     # 必须在modules里让zsh生效（但是具体bash, zsh的自定义配置则放到hm里），否则会报错
     bash.enable = true;
@@ -26,39 +20,50 @@ in
   #   SHELL = "${pkgs.zsh}/bin/zsh";
   # };
 
-  users.groups = {
-    "${username}" = { };
-    dialout = { };
-    # for openocd (embedded system development)
-    plugdev = { };
-  };
+  users = {
+    # Don't allow mutation of users outside the config.
+    mutableUsers = false;
 
-  # root's ssh key are mainly used for remote deployment
-  users.users.root = {
-    inherit (globals.auth) initialHashedPassword;
-    # 设置 root shell 为 zsh
-    shell = pkgs.zsh;
-    openssh.authorizedKeys.keys = globals.auth.sshPublicKeys;
-  };
+    # 设置系统默认用户 shell
+    # 这会影响新创建的用户和通过 users.defaultUserShell 设置的用户
+    defaultUserShell = pkgs.zsh;
 
-  users.users."${username}" = {
-    # we have to use initialHashedPassword here when using tmpfs for /
-    inherit (globals.auth) initialHashedPassword;
-    home = "/home/${username}";
-    isNormalUser = true;
-    # 显式设置用户 shell 为 zsh
-    shell = pkgs.zsh;
+    groups = {
+      "${username}" = { };
+      dialout = { };
+      # for openocd (embedded system development)
+      plugdev = { };
+    };
 
-    # !!! 需要添加该配置，否则无法使用 ssh luck@host 登录目标host
-    openssh.authorizedKeys.keys = globals.auth.sshPublicKeys;
+    users = {
+      # root's ssh key are mainly used for remote deployment
+      root = {
+        inherit (globals.auth) initialHashedPassword;
+        # 设置 root shell 为 zsh
+        shell = pkgs.zsh;
+        openssh.authorizedKeys.keys = globals.auth.sshPublicKeys;
+      };
 
-    extraGroups = [
-      username
-      "users"
-      "wheel"
-      "networkmanager" # for nmtui / nm-connection-editor
-      "nix-users" # allow nix-daemon access
-      "input" # allow input event access (xremap etc.)
-    ];
+      "${username}" = {
+        # we have to use initialHashedPassword here when using tmpfs for /
+        inherit (globals.auth) initialHashedPassword;
+        home = "/home/${username}";
+        isNormalUser = true;
+        # 显式设置用户 shell 为 zsh
+        shell = pkgs.zsh;
+
+        # !!! 需要添加该配置，否则无法使用 ssh luck@host 登录目标host
+        openssh.authorizedKeys.keys = globals.auth.sshPublicKeys;
+
+        extraGroups = [
+          username
+          "users"
+          "wheel"
+          "networkmanager" # for nmtui / nm-connection-editor
+          "nix-users" # allow nix-daemon access
+          "input" # allow input event access (xremap etc.)
+        ];
+      };
+    };
   };
 }

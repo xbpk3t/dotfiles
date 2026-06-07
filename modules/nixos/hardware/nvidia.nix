@@ -79,23 +79,25 @@ in
     # will install nvidia-vaapi-driver by default
     services.xserver.videoDrivers = [ "nvidia" ];
 
-    hardware.graphics = {
-      enable = true;
-      enable32Bit = cfg.enable32Bit;
+    hardware = {
+      graphics = {
+        enable = true;
+        inherit (cfg) enable32Bit;
+      };
+
+      nvidia = {
+        inherit (cfg) open;
+        package = mkDefault (
+          if cfg.package != null then cfg.package else config.boot.kernelPackages.nvidiaPackages.production
+        );
+
+        modesetting.enable = cfg.modesetting;
+        powerManagement.enable = cfg.powerManagement;
+        nvidiaSettings = true;
+      };
+
+      nvidia-container-toolkit.enable = cfg.enableContainerToolkit;
     };
-
-    hardware.nvidia = {
-      open = cfg.open;
-      package = mkDefault (
-        if cfg.package != null then cfg.package else config.boot.kernelPackages.nvidiaPackages.production
-      );
-
-      modesetting.enable = cfg.modesetting;
-      powerManagement.enable = cfg.powerManagement;
-      nvidiaSettings = true;
-    };
-
-    hardware.nvidia-container-toolkit.enable = cfg.enableContainerToolkit;
 
     # Wayland/VA-API friendly env for NVIDIA
     environment.variables = {

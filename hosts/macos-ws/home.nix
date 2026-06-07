@@ -1,45 +1,46 @@
-{ ... }:
-{
-  modules.infra = {
-    nh.enable = true;
-    networking.enable = true;
-  };
-
-  modules.devops.ssh = {
-    enable = true;
-    hosts = {
-      # github.enable = true;
-      hk-hdy.enable = true;
-      LA.enable = true;
-      homelab.enable = true;
+_: {
+  modules = {
+    infra = {
+      nh.enable = true;
+      networking.enable = true;
     };
-  };
 
-  modules.desktop = {
-    stylix.enable = true;
+    devops.ssh = {
+      enable = true;
+      hosts = {
+        # github.enable = true;
+        hk-hdy.enable = true;
+        LA.enable = true;
+        homelab.enable = true;
+      };
+    };
 
-    alacritty.enable = false;
-    ghostty.enable = false;
-    kitty.enable = false;
-    cmux.enable = true;
+    desktop = {
+      stylix.enable = true;
 
-    zed.enable = true;
-    vscode.enable = false;
-  };
+      alacritty.enable = false;
+      ghostty.enable = false;
+      kitty.enable = false;
+      cmux.enable = true;
 
-  modules.AI = {
-    codex.enable = true;
-    claude.enable = true;
-    skills.enable = true;
-    pi-agent.enable = true;
-    mcp.isDesktop = true;
-  };
+      zed.enable = true;
+      vscode.enable = false;
+    };
 
-  modules.langs = {
-    lsp.enable = true;
-  };
+    AI = {
+      codex.enable = true;
+      claude.enable = true;
+      skills.enable = true;
+      pi-agent.enable = true;
+      mcp.isDesktop = true;
+    };
 
-  modules.ms = {
-    colima.enable = true;
+    langs = {
+      lsp.enable = true;
+    };
+
+    ms = {
+      colima.enable = true;
+    };
   };
 }

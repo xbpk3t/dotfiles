@@ -8,7 +8,7 @@
 with lib;
 let
   cfg = config.modules.networking.netbird;
-  username = userMeta.username;
+  inherit (userMeta) username;
 in
 {
   # https://github.com/nukdokplex/ncaa/blob/master/nixos-modules/netbird-client.nix
@@ -16,7 +16,6 @@ in
     enable = mkEnableOption "NetBird client (VPN mesh network) on this host";
   };
 
-  # https://mynixos.com/nixpkgs/options/services.netbird
   config = mkIf cfg.enable {
     # Use native NixOS netbird service with "default" key
     # This creates: netbird-default.service, socket at /var/run/netbird-default/sock

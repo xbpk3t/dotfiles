@@ -34,5 +34,5 @@ src.to_pattern = "\\1"
 fetch.github = "trzsz/trzsz-go"
 
 [launchk]
-  src.github = "intellekthq/launchk"
-  fetch.github = "intellekthq/launchk"
+src.github = "intellekthq/launchk"
+fetch.github = "intellekthq/launchk"

@@ -27,7 +27,7 @@ in
   networking = {
     hostName = lib.mkDefault "nixos-agent";
     useDHCP = false;
-    nameservers = nameservers;
+    inherit nameservers;
     # 容器使用私有网桥网络（NAT），由宿主机 nixos-containers 自动分配 IP
   };
 

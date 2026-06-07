@@ -30,7 +30,6 @@ exclude = [
 stage = "none"
 
 
-
 # wt生成commit msg有两种方式（判断当前是否有 changes）：
 ## 1、如果有未commit的changes，那么自动执行。配置了下面这个 commit.generation 之后就会在 wt merge main时自动生成。本身是个hook操作。但是如果command有问题，那么就会产生一个 null 的 commit msg
 ## 2、如果changes区是干净的（也就是我们手动commit了）。那么就不会触发这个hook。我之前一直都是这么操作的。

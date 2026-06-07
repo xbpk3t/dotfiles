@@ -17,7 +17,6 @@
   # https://github.com/ChUrl/flake-nixinator/blob/master/home/modules/fcitx/default.nix
   # https://github.com/yutkat/dotfiles/tree/main/.config/fcitx5/conf
 
-  # https://mynixos.com/nixpkgs/options/i18n.inputMethod.fcitx5
   i18n.inputMethod = {
     enable = true;
     type = "fcitx5";

@@ -14,31 +14,31 @@ hs.ipc = require("hs.ipc")
 
 -- 音频控制 Spoon
 local success1, err1 = pcall(function()
-    hs.loadSpoon("AudioControl")
-    spoon.AudioControl:start()
+  hs.loadSpoon("AudioControl")
+  spoon.AudioControl:start()
 end)
 if not success1 then
-    hs.alert.show("AudioControl 加载失败")
-    print("AudioControl 错误:", err1)
+  hs.alert.show("AudioControl 加载失败")
+  print("AudioControl 错误:", err1)
 end
 
 local success2, err2 = pcall(function()
-    hs.loadSpoon("ChromeTabLimit")
-    hs.alert.show("ChromeTabLimit 加载成功")
-    spoon.ChromeTabLimit:start()
+  hs.loadSpoon("ChromeTabLimit")
+  hs.alert.show("ChromeTabLimit 加载成功")
+  spoon.ChromeTabLimit:start()
 end)
 if not success2 then
-    hs.alert.show("ChromeTabLimit 加载失败")
-    print("ChromeTabLimit 错误:", err2)
+  hs.alert.show("ChromeTabLimit 加载失败")
+  print("ChromeTabLimit 错误:", err2)
 end
 
 local success3, err3 = pcall(function()
-    hs.loadSpoon("HearingToggle")
-    spoon.HearingToggle:start()
+  hs.loadSpoon("HearingToggle")
+  spoon.HearingToggle:start()
 end)
 if not success3 then
-    hs.alert.show("HearingToggle 加载失败")
-    print("HearingToggle 错误:", err3)
+  hs.alert.show("HearingToggle 加载失败")
+  print("HearingToggle 错误:", err3)
 end
 
 -- ========================================
@@ -47,7 +47,7 @@ end
 
 -- 健康提醒：每40分钟提醒站起来活动
 hs.timer.doEvery(40 * 60, function()
-    hs.alert.show("站起来活动一下吧！")
+  hs.alert.show("站起来活动一下吧！")
 end)
 
 -- 安全关机函数（带条件检测）

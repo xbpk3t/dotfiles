@@ -8,7 +8,6 @@ let
   cfg = config.modules.desktop.chromium;
 in
 {
-  # https://mynixos.com/nixpkgs/options/programs.chromium
   # https://mynixos.com/home-manager/options/programs.chromium
 
   options.modules.desktop.chromium = with lib; {

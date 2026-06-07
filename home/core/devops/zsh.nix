@@ -76,7 +76,6 @@
 
       # 为命令行着色（合法命令绿色、未知命令红色等）
       # https://mynixos.com/home-manager/options/programs.zsh.syntaxHighlighting
-      # https://mynixos.com/nixpkgs/options/programs.zsh.syntaxHighlighting
       syntaxHighlighting = {
         enable = true;
         styles = {
@@ -87,7 +86,6 @@
 
       # 命令行自动补全/联想（zsh-autosuggestions）
       # https://mynixos.com/home-manager/options/programs.zsh.autosuggestion
-      # https://mynixos.com/nixpkgs/options/programs.zsh.autosuggestions
       # 相较 modules 缺少 async
       autosuggestion = {
         enable = true;

@@ -6,7 +6,7 @@
   ...
 }:
 let
-  hostName = hostMeta.hostName;
+  inherit (hostMeta) hostName;
 in
 {
   # Basic networking configuration
