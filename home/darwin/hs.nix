@@ -16,7 +16,6 @@
   home.packages = with pkgs; [
     # For HearingToggle
     # https://github.com/kirtan-shah/nowplaying-cli
-    # https://mynixos.com/nixpkgs/package/nowplaying-cli
     # nowplaying-cli
   ];
 }

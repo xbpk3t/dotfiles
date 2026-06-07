@@ -139,7 +139,6 @@ in
     # Nixpkgs 支持 Linux 上直接管理 Ghostty 包。
     # programs.ghostty.settings 自动写入 ~/.config/ghostty/config。
     (mkIf pkgs.stdenv.isLinux {
-      # https://mynixos.com/nixpkgs/package/ghostty
       programs.ghostty = {
         # https://github.com/NixOS/nixpkgs/issues/388984
         enable = true;

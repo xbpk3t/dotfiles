@@ -18,7 +18,6 @@
       noogle-search
 
       ###### nixpkgs 打包相关 ##########
-      # https://mynixos.com/nixpkgs/package/nurl
       # tags(desc): 打包辅助 > 源地址解析 > Nixpkgs
       nurl
 
@@ -71,7 +70,6 @@
     ];
 
   # https://mynixos.com/home-manager/options/programs.nix-init
-  # https://mynixos.com/nixpkgs/package/nix-init
   # nix-init 是基于nurl实现的
   # nix-init 和 nurl 都可以用来给“没有nixpkgs”的pkg手动打包。但是
   programs.nix-init = {

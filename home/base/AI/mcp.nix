@@ -28,22 +28,15 @@ in
     programs.mcp.enable = true;
 
     home.packages = with pkgs; [
-      # https://mynixos.com/nixpkgs/package/gitea-mcp-server
       # gitea-mcp-server
 
-      # https://mynixos.com/nixpkgs/package/mcp-k8s-go
-      # https://github.com/strowk/mcp-k8s-go
-      # https://github.com/containers/kubernetes-mcp-server
       # mcp-k8s-go
 
-      # https://mynixos.com/nixpkgs/package/aks-mcp-server
       # Azure Kubernetes Service
       # aks-mcp-server
 
-      # https://mynixos.com/nixpkgs/package/fluxcd-operator-mcp
       # fluxcd-operator-mcp
 
-      # https://mynixos.com/nixpkgs/package/markitdown-mcp
       # markitdown-mcp
     ];
 
@@ -52,11 +45,9 @@ in
         # [2026-06-01] 移除 filesystem MCP：功能被内置 Read/Edit/Write/Bash 完全覆盖，51 个 MCP tools 导致模型选择瘫痪
         # [2026-06-01] 移除 fetch MCP：功能被内置 WebFetch 完全覆盖
 
-        # https://mynixos.com/nixpkgs/package/mcp-nixos
         # [2026-04-26] build 失败，所以改为false
         # nixos.enable = false;
 
-        # https://mynixos.com/nixpkgs/package/github-mcp-server
         github = {
           enable = true;
         };
@@ -73,14 +64,11 @@ in
 
         # 先预留，按需启用。
         # serena.enable = true;
-        # https://mynixos.com/nixpkgs/package/mcp-grafana
         # grafana.enable = true;
 
-        # https://mynixos.com/nixpkgs/package/terraform-mcp-server
         # terraform.enable = true;
 
         # [2026-04-18] 用 chrome-devtools 替代掉了。playwright 更偏稳定自动化/脚本化操作，chrome-devtools 更偏调试、网络、console、性能、lighthouse、CDP 级观察。所以这组不是“完全同质”，但在日常使用中会明显抢同一个入口。
-        # https://mynixos.com/nixpkgs/package/playwright-mcp
         #  playwright = {
         #    enable = true;
         #    # Darwin 下默认会走 pkgs.google-chrome，触发 Nix 构建 GoogleChrome-*.dmg。

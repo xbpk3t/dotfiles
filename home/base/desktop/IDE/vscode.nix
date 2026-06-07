@@ -12,9 +12,6 @@ in
     enable = mkEnableOption "VSCode with opinionated defaults";
   };
 
-  # https://mynixos.com/home-manager/options/programs.vscode
-  # https://mynixos.com/nixpkgs/packages/vscode-extensions
-  #
   # https://notes.fe-mm.com/efficiency/software/vscode 还不错的可供参考的 vscode 配置/插件
   config = lib.mkIf cfg.enable {
     programs.vscode = {
@@ -65,7 +62,6 @@ in
 
           # tuttieee.emacs-mcx
 
-          # https://mynixos.com/nixpkgs/package/vscode-extensions.ziglang.vscode-zig
           # https://mynixos.com/nixpkgs/package/vscode-extensions.tiehuis.zig
           # used to replace tiehuis.zig
           # ziglang.vscode-zig

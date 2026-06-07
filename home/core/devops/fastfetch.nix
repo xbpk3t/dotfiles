@@ -1,7 +1,6 @@
 { pkgs, ... }:
 {
   home.packages = with pkgs; [
-    # https://mynixos.com/nixpkgs/package/lshw
     # Not support Darwin
     # lshw
   ];

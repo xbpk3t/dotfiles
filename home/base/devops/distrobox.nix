@@ -4,12 +4,10 @@
   # https://mynixos.com/home-manager/options/programs.distrobox
 
   # https://github.com/phanirithvij/distrobox-tui
-  # https://mynixos.com/nixpkgs/package/distrobox-tui
 
   programs.distrobox = {
     # Not support for Darwin
     enable = pkgs.stdenv.isLinux;
-    # https://mynixos.com/nixpkgs/package/distrobox
     package = pkgs.distrobox;
 
     # enableSystemdUnit requires at least one container to be defined

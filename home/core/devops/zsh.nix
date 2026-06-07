@@ -196,7 +196,6 @@
 
         # fzf-tab
         # https://github.com/Aloxaf/fzf-tab
-        # https://mynixos.com/nixpkgs/package/zsh-fzf-tab
         # fzf-tab 必须放在 compinit 之后、autosuggestions 之前。
         #  - compinit 在 programs.zsh.completionInit 阶段执行
         #  - autosuggestions 会在更后面 wrap ZLE widgets

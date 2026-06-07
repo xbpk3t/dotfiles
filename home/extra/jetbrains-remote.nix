@@ -16,7 +16,6 @@ let
   ];
   # 远端是 headless，只需要运行时，不需要 JCEF；用 jdk-no-jcef 更轻也更匹配用途
   runtimePkgs = with pkgs; [
-    # https://mynixos.com/nixpkgs/package/jetbrains.jdk-no-jcef
     jetbrains.jdk-no-jcef
   ];
 in

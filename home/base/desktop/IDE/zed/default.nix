@@ -17,7 +17,6 @@ in
   config = lib.mkIf cfg.enable {
     # Add zed to using zed-cli, otherwise "zed not found"
     home.packages = with pkgs; [
-      # https://mynixos.com/nixpkgs/package/zed-editor
       # [2026-01-21] 注释掉，因为 nixpkgs 跟 hm的pkgs的zed-editor冲突了
       # zed-editor
     ];
@@ -46,11 +45,6 @@ in
       # mutableUserTasks = false;
     };
 
-    # https://mynixos.com/nixpkgs/package/zed-discord-presence
     # https://github.com/xhyrom/zed-discord-presence
-    #
-    # https://mynixos.com/nixpkgs/package/zed-editor-fhs
-    #
-    # https://mynixos.com/nixpkgs/package/nerd-fonts.zed-mono
   };
 }

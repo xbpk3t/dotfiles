@@ -11,7 +11,6 @@
     # ── Formatters (used by treefmt) ───────────────────────────
     nixfmt
     taplo
-    # https://mynixos.com/nixpkgs/package/kdlfmt
     # kdlfmt 的 pre-commit 仍然需要bin才能使用
     # tags(desc): 代码质量 > 格式化 > KDL
     kdlfmt
@@ -44,10 +43,6 @@
     yamllint
     # tags(desc): 代码质量 > Markdown规范 > Lint
     markdownlint-cli
-
-    # https://mynixos.com/nixpkgs/package/api-linter
-    # https://mynixos.com/nixpkgs/package/dotenv-linter
-    # https://mynixos.com/nixpkgs/package/gitlab-ci-linter
   ];
 
   # Deploy linter configs globally from .github/linters/

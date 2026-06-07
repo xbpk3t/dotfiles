@@ -29,11 +29,9 @@
     with pkgs;
     [
       # Docker 基础 CLI
-      # https://mynixos.com/nixpkgs/package/docker
       # https://github.com/docker/cli
       docker
 
-      # https://mynixos.com/nixpkgs/package/docker-credential-helpers
       # https://github.com/docker/docker-credential-helpers
       # 否则会报 osxkeychain not found
       docker-credential-helpers
@@ -42,7 +40,6 @@
       # 日常 CLI / TUI 操作
 
       # 容器版 top
-      # https://mynixos.com/nixpkgs/package/ctop
       # https://github.com/bcicen/ctop
       ctop
     ]
@@ -51,14 +48,12 @@
 
       # 分析镜像层结构
       # 看镜像每一层内容、缩小image，非常经典
-      # https://mynixos.com/nixpkgs/package/dive
       # https://github.com/wagoodman/dive
       # dive {{.IMAGE_NAME}}:{{.IMAGE_TAG}}
       dive
 
       # 优化Image大小
       # 主打 inspect / optimize / debug / minify 容器镜像，命令面很宽，定位很像“容器优化工具箱”。它还明确提到有 xray、lint、build、debug、run、images、merge、registry、vulnerability 等命令。
-      # https://mynixos.com/nixpkgs/package/docker-slim
       # https://github.com/slimtoolkit/slim
       # [2026-04-22] slim可以上位替代 https://github.com/goldmann/docker-squash 因为
       ## 1、slim 使用了更高级的技术：动态探测 (Dynamic Analysis)。它会启动你的容器，监控哪些文件被真的调用了，然后把没用的（比如包管理器、文档、不常用的库）全部剔除。
@@ -70,7 +65,6 @@
       # Dockerfile / 供应链安全
 
       # Dockerfile linter，适合把 Dockerfile 质量门禁前置
-      # https://mynixos.com/nixpkgs/package/hadolint
       # https://github.com/hadolint/hadolint
       # hadolint Dockerfile
       hadolint
@@ -78,22 +72,17 @@
       # Image 安全漏洞扫描
       # docker 的镜像安全检测工具，查找 docker 容器、k8s 中是否有错误配置、密钥、SBOM 以及漏洞。（desktop 内置了，但是这个看起来更直观）, better than quay/clair and anchore/grype
       # https://github.com/owenrumney/lazytrivy
-      # https://mynixos.com/nixpkgs/package/lazytrivy
-      # https://mynixos.com/nixpkgs/package/trivy
       # trivy image --ignore-unfixed --severity CRITICAL {{.IMAGE_NAME}}:{{.IMAGE_TAG}}
       trivy
 
       # 给镜像和文件系统生 SBOM
-      # https://mynixos.com/nixpkgs/package/syft
       # https://github.com/anchore/syft
       syft
 
       # 扫镜像和文件系统漏洞
-      # https://mynixos.com/nixpkgs/package/grype
       # https://github.com/anchore/grype
       grype
 
-      # https://mynixos.com/nixpkgs/package/docker-sbom
       # https://github.com/docker/sbom-cli-plugin
       docker-sbom
 

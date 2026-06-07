@@ -21,6 +21,6 @@ module.exports = {
         // 禁止未知类型选择器（unknown type selectors）
         "selector-type-no-unknown": true,
         // 控制空行：规则间需要空行（empty lines）
-        "rule-empty-line-before": ["always", { "ignore": ["after-comment"] }]
+        "rule-empty-line-before": ["always", { "ignore": ["after-comment", "first-nested"] }]
     }
 };
