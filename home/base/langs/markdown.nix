@@ -15,7 +15,6 @@
       # like jq but for Markdown, find specific elements in a md doc
       # mdq
 
-      # https://mynixos.com/nixpkgs/package/doxx
       # https://github.com/bgreenwell/doxx
       doxx
     ];

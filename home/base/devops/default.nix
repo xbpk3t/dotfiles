@@ -12,7 +12,6 @@
       # 用nix的mkOutOfStoreSymlink代替了
       # dotbot
 
-      # https://mynixos.com/nixpkgs/package/pre-commit
       # tags(desc): 代码质量 > 提交钩子 > 自动化
       pre-commit
 
@@ -38,7 +37,6 @@
       cloudflared # cloudflare tunnel
 
       # https://github.com/cloudflare/workers-sdk
-      # https://mynixos.com/nixpkgs/package/wrangler
 
       # MAYBE: 等cf cli 成熟后，可以用来替代 wrangler
       # https://blog.cloudflare.com/cf-cli-local-explorer/
@@ -136,7 +134,6 @@
       imagemagick
 
       # cwebp. WebP官方工具
-      # https://mynixos.com/nixpkgs/package/libwebp
       # tags(desc): 媒体处理 > 图像编码 > WebP
       libwebp
 
@@ -146,7 +143,6 @@
       graphviz
 
       # static file server
-      # https://mynixos.com/nixpkgs/package/dufs
       # https://github.com/sigoden/dufs
       # https://github.com/cnphpbb/deploy.stack/blob/main/dufs/config/config.yaml ???
       # tags(desc): 文件服务 > 静态分发 > HTTP

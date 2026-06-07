@@ -89,7 +89,6 @@ in
       # tags(desc): 分支工作流 > worktree管理 > 并行开发
       worktrunk
 
-      # https://mynixos.com/nixpkgs/package/gitMinimal
       # [2025-12-11] 会跟git冲突，所以注释掉
       # gitMinimal # 确保 Git 在构建环境中可用
 
@@ -133,7 +132,6 @@ in
       glab
 
       # https://github.com/tj/git-extras
-      # https://mynixos.com/nixpkgs/package/git-extras
       # 注意 git-extras 直接使用git的插件扩展机制（Subcommand Expansion），所以直接以 git命令直接调用
       #analysis_&_stats:
       #  - command: git summary
@@ -201,7 +199,6 @@ in
     ]
     ++ [
       # 分类2：代码质量、安全与历史清理
-      # https://mynixos.com/nixpkgs/package/gitlint
       # tags(desc): 代码质量 > Commit规范 > Lint
       gitlint
 
@@ -216,7 +213,6 @@ in
     ];
 
   # https://mynixos.com/home-manager/options/services.git-sync
-  # https://mynixos.com/nixpkgs/package/git-sync
   # https://github.com/simonthum/git-sync
   services.git-sync = {
     enable = true;
@@ -239,7 +235,6 @@ in
   # why this? 也有 WorktreeWise, git-wt, LazyWorktree 等其他类似工具，为啥选择这个？
   # 这个要比 git-wt 好用
   # https://github.com/k1LoW/git-wt
-  # https://mynixos.com/nixpkgs/package/git-wt
   # [2026-04-22] worktrunk 要比 agent-worktree 更好用。“对大多数人来说，worktrunk 更强、更全，也通常更值得优先选；但不能简单说 agent-worktree 的所有核心体验都被一比一包含了，它在‘单次 agent 闭环’和‘默认合回原 base’这两个点上是更明确的。”
   ## 要平台化、长期用、功能全：选 worktrunk。
   ## 要极简 agent 闭环、做完就收：agent-worktree 反而更“顺手”。

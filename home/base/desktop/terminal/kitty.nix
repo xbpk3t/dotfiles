@@ -14,7 +14,6 @@ in
   };
 
   config = mkIf cfg.enable {
-    # https://mynixos.com/nixpkgs/package/kitty
     #
     # https://mynixos.com/home-manager/options/programs.kitty
     #

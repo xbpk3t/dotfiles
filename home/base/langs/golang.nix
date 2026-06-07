@@ -13,7 +13,6 @@
       go
 
       # goimports
-      # https://mynixos.com/nixpkgs/package/gotools
       # tags(desc): 核心工具链 > 官方工具集 > Go
       gotools
 
@@ -30,7 +29,6 @@
       # [2026-04-20] 注释掉 gosec, gofumpt, golines，因为本身可以作为 golangci-lint 的 linters/formatters 使用
       # tags(desc): 代码质量 > 聚合检查 > 静态分析
       golangci-lint
-      # https://mynixos.com/nixpkgs/package/gosec
       # https://github.com/securego/gosec
       # gosec
       # gofumpt
@@ -43,7 +41,6 @@
       # tags(desc): 代码质量 > 静态分析 > 空指针安全
       nilaway
 
-      # https://mynixos.com/nixpkgs/package/betteralign
       # tags(desc): 代码质量 > 可读性 > 对齐格式化
       betteralign
     ]
@@ -70,7 +67,6 @@
       # tags(desc): 前端模板 > 代码生成 > Go生态
       templ
 
-      # https://mynixos.com/nixpkgs/package/goctl
       # tags(desc): 工程脚手架 > 微服务框架 > 代码生成
       goctl
     ]
@@ -83,7 +79,6 @@
       # tags(desc): 数据迁移 > 数据库 > 运维
       go-migrate
 
-      # https://mynixos.com/nixpkgs/package/go-mod-graph-chart
       # tags(desc): 依赖分析 > 可视化 > 模块管理
       go-mod-graph-chart
     ];

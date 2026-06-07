@@ -8,7 +8,6 @@
   #
   # https://github.com/usagi-flow/evil-helix
   #
-  # https://mynixos.com/nixpkgs/package/evil-helix
 
   # https://mynixos.com/home-manager/options/programs.helix
   programs.helix = {

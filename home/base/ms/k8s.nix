@@ -4,7 +4,6 @@
     with pkgs;
     [
       # 分类1：Kubernetes 核心与生态工具
-      # https://mynixos.com/nixpkgs/package/compose2nix
       compose2nix
 
       # Kubernetes 工具
@@ -19,7 +18,6 @@
       #- minikube addons list # 列出所有可用的 Minikube 插件（addons）
       # minikube
 
-      # https://mynixos.com/nixpkgs/package/kompose
       # # [kubernetes/kompose：将 Compose 转换为 Kubernetes](https://github.com/kubernetes/kompose)
       kompose
 
@@ -54,15 +52,12 @@
       # 该项目脱胎于 mergeKubeConfig 项目，最早写该项目的目的是在一堆杂乱无章的 kubeconfig 中自由的切换。随着需要操作的 k8s 集群越来越多，在不同的集群之间切换也越来越麻烦，而操作 k8s 集群的本质不过是通过 kubeconfig 访问 k8s 集群的 API Server，以操作 k8s 的各种资源，而 kubeconfig 不过是一个 YAML 文件，用来保存访问集群的密钥，最早的 mergeKubeConfig 不过是一个操作 YAML 文件的 Python 脚本。而随着 Go 学习的深入，也就动了重写这个项目的念头，就这样 kubecm 诞生了。
       kubecm
 
-      # https://mynixos.com/nixpkgs/package/kubecfg
       # kubecfg is a CLI tool for managing Kubernetes kubeconfig files with fast context switching, namespace management, and multi-config merging through an interactive TUI
       kubecfg
     ]
     ++ [
       # 分类2：Kubernetes 节点依赖说明与 Kustomize 工具
-      # https://mynixos.com/nixpkgs/package/kustomize
       #
-      # https://mynixos.com/nixpkgs/package/kustomize-sops
       #
       #
       kustomize
@@ -88,7 +83,6 @@
 
       # copy/sync images between registries and local storage
       # 一个命令行工具，用于在不同的容器镜像仓库之间复制、检查和删除容器镜像
-      # https://mynixos.com/nixpkgs/package/skopeo
       # https://github.com/containers/skopeo
       # skopeo
       # go-containerregistry # provides `crane` & `gcrane`, it's similar to skopeo
@@ -106,7 +100,6 @@
       # istioctl
       # clusterctl # for kubernetes cluster-api
 
-      # https://mynixos.com/nixpkgs/package/kubevirt
       #
       # virtctl
       kubevirt
@@ -115,10 +108,8 @@
       #- url: https://github.com/ko-build/ko
       #  doc: https://ko.build/
       #  des: 专门用来打包golang应用容器的image的工具，被很多k8s生态下的主流OSS使用
-      # https://mynixos.com/nixpkgs/package/ko
       # ko
 
-      # https://mynixos.com/nixpkgs/package/kor
       # kor
     ];
 

@@ -16,7 +16,6 @@
   ## AC/BAT 自动切换
 
   environment.systemPackages = with pkgs; [
-    # https://mynixos.com/nixpkgs/package/powertop
     powertop
   ];
 

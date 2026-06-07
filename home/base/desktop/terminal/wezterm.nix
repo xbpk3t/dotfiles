@@ -15,7 +15,6 @@ in
   config = mkIf cfg.enable {
     # https://mynixos.com/home-manager/options/programs.wezterm
     #
-    # https://mynixos.com/nixpkgs/package/wezterm
     #
     # https://github.com/wezterm/wezterm
     #

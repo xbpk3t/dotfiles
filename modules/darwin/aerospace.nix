@@ -15,7 +15,6 @@ in
 
   config = mkIf cfg.enable {
     # Aerospace 服务配置（平铺窗口管理）
-    # https://mynixos.com/nixpkgs/package/aerospace
     # https://mynixos.com/nix-darwin/options/services.aerospace
     services.aerospace = {
       enable = true;
@@ -136,7 +135,6 @@ in
     };
 
     # jankyborders 高亮当前窗口，配合 Aerospace 使用
-    # https://mynixos.com/nixpkgs/package/jankyborders
     # https://mynixos.com/nix-darwin/options/services.jankyborders
     services.jankyborders = {
       enable = true;

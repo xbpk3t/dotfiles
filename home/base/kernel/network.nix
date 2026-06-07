@@ -43,11 +43,7 @@
       # inetutils
 
       # https://mynixos.com/nixpkgs/package/dig
-      # https://mynixos.com/nixpkgs/package/dnslookup
-      # https://mynixos.com/nixpkgs/package/whois
       dig
-
-      # https://mynixos.com/nixpkgs/package/netperf
 
       # ping, but with a graph(TUI)
       gping
@@ -56,7 +52,6 @@
       duf # Disk Usage/Free Utility - a better 'df' alternative
       #  du-dust # A more intuitive version of `du` in rust
 
-      # https://mynixos.com/nixpkgs/package/mtr
       # 同时支持 linux, darwin, windows
       mtr
 
@@ -82,7 +77,6 @@
       # caligula
 
       # https://github.com/openwall/john/
-      # https://mynixos.com/nixpkgs/package/john
       # used to crack passwords
       # john
 
@@ -145,14 +139,12 @@
       # - 如果你希望 “一个工具既能测明文端口也能测 TLS”，优先选它
       netcat
 
-      # https://mynixos.com/nixpkgs/package/websocat
       websocat
 
       # iperf3
     ]
     # Linux-only tools; Darwin 上直接跳过，避免 hostPlatform 不可用的求值错误
     ++ lib.optionals stdenv.isLinux [
-      # https://mynixos.com/nixpkgs/package/iputils
       # - arping: send ARP REQUEST to a neighbour host
       # - clockdiff: measure clock difference between hosts
       # - ping: send ICMP ECHO_REQUEST to network hosts
@@ -172,7 +164,6 @@
 
       # wifi with TUI
       # https://github.com/pythops/impala
-      # https://mynixos.com/nixpkgs/package/impala
       # 只有个人的minimal机器需要（VPS或者desktop都用不到）
       # impala（Wi‑Fi TUI），仅在 Linux 上可用
       impala
@@ -189,7 +180,6 @@
       # netcat-openbsd
 
       # https://github.com/GyulyVGC/sniffnet
-      # https://mynixos.com/nixpkgs/package/sniffnet
       # 仅作记录，暂不打算安装。
       # what: Sniffnet 是个GUI，“网络仪表盘”，侧重易用的可视化监控、地理位置识别和应用进程关联。
       # programs.sniffnet 必须放到 modules/nixos 里，因为依赖了 NixOS 特有的 security.wrappers 机制来分配内核特权
@@ -202,13 +192,11 @@
       # 想导出带进程上下文的 PCAP 再进 Wireshark
       # [Vincent Logic | 信号＞噪音 on X: "发现个终端里的网络监控神器！ RustNet，在终端里就能实时监控所有网络连接，哪个进程在偷偷传数据、服务器被谁连了，一眼看清。 最爽的是能看到每个连接对应的应用程序，这点 Wireshark 都做不到。SSH 连服务器直接看，不用搞 X11 转发。 界面分四块： - 总览：所有连接列表 + 实时流量 - https://t.co/l4GGKuJuXv" / X](https://x.com/VincentLogic/status/2053454574888071242)
       # https://github.com/domcyrus/rustnet
-      # https://mynixos.com/nixpkgs/package/rustnet
       rustnet
     ];
 
   # ncurses 的无线网卡监控工具
   # 带 capabilities 的 wrapper（setcap wrapper），让普通用户也能用到 wavemon 的一些需要特权的功能（不需要你再自己去折腾 setcap/wrapper）。
-  # https://mynixos.com/nixpkgs/package/wavemon
   # https://mynixos.com/nixpkgs/option/programs.wavemon.enable
   # programs.wavemon.enable = pkgs.stdenv.isLinux;
 

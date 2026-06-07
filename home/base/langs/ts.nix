@@ -18,7 +18,6 @@
       serve # https://github.com/vercel/serve 用来preview本地打包好的dist文件（vite可以直接vite preview）
 
       # [2026-01-21] rebuild error, hash mismatch, so comment it
-      # https://mynixos.com/nixpkgs/package/tsx
       # tags(desc): 执行器 > TypeScript运行 > Node生态
       tsx
 
@@ -40,7 +39,6 @@
       # tags(desc): 依赖治理 > 版本升级 > npm生态
       npm-check-updates # https://github.com/raineorshine/npm-check-updates 顾名思义，相当于 `npm-check -u`，用来检查pkg版本是否有新版本. 支持brew安装。`ncu -u`
 
-      # https://mynixos.com/nixpkgs/package/stylelint
       # tags(desc): 代码质量 > CSS规范 > 前端
       stylelint
 

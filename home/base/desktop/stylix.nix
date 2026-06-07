@@ -66,7 +66,6 @@ in
           # package = pkgs.nerd-fonts.jetbrains-mono;
           # name = "JetBrainsMono Nerd Font Mono";
 
-          # https://mynixos.com/nixpkgs/package/sarasa-gothic
           # https://github.com/be5invis/sarasa-gothic
 
           # https://linux.do/t/topic/8043/
@@ -143,11 +142,9 @@ in
     home.packages =
       with pkgs;
       optionals isLinux [
-        # https://mynixos.com/nixpkgs/package/bibata-cursors
         bibata-cursors
 
         # https://github.com/ful1e5/apple_cursor
-        # https://mynixos.com/nixpkgs/package/apple-cursor
         apple-cursor
       ];
   };

@@ -9,13 +9,11 @@
   # journalctl -u traefik --since "2026-01-10" --no-pager | tail -n 50
 
   home.packages = with pkgs; [
-    # https://mynixos.com/nixpkgs/package/lazyjournal
     # https://github.com/Lifailon/lazyjournal
     lazyjournal
 
     # 更成熟的通用日志分析器，适合搭配 journalctl
     # https://github.com/tstack/lnav
-    # https://mynixos.com/nixpkgs/package/lnav
   ];
 
   home.file.".config/lazyjournal/config.yml" = {
