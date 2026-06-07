@@ -1,6 +1,6 @@
 { userMeta, ... }:
 let
-  username = userMeta.username;
+  inherit (userMeta) username;
 in
 {
   modules.networking = {

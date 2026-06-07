@@ -1,6 +1,6 @@
 { userMeta, ... }:
 let
-  mail = userMeta.mail;
+  inherit (userMeta) mail;
 in
 {
   # 启动菜单等待时间

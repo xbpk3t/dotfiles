@@ -11,7 +11,7 @@ trap 'rm -rf "${TMP_DIR}"' EXIT
 FAKE_BIN="${TMP_DIR}/bin"
 mkdir -p "${FAKE_BIN}"
 
-cat > "${FAKE_BIN}/ps" <<'EOF'
+cat >"${FAKE_BIN}/ps" <<'EOF'
 #!/usr/bin/env bash
 cat <<'OUT'
   PID  PPID   UID CMD
@@ -21,7 +21,7 @@ cat <<'OUT'
 OUT
 EOF
 
-cat > "${FAKE_BIN}/readlink" <<'EOF'
+cat >"${FAKE_BIN}/readlink" <<'EOF'
 #!/usr/bin/env bash
 if [[ "${1:-}" == "-f" && "${2:-}" == "/proc/27200/exe" ]]; then
   printf '%s\n' "/nix/store/traefik/bin/traefik"
@@ -34,7 +34,7 @@ fi
 exit 1
 EOF
 
-cat > "${FAKE_BIN}/cat" <<'EOF'
+cat >"${FAKE_BIN}/cat" <<'EOF'
 #!/usr/bin/env bash
 if [[ "${1:-}" == "/proc/27200/cgroup" ]]; then
   printf '%s\n' '0::/kubepods.slice/kubepods-besteffort.slice/kubepods-besteffort-pod06010.scope/cri-containerd-traefik.scope'
@@ -47,12 +47,12 @@ fi
 /bin/cat "$@"
 EOF
 
-cat > "${FAKE_BIN}/kill" <<'EOF'
+cat >"${FAKE_BIN}/kill" <<'EOF'
 #!/usr/bin/env bash
 printf '%s\n' "$*" >> "${KILL_LOG}"
 EOF
 
-cat > "${FAKE_BIN}/iptables" <<'EOF'
+cat >"${FAKE_BIN}/iptables" <<'EOF'
 #!/usr/bin/env bash
 if [[ "${1:-}" == "-t" && "${2:-}" == "nat" && "${3:-}" == "-S" && "${4:-}" == "KUBE-SERVICES" ]]; then
   cat <<'OUT'
@@ -77,7 +77,7 @@ export K3S_CLEANUP_ASSUME_TARGETS_LIVE=1
 assert_contains() {
   local haystack="$1"
   local needle="$2"
-  if [[ "${haystack}" != *"${needle}"* ]]; then
+  if [[ ${haystack} != *"${needle}"* ]]; then
     printf 'expected output to contain: %s\nactual:\n%s\n' "${needle}" "${haystack}" >&2
     exit 1
   fi
@@ -86,7 +86,7 @@ assert_contains() {
 assert_not_contains() {
   local haystack="$1"
   local needle="$2"
-  if [[ "${haystack}" == *"${needle}"* ]]; then
+  if [[ ${haystack} == *"${needle}"* ]]; then
     printf 'expected output NOT to contain: %s\nactual:\n%s\n' "${needle}" "${haystack}" >&2
     exit 1
   fi

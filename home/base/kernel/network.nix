@@ -190,7 +190,6 @@
 
       # https://github.com/GyulyVGC/sniffnet
       # https://mynixos.com/nixpkgs/package/sniffnet
-      # https://mynixos.com/nixpkgs/options/programs.sniffnet
       # 仅作记录，暂不打算安装。
       # what: Sniffnet 是个GUI，“网络仪表盘”，侧重易用的可视化监控、地理位置识别和应用进程关联。
       # programs.sniffnet 必须放到 modules/nixos 里，因为依赖了 NixOS 特有的 security.wrappers 机制来分配内核特权
@@ -213,12 +212,10 @@
   # https://mynixos.com/nixpkgs/option/programs.wavemon.enable
   # programs.wavemon.enable = pkgs.stdenv.isLinux;
 
-  # https://mynixos.com/nixpkgs/options/programs.mtr
   #  programs.mtr = {
   #    enable = pkgs.stdenv.isLinux;
   #  };
 
-  # https://mynixos.com/nixpkgs/options/services.iperf3
   #你说得没错，`iperf3` 本质上确实是一个命令行工具（CLI）。但之所以在 NixOS 或其他 Linux 发行版中存在 **`services.iperf3`** 这样的守护进程（Daemon）配置，主要是为了方便进行**持续性**和**自动化**的网络测试。
   #
   #以下是为什么要把它作为“服务”运行的几个核心原因：

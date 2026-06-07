@@ -1,0 +1,50 @@
+# treefmt configuration
+# Deployed globally via home-manager to ~/.config/linters/treefmt.toml
+# Docs: https://treefmt.com/latest/configuration/
+
+[global]
+on-unmatched = "debug"
+
+[formatter.nix]
+command = "nixfmt"
+includes = ["*.nix"]
+
+[formatter.terraform]
+command = "tofu"
+options = ["fmt"]
+includes = ["*.tf", "*.tfvars", "*.tftest.hcl"]
+
+[formatter.taplo]
+command = "taplo"
+options = ["fmt"]
+includes = ["*.toml"]
+
+[formatter.kdlfmt]
+command = "kdlfmt"
+options = ["format"]
+includes = ["*.kdl"]
+
+[formatter.stylua]
+command = "stylua"
+options = [
+  "--indent-type",
+  "Spaces",
+  "--indent-width",
+  "2",
+  "--quote-style",
+  "AutoPreferDouble",
+  "--call-parentheses",
+  "Always",
+]
+includes = ["*.lua"]
+
+[formatter.terramate]
+command = "terramate"
+options = ["fmt"]
+includes = ["*.tm.hcl"]
+
+[formatter.shfmt]
+command = "shfmt"
+options = ["-i=2", "-s", "-w"]
+includes = ["*.sh", "*.bash"]
+excludes = ["modules/nixos/extra/k3s/k3s-cni-route.sh"]

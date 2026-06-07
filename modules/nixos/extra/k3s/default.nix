@@ -7,7 +7,7 @@
 let
   inherit (lib) mkIf mkMerge;
   cfg = config.modules.extra.k3s;
-  role = cfg.role;
+  inherit (cfg) role;
   tokenPath = config.sops.secrets.K3S_TOKEN.path;
   isServer = role == "server";
   isAgent = role == "agent";
@@ -30,8 +30,6 @@ let
   flannelIfaceIP = if cfg.nodeIP != "" then cfg.nodeIP else cfg.serverIP;
 in
 {
-  # https://mynixos.com/nixpkgs/options/services.k3s
-  #
   # https://github.com/NixOS/nixpkgs/blob/master/pkgs/applications/networking/cluster/k3s/README.md
   #
   #
@@ -179,7 +177,7 @@ in
       (mkIf isAgent {
         # agent 连接 homelab 控制面（Tailscale IP）
         tokenFile = tokenPath;
-        serverAddr = serverAddr;
+        inherit serverAddr;
       })
     ];
 

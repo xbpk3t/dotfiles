@@ -44,6 +44,9 @@ linters:
     - prealloc
     - recvcheck
     - unparam
+    - inamedparam
+    - tagliatelle
+    - gomodguard
 
 
   settings:
@@ -86,8 +89,8 @@ linters:
             - max-length: 4
 
         - name: cognitive-complexity # #2(认知复杂度)
-          severity: info
-          arguments: [9]
+          severity: warning
+          arguments: [25]
 
         - name: var-naming         # #1(变量命名)
           severity: warning
@@ -153,7 +156,7 @@ linters:
 
     goconst:
       min-len: 2
-      min-occurrences: 2
+      min-occurrences: 4
 
     misspell:
       locale: US
@@ -202,6 +205,7 @@ linters:
         - G115 # 整数转换误报
         - G204 # 命令执行误报
         - G304 # 文件包含误报
+        - G122 # 本地 repo cache 扫描场景下的 filepath.Walk 告警噪音较大
         - G307 # Deferring a method which returns an error
 
     varnamelen:

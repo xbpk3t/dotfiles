@@ -41,29 +41,31 @@ lib.mkIf agentEnabled {
         (mylib.relativeToRoot "secrets/default.nix")
         inputs.home-manager.nixosModules.home-manager
         {
-          home-manager.useGlobalPkgs = true;
-          home-manager.useUserPackages = true;
-          home-manager.backupFileExtension = null;
-          home-manager.extraSpecialArgs = {
-            inherit inputs mylib globals;
-            hostMeta = agentNode;
-            userMeta = agentUserMeta;
-            timeMeta = agentTimeMeta;
-            editorMeta = agentEditorMeta;
-            stateVersion = agentStateVersion;
+          home-manager = {
+            useGlobalPkgs = true;
+            useUserPackages = true;
+            backupFileExtension = null;
+            extraSpecialArgs = {
+              inherit inputs mylib globals;
+              hostMeta = agentNode;
+              userMeta = agentUserMeta;
+              timeMeta = agentTimeMeta;
+              editorMeta = agentEditorMeta;
+              stateVersion = agentStateVersion;
+            };
+            users.luck.imports =
+              map mylib.relativeToRoot [
+                "secrets/default.nix"
+                "hosts/nixos-agent/home.nix"
+                "home/core"
+                "home/base/AI"
+              ]
+              ++ [
+                inputs.nix-index-database.homeModules.default
+                inputs.nvf.homeManagerModules.default
+                inputs.sops-nix.homeManagerModules.sops
+              ];
           };
-          home-manager.users.luck.imports =
-            map mylib.relativeToRoot [
-              "secrets/default.nix"
-              "hosts/nixos-agent/home.nix"
-              "home/core"
-              "home/base/AI"
-            ]
-            ++ [
-              inputs.nix-index-database.homeModules.default
-              inputs.nvf.homeManagerModules.default
-              inputs.sops-nix.homeManagerModules.sops
-            ];
         }
       ];
     };

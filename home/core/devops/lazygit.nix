@@ -51,7 +51,6 @@
   #   #  '';
   # };
 
-  # https://mynixos.com/nixpkgs/options/programs.lazygit
   programs.lazygit = {
     enable = true;
     package = pkgs.lazygit;

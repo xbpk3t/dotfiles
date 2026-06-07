@@ -20,10 +20,6 @@ module.exports = {
         "property-no-unknown": true,
         // 禁止未知类型选择器（unknown type selectors）
         "selector-type-no-unknown": true,
-        // 确保 ; 结尾一致（trailing semicolons）
-        "declaration-block-trailing-semicolon": "always",
-        // 确保字符串使用一致引号（quote style）
-        "string-quotes": "double",
         // 控制空行：规则间需要空行（empty lines）
         "rule-empty-line-before": ["always", { "ignore": ["after-comment"] }]
     }

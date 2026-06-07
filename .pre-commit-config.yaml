@@ -32,34 +32,57 @@ repos:
       - id: check-executables-have-shebangs
       - id: check-shebang-scripts-are-executable
 
+  # Remote exception: nixpkgs has no direct pre-commit-ci-config package.
   - repo: https://github.com/pre-commit-ci/pre-commit-ci-config
     rev: v1.6.1
     hooks:
       - id: check-pre-commit-ci-config
 
-  - repo: https://github.com/jorisroovers/gitlint
-    rev: v0.19.1
+  - repo: local
     hooks:
       - id: gitlint
         name: Git Commit Message Linter
         entry: gitlint
-        types: [gitlint]
-        language: python
-      - id: gitlint-ci
+        args: [--staged, --msg-filename]
+        language: system
+        stages: [commit-msg]
 
-  - repo: https://github.com/commitizen-tools/commitizen
-    rev: v4.16.0
+      - id: gitlint-ci
+        name: gitlint ci
+        entry: gitlint
+        language: system
+        always_run: true
+        pass_filenames: false
+        stages: [manual]
+
+  - repo: local
     hooks:
       - id: commitizen
+        name: commitizen check
+        entry: cz check
+        args: [--allow-abort, --commit-msg-file]
+        language: system
         stages: [commit-msg]
+
       - id: commitizen-branch
+        name: commitizen check branch
+        entry: cz check
+        args: [--rev-range, '$PRE_COMMIT_FROM_REF..$PRE_COMMIT_TO_REF']
+        language: system
+        always_run: true
+        pass_filenames: false
         stages: [pre-push]
 
-  - repo: https://github.com/rhysd/actionlint
-    rev: v1.7.12
+  - repo: local
     hooks:
       - id: actionlint
+        name: Lint GitHub Actions workflow files
+        entry: actionlint
+        language: system
+        types: [yaml]
+        files: ^\.github/workflows/
 
+# Disabled: local shellcheck is installed via Nix; keep this as a candidate only.
 #  - repo: https://github.com/shellcheck-py/shellcheck-py
 #    rev: v0.10.0.1
 #    hooks:
@@ -67,7 +90,8 @@ repos:
 #        types: [shell]
 #
 
-# 报错 Cannot find package '@typescript-eslint/parser' 需要本地安装
+# Disabled: local eslint is installed via Nix, and .tms keeps @typescript-eslint/parser in its own package.json.
+# If enabled later, prefer `pnpm --dir .tms exec eslint --config eslint.config.mjs` over mirrors-eslint.
 #  - repo: https://github.com/pre-commit/mirrors-eslint
 #    rev: v10.3.0
 #    hooks:
@@ -81,42 +105,31 @@ repos:
 #          - "eslint@9.29.0"
 #          - "@typescript-eslint/parser@8.46.1"
 
-  - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.48.0
-    hooks:
-      - id: markdownlint
-        alias: md
-        name: Lint Markdown files
-        entry: markdownlint -f -c .github/linters/markdownlint.yml -i node_modules
-        types: [markdown]
-        language: node
-        files: ^blog/
 
-  - repo: https://github.com/adrienverge/yamllint
-    rev: v1.38.0
-    hooks:
-      - id: yamllint
-        name: Lint YAML files
-        entry: yamllint -c .github/linters/yamllint.yml
-        exclude: (^|/)(node_modules|\\.pnpm|\\.tms/node_modules|\\.tms/\\.e2e|\\.e2e)/|.*pnpm-lock\\.yaml$
-        types: [yaml]
-        language: python
-
-
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.12
+  - repo: local
     hooks:
       - id: ruff
+        name: ruff check
+        entry: ruff check --force-exclude
+        language: system
         types: [python]
-      - id: ruff-format
-        types: [python]
+        require_serial: true
 
-  - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.30.0
+      - id: ruff-format
+        name: ruff format
+        entry: ruff format --force-exclude
+        language: system
+        types: [python]
+        require_serial: true
+
+  - repo: local
     hooks:
       - id: gitleaks
         name: Scan Secrets
-        entry: gitleaks detect --source . -v && gitleaks dir . -v
+        entry: gitleaks git --pre-commit --redact --staged --verbose
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
 
 
   - repo: https://github.com/antonbabenko/pre-commit-terraform
@@ -124,6 +137,7 @@ repos:
     hooks:
       - id: terraform_fmt
         args:
+          - --hook-config=--tf-path=tofu
           - --args=-diff
 
   #  - repo: local
@@ -135,33 +149,28 @@ repos:
   #        pass_filenames: false
   #        files: ^components/dashboard/
 
-  - repo: https://github.com/hadolint/hadolint
-    rev: v2.14.0
+  - repo: local
     hooks:
       - id: hadolint
+        name: Lint Dockerfiles
+        entry: hadolint
+        language: system
+        types: [dockerfile]
 
 
-  - repo: https://github.com/golangci/golangci-lint
-    rev: v2.12.2
-    hooks:
-      - id: golangci-lint-config-verify
-        args: ["-c", ".github/linters/golangci-lint.yml"]
-      - id: golangci-lint
-        entry: golangci-lint run --fix -c .github/linters/golangci-lint.yml
-        types: [go]
-        language: golang
-      - id: golangci-lint-full
-        args: ["-c", ".github/linters/golangci-lint.yml"]
-
-  - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v4.0.0-alpha.8
+  - repo: local
     hooks:
       - id: prettier
+        name: prettier
+        entry: prettier --write --ignore-unknown
+        language: system
+        types: [text]
         files: ^\.tms/
         exclude: \.md$ # 禁止 prettier 格式化MD文件
 
 
 
+  # Disabled Go candidates: the repo currently has no tracked go.mod or *.go.
   #- url: https://github.com/uber-go/goleak
   #  des: Used to detect goroutine leaks
   #- url: https://github.com/uber-go/nilaway
@@ -190,6 +199,14 @@ repos:
 
   - repo: local
     hooks:
+      - id: treefmt
+        name: treefmt
+        description: Format files through treefmt
+        entry: treefmt --config-file .github/linters/treefmt.toml
+        language: system
+        require_serial: true
+        files: \.(nix|tf|tfvars|tftest\.hcl|tm\.hcl|toml|kdl|sh|bash|envrc|lua)$
+
       - id: betteralign
         name: betteralign
         types: [go]
@@ -211,7 +228,8 @@ repos:
       - id: statix-fix
         name: Statix Fix
         description: Fix files with statix
-        entry: statix fix ./nix
+        entry: statix
+        args: ["fix", "--ignore", "pkgs/_sources/**", "."]
         types: [nix]
         pass_filenames: false
         language: system
@@ -219,7 +237,8 @@ repos:
       - id: statix-check
         name: Statix Check
         description: Check files for improvements with statix
-        entry: statix check ./nix
+        entry: statix
+        args: ["check", "--ignore", "pkgs/_sources/**", "."]
         types: [nix]
         pass_filenames: false
         language: system
@@ -240,29 +259,39 @@ repos:
         # 的指令会因 env 为空报错。runtime 校验留给真实 compose/CI 环境。
         entry: caddy adapt --config .cntr/caddy/Caddyfile
 
+      - id: markdownlint
+        name: Lint Markdown files
+        alias: md
+        entry: markdownlint -c .github/linters/markdownlint.yml
+        types: [markdown]
+        language: system
+        files: ^blog/
 
-  - repo: https://github.com/astro/deadnix
-    rev: v1.3.1
-    hooks:
-      - id: deadnix
-        args: [--edit]
-        exclude: pkgs/_sources/ # 这个文件不应该修改
-  - repo: local
-    hooks:
-      - id: nixfmt
-        name: nixfmt
-        description: Format Nix files with nixfmt
-        entry: nixfmt
-        types: [nix]
+      - id: yamllint
+        name: Lint YAML files
+        entry: yamllint -c .github/linters/yamllint.yml
+        exclude: (^|/)(node_modules|\.pnpm|\.tms/node_modules|\.tms/\.e2e|\.e2e)/|.*pnpm-lock\.yaml$
+        types: [yaml]
         language: system
 
-  - repo: https://github.com/hougesen/kdlfmt
-    rev: v0.1.6
-    hooks:
-      - id: kdlfmt-format
+      - id: golangci-lint
+        name: golangci-lint
+        entry: golangci-lint run --fix -c .github/linters/golangci-lint.yml
+        types: [go]
+        language: system
 
-  - repo: https://github.com/thibaudcolas/pre-commit-stylelint
-    rev: v17.11.0
-    hooks:
       - id: stylelint
-        args: ["--config", ".github/linters/stylelint.config.cjs"]
+        name: stylelint
+        entry: stylelint --config .github/linters/stylelint.config.cjs
+        files: \.(css|scss|sass)$
+        language: system
+
+  - repo: local
+    hooks:
+      - id: deadnix
+        name: deadnix
+        entry: deadnix
+        language: system
+        types: [nix]
+        args: [--edit]
+        exclude: pkgs/_sources/ # 这个文件不应该修改

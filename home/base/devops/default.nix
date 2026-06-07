@@ -24,29 +24,12 @@
       # tags(desc): 文本规范化 > 换行修复 > 文件处理
       dos2unix
 
-      # 代码质量和分析
-      # tags(desc): 代码质量 > Shell静态检查 > Lint
-      shellcheck
-      # tags(desc): 代码质量 > 拼写检查 > Lint
-      typos
-      # tags(desc): 代码质量 > YAML规范 > Lint
-      yamllint
-      # tags(desc): 代码质量 > Markdown规范 > Lint
-      markdownlint-cli
-
-      # https://mynixos.com/nixpkgs/package/api-linter
-      # https://mynixos.com/nixpkgs/package/dotenv-linter
-      # https://mynixos.com/nixpkgs/package/gitlab-ci-linter
-
-      # https://mynixos.com/nixpkgs/package/kdlfmt
-      # kdlfmt 的 pre-commit 仍然需要bin才能使用
-      # tags(desc): 代码质量 > 格式化 > KDL
-      kdlfmt
-
       # tags(desc): 代码质量 > URL提取检查 > 文本分析
       urlscan
       # tags(desc): 代码质量 > 链接校验 > 文档检查
       lychee
+
+      # shellcheck/typos/yamllint/markdownlint-cli/kdlfmt → home/base/langs/treefmt.nix
     ]
     ++ [
       # 分类2：云与 API 工具

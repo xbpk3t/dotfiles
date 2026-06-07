@@ -26,7 +26,7 @@ let
   normalizeSingboxNode =
     name: node:
     let
-      singbox = node.singbox;
+      inherit (node) singbox;
     in
     singbox
     // {
@@ -81,13 +81,13 @@ in
       hostname = host;
       # What：SSH 用户名。
       # Why：默认 root，允许每个节点覆盖（node.ssh.user）。
-      sshUser = sshUser;
+      inherit sshUser;
       # What：额外 SSH 参数（如端口）。
       # Why：deploy-rs 没有独立的 sshPort 字段，只能通过 sshOpts 传递。
-      sshOpts = sshOpts;
+      inherit sshOpts;
       # What：是否在远端构建。
       # Why：与 Colmena 的 buildOnTarget 行为一致，避免本地负载。
-      remoteBuild = remoteBuild;
+      inherit remoteBuild;
       profiles.system = {
         # What：远端激活该 profile 的用户。
         # Why：NixOS 系统级激活必须以 root 执行。

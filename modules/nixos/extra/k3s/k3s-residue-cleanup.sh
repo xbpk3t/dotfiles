@@ -25,7 +25,7 @@ run_kill() {
   local signal="$1"
   shift
 
-  if [[ -n "${KILL_BIN:-}" ]]; then
+  if [[ -n ${KILL_BIN:-} ]]; then
     "${KILL_BIN}" "${signal}" "$@"
     return
   fi
@@ -46,24 +46,24 @@ fi
 
 if [[ $# -eq 1 ]]; then
   case "$1" in
-    inspect)
-      MODE="inspect"
-      ;;
-    --apply)
-      MODE="apply"
-      ;;
-    -h|--help)
-      usage
-      exit 0
-      ;;
-    *)
-      usage >&2
-      exit 1
-      ;;
+  inspect)
+    MODE="inspect"
+    ;;
+  --apply)
+    MODE="apply"
+    ;;
+  -h | --help)
+    usage
+    exit 0
+    ;;
+  *)
+    usage >&2
+    exit 1
+    ;;
   esac
 fi
 
-if [[ "${MODE}" == "apply" && "${EUID}" -ne 0 && "${K3S_CLEANUP_SKIP_ROOT_CHECK:-0}" != "1" ]]; then
+if [[ ${MODE} == "apply" && ${EUID} -ne 0 && ${K3S_CLEANUP_SKIP_ROOT_CHECK:-0} != "1" ]]; then
   if command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then
     exec sudo "$0" --apply
   fi
@@ -77,7 +77,7 @@ declare -A TARGET_REASON=()
 declare -a TARGET_PIDS=()
 
 while read -r pid ppid uid cmd; do
-  [[ -n "${pid}" ]] || continue
+  [[ -n ${pid} ]] || continue
   PROC_CMD["${pid}"]="${cmd}"
 done < <(ps -eo pid=,ppid=,uid=,args=)
 
@@ -90,28 +90,28 @@ is_target_trailing_traefik() {
   exe="$(readlink -f "/proc/${pid}/exe" 2>/dev/null || true)"
   parent_cmd="${PROC_CMD["${ppid}"]:-}"
 
-  [[ "${exe}" == *traefik* ]] || [[ "${cgroup}" == *kubepods* ]] || [[ "${parent_cmd}" == *containerd-shim-runc-v2* ]]
+  [[ ${exe} == *traefik* ]] || [[ ${cgroup} == *kubepods* ]] || [[ ${parent_cmd} == *containerd-shim-runc-v2* ]]
 }
 
 discover_targets() {
   local pid ppid uid cmd
 
   while read -r pid ppid uid cmd; do
-    [[ -n "${pid}" ]] || continue
+    [[ -n ${pid} ]] || continue
 
-    if [[ "${cmd}" == *containerd-shim-runc-v2* ]] && { [[ "${cmd}" == *" -namespace k8s.io "* ]] || [[ "${cmd}" == *"/run/k3s/containerd/containerd.sock"* ]] || [[ "${cmd}" == *"/var/lib/rancher/k3s/"* ]]; }; then
+    if [[ ${cmd} == *containerd-shim-runc-v2* ]] && { [[ ${cmd} == *" -namespace k8s.io "* ]] || [[ ${cmd} == *"/run/k3s/containerd/containerd.sock"* ]] || [[ ${cmd} == *"/var/lib/rancher/k3s/"* ]]; }; then
       TARGET_REASON["${pid}"]="k3s-containerd-shim"
       TARGET_PIDS+=("${pid}")
       continue
     fi
 
-    if [[ "${cmd}" == traefik\ * ]] && is_target_trailing_traefik "${pid}" "${ppid}"; then
+    if [[ ${cmd} == traefik\ * ]] && is_target_trailing_traefik "${pid}" "${ppid}"; then
       TARGET_REASON["${pid}"]="k3s-traefik-pod"
       TARGET_PIDS+=("${pid}")
       continue
     fi
 
-    if [[ "${cmd}" == *"/bin/k3s"* ]] || [[ "${cmd}" == k3s\ * ]] || [[ "${cmd}" == kubelet\ * && "${cmd}" == *"/var/lib/rancher/k3s"* ]]; then
+    if [[ ${cmd} == *"/bin/k3s"* ]] || [[ ${cmd} == k3s\ * ]] || [[ ${cmd} == kubelet\ * && ${cmd} == *"/var/lib/rancher/k3s"* ]]; then
       TARGET_REASON["${pid}"]="k3s-runtime"
       TARGET_PIDS+=("${pid}")
     fi
@@ -121,7 +121,7 @@ discover_targets() {
 print_targets() {
   local pid
 
-  if [[ "${#TARGET_PIDS[@]}" -eq 0 ]]; then
+  if [[ ${#TARGET_PIDS[@]} -eq 0 ]]; then
     log "no k3s residual processes detected"
     return
   fi
@@ -152,11 +152,11 @@ cleanup_stale_kube_external_ip_rules() {
   fi
 
   while IFS= read -r rule; do
-    [[ -n "${rule}" ]] || continue
+    [[ -n ${rule} ]] || continue
     rules+=("${rule}")
   done < <(run_iptables -t nat -S KUBE-SERVICES 2>/dev/null | grep -E 'external IP' | grep -E -- '--dport (80|443)( |$)' || true)
 
-  if [[ "${#rules[@]}" -eq 0 ]]; then
+  if [[ ${#rules[@]} -eq 0 ]]; then
     return
   fi
 
@@ -170,11 +170,11 @@ cleanup_stale_kube_external_ip_rules() {
 pid_is_alive() {
   local pid="$1"
 
-  if [[ "${K3S_CLEANUP_ASSUME_TARGETS_LIVE:-0}" == "1" ]]; then
+  if [[ ${K3S_CLEANUP_ASSUME_TARGETS_LIVE:-0} == "1" ]]; then
     return 0
   fi
 
-  if [[ -n "${KILL_BIN:-}" ]]; then
+  if [[ -n ${KILL_BIN:-} ]]; then
     "${KILL_BIN}" -0 "${pid}" >/dev/null 2>&1
     return
   fi
@@ -191,7 +191,7 @@ apply_targets() {
     fi
   done
 
-  if [[ "${#existing[@]}" -eq 0 ]]; then
+  if [[ ${#existing[@]} -eq 0 ]]; then
     log "no live target processes to stop"
     return
   fi
@@ -207,7 +207,7 @@ apply_targets() {
     fi
   done
 
-  if [[ "${#stubborn[@]}" -gt 0 ]]; then
+  if [[ ${#stubborn[@]} -gt 0 ]]; then
     log "sending KILL to: ${stubborn[*]}"
     run_kill -KILL "${stubborn[@]}"
   fi
@@ -217,7 +217,7 @@ discover_targets
 print_targets
 port_snapshot
 
-if [[ "${MODE}" == "apply" ]]; then
+if [[ ${MODE} == "apply" ]]; then
   apply_targets
   cleanup_stale_kube_external_ip_rules
   port_snapshot

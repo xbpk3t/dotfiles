@@ -35,7 +35,7 @@ else
   info "未发现本地仓库，跳过 git pull（仅执行 Flux 同步）"
 fi
 
-if [[ "${1:-}" == "--bootstrap" ]]; then
+if [[ ${1:-} == "--bootstrap" ]]; then
   # 首次初始化时使用（已有 Flux 则无需重复执行）
   info "执行 Flux Bootstrap（首次安装用）"
   flux bootstrap github \

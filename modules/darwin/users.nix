@@ -10,7 +10,7 @@
 }:
 let
   cacheSettings = mylib.nixCacheSettings;
-  username = userMeta.username;
+  inherit (userMeta) username;
 in
 {
   # Default user configuration (can be overridden by host-specific settings)
@@ -38,7 +38,7 @@ in
     ];
 
     # 系统级 cache：确保 deploy-rs / nix run 也能命中
-    substituters = cacheSettings.substituters;
+    inherit (cacheSettings) substituters;
     trusted-public-keys = cacheSettings.trustedPublicKeys;
 
     # 允许非 trusted user 也可以使用这些 substituters（避免 untrusted substituter 警告）

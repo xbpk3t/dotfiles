@@ -142,9 +142,7 @@ in
 
     home.packages =
       with pkgs;
-      [
-      ]
-      ++ optionals isLinux [
+      optionals isLinux [
         # https://mynixos.com/nixpkgs/package/bibata-cursors
         bibata-cursors
 

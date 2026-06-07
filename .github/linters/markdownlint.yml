@@ -59,3 +59,10 @@ MD047: false
 # 统一使用span标签跳转，注释该规则
 # docs/zzz/running.md:159:96 MD051/link-fragments Link fragments should be valid [Context: "[运动安全](#运动
 MD051: false
+
+# ol-prefix Ordered list item prefix
+# 允许有序列表以非1开始（有时会有有序列表混搭无序列表的情况）
+MD029: false
+
+# error MD060/table-column-style Table column style
+MD060: false

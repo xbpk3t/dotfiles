@@ -42,13 +42,6 @@ in
     inherit nameservers;
   };
 
-  # 确保 systemd-resolved 正确启用
-  services.resolved = {
-    enable = true;
-    # NOTE: fallbackDns 已迁移到 settings.Resolve.FallbackDNS
-    settings.Resolve.FallbackDNS = nameservers;
-  };
-
   # 禁用挂起/休眠/混合睡眠，仅阻断这些 target，不影响 systemctl poweroff 或桌面关机。
   # 为什么建议前两段都加
   #  - 只加第一段：阻止任何显式的 suspend/hibernate 调用，但如果GNOME/桌面或 logind 因“合盖、空闲超时、电源键”触发的是挂起动作，它仍会去拉起 suspend，结果被 systemd 拒绝 → 屏幕会黑一下或弹警告，体验不好；而且某些发行版会回退到其他动作，行为不确定。
@@ -68,15 +61,36 @@ in
     AllowHybridSleep = "no";
   };
 
-  # logind 也屏蔽合盖/闲置触发挂起，避免出现“尝试挂起但被上面拒绝”的黑屏/提示；关机/重启仍正常
-  # 忽略合盖、闲置和电源键触发的挂起，避免出现“尝试挂起但被拒绝”的黑屏/提示；若想让电源键关机，可把powerKey 改成 "poweroff"。
-  services.logind = {
-    # NOTE: 旧字段已迁移到 settings.Login.*
-    settings.Login.HandleLidSwitch = "ignore";
-    settings.Login.HandleLidSwitchDocked = "ignore";
-    # idleAction = "ignore";
-    # 若希望电源键关机可改为 "poweroff"；为防误触挂起这里默认忽略
-    settings.Login.HandlePowerKey = "ignore";
+  services = {
+    # 确保 systemd-resolved 正确启用
+    resolved = {
+      enable = true;
+      # NOTE: fallbackDns 已迁移到 settings.Resolve.FallbackDNS
+      settings.Resolve.FallbackDNS = nameservers;
+    };
+
+    # logind 也屏蔽合盖/闲置触发挂起，避免出现“尝试挂起但被上面拒绝”的黑屏/提示；关机/重启仍正常
+    # 忽略合盖、闲置和电源键触发的挂起，避免出现“尝试挂起但被拒绝”的黑屏/提示；若想让电源键关机，可把powerKey 改成 "poweroff"。
+    logind = {
+      # NOTE: 旧字段已迁移到 settings.Login.*
+      settings.Login = {
+        HandleLidSwitch = "ignore";
+        HandleLidSwitchDocked = "ignore";
+        # idleAction = "ignore";
+        # 若希望电源键关机可改为 "poweroff"；为防误触挂起这里默认忽略
+        HandlePowerKey = "ignore";
+      };
+    };
+
+    # https://mynixos.com/nixpkgs/options/services.cron
+    # 使用 NixOS 自带 cron，每日运行 task 里的 rclone:sync-docs-images
+    # 因为这些cron并不通用，所以放在host里
+    cron = {
+      enable = true;
+
+      # 需要真正可用的 sendmail/MTA 才能投递 MAILTO；如未配置邮件服务，请留空或自建 msmtp/postfix。
+      mailto = lib.mkDefault ""; # 如需邮件，在主机级覆写为有效邮箱
+    };
   };
 
   # Boot configuration - Enable systemd-boot and disable GRUB
@@ -147,14 +161,4 @@ in
   # };
 
   #  modules.networking.netbird.enable = false;
-
-  # https://mynixos.com/nixpkgs/options/services.cron
-  # 使用 NixOS 自带 cron，每日运行 task 里的 rclone:sync-docs-images
-  # 因为这些cron并不通用，所以放在host里
-  services.cron = {
-    enable = true;
-
-    # 需要真正可用的 sendmail/MTA 才能投递 MAILTO；如未配置邮件服务，请留空或自建 msmtp/postfix。
-    mailto = lib.mkDefault ""; # 如需邮件，在主机级覆写为有效邮箱
-  };
 }

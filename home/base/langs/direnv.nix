@@ -2,7 +2,6 @@
 {
   # https://github.com/nix-community/nix-direnv
   # https://mynixos.com/home-manager/options/programs.direnv
-  # https://mynixos.com/nixpkgs/options/programs.direnv
 
   # https://blog.therainisme.com/nixos
 

@@ -49,16 +49,22 @@ end
 
 local function readFile(path)
   local file = io.open(path, "r")
-  if not file then return nil end
+  if not file then
+    return nil
+  end
   local content = file:read("*a")
   file:close()
-  if not content then return nil end
+  if not content then
+    return nil
+  end
   return trim(content)
 end
 
 local function writeFile(path, content)
   local file = io.open(path, "w")
-  if not file then return false end
+  if not file then
+    return false
+  end
   file:write(content)
   file:close()
   return true
@@ -71,7 +77,9 @@ end
 
 local function currentSound()
   local saved = readFile(obj.soundFile)
-  if not saved or saved == "" then return "rain" end
+  if not saved or saved == "" then
+    return "rain"
+  end
   return normalizeSound(saved)
 end
 
@@ -133,7 +141,9 @@ end
 
 local function pgMatches(pattern)
   local code, stdout = capture("/usr/bin/pgrep", { "-f", pattern })
-  if code ~= 0 then return {} end
+  if code ~= 0 then
+    return {}
+  end
 
   local matches = {}
   for line in stdout:gmatch("[^\r\n]+") do
@@ -254,11 +264,7 @@ function obj:_statusRecord()
 end
 
 function obj:_statusMessage(record)
-  return string.format(
-    "noise=%s (%s)",
-    record.noise_running and "on" or "off",
-    record.noise_sound
-  )
+  return string.format("noise=%s (%s)", record.noise_running and "on" or "off", record.noise_sound)
 end
 
 function obj:_effectiveMediaFlags(event)
@@ -356,28 +362,38 @@ end
 -- ── lifecycle ────────────────────────────────────────────────────────
 
 function obj:start()
-  if self._hotkeys or self._eventTap then return self end
+  if self._hotkeys or self._eventTap then
+    return self
+  end
 
   -- Primary path: intercept Cmd+Shift + top-row media keys directly, so users
   -- do not need to hold Fn just to reach white-noise control.
-  self._eventTap = hs.eventtap.new({ hs.eventtap.event.types.systemDefined }, function(event)
-    local systemKey = event:systemKey()
-    if not systemKey or not systemKey.key then
-      return false
-    end
+  self._eventTap = hs.eventtap
+    .new({ hs.eventtap.event.types.systemDefined }, function(event)
+      local systemKey = event:systemKey()
+      if not systemKey or not systemKey.key then
+        return false
+      end
 
-    local handled = self:_handleMediaSystemKey(systemKey, self:_effectiveMediaFlags(event))
-    return handled
-  end):start()
+      local handled = self:_handleMediaSystemKey(systemKey, self:_effectiveMediaFlags(event))
+      return handled
+    end)
+    :start()
 
   -- Fallback path: if the keyboard is configured to send the top row as
   -- standard function keys should still work. We keep this
   -- alongside the media-key event tap because which path fires is decided by
   -- the keyboard mode, not by Hammerspoon.
   self._hotkeys = {
-    hs.hotkey.bind(self.hotkeyModifiers, "f7", function() self:prev() end),
-    hs.hotkey.bind(self.hotkeyModifiers, "f8", function() self:toggle() end),
-    hs.hotkey.bind(self.hotkeyModifiers, "f9", function() self:next() end),
+    hs.hotkey.bind(self.hotkeyModifiers, "f7", function()
+      self:prev()
+    end),
+    hs.hotkey.bind(self.hotkeyModifiers, "f8", function()
+      self:toggle()
+    end),
+    hs.hotkey.bind(self.hotkeyModifiers, "f9", function()
+      self:next()
+    end),
   }
 
   self.logger.i("HearingToggle v3 started: Cmd+Shift+media-key white-noise controls enabled")

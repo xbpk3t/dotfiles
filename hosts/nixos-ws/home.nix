@@ -1,29 +1,30 @@
-{ ... }:
-{
-  modules.infra = {
-    nh.enable = true;
-    networking.enable = true;
-  };
+_: {
+  modules = {
+    infra = {
+      nh.enable = true;
+      networking.enable = true;
+    };
 
-  modules.desktop = {
-    stylix.enable = true;
+    desktop = {
+      stylix.enable = true;
 
-    gnome.enable = true;
+      gnome.enable = true;
 
-    zed.enable = false;
+      zed.enable = false;
 
-    alacritty.enable = true;
-    kitty.enable = false;
-    ghostty.enable = false;
+      alacritty.enable = true;
+      kitty.enable = false;
+      ghostty.enable = false;
 
-    firefox.enable = true;
-  };
+      firefox.enable = true;
+    };
 
-  modules.devops.ssh = {
-    enable = true;
-    hosts = {
-      github.enable = true;
-      hk-hdy.enable = true;
+    devops.ssh = {
+      enable = true;
+      hosts = {
+        github.enable = true;
+        hk-hdy.enable = true;
+      };
     };
   };
 }

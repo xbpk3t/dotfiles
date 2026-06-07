@@ -9,7 +9,7 @@
 with lib;
 let
   cfg = config.modules.networking.singbox;
-  username = userMeta.username;
+  inherit (userMeta) username;
   client = import ../../lib/singbox/client-config.nix {
     inherit
       config
@@ -18,7 +18,7 @@ let
       pkgs
       ;
   };
-  clientConfigPath = client.clientConfigPath;
+  inherit (client) clientConfigPath;
 in
 {
   options.modules.networking.singbox = {

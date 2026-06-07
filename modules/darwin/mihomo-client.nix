@@ -9,7 +9,7 @@
 with lib;
 let
   cfg = config.modules.networking.mihomo;
-  username = userMeta.username;
+  inherit (userMeta) username;
   client = import ../../lib/mihomo/client-config.nix {
     inherit
       config

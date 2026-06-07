@@ -7,7 +7,7 @@
 }:
 let
   isSystemConfig = config ? system;
-  username = userMeta.username;
+  inherit (userMeta) username;
   # 平台相关配置
   platform = {
     userGroup = if pkgs.stdenv.isDarwin then "staff" else "users";

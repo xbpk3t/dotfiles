@@ -26,5 +26,5 @@
     # cabal-install
   ];
 
-  xdg.configFile.".stylua.toml".text = builtins.readFile ./stylua.toml;
+  # stylua config: managed by treefmt (home/base/langs/treefmt.nix)
 }

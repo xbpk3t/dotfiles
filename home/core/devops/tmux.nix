@@ -125,26 +125,28 @@ in
       '';
     };
 
-    # TPM 引导——首次运行或更新时克隆/拉取
-    # 跟随 home/darwin/default-apps.nix 中 home.activation.setDefaultApps 的先例模式
-    home.activation.installTpm = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      TPM_DIR="$HOME/.tmux/plugins/tpm"
-      if [ ! -d "$TPM_DIR/.git" ]; then
-        $VERBOSE_ECHO "Cloning TPM..."
-        mkdir -p "$HOME/.tmux/plugins"
-        ${pkgs.git}/bin/git clone --depth 1 https://github.com/tmux-plugins/tpm "$TPM_DIR"
-      else
-        $VERBOSE_ECHO "Updating TPM..."
-        ${pkgs.git}/bin/git -C "$TPM_DIR" pull --ff-only
-      fi
-    '';
+    home = {
+      # TPM 引导——首次运行或更新时克隆/拉取
+      # 跟随 home/darwin/default-apps.nix 中 home.activation.setDefaultApps 的先例模式
+      activation.installTpm = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        TPM_DIR="$HOME/.tmux/plugins/tpm"
+        if [ ! -d "$TPM_DIR/.git" ]; then
+          $VERBOSE_ECHO "Cloning TPM..."
+          mkdir -p "$HOME/.tmux/plugins"
+          ${pkgs.git}/bin/git clone --depth 1 https://github.com/tmux-plugins/tpm "$TPM_DIR"
+        else
+          $VERBOSE_ECHO "Updating TPM..."
+          ${pkgs.git}/bin/git -C "$TPM_DIR" pull --ff-only
+        fi
+      '';
 
-    home.packages = with pkgs; [
-      tmux
-    ];
+      packages = with pkgs; [
+        tmux
+      ];
 
-    home.shellAliases = {
-      tx = "tmux";
+      shellAliases = {
+        tx = "tmux";
+      };
     };
   };
 }

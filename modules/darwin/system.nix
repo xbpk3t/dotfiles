@@ -4,8 +4,8 @@
   ...
 }:
 let
-  username = userMeta.username;
-  timeZone = timeMeta.timeZone;
+  inherit (userMeta) username;
+  inherit (timeMeta) timeZone;
 in
 {
   # Shared macOS system preferences with default values

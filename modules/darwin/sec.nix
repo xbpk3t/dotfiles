@@ -1,6 +1,5 @@
 # Darwin security configuration
-{ ... }:
-{
+_: {
   security = {
     # PAM configuration
     pam = {
