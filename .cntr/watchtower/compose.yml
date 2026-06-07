@@ -1,0 +1,40 @@
+---
+# https://github.com/containrrr/watchtower
+
+name: watchtower
+
+services:
+  watchtower:
+    image: containrrr/watchtower:v1.7.1
+    container_name: watchtower
+    restart: unless-stopped
+    command:
+      # Container-name allowlist. Do not scan every container on the host.
+      - axonhub
+      - rsshub
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      TZ: Asia/Shanghai
+
+      # Run once per day at 05:00 local time. Cron format has 6 fields.
+      WATCHTOWER_SCHEDULE: "0 0 5 * * *"
+
+      # Remove old images after successful updates, but never remove volumes.
+      WATCHTOWER_CLEANUP: "true"
+      WATCHTOWER_REMOVE_VOLUMES: "false"
+
+      # Restart one container at a time and give apps more time to stop cleanly.
+      WATCHTOWER_ROLLING_RESTART: "true"
+      WATCHTOWER_TIMEOUT: "30s"
+
+      # SMTP via Resend. RESEND_TOKEN is injected by the host environment.
+      WATCHTOWER_NOTIFICATIONS: email
+      WATCHTOWER_NO_STARTUP_MESSAGE: "true"
+      WATCHTOWER_NOTIFICATION_REPORT: "true"
+      WATCHTOWER_NOTIFICATION_EMAIL_FROM: onboarding@resend.dev
+      WATCHTOWER_NOTIFICATION_EMAIL_TO: jeffcottlu@gmail.com
+      WATCHTOWER_NOTIFICATION_EMAIL_SERVER: smtp.resend.com
+      WATCHTOWER_NOTIFICATION_EMAIL_SERVER_PORT: "587"
+      WATCHTOWER_NOTIFICATION_EMAIL_SERVER_USER: resend
+      WATCHTOWER_NOTIFICATION_EMAIL_SERVER_PASSWORD: ${RESEND_TOKEN}
