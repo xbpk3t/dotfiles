@@ -158,6 +158,20 @@ in
   # 启用 nixos-container 容器支持（当前仅 nixos-agent 使用）。
   boot.enableContainers = lib.mkIf agentEnabled true;
 
+  # Why: VPS 上的交互入口主要是 SSH。默认 Linger=no 时，第一次 SSH 登录会冷启动
+  # `systemd --user`，而 zsh 的 .zshenv 会立刻 source Home Manager 生成的
+  # hm-session-vars.sh。这个脚本里的 secret env 会执行
+  # `cat ~/.config/sops-nix/secrets/<name>`；如果它早于 user-level sops-nix.service
+  # 生成 `/run/user/<uid>/secrets.d/*`，就会偶发 `No such file or directory`。
+  #
+  # What: 启用 linger 让 luck 的 user manager 在无人登录时也保持可用，语义上接近
+  # macOS 的长期 GUI user session：Home Manager 的 sops-nix user service 可以提前生成
+  # user secrets，SSH shell 读取 hm-session-vars.sh 时不再和 secret 生成过程竞态。
+  #
+  # Scope: 只在 VPS role 上开启。workstation/macOS 不依赖 SSH 冷启动 user manager，
+  # 不需要把这个生命周期变化推广到全局 NixOS base。
+  users.users.${userMeta.username}.linger = true;
+
   # [2026-05-25] sops-nix age key：宿主机的 keys.txt 只读挂入 nixos-agent 容器。
   # 容器通过 deploy-rs 独立部署，但 sops 解密发生在容器激活阶段（非构建阶段）。
   # 若容器内无 age 私钥，所有 sops secret（GITHUB_TOKEN 等）解密失败。
