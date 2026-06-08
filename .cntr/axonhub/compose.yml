@@ -23,6 +23,16 @@ services:
       - default
       - edge
     restart: unless-stopped
+    # Why: AxonHub panel Backup / request-log paths have already pushed this VPS
+    # into global OOM; the AxonHub container peaked around 4.4G RAM plus 3.3G
+    # swap, then the kernel killed host-critical services such as dockerd,
+    # nix-daemon, and caddy.
+    # What: cap only the AxonHub container so a future leak or oversized backup
+    # fails inside this service and restarts via Docker instead of taking down
+    # the whole VPS. Set memswap_limit equal to mem_limit to avoid hiding the
+    # leak behind swap and exhausting host memory pressure later.
+    mem_limit: 2g
+    memswap_limit: 2g
     healthcheck:
       test:
         [
