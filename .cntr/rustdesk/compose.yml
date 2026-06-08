@@ -1,7 +1,4 @@
 ---
-#  # https://mynixos.com/nixpkgs/package/rustdesk-server
-#  # https://mynixos.com/nixpkgs/options/services.rustdesk-server
-
 
 #networks:
 #  rustdesk-net:

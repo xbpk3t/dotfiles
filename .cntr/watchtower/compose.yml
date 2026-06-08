@@ -5,7 +5,7 @@ name: watchtower
 
 services:
   watchtower:
-    image: containrrr/watchtower:v1.7.1
+    image: containrrr/watchtower:latest
     container_name: watchtower
     restart: unless-stopped
     command:
@@ -16,6 +16,12 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       TZ: Asia/Shanghai
+
+      # [Incorrect docker version detection · Issue #2122 · containrrr/watchtower](https://github.com/containrrr/watchtower/issues/2122)
+      DOCKER_API_VERSION: "1.52"
+      WATCHTOWER_INCLUDE_STOPPED: "true"
+      # Default Level
+      WATCHTOWER_NOTIFICATIONS_LEVEL: "info"
 
       # Run once per day at 05:00 local time. Cron format has 6 fields.
       WATCHTOWER_SCHEDULE: "0 0 5 * * *"

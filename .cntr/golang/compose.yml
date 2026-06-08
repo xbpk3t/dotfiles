@@ -1,193 +1,176 @@
 ---
 
-x-common-variables: &common-variables
+name: golang
+
+x-common-env: &common-env
   TZ: ${TZ:-Asia/Shanghai}
 
 x-common-logging: &common-logging
-  driver: "json-file"
+  driver: json-file
   options:
     max-size: "10m"
     max-file: "3"
 
-x-common-restart: &common-restart
+x-common-service: &common-service
   restart: "no"
-
-x-backend-network: &backend-network
   networks:
     - backend
+  logging: *common-logging
 
-
-networks:
-  backend:
-    driver: ${NETWORKS_DRIVER:-bridge}
-    name: devenv_backend
-
-
-volumes:
-  mysql_data:
-    name: devenv_mysql_data
-  redis_data:
-    name: devenv_redis_data
-  clickhouse_data:
-    name: devenv_clickhouse_data
-  clickhouse_logs:
-    name: devenv_clickhouse_logs
-  prometheus_data:
-    name: devenv_prometheus_data
-  grafana_data:
-    name: devenv_grafana_data
-  nightingale_mysql_data:
-    name: devenv_nightingale_mysql_data
-  nightingale_redis_data:
-    name: devenv_nightingale_redis_data
-  nightingale_vm_data:
-    name: devenv_nightingale_vm_data
-  n8n_pgsql_data:
-    name: devenv_n8n_pgsql_data
-
-# 服务容器配置
 services:
-  #  # 开发环境 - Golang
-  #  golang:
-  #    build:
-  #      context: ./golang
-  #    container_name: devenv_golang
-  #    environment:
-  #      <<: *common-variables
-  #    privileged: true
-  #    volumes:
-  #      - ${CODE_PATH_HOST:-../}:/usr/src/code
-  #    ports:
-  #      - "${GOLANG_PORT_8000:-8000}:8000"
-  #      - "${GOLANG_PORT_8001:-8001}:8001"
-  #      - "${GOLANG_PORT_8002:-8002}:8002"
-  #      - "${GOLANG_PORT_8003:-8003}:8003"
-  #      - "${GOLANG_PORT_9000:-9000}:9000"
-  #      - "${GOLANG_PORT_9001:-9001}:9001"
-  #      - "${GOLANG_PORT_9002:-9002}:9002"
-  #      - "${GOLANG_PORT_9003:-9003}:9003"
-  #    stdin_open: true
-  #    tty: true
-  #    <<: [*backend-network, *common-restart]
-  #    logging: *common-logging
-
-  # 数据库服务
-  etcd:
-    image: bitnami/etcd:latest
-    container_name: devenv_etcd
-    environment:
-      <<: *common-variables
-      ALLOW_NONE_AUTHENTICATION: true
-      ETCD_ADVERTISE_CLIENT_URLS: http://etcd:2379
-    ports:
-      - "${ETCD_PORT:-2379}:2379"
-    <<: [*backend-network, *common-restart]
-    logging: *common-logging
-    healthcheck:
-      test: ["CMD", "etcdctl", "endpoint", "health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
   mysql:
-    image: mysql:${MYSQL_VERSION:-5.7}
-    container_name: devenv_mysql
+    <<: *common-service
+    profiles: ["db", "mysql"]
+    image: mysql:${MYSQL_VERSION:-8.0}
+    container_name: golang-mysql
     environment:
-      <<: *common-variables
+      <<: *common-env
       MYSQL_USER: ${MYSQL_USERNAME:-devuser}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-devpass}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpass}
       MYSQL_DATABASE: ${MYSQL_DATABASE:-devdb}
-    command: [
-      '--character-set-server=utf8mb4',
-      '--collation-server=utf8mb4_unicode_ci',
-      '--default-authentication-plugin=mysql_native_password'
-    ]
-    privileged: true
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-authentication-plugin=mysql_native_password
     volumes:
       - mysql_data:/var/lib/mysql
     ports:
       - "${MYSQL_PORT:-3306}:3306"
-    <<: [*backend-network, *common-restart]
-    logging: *common-logging
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${MYSQL_ROOT_PASSWORD:-rootpass}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
       start_period: 30s
 
-  redis:
-    image: redis:${REDIS_VERSION:-7-alpine}
-    container_name: devenv_redis
+  postgres:
+    <<: *common-service
+    profiles: ["db", "postgres"]
+    image: postgres:${PGSQL_VERSION:-16-alpine}
+    container_name: golang-postgres
     environment:
-      <<: *common-variables
+      <<: *common-env
+      POSTGRES_USER: ${PGSQL_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${PGSQL_PASSWORD:-postgres}
+      POSTGRES_DB: ${PGSQL_DATABASE:-postgres}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${PGSQL_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    <<: *common-service
+    profiles: ["cache", "redis"]
+    image: redis:${REDIS_VERSION:-7-alpine}
+    container_name: golang-redis
+    command: redis-server --appendonly yes
     volumes:
       - redis_data:/data
-      - ./configs/redis.sh:/usr/local/bin/redis-optimize.sh:ro
     ports:
       - "${REDIS_PORT:-6379}:6379"
-    <<: [*backend-network, *common-restart]
-    logging: *common-logging
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
-  # Caddy - 反向代理和认证
-  caddy:
-    image: stefanprodan/caddy:${CADDY_VERSION:-latest}
-    container_name: devenv_caddy
+  etcd:
+    <<: *common-service
+    profiles: ["ms", "dtm", "etcd"]
+    image: bitnami/etcd:${ETCD_VERSION:-3.5}
+    container_name: golang-etcd
     environment:
-      <<: *common-variables
-      ADMIN_USER: ${CADDY_ADMIN_USER:-admin}
-      ADMIN_PASSWORD: ${CADDY_ADMIN_PASSWORD:-admin}
+      <<: *common-env
+      ALLOW_NONE_AUTHENTICATION: "yes"
+      ETCD_LISTEN_CLIENT_URLS: http://0.0.0.0:2379
+      ETCD_ADVERTISE_CLIENT_URLS: http://etcd:2379
     volumes:
-      - ./configs/caddy:/etc/caddy:ro
+      - etcd_data:/bitnami/etcd
     ports:
-      - "${CADDY_GRAFANA_PORT:-3001}:3000"
-      - "${CADDY_PROMETHEUS_PORT:-9099}:9090"
-      - "${CADDY_ALERTMANAGER_PORT:-9094}:9093"
-      - "${CADDY_PUSHGATEWAY_PORT:-9092}:9091"
-    depends_on:
-      - prometheus
-      - grafana
-      - alertmanager
-      - pushgateway
-    <<: [*backend-network, *common-restart]
-    logging: *common-logging
+      - "${ETCD_PORT:-2379}:2379"
+    healthcheck:
+      test: ["CMD", "etcdctl", "endpoint", "health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
-  # 链路追踪
   jaeger:
-    image: jaegertracing/all-in-one:${JAEGER_VERSION:-1.28}
-    container_name: devenv_jaeger
+    <<: *common-service
+    profiles: ["trace", "jaeger"]
+    image: jaegertracing/all-in-one:${JAEGER_VERSION:-1.57}
+    container_name: golang-jaeger
     environment:
-      <<: *common-variables
-      COLLECTOR_OTLP_ENABLED: true
+      <<: *common-env
+      COLLECTOR_OTLP_ENABLED: "true"
     ports:
-      - "${JAEGER_PORT:-16686}:16686"
-      - "${JAEGER_OTLP_PORT:-4317}:4317"
+      - "${JAEGER_UI_PORT:-16686}:16686"
+      - "${JAEGER_OTLP_GRPC_PORT:-4317}:4317"
       - "${JAEGER_OTLP_HTTP_PORT:-4318}:4318"
-    <<: [*backend-network, *common-restart]
-    logging: *common-logging
 
-  # 分布式事务管理
   dtm:
-    image: yedf/dtm:latest
-    container_name: devenv_dtm
-    environment:
-      <<: *common-variables
+    <<: *common-service
+    profiles: ["ms", "dtm"]
+    image: yedf/dtm:${DTM_VERSION:-latest}
+    container_name: golang-dtm
     entrypoint:
-      - "/app/dtm/dtm"
-      - "-c=/app/dtm/configs/config.yaml"
+      - /app/dtm/dtm
+      - -c=/app/dtm/configs/config.yaml
     volumes:
-      - ./configs/dtm-config.yml:/app/dtm/configs/config.yaml:ro
+      - ./dtm/config.yml:/app/dtm/configs/config.yaml:ro
     ports:
       - "${DTM_HTTP_PORT:-36789}:36789"
       - "${DTM_GRPC_PORT:-36790}:36790"
     depends_on:
       etcd:
         condition: service_healthy
-    <<: [*backend-network, *common-restart]
-    logging: *common-logging
+
+  clickhouse:
+    <<: *common-service
+    profiles: ["analytics", "clickhouse"]
+    image: clickhouse/clickhouse-server:${CLICKHOUSE_VERSION:-24.8}
+    container_name: golang-clickhouse
+    environment:
+      <<: *common-env
+      CLICKHOUSE_DB: ${CLICKHOUSE_DATABASE:-default}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-clickhouse}
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+      - clickhouse_logs:/var/log/clickhouse-server
+    ports:
+      - "${CLICKHOUSE_HTTP_PORT:-8123}:8123"
+      - "${CLICKHOUSE_TCP_PORT:-9000}:9000"
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    healthcheck:
+      test: ["CMD", "clickhouse-client", "--query", "SELECT 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+networks:
+  backend:
+    name: golang_backend
+    driver: ${NETWORKS_DRIVER:-bridge}
+
+volumes:
+  mysql_data:
+    name: golang_mysql_data
+  postgres_data:
+    name: golang_postgres_data
+  redis_data:
+    name: golang_redis_data
+  etcd_data:
+    name: golang_etcd_data
+  clickhouse_data:
+    name: golang_clickhouse_data
+  clickhouse_logs:
+    name: golang_clickhouse_logs
