@@ -10,27 +10,85 @@ repos:
   #      - id: check-useless-excludes
   #        exclude: ^/nix/store/
 
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v6.0.0
+  - repo: local
     hooks:
       - id: check-toml
+        name: check toml
+        entry: check-toml
+        language: system
+        types: [toml]
+
       - id: end-of-file-fixer
+        name: fix end of files
+        entry: end-of-file-fixer
+        language: system
+        types: [text]
+        stages: [pre-commit, pre-push, manual]
 
       # 定义的hook脚本，在repo的.pre-commit-hooks.yaml中定义
       - id: check-added-large-files
+        name: check for added large files
+        entry: check-added-large-files
+        language: system
+        stages: [pre-commit, pre-push, manual]
         args: ["--maxkb=1024", "--enforce-all"]
 
       - id: check-added-large-files
+        name: check for added large files
+        entry: check-added-large-files
+        language: system
+        stages: [pre-commit, pre-push, manual]
         args: ["--maxkb=5120", "--enforce-all"]
 
       - id: trailing-whitespace # 移除尾部空格符
+        name: trim trailing whitespace
+        entry: trailing-whitespace-fixer
+        language: system
+        types: [text]
+        stages: [pre-commit, pre-push, manual]
+
       - id: check-merge-conflict # 检查是否含有合并冲突符号
+        name: check for merge conflicts
+        entry: check-merge-conflict
+        language: system
+        types: [text]
+
       - id: check-json
+        name: check json
+        entry: check-json
+        language: system
+        types: [json]
+
       - id: check-symlinks
+        name: check for broken symlinks
+        entry: check-symlinks
+        language: system
+        types: [symlink]
+
       - id: mixed-line-ending
+        name: mixed line ending
+        entry: mixed-line-ending
+        language: system
+        types: [text]
+
       - id: check-case-conflict
+        name: check for case conflicts
+        entry: check-case-conflict
+        language: system
+
       - id: check-executables-have-shebangs
+        name: check that executables have shebangs
+        entry: check-executables-have-shebangs
+        language: system
+        types: [text, executable]
+        stages: [pre-commit, pre-push, manual]
+
       - id: check-shebang-scripts-are-executable
+        name: check that scripts with shebangs are executable
+        entry: check-shebang-scripts-are-executable
+        language: system
+        types: [text]
+        stages: [pre-commit, pre-push, manual]
 
   # Remote exception: nixpkgs has no direct pre-commit-ci-config package.
   - repo: https://github.com/pre-commit-ci/pre-commit-ci-config
@@ -132,13 +190,14 @@ repos:
         stages: [pre-commit]
 
 
-  - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.105.0
+  - repo: local
     hooks:
       - id: terraform_fmt
-        args:
-          - --hook-config=--tf-path=tofu
-          - --args=-diff
+        name: Terraform fmt
+        entry: tofu fmt -diff
+        language: system
+        files: \.(tf|tofu|tfvars|(tftest|tofutest|tfmock|tfquery)\.hcl)$
+        exclude: \.terraform/.*$
 
   #  - repo: local
   #    hooks:
