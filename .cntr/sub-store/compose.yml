@@ -13,6 +13,7 @@
 
 name: sub-store
 
+# MAYBE: [2026-05-28] 想了一下 sub-store 还是应该部署到homelab，然后走 tailnet 给ws使用。两点好处（1、现在扔到VPS上，测速必然不准。2、）
 services:
   sub-store:
     image: xream/sub-store:latest

@@ -13,6 +13,7 @@ tasks:
     summary: |
       task tf
       task tf TAG=cloudflare
+      task tf TAG=github
     cmds:
       - task: stack:list
         vars:
@@ -23,6 +24,7 @@ tasks:
     summary: |
       task tf:validate STACK=infra/stacks/homelab/cloudflare/lucc.dev/dns
       task tf:validate STACK=infra/stacks/homelab/cloudflare/account/pages
+      task tf:validate STACK=infra/stacks/homelab/github/repositories
     cmds:
       - task: stack:validate
         vars:
@@ -32,7 +34,9 @@ tasks:
     desc: "对单个 stack 或一组 tagged stacks 做计划预览"
     summary: |
       task tf:plan STACK=infra/stacks/homelab/cloudflare/account/pages
+      task tf:plan STACK=infra/stacks/homelab/github/repositories
       task tf:plan TAG=cloudflare
+      task tf:plan TAG=github
     cmds:
       - task: stack:plan
         vars:
@@ -43,6 +47,7 @@ tasks:
     desc: "对单个 infra stack 执行 apply"
     summary: |
       task tf:apply STACK=infra/stacks/homelab/cloudflare/account/pages
+      task tf:apply STACK=infra/stacks/homelab/github/repositories
     cmds:
       - task: stack:apply
         vars:
