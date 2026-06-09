@@ -1,16 +1,14 @@
 version: "3"
 
-# init-templatedir    Install hook script in a directory intended for use with `git config init.templateDir`.
-# install             Install the pre-commit script.
-# install-hooks       Install hook environments for all environments in the config file. You may find `pre-commit install --install-hooks` more useful.
-# migrate-config      Migrate list configuration to new map configuration.
-# run                 Run hooks.
-# sample-config       Produce a sample .pre-commit-config.yaml file
-# try-repo            Try the hooks in a repository, useful for developing new hooks.
-# uninstall           Uninstall the pre-commit script.
-# validate-config     Validate .pre-commit-config.yaml files
-# validate-manifest   Validate .pre-commit-hooks.yaml files
-# help                Show help for a specific command.
+# install            Install prek Git shims into Git's effective hooks directory.
+# prepare-hooks      Prepare environments for all hooks used in the config file.
+# run                Run hooks.
+# sample-config      Produce a sample configuration file.
+# try-repo           Try hooks from another repository.
+# uninstall          Uninstall prek Git shims.
+# validate-config    Validate configuration files.
+# validate-manifest  Validate .pre-commit-hooks.yaml files.
+# auto-update        Update remote repository rev fields.
 
 vars:
   HOOKS:
@@ -28,7 +26,7 @@ vars:
     - plantuml-check
 
 
-# [2026-03-31] 精简 pre-commit task
+# [2026-03-31] 精简 hook task
 #
 # 本轮移除的 task：
 # - init-template
@@ -48,10 +46,9 @@ vars:
 # - uninstall
 #
 # 进一步删除原因：
-# - update 只是 pre-commit autoupdate 的单步封装，而 maintain 已经包含 clean / gc /
-#   install-hooks / autoupdate 这一整套维护流程；当前不再单独保留一个更轻的 update
-#   入口。
-# - uninstall 的语义只是移除当前仓库 .git/hooks/ 里的 pre-commit hook script，
+# - update 只是远端 hook rev 更新的单步封装；当前不再单独保留一个更轻的 update
+#   入口，避免把日常维护和 remote rev bump 混在一起。
+# - uninstall 的语义只是移除当前仓库 .git/hooks/ 里的 hook wrapper，
 #   不会删除 .pre-commit-config.yaml，也不会清理本地 cache；对当前仓库的日常维护来说，
 #   这个动作过于边缘，不值得继续挂在主入口里。
 
@@ -60,45 +57,64 @@ vars:
 
 tasks:
   default:
-    desc: "default 任务"
-    summary: "task -g pc"
-    cmd: pre-commit run --all-files  # 检查所有文件（非暂存区）
+    desc: 运行当前仓库所有 Prek hooks
+    summary: |
+      task -g pc
+
+      在调用目录执行 `prek run --all-files`，用于检查当前仓库全部已跟踪文件。
+    cmd: prek run --all-files
     dir: '{{.USER_WORKING_DIR}}'
     interactive: true
 
   hook:
     desc: 执行指定hook（交互式选择或直接运行检查）
-    summary: "task -g pc:hook"
+    summary: |
+      task -g pc:hook
+      task -g pc:hook -- check-json
+
+      未传参数时从 HOOKS 白名单中交互选择一个 hook；传入参数时直接执行 `prek run <hook>`。
     interactive: true
     dir: '{{.USER_WORKING_DIR}}'
-    cmd: pre-commit run {{.SELECTED}}
-    vars:
-      SELECTED:
-        sh: gum choose {{.HOOKS | join " "}}
+    cmd: |
+      selected='{{.CLI_ARGS}}'
+      if [ -z "$selected" ]; then
+        selected="$(gum choose {{.HOOKS | join " "}})"
+      fi
+      prek run "$selected"
 
-  # 维护任务：clean + gc + 重装 hook wrapper + 重装工具环境 + autoupdate
+  # 维护任务：clean + gc + 重装已存在的 hook wrapper + 重装工具环境
   #
-  # [2026-05-28] 添加 pre-commit install
+  # [2026-05-28] 添加 hook wrapper 重装
   # 背景：Nix GC（nix-collect-garbage）会清除旧 generation 的 store 路径，
-  # 而 pre-commit install 会将当前 Nix store 的绝对路径硬编码写入
+  # 而 hook install 会将当前 Nix store 的绝对路径硬编码写入
   # .git/hooks/pre-commit 和 .git/hooks/pre-push（包括 shebang 和 exec 行）。
   # GC 后这些路径变死链接 → git push 报错 "cannot exec .git/hooks/pre-push"。
   #
-  # 注意 install 和 install-hooks 的区别：
-  #   - install:      写 .git/hooks/ 下的 wrapper script（修复的就是这个）
-  #   - install-hooks: 安装 hook 工具本身到 cache（lint 等），不碰 wrapper
-  # 两者缺一不可，都放在 maintain 里。
-  #
-  # 另外，pre-commit install 默认只装 pre-commit hook type，
-  # 当前仓库配置了 default_stages: [pre-commit, pre-push]，
-  # 所以需要 --hook-type pre-commit --hook-type pre-push 两个都显式指定。
+  # 只重装当前仓库里已经存在的 hook type，避免 maintain 意外启用新的 commit-msg 等行为。
   maintain:
-    desc: 对全局Pre-commit的hook进行 clean+gc+重装 操作
-    summary: "task -g pc:maintain"
+    desc: 对当前仓库的 Prek cache 和 hook wrapper 进行维护
+    summary: |
+      task -g pc:maintain
+
+      执行 `prek cache clean`、`prek cache gc`，并只覆盖重装当前仓库 .git/hooks/ 下已经存在的
+      pre-commit/pre-push/commit-msg wrapper。若当前仓库没有这些 wrapper，则只执行
+      `prek prepare-hooks`。
     cmds:
-      - pre-commit clean  # 清理缓存
-      - pre-commit gc     # 垃圾回收
-      - pre-commit install --hook-type pre-commit --hook-type pre-push  # 重装 hook wrapper script（修复 Nix GC 后死路径）
-      - pre-commit install-hooks  # 重新安装 hook 工具环境
-      - pre-commit autoupdate  # 更新 hook 版本
+      - prek cache clean
+      - prek cache gc
+      - |
+        hook_args=""
+        for hook_type in pre-commit pre-push commit-msg; do
+          hook_path="$(git rev-parse --git-path "hooks/$hook_type")"
+          if [ -f "$hook_path" ]; then
+            hook_args="$hook_args --hook-type $hook_type"
+          fi
+        done
+
+        if [ -n "$hook_args" ]; then
+          # hook_args only contains fixed hook names from the loop above.
+          prek install --overwrite --prepare-hooks $hook_args
+        else
+          prek prepare-hooks
+        fi
     dir: '{{.USER_WORKING_DIR}}'
