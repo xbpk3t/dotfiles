@@ -9,8 +9,9 @@ tasks:
   list:
     desc: "列出 infra stacks"
     summary: |
-      task tf:list
-      task tf:list TAG=cloudflare
+      task tf
+      task tf TAG=cloudflare
+      task tf TAG=github
     vars:
       EFFECTIVE_TAG: '{{if .TAG}}{{.TAG}}{{else}}layer-infra{{end}}'
     dir: "{{.USER_WORKING_DIR}}"
@@ -21,6 +22,7 @@ tasks:
     desc: "对单个 stack 做 tofu validate"
     summary: |
       task tf:validate STACK=infra/stacks/homelab/cloudflare/lucc.dev/dns
+      task tf:validate STACK=infra/stacks/homelab/github/repositories
     requires:
       vars:
         - STACK
@@ -37,7 +39,9 @@ tasks:
     desc: "对单个 stack 或一组 tagged stacks 做 tofu plan"
     summary: |
       task tf:plan STACK=infra/stacks/homelab/cloudflare/account/pages
+      task tf:plan STACK=infra/stacks/homelab/github/repositories
       task tf:plan TAG=cloudflare
+      task tf:plan TAG=github
     cmds:
       - task: '{{if .STACK}}plan-stack{{else}}plan-tag{{end}}'
         vars:
@@ -60,12 +64,20 @@ tasks:
         msg: "plan 需要 Cloudflare R2 backend 凭据，请提供 CF_R2_AK"
       - sh: test -n "${CF_R2_SK:-}"
         msg: "plan 需要 Cloudflare R2 backend 凭据，请提供 CF_R2_SK"
-      - sh: test -n "${CLOUDFLARE_API_TOKEN:-}"
-        msg: "plan 需要 Cloudflare API token，请提供 CLOUDFLARE_API_TOKEN"
+      - sh: |
+          case "{{.STACK}}" in
+            */cloudflare/*) test -n "${CLOUDFLARE_API_TOKEN:-}" ;;
+            */tailscale/*) test -n "${TAILSCALE_API_KEY:-}" ;;
+            */github/*) test -n "${GITHUB_TOKEN:-}" ;;
+            *) true ;;
+          esac
+        msg: "plan 需要 stack 对应 provider token：CLOUDFLARE_API_TOKEN、TAILSCALE_API_KEY 或 GITHUB_TOKEN"
     env:
       AWS_ACCESS_KEY_ID: "{{.CF_R2_AK}}"
       AWS_SECRET_ACCESS_KEY: "{{.CF_R2_SK}}"
       CLOUDFLARE_API_TOKEN: "{{.CLOUDFLARE_API_TOKEN}}"
+      TAILSCALE_API_KEY: "{{.TAILSCALE_API_KEY}}"
+      GITHUB_TOKEN: "{{.GITHUB_TOKEN}}"
     cmds:
       - tofu init -reconfigure -input=false
       - tofu plan -input=false
@@ -81,12 +93,18 @@ tasks:
         msg: "plan 需要 Cloudflare R2 backend 凭据，请提供 CF_R2_AK"
       - sh: test -n "${CF_R2_SK:-}"
         msg: "plan 需要 Cloudflare R2 backend 凭据，请提供 CF_R2_SK"
-      - sh: test -n "${CLOUDFLARE_API_TOKEN:-}"
-        msg: "plan 需要 Cloudflare API token，请提供 CLOUDFLARE_API_TOKEN"
+      - sh: |
+          stacks="$(terramate list --tags "{{.TAG}}")"
+          case "$stacks" in */cloudflare/*) test -n "${CLOUDFLARE_API_TOKEN:-}" || exit 1 ;; esac
+          case "$stacks" in */tailscale/*) test -n "${TAILSCALE_API_KEY:-}" || exit 1 ;; esac
+          case "$stacks" in */github/*) test -n "${GITHUB_TOKEN:-}" || exit 1 ;; esac
+        msg: "plan TAG 需要所选 stacks 对应 provider token：CLOUDFLARE_API_TOKEN、TAILSCALE_API_KEY 或 GITHUB_TOKEN"
     env:
       AWS_ACCESS_KEY_ID: "{{.CF_R2_AK}}"
       AWS_SECRET_ACCESS_KEY: "{{.CF_R2_SK}}"
       CLOUDFLARE_API_TOKEN: "{{.CLOUDFLARE_API_TOKEN}}"
+      TAILSCALE_API_KEY: "{{.TAILSCALE_API_KEY}}"
+      GITHUB_TOKEN: "{{.GITHUB_TOKEN}}"
     cmds:
       - terramate run --tags "{{.TAG}}" -- tofu init -reconfigure -input=false
       - terramate run --tags "{{.TAG}}" -- tofu plan -input=false
@@ -95,6 +113,7 @@ tasks:
     desc: "对单个 stack 执行 tofu apply"
     summary: |
       task tf:apply STACK=infra/stacks/homelab/cloudflare/account/pages
+      task tf:apply STACK=infra/stacks/homelab/github/repositories
     requires:
       vars:
         - STACK
@@ -106,12 +125,20 @@ tasks:
         msg: "apply 需要 Cloudflare R2 backend 凭据，请提供 CF_R2_AK"
       - sh: test -n "${CF_R2_SK:-}"
         msg: "apply 需要 Cloudflare R2 backend 凭据，请提供 CF_R2_SK"
-      - sh: test -n "${CLOUDFLARE_API_TOKEN:-}"
-        msg: "apply 需要 Cloudflare API token，请提供 CLOUDFLARE_API_TOKEN"
+      - sh: |
+          case "{{.STACK}}" in
+            */cloudflare/*) test -n "${CLOUDFLARE_API_TOKEN:-}" ;;
+            */tailscale/*) test -n "${TAILSCALE_API_KEY:-}" ;;
+            */github/*) test -n "${GITHUB_TOKEN:-}" ;;
+            *) true ;;
+          esac
+        msg: "apply 需要 stack 对应 provider token：CLOUDFLARE_API_TOKEN、TAILSCALE_API_KEY 或 GITHUB_TOKEN"
     env:
       AWS_ACCESS_KEY_ID: "{{.CF_R2_AK}}"
       AWS_SECRET_ACCESS_KEY: "{{.CF_R2_SK}}"
       CLOUDFLARE_API_TOKEN: "{{.CLOUDFLARE_API_TOKEN}}"
+      TAILSCALE_API_KEY: "{{.TAILSCALE_API_KEY}}"
+      GITHUB_TOKEN: "{{.GITHUB_TOKEN}}"
     cmds:
       - tofu init -reconfigure -input=false
       - tofu apply
@@ -132,12 +159,9 @@ tasks:
         msg: "state-rm 需要 Cloudflare R2 backend 凭据，请提供 CF_R2_AK"
       - sh: test -n "${CF_R2_SK:-}"
         msg: "state-rm 需要 Cloudflare R2 backend 凭据，请提供 CF_R2_SK"
-      - sh: test -n "${CLOUDFLARE_API_TOKEN:-}"
-        msg: "state-rm 需要 Cloudflare API token，请提供 CLOUDFLARE_API_TOKEN"
     env:
       AWS_ACCESS_KEY_ID: "{{.CF_R2_AK}}"
       AWS_SECRET_ACCESS_KEY: "{{.CF_R2_SK}}"
-      CLOUDFLARE_API_TOKEN: "{{.CLOUDFLARE_API_TOKEN}}"
     cmds:
       - tofu init -reconfigure -input=false
       - tofu state rm '{{.ADDRESS}}'

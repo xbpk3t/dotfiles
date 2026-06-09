@@ -89,9 +89,6 @@ in
       # tags(desc): 分支工作流 > worktree管理 > 并行开发
       worktrunk
 
-      # [2025-12-11] 会跟git冲突，所以注释掉
-      # gitMinimal # 确保 Git 在构建环境中可用
-
       # tags(desc): 大文件支持 > 版本控制 > Git生态
       git-lfs
 

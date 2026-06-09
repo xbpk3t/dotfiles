@@ -14,6 +14,7 @@
 
       # tags(desc): 代码质量 > 提交钩子 > 自动化
       pre-commit
+      prek
 
       # https://mynixos.com/nixpkgs/package/dos2unix
       #
