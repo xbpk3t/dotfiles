@@ -7,7 +7,7 @@
 }:
 let
   cfg = config.modules.AI.claude;
-  claudeDefaultModel = "claude-opus-4-7[1m]";
+  claudeDefaultModel = "deepseek-v4-flash";
 in
 {
   options.modules.AI.claude = with lib; {
@@ -55,6 +55,22 @@ in
 
           # 文件2建议：真正关闭内置 auto memory（之前只禁了 claude-mem 插件，未关内置 auto memory）
           autoMemoryEnabled = false;
+
+          # [2026-06-09] Agent View cache 优化：
+          # 默认 bgIsolation = "worktree" 会把每个后台 session 放进独立 worktree，
+          # 导致 cwd 不同 → system prompt 前缀不同 → prompt cache 全量 miss。
+          # 实测同等 100M token 下 cost 差 ~10 倍，根因就是 worktree 隔离导致 cache hit rate 崩溃。
+          # 设为 "none" 后所有后台 session 共享同一 cwd，cache prefix 可以对上。
+          # 代价：多个后台 agent 会直接改主 checkout，不再有文件隔离保护。
+          worktree = {
+            bgIsolation = "none";
+          };
+
+          # [2026-06-09] 减少 system prompt 前缀变动：
+          # includeGitInstructions 默认 true 会把 git status snapshot（branch + recent commits）
+          # 塞进 system prompt，每次启动都不同，导致前缀变化 → cache miss。
+          # 关掉后 git 工作流不受影响（CLAUDE.md 和 skills 里已有 git 指引）。
+          includeGitInstructions = false;
 
           # 走 Claude 原生插件生态：
           # 1) 先声明第三方 marketplace 来源（官方 marketplace 不需要声明）
