@@ -16,7 +16,6 @@ in
   config = lib.mkIf cfg.enable {
     programs.vscode = {
       enable = pkgs.stdenv.isLinux;
-      package = pkgs.vscode;
 
       # 保证 settings, ext, keybinds 相应配置文件可写
       mutableExtensionsDir = true;
@@ -24,22 +23,22 @@ in
       # mutableKeybindings = true;
 
       profiles.default = {
-        enableUpdateCheck = true;
-        enableExtensionUpdateCheck = true;
+        enableUpdateCheck = false;
+        enableExtensionUpdateCheck = false;
 
         extensions = with pkgs.vscode-extensions; [
           rust-lang.rust-analyzer
           kahole.magit
           graphql.vscode-graphql
 
-          bbenoist.nix
+          # bbenoist.nix  # superseded by jnoortheen.nix-ide
           jnoortheen.nix-ide
 
           golang.go
           ms-python.python
           redhat.vscode-yaml
           ms-azuretools.vscode-docker
-          ms-vscode.cpptools
+          # ms-vscode.cpptools  # not using C/C++
           hashicorp.terraform
           tamasfe.even-better-toml
           timonwong.shellcheck
@@ -52,11 +51,13 @@ in
           ms-vscode.makefile-tools
           ms-vscode-remote.remote-ssh
           # ms-vscode-remote.remote-ssh-edit
-          ms-vscode-remote.remote-containers
+          # ms-vscode-remote.remote-containers  # not using Dev Containers
           github.vscode-pull-request-github
-          ibm.output-colorizer
-          formulahendry.code-runner
+          # ibm.output-colorizer  # VSCode built-in is sufficient
+          # formulahendry.code-runner  # prefer terminal
           gruntfuggly.todo-tree
+          usernamehw.errorlens
+          charliermarsh.ruff
 
           # oderwat.indent-rainbow
 
@@ -102,8 +103,8 @@ in
           "explorer.confirmDelete" = false;
           "explorer.confirmDragAndDrop" = false;
 
-          "extensions.autoCheckUpdates" = false;
-          "extensions.autoUpdate" = false;
+          # "extensions.autoCheckUpdates" = false;  # managed by enableExtensionUpdateCheck
+          # "extensions.autoUpdate" = false;  # managed by enableExtensionUpdateCheck
 
           "files.eol" = "\n";
           "files.insertFinalNewline" = true;
@@ -130,7 +131,7 @@ in
           "nix.serverPath" = "nixd";
 
           "python.analysis.autoImportCompletions" = true;
-          "python.formatting.provider" = "black";
+          # "python.formatting.provider" = "black";  # deprecated, use ruff
 
           "remote.SSH.useLocalServer" = false;
 
@@ -160,13 +161,13 @@ in
           ];
           "todo-tree.tree.showScanModeButton" = false;
 
-          "update.mode" = "none";
+          # "update.mode" = "none";  # managed by enableUpdateCheck
           "window.autoDetectColorScheme" = false;
           "window.commandCenter" = false;
           "window.titleBarStyle" = "custom";
           #      "workbench.colorTheme" = "Catppuccin Mocha";
           "workbench.editor.enablePreview" = false;
-          "workbench.preferredDarkColorTheme" = "Catppuccin Mocha";
+          "workbench.preferredDarkColorTheme" = "Modern Dark";
           "workbench.startupEditor" = "none";
 
           "[go]" = {
@@ -193,7 +194,7 @@ in
             "editor.defaultFormatter" = "jnoortheen.nix-ide";
           };
           "[python]" = {
-            "editor.defaultFormatter" = "ms-python.python";
+            "editor.defaultFormatter" = "charliermarsh.ruff";
           };
           "[rust]" = {
             "editor.defaultFormatter" = "rust-lang.rust-analyzer";

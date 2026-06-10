@@ -368,9 +368,9 @@ in
   };
 
   restore_on_startup = "last_session";
-  # AI Configuration - Enable Claude Code via ACP
-  # Reference: https://zed.dev/blog/claude-code-via-acp
-  disable_ai = false;
+  # 禁用所有内置 AI 功能（Agent Panel / Inline Assistant / Edit Prediction / Git commit 生成）
+  # Claude Code/Codex 在外部终端直接使用，不走 Zed 内置 AI
+  disable_ai = true;
   cursor_shape = "bar";
 
   # 意思很明确，Bottom Dock的layout（是否会挤占两侧Pane的Dock），默认 Contained (底部 dock 只占中间编辑区的宽度，而非 full 占据整个窗口宽度)，这里显式声明
@@ -427,45 +427,12 @@ in
   #
   relative_line_numbers = "disabled";
 
-  # 禁用Tab补全，很干扰
-  show_edit_predictions = false;
-
-  # AI Features Configuration
-  features = {
-    # https://zed.dev/docs/reference/all-settings#edit-prediction-provider
-    edit_prediction_provider = "none";
-  };
-
   # hour_format = "hour24";
 
   # https://zed.dev/docs/configuring-zed#scroll-beyond-last-line
   # 默认 one_page. 在编辑区里，无论什么文件类型，都可以拉到最后一行，导致下面整块全都是一片空白
   # 完全禁用。文件底部将固定在编辑器的底端，无法继续向下滚动。
   scroll_beyond_last_line = "vertical_scroll_margin";
-
-  # https://linux.do/t/topic/929471
-  language_models = {
-    openai_compatible = {
-      glm-open = {
-        api_url = "https=//open.bigmodel.cn/api/paas/v4/";
-        available_models = [
-          {
-            name = "glm-4.6";
-            display_name = null;
-            max_tokens = 128000;
-            max_output_tokens = 80000;
-            max_completion_tokens = 200000;
-            capabilities = {
-              tools = true;
-              images = false;
-              parallel_tool_calls = true;
-              prompt_cache_key = true;
-            };
-          }
-        ];
-      };
-    };
-  };
 
   # Remote Development Configuration
   # https://zed.dev/docs/remote-development
