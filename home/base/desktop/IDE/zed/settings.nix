@@ -107,6 +107,12 @@ in
     show = "system";
   };
 
+  # 在底部状态栏显示当前文件名（默认false）
+  # 比 breadcrumbs 更轻量，不在编辑区上方额外占一行
+  status_bar = {
+    show_active_file = true;
+  };
+
   ############ Search ###########
 
   # https://zed.dev/docs/configuring-zed#search

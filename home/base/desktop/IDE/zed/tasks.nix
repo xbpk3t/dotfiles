@@ -1,3 +1,6 @@
+let
+  notesDir = "/Users/luck/notes";
+in
 [
   # https://github.com/zed-industries/extensions/issues/523#issuecomment-3325210094
   {
@@ -22,10 +25,16 @@
   }
   {
     "label" = "Scratch: New";
-    "command" = "task";
+    "command" = "bash";
     "args" = [
-      "-g"
-      "sc:new"
+      "-c"
+      ''
+        today=$(date +%Y-%m-%d)
+        n=1
+        while [ -f "${notesDir}/''${today}.''${n}.md" ]; do ((n++)); done
+        f="${notesDir}/''${today}.''${n}.md"
+        touch "$f" && zeditor -a "$f"
+      ''
     ];
     "use_new_terminal" = true;
     "allow_concurrent_runs" = false;
@@ -37,55 +46,13 @@
   }
   {
     "label" = "Scratch: List";
-    "command" = "task";
+    "command" = "bash";
     "args" = [
-      "-g"
-      "sc:list"
-    ];
-    "use_new_terminal" = true;
-    "allow_concurrent_runs" = false;
-    "reveal" = "always";
-    "hide" = "never";
-    "show_summary" = true;
-    "show_command" = true;
-    "reveal_target" = "center";
-  }
-  {
-    "label" = "Scratch: Search";
-    "command" = "task";
-    "args" = [
-      "-g"
-      "sc:search"
-    ];
-    "use_new_terminal" = true;
-    "allow_concurrent_runs" = false;
-    "reveal" = "always";
-    "hide" = "never";
-    "show_summary" = true;
-    "show_command" = true;
-    "reveal_target" = "center";
-  }
-  {
-    "label" = "Scratch: Rename";
-    "command" = "task";
-    "args" = [
-      "-g"
-      "sc:rename"
-    ];
-    "use_new_terminal" = true;
-    "allow_concurrent_runs" = false;
-    "reveal" = "always";
-    "hide" = "never";
-    "show_summary" = true;
-    "show_command" = true;
-    "reveal_target" = "center";
-  }
-  {
-    "label" = "Scratch: Delete";
-    "command" = "task";
-    "args" = [
-      "-g"
-      "sc:delete"
+      "-c"
+      ''
+        f=$(command ls -t ${notesDir}/*.md | fzf --prompt="Scratch: " --preview="cat {}" --preview-window=right:60%)
+        [ -n "$f" ] && zeditor -a "$f"
+      ''
     ];
     "use_new_terminal" = true;
     "allow_concurrent_runs" = false;
