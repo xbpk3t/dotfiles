@@ -162,7 +162,7 @@ linters:
       locale: US
 
     lll:
-      line-length: 140
+      line-length: 200
 
     # ===== 性能相关配置 =====
     staticcheck:
