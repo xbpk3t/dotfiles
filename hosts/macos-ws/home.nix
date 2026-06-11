@@ -5,13 +5,16 @@ _: {
       networking.enable = true;
     };
 
-    devops.ssh = {
-      enable = true;
-      hosts = {
-        # github.enable = true;
-        hk-hdy.enable = true;
-        LA.enable = true;
-        homelab.enable = true;
+    devops = {
+      tmux.enable = false;
+      ssh = {
+        enable = true;
+        hosts = {
+          # github.enable = true;
+          hk-hdy.enable = true;
+          LA.enable = true;
+          homelab.enable = true;
+        };
       };
     };
 
