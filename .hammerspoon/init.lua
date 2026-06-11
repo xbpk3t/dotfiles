@@ -41,6 +41,16 @@ if not success3 then
   print("HearingToggle 错误:", err3)
 end
 
+-- CASK Hotkeys Spoon（app 启动 / 窗口管理 / Chrome tab link）
+local success4, err4 = pcall(function()
+  hs.loadSpoon("Hotkeys")
+  spoon.Hotkeys:start()
+end)
+if not success4 then
+  hs.alert.show("Hotkeys 加载失败")
+  print("Hotkeys 错误:", err4)
+end
+
 -- ========================================
 -- 系统功能
 -- ========================================
