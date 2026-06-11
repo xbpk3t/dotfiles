@@ -20,9 +20,7 @@ obj.logger = hs.logger.new("Hotkeys")
 -- 内部状态：保存 hotkey 引用以便 unbind
 obj._hotkeys = {}
 
--- ========================================
 -- App 启动（⌘1 / ⌘2 / ⌘3 / ⌘0）
--- ========================================
 
 local appHotkeys = {
   { key = "1", bundleID = "com.apple.finder", label = "Finder" },
@@ -42,31 +40,7 @@ local function launchApp(bundleID, label)
   end
 end
 
--- ========================================
--- 窗口管理（⌘⌥[ / ⌘⌥] / ⌘↩）
--- ========================================
-
-local function moveWindowToUnit(rect)
-  return function()
-    local win = hs.window.focusedWindow()
-    if win then
-      win:moveToUnit(rect)
-    end
-  end
-end
-
-local function maximizeWindow()
-  return function()
-    local win = hs.window.focusedWindow()
-    if win then
-      win:maximize()
-    end
-  end
-end
-
--- ========================================
 -- Chrome tab → Markdown link（⌘⇧D）
--- ========================================
 
 local function chromeTabToMarkdownLink()
   local ok, result = hs.osascript.applescript([[
@@ -98,9 +72,7 @@ local function chromeTabToMarkdownLink()
   obj.logger.i("Copied markdown link: " .. markdownLink)
 end
 
--- ========================================
 -- 生命周期
--- ========================================
 
 --- Hotkeys:start()
 --- Method
@@ -114,21 +86,15 @@ end
 function obj:start()
   -- App 启动热键（⌘1-3, ⌘0）
   for _, app in ipairs(appHotkeys) do
-    table.insert(self._hotkeys, hs.hotkey.new("cmd", app.key, launchApp(app.bundleID, app.label)))
+    local hk = hs.hotkey.new("cmd", app.key, launchApp(app.bundleID, app.label))
+    hk:enable()
+    table.insert(self._hotkeys, hk)
   end
-
-  -- 窗口管理热键
-  table.insert(self._hotkeys, hs.hotkey.new("cmd", "return", maximizeWindow()))
-  table.insert(self._hotkeys, hs.hotkey.new("cmd alt", "[", moveWindowToUnit({ x = 0, y = 0, w = 0.5, h = 1 })))
-  table.insert(self._hotkeys, hs.hotkey.new("cmd alt", "]", moveWindowToUnit({ x = 0.5, y = 0, w = 0.5, h = 1 })))
 
   -- Chrome tab → Markdown link
-  table.insert(self._hotkeys, hs.hotkey.new("cmd shift", "d", chromeTabToMarkdownLink))
-
-  -- 启用所有热键
-  for _, hk in ipairs(self._hotkeys) do
-    hk:enable()
-  end
+  local hk = hs.hotkey.new("cmd shift", "d", chromeTabToMarkdownLink)
+  hk:enable()
+  table.insert(self._hotkeys, hk)
 
   self.logger.i("Hotkeys started, " .. #self._hotkeys .. " hotkeys bound")
   return self
