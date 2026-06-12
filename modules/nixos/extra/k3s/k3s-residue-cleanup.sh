@@ -76,7 +76,7 @@ declare -A PROC_CMD=()
 declare -A TARGET_REASON=()
 declare -a TARGET_PIDS=()
 
-while read -r pid ppid uid cmd; do
+while read -r pid ppid _ cmd; do
   [[ -n ${pid} ]] || continue
   PROC_CMD["${pid}"]="${cmd}"
 done < <(ps -eo pid=,ppid=,uid=,args=)
@@ -94,9 +94,9 @@ is_target_trailing_traefik() {
 }
 
 discover_targets() {
-  local pid ppid uid cmd
+  local pid ppid _ cmd
 
-  while read -r pid ppid uid cmd; do
+  while read -r pid ppid _ cmd; do
     [[ -n ${pid} ]] || continue
 
     if [[ ${cmd} == *containerd-shim-runc-v2* ]] && { [[ ${cmd} == *" -namespace k8s.io "* ]] || [[ ${cmd} == *"/run/k3s/containerd/containerd.sock"* ]] || [[ ${cmd} == *"/var/lib/rancher/k3s/"* ]]; }; then
