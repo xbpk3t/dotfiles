@@ -121,13 +121,17 @@ in
           default_tools_approval_mode = "approve";
         };
 
-        # https://linear.app/downloads/mcp
-        #   把 LINEAR_API_KEY 提到 home.sessionVariables 后，MCP server 和 linear CLI都从同一个环境变量取值，消除了之前 bash -c wrapper 的冗余层。这遵循了 Nix管理凭据的标准模式——$(cat ${config.sops.secrets.XXX.path}) 在 shell启动时展开一次，所有子进程继承。
-        # [2026-05-30] 注释掉该MCP，但要说明之前配置有问题 ① pnpm dlx 每次创建独立缓存。pnpm dlx 的 cache key 会根据当前项目目录的 package.json 算 hash。Claude 每次在不同工作目录（不同 worktree）启动 session，hash 不同 → 生成不同 cache 目录。即使 hash 相同，pnpm dlx 仍然 spawn 新的 node 进程。
-        # "linear" = {
-        #  command = ["linear-mcp"];
-        #  default_tools_approval_mode = "approve";
-        # };
+        # https://linear.app/docs/mcp
+        #   Linear MCP 是远程 HTTP MCP（`https://mcp.linear.app/mcp`），走 native HTTP transport。
+        #   把 LINEAR_API_KEY 提到 home.sessionVariables 后，MCP server 子进程自动继承。
+        #   这遵循了 Nix 管理凭据的标准模式——$(cat ${config.sops.secrets.XXX.path}) 在 shell
+        #   启动时展开一次，所有子进程继承。
+        #   [2026-06-12] 使用 streamable HTTP（与 deepwiki 相同模式），零本地进程开销。
+        "linear" = {
+          type = "http";
+          url = "https://mcp.linear.app/mcp";
+          default_tools_approval_mode = "approve";
+        };
 
         # https://github.com/colbymchenry/codegraph
         # CodeGraph: 基于 Tree-sitter 的代码知识图谱，构建本地 SQLite 索引后通过 MCP 工具暴露
