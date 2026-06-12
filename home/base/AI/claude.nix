@@ -50,11 +50,26 @@ in
           # 文件2建议：plan accept 页显示 clear context 按钮
           showClearContextOnPlanAccept = true;
 
-          # 文件2建议：关掉离开 session 后的 recap，配合低噪音风格
+          # [2026-06-12] 关掉离开 session 后的 recap，配合低噪音风格
           awaySummaryEnabled = false;
 
-          # 文件2建议：真正关闭内置 auto memory（之前只禁了 claude-mem 插件，未关内置 auto memory）
+          # [2026-06-12] 真正关闭内置 auto memory（之前只禁了 claude-mem 插件，未关内置 auto memory）
           autoMemoryEnabled = false;
+
+          # [2026-06-12] 禁用 auto mode，原因：
+          #
+          # 通过 ANTHROPIC_BASE_URL (api.lucc.dev) 走自定义 gateway 时，
+          # auto mode 的安全分类器 (deepseek-v4-flash) 频繁不可用，报：
+          #   "auto mode cannot determine the safety of Bash right now"
+          #
+          # 分类器是独立模型调用，不受 /model 切换影响，
+          # 并且官方文档确认这是 transient classifier outage，和 eligibility 无关。
+          #
+          # 当前工作流：
+          #   defaultMode = "plan" → 日常只读探索
+          #   需要执行时 Shift+Tab 切到 acceptEdits（少弹确认）或 bypassPermissions（完全跳过）
+          #   auto 从 Shift+Tab 循环中移除，--permission-mode auto 也会被拒绝
+          disableAutoMode = "disable";
 
           # [2026-06-09] Agent View cache 优化：
           # 默认 bgIsolation = "worktree" 会把每个后台 session 放进独立 worktree，
