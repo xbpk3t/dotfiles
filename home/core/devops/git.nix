@@ -193,6 +193,8 @@ in
       #    cmd: git obliterate {{.PATH}}
       # tags(desc): 工作流增强 > 子命令扩展 > Git生态
       (lib.lowPrio git-extras)
+
+      git-filter-repo
     ]
     ++ [
       # 分类2：代码质量、安全与历史清理

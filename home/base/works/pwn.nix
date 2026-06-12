@@ -24,12 +24,12 @@
       metasploit
 
       # 嗅探欺骗
-      # https://github.com/Ettercap/ettercap
       ettercap
 
       # 内网扫描工具
-      # https://github.com/shadow1ng/fscan
       fscan
+      mimikatz
+      python313Packages.impacket
 
       # https://github.com/projectdiscovery/subfinder
       # https://github.com/projectdiscovery/subfinder

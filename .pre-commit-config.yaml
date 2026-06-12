@@ -90,11 +90,18 @@ repos:
         types: [text]
         stages: [pre-commit, pre-push, manual]
 
-  # Remote exception: nixpkgs has no direct pre-commit-ci-config package.
-  - repo: https://github.com/pre-commit-ci/pre-commit-ci-config
-    rev: v1.6.1
-    hooks:
-      - id: check-pre-commit-ci-config
+      - id: detect-private-key
+        name: detect private key
+        entry: detect-private-key
+        language: system
+        types: [text]
+
+      - id: destroyed-symlinks
+        name: detect destroyed symlinks
+        entry: destroyed-symlinks
+        language: system
+        types: [file]
+        stages: [pre-commit, pre-push, manual]
 
   - repo: local
     hooks:
@@ -140,29 +147,14 @@ repos:
         types: [yaml]
         files: ^\.github/workflows/
 
-# Disabled: local shellcheck is installed via Nix; keep this as a candidate only.
-#  - repo: https://github.com/shellcheck-py/shellcheck-py
-#    rev: v0.10.0.1
-#    hooks:
-#      - id: shellcheck
-#        types: [shell]
-#
-
-# Disabled: local eslint is installed via Nix, and .tms keeps @typescript-eslint/parser in its own package.json.
-# If enabled later, prefer `pnpm --dir .tms exec eslint --config eslint.config.mjs` over mirrors-eslint.
-#  - repo: https://github.com/pre-commit/mirrors-eslint
-#    rev: v10.3.0
-#    hooks:
-#      - id: eslint
-#        files: ^\.tms/.*\.[jt]sx?$ # *.js, *.jsx, *.ts and *.tsx under .tms
-#        types: [file]
-#        args:
-#          - --config
-#          - .tms/eslint.config.mjs
-#        additional_dependencies:
-#          - "eslint@9.29.0"
-#          - "@typescript-eslint/parser@8.46.1"
-
+  # Tags(description): 代码质量 > Shell静态检查 > Lint
+  - repo: local
+    hooks:
+      - id: shellcheck
+        name: shellcheck
+        entry: shellcheck
+        language: system
+        types: [shell]
 
   - repo: local
     hooks:
@@ -184,7 +176,7 @@ repos:
     hooks:
       - id: gitleaks
         name: Scan Secrets
-        entry: gitleaks git --pre-commit --redact --staged --verbose
+        entry: gitleaks detect --source . -v
         language: system
         pass_filenames: false
         stages: [pre-commit]
@@ -240,22 +232,6 @@ repos:
   #- url: https://github.com/daixiang0/gci
   #  des: GCI, a tool that control golang package import order and make it always deterministic.
   #- url: https://github.com/mgechev/revive
-  #  des: golangci-lint已经内置了
-  #  - repo: https://github.com/lietu/go-pre-commit
-  #    rev: v0.1.0
-  #    hooks:
-  #      - id: errcheck
-  #      - id: go-fmt-goimports
-  #      - id: go-test
-  #      - id: go-vet
-  #        entry: go vet -vettool=$(which shadow) -strict
-  #      - id: gofumpt
-  #        entry: gofumpt -l -w .
-  #      - id: golangci-lint
-  #      - id: golint
-  #      - id: staticcheck
-  #      - id: go-mod-tidy
-
   - repo: local
     hooks:
       - id: treefmt
