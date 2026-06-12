@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 
 # ===== 键盘绑定 =====
 # 设置键绑定模式
@@ -16,6 +17,7 @@ fi
 
 # ===== 文件后缀处理 =====
 # zsh 支持 alias -s 功能
+# shellcheck disable=SC2139
 alias -s {md,go,json,ts,html,yaml,yml,py,sql}=goland
 
 # ===== eza wrapper (works even without a TTY stdin) =====
@@ -56,7 +58,7 @@ mkcd() {
     echo "Usage: mkcd <directory>"
     return 1
   fi
-  mkdir -p "$1" && cd "$1"
+  mkdir -p "$1" && cd "$1" || return
 }
 
 # rm 函数：使用 trash-cli 安全删除
