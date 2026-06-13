@@ -7,56 +7,11 @@
   home.packages =
     with pkgs;
     [
-      # 信息收集
-      # https://github.com/nmap/nmap
-      nmap
-      # https://github.com/royhills/arp-scan/wiki/arp-scan-User-Guide
-      # sudo arp-scan --interface=en0 --localnet
-      # [2026-01-21] 用了一下，感觉跟nmap没啥区别，移除掉了
-      # arp-scan
-
-      # https://github.com/projectdiscovery/naabu
-      # 端口扫描工具
-      naabu
+      # === Red Team / 红队 ===
 
       # 渗透测试框架
       # https://github.com/rapid7/metasploit-framework
       metasploit
-
-      # 嗅探欺骗
-      ettercap
-
-      # 内网扫描工具
-      fscan
-      mimikatz
-      python313Packages.impacket
-
-      # https://github.com/projectdiscovery/subfinder
-      # https://github.com/projectdiscovery/subfinder
-      # 【子域名发现工具，支持多个数据源和被动枚举】它已成为sublist3r项目的继承者。SubFinder使用被动源，搜索引擎，Pastebins，Internet Archives等来查找子域，然后使用灵感来自于altdns的置换模块来生成排列，并使用强大的bruteforcing引擎快速的解析它们。如果需要，它也可以执行纯粹的爆破。此外，SubFinder还具有高可定制性。其代码构建模块化的特点，使你能够轻松地添加功能或移除错误。
-      subfinder
-
-      # https://github.com/projectdiscovery/httpx
-      httpx
-
-      # 渗透测试
-      # https://github.com/projectdiscovery/katana
-      katana
-
-      # 漏洞分析
-      # https://github.com/projectdiscovery/nuclei
-      nuclei
-
-      nuclei-templates
-      nucleiparser
-
-      # 自动化 SQL 注入工具
-      # https://github.com/sqlmapproject/sqlmap
-      sqlmap
-
-      # wifi攻击
-      # https://github.com/aircrack-ng/aircrack-ng
-      aircrack-ng
 
       # 社会工程
       # https://github.com/gophish/gophish
@@ -65,8 +20,29 @@
       # 拿信-windows
       # https://github.com/gentilkiwi/mimikatz
       mimikatz
+
+      python313Packages.impacket
     ]
     ++ lib.optionals pkgs.stdenv.isLinux [
+      # 分类1：AD Internal Pentest（Linux-only）
+      # bloodhound # tags(desc): 信息收集 > AD域 > 可视化分析
+
+      # 分类1：Hash 破解（Linux-only）
+      # johnny # tags(desc): 密码破解 > GUI > John前端
+
+      # 分类2：在线爆破（Linux-only）
+      # crowbar # tags(desc): 暴力破解 > 在线服务 > RDP/SSH
+
+      # 分类4：专项破解（Linux-only）
+      # veracrypt # tags(desc): 专项破解 > VeraCrypt > 卷密码
+    ]
+    ++ lib.optionals pkgs.stdenv.isLinux [
+      # 分类2：隧道 & 后渗透（Linux-only）
+      # ligolo-ng # tags(desc): 隧道代理 > 网络层 > 反向代理
+    ]
+    ++ lib.optionals pkgs.stdenv.isLinux [
+      # === Blue / 蓝队防御 ===
+
       # 入侵检测
       # https://github.com/snort3/snort3
       snort

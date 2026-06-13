@@ -258,6 +258,9 @@ in
 
           ANTHROPIC_BASE_URL = "https://api.lucc.dev";
           ANTHROPIC_AUTH_TOKEN = "$(cat ${config.sops.secrets.LLM_AxonHub.path})";
+
+          # AnyRouter 直连 token
+          LLM_ANY_TOKEN = "$(cat ${config.sops.secrets.LLM_AnyRouter.path})";
         };
         shellAliases = {
           # 默认 alias 保持权限模型生效，避免和 settings.permissions.defaultMode 冲突。
@@ -267,10 +270,8 @@ in
           # 兜底逃生开关：仅在明确需要跳过权限确认时手动使用。
           # cc-unsafe = "claude --dangerously-skip-permissions";
 
-          ccr = "claude-code-router"; # Alias for claude-code-router
-
-          # 文件2建议：复杂任务时临时开最高 effort，日常用 cc 保持 auto
-          ccmax = "claude --effort max";
+          # AnyRouter 直连：覆盖 ANTHROPIC_AUTH_TOKEN + BASE_URL，默认模型 claude-opus-4-7
+          # cc-any = "ANTHROPIC_BASE_URL=https://anyrouter.top ANTHROPIC_AUTH_TOKEN=$LLM_ANY_TOKEN claude --model='claude-opus-4-7[1m]' --effort max";
         };
       };
 
