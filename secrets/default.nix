@@ -91,6 +91,7 @@ in
 
       # LLM
       LLM_AxonHub = mkUserSecret "LLM/AxonHub";
+      LLM_AnyRouter = mkUserSecret "LLM/AnyRouter";
 
       # singbox
       SINGBOX_UUID = mkRootSecret "singbox/UUID";

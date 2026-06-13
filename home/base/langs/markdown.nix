@@ -41,11 +41,11 @@
     # };
 
     # Yazi 作为 ~/notes 的笔记浏览器
-    shellAliases = {
-      sc = "hx ~/notes";
-    };
-
-    # 确保 ~/notes 目录存在
-    file."notes/.keep".text = "";
+    #    shellAliases = {
+    #      sc = "hx ~/notes";
+    #    };
+    #
+    #    # 确保 ~/notes 目录存在
+    #    file."notes/.keep".text = "";
   };
 }

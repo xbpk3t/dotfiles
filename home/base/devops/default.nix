@@ -115,7 +115,7 @@
       rsync
 
       # 压缩工具
-      ouch
+      ouch-rar
       xz
       zstd
     ]
