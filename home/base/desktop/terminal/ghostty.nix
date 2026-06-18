@@ -50,6 +50,16 @@ let
     # 光标闪烁，便于在多 pane 场景下快速定位焦点。
     cursor-style-blink = true;
 
+    # ── Quick Terminal ────────────────────────────────────────────
+    # Quick terminal 是全局浮层终端（Quake-style dropdown），
+    # 按快捷键时从屏幕边缘弹出，适合快速敲命令后消失。
+    # 独立于 cmux 运行，作为 cmux agent cockpit 的"副终端"。
+    # https://ghostty.org/docs/config/reference#quick-terminal-position
+    quick-terminal-position = "right";
+    quick-terminal-size = "0.35";
+    quick-terminal-screen = "main";
+    quick-terminal-auto-hide = true;
+
     # ── 待定（注释掉供参考）─────────────────────────────────────────
     # background = "black";
     # window-padding-color = "background";
@@ -82,11 +92,15 @@ let
       "ctrl+shift+plus=increase_font_size:1"
       "ctrl+shift+0=reset_font_size"
 
+      # ── Quick Terminal ──
+      "super+grave_accent=toggle_quick_terminal"
+
       # ── 屏蔽默认快捷键（与 tmux/zellij 冲突）────────────────────
       "ctrl+shift+e=unbind" # new_split   → 被 tmux split 取代
       "ctrl+shift+n=unbind" # new_window  → 由 tmux/zellij 管理
       "ctrl+shift+t=unbind" # new_tab     → 由 tmux/zellij 管理
     ];
+
   };
 in
 {

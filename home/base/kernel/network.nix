@@ -124,6 +124,7 @@
       procs
 
       # 实用工具集（ts 等小工具）
+      # vidir
       moreutils
 
       # https://github.com/zachwilke/netops
