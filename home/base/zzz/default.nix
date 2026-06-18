@@ -1,6 +1,7 @@
 {
   mylib,
   pkgs,
+  config,
   ...
 }:
 {
@@ -36,4 +37,10 @@
   #    "compression" = "lzma";
   #    "extension" = "cbz";
   #};
+
+  home.sessionVariables = {
+    # For docs-alfred data-cli enrich Movie/TV/books/...
+    GOOGLE_CLOUD_API_KEY = "$(cat ${config.sops.secrets.GOOGLE_CLOUD_API_KEY.path})";
+    TMDB_API_KEY = "$(cat ${config.sops.secrets.API_TMDB.path})";
+  };
 }
