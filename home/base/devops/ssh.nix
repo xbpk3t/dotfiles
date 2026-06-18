@@ -14,5 +14,8 @@
     ## 2、直接用ssh登录（推荐用tssh登录，兼容性更好，但是ssh也没啥问题）。trz 上传， tsz 下载。
     # [2026-04-20] 给 trzsz-go 打了nixpkgs，之后就不再需要 上面的 install-trzsz 操作了。trzsz的核心在于，服务器装 trzsz-go，本地装 tssh，所以我们这么处理后，就完全OOTB了
     trzsz-ssh
+
+    # 【2026-06-18】从 home/base/infra/default.nix 迁入
+    openssh
   ];
 }

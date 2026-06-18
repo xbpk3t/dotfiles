@@ -44,6 +44,8 @@
 
       # tags(desc): 代码质量 > 语法检查 > JavaScript/TypeScript
       eslint
+      oxlint
+
       # tags(desc): 代码质量 > 格式化 > JavaScript/TypeScript
       prettier
     ];

@@ -67,7 +67,17 @@
       # 树状查看依赖（替代 nix-store --query --requisites）
       # tags(desc): 依赖分析 > 依赖树 > store查询
       nix-tree
-    ];
+    ]
+    ++
+      # 之前放在 hosts/nixos-vps 里，但是实际上VPS并不需要这两个pkg，所以放在homelab里
+      [
+        # 因为可能之后也会用mac作为核心控制端，所以直接放到base里，来多端复用（而非放到专门nixos的nix文件里）
+        # 之所以放在这里，因为无论是nixos还是mac都会引入 home/base/desktop，严格对应关系引用
+        nixos-anywhere
+
+        # 同上，同样只有 workstation 才有必要引入 deploy-rs
+        deploy-rs
+      ];
 
   # https://mynixos.com/home-manager/options/programs.nix-init
   # nix-init 是基于nurl实现的
