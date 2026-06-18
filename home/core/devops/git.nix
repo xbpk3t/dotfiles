@@ -198,8 +198,6 @@ in
     ]
     ++ [
       # 分类2：代码质量、安全与历史清理
-      # tags(desc): 代码质量 > Commit规范 > Lint
-      gitlint
 
       # tags(desc): 安全扫描 > 密钥泄漏 > 仓库安全
       gitleaks

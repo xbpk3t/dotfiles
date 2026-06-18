@@ -33,7 +33,6 @@
       # nix 代码格式化
       # alejandra
 
-      gitlint
       commitizen
       prettier
 

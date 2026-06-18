@@ -91,7 +91,6 @@ in
 
       # LLM
       LLM_AxonHub = mkUserSecret "LLM/AxonHub";
-      LLM_AnyRouter = mkUserSecret "LLM/AnyRouter";
 
       # singbox
       SINGBOX_UUID = mkRootSecret "singbox/UUID";
@@ -117,6 +116,9 @@ in
       DOCKER_HUB_TOKEN = mkUserSecret "API/docker_hub";
       API_TAVILY = mkUserSecret "API/tavily";
       API_EXA = mkUserSecret "API/exa";
+      API_TMDB = mkUserSecret "API/tmdb";
+
+      GOOGLE_CLOUD_API_KEY = mkUserSecret "google/cloud";
 
       # Atuin
       AUTIN_KEY = mkUserSecret "atuin/key";
