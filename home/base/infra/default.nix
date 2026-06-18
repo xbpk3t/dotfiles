@@ -1,79 +1,14 @@
 {
   mylib,
-  pkgs,
   ...
 }:
 {
+  # 所有包已拆解到各自归属模块：
+  #   curl/wget/tree/file/which/screen → home/base/DX/default.nix
+  #   zip/unzip/p7zip/xz/zstd          → 由 ouch-rar 替代（home/base/devops/default.nix）
+  #   gnupg/sops/age                   → home/base/devops/secrets.nix
+  #   openssh                          → home/base/devops/ssh.nix
+  #   openssl                          → home/core/infra/networking.nix
+
   imports = mylib.scanPaths ./.;
-
-  home.packages =
-    with pkgs;
-    [
-      # Basic utilities
-
-      # [7 Amazing Terminal API Tools You Need To Try](https://www.youtube.com/watch?v=eyXxEBZMVQI)
-      curl
-      wget
-      # httpie
-
-      # https://github.com/ducaale/xh
-      # https://posting.sh/
-
-      #- cURL
-      #- xh
-      #- Nushell http
-      #- Httpie
-      #- Curlie
-      #- Kulala nvim
-      #- Posting
-
-      tree
-
-      zip
-      unzip
-
-      # System utilities
-      screen
-
-      # Development tools
-      gcc
-      gnumake
-      cmake
-
-      # [2026-04-25] darwin 上rebuild失败
-      # dateutils # 操作日期和时间表达式 dateadd、datediff、strptime
-
-      # 文件处理
-      tree
-      file
-      which
-
-      # 压缩工具
-      zip
-      unzip
-      p7zip
-      xz
-      zstd
-
-      gnupg
-      # 挪到base里，因为darwin和nixos都需要使用sops-nix
-      sops
-      age
-      openssh
-
-      # 证书和密钥管理
-
-      # [2026-01-15] 需要在目标host上检查证书问题
-      openssl
-    ]
-    ++
-      # 之前放在 hosts/nixos-vps 里，但是实际上VPS并不需要这两个pkg，所以放在homelab里
-      [
-        # 因为可能之后也会用mac作为核心控制端，所以直接放到base里，来多端复用（而非放到专门nixos的nix文件里）
-        # 之所以放在这里，因为无论是nixos还是mac都会引入 home/base/desktop，严格对应关系引用
-        nixos-anywhere
-
-        # 同上，同样只有 workstation 才有必要引入 deploy-rs
-        deploy-rs
-      ];
 }

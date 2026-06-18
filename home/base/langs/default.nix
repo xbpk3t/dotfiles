@@ -6,23 +6,32 @@
 {
   imports = mylib.scanPaths ./.;
 
-  home.packages = with pkgs; [
-    devenv
+  home.packages =
+    with pkgs;
+    [
+      devenv
 
-    # 其他语言
-    # php
-    # elixir
-    # android-tools
+      # 其他语言
+      # php
+      # elixir
+      # android-tools
 
-    lua
+      lua
 
-    # https://github.com/johnnymorganz/stylua
-    # lua formater
-    stylua
+      # https://github.com/johnnymorganz/stylua
+      # lua formater
+      stylua
 
-    # haskell
-    # cabal-install
-  ];
+      # haskell
+      # cabal-install
+    ]
+    ++ [
+      # Development tools
+      gcc
+      gnumake
+      cmake
+
+    ];
 
   # stylua config: managed by treefmt (home/base/langs/treefmt.nix)
 }
