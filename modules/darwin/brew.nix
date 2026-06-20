@@ -27,7 +27,6 @@ in
     enable = true;
 
     taps = [
-      "joa23/linear-cli"
     ];
 
     brews = [
@@ -37,16 +36,7 @@ in
       # https://github.com/tw93/Mole
       "mole"
 
-      # https://github.com/schpet/linear-cli
-      # "schpet/tap/linear"
-      # https://github.com/joa23/linear-cli
-      "linear-cli"
-
-      # https://github.com/rochacbruno/marmite
-      "marmite"
-
-      # https://github.com/vjeantet/alerter
-      "vjeantet/tap/alerter"
+      "cc-connect"
     ];
 
     # 以下casks根据重要性排序

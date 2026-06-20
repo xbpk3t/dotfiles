@@ -8,10 +8,10 @@
 {
   chrome-devtools-mcp = {
     pname = "chrome-devtools-mcp";
-    version = "0.21.0";
+    version = "1.3.0";
     src = fetchurl {
-      url = "https://registry.npmjs.org/chrome-devtools-mcp/-/chrome-devtools-mcp-0.21.0.tgz";
-      sha256 = "sha256-KMHWSSctf6ihIT792yZeTqaYuHqmUanN2SJje5PI184=";
+      url = "https://registry.npmjs.org/chrome-devtools-mcp/-/chrome-devtools-mcp-1.3.0.tgz";
+      sha256 = "sha256-guEeSOgLv5ZlAPoMrsszBNppFolhyidZvuepl0FXpfQ=";
     };
   };
   launchk = {
@@ -36,12 +36,23 @@
       sha256 = "sha256-CokZAXT61UKSsKnzE5mPMdAZecGX/8mgDkG4yDSat5M=";
     };
   };
+  voltagent-subagents = {
+    pname = "voltagent-subagents";
+    version = "5983fe3b4ea2785335ac1712c4aa1ac4e13a8fa2";
+    src = fetchFromGitHub {
+      owner = "VoltAgent";
+      repo = "awesome-claude-code-subagents";
+      rev = "5983fe3b4ea2785335ac1712c4aa1ac4e13a8fa2";
+      fetchSubmodules = false;
+      sha256 = "sha256-7XpsETQwB/yVfgZpeUWKPlt8cVCsp6ypj4EVyC1aqZ4=";
+    };
+  };
   zashboard = {
     pname = "zashboard";
-    version = "v3.5.0";
+    version = "v3.10.1";
     src = fetchurl {
-      url = "https://github.com/Zephyruso/zashboard/releases/download/v3.5.0/dist.zip";
-      sha256 = "sha256-t3iKxz6Ko1by3p79nPTcPXuEIa+PWBFP4HrPn2y1N5Y=";
+      url = "https://github.com/Zephyruso/zashboard/releases/download/v3.10.1/dist.zip";
+      sha256 = "sha256-UBoncrVvhHICOTAJ/NhutSfHoejK/pmFWxCX4MbTwDM=";
     };
   };
 }

@@ -8,6 +8,7 @@
 let
   cfg = config.modules.AI.claude;
   claudeDefaultModel = "deepseek-v4-flash";
+  subagentSrc = "${pkgs.voltagent-subagents}";
 in
 {
   options.modules.AI.claude = with lib; {
@@ -40,6 +41,18 @@ in
         claude-code = {
           enable = true;
           package = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.claude-code;
+
+          agents = {
+            # 本地自定义 sub-agent
+            debugger = ./agents/debugger.md;
+            session-to-wiki = ./agents/session-to-wiki.md;
+
+            # VoltAgent 社区 sub-agent（通过 nvfetcher 管理源码）
+            python-pro = "${subagentSrc}/categories/02-language-specialists/python-pro.md";
+            rust-engineer = "${subagentSrc}/categories/02-language-specialists/rust-engineer.md";
+            frontend-developer = "${subagentSrc}/categories/01-core-development/frontend-developer.md";
+            code-reviewer = "${subagentSrc}/categories/04-quality-security/code-reviewer.md";
+          };
 
           # https://x.com/xiangxiang103/status/2043612207175602671 cc 稳定不降智的技巧：换稳定性：关掉超长上下文、adaptive thinking、auto memory，确实更像“固定档位”了。适合长任务复现，但一般会牺牲一点探索效率。
           settings = {
@@ -150,7 +163,10 @@ in
               # [2026-04-29] 从 max -> xhigh，避免耗费太多token
               CLAUDE_CODE_EFFORT_LEVEL = "max";
 
-              ANTHROPIC_DEFAULT_OPUS_MODEL = claudeDefaultModel;
+              # 三档模型映射：DS-V4 系列
+              ANTHROPIC_DEFAULT_OPUS_MODEL = "deepseek-v4-pro";
+              ANTHROPIC_DEFAULT_SONNET_MODEL = claudeDefaultModel;
+              ANTHROPIC_DEFAULT_HAIKU_MODEL = claudeDefaultModel;
 
               # 可选：通过 gateway 时，减少系统 prompt 中客户端归因头变化，有助于 gateway 层 prompt cache 命中
               CLAUDE_CODE_ATTRIBUTION_HEADER = "0";
@@ -158,21 +174,24 @@ in
               # 可选：你确实要用 experimental agent teams 再开
               # 实验功能：多 Claude Code session 协作。会显著增加 token，用时再开。
               # CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
+
+              # ccx session export 配置
+              CCX_WIKI_ROOT = "/Users/luck/Desktop/docs/wiki";
+              CCX_AI_MODEL = "deepseek-v4-flash";
+              CCX_AI_BASE_URL = "https://api.lucc.dev/v1";
             };
 
             hooks = {
-              #  SessionStart = [
-              #    {
-              #      hooks = [
-              #        {
-              #          type = "command";
-              #          command = ''
-              #            ${pkgs.nushell}/bin/nu ${./hooks/session-chain.nu}
-              #          '';
-              #        }
-              #      ];
-              #    }
-              #  ];
+              SessionStart = [
+                {
+                  hooks = [
+                    {
+                      type = "command";
+                      command = "ccx session chain";
+                    }
+                  ];
+                }
+              ];
             };
 
             # statusLine = {

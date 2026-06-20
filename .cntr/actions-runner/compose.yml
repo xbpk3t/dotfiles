@@ -32,6 +32,7 @@ services:
       RUN_AS_ROOT: "true"
     volumes:
       - runner_data:/tmp/runner
+      - ~/.opencli/xiaoyuzhou.json:/root/.opencli/xiaoyuzhou.json
 
 volumes:
   runner_data:

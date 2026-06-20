@@ -20,7 +20,7 @@ let
 in
 lib.mkIf agentEnabled {
   containers.nixos-agent = {
-    autoStart = true;
+    autoStart = agentNode.autoStart or true;
     privateNetwork = true;
     hostAddress = "10.233.0.1";
     localAddress = agentNode.primaryIp or "10.233.0.2";
@@ -33,7 +33,10 @@ lib.mkIf agentEnabled {
       stateVersion = agentStateVersion;
     };
     config = {
-      nixpkgs.config.allowUnfree = true;
+      nixpkgs = {
+        config.allowUnfree = true;
+        overlays = [ (import (mylib.relativeToRoot "pkgs/overlay.nix")) ];
+      };
       imports = [
         inputs.sops-nix.nixosModules.sops
         (mylib.relativeToRoot "hosts/nixos-agent/default.nix")
