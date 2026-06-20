@@ -1,0 +1,125 @@
+data_dir = ""
+attachment_send = "on"
+language = "zh"
+idle_timeout_mins = 120
+
+[[providers]]
+name = "test"
+api_key = "${GLM_CODING_API_KEY}"
+base_url = "https://api.lucc.dev/"
+model = "deepseek-v4-flash"
+thinking = "enabled"
+agent_types = ["claudecode", "codex"]
+
+[providers.agent_models]
+codex = "gpt-5.5"
+
+[[projects]]
+name = "my-project"
+show_context_indicator = true
+reply_footer = true
+inject_sender = false
+
+[projects.agent]
+type = "claudecode"
+provider_refs = ["test"]
+
+[projects.agent.options]
+mode = "default"
+provider = "test"
+work_dir = "/Users/luck/Desktop/docs"
+
+[[projects.agent.providers]]
+name = "test"
+api_key = "${GLM_CODING_API_KEY}"
+base_url = "https://api.lucc.dev/"
+model = "deepseek-v4-flash"
+
+[[projects.platforms]]
+type = "feishu"
+
+[projects.platforms.options]
+allow_from = "ou_89e257c049863c7127483a9331d965c6"
+app_id = "cli_aaa2b85a98b85cef"
+app_secret = "${FEISHU_APP_SECRET}"
+
+[log]
+level = "info"
+
+[speech]
+enabled = false
+provider = ""
+language = ""
+
+[speech.openai]
+api_key = ""
+base_url = ""
+model = ""
+
+[speech.groq]
+api_key = ""
+base_url = ""
+model = ""
+
+[speech.qwen]
+api_key = ""
+base_url = ""
+model = ""
+
+[speech.gemini]
+api_key = ""
+model = ""
+
+[tts]
+enabled = false
+provider = ""
+voice = ""
+tts_mode = ""
+max_text_len = 0
+
+[tts.openai]
+api_key = ""
+base_url = ""
+model = ""
+
+[tts.qwen]
+api_key = ""
+base_url = ""
+model = ""
+
+[tts.minimax]
+api_key = ""
+base_url = ""
+model = ""
+
+[display]
+thinking_messages = true
+thinking_max_len = 300
+tool_max_len = 500
+tool_messages = true
+
+[stream_preview]
+enabled = true
+interval_ms = 1500
+
+[rate_limit]
+max_messages = 20
+window_secs = 60
+
+[cron]
+session_mode = ""
+
+[webhook]
+port = 0
+
+[bridge]
+enabled = true
+port = 9810
+token = "${DEFAULT_SK}"
+cors_origins = ["*"]
+
+[management]
+enabled = true
+port = 9820
+token = "${DEFAULT_SK}"
+cors_origins = ["*"]

@@ -111,12 +111,14 @@ in
           };
         };
 
-        # profiles 用于显式切换/覆盖；默认路径本身也指向 axonhub。
-        profiles = {
-          axonhub = {
-            model_provider = "axonhub";
-            model = codexDefaultModel;
-          };
+      };
+
+      # profiles 用于显式切换/覆盖；默认路径本身也指向 axonhub。
+      # Codex 0.134.0+ 将 profiles 从 settings 移到了顶层 programs.codex.profiles。
+      profiles = {
+        axonhub = {
+          model_provider = "axonhub";
+          model = codexDefaultModel;
         };
       };
     };

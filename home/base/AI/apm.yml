@@ -25,8 +25,3 @@ dependencies:
         - opencli-browser # opencli browser 命令（驱动chrome做交互式操作）
 
   claude:
-    - git: https://github.com/joa23/linear-cli.git
-      path: .claude/skills
-      skills:
-        - deps
-        - triage
