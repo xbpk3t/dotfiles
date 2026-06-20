@@ -117,6 +117,7 @@ in
       API_TAVILY = mkUserSecret "API/tavily";
       API_EXA = mkUserSecret "API/exa";
       API_TMDB = mkUserSecret "API/tmdb";
+      FEISHU_APP_SECRET = mkUserSecret "API/feishu";
 
       GOOGLE_CLOUD_API_KEY = mkUserSecret "google/cloud";
 

@@ -5,6 +5,7 @@
 }:
 {
   imports = [
+    ./cc-connect.nix
     ./mcp.nix
     ./codex.nix
     ./claude.nix

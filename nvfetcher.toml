@@ -36,3 +36,9 @@ fetch.github = "trzsz/trzsz-go"
 [launchk]
 src.github = "intellekthq/launchk"
 fetch.github = "intellekthq/launchk"
+
+[voltagent-subagents]
+# 社区 sub-agent 仓库暂无 release/tag，用 manual + latest commit hash 确保可复现。
+# 后续上游打 tag 后可切回 src.github_tag。
+src.manual = "5983fe3b4ea2785335ac1712c4aa1ac4e13a8fa2"
+fetch.github = "VoltAgent/awesome-claude-code-subagents"

@@ -19,14 +19,7 @@ in
   config = lib.mkIf cfg.enable {
     programs.agent-skills = {
       enable = true;
-      sources = {
-        local = {
-          path = ./skills;
-        };
-      };
-
       skills = {
-        # enableAll = [ "local" ];
         enableAll = true;
       };
     };
