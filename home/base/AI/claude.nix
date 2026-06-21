@@ -294,8 +294,18 @@ in
           "WebSearch(*)"
           "WebFetch(*)"
           "Skill(*)"
-          # 默认允许所有MCP操作
-          "mcp__*"
+          # chrome-devtools 插件：浏览器操作（导航、截图、点击等）
+          "mcp__plugin_claude-code-home-manager_chrome-devtools__*"
+          # github 插件：仓库操作（拉取 commits、创建 PR 等）
+          "mcp__plugin_claude-code-home-manager_github__*"
+          # linear 插件：issue 管理、sprint 操作、团队协作
+          "mcp__plugin_claude-code-home-manager_linear__*"
+          # codegraph 插件：代码知识图谱搜索、探索、调用者分析
+          "mcp__plugin_claude-code-home-manager_codegraph__*"
+          # context7 插件：库/框架文档查询
+          "mcp__plugin_claude-code-home-manager_context7__*"
+          # deepwiki 插件：公开 repo wiki 知识访问
+          "mcp__plugin_claude-code-home-manager_deepwiki__*"
         ];
         ask = [
           "Bash(git push *)"
