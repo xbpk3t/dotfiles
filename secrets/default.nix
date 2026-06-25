@@ -68,7 +68,8 @@ in
 
     secrets = {
       # Me
-      # me_pwgen = mkUserSecret "me/pwgen";
+      ME_PASS = mkUserSecret "me/pass";
+      ME_PWGEN = mkUserSecret "me/pwgen";
       ME_SK = mkUserSecret "me/sk";
 
       # Cloudflare
