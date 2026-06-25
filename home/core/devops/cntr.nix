@@ -12,7 +12,10 @@
   };
 
   home.sessionVariables = {
+    DEFAULT_PASS = "$(cat ${config.sops.secrets.ME_PASS.path})";
+    DEFAULT_PWGEN = "$(cat ${config.sops.secrets.ME_PWGEN.path})";
     DEFAULT_SK = "$(cat ${config.sops.secrets.ME_SK.path})";
+
     TAILSCALE_IPV4 = "$(tailscale ip -4 | head -n 1)";
 
     # Actions Runner: 复用 GITHUB_TOKEN（需 Administration: Write scope）

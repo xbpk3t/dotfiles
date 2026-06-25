@@ -83,7 +83,7 @@ in
             #   defaultMode = "plan" → 日常只读探索
             #   需要执行时 Shift+Tab 切到 acceptEdits（少弹确认）或 bypassPermissions（完全跳过）
             #   auto 从 Shift+Tab 循环中移除，--permission-mode auto 也会被拒绝
-            disableAutoMode = "disable";
+            # disableAutoMode = "disable";
 
             # [2026-06-09] Agent View cache 优化：
             # 默认 bgIsolation = "worktree" 会把每个后台 session 放进独立 worktree，

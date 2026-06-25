@@ -1,52 +1,86 @@
 ---
-# golangci-lint configuration
-# https://golangci-lint.run/usage/configuration/
-# 基于《100 Go Mistakes and How to Avoid Them》的完整配置
-
-# 配置文件版本
-version: 2
-
-
-#output:
-#  formats:
-#    text: # colored-line-number
-#      path: stdout
-#      colors: true
-#      print-issued-lines: true
-#      print-linter-name: true
-
+version: "2"
 
 linters:
+  enable:
+    # ===== 默认 5 个（golangci-lint 内置，显式列出以保持完整）=====
+    - errcheck          # 未检查 error 返回值
+    - govet             # Go 官方静态分析（go vet）
+    - ineffassign       # 无效赋值
+    - staticcheck       # 最全面的 bug pattern 检测（SA/S1/ST）
+    - unused            # 死代码（未使用的常量/变量/函数/类型）
+
+    # ===== 核心：bug 检测 =====
+    - bodyclose         # HTTP response body 是否关闭（项目有 10+ HTTP client 文件）
+    - forcetypeassert    # 类型断言不检查 ok 会 panic
+    - nilerr            # 检查了 err != nil 但返回了 nil error
+    - errorlint         # 强制 errors.Is/As/%w（Go 1.13+ 错误处理）
+    - durationcheck     # 两个 duration 相乘的常见 bug
+    - nilnesserr        # 检查 err != nil 但返回了不同的 nil error
+    - sqlclosecheck     # #78-79 SQL 连接/rows 未关闭
+    - errchkjson        # #77 json.Marshal/Unmarshal error 补充检查
+
+    # ===== 核心：安全 =====
+    - gosec             # 安全扫描（注入/命令执行/整数溢出等）
+
+    # ===== 核心：代码质量 =====
+    - gocritic          # 最多多检查器（hugeParam/rangeExprCopy/diagnostic/style）
+    - revive            # golint 替代品（命名/复杂度/注释/struct tag）
+    - gocyclo           # 循环复杂度（阈值 15）
+    - gocognit          # 认知复杂度（阈值 35，与 gocyclo 互补）
+    - nestif            # 深层嵌套 if（阈值 4）
+    - goconst           # 重复字面量（min-occurrences=6）
+    - funlen            # 函数长度（120行/80语句）
+    - dupl              # 重复代码检测（阈值 100）
+    - forbidigo         # 禁 panic()/fmt.Print
+    - varnamelen        # 变量名长度 vs 作用域
+    - recvcheck         # #42 receiver 类型一致性（value/pointer 混用检测）
+
+    # ===== 风格 & 惯用写法 =====
+    - misspell          # 拼写检查（US locale）
+    - usestdlibvars     # 用标准库常量替代硬编码
+    - nakedret          # naked return 超阈值告警
+    - whitespace        # 去掉函数/if/for 前后多余空行（auto-fix）
+    - nolintlint        # nolint 注释规范（必须指定 linter 名）
+    - unconvert         # 不必要的类型转换（auto-fix）
+    - goprintffuncname  # printf 类函数命名规范（以 f 结尾）
+
+    # ===== 按项目情况 =====
+    - errname           # sentinel error 命名（Err 前缀 / Error 后缀）
+    - testifylint       # testify 用法检查
+    - fatcontext        # 循环/literal 中嵌套 context 检测
+    - paralleltest      # #84 subtest 并行检测（docs-alfred 测试轻量，flaky 风险低）
+    # - gochecknoglobals
+
   exclusions:
     paths:
       - ".*_test\\.go"
+      - ".*\\.pb\\.go$"
+      - vendor
+      - node_modules
+    rules:
+      # 只在测试文件中忽略函数长度检查
+      - path: _test\.go
+        linters:
+          - funlen
+          - goconst
+          - gocognit
+          - revive
 
+      - linters:
+          - lll
+        source: "^//go:generate "
 
-  default: all
-  disable:
-    - depguard
-    - testpackage     # 测试包检查 - 禁用过于严格的测试包命名要求
-    - wrapcheck       # 错误包装检查 - 禁用过于严格的错误包装要求
-    - wsl
-    - wsl_v5
-    - err113
-    - exhaustive
-    - exhaustruct
-    - funcorder
-    - godox
-    - gosmopolitan
-    - intrange
-    - ireturn
-    - mnd
-    - noctx
-    - noinlineerr
-    - paralleltest
-    - prealloc
-    - recvcheck
-    - unparam
-    - inamedparam
-    - tagliatelle
-    - gomodguard
+      # 只在包含特定注释的代码行忽略常量检查
+      - linters:
+          - goconst
+        source: "^// nolint:"
+
+      # 排除大部分revive的过于严格的规则
+      # 只在错误信息匹配特定模式时忽略
+      - linters:
+          - revive
+        text: "(should have comment or be unexported|exported.*should have comment|package-comments|blank-imports|redefines-builtin-id|stutters|comment on exported.*should be of the form)"
 
 
   settings:
@@ -60,10 +94,10 @@ linters:
       disabled-checks:
         - dupImport
         - ifElseChain
-        - octalLiteral
         - whyNoLint
         - wrapperFunc
         - exitAfterDefer   # 已经默认启用，移除重复配置
+        - unnamedResult    # 与 nonamedreturns 冲突
 
       # 特定规则配置
       settings:
@@ -79,12 +113,11 @@ linters:
       rules:
         - name: package-comments  # #15(文档缺失)
           severity: warning
-          disabled: true
+          disabled: false
 
         - name: receiver-naming    # #42(接收器命名)
           severity: warning
           disabled: false
-          exclude: [""]
           arguments:
             - max-length: 4
 
@@ -97,7 +130,6 @@ linters:
           arguments:
             - ["ID", "HTTP", "API", "URL"] # Allowlist for correct initialisms
             - ["Id", "Http", "Url", "VM"] # Blocklist for incorrect initialisms
-          message: "Use Go-style naming conventions (e.g., 'HTTP' for 'Http')"
 
         # 补充的最佳实践规则
         - name: function-length    # 函数长度限制 - 单一职责原则
@@ -111,35 +143,23 @@ linters:
         - name: struct-tag         # 结构体标签检查 - 规范标签使用
           severity: warning
           disabled: false
-          exclude: [""]
           arguments:
             - "json,inline"
             - "bson,outline,gnu"
+            - "!validate"          # gookit/validate 使用自定义 tag 语法，跳过检查
 
         - name: unnecessary-stmt   # 不必要的语句检查 - 简化代码
           arguments: [true]
 
-        - name: unused-receiver    # 未使用的接收器检查 - 避免无用的方法
+        - name: unused-receiver    # 未使用的接收器检查 - 接口实现和单行方法常有未使用receiver，太严格
           disabled: true
-          severity: warning
-          exclude: [""]
-          arguments:
-            - allow-regex: "^_"
 
-        - name: exported           # 导出检查 - 避免过度导出
+        - name: exported           # 导出检查 - 默认检查 private receivers 和 public interfaces 的文档
           severity: warning
           disabled: false
-          exclude: [""]
           arguments:
             - "check-private-receivers"
-            - "disable-stuttering-check"
-            - "say-repetitive-instead-of-stutters"
             - "check-public-interface"
-            - "disable-checks-on-constants"
-            - "disable-checks-on-functions"
-            - "disable-checks-on-methods"
-            - "disable-checks-on-types"
-            - "disable-checks-on-variables"
 
     # ===== 其他linter配置 =====
     gocognit:
@@ -156,7 +176,8 @@ linters:
 
     goconst:
       min-len: 2
-      min-occurrences: 4
+      min-occurrences: 6
+      ignore-tests: true
 
     misspell:
       locale: US
@@ -169,8 +190,6 @@ linters:
       checks: ["all", "-ST1000", "-ST1003", "-ST1016", "-ST1020", "-ST1021", "-ST1022"]
 
     # ===== 补充的最佳实践配置 =====
-    gochecknoglobals: # 允许的全局变量类型
-      allow: ["errors", "sync.Once", "init"]
 
     funlen:
       lines: 120  # 进一步放宽函数行数限制，允许数据处理函数
@@ -178,35 +197,25 @@ linters:
 
     forbidigo: # 禁止使用的标识符
       forbid:
-
+        - pattern: "fmt\\.Print(f|ln)?"
+          msg: "use a logger instead of fmt.Print"
+        - pattern: "panic\\("
+          msg: "return an error instead of panic"
 
     nestif:
       min-complexity: 4  # 嵌套if的复杂度阈值
 
-    testpackage: # 测试包检查配置
-      skip-imports: ["testing"]
-
-    wrapcheck: # 错误包装检查配置
-      ignoreSigs:
-        - "fmt\\.Errorf"
-        - "errors\\.Wrap"
-        - "errors\\.Wrapf"
 
     errorlint: # 错误处理检查配置
       errorf: true
       asserts: true
       comparison: true
 
-    # [securego/gosec: Golang security checker](https://github.com/securego/gosec)
     gosec:
       excludes:
         - G104 # 部分error不需要处理
-        - G107 # http请求时不能使用动态url，关闭
-        - G115 # 整数转换误报
-        - G204 # 命令执行误报
-        - G304 # 文件包含误报
         - G122 # 本地 repo cache 扫描场景下的 filepath.Walk 告警噪音较大
-        - G307 # Deferring a method which returns an error
+        - G304
 
     varnamelen:
       max-distance: 6
@@ -231,46 +240,10 @@ linters:
 
 
 issues:
-  exclude-use-default: false
   max-issues-per-linter: 0
   max-same-issues: 0
   new: false
-  exclude-files:
-    - ".*\\.pb\\.go$"
-    - ".*_test\\.go$"
-  exclude-dirs:
-    - vendor
-    - node_modules
-  exclude-rules:
-
-    # 只在测试文件中忽略函数长度检查
-    - path: _test\.go
-      linters:
-        - funlen
-        - goconst
-        - gocognit
-        - revive
-
-    - linters:
-        - lll
-      source: "^//go:generate "
-
-    # 只在包含特定注释的代码行忽略常量检查
-    - linters:
-        - goconst
-      source: "^// nolint:"
-
-    # 排除大部分revive的过于严格的规则
-    # 只在错误信息匹配特定模式时忽略
-    - linters:
-        - revive
-      text: "(should have comment or be unexported|exported.*should have comment|package-comments|blank-imports|redefines-builtin-id|stutters|comment on exported.*should be of the form|var-naming)"
 
 
 severity:
   default: error
-  rules:
-    - severity: info
-      linters:
-        - foo
-      text: '(?i)Example.*'
