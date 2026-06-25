@@ -81,6 +81,10 @@
 
       # tags(desc): 依赖分析 > 可视化 > 模块管理
       go-mod-graph-chart
+    ]
+    ++ [
+      # Test
+      tparse
     ];
 
   # Go 运行时和配置
