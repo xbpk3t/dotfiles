@@ -1,4 +1,25 @@
 {
+    "cc-connect": {
+        "cargoLock": null,
+        "date": null,
+        "extract": null,
+        "name": "cc-connect",
+        "passthru": null,
+        "pinned": false,
+        "src": {
+            "deepClone": false,
+            "fetchSubmodules": false,
+            "leaveDotGit": false,
+            "name": null,
+            "owner": "chenhg5",
+            "repo": "cc-connect",
+            "rev": "v1.4.1",
+            "sha256": "sha256-Spm1OB0z7+E0JvWOtBAtUrRHiEc+aPjBYVHy0zc7ww4=",
+            "sparseCheckout": [],
+            "type": "github"
+        },
+        "version": "v1.4.1"
+    },
     "chrome-devtools-mcp": {
         "cargoLock": null,
         "date": null,
@@ -8,11 +29,11 @@
         "pinned": false,
         "src": {
             "name": null,
-            "sha256": "sha256-guEeSOgLv5ZlAPoMrsszBNppFolhyidZvuepl0FXpfQ=",
+            "sha256": "sha256-0tRNmnPaSZIILB8WhfvEoTaUF2cNSplI0w7L70FBmZk=",
             "type": "url",
-            "url": "https://registry.npmjs.org/chrome-devtools-mcp/-/chrome-devtools-mcp-1.3.0.tgz"
+            "url": "https://registry.npmjs.org/chrome-devtools-mcp/-/chrome-devtools-mcp-1.4.0.tgz"
         },
-        "version": "1.3.0"
+        "version": "1.4.0"
     },
     "launchk": {
         "cargoLock": null,
@@ -86,10 +107,10 @@
         "pinned": false,
         "src": {
             "name": null,
-            "sha256": "sha256-UBoncrVvhHICOTAJ/NhutSfHoejK/pmFWxCX4MbTwDM=",
+            "sha256": "sha256-pH0ZZtTflkh/8F8J4YlIKrgiUC8VchL6hy5JtgV/pYA=",
             "type": "url",
-            "url": "https://github.com/Zephyruso/zashboard/releases/download/v3.10.1/dist.zip"
+            "url": "https://github.com/Zephyruso/zashboard/releases/download/v3.11.0/dist.zip"
         },
-        "version": "v3.10.1"
+        "version": "v3.11.0"
     }
 }

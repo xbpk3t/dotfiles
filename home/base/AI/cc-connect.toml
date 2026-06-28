@@ -3,45 +3,30 @@ attachment_send = "on"
 language = "zh"
 idle_timeout_mins = 120
 
-[[providers]]
-name = "test"
-api_key = "${GLM_CODING_API_KEY}"
-base_url = "https://api.lucc.dev/"
-model = "deepseek-v4-flash"
-thinking = "enabled"
-agent_types = ["claudecode", "codex"]
-
-[providers.agent_models]
-codex = "gpt-5.5"
-
 [[projects]]
-name = "my-project"
-show_context_indicator = true
-reply_footer = true
-inject_sender = false
+name = "docs"
 
 [projects.agent]
 type = "claudecode"
-provider_refs = ["test"]
+provider_refs = ["docs-provider"]
 
 [projects.agent.options]
+work_dir = "/home/luck/Desktop/docs"
 mode = "default"
-provider = "test"
-work_dir = "/Users/luck/Desktop/docs"
-
-[[projects.agent.providers]]
-name = "test"
-api_key = "${GLM_CODING_API_KEY}"
-base_url = "https://api.lucc.dev/"
-model = "deepseek-v4-flash"
 
 [[projects.platforms]]
 type = "feishu"
 
 [projects.platforms.options]
-allow_from = "ou_89e257c049863c7127483a9331d965c6"
-app_id = "cli_aaa2b85a98b85cef"
-app_secret = "${FEISHU_APP_SECRET}"
+app_id = ""
+app_secret = ""
+
+[[projects.agent.providers]]
+name = "docs-provider"
+api_key = "${ANTHROPIC_AUTH_TOKEN}"
+base_url = "https://api.lucc.dev/"
+model = "deepseek-v4-flash"
+env = { ANTHROPIC_AUTH_TOKEN = "${ANTHROPIC_AUTH_TOKEN}", ANTHROPIC_BASE_URL = "${ANTHROPIC_BASE_URL}" }
 
 [log]
 level = "info"
