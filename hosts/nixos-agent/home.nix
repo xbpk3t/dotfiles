@@ -9,6 +9,7 @@
         permissionMode = "yolo";
       };
       skills.enable = true;
+      cc-connect.enable = true;
     };
     infra = {
       nh.enable = true;
@@ -17,6 +18,9 @@
   };
 
   home.packages = with pkgs; [
+    # VCS & code
+    git
+
     # 容器调试工具
     htop
     iotop

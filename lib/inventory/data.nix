@@ -183,7 +183,7 @@ in
       # 该容器节点归属的 VPS inventory node。
       containerHost = "nixos-vps-dev";
       # 不随宿主机自动启动，需要时手动 deploy。
-      autoStart = false;
+      autoStart = true;
       # What：容器 IP（宿主机 ve-nixos-agent 网桥地址）。
       # Why：NixOS 容器默认分配 10.233.0.0/16 段地址，首个容器为 10.233.0.2。
       # Note：容器创建后若 IP 不符，在此覆写。

@@ -7,7 +7,6 @@
 }:
 let
   cfg = config.modules.AI.claude;
-  claudeDefaultModel = "deepseek-v4-flash";
   subagentSrc = "${pkgs.voltagent-subagents}";
 in
 {
@@ -56,6 +55,7 @@ in
 
           # https://x.com/xiangxiang103/status/2043612207175602671 cc 稳定不降智的技巧：换稳定性：关掉超长上下文、adaptive thinking、auto memory，确实更像“固定档位”了。适合长任务复现，但一般会牺牲一点探索效率。
           settings = {
+            model = "deepseek-v4-flash[1m]";
             theme = "dark";
             # [2026-06-02] concise: 去除每 turn 的 Insight 框 + 原理展开，节省 30-50% 输出 token
             outputStyle = "concise";
@@ -163,10 +163,10 @@ in
               # [2026-04-29] 从 max -> xhigh，避免耗费太多token
               CLAUDE_CODE_EFFORT_LEVEL = "max";
 
-              # 三档模型映射：DS-V4 系列
-              ANTHROPIC_DEFAULT_OPUS_MODEL = "deepseek-v4-pro";
-              ANTHROPIC_DEFAULT_SONNET_MODEL = claudeDefaultModel;
-              ANTHROPIC_DEFAULT_HAIKU_MODEL = claudeDefaultModel;
+              # 三档模型映射：DS-V4 系列（[1m] = 1M context window）
+              ANTHROPIC_DEFAULT_OPUS_MODEL = "mimo-v2.5-pro[1m]";
+              ANTHROPIC_DEFAULT_SONNET_MODEL = "deepseek-v4-pro[1m]";
+              ANTHROPIC_DEFAULT_HAIKU_MODEL = "deepseek-v4-flash[1m]";
 
               # 可选：通过 gateway 时，减少系统 prompt 中客户端归因头变化，有助于 gateway 层 prompt cache 命中
               CLAUDE_CODE_ATTRIBUTION_HEADER = "0";
