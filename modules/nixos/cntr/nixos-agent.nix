@@ -7,6 +7,7 @@
   hostMeta,
   timeMeta,
   editorMeta,
+  pkgs,
   ...
 }:
 let
@@ -33,10 +34,9 @@ lib.mkIf agentEnabled {
       stateVersion = agentStateVersion;
     };
     config = {
-      nixpkgs = {
-        config.allowUnfree = true;
-        overlays = [ (import (mylib.relativeToRoot "pkgs/overlay.nix")) ];
-      };
+      # 容器使用宿主机（nixos-vps）的 pkgs → nixpkgs-stable
+      # allowUnfree + overlay 已由宿主机 pkgs 内置，不设 config/overlays 避免断言冲突
+      nixpkgs.pkgs = pkgs;
       imports = [
         inputs.sops-nix.nixosModules.sops
         (mylib.relativeToRoot "hosts/nixos-agent/default.nix")

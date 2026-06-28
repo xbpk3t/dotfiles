@@ -35,8 +35,6 @@ in
 
       # https://github.com/tw93/Mole
       "mole"
-
-      "cc-connect"
     ];
 
     # 以下casks根据重要性排序

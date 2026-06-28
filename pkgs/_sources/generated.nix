@@ -6,12 +6,23 @@
   dockerTools,
 }:
 {
+  cc-connect = {
+    pname = "cc-connect";
+    version = "v1.4.1";
+    src = fetchFromGitHub {
+      owner = "chenhg5";
+      repo = "cc-connect";
+      rev = "v1.4.1";
+      fetchSubmodules = false;
+      sha256 = "sha256-Spm1OB0z7+E0JvWOtBAtUrRHiEc+aPjBYVHy0zc7ww4=";
+    };
+  };
   chrome-devtools-mcp = {
     pname = "chrome-devtools-mcp";
-    version = "1.3.0";
+    version = "1.4.0";
     src = fetchurl {
-      url = "https://registry.npmjs.org/chrome-devtools-mcp/-/chrome-devtools-mcp-1.3.0.tgz";
-      sha256 = "sha256-guEeSOgLv5ZlAPoMrsszBNppFolhyidZvuepl0FXpfQ=";
+      url = "https://registry.npmjs.org/chrome-devtools-mcp/-/chrome-devtools-mcp-1.4.0.tgz";
+      sha256 = "sha256-0tRNmnPaSZIILB8WhfvEoTaUF2cNSplI0w7L70FBmZk=";
     };
   };
   launchk = {
@@ -49,10 +60,10 @@
   };
   zashboard = {
     pname = "zashboard";
-    version = "v3.10.1";
+    version = "v3.11.0";
     src = fetchurl {
-      url = "https://github.com/Zephyruso/zashboard/releases/download/v3.10.1/dist.zip";
-      sha256 = "sha256-UBoncrVvhHICOTAJ/NhutSfHoejK/pmFWxCX4MbTwDM=";
+      url = "https://github.com/Zephyruso/zashboard/releases/download/v3.11.0/dist.zip";
+      sha256 = "sha256-pH0ZZtTflkh/8F8J4YlIKrgiUC8VchL6hy5JtgV/pYA=";
     };
   };
 }

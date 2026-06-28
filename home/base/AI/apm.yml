@@ -23,14 +23,4 @@ dependencies:
       skills:
         - opencli-usage # 命令快速参考，用来插命令
         - opencli-browser # opencli browser 命令（驱动chrome做交互式操作）
-
-    - git: https://github.com/mattpocock/skills
-      skills:
-        - grill-with-docs
-        - grilling
-        - diagnosing-bugs
-        - codebase-design
-        - tdd
-        - domain-modeling
-        - handoff
   claude:

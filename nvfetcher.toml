@@ -37,6 +37,11 @@ fetch.github = "trzsz/trzsz-go"
 src.github = "intellekthq/launchk"
 fetch.github = "intellekthq/launchk"
 
+[cc-connect]
+# Go 项目，从源码构建。buildGoModule 自行处理 Go module 依赖。
+src.github = "chenhg5/cc-connect"
+fetch.github = "chenhg5/cc-connect"
+
 [voltagent-subagents]
 # 社区 sub-agent 仓库暂无 release/tag，用 manual + latest commit hash 确保可复现。
 # 后续上游打 tag 后可切回 src.github_tag。
