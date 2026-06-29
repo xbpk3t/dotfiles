@@ -64,9 +64,6 @@
     ++ [
       # Dockerfile / 供应链安全
 
-      # Dockerfile linter，适合把 Dockerfile 质量门禁前置
-      # https://github.com/hadolint/hadolint
-      # hadolint Dockerfile
       hadolint
 
       # Image 安全漏洞扫描

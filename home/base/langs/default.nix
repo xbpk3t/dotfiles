@@ -9,7 +9,6 @@
   home.packages =
     with pkgs;
     [
-      devenv
 
       # 其他语言
       # php

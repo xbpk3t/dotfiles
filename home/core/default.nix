@@ -6,50 +6,21 @@
 {
   imports = mylib.scanPaths ./.;
 
-  home.packages =
-    with pkgs;
-    [
-      # Basic utilities
+  home.packages = with pkgs; [
+    # Basic utilities
 
-      # [7 Amazing Terminal API Tools You Need To Try](https://www.youtube.com/watch?v=eyXxEBZMVQI)
-      curl
-      wget
+    # [7 Amazing Terminal API Tools You Need To Try](https://www.youtube.com/watch?v=eyXxEBZMVQI)
+    curl
+    wget
+    # 终端复用
+    screen
 
-      # System utilities
-      screen
+    # [2026-04-25] darwin 上rebuild失败
+    # dateutils # 操作日期和时间表达式 dateadd、datediff、strptime
 
-      # Development tools
-      gcc
-      gnumake
-      cmake
-
-      # [2026-04-25] darwin 上rebuild失败
-      # dateutils # 操作日期和时间表达式 dateadd、datediff、strptime
-
-      # 文件处理
-      tree
-      file
-      which
-
-      gnupg
-      # 挪到base里，因为darwin和nixos都需要使用sops-nix
-      sops
-      age
-      openssh
-
-      # 证书和密钥管理
-
-      # [2026-01-15] 需要在目标host上检查证书问题
-      openssl
-    ]
-    ++
-      # 之前放在 hosts/nixos-vps 里，但是实际上VPS并不需要这两个pkg，所以放在homelab里
-      [
-        # 因为可能之后也会用mac作为核心控制端，所以直接放到base里，来多端复用（而非放到专门nixos的nix文件里）
-        # 之所以放在这里，因为无论是nixos还是mac都会引入 home/base/desktop，严格对应关系引用
-        nixos-anywhere
-
-        # 同上，同样只有 workstation 才有必要引入 deploy-rs
-        deploy-rs
-      ];
+    # 文件处理
+    tree
+    file
+    which
+  ];
 }

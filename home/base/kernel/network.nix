@@ -45,6 +45,10 @@
       # https://mynixos.com/nixpkgs/package/dig
       dig
 
+      # https://mynixos.com/nixpkgs/package/dnslookup
+      # DNS 排错工具，比 dig/host 更直观的输出
+      dnslookup
+
       # ping, but with a graph(TUI)
       gping
       #  doggo # DNS client for humans
@@ -54,6 +58,7 @@
 
       # 同时支持 linux, darwin, windows
       mtr
+      trippy
 
       ncdu
 
@@ -142,7 +147,16 @@
 
       websocat
 
+      # https://mynixos.com/nixpkgs/package/tcpflow
+      # TCP 流量记录器，按连接拆分 pcap
+      tcpflow
+
+      # https://mynixos.com/nixpkgs/package/termshark
+      # tshark 的 TUI wrapper
+      termshark
+
       # iperf3
+
     ]
     # Linux-only tools; Darwin 上直接跳过，避免 hostPlatform 不可用的求值错误
     ++ lib.optionals stdenv.isLinux [
