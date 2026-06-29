@@ -2,12 +2,11 @@
   pkgs,
   config,
   lib,
-  mylib,
   ...
 }:
 let
   cfg = config.modules.extra.zed-remote;
-  lspPackages = mylib.langs.lspPkgs pkgs;
+  lspPackages = config.modules.langs.lsp.packages;
 in
 {
   options.modules.extra.zed-remote = {

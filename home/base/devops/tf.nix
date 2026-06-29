@@ -19,6 +19,8 @@
     # > `/nix/store/prgxvl5sw4sn44i9sinv82asj1fihhcc-terramate-0.16.0/bin/terramate'
     # tenv
 
+    terranix
+
     # ==================== 新增：带 Cloudflare provider 的 OpenTofu ====================
     #    (opentofu.withPlugins (p: [
     #      p.cloudflare_cloudflare # terraform-providers.cloudflare 已重命名为 cloudflare_cloudflare
