@@ -2,12 +2,11 @@
   pkgs,
   config,
   lib,
-  mylib,
   ...
 }:
 let
   cfg = config.modules.desktop.zed;
-  lspPackages = mylib.langs.lspPkgs pkgs;
+  lspPackages = config.modules.langs.lsp.packages;
 in
 {
   options.modules.desktop.zed = {

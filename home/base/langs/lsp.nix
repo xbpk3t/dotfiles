@@ -1,11 +1,69 @@
 {
   config,
   lib,
-  mylib,
   pkgs,
   ...
 }:
 let
+  lspPkgs = with pkgs; [
+    # Nix
+    nixd
+    nil
+
+    # Rust
+    rust-analyzer
+    rustfmt
+
+    # Zig
+    zls
+
+    # C/C++
+    clang-tools
+
+    # TypeScript/JavaScript
+    typescript
+    typescript-language-server
+    vscode-langservers-extracted
+
+    # YAML
+    yaml-language-server
+
+    # Bash
+    bash-language-server
+
+    # Docker
+    dockerfile-language-server
+
+    # Terraform
+    terraform-ls
+
+    # Helm
+    helm-ls
+
+    # Lua
+    lua-language-server
+
+    # TeX
+    texlab
+
+    # Markdown
+    marksman
+
+    # TOML
+    taplo
+
+    # Python
+    pyright
+    ruff
+
+    # API
+    api-linter
+
+    # General
+    cookiecutter
+    dotenv-linter
+  ];
+
   cfg = config.modules.langs.lsp;
 in
 {
@@ -14,7 +72,7 @@ in
 
     packages = mkOption {
       type = types.listOf types.package;
-      default = mylib.langs.lspPkgs pkgs;
+      default = lspPkgs;
       description = "Common LSP/toolchain packages shared by IDEs.";
     };
   };
