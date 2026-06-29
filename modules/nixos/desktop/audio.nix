@@ -1,5 +1,4 @@
-{ pkgs, ... }:
-{
+_: {
   # PipeWire 音频栈（含 Pulse/JACK 兼容）+ rtkit
   services.pipewire = {
     enable = true;
@@ -17,7 +16,7 @@
   services.pulseaudio.enable = false;
 
   # 提供 `pactl` 等工具
-  environment.systemPackages = with pkgs; [
-    pulseaudio
-  ];
+  #  environment.systemPackages = with pkgs; [
+  #    pulseaudio
+  #  ];
 }

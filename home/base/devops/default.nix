@@ -159,12 +159,6 @@
       # 计算子网掩码/网段
       # tags(desc): 网络工具 > IP规划 > 子网计算
       ipcalc
-    ]
-    ++ [
-      # 【2026-06-18】从 home/base/infra/default.nix 迁入
-      gnupg # GPG 加密/签名
-      sops # 加密文件管理（配合 sops-nix）
-      age # 现代加密工具（sops 的 age key 后端
     ];
 
   home.sessionVariables = {

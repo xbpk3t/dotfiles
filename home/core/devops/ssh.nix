@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }:
 let
@@ -42,6 +43,13 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    home.packages = with pkgs; [
+      openssh
+      openssl
+      age
+      sops
+      gnupg
+    ];
     programs.ssh = {
       enable = true;
       enableDefaultConfig = false;

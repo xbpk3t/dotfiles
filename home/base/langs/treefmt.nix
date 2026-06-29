@@ -8,7 +8,6 @@
   home.packages =
     (with pkgs; [
       # ── Hook runner / meta formatter ─────────────────────────
-      prek
       treefmt
 
       # ── Formatters (used by treefmt) ───────────────────────────
@@ -24,7 +23,6 @@
 
       # ── Linters ────────────────────────────────────────────────
       actionlint
-      hadolint
       golangci-lint
       ruff
       statix

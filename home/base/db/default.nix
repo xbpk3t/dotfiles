@@ -37,5 +37,7 @@
     duckdb
 
     csvkit
+
+    postgrest
   ];
 }

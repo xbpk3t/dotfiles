@@ -192,9 +192,9 @@ in
         RemainAfterExit = true;
       };
       path = with pkgs; [
-        iproute2
-        gawk
-        python3
+        # iproute2
+        # gawk
+        # python3
       ];
       script = builtins.readFile ./k3s-cni-route.sh;
     };

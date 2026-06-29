@@ -13,5 +13,6 @@
     # sudo bpftool map show
     # bpftool 查看网络 attach 点，网络 BPF 调试时有用
     # sudo bpftool net
+    bpftools
   ];
 }
