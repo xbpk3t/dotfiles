@@ -111,6 +111,8 @@
       # ko
 
       # kor
+
+      kustomize-sops
     ];
 
   programs = {

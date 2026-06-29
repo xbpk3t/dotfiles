@@ -3,8 +3,6 @@
   home.packages =
     with pkgs;
     [
-      # 分类1：Typst 核心工具
-      # https://github.com/ItsEthra/typst-live
       typst
 
       # why: 用来替代 typstfmt
