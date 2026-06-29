@@ -22,6 +22,8 @@
       mimikatz
 
       python313Packages.impacket
+
+      chisel
     ]
     ++ lib.optionals pkgs.stdenv.isLinux [
       # 分类1：AD Internal Pentest（Linux-only）

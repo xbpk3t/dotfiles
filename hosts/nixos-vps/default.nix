@@ -61,7 +61,6 @@ in
       pkgs.kitty.terminfo
       pkgs.tmux.terminfo
       pkgs.wezterm.terminfo
-      pkgs.alacritty.terminfo
       pkgs.foot.terminfo
     ];
   };

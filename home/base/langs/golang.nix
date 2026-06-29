@@ -29,11 +29,7 @@
       # [2026-04-20] 注释掉 gosec, gofumpt, golines，因为本身可以作为 golangci-lint 的 linters/formatters 使用
       # tags(desc): 代码质量 > 聚合检查 > 静态分析
       golangci-lint
-      # https://github.com/securego/gosec
-      # gosec
-      # gofumpt
-      # https://github.com/segmentio/golines
-      # golines
+      golangci-lint-langserver
 
       # tags(desc): 代码质量 > import规范化 > 格式化
       goimports-reviser

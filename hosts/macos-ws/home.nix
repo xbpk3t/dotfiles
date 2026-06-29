@@ -21,7 +21,6 @@ _: {
     desktop = {
       stylix.enable = true;
 
-      alacritty.enable = false;
       ghostty.enable = false;
       kitty.enable = false;
       cmux.enable = true;

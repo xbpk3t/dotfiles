@@ -202,19 +202,6 @@ repos:
         files: ^\.tms/
         exclude: \.md$ # 禁止 prettier 格式化MD文件
 
-
-
-  # Disabled Go candidates: the repo currently has no tracked go.mod or *.go.
-  #- url: https://github.com/uber-go/goleak
-  #  des: Used to detect goroutine leaks
-  #- url: https://github.com/uber-go/nilaway
-  #  des: 用来在编译时捕获nil，来规避生产环境出现nil panic问题。确实非常实用，帮我避免了很多坑。
-  #- url: https://github.com/dkorunic/betteralign
-  #  des: 相比于fieldalignment，不会去修改各种 xxx_gen.go 以及 xxx_test.go 代码
-  #- url: https://github.com/mvdan/gofumpt
-  #- url: https://github.com/daixiang0/gci
-  #  des: GCI, a tool that control golang package import order and make it always deterministic.
-  #- url: https://github.com/mgechev/revive
   - repo: local
     hooks:
       - id: treefmt

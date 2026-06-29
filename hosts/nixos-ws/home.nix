@@ -12,7 +12,6 @@ _: {
 
       zed.enable = false;
 
-      alacritty.enable = true;
       kitty.enable = false;
       ghostty.enable = false;
 
