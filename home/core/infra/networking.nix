@@ -13,13 +13,7 @@ in
 
   config = lib.mkIf cfg.enable {
     home.packages = with pkgs; [
-      # tcpdump 网络抓包
-      # [2026-01-07] VPS上需要通过tcpdump抓包来排查问题，所以挪到core里
-      tcpdump
-
-      # 【2026-06-18】从 home/base/infra/default.nix 迁入，TLS 调试/证书管理
-      openssl
-
+      # 网络诊断工具 — tcpdump/openssl 已迁至 home/base/kernel/network.nix
     ];
   };
 }

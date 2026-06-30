@@ -76,14 +76,11 @@ in
 
       gnomeExtensions.clipboard-indicator
       # 将 Dash 变为 Dock，可自定义位置/自动隐藏
-      # https://github.com/micheleg/dash-to-dock
       gnomeExtensions.dash-to-dock
       # 窗口平铺/网格助手
       gnomeExtensions.tiling-assistant
       # 顶栏防休眠/防锁屏开关
       gnomeExtensions.caffeine
-
-      # ???
 
       # 键盘重映射工具及配置
       # xremap

@@ -39,10 +39,9 @@ in
       };
     };
 
-    # Add netbird CLI and nftables to system packages
+    # Add netbird CLI to system packages (nftables is in home/base/kernel/network.nix)
     environment.systemPackages = [
       pkgs.netbird
-      pkgs.nftables
     ];
 
     # CLI socket compatibility symlinks/tmpfiles

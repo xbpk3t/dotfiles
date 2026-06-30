@@ -6,5 +6,6 @@
 
     # gRPC API 调试 CLI
     grpcurl
+    buf
   ];
 }

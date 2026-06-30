@@ -1247,8 +1247,4 @@ in
       }
     '';
   };
-
-  # ueberzugpp 仅用于 Linux 上不带 Kitty 协议的终端（如 Alacritty）
-  # Ghostty / Kitty 终端使用原生图像协议，不需要 ueberzugpp
-  home.packages = with pkgs; lib.optionals stdenv.hostPlatform.isLinux [ ueberzugpp ];
 }
