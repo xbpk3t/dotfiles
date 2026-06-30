@@ -20,10 +20,11 @@ let
     ++ map mylib.relativeToRoot [
       "hosts/${name}/default.nix"
       "secrets/default.nix"
-      "modules/nixos/base"
-      "modules/nixos/vps"
-      "modules/nixos/cntr/nixos-agent.nix"
-      "modules/nixos/extra/k3s/default.nix"
+      "modules/nixos/kernel"
+      "modules/nixos/devops/nixos-agent.nix"
+      "modules/nixos/ms/mihomo-server.nix"
+      "modules/nixos/ms/singbox-server.nix"
+      "modules/nixos/ms/k3s.nix"
     ];
     home-modules = map mylib.relativeToRoot [
       "hosts/${name}/home.nix"
