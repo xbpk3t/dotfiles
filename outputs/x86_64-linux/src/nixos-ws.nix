@@ -19,15 +19,13 @@ let
     ++ map mylib.relativeToRoot [
       # Host-specific configuration
       "hosts/${name}/default.nix"
-      "modules/nixos/hardware/nvidia.nix"
-
       # common
       "secrets/default.nix"
-      "modules/nixos/base"
+      "modules/nixos/kernel"
+      "modules/nixos/devops/nvidia.nix"
       "modules/nixos/desktop"
-      "modules/nixos/extra/singbox-client.nix"
-      "modules/nixos/extra/mihomo-client.nix"
-      "modules/nixos/extra/vscode-remote.nix"
+      "modules/nixos/ms/singbox-client.nix"
+      "modules/nixos/ms/mihomo-client.nix"
     ];
     home-modules = map mylib.relativeToRoot [
       "secrets/default.nix"

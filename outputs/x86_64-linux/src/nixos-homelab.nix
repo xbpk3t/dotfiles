@@ -20,17 +20,13 @@ let
     ++ map mylib.relativeToRoot [
       "hosts/${name}/default.nix"
       "secrets/default.nix"
-      "modules/nixos/base"
-      "modules/nixos/homelab"
+      "modules/nixos/kernel"
+      "modules/nixos/infra/homelab.nix"
 
-      "modules/nixos/hardware/nvidia.nix"
-      "modules/nixos/extra/singbox-client.nix"
-      "modules/nixos/extra/vscode-remote.nix"
-      "modules/nixos/extra/fhs.nix"
-      "modules/nixos/extra/k3s/default.nix"
-
-      # homelab 需要时可启用 k3s 模块，先在 host 层决定
-      # "modules/nixos/homelab/k3s.nix"
+      "modules/nixos/devops/nvidia.nix"
+      "modules/nixos/devops/fhs.nix"
+      "modules/nixos/ms/singbox-client.nix"
+      "modules/nixos/ms/k3s.nix"
     ];
     home-modules = map mylib.relativeToRoot [
       "secrets/default.nix"

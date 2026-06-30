@@ -115,9 +115,9 @@ in
     # What：为 k3s 提供 iptables/ip6tables、ipset、conntrack 工具。
     # Why：k3s/kube-proxy 需要这些二进制来下发 Service/ClusterIP 规则，否则 10.43.0.1 等 ClusterIP 不可达。
     environment.systemPackages = [
-      pkgs.iptables
-      pkgs.ipset
-      pkgs.conntrack-tools
+      #  pkgs.iptables
+      #  pkgs.ipset
+      #  pkgs.conntrack-tools
     ];
 
     assertions = [
