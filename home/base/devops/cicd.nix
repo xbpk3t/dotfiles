@@ -13,5 +13,9 @@
     fluxcd
 
     fluxcd-operator
+
+    # === Release 自动化 ===
+    # tags(desc): 发布交付 > Release自动化 > CI/CD
+    goreleaser
   ];
 }

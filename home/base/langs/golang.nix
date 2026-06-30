@@ -22,7 +22,6 @@
       (lib.lowPrio gopls)
 
       # tags(desc): 开发体验 > 交互CLI > 终端UI
-      gum
     ]
     ++ [
       # 分类2：代码质量与静态分析
@@ -68,8 +67,6 @@
     ]
     ++ [
       # 分类4：发布、迁移与依赖分析
-      # tags(desc): 发布交付 > Release自动化 > CI/CD
-      goreleaser
 
       # https://github.com/golang-migrate/migrate
       # tags(desc): 数据迁移 > 数据库 > 运维

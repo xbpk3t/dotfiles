@@ -23,7 +23,7 @@
     httpx
 
     dnsx
-    theharvester
+    # theharvester
     gau
   ];
 }

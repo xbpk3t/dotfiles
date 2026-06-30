@@ -18,8 +18,7 @@
       noogle-search
 
       ###### nixpkgs 打包相关 ##########
-      # tags(desc): 打包辅助 > 源地址解析 > Nixpkgs
-      nurl
+      # nurl moved to home/base/devops/nix-tools.nix
 
       # https://github.com/berberman/nvfetcher
       # nvfetcher -- -c nvfetcher.toml -o pkgs/_sources
@@ -39,8 +38,6 @@
       # 发现 nix 里未使用的变量/绑定
       # tags(desc): 代码质量 > 格式化 > Nix
       nixfmt
-      # tags(desc): 代码质量 > 死代码检查 > Nix
-      deadnix
       # tags(desc): 代码质量 > 规则检查 > Nix
       statix # nix 风格与常见陷阱检查
 
@@ -67,24 +64,7 @@
       # 树状查看依赖（替代 nix-store --query --requisites）
       # tags(desc): 依赖分析 > 依赖树 > store查询
       nix-tree
-    ]
-    ++
-      # 之前放在 hosts/nixos-vps 里，但是实际上VPS并不需要这两个pkg，所以放在homelab里
-      [
-        # 因为可能之后也会用mac作为核心控制端，所以直接放到base里，来多端复用（而非放到专门nixos的nix文件里）
-        # 之所以放在这里，因为无论是nixos还是mac都会引入 home/base/desktop，严格对应关系引用
-        nixos-anywhere
-
-        # 同上，同样只有 workstation 才有必要引入 deploy-rs
-        deploy-rs
-      ];
-
-  # https://mynixos.com/home-manager/options/programs.nix-init
-  # nix-init 是基于nurl实现的
-  # nix-init 和 nurl 都可以用来给“没有nixpkgs”的pkg手动打包。但是
-  programs.nix-init = {
-    enable = true;
-  };
+    ];
 
   programs.zsh.shellAliases = {
     # noogle-search 是 nixpkgs 中的实际可执行文件名；补一个更直观的入口。

@@ -28,19 +28,12 @@
   home.packages =
     with pkgs;
     [
-      # Docker 基础 CLI
-      # https://github.com/docker/cli
-      docker
-
-      # https://github.com/docker/docker-credential-helpers
       # 否则会报 osxkeychain not found
       docker-credential-helpers
     ]
     ++ [
       # 日常 CLI / TUI 操作
 
-      # 容器版 top
-      # https://github.com/bcicen/ctop
       ctop
     ]
     ++ [
@@ -72,12 +65,8 @@
       # trivy image --ignore-unfixed --severity CRITICAL {{.IMAGE_NAME}}:{{.IMAGE_TAG}}
       trivy
 
-      # 给镜像和文件系统生 SBOM
-      # https://github.com/anchore/syft
       syft
 
-      # 扫镜像和文件系统漏洞
-      # https://github.com/anchore/grype
       grype
 
       # https://github.com/docker/sbom-cli-plugin
