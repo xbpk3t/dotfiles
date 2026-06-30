@@ -110,6 +110,13 @@
 
       # 主动重协商 key，限制长期会话的密文暴露面（1GiB 或 1h 触发）
       RekeyLimit = "1G 1h";
+
+      # VPS/服务器默认：禁用 X11 转发与代理转发，减小攻击面
+      # 桌面可 override（desktop/openssh-desktop.nix 中开启）
+      X11Forwarding = false;
+      AllowAgentForwarding = false;
+      # 禁用键盘交互认证，减少暴力破解面
+      KbdInteractiveAuthentication = false;
     };
   };
   # Add terminfo database of all known terminals to the system profile.
