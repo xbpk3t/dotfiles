@@ -35,7 +35,7 @@
       # 分类2：云与 API 工具
 
       # tags(desc): 云平台 > 隧道代理 > Cloudflare
-      cloudflared # cloudflare tunnel
+      # cloudflared moved to home/core/infra/nh.nix
 
       # https://github.com/cloudflare/workers-sdk
 

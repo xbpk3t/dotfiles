@@ -24,8 +24,8 @@ let
       "modules/nixos/kernel"
       "modules/nixos/devops/nvidia.nix"
       "modules/nixos/desktop"
-      "modules/nixos/ms/singbox-client.nix"
-      "modules/nixos/ms/mihomo-client.nix"
+      "modules/nixos/infra/singbox-client.nix"
+      "modules/nixos/infra/mihomo-client.nix"
     ];
     home-modules = map mylib.relativeToRoot [
       "secrets/default.nix"

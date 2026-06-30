@@ -42,9 +42,6 @@
     # tags(desc): 代码质量 > CSS规范 > 前端
     stylelint
 
-    # ── Pre-commit / prek remote-hook system alternatives ─────
-    # pre-commit-ci-config、pre-commit-terraform wrapper、postcss-scss 暂无直接 nixpkgs attr。
-    buf
   ];
 
   # Deploy linter configs globally from .github/linters/

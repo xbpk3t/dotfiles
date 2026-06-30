@@ -9,7 +9,7 @@
     [
       # === HTTP 客户端 ===
       xh # curl 替代（Rust）
-      httpie
+      # httpie moved to home/core/infra/nh.nix
       # === 下载工具 ===
 
       # === 磁盘使用分析 ===
