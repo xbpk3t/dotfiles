@@ -57,7 +57,6 @@
       #  du-dust # A more intuitive version of `du` in rust
 
       # 同时支持 linux, darwin, windows
-      mtr
       trippy
 
       ncdu
