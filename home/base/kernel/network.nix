@@ -10,8 +10,9 @@
     [
       # 网络工具 (excluding wget/curl which are in minimal)
 
-      mosh
       fping
+
+      nftables
 
       # https://mynixos.com/nixpkgs/package/inetutils
       # 提供了 ftp(d), hostname, ifconfig, inetd, logger, ping, rcp, rexec(d), rlogin(d), rsh(d), syslogd, talk(d), telnet(d), tftp(d), traceroute, uucpd, and whois 这些cli
@@ -106,6 +107,13 @@
       # 查看进程打开的文件
       lsof
 
+      # 网络抓包与 TLS 调试 — 从 home/core/infra/networking.nix 迁入
+      tcpdump
+      openssl
+
+      # SSH 文件传输 — 从 home/base/devops/ssh.nix 迁入
+      trzsz-ssh
+
       # 系统性能监控工具集
       # sysstat
 
@@ -149,10 +157,6 @@
       # https://mynixos.com/nixpkgs/package/tcpflow
       # TCP 流量记录器，按连接拆分 pcap
       tcpflow
-
-      # https://mynixos.com/nixpkgs/package/termshark
-      # tshark 的 TUI wrapper
-      termshark
 
       # iperf3
 
@@ -207,7 +211,81 @@
       # [Vincent Logic | 信号＞噪音 on X: "发现个终端里的网络监控神器！ RustNet，在终端里就能实时监控所有网络连接，哪个进程在偷偷传数据、服务器被谁连了，一眼看清。 最爽的是能看到每个连接对应的应用程序，这点 Wireshark 都做不到。SSH 连服务器直接看，不用搞 X11 转发。 界面分四块： - 总览：所有连接列表 + 实时流量 - https://t.co/l4GGKuJuXv" / X](https://x.com/VincentLogic/status/2053454574888071242)
       # https://github.com/domcyrus/rustnet
       rustnet
-    ];
+    ]
+    ++ lib.optionals pkgs.stdenv.isLinux (
+      with pkgs;
+      [
+        # https://www.wireshark.org/
+        # 正如 modules/wireshark 所说，在 darwin/nixos 拆分安装 wireshark
+        # wireshark
+
+        # Wireshark-TUI
+        # https://github.com/gcla/termshark
+        # [2026-04-08] 注释掉了，两方面：
+        ## 1、【生态位尴尬】主力场景还是GUI，暂时没有 SSH上直接查看目标机器wireshark的需求。如果轻量场景直接用 tshark，复杂功能则传回workstation直接用 wireshark 查看。
+        ## 2、综合来说，termshark 只能覆盖 30%-40% wireshark 本身的能力。
+        ## 3、已经EOL很久了
+        # termshark
+
+        # wireshark-cli
+        # 本身就内置了以下命令
+        #  - tshark
+        #  - dumpcap
+        #  - editcap
+        #  - mergecap
+        #  - text2pcap
+        #  - capinfos
+        #  - captype
+        #  - rawshark
+        #  - reordercap
+        #  - randpkt
+        #  - sharkd
+        tshark
+
+        #  ngrep 适合“先快速定位，再进入深分析”。
+        #
+        #  典型搭配流程：
+        #
+        #  1. 先用 ngrep 快速看有没有你关心的内容
+        #     比如某个 Host、某个 HTTP 路径、某个明文关键字。
+        #     它适合回答：
+        #     “这台机器到底有没有发出这个请求？”
+        #     “流量里有没有出现这个字符串？”
+        #     “哪个连接里带了这个 header / payload？”
+        #  2. 定位到问题后，再用 tshark / termshark / wireshark 深入分析
+        #     比如：
+        #
+        #  - 看协议字段
+        #  - 跟踪 TCP stream
+        #  - 看重传、乱序、握手失败
+        #  - 做 display filter
+        #  - 看完整 pcap 结构
+        #
+        #  可以把它理解成：
+        #
+        #  - ngrep：网络里的 grep
+        #  - tshark：网络里的结构化解析器
+        #  - termshark：tshark 的交互 TUI
+        #  - wireshark：最完整的 GUI 分析器
+        #
+        #  一个很实际的分工是：
+        #
+        #  - 想快速确认“有没有某段内容” -> ngrep
+        #  - 想精确过滤字段、导出、统计 -> tshark
+        #  - 想在终端里交互浏览 -> termshark
+        #  - 想最完整地分析 -> wireshark
+        ngrep
+
+        #- zeek
+        #  太重，已经不是同一层级的工具。
+        #- pyshark
+        #  这是 Python 库，不是你这个 home.packages 文件的合适层。
+        #- tcpreplay
+        #  只有你明确有 pcap 回放需求时再加。
+        #- netsniff-ng
+        #  更偏专用网络工具，不是 Wireshark 主线工作流必需。
+      ]
+    );
 
   # ncurses 的无线网卡监控工具
   # 带 capabilities 的 wrapper（setcap wrapper），让普通用户也能用到 wavemon 的一些需要特权的功能（不需要你再自己去折腾 setcap/wrapper）。

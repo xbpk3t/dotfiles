@@ -25,7 +25,7 @@ let
 
       "modules/nixos/devops/nvidia.nix"
       "modules/nixos/devops/fhs.nix"
-      "modules/nixos/ms/singbox-client.nix"
+      "modules/nixos/infra/singbox-client.nix"
       "modules/nixos/ms/k3s.nix"
     ];
     home-modules = map mylib.relativeToRoot [
