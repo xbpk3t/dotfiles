@@ -70,10 +70,6 @@
     ]
     ++ [
       # 分类3：扩展候选与补充工具
-      # # 网络工具
-      # curl
-      # wget
-      # httpie
 
       # # 监控相关
       # prometheus-cli
