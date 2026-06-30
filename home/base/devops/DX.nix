@@ -3,7 +3,7 @@
   home.packages = with pkgs; [
     # === HTTP 客户端 ===
     xh # curl 替代（Rust）
-
+    httpie
     # === 下载工具 ===
 
     # === 磁盘使用分析 ===
@@ -12,6 +12,5 @@
 
     # === 磁盘信息 ===
     dysk # df 替代（Rust）
-
   ];
 }
