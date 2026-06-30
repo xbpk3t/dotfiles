@@ -25,7 +25,6 @@
     ++ (with pkgs.kubernetes-helmPlugins; [
       # https://mynixos.com/packages/kubernetes-helmPlugins
 
-      # helm plugin install https://github.com/databus23/helm-diff
       helm-diff
     ]);
 }
