@@ -17,6 +17,14 @@ in
       nix-output-monitor
       # https://mynixos.com/nixpkgs/package/nvd
       nvd
+      # Nix 死代码检查
+      deadnix
+      # [move history] 之前放在 hosts/nixos-vps，但 VPS 不需要这两个 pkg，所以放 homelab；
+      # 之后因为可能也会用 mac 作为核心控制端，直接放到 base 来多端复用；
+      # 现在放到 infra（Nix 生态工具的统一位置）。
+      nixos-anywhere
+      # 同上，目前仅 workstation 有必要引入
+      deploy-rs
     ];
 
     # 把这些支持 HM 的 Nix 相关工具放在这里，以便 Darwin 和 NixOS 复用。

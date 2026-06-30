@@ -1226,7 +1226,7 @@ in
       full-border = pkgs.yaziPlugins.full-border;
       smart-enter = pkgs.yaziPlugins.smart-enter;
       # used to preview archive
-      ouch = pkgs.yaziPlugins.ouch;
+      ouch = pkgs.yaziPlugins.ouch-rar;
 
       duckdb = pkgs.yaziPlugins.duckdb;
 

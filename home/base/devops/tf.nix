@@ -30,5 +30,9 @@
     #      # p.null
     #      # p.random
     #    ]))
+
+    # === Terraform 代码质量 ===
+    tflint
+    terraform-docs
   ];
 }

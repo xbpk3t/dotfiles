@@ -58,7 +58,6 @@
       ## 功能：直接调用某个 gRPC 方法，以 JSON 格式传入请求体
       ## 示例：grpcurl -d '{"name":"World"}' localhost:50051 helloworld.Greeter/SayHello
       #- "grpcurl -d '{{.DATA}}' {{.TARGET}} {{.METHOD}}"
-      grpcurl
     ]
     ++ [
       # 分类3：基础系统与文本处理工具
