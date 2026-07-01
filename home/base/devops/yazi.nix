@@ -1,5 +1,4 @@
 {
-  lib,
   pkgs,
   editorMeta,
   ...
@@ -1225,8 +1224,7 @@ in
       lazygit = pkgs.yaziPlugins.lazygit;
       full-border = pkgs.yaziPlugins.full-border;
       smart-enter = pkgs.yaziPlugins.smart-enter;
-      # used to preview archive
-      ouch = pkgs.yaziPlugins.ouch-rar;
+      # ouch-rar plugin was removed — use system ouch instead
 
       duckdb = pkgs.yaziPlugins.duckdb;
 

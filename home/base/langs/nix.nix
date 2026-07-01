@@ -9,26 +9,8 @@
     with pkgs;
     [
       # 分类1：Nix 打包
-      # https://github.com/nix-community/noogle
-      # https://noogle.dev/
-      # nix search nixpkgs noogle
-      # what: nixpkgs 里的 Noogle 终端搜索前端，用来查 Nix API / lib / builtins 函数。
-      # why: 这类检索需求属于开发型主机共享能力，适合放在 langs 层，而不是 mac 专属或 core 基础层。
-      # tags(desc): 检索工具 > Nix语言 > API查询
       noogle-search
-
-      ###### nixpkgs 打包相关 ##########
-      # nurl moved to home/base/devops/nix-tools.nix
-
-      # https://github.com/berberman/nvfetcher
-      # nvfetcher -- -c nvfetcher.toml -o pkgs/_sources
-      # 统一维护 repo 内自定义 source 的更新元数据。
-      # 注意：它不是 builder，本质上是 source update generator。
-      # tags(desc): 打包辅助 > 源更新 > 自动化
       nvfetcher
-
-      # https://github.com/ipetkov/crane
-      # 用来打包 rust项目的nixpkgs
       crane
     ]
     ++ [

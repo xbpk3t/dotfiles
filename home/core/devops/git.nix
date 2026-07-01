@@ -92,33 +92,6 @@ in
       # tags(desc): 大文件支持 > 版本控制 > Git生态
       git-lfs
 
-      # https://github.com/Bhupesh-V/ugit
-      # 千呼万唤才出来的git工具，用来撤销git操作。最经典的场景就是，经常有那种已经commit了，然后还有点代码想放到那个commit里提交上去。这个就很难操作，这种情况下用ugit就很容易了。
-      # 使用 ugit 撤销上一次 Git 操作（支持交互式选择）
-      #- 操作场景: 【回滚本地未提交代码】丢弃未暂存更改
-      #  原生 Git 命令: "git restore . 或 git checkout -- ."
-      #  ugit 替代方案: "ugit → 选择 Undo git add"
-      #
-      #- 操作场景: 【回滚本地已提交的代码】
-      #  原生 Git 命令: "git reset --soft HEAD~1（保留修改）；git reset --hard HEAD~1（彻底删除）"
-      #  ugit 替代方案: "ugit → 选择 Undo git commit"
-      #
-      #- 操作场景: 回滚所有未暂存/未贮藏代码
-      #  原生 Git 命令: "git restore . && git clean -df（含未跟踪文件）"
-      #  ugit 替代方案: "ugit → 组合使用 Undo git add + git clean"
-      #
-      #- 操作场景: 【撤回已 push 的提交】
-      #  原生 Git 命令: "git revert <commit>（安全）；git reset --hard <commit> && git push -f（危险）"
-      #  ugit 替代方案: "ugit → 选择 Undo git push"
-      #
-      #- 操作场景: 恢复误删除的 commit
-      #  原生 Git 命令: "git reflog → 找到 commit hash → git reset --hard <hash>"
-      #  ugit 替代方案: "ugit → 选择 Undo git reset"
-      #
-      #- 操作场景: 彻底删除历史 commit
-      #  原生 Git 命令: "git reset --hard <commit-id>（本地）；git push origin HEAD --force（远程）"
-      #  ugit 替代方案: "ugit 仅支持删除最近 commit（等效 reset HEAD~1）"
-      # tags(desc): 变更回滚 > 交互CLI > Git操作
       ugit
 
       # gitlab-cli
@@ -209,8 +182,6 @@ in
       git-quick-stats
     ];
 
-  # https://mynixos.com/home-manager/options/services.git-sync
-  # https://github.com/simonthum/git-sync
   services.git-sync = {
     enable = true;
     #    repositories = {
@@ -227,14 +198,6 @@ in
     enableGitIntegration = true;
   };
 
-  # worktrunk
-  # hooks、AI 集成、缓存、merge
-  # why this? 也有 WorktreeWise, git-wt, LazyWorktree 等其他类似工具，为啥选择这个？
-  # 这个要比 git-wt 好用
-  # https://github.com/k1LoW/git-wt
-  # [2026-04-22] worktrunk 要比 agent-worktree 更好用。“对大多数人来说，worktrunk 更强、更全，也通常更值得优先选；但不能简单说 agent-worktree 的所有核心体验都被一比一包含了，它在‘单次 agent 闭环’和‘默认合回原 base’这两个点上是更明确的。”
-  ## 要平台化、长期用、功能全：选 worktrunk。
-  ## 要极简 agent 闭环、做完就收：agent-worktree 反而更“顺手”。
   xdg.configFile."worktrunk/config.toml".text = builtins.readFile ./worktrunk.toml;
   home.shellAliases = {
     # why: 修改为 PR-first，所以添加本alias来简化操作

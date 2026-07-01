@@ -10,11 +10,6 @@ let
   cfg = config.modules.AI.mcp;
 in
 {
-  # [2026-04-03] https://mynixos.com/home-manager/options/programs.mcp 最终是生成 $HOME/mcp/mcp.json 这么一个 mcp.json，跟目前所有cli都不一致（比如说 codex 的MCP的目标path就在config.toml, cc是 ~/.claude.json, cursor则是 $HOME/.cursor/mcp.json），所以没意义
-  # [2026-04-03] 把mcp server由 mcp-servers-nix 管理，优势在于可以让 codex/cc 等所有cli复用一份mcp配置。带来的问题是 msn只有 command, args, env, url, headers 等通用字段，不支持codex的 approve 操作。
-  # [2026-04-18] https://github.com/natsukium/mcp-servers-nix/issues/420 其实 MSN 是支持 approve 操作的，所以修改相应配置
-  # [2026-04-18] 移除掉部分目前已经被主流agent（codex, cc）已经内置功能覆盖掉的mcp. sequential-thinking, ddg, octocode (被github mcp 替代), git (git操作已被主流agent完美支持), textlint, time (功能太简单，没必要)， memory (我其实并没有用这个 graph记忆，所以移除掉)
-
   imports = [
     inputs.mcp-servers-nix.homeManagerModules.default
   ];
@@ -42,12 +37,6 @@ in
 
     mcp-servers = {
       programs = {
-        # [2026-06-01] 移除 filesystem MCP：功能被内置 Read/Edit/Write/Bash 完全覆盖，51 个 MCP tools 导致模型选择瘫痪
-        # [2026-06-01] 移除 fetch MCP：功能被内置 WebFetch 完全覆盖
-
-        # [2026-04-26] build 失败，所以改为false
-        # nixos.enable = false;
-
         github = {
           enable = true;
         };

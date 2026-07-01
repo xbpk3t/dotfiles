@@ -10,3 +10,7 @@ includes:
   rollback: ./Taskfile.rollback.yml
   sk: ./Taskfile.sops.yml
   test: ./Taskfile.test.yml
+
+tasks:
+  nvfetcher:
+    cmd: nvfetcher -c nvfetcher.toml -o pkgs/_sources

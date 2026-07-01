@@ -5,7 +5,6 @@
     tuptime
   ];
 
-  # https://github.com/rfmoz/tuptime
   services.tuptime = {
     enable = true;
     timer = {
@@ -13,7 +12,6 @@
     };
   };
 
-  # https://github.com/cdown/tzupdate
   # services.tzupdate = {
   #   enable = true;
   #   package = pkgs.tzupdate;

@@ -6,12 +6,6 @@
 
     opentofu
 
-    # https://github.com/cloudflare/cf-terraforming/
-    # [2026-03-27] 注释了，目前已经用不到这个pkg了。
-    # cf-terraforming
-
-    # 注意 tf框架 选择使用 terramate 而非 terragrunt
-    # https://github.com/terramate-io/terramate
     terramate
 
     # [2026-03-27] conflict with terramate

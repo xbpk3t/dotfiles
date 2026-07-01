@@ -20,8 +20,6 @@ in
       # zed-editor
     ];
 
-    # https://mynixos.com/home-manager/options/programs.zed-editor
-    # https://github.com/NixOS/nixpkgs/blob/master/pkgs/by-name/ze/zed-editor/package.nix
     programs.zed-editor = {
       enable = true;
       package = pkgs.zed-editor;
@@ -43,7 +41,5 @@ in
       # mutableUserKeymaps = false;
       # mutableUserTasks = false;
     };
-
-    # https://github.com/xhyrom/zed-discord-presence
   };
 }

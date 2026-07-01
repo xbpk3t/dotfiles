@@ -3,7 +3,6 @@
   home.packages = with pkgs; [
     sshpass
 
-    # https://github.com/Adembc/lazyssh
     # 用 lazyssh 替代了 sshs
     lazyssh
 

@@ -63,8 +63,6 @@ in
           # package = pkgs.nerd-fonts.jetbrains-mono;
           # name = "JetBrainsMono Nerd Font Mono";
 
-          # https://github.com/be5invis/sarasa-gothic
-
           # https://linux.do/t/topic/8043/
           # https://zhuanlan.zhihu.com/p/627059922
 
@@ -112,8 +110,6 @@ in
         zed.enable = false;
         # helix本身有内置theme，比stylix提供的要好很多
         helix.enable = false;
-
-        kitty.enable = false;
 
         # 配置 Firefox profile names 以避免 stylix warning
         firefox.profileNames = [ "default" ];
