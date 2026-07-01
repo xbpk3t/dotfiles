@@ -9,7 +9,7 @@
   #
   # Ensure the Remmina package is available
   home.packages = with pkgs; [
-    # remmina # Explicitly include the Remmina package
+    # remmina
     # freerdp # required by remmina
   ];
 }

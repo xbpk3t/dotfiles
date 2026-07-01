@@ -12,7 +12,6 @@ _: {
 
       zed.enable = false;
 
-      kitty.enable = false;
       ghostty.enable = false;
 
       firefox.enable = true;

@@ -138,7 +138,7 @@ in
     # Ghostty 配置格式为 key=value（类似 env），直接用 generators.toKeyValue 渲染。
     # cmux (libghostty) 也读取同一份配置，见 cmux.nix。
     (mkIf pkgs.stdenv.isDarwin {
-      # https://mynixos.com/home-manager/options/programs.ghostty
+      #
       # !!! macOS 上 nixpkgs 的 ghostty 包不受支持，通过 Brew Cask 安装。
       #     但配置文件通过 Nix 统一管理（ghostty 和 cmux 共享）。
       xdg.configFile."ghostty/config" = {
