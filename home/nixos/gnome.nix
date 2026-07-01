@@ -17,9 +17,6 @@ in
     services.kdeconnect = {
       enable = true;
       indicator = true;
-      # https://mynixos.com/nixpkgs/option/programs.kdeconnect.package
-      # https://github.com/GSConnect/gnome-shell-extension-gsconnect
-      # KDE Connect 定义了一套协议（怎么发现设备、怎么传文件、怎么发通知等等）。GSConnect 完全兼容这套协议
       package = pkgs.gnomeExtensions.gsconnect;
     };
 

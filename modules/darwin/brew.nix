@@ -30,10 +30,7 @@ in
     ];
 
     brews = [
-      # https://github.com/gruntwork-io/fetch
       "fetch"
-
-      # https://github.com/tw93/Mole
       "mole"
     ];
 
@@ -67,10 +64,6 @@ in
       # "jetbrains-toolbox"
       # "visual-studio-code"
       # "tencent-lemon"
-
-      # https://github.com/insanum/gcalcli
-      # https://formulae.brew.sh/formula/gcalcli
-      # https://github.com/ajrosen/icalPal
     ];
     # 开启这个配置，以及autoUpdate。完全由nix管理brew
     greedyCasks = true;

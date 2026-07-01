@@ -8,19 +8,13 @@
     with pkgs;
     [
       # 渗透测试
-      # https://github.com/projectdiscovery/katana
       katana
 
       # 漏洞分析
-      # https://github.com/projectdiscovery/nuclei
       nuclei
 
       nuclei-templates
-      # nucleiparser（nuclei 结果解析器，极少单独使用）
-      # nucleiparser
 
-      # 自动化 SQL 注入工具
-      # https://github.com/sqlmapproject/sqlmap
       sqlmap
 
       # ffuf

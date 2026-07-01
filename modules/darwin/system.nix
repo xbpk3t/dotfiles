@@ -296,8 +296,6 @@ in
     #  '';
   };
 
-  # https://github.com/smudge/nightlight
-
   # Time zone and locale settings
   time = {
     inherit timeZone;

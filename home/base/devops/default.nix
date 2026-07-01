@@ -32,34 +32,6 @@
       # shellcheck/typos/yamllint/markdownlint-cli/kdlfmt → home/base/langs/treefmt.nix
     ]
     ++ [
-      # 分类2：云与 API 工具
-
-      # tags(desc): 云平台 > 隧道代理 > Cloudflare
-      # cloudflared moved to home/core/infra/nh.nix
-
-      # https://github.com/cloudflare/workers-sdk
-
-      # MAYBE: 等cf cli 成熟后，可以用来替代 wrangler
-      # https://blog.cloudflare.com/cf-cli-local-explorer/
-      # https://www.npmjs.com/package/cf
-      # wrangler
-
-      # API 工具
-      # tags(desc): API调试 > gRPC > 网络工具
-      #
-      ## 功能：列出目标地址上所有可用的 gRPC 服务
-      ## 示例：grpcurl localhost:50051 list
-      #- 'grpcurl {{.TARGET}} list'
-      #
-      ## 功能：查看指定服务或消息类型的完整定义（proto 描述）
-      ## 示例：grpcurl localhost:50051 describe helloworld.Greeter
-      #- 'grpcurl {{.TARGET}} describe {{.SERVICE}}'
-      #
-      ## 功能：直接调用某个 gRPC 方法，以 JSON 格式传入请求体
-      ## 示例：grpcurl -d '{"name":"World"}' localhost:50051 helloworld.Greeter/SayHello
-      #- "grpcurl -d '{{.DATA}}' {{.TARGET}} {{.METHOD}}"
-    ]
-    ++ [
       # 分类3：基础系统与文本处理工具
 
       # 基础工具
