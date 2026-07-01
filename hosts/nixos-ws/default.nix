@@ -135,14 +135,9 @@ in
       singbox.enable = true;
       # Mihomo (Clash.Meta) proxy service
       mihomo.enable = true;
-      # NetBird VPN client (enabled by default in module)
-      # All configuration is handled in modules/nixos/base/networking/netbird.nix
-      netbird.enable = true;
     };
 
-    extra = {
-      vscode-remote.enable = true;
-    };
+    # NOTE: zed-remote 配置在 home/extra/zed-remote.nix
   };
   # Allow user-space input remapping tools (xremap)
   # hardware.uinput.enable = true;
@@ -159,6 +154,4 @@ in
   #     grafana.serviceType = "LoadBalancer";
   #   };
   # };
-
-  #  modules.networking.netbird.enable = false;
 }
