@@ -28,8 +28,6 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    # https://mynixos.com/home-manager/options/programs.codex
-    # https://github.com/openai/codex
     programs.codex = {
       enable = true;
       # [2026-04-18] 关闭 HM bridge 到 programs.mcp.servers 的自动整合：

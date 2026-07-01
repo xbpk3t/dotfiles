@@ -9,19 +9,9 @@
     with pkgs;
     [
       # 分类1：Go 核心工具链与语言服务
-      # tags(desc): 核心工具链 > 语言运行时 > Go
       go
-
-      # goimports
-      # tags(desc): 核心工具链 > 官方工具集 > Go
       gotools
-
-      # https://github.com/golang/tools includes modernize
-      # tags(desc): 语言服务 > LSP > 代码智能
-      # [2026-04-26] 跟 gotools 的 modernize pkg conflicts 了
       (lib.lowPrio gopls)
-
-      # tags(desc): 开发体验 > 交互CLI > 终端UI
     ]
     ++ [
       # 分类2：代码质量与静态分析
@@ -54,11 +44,9 @@
       # tags(desc): 代码生成 > API文档 > OpenAPI
       go-swag
 
-      # https://github.com/vektra/mockery
       # tags(desc): 测试工具 > Mock生成 > 代码生成
       go-mockery
 
-      # https://github.com/a-h/templ
       # tags(desc): 前端模板 > 代码生成 > Go生态
       templ
 
@@ -67,12 +55,7 @@
     ]
     ++ [
       # 分类4：发布、迁移与依赖分析
-
-      # https://github.com/golang-migrate/migrate
-      # tags(desc): 数据迁移 > 数据库 > 运维
       go-migrate
-
-      # tags(desc): 依赖分析 > 可视化 > 模块管理
       go-mod-graph-chart
     ]
     ++ [

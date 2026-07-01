@@ -9,7 +9,6 @@
   # journalctl -u traefik --since "2026-01-10" --no-pager | tail -n 50
 
   home.packages = with pkgs; [
-    # https://github.com/Lifailon/lazyjournal
     lazyjournal
 
     # 更成熟的通用日志分析器，适合搭配 journalctl

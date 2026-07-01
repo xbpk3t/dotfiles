@@ -1,4 +1,3 @@
-# https://mynixos.com/nixpkgs/options/fonts.fontconfig
 # 注意：本文件仅作为stylix的补充配置
 { pkgs, ... }:
 {
@@ -9,6 +8,7 @@
     FREETYPE_PROPERTIES = "cff:no-stem-darkening=0 autofitter:no-stem-darkening=0";
   };
 
+  # https://mynixos.com/nixpkgs/options/fonts.fontconfig
   # all fonts are linked to /nix/var/nix/profiles/system/sw/share/X11/fonts
   fonts = {
     # use fonts specified by user rather than default ones

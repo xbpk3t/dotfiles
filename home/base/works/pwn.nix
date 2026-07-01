@@ -10,15 +10,12 @@
       # === Red Team / 红队 ===
 
       # 渗透测试框架
-      # https://github.com/rapid7/metasploit-framework
       metasploit
 
       # 社会工程
-      # https://github.com/gophish/gophish
       gophish
 
       # 拿信-windows
-      # https://github.com/gentilkiwi/mimikatz
       mimikatz
 
       python313Packages.impacket
@@ -46,7 +43,6 @@
       # === Blue / 蓝队防御 ===
 
       # 入侵检测
-      # https://github.com/snort3/snort3
       snort
     ];
 }

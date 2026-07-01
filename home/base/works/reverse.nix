@@ -8,8 +8,7 @@
     with pkgs;
     lib.optionals pkgs.stdenv.isLinux [
       # 分类1：逆向框架 & GUI（Linux-only）
-      # https://github.com/radareorg/iaito
-      # iaito                         # tags(desc): 逆向框架 > GUI > Radare2前端
+      # iaito
     ]
     ++ lib.optionals pkgs.stdenv.isLinux [
       # 分类2：动态调试 & 分析（Linux-only）
@@ -22,11 +21,8 @@
     ]
     ++ lib.optionals pkgs.stdenv.isLinux [
       # 分类3：二进制文件分析（Linux-only）
-      # https://github.com/mentebinaria/pev
-      # pev                           # tags(desc): 文件分析 > PE > 结构查看
-      # https://github.com/hasherezade/pe-bear
-      # pe-bear                       # tags(desc): 文件分析 > PE > GUI查看器
-      # https://github.com/horsicq/Detect-It-Easy
-      # detect-it-easy                # tags(desc): 文件分析 > 格式识别 > 查壳类型
+      # pev
+      # pe-bear
+      # detect-it-easy
     ];
 }
