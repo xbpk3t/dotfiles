@@ -1,7 +1,6 @@
 { pkgs, config, ... }:
 {
   # Colima 本身负责创建和管理 docker context，这里只负责声明式启用默认 profile。
-  # https://mynixos.com/home-manager/options/programs.docker-cli
   programs.docker-cli = {
     enable = true;
 

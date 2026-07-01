@@ -4,12 +4,6 @@
   ...
 }:
 {
-  # https://github.com/aristocratos/btop
-  # 【技术选型】简单说明，为啥同时使用 btop 和 htp? 以及为什么不需要 glances
-  ##  glances 本质是个services (还是个WebAPP)。但是其核心是“轻量级monitor系统”，glances还分可以分为server模式和client模式，所有slave机器都需要安装glances的server，master开启client模式就可以收集所有slave的数据（类似prometheus这样的pull模式）。所以也可以理解为局域网下的prom（glances不适合在公网做monitor），感觉意思不大。
-  ## htop：更像 Better top，核心是 process + CPU/内存 的交互与操作
-  ## btop：更像 轻量系统仪表盘，把 procs/mem/Disk/net/CPU 放到一屏里。btop的procs里没有 nice、priority、virt/res/shr 这类字段。所以仍然需要htop
-
   programs.btop = {
     enable = true;
     package = pkgs.btop.override {
@@ -32,7 +26,6 @@
     };
   };
 
-  # https://mynixos.com/home-manager/options/programs.htop
   programs.htop = {
     enable = true;
     settings = {

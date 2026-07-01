@@ -27,7 +27,6 @@ in
       };
     };
 
-    # https://mynixos.com/home-manager/options/services.colima
     services.colima = {
       # 只有在 mac，才有必要用 colima，在 linux下没必要，所以这么设置
       enable = pkgs.stdenv.isDarwin;

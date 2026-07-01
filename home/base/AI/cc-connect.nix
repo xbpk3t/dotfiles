@@ -19,7 +19,10 @@ in
         cc-connect
       ];
 
-      file.".cc-connect/config.toml".source = ./cc-connect.toml;
+      file.".cc-connect/config.toml" = {
+        source = ./cc-connect.toml;
+        force = true;
+      };
 
       # FEISHU_APP_SECRET 是 cc-connect 的 TOML 变量展开所需的 env var，
       # 由 sops-nix 统一注入，所有 host 都能拿到。

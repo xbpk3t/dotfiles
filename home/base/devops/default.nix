@@ -16,20 +16,12 @@
       pre-commit
       prek
 
-      # https://mynixos.com/nixpkgs/package/dos2unix
-      #
-      # [2026-01-24] 遇到了 CRLF 换行符 问题。
-      # yamllint 报 wrong new line character: expected \n 期望 LF，但文件是 CRLF。
-      # 可以直接用 dos2unix manifests/**/kustomization.yaml 批量解决问题
-      # tags(desc): 文本规范化 > 换行修复 > 文件处理
       dos2unix
 
       # tags(desc): 代码质量 > URL提取检查 > 文本分析
       urlscan
       # tags(desc): 代码质量 > 链接校验 > 文档检查
       lychee
-
-      # shellcheck/typos/yamllint/markdownlint-cli/kdlfmt → home/base/langs/treefmt.nix
     ]
     ++ [
       # 分类3：基础系统与文本处理工具
@@ -60,29 +52,6 @@
       # 其他实用工具
       # tags(desc): 基础工具 > 监控观察 > 实时刷新
       watch
-      # tags(desc): 基础工具 > 文件同步 > 传输
-      #- rsync [选项] 源路径 目标路径 # 基本语法
-      #- rsync /source/ /destination/ # 同步目录，不保留属性
-      #- rsync -a /source/ /destination/ # 保留文件属性
-      #- rsync -av /source/ /destination/ # 详细输出并保留属性
-      #- rsync -av --progress /source/ /destination/ # 显示进度
-      #- rsync -av -e "ssh -p 2222" /local/ username@hostname:/remote/ # 指定 SSH 端口
-      #- rsync -av -e "ssh -i ~/.ssh/mykey.pem" /local/ username@hostname:/remote/ # 指定私钥
-      #- rsync -av --delete --progress /local username@hostname:/remote/ # 远程同步并删除目标端多余文件
-      #- rsync -av --exclude='*.tmp' --exclude='cache/' /source/ /backup/ # 排除临时文件和缓存目录
-      #- rsync -av --exclude-from='exclude-list.txt' /source/ /backup/ # 使用排除文件
-      #- rsync -avP --partial large-video.mp4 username@hostname:/videos/ # 断点续传大文件
-      #- rsync -avz --delete --progress -e "ssh -o StrictHostKeyChecking=no" /Users/luck/Desktop/nix-config/ luck@192.168.71.7:~/Desktop/nix-config/ # 同步本机 nix-config 到远端
-      #- rsync -avzP /local/dir/ user@remote:/remote/dir/ # 本机同步目录内容到远端
-      #- rsync -avzP user@remote:/remote/dir/ /local/dir/ # 远端同步目录内容到本机
-      #- rsync -avzP -e ssh user@hostA:/path/file user@hostB:/path/ # 远端 A 同步文件到远端 B
-      #- rsync -avzP -e "ssh -p 2222 -i ~/.ssh/id_ed25519" /local/dir/ user@remote:/remote/dir/ # 指定 SSH 端口和私钥
-      #- rsync -avzP --delete /src/ user@remote:/dst/ # 删除目标端多余文件，让目标镜像源
-      #- rsync -avzP --exclude '*.log' --exclude node_modules/ /src/ user@remote:/dst/ # 排除日志和 node_modules
-      #- rsync -avzP --dry-run /src/ user@remote:/dst/ # 演练，不真正执行
-      #- rsync -avzP --bwlimit=20m /src/ user@remote:/dst/ # 限速同步
-      #- rsync -avzP --rsync-path="sudo rsync" /local/file user@remote:/protected/path/ # 远端使用 sudo 写入受保护目录
-      #- rsync -avz --delete --progress -e # taskfile 中的不完整命令
       rsync
 
       # 压缩工具
@@ -119,17 +88,6 @@
       # https://github.com/cnphpbb/deploy.stack/blob/main/dufs/config/config.yaml ???
       # tags(desc): 文件服务 > 静态分发 > HTTP
       dufs
-
-      # https://mynixos.com/nixpkgs/package/dogdns
-      # DNS 查询与诊断工具
-      # 'dogdns' has been removed as it is unmaintained upstream and vendors insecure dependencies. Consider switching to 'doggo', a similar tool.
-      # dogdns
-      # doggo
-
-      # https://mynixos.com/nixpkgs/package/ipcalc
-      # 计算子网掩码/网段
-      # tags(desc): 网络工具 > IP规划 > 子网计算
-      ipcalc
     ];
 
   home.sessionVariables = {

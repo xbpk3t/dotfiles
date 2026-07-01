@@ -14,13 +14,10 @@
 
       dig
 
-      # https://mynixos.com/nixpkgs/package/dnslookup
-      # DNS 排错工具，比 dig/host 更直观的输出
       dnslookup
 
       # ping, but with a graph(TUI)
       gping
-      #  doggo # DNS client for humans
 
       duf # Disk Usage/Free Utility - a better 'df' alternative
       #  du-dust # A more intuitive version of `du` in rust
@@ -45,8 +42,6 @@
       # parted 磁盘分区管理
       # parted
 
-      # https://github.com/ifd3f/caligula
-      # 更强的 dd，用于制作 UEFI 启动盘
       # caligula
 
       # 监控当前运行的 BPF 程序
@@ -112,13 +107,10 @@
       netcat
 
       websocat
-
-      # https://mynixos.com/nixpkgs/package/tcpflow
-      # TCP 流量记录器，按连接拆分 pcap
       tcpflow
-
       # iperf3
 
+      ipcalc
     ]
     # Linux-only tools; Darwin 上直接跳过，避免 hostPlatform 不可用的求值错误
     ++ lib.optionals stdenv.isLinux [
