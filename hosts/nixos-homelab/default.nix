@@ -89,9 +89,6 @@ in
     security.enableFirewall = false;
 
     extra = {
-      # 需要远程开发再开启；默认保持关闭即可在 host 覆写
-      vscode-remote.enable = lib.mkDefault true;
-
       # k3s 控制面：只设置 enable/role，其它配置在模块内固化
       k3s = {
         enable = true;
