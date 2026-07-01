@@ -34,7 +34,6 @@
 {
   "$schema" = "https://zed.dev/schema/themes/v0.2.0.json";
 
-  # https://github.com/slymax/zedokai
   name = "Monokai";
   author = "lucas";
   themes = [

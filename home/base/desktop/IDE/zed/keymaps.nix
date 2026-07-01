@@ -44,8 +44,6 @@
   #  }
   #
 
-  # https://github.com/jellydn/zed-101-setup#keymaps
-
   {
     context = "Editor && (vim_mode == normal || vim_mode == visual) && !VimWaiting && !menu";
     bindings = {

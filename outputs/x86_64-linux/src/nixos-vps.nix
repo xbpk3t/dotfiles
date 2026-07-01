@@ -24,6 +24,7 @@ let
       "modules/nixos/devops/nixos-agent.nix"
       "modules/nixos/infra/mihomo-server.nix"
       "modules/nixos/infra/singbox-server.nix"
+      "modules/nixos/infra/tailscale-client.nix"
       "modules/nixos/ms/k3s.nix"
     ];
     home-modules = map mylib.relativeToRoot [

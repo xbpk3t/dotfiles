@@ -7,7 +7,6 @@ let
   source = sources.trzsz;
 in
 buildGoModule rec {
-  # https://github.com/trzsz/trzsz-go
   pname = "trzsz-go";
   inherit (source) version src;
 

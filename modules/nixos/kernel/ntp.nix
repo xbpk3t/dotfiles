@@ -9,9 +9,6 @@
     "ntp.tencent.com" # Tencent NTP Server
   ];
 
-  # NixOS 默认启用的是 systemd-timesyncd，这是 systemd 自带的一个轻量 SNTP（简化版 NTP）客户端，用来自动同步时间。NixOS 的 NTP 文档里明确说默认 NTP 实现是 systemd-timesyncd。
-  # https://mynixos.com/nixpkgs/options/services.chrony
-
   # 想让这台机器 给别的机器当时间服务器（NTP/NTS server）
   # 对时间精度有比较高的要求（日志对齐、多机事务、金融、监控等）：需要 毫秒甚至更优
   # 机器 经常睡眠/断网/虚拟化环境多，网络质量比较复杂
