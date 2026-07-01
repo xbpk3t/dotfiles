@@ -37,7 +37,6 @@ in
       # package = pkgs.codex;
       package = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.codex;
 
-      # https://github.com/openai/codex/blob/main/docs/config.md
       # https://developers.openai.com/codex/config-reference
       settings = {
         # 默认模型；可被命令行 `-m` 临时覆盖。

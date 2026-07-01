@@ -21,13 +21,6 @@ let
   exts = import ./extensions.nix;
 in
 {
-  # https://zed.dev/blog/hidden-gems-part-2
-
-  # 可供参考的zed配置
-  # https://github.com/linkfrg/dotfiles/blob/main/modules/home-manager/software/zed/settings.nix
-  # https://github.com/pabloagn/rhodium/blob/main/home/apps/ides/zed/default.nix
-  # https://github.com/craole-cc/dotDots/blob/main/Admin/Packages/home/zed/settings.nix
-
   # [2026-01-17] 嵌套写法=dynamic，我需要static，所以直接写死。另外把 theme 从 Catpppuccin -> Monokai
   # theme = {
   #   mode = dark;
@@ -247,11 +240,6 @@ in
       show = "system";
     };
   };
-
-  ##############################
-  #
-  #
-  #
 
   # 禁用
   toolbar = {

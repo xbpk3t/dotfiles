@@ -4,7 +4,6 @@
     python313
   ];
 
-  # https://mynixos.com/home-manager/options/programs.uv
   programs.uv = {
     enable = true;
 

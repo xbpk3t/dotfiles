@@ -4,10 +4,6 @@
   ...
 }:
 {
-  # https://mynixos.com/nix-darwin/options/services.tailscale
-
-  # Warning: client version "1.96.5" != tailscaled server version "1.96.5-t4ee448d3a-g74ffbefc2"
-  # 会出现这个 warning, 大概率并非版本真不一致，或者版本漂移问题，应该是 server version本身格式不对
   services.tailscale = {
     enable = true;
     # https://mynixos.com/nix-darwin/option/services.tailscale.overrideLocalDns

@@ -30,13 +30,6 @@ let
   flannelIfaceIP = if cfg.nodeIP != "" then cfg.nodeIP else cfg.serverIP;
 in
 {
-  # https://github.com/NixOS/nixpkgs/blob/master/pkgs/applications/networking/cluster/k3s/README.md
-  #
-  #
-  # [This homelab setup is my favorite one yet. - YouTube](https://www.youtube.com/watch?v=2yplBzPCghA)
-  #
-  #
-  # https://github.com/longhorn/longhorn
   options.modules.extra.k3s = with lib; {
     enable = mkEnableOption "Enable k3s (server/agent)";
 

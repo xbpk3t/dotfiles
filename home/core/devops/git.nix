@@ -94,79 +94,8 @@ in
 
       ugit
 
-      # gitlab-cli
-      # https://mynixos.com/nixpkgs/package/glab
-      # https://gitlab.com/gitlab-org/cli
-      # https://docs.gitlab.com/cli/
-      # tags(desc): 平台集成 > GitLab > 代码托管
       glab
-
-      # https://github.com/tj/git-extras
-      # 注意 git-extras 直接使用git的插件扩展机制（Subcommand Expansion），所以直接以 git命令直接调用
-      #analysis_&_stats:
-      #  - command: git summary
-      #    description: "查看仓库概况（提交次数、活跃时长、文件数等）"
-      #  - command: git effort
-      #    description: "显示每个文件的提交频率，识别代码热点"
-      #  - command: git authors
-      #    description: "列出所有贡献者及其贡献百分比"
-      #  - command: git info
-      #    description: "显示当前仓库的详细信息（远程、分支、配置）"
-      #
-      #workflow_&_release:
-      #  - command: git changelog
-      #    description: "自动从提交历史中提取并生成 CHANGELOG 文本"
-      #  - command: git release
-      #    description: "一键完成提交、打标（tag）、推送的全流程"
-      #  - command: git feature
-      #    description: "简单的功能分支管理流程（创建/合并/删除）"
-      #  - command: git standup
-      #    description: "显示你今天或最近几天的提交记录，用于站会汇报"
-      #
-      #cleanup_&_maintenance:
-      #  - command: git delete-merged-branches
-      #    score: 5
-      #    description: "一键清理本地所有已经合并到主分支的废弃分支"
-      #  - command: git delete-submodule
-      #    description: "从项目中彻底移除子模块，无需手动修改 .gitmodules"
-      #  - command: git squash
-      #    score: 5
-      #    description: "将多个提交合并为一个，保持提交历史整洁"
-      #  - command: git clear
-      #    description: "类似 git reset --hard，但更彻底且安全地重置工作区"
-      #
-      #utilities:
-      #  - command: git sync
-      #    description: "自动执行拉取、重基（rebase）并推送，保持双向同步"
-      #  - command: git ignore [pattern]
-      #    description: "快速将文件模式添加到 .gitignore 且不重复添加"
-      #  - command: git sed
-      #    description: "在整个项目文件的历史记录中进行字符串查找替换"
-      #  - command: git browse
-      #    description: "直接在浏览器中打开当前仓库的远程页面（GitHub/GitLab）"
-      #  - command: git repl
-      #    description: "进入一个专门的 Git 交互式 Shell 模式"
-
-      # git sync upstream main
-      # git obliterate {{.PATH}}
-      ## 替换原来的 sync-upstream
-      #  sync-upstream:
-      #    desc: "使用 git-extras 同步上游代码"
-      #    cmd: git sync upstream main
-      #
-      #  # 替换/增强搜索任务
-      #  search-and-replace:
-      #    desc: "全项目字符串替换 (谨慎使用)"
-      #    summary: "task -g search-and-replace OLD=... NEW=..."
-      #    cmd: git sed {{.OLD}} {{.NEW}}
-      #
-      #  # 定点抹除大文件/敏感文件
-      #  obliterate:
-      #    desc: "从历史中彻底删除指定路径 (git-extras)"
-      #    cmd: git obliterate {{.PATH}}
-      # tags(desc): 工作流增强 > 子命令扩展 > Git生态
       (lib.lowPrio git-extras)
-
       git-filter-repo
     ]
     ++ [
@@ -177,7 +106,6 @@ in
     ]
     ++ [
       # 分类3：分析与可视化
-      # https://github.com/git-quick-stats/git-quick-stats
       # tags(desc): 统计分析 > 仓库指标 > Git历史
       git-quick-stats
     ];
