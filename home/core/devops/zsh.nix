@@ -10,16 +10,19 @@
     packages = with pkgs; [
       zsh-completions
       carapace
-
-      # https://github.com/andreafrancia/trash-cli
-      # trash-list
-      # trash-empty
-      # [2026-03-28] 其实没啥用，移除掉了
-      # trash-cli
     ];
 
     # 环境变量
     # Note: Dynamic variables (those using command substitution) are set in zsh initContent
+    # PATH 使用 home.sessionPath（由 zsh 模块在 .zprofile 中加载，避免系统 PATH 覆盖问题）
+    # 参考 home-manager PR #9356（已合并，修复了 #2991）
+    sessionPath = [
+      "$HOME/go/bin"
+      "$HOME/.bun/bin"
+      # [2026-05-16] pnpm >= 11 的 global-bin-dir 默认为 $PNPM_HOME/bin
+      "$PNPM_HOME/bin"
+    ];
+
     sessionVariables = {
       # 通用配置
       # EDITOR = editorMeta.command;
@@ -45,12 +48,10 @@
   };
 
   programs = {
-    # https://mynixos.com/home-manager/options/programs.bash
     bash = {
       enable = true;
     };
 
-    # https://mynixos.com/home-manager/options/programs.zsh
     zsh = {
       enable = true;
       # NOTE: 固定 legacy 行为，避免 HM 将来默认切到 XDG 路径导致行为变化。
@@ -75,7 +76,6 @@
       # enableGlobalCompInit = true;
 
       # 为命令行着色（合法命令绿色、未知命令红色等）
-      # https://mynixos.com/home-manager/options/programs.zsh.syntaxHighlighting
       syntaxHighlighting = {
         enable = true;
         styles = {
@@ -85,7 +85,6 @@
       };
 
       # 命令行自动补全/联想（zsh-autosuggestions）
-      # https://mynixos.com/home-manager/options/programs.zsh.autosuggestion
       # 相较 modules 缺少 async
       autosuggestion = {
         enable = true;
@@ -182,7 +181,6 @@
         v = "${editorMeta.command} .";
       };
 
-      # https://mynixos.com/home-manager/options/programs.zsh.history
       history = {
         size = 10000;
         save = 10000;
@@ -195,7 +193,6 @@
         (lib.mkOrder 550 (builtins.readFile ./zsh-init.zsh))
 
         # fzf-tab
-        # https://github.com/Aloxaf/fzf-tab
         # fzf-tab 必须放在 compinit 之后、autosuggestions 之前。
         #  - compinit 在 programs.zsh.completionInit 阶段执行
         #  - autosuggestions 会在更后面 wrap ZLE widgets
@@ -206,7 +203,7 @@
         # - completionInit / compinit: 570
         # - autosuggestions: 700
         # 因此这里显式卡在中间，避免被 programs.zsh.plugins 的更晚 source 顺序破坏。
-
+        #
         # carapace: 多 shell 补全引擎，增强 zsh tab 补全数据源
         (lib.mkOrder 600 ''
           source <(${pkgs.carapace}/bin/carapace _carapace zsh)
@@ -223,25 +220,9 @@
         # 目前保持空白以最大化性能
       '';
 
-      # PATH 设置（使用 Home Manager 的正确方式）
-      # MAYBE: [2025-10-06] home.sessionPath -> programs.zsh.sessionVariables 现在zsh有bug，只能这么来处理
-      # [bug: home.sessionPath is broken with ZSH · Issue #2991 · nix-community/home-manager](https://github.com/nix-community/home-manager/issues/2991)
-      # [2026-04-04] 查了一下，这个还没fix. Zsh 模块实现都还是把 hm-session-vars.sh 从 .zshenv 里 source，然后再在 .zshenv 里写 programs.zsh.sessionVariables。home.sessionPath 仍然只是生成到 hm-session-vars.sh 里的 PATH prepend 逻辑，没有改到更晚的加载阶段。
-      sessionVariables = {
-        PNPM_HOME = "$HOME/.local/share/pnpm";
-        PATH = lib.concatStringsSep ":" [
-          #          "$HOME/.orbstack/bin"
-          "$HOME/go/bin"
-          "$HOME/.bun/bin"
-          # [2026-05-16] pnpm >= 11 的 global-bin-dir 默认为 $PNPM_HOME/bin，不再放在 $PNPM_HOME 根目录
-          # 不加上 /bin 的话 pnpm install -g 会报 "global bin directory is not in PATH"
-          "$PNPM_HOME/bin"
-          "$HOME/.local/bin" # rofi shells
-
-          "$PATH" # 注意放到最后，且不要删除
-        ];
-        #       PATH = "$HOME/.orbstack/bin:$HOME/go/bin:$BUN_INSTALL/bin:$PNPM_HOME/bin:$HOME/.local/bin:$PATH";
-      };
+      # PATH 设置由 home.sessionPath 统一管理（见上方 home 层级配置）
+      # 之前因 home-manager #2991（zsh 中 home.sessionPath 被系统 PATH 覆盖）而在此手动设置
+      # 该 bug 已由 PR #9356 修复（2026-06-02 合并），故改用 home.sessionPath
     };
 
     # A cat(1) clone with syntax highlighting and Git integration
@@ -308,9 +289,6 @@
         "--max-filesize=10M"
       ];
     };
-
-    # Atuin shell history
-    # https://mynixos.com/home-manager/options/programs.atuin
 
     atuin = {
       enable = true;
