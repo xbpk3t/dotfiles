@@ -8,8 +8,6 @@ let
   cfg = config.modules.desktop.chromium;
 in
 {
-  # https://mynixos.com/home-manager/options/programs.chromium
-
   options.modules.desktop.chromium = with lib; {
     enable = mkEnableOption "Chromium Enable";
   };

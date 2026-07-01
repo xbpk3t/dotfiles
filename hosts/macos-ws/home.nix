@@ -22,11 +22,9 @@ _: {
       stylix.enable = true;
 
       ghostty.enable = false;
-      kitty.enable = false;
       cmux.enable = true;
 
       zed.enable = true;
-      vscode.enable = false;
     };
 
     AI = {

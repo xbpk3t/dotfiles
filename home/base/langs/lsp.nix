@@ -23,7 +23,6 @@ let
     # TypeScript/JavaScript
     typescript
     typescript-language-server
-    vscode-langservers-extracted
 
     # YAML
     yaml-language-server

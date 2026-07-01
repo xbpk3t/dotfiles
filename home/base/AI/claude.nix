@@ -33,8 +33,6 @@ in
       programs.claude-code.enableMcpIntegration = true;
     }
     (lib.mkIf cfg.enable {
-      # https://mynixos.com/home-manager/options/programs.claude-code
-
       # https://x.com/yanhua1010/status/2044559129134698609
       programs = {
         claude-code = {
