@@ -42,35 +42,20 @@ rec {
     };
 
     # Keep nix-homebrew for compatibility
-    # https://github.com/zhaofengli/nix-homebrew
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
-
-    nvf.url = "github:notashelf/nvf";
 
     sops-nix = {
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
 
-    # Stylix theming system
     stylix = {
       url = "github:nix-community/stylix";
       inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
 
-    # https://github.com/nix-community/nixos-vscode-server
-    vscode-server = {
-      url = "github:nix-community/nixos-vscode-server";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     nixos-hardware.url = "github:nixos/nixos-hardware";
 
-    # https://github.com/nix-community/nix-index-database
-    # Weekly prebuilt nix-index database.
-    # what: 复用上游预生成索引，避免每台机器各自构建本地 database。预生成的 nix-index 数据库（定期更新），并带 NixOS/HM 模块与 wrapper。让 nix-locate / command-not-found 等不用本地跑索引也能快速查“哪个包提供某文件/命令”。
-    # why: 对当前多平台仓库来说，这是低成本提升 nix-locate/command-not-found 体验的方式。
-    # htu:
     nix-index-database = {
       url = "github:nix-community/nix-index-database";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -84,27 +69,16 @@ rec {
     };
 
     # nixos-cli - Modern NixOS management CLI
-    # https://github.com/nix-community/nixos-cli
     nixos-cli = {
       url = "github:water-sucks/nixos";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # https://github.com/nix-community/nixos-facter
-    # nixos-facter - Generate machine-readable hardware facts reports.
-    # 注意：消费 report 的 NixOS modules 已经 upstream 到 nixpkgs，
-    # 这里保留上游 flake 主要是为了拿到最新 CLI。
-    # 是啥：NixOS 的“事实采集/硬件探测”方案：先生成机器 JSON 报告（facts），再由 NixOS 模块读取该报告做硬件相关的启用/参数决策。
-    # 有啥用：批量装机/多硬件平台统一一份配置；减少手写硬件差异逻辑。
-    # 怎么用：在目标机运行 facter 生成 report.json；在 NixOS 配置中引入模块并指向 report 文件路径，使配置随硬件事实自适配。
-    # 决策：用在机器多且硬件差异大、想“一份配置跑全场”的场景；单机或少量固定硬件则直接 generate-config 就够。
     nixos-facter = {
       url = "github:nix-community/nixos-facter";
       # inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # deploy-rs - Multi-profile deployment tool
-    # https://github.com/serokell/deploy-rs
     "deploy-rs" = {
       url = "github:serokell/deploy-rs";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -121,13 +95,8 @@ rec {
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # https://github.com/tak-bro/aicommit2
-    # aicommit2.url = "github:tak-bro/aicommit2";
-
     # Nix unit testing tools
-    # https://github.com/nix-community/nixt
     nixt.url = "github:nix-community/nixt";
-    # https://github.com/nix-community/nix-unit
     nix-unit.url = "github:nix-community/nix-unit";
   };
 
