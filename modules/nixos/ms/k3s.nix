@@ -196,7 +196,7 @@ in
         # gawk
         # python3
       ];
-      script = builtins.readFile ./k3s-cni-route.sh;
+      # script = builtins.readFile ./k3s-cni-route.sh;
     };
 
     # k3s 基础端口放行：

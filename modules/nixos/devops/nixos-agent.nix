@@ -40,7 +40,8 @@ lib.mkIf agentEnabled {
       imports = [
         inputs.sops-nix.nixosModules.sops
         (mylib.relativeToRoot "hosts/nixos-agent/default.nix")
-        (mylib.relativeToRoot "modules/nixos/base")
+        (mylib.relativeToRoot "modules/nixos/kernel")
+        (mylib.relativeToRoot "modules/nixos/devops")
         (mylib.relativeToRoot "secrets/default.nix")
         inputs.home-manager.nixosModules.home-manager
         {
@@ -65,7 +66,6 @@ lib.mkIf agentEnabled {
               ]
               ++ [
                 inputs.nix-index-database.homeModules.default
-                inputs.nvf.homeManagerModules.default
                 inputs.sops-nix.homeManagerModules.sops
               ];
           };
