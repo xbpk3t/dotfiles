@@ -1,4 +1,3 @@
-# see https://github.com/openebs/zfs-localpv/blob/develop/docs/storageclasses.md
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
@@ -15,7 +14,6 @@ provisioner: zfs.csi.openebs.io
 volumeBindingMode: WaitForFirstConsumer
 reclaimPolicy: Delete
 ---
-# see https://github.com/openebs/zfs-localpv/blob/develop/docs/storageclasses.md
 apiVersion: snapshot.storage.k8s.io/v1
 kind: VolumeSnapshotClass
 metadata:
@@ -25,7 +23,6 @@ metadata:
 driver: zfs.csi.openebs.io
 deletionPolicy: Delete
 ---
-# see https://github.com/anoxape/external-reprovisioner
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:

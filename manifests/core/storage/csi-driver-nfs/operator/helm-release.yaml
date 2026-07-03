@@ -21,7 +21,6 @@ spec:
 
   postRenderers:
     - kustomize:
-        # see https://github.com/kubernetes-csi/csi-driver-nfs/blob/master/deploy/csi-nfs-controller.yaml
         patches:
           - target:
               kind: Deployment
