@@ -168,12 +168,12 @@ in
     Defaults env_keep += "NO_COLOR"
   '';
 
-  programs.nix-ld = {
-    enable = true;
-    libraries = with pkgs; [
-      stdenv.cc.cc
-      openssl
-      zlib
-    ];
-  };
+  # programs.nix-ld = {
+  #   enable = true;
+  #   libraries = with pkgs; [
+  #     stdenv.cc.cc
+  #     openssl
+  #     zlib
+  #   ];
+  # };
 }

@@ -97,6 +97,8 @@ in
       glab
       (lib.lowPrio git-extras)
       git-filter-repo
+
+      commitizen
     ]
     ++ [
       # 分类2：代码质量、安全与历史清理
