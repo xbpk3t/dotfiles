@@ -15,7 +15,7 @@
 
   # 添加用户可用的 shell 到 /etc/shells
   environment.shells = with pkgs; [
-    bashInteractive
+    # bashInteractive
     zsh
   ];
 }

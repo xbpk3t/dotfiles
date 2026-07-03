@@ -15,8 +15,7 @@
       # tags(desc): 代码质量 > 提交钩子 > 自动化
       pre-commit
       prek
-
-      dos2unix
+      python3Packages.pre-commit-hooks
 
       # tags(desc): 代码质量 > URL提取检查 > 文本分析
       urlscan
@@ -48,7 +47,8 @@
       # tags(desc): 可视化 > 图绘制 > 图结构
       graphviz
 
-    ];
+    ]
+    ++ [ gum ];
 
   home.sessionVariables = {
     TAILSCALE_API_KEY = "$(cat ${config.sops.secrets.TAILSCALE_API_KEY.path})";

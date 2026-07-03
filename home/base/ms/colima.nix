@@ -141,7 +141,7 @@ in
             # EXAMPLE
             # dnsHosts:
             #   example.com: 1.2.3.4
-            dnsHosts = {};
+            dnsHosts = { };
 
             # Replicate host IP addresses in the VM. This enables port forwarding to specific
             # host IP addresses.
@@ -186,7 +186,7 @@ in
           #
           # Colima default behaviour: buildkit enabled
           # Default: {}
-          docker = {};
+          docker = { };
 
           # Virtual Machine type (krunkit, qemu, vz)
           # this is macOS 13 only. For Linux and macOS <13.0, qemu is always used.
@@ -303,7 +303,7 @@ in
           #
           # Colima default behaviour: $HOME is mounted as writable.
           # Default: []
-          mounts = [];
+          mounts = [ ];
 
           # Specify a custom disk image for the virtual machine.
           # The file path to a custom disk image can be specified to override the behaviour.
@@ -324,7 +324,7 @@ in
           #   ANOTHER_KEY: another value
           #
           # Default: {}
-          env = {};
+          env = { };
         };
       };
     };
