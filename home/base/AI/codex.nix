@@ -148,16 +148,5 @@ in
     #    force = true;
     #  };
 
-    programs.agent-skills = {
-      # 注意这个 targets 是用来把 skills folder 放到不同cli工具的folder，以实现skills的复用。所以所有这里配置了的 targets 里的 skills 都是完全一致的。
-      targets.codex = {
-        enable = true;
-        # dest = ".agents/skills";
-        dest = ".codex/skills";
-        # link keeps the local skills catalog single-sourced through ASN.
-        # If Codex skill discovery regresses on symlinks, switch this target to copy-tree and document the repro.
-        structure = "link";
-      };
-    };
   };
 }
