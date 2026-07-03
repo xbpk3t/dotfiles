@@ -27,17 +27,7 @@
       addons = with pkgs; [
         # 智能拼音输入引擎 (核心)
         qt6Packages.fcitx5-chinese-addons
-
-        # 配置工具
-        # [2025-10-31] 不需要GUI来做fcitx5配置
-        # fcitx5-configtool
-
-        # 基于中文维基百科的拼音词典
         fcitx5-pinyin-zhwiki
-        # https://github.com/sanweiya/fcitx5-mellow-themes
-        # fcitx5-mellow-themes
-        # https://github.com/catppuccin/fcitx5
-        # catppuccin-fcitx5
       ];
 
       settings = {

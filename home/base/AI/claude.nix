@@ -26,8 +26,6 @@ in
     };
   };
 
-  # https://github.com/AddG0/nix-config/blob/main/home/common/optional/development/ai/claude-code/default.nix
-  # https://github.com/blessuselessk/determinate-OCD/blob/main/modules/lessuseless/claude.nix
   config = lib.mkMerge [
     {
       programs.claude-code.enableMcpIntegration = true;

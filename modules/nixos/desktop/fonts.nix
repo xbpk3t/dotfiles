@@ -33,11 +33,15 @@
       noto-fonts-color-emoji
 
       # Chinese fonts for CJK support
-      apple-pingfang # 苹果苹方
-      # noto-fonts-cjk-sans # 思源黑体
-      noto-fonts-cjk-serif # 思源宋体
-      source-han-sans # Adobe 思源黑体
-      lxgw-neoxihei # https://github.com/lxgw/LxgwNeoXiHei 霞鹜新晰
+      # 苹果苹方
+      apple-pingfang
+      # 思源黑体
+      noto-fonts-cjk-sans
+      # 思源宋体
+      noto-fonts-cjk-serif
+      # Adobe 思源黑体
+      source-han-sans
+      lxgw-neoxihei
       wqy_zenhei # 文泉驿正黑
       wqy_microhei
 

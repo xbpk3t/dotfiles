@@ -22,19 +22,6 @@ in
   config = lib.mkIf mcpEnabled {
     programs.mcp.enable = true;
 
-    home.packages = with pkgs; [
-      # gitea-mcp-server
-
-      # mcp-k8s-go
-
-      # Azure Kubernetes Service
-      # aks-mcp-server
-
-      # fluxcd-operator-mcp
-
-      # markitdown-mcp
-    ];
-
     mcp-servers = {
       programs = {
         github = {
@@ -50,40 +37,10 @@ in
             ];
           };
         };
-
-        # 先预留，按需启用。
-        # serena.enable = true;
-        # grafana.enable = true;
-
-        # terraform.enable = true;
-
-        # [2026-04-18] 用 chrome-devtools 替代掉了。playwright 更偏稳定自动化/脚本化操作，chrome-devtools 更偏调试、网络、console、性能、lighthouse、CDP 级观察。所以这组不是“完全同质”，但在日常使用中会明显抢同一个入口。
-        #  playwright = {
-        #    enable = true;
-        #    # Darwin 下默认会走 pkgs.google-chrome，触发 Nix 构建 GoogleChrome-*.dmg。
-        #    # 这里显式复用系统（brew 安装）的 Chrome，可避免重复下载/构建。
-        #    executable = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
-        #  };
       };
 
       settings.servers = {
-        # [2026-06-01] 已移除 fetch 和 filesystem MCP 服务器，相关 settings 一起清理
 
-        # https://github.com/johnhuang316/code-index-mcp
-        # code-index 可以找文件、建索引、搜代码、拿 symbol body、文件摘要。code-index 是面向代码语义和索引的增强层。
-        # [2026-04-19] 好像没什么人用，所以注释掉，之后再判断是否要移除掉
-        #  "code-index" = {
-        #    command = "uvx";
-        #    args = ["code-index-mcp"];
-        #    default_tools_approval_mode = "approve";
-        #  };
-
-        #  nixos = {
-        #    startup_timeout_sec = 50;
-        #    default_tools_approval_mode = "approve";
-        #  };
-
-        # https://github.com/ChromeDevTools/chrome-devtools-mcp
         # 默认改为让 MCP 自己拉起受控 Chrome，而不是附着当前正在使用的浏览器。
         # Why:
         # - `--autoConnect` 依赖 chrome://inspect/#remote-debugging 的握手与授权弹窗，实际更脆；
@@ -101,9 +58,6 @@ in
           args = [ ];
           default_tools_approval_mode = "approve";
         };
-        # Future desktop-only entries (uncomment and add here):
-        # "playwright" = lib.mkIf cfg.isDesktop { ... };   # needs browser
-        # "bb-browser" = lib.mkIf cfg.isDesktop { ... };   # needs browser + login state
 
         # context7 偏库/框架文档
         context7 = {
@@ -119,33 +73,6 @@ in
         "linear" = {
           type = "http";
           url = "https://mcp.linear.app/mcp";
-          default_tools_approval_mode = "approve";
-        };
-
-        # https://github.com/colbymchenry/codegraph
-        # CodeGraph: 基于 Tree-sitter 的代码知识图谱，构建本地 SQLite 索引后通过 MCP 工具暴露
-        # search/explore/callers/impact 等能力给 AI agent 使用。
-        # 二进制由 pnpm 全局安装管理 (~/.local/share/pnpm/bin/codegraph)，已包含在 PATH 中。
-        #
-        # MAYBE: [2026-05-26] Codex 侧 CodeGraph MCP 可见性待复查。
-        # 已确认：CodeGraph server 配置符合 upstream Codex 示例，`codex mcp get codegraph`
-        # 能识别该 server，Codex 日志里也能看到 CodeGraph MCP watcher 启动；Claude Code
-        # 同一套 MCP 配置可以识别 CodeGraph 工具，手动 MCP tools/list 也能列出
-        # codegraph_search/context/callers/impact 等工具。
-        # 当前问题只出现在 Codex 模型可调用 tool schema 层：会话里看不到 codegraph_*。
-        # 优先怀疑 `model_provider = "axonhub"` 的 Responses-compatible 路径没有正确透传动态
-        # MCP tools，其次再排查 Codex 0.130.0 -> 最新版本的 MCP tool 注入差异。
-        # 验证顺序：先临时移除默认 axonhub provider、走 Codex 官方默认 provider；若仍失败，
-        # 再升级 Codex 并复测。不是 CodeGraph server 本身的接入配置问题。
-        #
-        # MAYBE: [2026-05-26] 目前codegraph不支持nix，等支持后用codegraph再扫一次本项目，并做优化
-        # [feat: add Nix language support by uxtechie · Pull Request #330 · colbymchenry/codegraph](https://github.com/colbymchenry/codegraph/pull/330)
-        "codegraph" = {
-          command = "codegraph";
-          args = [
-            "serve"
-            "--mcp"
-          ];
           default_tools_approval_mode = "approve";
         };
 
@@ -179,22 +106,6 @@ in
         #      "--mcp"
         #    ];
         #  };
-
-        #  terraform = {
-        #  default_tools_approval_mode = "approve";
-        #  };
-
-        #  playwright = {
-        #  default_tools_approval_mode = "approve";
-        #  };
-
-        # 先预留，按需启用（当前先注释）。
-        # serena = {
-        #  default_tools_approval_mode = "approve";
-        # };
-        # grafana = {
-        # default_tools_approval_mode = "approve";
-        # };
       };
     };
 
