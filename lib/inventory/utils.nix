@@ -6,11 +6,8 @@ let
   nodesOrEmpty = inventory: if inventory == null then { } else inventory;
   inventory = nodesOrEmpty inventoryData;
   groupOrEmpty = name: inventory.${name} or { };
-  nodesForContainerHost =
-    group: hostName:
-    lib.filterAttrs (_: node: (node.containerHost or null) == hostName) (groupOrEmpty group);
   # Why：inventory 是纯数据（分组内节点结构），可能同时提供 primaryIp/ip/ips/ssh.host。
-  # What：按优先级挑一个“主机地址”作为部署/连接默认值。
+  # What：按优先级挑一个”主机地址”作为部署/连接默认值。
   primaryHostForNode =
     name: node:
     let
@@ -35,10 +32,9 @@ let
     };
 in
 {
-  inherit primaryHostForNode nodesForContainerHost;
+  inherit primaryHostForNode;
   # 分组入口（简化调用）：mylib.inventory.<group>
   "nixos-avf" = groupOrEmpty "nixos-avf";
-  "nixos-agent" = groupOrEmpty "nixos-agent";
   "nixos-vps" = groupOrEmpty "nixos-vps";
   "nixos-homelab" = groupOrEmpty "nixos-homelab";
   "nixos-ws" = groupOrEmpty "nixos-ws";
