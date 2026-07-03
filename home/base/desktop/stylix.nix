@@ -135,9 +135,6 @@ in
     home.packages =
       with pkgs;
       optionals isLinux [
-        bibata-cursors
-
-        # https://github.com/ful1e5/apple_cursor
         apple-cursor
       ];
   };
