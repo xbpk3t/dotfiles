@@ -97,20 +97,5 @@
             "type": "github"
         },
         "version": "5983fe3b4ea2785335ac1712c4aa1ac4e13a8fa2"
-    },
-    "zashboard": {
-        "cargoLock": null,
-        "date": null,
-        "extract": null,
-        "name": "zashboard",
-        "passthru": null,
-        "pinned": false,
-        "src": {
-            "name": null,
-            "sha256": "sha256-pH0ZZtTflkh/8F8J4YlIKrgiUC8VchL6hy5JtgV/pYA=",
-            "type": "url",
-            "url": "https://github.com/Zephyruso/zashboard/releases/download/v3.11.0/dist.zip"
-        },
-        "version": "v3.11.0"
     }
 }

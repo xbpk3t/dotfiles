@@ -58,12 +58,4 @@
       sha256 = "sha256-7XpsETQwB/yVfgZpeUWKPlt8cVCsp6ypj4EVyC1aqZ4=";
     };
   };
-  zashboard = {
-    pname = "zashboard";
-    version = "v3.11.0";
-    src = fetchurl {
-      url = "https://github.com/Zephyruso/zashboard/releases/download/v3.11.0/dist.zip";
-      sha256 = "sha256-pH0ZZtTflkh/8F8J4YlIKrgiUC8VchL6hy5JtgV/pYA=";
-    };
-  };
 }
