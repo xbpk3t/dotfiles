@@ -22,7 +22,7 @@ let
       # common
       "secrets/default.nix"
       "modules/nixos/kernel"
-      "modules/nixos/devops/nvidia.nix"
+      "modules/nixos/desktop/nvidia.nix"
       "modules/nixos/desktop"
       "modules/nixos/infra/singbox-client.nix"
       "modules/nixos/infra/mihomo-client.nix"
