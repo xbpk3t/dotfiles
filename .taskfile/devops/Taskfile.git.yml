@@ -59,8 +59,6 @@ tasks:
       - echo "================ 文件活跃度分析 ================"
       - git effort --stale
       - echo "✅ Git仓库分析报告完成！"
-
-      # https://github.com/hellodigua/code996
       - npx code996
     dir: '{{.USER_WORKING_DIR}}'
 

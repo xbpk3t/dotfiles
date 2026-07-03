@@ -97,7 +97,6 @@ in
       external_controller = "0.0.0.0:9090";
       # Clash API 若监听在 0.0.0.0，官方强烈要求设置 secret
       secret = clashSecret;
-      # https://github.com/Zephyruso/zashboard
       external_ui = "${pkgs.zashboard}";
     };
   };

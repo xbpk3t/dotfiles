@@ -1,7 +1,5 @@
 { pkgs, ... }:
 {
-  # https://github.com/nix-community/nix-direnv
-  # https://mynixos.com/home-manager/options/programs.direnv
 
   # https://blog.therainisme.com/nixos
 
@@ -12,10 +10,6 @@
     # "-linkmode=external requires external (cgo) linking, but cgo is not enabled"。
     # 在上游修复或锁版本回退前，先禁用 direnv / nix-direnv，避免 macos-ws deploy 失败。
     # direnv
-    # nix-direnv
-
-    # https://github.com/Mic92/direnv-instant
-
     devbox
   ];
 

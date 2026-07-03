@@ -9,7 +9,6 @@
       helmfile
     ]
     ++ (with pkgs.kubernetes-helmPlugins; [
-      # https://mynixos.com/packages/kubernetes-helmPlugins
 
       helm-diff
     ]);

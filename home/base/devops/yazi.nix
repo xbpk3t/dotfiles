@@ -1219,18 +1219,16 @@ in
     # 另外，注意 plugins = pkgs.yaziPlugins 意味着直接import进来上面所有plugins (但是部分plugin会有兼容性问题（比如说 mactag 只支持darwin，无法在linux下使用），所以不建议这么配置)
     plugins = {
       # Ensure git.yazi is always present for inline status and blame info
-      git = pkgs.yaziPlugins.git;
+      # git = pkgs.yaziPlugins.git;
 
-      lazygit = pkgs.yaziPlugins.lazygit;
-      full-border = pkgs.yaziPlugins.full-border;
-      smart-enter = pkgs.yaziPlugins.smart-enter;
-      # ouch-rar plugin was removed — use system ouch instead
-
-      duckdb = pkgs.yaziPlugins.duckdb;
+      # lazygit = pkgs.yaziPlugins.lazygit;
+      # full-border = pkgs.yaziPlugins.full-border;
+      # smart-enter = pkgs.yaziPlugins.smart-enter;
+      # duckdb = pkgs.yaziPlugins.duckdb;
 
       # 之所以使用 system-clipboard.yazi
       # 用的是 cb 这个跨平台 clipboard 工具，所以理论上 Linux / macOS / Windows 统一一套调用方式，不用管 X11 / Wayland / macOS 命令差异。复制的是 文件路径传给 cb，然后由 Clipboard 这个程序负责和系统剪贴板交互，你也可以借它的历史、多剪贴板等高级功能（取决于你怎么用 cb）。
-      wl-clipboard = pkgs.yaziPlugins.wl-clipboard;
+      # wl-clipboard = pkgs.yaziPlugins.wl-clipboard;
     };
 
     initLua = ''

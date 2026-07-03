@@ -8,10 +8,12 @@
   home.packages =
     with pkgs;
     [
-      # 分类1：Nix 打包
+      # === Nix 打包工具 ===
       noogle-search
       nvfetcher
       crane
+
+      nurl
     ]
     ++ [
       # 分类2：代码质量与测试
@@ -51,5 +53,10 @@
   programs.zsh.shellAliases = {
     # noogle-search 是 nixpkgs 中的实际可执行文件名；补一个更直观的入口。
     noogle = "noogle-search";
+  };
+
+  # nix-init: Nix 包起稿工具
+  programs.nix-init = {
+    enable = true;
   };
 }

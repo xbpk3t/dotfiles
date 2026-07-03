@@ -1,18 +1,14 @@
-{ pkgs, ... }:
+{ config, ... }:
+let
+  lspPackages = config.modules.langs.lsp.packages;
+in
 {
 
   programs.helix = {
     enable = true;
     defaultEditor = true;
 
-    extraPackages = with pkgs; [
-      marksman
-      nil
-      gopls
-      yaml-language-server
-      dockerfile-language-server
-      terraform-ls
-    ];
+    extraPackages = lspPackages;
 
     settings = {
       theme = "monokai";

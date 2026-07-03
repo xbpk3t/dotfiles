@@ -3,7 +3,7 @@
 cpu: 2
 
 # Size of the disk in GiB to be allocated to the virtual machine for container data.
-# NOTE: value can only be increased after virtual machine has been created.
+# value can only be increased after virtual machine has been created.
 #
 # Default: 100
 disk: 100
@@ -14,13 +14,13 @@ memory: 2
 
 # Architecture of the virtual machine (x86_64, aarch64, host).
 #
-# NOTE: value cannot be changed after virtual machine is created.
+# value cannot be changed after virtual machine is created.
 # Default: host
 arch: aarch64
 
 # Container runtime to be used (docker, containerd).
 #
-# NOTE: value cannot be changed after virtual machine is created.
+# value cannot be changed after virtual machine is created.
 # Default: docker
 runtime: docker
 
@@ -69,18 +69,18 @@ autoActivate: true
 # Network configurations for the virtual machine.
 network:
   # Assign reachable IP address to the virtual machine.
-  # NOTE: this is currently macOS only and ignored on Linux.
+  # this is currently macOS only and ignored on Linux.
   # Default: false
   address: false
 
   # Network mode for the virtual machine (shared, bridged).
-  # NOTE: this is currently macOS only and ignored on Linux.
+  # this is currently macOS only and ignored on Linux.
   # Default: shared
   mode: shared
 
   # Network interface to use for bridged mode.
   # This is only used when mode is set to bridged.
-  # NOTE: this is currently macOS only and ignored on Linux.
+  # this is currently macOS only and ignored on Linux.
   # Default: en0
   interface: en0
 
@@ -136,7 +136,7 @@ forwardAgent: false
 
 # Docker daemon configuration that maps directly to daemon.json.
 # https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file.
-# NOTE: some settings may affect Colima's ability to start docker. e.g. `hosts`.
+# some settings may affect Colima's ability to start docker. e.g. `hosts`.
 #
 # EXAMPLE - disable buildkit
 # docker:
@@ -154,12 +154,12 @@ forwardAgent: false
 docker: {}
 
 # Virtual Machine type (krunkit, qemu, vz)
-# NOTE: this is macOS 13 only. For Linux and macOS <13.0, qemu is always used.
+# this is macOS 13 only. For Linux and macOS <13.0, qemu is always used.
 #
 # vz is macOS virtualization framework and requires macOS 13.
 # krunkit runs super‑light VMs on macOS/ARM64 with a focus on GPU access. It is experimental.
 #
-# NOTE: value cannot be changed after virtual machine is created.
+# value cannot be changed after virtual machine is created.
 # Default: qemu
 vmType: vz
 
@@ -192,13 +192,13 @@ nestedVirtualization: false
 # sshfs is faster than 9p but the least reliable of the options (when there are lots
 # of concurrent reads or writes).
 #
-# NOTE: value cannot be changed after virtual machine is created.
+# value cannot be changed after virtual machine is created.
 # Default: virtiofs (for vz), sshfs (for qemu)
 # [2026-04-14]
 mountType: 9p
 
 # Propagate inotify file events to the VM.
-# NOTE: this is experimental.
+# this is experimental.
 mountInotify: true
 
 # The CPU type for the virtual machine (requires vmType `qemu`).

@@ -5,8 +5,6 @@ version: '3'
 
 
 tasks:
-
-  # https://github.com/kpym/gm
   md2html:
     desc: markdown -> html using goldmark cli tool
     summary: "task -g md:md2html -- <filename>"

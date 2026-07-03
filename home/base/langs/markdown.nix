@@ -5,7 +5,9 @@
       # python313Packages.markitdown
       # docling
       mdq
-      doxx
+
+      markdownlint-cli
+      # doxx
     ];
   };
 }
