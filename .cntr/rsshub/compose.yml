@@ -1,6 +1,4 @@
 ---
-# https://github.com/einverne/dockerfile/blob/master/rsshub/docker-compose.yml
-
 
 x-common-variables: &common-variables
   TZ: ${TZ:-Asia/Shanghai}

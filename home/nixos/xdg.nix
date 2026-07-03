@@ -9,10 +9,11 @@
   ...
 }:
 {
-  home.packages = with pkgs; [
-    xdg-utils # provides cli tools such as `xdg-mime` `xdg-open`
-    xdg-user-dirs
-  ];
+  # home.packages = with pkgs; [
+  #   # provides cli tools such as `xdg-mime` `xdg-open`
+  #   xdg-utils
+  #   xdg-user-dirs
+  # ];
 
   xdg.configFile."mimeapps.list".force = true;
   xdg = {

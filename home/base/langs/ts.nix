@@ -14,8 +14,6 @@
 
       # tags(desc): 包管理 > Node生态 > 性能优先
       pnpm
-      # tags(desc): 本地服务 > 静态预览 > 前端开发
-      serve # https://github.com/vercel/serve 用来preview本地打包好的dist文件（vite可以直接vite preview）
 
       # [2026-01-21] rebuild error, hash mismatch, so comment it
       # tags(desc): 执行器 > TypeScript运行 > Node生态
@@ -45,7 +43,6 @@
       # tags(desc): 代码质量 > 语法检查 > JavaScript/TypeScript
       eslint
       oxlint
-
       # tags(desc): 代码质量 > 格式化 > JavaScript/TypeScript
       prettier
     ];

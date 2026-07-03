@@ -59,7 +59,6 @@
           edit = "<c-r>";
         };
       };
-      # https://github.com/jesseduffield/lazygit/blob/master/docs/Custom_Command_Keybindings.md
       customCommands = [
         {
           key = "H";

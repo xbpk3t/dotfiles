@@ -27,14 +27,9 @@
       # 分类3：基础系统与文本处理工具
 
       # 基础工具
-      #
-      # [2026-01-25]
-      # https://mynixos.com/nixpkgs/package/coreutils-prefixed
-      # why: For stdbuf/gstdbuf. 需要 stdbuf 来实现 用于并行执行时让日志实时刷新、减少输出延迟/卡住的情况。
-      # what: 并不需要 coreutils-prefixed (这个pkg会提供一套 g* 的命令，以与 coreutils 避免冲突)，仅作记录
-      #
+
       # tags(desc): 基础工具 > Unix工具集 > 系统命令
-      coreutils
+      # coreutils
 
       # tags(desc): 基础工具 > 文件检索 > Unix
       findutils
@@ -44,10 +39,6 @@
       gawk
       # tags(desc): 基础工具 > 文本处理 > sed
       gnused
-      # tags(desc): 基础工具 > 归档打包 > tar
-      gnutar
-      # tags(desc): 基础工具 > 压缩 > gzip
-      gzip
 
       # 其他实用工具
       # tags(desc): 基础工具 > 监控观察 > 实时刷新
@@ -83,9 +74,6 @@
       # tags(desc): 可视化 > 图绘制 > 图结构
       graphviz
 
-      # static file server
-      # https://github.com/sigoden/dufs
-      dufs
     ];
 
   home.sessionVariables = {

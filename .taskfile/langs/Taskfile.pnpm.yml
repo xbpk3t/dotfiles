@@ -51,6 +51,5 @@ tasks:
     dir: '{{.USER_WORKING_DIR}}'
     interactive: true
 
-  # https://github.com/millionco/react-doctor
   # pnpm install -g react-doctor 直接安装到global cli
   # react-doctor . --verbose          # 显示具体文件和行号
