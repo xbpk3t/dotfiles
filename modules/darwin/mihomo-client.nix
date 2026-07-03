@@ -88,7 +88,6 @@ in
     sops.templates."mihomo-self-provider.yaml".content = client.selfProviderContent;
 
     # config 已在构建时转为 YAML，sops 渲染后由 launcher 直接 exec mihomo
-    # Metacubexd 作为 Web UI 通过 external-controller 端口管理配置
     launchd.daemons.mihomo-tun = {
       serviceConfig = {
         Label = "local.mihomo.tun";
@@ -110,9 +109,9 @@ in
           # 兜底（保证 launcher 自己能被 launchd exec 起来）。
           PATH = "/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
           # mihomo 默认只允许 working dir / homedir / SAFE_PATHS 下的路径作为
-          # file provider 源或 external-ui 来源。把 metacubexd（UI）和
+          # file provider 源或 external-ui 来源。把 zashboard（UI）和
           # sops 渲染目录都加进来。
-          SAFE_PATHS = "${pkgs.metacubexd}:/run/secrets/rendered";
+          SAFE_PATHS = "${pkgs.zashboard}:/run/secrets/rendered";
         };
       };
     };
