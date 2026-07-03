@@ -33,7 +33,7 @@ let
   #    其 passAsFile 机制天然保留 string context（不需要 unsafeDiscardStringContext）；
   # 2) 不再有"先 toJSON、再 toFile、再 yq"三层 boilerplate；
   # 3) 输出 derivation 的依赖关系由 nixpkgs 维护，避免我们在 lib 层自己造轮子时
-  #    把 metacubexd 这类 store path 的 GC 追踪搞断。
+  #    把 zashboard 这类 store path 的 GC 追踪搞断。
   yamlFmt = pkgs.formats.yaml { };
   secrets = {
     uuid = config.sops.placeholder.SINGBOX_UUID;
@@ -68,7 +68,7 @@ let
     ipv6 = true;
     external-controller = "0.0.0.0:9090";
     secret = secrets.clashSecret;
-    external-ui = "${pkgs.metacubexd}";
+    external-ui = "${pkgs.zashboard}/share/zashboard";
     mixed-port = 7890;
     allow-lan = true;
     bind-address = "*";

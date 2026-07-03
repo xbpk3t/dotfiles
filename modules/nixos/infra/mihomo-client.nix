@@ -50,7 +50,7 @@ in
 
     # sops 默认 owner=root mode=0400，DynamicUser 或静态非 root 都读不到。
     # 显式声明 owner+group+mode 让模板对 mihomo 用户可读。group 0440 而非
-    # owner 0400 是为了将来 metacubexd UI 如果以普通用户身份 reload 也能读。
+    # owner 0400 是为了将来 zashboard UI 如果以普通用户身份 reload 也能读。
     sops.templates."mihomo-client.yaml" = {
       content = client.templatesContent;
       owner = "mihomo";
@@ -87,8 +87,8 @@ in
         User = "mihomo";
         Group = "mihomo";
         # mihomo 默认只允许 homedir 和 SAFE_PATHS 下的路径作为 external-ui /
-        # file provider 源。把 metacubexd（UI）和 sops 渲染目录都加进来。
-        Environment = "SAFE_PATHS=${pkgs.metacubexd}:/run/secrets/rendered";
+        # file provider 源。把 zashboard（UI）和 sops 渲染目录都加进来。
+        Environment = "SAFE_PATHS=${pkgs.zashboard}:/run/secrets/rendered";
         ExecStartPre = [
           "${pkgs.coreutils}/bin/mkdir -p /var/lib/mihomo/providers"
         ];
