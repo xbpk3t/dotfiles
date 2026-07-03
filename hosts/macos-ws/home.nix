@@ -6,7 +6,6 @@ _: {
     };
 
     devops = {
-      tmux.enable = false;
       ssh = {
         enable = true;
         hosts = {

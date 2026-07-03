@@ -23,8 +23,7 @@ let
       "modules/nixos/kernel"
       "modules/nixos/infra/homelab.nix"
 
-      "modules/nixos/devops/nvidia.nix"
-      "modules/nixos/devops/fhs.nix"
+      "modules/nixos/desktop/nvidia.nix"
       "modules/nixos/infra/singbox-client.nix"
       "modules/nixos/ms/k3s.nix"
     ];
