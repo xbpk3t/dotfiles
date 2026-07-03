@@ -3,7 +3,6 @@
   lib,
   globals,
   hostMeta,
-  mylib,
   pkgs,
   userMeta,
   stateVersion,
@@ -11,8 +10,6 @@
 }:
 let
   inherit (globals.networking) nameservers;
-  agentNodes = mylib.inventory.nodesForContainerHost "nixos-agent" hostMeta.hostName;
-  agentEnabled = agentNodes != { };
   agentExternalInterface = lib.attrByPath [ "networking" "externalInterface" ] null hostMeta;
   diskDevice = lib.attrByPath [ "disko" "devices" "disk" "vda" "device" ] "/dev/vda" config;
 in
@@ -84,20 +81,18 @@ in
     # [2026-05-25] nixos-agent 容器使用 privateNetwork（10.233.0.0/24）。
     # 只有 inventory 中归属到当前 VPS 的 agent 节点存在时才开启 NAT，
     # 并限制到目标机确认过的公网出口。
-    nat = lib.mkIf agentEnabled (
-      {
-        enable = true;
-        internalInterfaces = [ "ve-nixos-agent" ];
-      }
-      // lib.optionalAttrs (agentExternalInterface != null) {
-        externalInterface = agentExternalInterface;
-      }
-    );
+    nat = {
+      enable = true;
+      internalInterfaces = [ "ve-nixos-agent" ];
+    }
+    // lib.optionalAttrs (agentExternalInterface != null) {
+      externalInterface = agentExternalInterface;
+    };
   };
 
   assertions = [
     {
-      assertion = !agentEnabled || agentExternalInterface != null;
+      assertion = agentExternalInterface != null;
       message = "nixos-agent container host requires hostMeta.networking.externalInterface.";
     }
   ];
@@ -155,7 +150,7 @@ in
   systemd.timers."nixos-upgrade".enable = lib.mkForce false;
 
   # 启用 nixos-container 容器支持（当前仅 nixos-agent 使用）。
-  boot.enableContainers = lib.mkIf agentEnabled true;
+  boot.enableContainers = true;
 
   # Why: VPS 上的交互入口主要是 SSH。默认 Linger=no 时，第一次 SSH 登录会冷启动
   # `systemd --user`，而 zsh 的 .zshenv 会立刻 source Home Manager 生成的
@@ -175,7 +170,7 @@ in
   # 容器通过 deploy-rs 独立部署，但 sops 解密发生在容器激活阶段（非构建阶段）。
   # 若容器内无 age 私钥，所有 sops secret（GITHUB_TOKEN 等）解密失败。
   # bind mount 让宿主机和容器共用同一份 age key，无需在容器内手动维护。
-  containers.nixos-agent = lib.mkIf agentEnabled {
+  containers.nixos-agent = {
     bindMounts."sops-age-key" = {
       hostPath = "/home/luck/.config/sops/age/keys.txt";
       mountPoint = "/home/luck/.config/sops/age/keys.txt";
