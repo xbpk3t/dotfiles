@@ -13,7 +13,6 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    # https://mynixos.com/home-manager/options/services.kdeconnect
     services.kdeconnect = {
       enable = true;
       indicator = true;

@@ -68,10 +68,6 @@ in
   # nixpkgs.config 已上移到 outputs/default.nix 的 pkgs 构造阶段，
   # 以兼容 home-manager.useGlobalPkgs + readOnlyPkgs 模式并消除评估警告。
 
-  # nixos-cli - Modern NixOS management CLI
-  # https://github.com/nix-community/nixos-cli
-  # https://nix-community.github.io/nixos-cli/installation.html
-  # Note: nixos-cli is installed as a package (see environment.systemPackages above)
   # It provides commands like: nixos build, nixos switch, nixos test, etc.
   # Configuration is done via environment variables and config files
   # NIXOS_CONFIG="$HOME/Desktop/dotfiles" nixos apply
@@ -171,4 +167,13 @@ in
   security.sudo.extraConfig = ''
     Defaults env_keep += "NO_COLOR"
   '';
+
+  programs.nix-ld = {
+    enable = true;
+    libraries = with pkgs; [
+      stdenv.cc.cc
+      openssl
+      zlib
+    ];
+  };
 }

@@ -1,6 +1,4 @@
 ---
-# https://github.com/myoung34/docker-github-actions-runner
-#
 # 使用 myoung34/github-runner 镜像，通过 PAT（ACCESS_TOKEN）自动管理
 # short-lived runner token，无需手动注册/轮换。
 #

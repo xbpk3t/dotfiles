@@ -13,7 +13,7 @@
     # gpg agent with pinentry
     gnupg.agent = {
       enable = true;
-      pinentryPackage = pkgs.pinentry-qt;
+      # pinentryPackage = pkgs.pinentry-qt;
       # default-cache-ttl in seconds (4 hours)
       settings.default-cache-ttl = 4 * 60 * 60;
       enableSSHSupport = false;

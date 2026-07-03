@@ -34,7 +34,6 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    # https://mynixos.com/home-manager/options/services.unison
     services.unison = {
       # 注意只支持linux
       enable = isLinux;

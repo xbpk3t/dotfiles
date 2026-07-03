@@ -65,11 +65,7 @@ in
     #
     # Q: Why not change the upstream module?
     # A: Keep a local drop-in here to avoid forking; adjust if upstream adds this.
-    #
-    # Ref:
-    # https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/services/networking/sing-box.nix
-    #
-    # github.com/NixOS/nixpkgs/blob/master/nixos/tests/sing-box.nix/
+
     #
     # 以上这些问题都可以通过查看以上源码中，有所体现
     systemd.services.sing-box = {

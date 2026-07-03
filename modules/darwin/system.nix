@@ -58,7 +58,6 @@ in
       };
 
       # Global settings
-      # https://mynixos.com/nix-darwin/options/system.defaults.NSGlobalDomain
       NSGlobalDomain = {
         # Time configuration
         AppleICUForce24HourTime = true;
@@ -99,7 +98,6 @@ in
         NSAutomaticQuoteSubstitutionEnabled = false;
       };
 
-      # https://mynixos.com/nix-darwin/option/system.defaults.CustomUserPreferences
       CustomUserPreferences = {
         # Date format (Language -> Date and number formats)
         # 默认 Date format 是 Year/Month-Day，这里修改为 Year-Month-Day
@@ -139,7 +137,6 @@ in
         #        };
       };
 
-      # https://mynixos.com/nix-darwin/option/system.defaults.CustomSystemPreferences
       CustomSystemPreferences = {
         ".GlobalPreferences" = {
           # 注销（0s表示自动注销）

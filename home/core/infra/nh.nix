@@ -27,8 +27,6 @@ in
 
       # 云平台隧道工具
       cloudflared
-      # HTTP CLI
-      httpie
     ];
 
     # 把这些支持 HM 的 Nix 相关工具放在这里，以便 Darwin 和 NixOS 复用。

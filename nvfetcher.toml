@@ -4,7 +4,6 @@
 # 当前先只接入适合”直接消费 release artifact”的 package：
 # - 维护成本最低
 # - 不会把 builder 选型和 source 更新流程耦合在一起
-# https://github.com/iynaix/dotfiles/blob/main/nvfetcher.toml
 
 [chrome-devtools-mcp]
 # 这里用 `gh release view` 读取最新 release tag，再在 nvfetcher 层剥掉 tag 前缀。
