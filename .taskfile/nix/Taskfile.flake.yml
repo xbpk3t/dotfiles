@@ -13,7 +13,8 @@ tasks:
     cmds:
       - gum confirm "是否已经在flake.nix移除指定flake包了?"
       - nix flake lock
-      - nix flake check --no-build --impure
+      # nix flake check 不可用：macOS 上评估 x86_64-linux nixosConfigurations 会因缺少 store path 失败
+      # 验证用 task nix:test:quick（仅评估当前 host）
       - nix flake metadata
 
   update:
