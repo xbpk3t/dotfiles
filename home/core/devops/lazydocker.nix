@@ -1,8 +1,5 @@
 { lib, ... }:
 {
-  # https://github.com/jesseduffield/lazydocker/issues/4#issuecomment-3367900538
-  # https://github.com/luisnquin/nixos-config/blob/main/home/modules/programs/development/docker/lazydocker.nix
-  # https://github.com/jesseduffield/lazydocker/blob/master/docs/Config.md
   programs.lazydocker = {
     enable = true;
     settings = {
