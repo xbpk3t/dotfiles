@@ -1228,10 +1228,6 @@ in
 
       duckdb = pkgs.yaziPlugins.duckdb;
 
-      # https://github.com/orhnk/system-clipboard.yazi
-      # https://github.com/Slackadays/ClipBoard
-      # Yazi 自己默认只有「内部剪切板」，不会自动往系统剪贴板里写东西。
-      # Yazi 里按 y / d 这些，是往 Yazi 内部的 yank 缓冲区 里放文件，用来在 Yazi 里 p 粘贴移动 / 复制。但是默认情况下，你 yank 了文件之后，是不能直接在浏览器、编辑器里 Ctrl+V 出路径的——那是“系统剪贴板”的事。
       # 之所以使用 system-clipboard.yazi
       # 用的是 cb 这个跨平台 clipboard 工具，所以理论上 Linux / macOS / Windows 统一一套调用方式，不用管 X11 / Wayland / macOS 命令差异。复制的是 文件路径传给 cb，然后由 Clipboard 这个程序负责和系统剪贴板交互，你也可以借它的历史、多剪贴板等高级功能（取决于你怎么用 cb）。
       wl-clipboard = pkgs.yaziPlugins.wl-clipboard;

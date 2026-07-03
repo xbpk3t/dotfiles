@@ -89,8 +89,6 @@ in
           default_tools_approval_mode = "approve";
         };
 
-        # https://github.com/epiral/bb-browser
-        # bb-browser: 复用真实 Chrome 登录态的浏览器 MCP。
         # 这次选择它，不是因为它比 skill“更酷”，而是因为浏览器能力更适合作为 MCP 能力层接入。
         # upstream README 直接给出了 MCP 用法：`npx -y bb-browser --mcp`。
         # 与 chrome-devtools 的边界：

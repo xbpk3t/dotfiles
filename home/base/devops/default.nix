@@ -85,8 +85,6 @@
 
       # static file server
       # https://github.com/sigoden/dufs
-      # https://github.com/cnphpbb/deploy.stack/blob/main/dufs/config/config.yaml ???
-      # tags(desc): 文件服务 > 静态分发 > HTTP
       dufs
     ];
 

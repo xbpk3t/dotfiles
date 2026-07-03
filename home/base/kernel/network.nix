@@ -93,9 +93,6 @@
       # vidir
       moreutils
 
-      # https://github.com/zachwilke/netops
-
-      # https://mynixos.com/nixpkgs/package/netcat
       #
       # 类似 nc -zv dokploy-postgres 5432 这种命令
       #
