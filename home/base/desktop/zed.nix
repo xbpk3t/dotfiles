@@ -80,8 +80,9 @@ in
   config = lib.mkIf cfg.enable {
 
     programs.zed-editor = {
+      # 因为 nixpkgs 的 zed 版本过于落后，所以darwin直接走brew
       enable = true;
-      package = pkgs.zed-editor;
+      package = lib.mkIf pkgs.stdenv.isLinux pkgs.zed-editor;
 
       extraPackages = lspPackages;
 

@@ -39,7 +39,8 @@ in
       "alfred"
       "hammerspoon"
 
-      "goland"
+      # "goland"
+      "zed"
 
       "wechat"
       "wechatwork"
