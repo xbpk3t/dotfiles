@@ -4,7 +4,6 @@
 #   https://www.freedesktop.org/wiki/Specifications/
 {
   config,
-  pkgs,
   editorMeta,
   ...
 }:

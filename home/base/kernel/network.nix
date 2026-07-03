@@ -126,7 +126,6 @@
 
       impala
 
-
       # - 重点：更接近多数 Linux 发行版里常见的 “nc” 行为与参数习惯（脚本兼容性通常更稳）
       # - 支持常见 TCP/UDP、端口扫描(-z)、代理(-x/-X)、UNIX socket(-U) 等
       # - 一般不主打/不提供内置 TLS（需要 TLS 时另用 openssl s_client 或改用 LibreSSL 版 netcat）
