@@ -21,8 +21,6 @@
   # Note that changes made in this way will be discarded when switching configurations.
   environment.etc.hosts.mode = "0644";
 
-  # PLAN[2026-01-20]: https://github.com/kaseiwang/flakes/blob/master/nixos/n3160/networking.nix#L294
-  #
   # https://mynixos.com/nixpkgs/options/services.hostapd
   # services.hostapd
   # services.kaseinet

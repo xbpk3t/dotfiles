@@ -1,8 +1,6 @@
 { pkgs, ... }:
 {
 
-  # https://github.com/max-baz/dotfiles/blob/main/modules/common/helix.nix
-  # https://github.com/TheMaxMur/NixOS-Configuration/blob/master/home/modules/helix/default.nix
   programs.helix = {
     enable = true;
     defaultEditor = true;

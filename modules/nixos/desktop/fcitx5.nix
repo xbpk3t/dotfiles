@@ -9,14 +9,6 @@
 
   # [fcitx5 settings](https://gist.github.com/ktpss95112/8c0b79a8f82058b89633a4fd1d3e9fa4)
 
-  # https://github.com/Ev357/.dotfiles/blob/main/modules/fcitx5/settings.nix 我的配置基本上就是从这个复制过来的
-
-  # https://github.com/kyehn/kudzu/blob/main/nixos/modules/fcitx5.nix
-  # https://github.com/Sittymin/nixos_config/blob/main/system/config/locale.nix
-  # https://github.com/chenlijun99/dotfiles/blob/master/src/nixos/users/common/lijun-base/fcitx5.nix 目前找到最全面的 fcitx5 的 nix 配置
-  # https://github.com/ChUrl/flake-nixinator/blob/master/home/modules/fcitx/default.nix
-  # https://github.com/yutkat/dotfiles/tree/main/.config/fcitx5/conf
-
   i18n.inputMethod = {
     enable = true;
     type = "fcitx5";

@@ -9,14 +9,7 @@ let
 in
 {
   # [Sing-box realip配置方案 - 开发调优 - LINUX DO](https://linux.do/t/topic/175470)
-  # https://github.com/MetaCubeX/meta-rules-dat
-  # [最好用的 sing-box 一键安装脚本 - 233Boy](https://233boy.com/sing-box/sing-box-script/)
   # https://linux.do/t/topic/1146113/5
-
-  # https://github.com/shuritch/nixos/blob/main/src/modules/core/services/other/sing-box.nix
-  # https://github.com/nukdokplex/ncaa/blob/master/nixos-modules/sing-box-client.nix
-  # https://github.com/ourgal/snowfall/blob/main/lib/sing-box/default.nix
-  # https://github.com/kaseiwang/flakes/blob/master/nixos/n3160/networking.nix#L294
 
   # 注意
   # 1、未配置

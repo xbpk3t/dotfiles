@@ -48,7 +48,6 @@ let
   extraRuleSets =
     if enableRuleSetExtras then
       [
-        # https://github.com/xmdhs/sing-box-ruleset
         # AdGuard 官方提供了原始的 AdGuard DNS Filter（简化域名过滤列表），用于 DNS 级广告和跟踪阻挡。
         # sing-box 官方不支持直接加载 AdGuard 的 txt 格式，需要先用 sing-box 工具转换为二进制 .srs 格式。因此，没有 SagerNet/sing-box 官方提供的预转换 .srs 文件。
         {
