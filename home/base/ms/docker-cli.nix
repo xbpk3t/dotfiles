@@ -8,8 +8,9 @@
     #  - detachKeys — 默认 ctrl-p,ctrl-q 已经够用，除非你遇到快捷键冲突（比如 tmux 里），否则不需要改。
     #  - credHelpers — 你已经用了 credsStore = "osxkeychain"，它会统一处理所有 registry 的凭证。credHelpers 只在你需要按 registry 用不同 helper 时才需要（比如 AWS ECR 用 ecr-login），否则多余。
     settings = {
-      # 保持 currentContext 为 colima（Colima 启动时会自动设置，但声明式更保险）
-      currentContext = "colima";
+      # Colima 模块（services.colima）在 active profile 存在时，
+      # 会自动设置 programs.docker-cli.settings.currentContext = "colima"。
+      # 此处无需重复声明。
 
       # 如果你有其他全局配置，也可以加在这里
       # 例如：
