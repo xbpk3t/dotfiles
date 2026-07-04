@@ -1296,44 +1296,58 @@ in
 {
   options.modules.desktop.zed = {
     enable = lib.mkEnableOption "Enable zed (client)";
+    # 远程/headless 模式（用于 headless server，无 GUI）
+    remote.enable = lib.mkEnableOption "Enable zed remote server (headless)";
   };
 
-  config = lib.mkIf cfg.enable {
+  config = lib.mkMerge [
+    (lib.mkIf cfg.enable {
 
-    programs.zed-editor = {
-      # 因为 nixpkgs 的 zed 版本过于落后，所以darwin直接走brew
-      enable = true;
-      package = lib.mkIf pkgs.stdenv.isLinux pkgs.zed-editor;
+      programs.zed-editor = {
+        # 因为 nixpkgs 的 zed 版本过于落后，所以darwin直接走brew
+        enable = true;
+        package = lib.mkIf pkgs.stdenv.isLinux pkgs.zed-editor;
 
-      extraPackages = lspPackages;
+        extraPackages = lspPackages;
 
-      # 配置由 home.file 管理（Nix store symlink → immutable），
-      # 不清空 userSettings 会导致 zed 模块与 home.file 争管同一文件。
-      userSettings = { };
-      userKeymaps = [ ];
-      userTasks = [ ];
-    };
+        # 配置由 home.file 管理（Nix store symlink → immutable），
+        # 不清空 userSettings 会导致 zed 模块与 home.file 争管同一文件。
+        userSettings = { };
+        userKeymaps = [ ];
+        userTasks = [ ];
+      };
 
-    # 用 home.file 做 immutable symlink，避免 Zed 直接改写导致 drift
-    # 所有配置需改 zed.nix → deploy 才能生效，不再通过 Zed GUI 修改
-    home.file = {
-      ".config/zed/settings.json" = {
-        text = builtins.toJSON settings;
-        force = true;
+      # 用 home.file 做 immutable symlink，避免 Zed 直接改写导致 drift
+      # 所有配置需改 zed.nix → deploy 才能生效，不再通过 Zed GUI 修改
+      home.file = {
+        ".config/zed/settings.json" = {
+          text = builtins.toJSON settings;
+          force = true;
+        };
+        ".config/zed/keymaps.json" = {
+          text = builtins.toJSON keymaps;
+          force = true;
+        };
+        ".config/zed/tasks.json" = {
+          text = builtins.toJSON tasks;
+          force = true;
+        };
+        # theme 独立文件，Zed 会自动加载 ~/.config/zed/themes/*.json
+        ".config/zed/themes/monokai.json" = {
+          text = builtins.toJSON monokaiTheme;
+          force = true;
+        };
       };
-      ".config/zed/keymaps.json" = {
-        text = builtins.toJSON keymaps;
-        force = true;
+    })
+
+    (lib.mkIf cfg.remote.enable {
+      # 远程/headless 模式：提供 LSP 工具链 + Zed remote server 二进制路径
+      home.packages = lspPackages;
+
+      home.file.".zed_server" = {
+        source = "${pkgs.zed-editor.remote_server}/bin";
+        recursive = true;
       };
-      ".config/zed/tasks.json" = {
-        text = builtins.toJSON tasks;
-        force = true;
-      };
-      # theme 独立文件，Zed 会自动加载 ~/.config/zed/themes/*.json
-      ".config/zed/themes/monokai.json" = {
-        text = builtins.toJSON monokaiTheme;
-        force = true;
-      };
-    };
-  };
+    })
+  ];
 }

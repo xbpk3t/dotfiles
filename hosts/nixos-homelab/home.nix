@@ -5,8 +5,10 @@ _: {
       networking.enable = true;
     };
 
-    extra = {
-      zed-remote.enable = true;
+    desktop = {
+      zed = {
+        remote.enable = true;
+      };
     };
 
     AI = {
