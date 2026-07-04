@@ -4,6 +4,12 @@
   ...
 }:
 {
+  # Nix LSP 包，供 zed/helix 等 IDE 使用
+  modules.langs.lsp.packages = with pkgs; [
+    nil
+    nixd
+  ];
+
   # Nix/NixOS 开发与调试常用 CLI
   home.packages =
     with pkgs;

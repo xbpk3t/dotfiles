@@ -1,7 +1,7 @@
 { mail, ... }:
 {
   programs.gpg = {
-    enable = false;
+    enable = true;
     settings = {
       # 基本设置
       default-key = mail;
@@ -39,11 +39,11 @@
     };
   };
 
-  services.gpg-agent = {
-    enable = false;
-    enableSshSupport = true;
-    defaultCacheTtl = 1800;
-    maxCacheTtl = 7200;
-    pinentry.package = null; # 使用系统默认的 pinentry
-  };
+  # services.gpg-agent = {
+  #   enable = false;
+  #   enableSshSupport = true;
+  #   defaultCacheTtl = 1800;
+  #   maxCacheTtl = 7200;
+  #   pinentry.package = null; # 使用系统默认的 pinentry
+  # };
 }

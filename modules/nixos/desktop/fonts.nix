@@ -34,11 +34,11 @@
 
       # Chinese fonts for CJK support
       # 苹果苹方
-      apple-pingfang
+      # apple-pingfang
       # 思源黑体
-      noto-fonts-cjk-sans
+      # noto-fonts-cjk-sans
       # 思源宋体
-      noto-fonts-cjk-serif
+      # noto-fonts-cjk-serif
       # Adobe 思源黑体
       source-han-sans
       lxgw-neoxihei

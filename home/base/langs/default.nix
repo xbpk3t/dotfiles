@@ -6,9 +6,17 @@
 {
   imports = mylib.scanPaths ./.;
 
-  home.packages = with pkgs; [
-    lua
-    # stylua config: managed by treefmt (home/base/langs/treefmt.nix)
-    stylua
-  ];
+  home.packages =
+    with pkgs;
+    [
+
+      gcc
+
+      cmake
+    ]
+    ++ [
+      lua
+      # stylua config: managed by treefmt (home/base/langs/treefmt.nix)
+      stylua
+    ];
 }

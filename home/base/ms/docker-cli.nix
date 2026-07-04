@@ -1,5 +1,10 @@
 { pkgs, config, ... }:
 {
+  # Docker LSP 包，供 zed/helix 等 IDE 使用
+  modules.langs.lsp.packages = with pkgs; [
+    dockerfile-language-server
+  ];
+
   # Colima 本身负责创建和管理 docker context，这里只负责声明式启用默认 profile。
   programs.docker-cli = {
     enable = true;

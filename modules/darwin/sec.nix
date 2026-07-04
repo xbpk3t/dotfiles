@@ -26,12 +26,12 @@ _: {
   };
 
   # GPG configuration
-  programs.gnupg.agent = {
-    enable = true;
-    enableSSHSupport = true;
-    # Note: pinentryPackage is not available on nix-darwin
-    # Use pinentryFlavor instead or configure manually
-  };
+  # programs.gnupg.agent = {
+  #   enable = true;
+  #   enableSSHSupport = true;
+  #   # Note: pinentryPackage is not available on nix-darwin
+  #   # Use pinentryFlavor instead or configure manually
+  # };
 
   # Note: System defaults are managed in system.nix to avoid duplication
 }

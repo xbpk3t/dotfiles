@@ -11,6 +11,6 @@
     openssl
     age
     sops
-    gnupg
+
   ];
 }

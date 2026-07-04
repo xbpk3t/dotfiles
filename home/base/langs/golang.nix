@@ -1,7 +1,6 @@
 {
   pkgs,
   config,
-  lib,
   ...
 }:
 {
@@ -11,7 +10,7 @@
       # 分类1：Go 核心工具链与语言服务
       go
       gotools
-      (lib.lowPrio gopls)
+      # (lib.lowPrio gopls)
     ]
     ++ [
       # 分类2：代码质量与静态分析
@@ -33,9 +32,6 @@
       # 分类3：代码生成与工程脚手架
       # tags(desc): 代码生成 > Protobuf > 序列化
       protoc-gen-go
-
-      # tags(desc): 代码生成 > gRPC > Protobuf
-      protoc-gen-go-grpc
 
       # tags(desc): 工程脚手架 > CLI框架 > 代码生成
       cobra-cli
