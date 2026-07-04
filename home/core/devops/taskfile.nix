@@ -33,6 +33,7 @@
     };
 
     packages = with pkgs; [
+      gnumake
       go-task
     ];
 

@@ -1344,10 +1344,10 @@ in
       # 远程/headless 模式：提供 LSP 工具链 + Zed remote server 二进制路径
       home.packages = lspPackages;
 
-      home.file.".zed_server" = {
-        source = "${pkgs.zed-editor.remote_server}/bin";
-        recursive = true;
-      };
+      # home.file.".zed_server" = {
+      #   source = "${pkgs.zed-editor.remote_server}/bin";
+      #   recursive = true;
+      # };
     })
   ];
 }

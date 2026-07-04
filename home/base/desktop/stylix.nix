@@ -72,24 +72,24 @@ in
         };
 
         # UI文本 - 使用支持中文的字体
-        sansSerif = {
-          # 苹果苹方作为默认 UI 字体
-          package = pkgs.apple-pingfang;
-          name = "PingFang SC";
-        };
+        # sansSerif = {
+        #   # 苹果苹方作为默认 UI 字体
+        #   package = pkgs.apple-pingfang;
+        #   name = "PingFang SC";
+        # };
 
-        # 正式文本（比如浏览器文本）- 使用支持中文的字体
-        serif = {
-          package = pkgs.noto-fonts-cjk-serif;
-          # Noto Serif CJK 作为 fallback
-          name = "Noto Serif CJK SC";
-        };
+        # # 正式文本（比如浏览器文本）- 使用支持中文的字体
+        # serif = {
+        #   package = pkgs.noto-fonts-cjk-serif;
+        #   # Noto Serif CJK 作为 fallback
+        #   name = "Noto Serif CJK SC";
+        # };
 
-        # Emoji font - using noto-fonts-color-emoji for better compatibility
-        emoji = {
-          package = pkgs.noto-fonts-color-emoji;
-          name = "Noto Color Emoji";
-        };
+        # # Emoji font - using noto-fonts-color-emoji for better compatibility
+        # emoji = {
+        #   package = pkgs.noto-fonts-color-emoji;
+        #   name = "Noto Color Emoji";
+        # };
 
         sizes = {
           # GUI 应用（Qt/GTK）+ 部分工具firefox, thunderbird, vscode, jetbrains.*, discord, slack, spotify

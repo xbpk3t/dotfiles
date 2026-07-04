@@ -20,16 +20,11 @@
 
     ruff
 
-    # 代码质量和分析
-    # tags(desc): 代码质量 > Shell静态检查 > Lint
-    shellcheck
-    shfmt
     # tags(desc): 代码质量 > 拼写检查 > Lint
     typos
     # tags(desc): 代码质量 > YAML规范 > Lint
     yamllint
     # tags(desc): 代码质量 > Markdown规范 > Lint
-
   ];
 
   # Deploy linter configs globally from .github/linters/
