@@ -1,5 +1,10 @@
 { pkgs, ... }:
 {
+  # Terraform LSP 包，供 zed/helix 等 IDE 使用
+  modules.langs.lsp.packages = with pkgs; [
+    terraform-ls
+  ];
+
   home.packages = with pkgs; [
     # CICD
     # ansible  # Temporarily disabled due to hash mismatch in ncclient dependency

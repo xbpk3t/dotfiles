@@ -47,8 +47,7 @@
       # tags(desc): 可视化 > 图绘制 > 图结构
       graphviz
 
-    ]
-    ++ [ gum ];
+    ];
 
   home.sessionVariables = {
     TAILSCALE_API_KEY = "$(cat ${config.sops.secrets.TAILSCALE_API_KEY.path})";

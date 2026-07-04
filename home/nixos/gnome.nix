@@ -16,7 +16,7 @@ in
     services.kdeconnect = {
       enable = true;
       indicator = true;
-      package = pkgs.gnomeExtensions.gsconnect;
+      # package = pkgs.gnomeExtensions.gsconnect;
     };
 
     # XDG portal 只保留 GNOME/GTK，避免与其他 compositor portal 冲突

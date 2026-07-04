@@ -6,10 +6,6 @@
 }:
 let
   lspPkgs = with pkgs; [
-    # Nix
-    nixd
-    nil
-
     # Rust
     rust-analyzer
     rustfmt
@@ -29,15 +25,6 @@ let
 
     # Bash
     bash-language-server
-
-    # Docker
-    dockerfile-language-server
-
-    # Terraform
-    terraform-ls
-
-    # Helm
-    helm-ls
 
     # Lua
     lua-language-server

@@ -7,5 +7,8 @@
     # gRPC API 调试 CLI
     grpcurl
     buf
+
+    # tags(desc): 代码生成 > gRPC > Protobuf
+    protoc-gen-go-grpc
   ];
 }
