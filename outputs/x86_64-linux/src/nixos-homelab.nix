@@ -33,7 +33,6 @@ let
       "home/core"
       "home/base"
       "home/nixos"
-      "home/extra/zed-remote.nix"
     ];
   };
 
