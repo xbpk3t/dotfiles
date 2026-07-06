@@ -11,6 +11,8 @@
     # 在上游修复或锁版本回退前，先禁用 direnv / nix-direnv，避免 macos-ws deploy 失败。
     # direnv
     devbox
+
+    devenv
   ];
 
   # why: 见上面的 Darwin 构建回归说明；暂时整块禁用，避免 HM 拉入 pkgs.direnv。
