@@ -36,10 +36,6 @@
       # tags(desc): 工程脚手架 > CLI框架 > 代码生成
       cobra-cli
 
-      # = swaggo/swag
-      # tags(desc): 代码生成 > API文档 > OpenAPI
-      go-swag
-
       # tags(desc): 测试工具 > Mock生成 > 代码生成
       go-mockery
 
