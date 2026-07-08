@@ -76,6 +76,7 @@ let
     // {
       inherit hostMeta;
       userMeta = hostMeta.user;
+      mail = hostMeta.user.mail or null;
       timeMeta = hostMeta.time;
       editorMeta = hostMeta.editor;
       stateVersion = hostMeta.stateVersion or "24.11";

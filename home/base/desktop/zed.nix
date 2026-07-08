@@ -113,6 +113,11 @@ let
         "jsonc"
         "*.code-snippets"
       ];
+      "Ini" = [
+        ".env"
+        ".env.*"
+        "*.env"
+      ];
     };
 
     # 直接使用stylix的theme
@@ -140,6 +145,10 @@ let
     buffer_line_height = "standard";
     # Agent Panel 字体大小
     agent_buffer_font_size = 13;
+
+    # Markdown Preview 字体大小（Zed 1.10.0 新增），独立于编辑区字体
+    # [2026-07-09] 保持与 buffer_font_size 一致
+    markdown_preview_font_size = 13;
 
     # 禁用OTel
     telemetry = {
@@ -448,7 +457,10 @@ let
     git = {
       git_gutter = "hide";
       inline_blame = {
-        enabled = false;
+        enabled = true;
+        # 显示在底部状态栏，不在代码行内，不干扰编辑区
+        # （Zed 1.10.0 新增 location 选项）
+        location = "status_bar";
       };
       branch_picker = {
         show_author_name = true;
@@ -526,6 +538,15 @@ let
 
     # https://zed.dev/docs/languages
     languages = {
+      Markdown = {
+        # 默认 Zed 用 tree-sitter 做 outline（document_symbols: off），
+        # 但 tree-sitter 的 Markdown parser 会把 fenced code block 内的 # heading
+        # 也识别为 atx_heading 节点，导致 Outline Panel 出现不应有的条目。
+        # 改用 Marksman LSP 的 textDocument/documentSymbol 做 outline，Marksman
+        # 会正确区分 code block 内容与文档结构。
+        document_symbols = "on";
+      };
+
       Nix = {
         language_servers = [
           "nil"
@@ -666,6 +687,12 @@ let
       };
 
       TypeScript = {
+        # 走 LSP（vtsls/typescript-language-server）的 textDocument/documentSymbol
+        # 可以获得更丰富的 outline 信息（interface 展开、type 别名、模块导出等），
+        # 比默认的 tree-sitter 查询更完整。
+        document_symbols = "on";
+        # 显式声明，覆盖 Zed 1.10.0 默认禁用的 format_on_save
+        format_on_save = "on";
         inlay_hints = {
           enabled = true;
           show_parameter_hints = false;
@@ -741,7 +768,6 @@ let
         ctrl-l = "workspace::ActivatePaneRight";
         ctrl-k = "workspace::ActivatePaneUp";
         ctrl-j = "workspace::ActivatePaneDown";
-        "space e" = "pane::RevealInProjectPanel";
       };
     }
     {
@@ -764,7 +790,6 @@ let
         c = "project_panel::Copy";
         p = "project_panel::Paste";
         q = "workspace::ToggleRightDock";
-        "space e" = "workspace::ToggleRightDock";
         ctrl-h = "workspace::ActivatePaneLeft";
         ctrl-l = "workspace::ActivatePaneRight";
         ctrl-k = "workspace::ActivatePaneUp";
@@ -786,18 +811,6 @@ let
         cmd-b = "workspace::ToggleRightDock";
       };
     }
-    {
-      context = "EmptyPane || SharedScreen";
-      bindings = {
-        "space r t" = [
-          "editor::SpawnNearestTask"
-          {
-            reveal = "no_focus";
-          }
-        ];
-      };
-    }
-
     # 禁用 CMD +/- 字体缩放快捷键（容易误触）
     {
       context = "Workspace";
@@ -1171,8 +1184,10 @@ in
     (lib.mkIf cfg.enable {
 
       programs.zed-editor = {
-        # 因为 nixpkgs 的 zed 版本过于落后，所以darwin直接走brew
-        enable = true;
+        # macOS 上 nixpkgs 的 zed 版本过于落后且与 brew cask 冲突，
+        # 所以 macOS 不走 HM 管理 app bundle（仅管理配置文件，由 home.file 提供），
+        # 直接使用 brew cask 安装的 /Applications/Zed.app
+        enable = pkgs.stdenv.isLinux;
         package = lib.mkIf pkgs.stdenv.isLinux pkgs.zed-editor;
 
         extraPackages = lspPackages;
