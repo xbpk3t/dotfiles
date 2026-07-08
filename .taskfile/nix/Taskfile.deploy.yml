@@ -47,6 +47,34 @@ tasks:
 #    cmds:
 #      - '{{.NODES_CMD}}'
 
+  vps:
+    desc: "使用 rsync + SSH 部署 nixos-vps-dev（远程 eval/build，Mac 零负载）"
+    summary: "task nix:deploy:vps"
+    dir: '{{.USER_WORKING_DIR}}'
+    vars:
+      VPS_HOST: "nixos-vps-dev"
+      VPS_IP: '{{.VPS_IP | default "192.129.183.26"}}'
+      VPS_USER: '{{.VPS_USER | default "root"}}'
+      VPS_DIR: '{{.VPS_DIR | default "~/dotfiles"}}'
+      FLAKE_ATTR: '{{.FLAKE_ATTR | default ".#nixos-vps-dev"}}'
+    cmds:
+      - |
+        echo "==> rsync dotfiles to $VPS_USER@$VPS_IP:$VPS_DIR ..."
+        rsync -avz --delete \
+          --exclude='result' \
+          --exclude='.direnv' \
+          "{{.USER_WORKING_DIR}}/" \
+          "$VPS_USER@$VPS_IP:$VPS_DIR/"
+      - |
+        echo "==> chown + nixos-rebuild switch on VPS ..."
+        ssh -t "$VPS_USER@$VPS_IP" \
+          "chown -R $VPS_USER:$VPS_USER $VPS_DIR && \
+           cd $VPS_DIR && \
+           nixos-rebuild switch --flake $FLAKE_ATTR --impure"
+      - |
+        echo "==> Done. VPS current generation:"
+        ssh "$VPS_USER@$VPS_IP" "nixos-version && uptime"
+
 # [2026-04-22] 注释掉，因为 default task 本身支持的 多选就已经覆盖掉这个单选profile 的需求了
 #  profile:
 #    desc: "deploy-rs 部署指定 profile"

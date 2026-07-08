@@ -33,6 +33,7 @@
   home.packages =
     with pkgs;
     [
+      docker
       # 否则会报 osxkeychain not found
       docker-credential-helpers
     ]
