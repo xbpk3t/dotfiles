@@ -13,5 +13,7 @@ let
 in
 {
   # VPS 专用：根据 inventory.hardware 动态生成 sysctl
-  boot.kernel.sysctl = sysctl;
+  # mkForce 确保覆盖 nixpkgs 默认 sysctl（如 fs.inotify.max_user_instances），
+  # 避免在容器等叠加上下文中出现 "defined multiple times" 错误。
+  boot.kernel.sysctl = lib.mkForce sysctl;
 }

@@ -1,5 +1,12 @@
 ---
-
+# ℹ️ 用途：AxonHub 是主 LLM 网关，统一所有 client 的路由入口。
+#   client → api.lucc.dev/v1 → Caddy → AxonHub → 各个 upstream provider
+#
+# 同文件包含：9router sidecar（仅用于 ds4f 的 proxy pool 路由转发）。
+#   架构：AxonHub → http://9router:20128/v1 → 9router → proxy pool → OpenCode Zen
+#   分离理由：只有 ds4f 走 proxy pool，其他 model 直连不走 9router。
+#   9router 不暴露公网（127.0.0.1:20228），Dashboard 通过 SSH tunnel 访问。
+#   Docker 内部 DNS 解析 9router 主机名，无需 TAILSCALE_IP / edge network。
 
 services:
   axonhub:
@@ -69,6 +76,55 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+
+  # 9router sidecar — 仅为 ds4f 提供 proxy pool 转发能力
+  #
+  # 架构：AxonHub → http://9router:20128/v1 → 9router → proxy pool → OpenCode Zen
+  # 网络：只绑 127.0.0.1，仅用于 SSH tunnel 后本机调 Dashboard 配 proxy pool。
+  #       9router 和 AxonHub 在同一个 Docker internal network 内，直接 DNS 解析。
+  #
+  # Dashboard 访问：
+  #   ssh -L 20228:localhost:20228 nixos-vps-dev
+  #   然后浏览器打开 http://localhost:20228
+  #
+  # 使用方法：
+  #   1. 浏览器连 Dashboard → Proxy Pools → 新建 pool（填入你的代理列表）
+  #   2. Providers → OpenCode Zen → 绑定这个 pool
+  #   3. AxonHub 新建 channel，type=OpenAI，base_url=http://9router:20128/v1
+  #   4. AxonHub 把 ds4f 模型映射到这个 channel
+  #   5. 其他 channel（pro/gpt-5.5 等）直连 upstream，不走 9router
+  9router:
+    image: decolua/9router:latest
+    container_name: 9router
+    restart: unless-stopped
+    # 仅本地暴露，Dashboard 通过 SSH tunnel 访问
+    ports:
+      - "127.0.0.1:20228:20128"
+    volumes:
+      - 9router-data:/app/data
+    environment:
+      DATA_DIR: /app/data
+      PORT: "20128"
+      HOSTNAME: "0.0.0.0"
+      NODE_ENV: production
+
+      JWT_SECRET: ${JWT_SECRET:-change-me-to-a-long-random-secret}
+      INITIAL_PASSWORD: ${DEFAULT_SK}
+      API_KEY_SECRET: ${API_KEY_SECRET:-endpoint-proxy-api-key-secret}
+      MACHINE_ID_SALT: ${MACHINE_ID_SALT:-endpoint-proxy-salt}
+      REQUIRE_API_KEY: true
+      AUTH_COOKIE_SECURE: false
+      ENABLE_REQUEST_LOGS: false
+      OBSERVABILITY_ENABLED: true
+
+      BASE_URL: http://localhost:20228
+      NEXT_PUBLIC_BASE_URL: http://localhost:20228
     logging:
       driver: json-file
       options:
@@ -150,3 +206,4 @@ networks:
 volumes:
   axonhub_data:
   postgres_data:
+  9router-data:

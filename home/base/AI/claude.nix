@@ -178,16 +178,6 @@ in
             };
 
             hooks = {
-              SessionStart = [
-                {
-                  hooks = [
-                    {
-                      type = "command";
-                      command = "ccx session chain";
-                    }
-                  ];
-                }
-              ];
             };
 
             # statusLine = {

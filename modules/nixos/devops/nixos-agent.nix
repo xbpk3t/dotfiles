@@ -19,6 +19,7 @@
     specialArgs = {
       inherit mylib globals;
       inherit userMeta timeMeta stateVersion;
+      mail = userMeta.mail or null;
     };
     config = {
       # 容器使用宿主机（nixos-vps）的 pkgs → nixpkgs-stable
@@ -28,7 +29,7 @@
         inputs.sops-nix.nixosModules.sops
         (mylib.relativeToRoot "modules/nixos/kernel")
         (mylib.relativeToRoot "modules/nixos/devops/container.nix")
-        (mylib.relativeToRoot "modules/nixos/devops/fhs.nix")
+        (mylib.relativeToRoot "modules/nixos/kernel/fhs.nix")
         (mylib.relativeToRoot "secrets/default.nix")
         inputs.home-manager.nixosModules.home-manager
       ];
@@ -81,6 +82,7 @@
             editorMeta
             stateVersion
             ;
+          mail = userMeta.mail or null;
         };
         users.luck.imports =
           map mylib.relativeToRoot [
