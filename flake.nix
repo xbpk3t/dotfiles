@@ -62,6 +62,7 @@ rec {
     };
 
     llm-agents.url = "github:numtide/llm-agents.nix";
+    agent-skills.url = "github:Kyure-A/agent-skills-nix";
     mcp-servers-nix = {
       url = "github:natsukium/mcp-servers-nix";
       inputs.nixpkgs.follows = "nixpkgs-darwin";

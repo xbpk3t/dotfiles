@@ -23,8 +23,4 @@ dependencies:
       skills:
         - opencli-usage # 命令快速参考，用来插命令
         - opencli-browser # opencli browser 命令（驱动chrome做交互式操作）
-    # 本地 skills — Nix 管源码放 HOME，APM 管部署到各 target
-    - path: ~/.local/share/skills/go-pitfalls
-    - path: ~/.local/share/skills/nushell-optimize
-    - path: ~/.local/share/skills/taskfile-optimize
   claude:
