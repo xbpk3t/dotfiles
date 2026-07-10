@@ -32,6 +32,17 @@ in
     }
     (lib.mkIf cfg.enable {
       # https://x.com/yanhua1010/status/2044559129134698609
+
+      programs.agent-skills = {
+        # Claude 和 Codex 复用同一份 skills 发布管道，避免两边手工维护两套分发逻辑。
+        # 注意：这只代表"分发机制复用"，不代表"技能语义天然通用"。
+        # 像 `ce-codex` 这类 agent 绑定技能，后续应按 agent 维度拆 catalog，而不是继续共用同一 skill 集。
+        targets.claude = {
+          enable = true;
+          dest = ".claude/skills";
+          structure = "link";
+        };
+      };
       programs = {
         claude-code = {
           enable = true;
