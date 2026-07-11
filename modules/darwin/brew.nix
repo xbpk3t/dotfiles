@@ -32,6 +32,7 @@ in
     brews = [
       "fetch"
       "mole"
+      "dagu"
     ];
 
     # 以下casks根据重要性排序
@@ -43,7 +44,7 @@ in
       "zed"
 
       "wechat"
-      "wechatwork"
+      # "wechatwork"
 
       #"tailscale-app"
 
