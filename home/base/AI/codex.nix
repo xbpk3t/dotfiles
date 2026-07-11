@@ -80,7 +80,7 @@ in
         };
         # 声明式 trusted projects：避免首次进入仓库时反复询问 trust。
         projects = {
-          "${config.home.homeDirectory}/Desktop/docs/dotfiles" = {
+          "${config.home.homeDirectory}/Desktop/dotfiles" = {
             trust_level = "trusted";
           };
           "${config.home.homeDirectory}/Desktop/docs" = {

@@ -66,14 +66,19 @@ in
 
         # https://linear.app/docs/mcp
         #   Linear MCP 是远程 HTTP MCP（`https://mcp.linear.app/mcp`），走 native HTTP transport。
-        #   把 LINEAR_API_KEY 提到 home.sessionVariables 后，MCP server 子进程自动继承。
-        #   这遵循了 Nix 管理凭据的标准模式——$(cat ${config.sops.secrets.XXX.path}) 在 shell
-        #   启动时展开一次，所有子进程继承。
+        #   认证方式：使用 Bearer token + LINEAR_API_KEY，不依赖 OAuth。
+        #   Codex: bearer_token_env_var 让它读 env 发 Authorization header。
+        #   CC: headers 的 {env:...} 在运行时展开。
+        #   两边共用 home.sessionVariables 里的 LINEAR_API_KEY（sops 注入）。
         #   [2026-06-12] 使用 streamable HTTP（与 deepwiki 相同模式），零本地进程开销。
         "linear" = {
           type = "http";
           url = "https://mcp.linear.app/mcp";
           default_tools_approval_mode = "approve";
+          bearer_token_env_var = "LINEAR_API_KEY";
+          headers = {
+            Authorization = "Bearer {env:LINEAR_API_KEY}";
+          };
         };
 
         # https://docs.devin.ai/work-with-devin/deepwiki-mcp

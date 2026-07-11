@@ -33,8 +33,6 @@
       # tags(desc): 代码生成 > Protobuf > 序列化
       protoc-gen-go
 
-      # tags(desc): 工程脚手架 > CLI框架 > 代码生成
-      cobra-cli
 
       # tags(desc): 测试工具 > Mock生成 > 代码生成
       go-mockery
