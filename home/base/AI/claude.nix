@@ -269,7 +269,7 @@ in
       programs.claude-code.settings.permissions = {
         defaultMode = "plan";
         additionalDirectories = [
-          "~/Desktop/docs/dotfiles"
+          "~/Desktop/dotfiles"
           "~/Desktop/docs"
         ];
         allow = [
@@ -288,7 +288,7 @@ in
           # linear 插件：issue 管理、sprint 操作、团队协作
           "mcp__plugin_claude-code-home-manager_linear__*"
           # codegraph 插件：代码知识图谱搜索、探索、调用者分析
-          "mcp__plugin_claude-code-home-manager_codegraph__*"
+          # "mcp__plugin_claude-code-home-manager_codegraph__*"
           # context7 插件：库/框架文档查询
           "mcp__plugin_claude-code-home-manager_context7__*"
           # deepwiki 插件：公开 repo wiki 知识访问

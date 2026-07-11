@@ -18,7 +18,7 @@
       python3Packages.pre-commit-hooks
 
       # tags(desc): 代码质量 > URL提取检查 > 文本分析
-      urlscan
+      xurls
       # tags(desc): 代码质量 > 链接校验 > 文档检查
       lychee
     ]
