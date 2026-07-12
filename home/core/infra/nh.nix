@@ -15,7 +15,7 @@ in
     home.packages = with pkgs; [
       # nom
       nix-output-monitor
-      nvd
+      # nvd
       # Nix 死代码检查
       deadnix
       # [move history] 之前放在 hosts/nixos-vps，但 VPS 不需要这两个 pkg，所以放 homelab；

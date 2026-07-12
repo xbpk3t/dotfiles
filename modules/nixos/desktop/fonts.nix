@@ -42,11 +42,12 @@
       # Adobe 思源黑体
       source-han-sans
       lxgw-neoxihei
-      wqy_zenhei # 文泉驿正黑
-      wqy_microhei
+      # wqy_zenhei # 文泉驿正黑
+      # wqy_microhei
 
       # Additional fonts for better rendering
-      terminus_font
+      # terminus_font
+
       liberation_ttf
       dejavu_fonts
     ];

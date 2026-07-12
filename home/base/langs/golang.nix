@@ -33,7 +33,6 @@
       # tags(desc): 代码生成 > Protobuf > 序列化
       protoc-gen-go
 
-
       # tags(desc): 测试工具 > Mock生成 > 代码生成
       go-mockery
 
