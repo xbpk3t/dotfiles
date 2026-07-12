@@ -10,7 +10,7 @@
       # 基础工具
 
       # tags(desc): 基础工具 > Unix工具集 > 系统命令
-      coreutils
+      # coreutils
 
       # tags(desc): 基础工具 > 文件检索 > Unix
       # findutils
@@ -23,8 +23,8 @@
 
       # 其他实用工具
       # tags(desc): 基础工具 > 监控观察 > 实时刷新
-      watch
-      rsync
+      # watch
+      # rsync
 
       # 压缩工具
       ouch-rar
@@ -45,12 +45,12 @@
     ]
     ++ [
       curl
-      wget
-      screen
-      tree
+      # wget
+      # screen
+      # tree
       file
       which
-      dos2unix
+      # dos2unix
     ]
     ++ [
       shellcheck

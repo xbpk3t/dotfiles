@@ -91,7 +91,7 @@
 
       # 实用工具集（ts 等小工具）
       # vidir
-      moreutils
+      # moreutils
 
       #
       # 类似 nc -zv dokploy-postgres 5432 这种命令
@@ -118,13 +118,13 @@
       iputils
 
       nftables
-      iproute2
+      # iproute2
 
       nexttrace
 
-      ethtool
+      # ethtool
 
-      impala
+      # impala
 
       # - 重点：更接近多数 Linux 发行版里常见的 “nc” 行为与参数习惯（脚本兼容性通常更稳）
       # - 支持常见 TCP/UDP、端口扫描(-z)、代理(-x/-X)、UNIX socket(-U) 等
