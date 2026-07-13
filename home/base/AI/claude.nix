@@ -51,7 +51,6 @@ in
           agents = {
             # 本地自定义 sub-agent
             debugger = ./agents/debugger.md;
-            session-to-wiki = ./agents/session-to-wiki.md;
 
             # VoltAgent 社区 sub-agent（通过 nvfetcher 管理源码）
             python-pro = "${subagentSrc}/categories/02-language-specialists/python-pro.md";
