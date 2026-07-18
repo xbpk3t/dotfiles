@@ -1,9 +1,14 @@
 ---
 # ℹ️ 用途：AxonHub 是主 LLM 网关，统一所有 client 的路由入口。
-#   client → api.lucc.dev/v1 → Caddy → AxonHub → 各个 upstream provider
+#   client → api.lucc.dev → Caddy → AxonHub → 各个 upstream provider
 #
-# 同文件包含：9router sidecar（仅用于 ds4f 的 proxy pool 路由转发）。
-#   架构：AxonHub → http://9router:20128/v1 → 9router → proxy pool → OpenCode Zen
+# 同文件包含：
+#   9router — ds4f proxy pool 转发 sidecar（仅 127.0.0.1:20228，SSH tunnel 管理）
+#   register-lite — Grok 账号注册机（仅 127.0.0.1:8788，SSH tunnel 管理）
+#     SSH: ssh -L 8788:localhost:8788 nixos-vps-dev
+#     注册完成后在「账号池」→ 导出 CPA → cp 到 CPA/auth-dir/
+#
+# 9router 架构：AxonHub → http://9router:20128/v1 → 9router → proxy pool → OpenCode Zen
 #   分离理由：只有 ds4f 走 proxy pool，其他 model 直连不走 9router。
 #   9router 不暴露公网（127.0.0.1:20228），Dashboard 通过 SSH tunnel 访问。
 #   Docker 内部 DNS 解析 9router 主机名，无需 TAILSCALE_IP / edge network。
@@ -132,67 +137,101 @@ services:
         max-file: "5"
 
 
-#  cpa:
-#    image: eceasy/cli-proxy-api:latest
-#    container_name: cli-proxy-api
-#    ports:
-#      - "${TAILSCALE_IPV4:?TAILSCALE_IPV4 is required}:8317:8317"
-#    volumes:
-#      # 注释掉ro，为了可以在CPA面板修改后，直接同步到本地配置（符合我的本地使用需求，因为我连 ak和sk都没配置）
-#      - ./CPA/config.yaml:/CLIProxyAPI/config.yaml # :ro
-#      - ./CPA/auth-dir:/root/.cli-proxy-api
-#    restart: unless-stopped
-#    healthcheck:
-#      test:
-#        [
-#          "CMD",
-#          "wget",
-#          "--no-verbose",
-#          "--tries=1",
-#          "--spider",
-#          "http://localhost:8317/health"
-#        ]
-#      interval: 30s
-#      timeout: 10s
-#      retries: 3
-#      start_period: 20s
-#    logging:
-#      driver: json-file
-#      options:
-#        max-size: "20m"
-#        max-file: "5"
-#
-#  cpa-usage-keeper:
-#    image: ghcr.io/willxup/cpa-usage-keeper:latest
-#    container_name: cpa-usage-keeper
-#    depends_on:
-#      cpa:
-#        condition: service_started
-#    ports:
-#      - "${TAILSCALE_IPV4:?TAILSCALE_IPV4 is required}:8080:8080"
-#    environment:
-#      TZ: ${TZ:-Asia/Shanghai}
-#      CPA_BASE_URL: http://cpa:8317
-#      # Keeper 这里需要的是 management 密钥的明文，不是 bcrypt 哈希串。
-#      CPA_MANAGEMENT_KEY: ${DEFAULT_SK}
-#      REDIS_QUEUE_ADDR: cpa:8317
-#      AUTH_ENABLED: true
-#      LOGIN_PASSWORD: ${DEFAULT_SK}
-#      APP_PORT: 8080
-#      WORK_DIR: /data
-#      LOG_LEVEL: info
-#      LOG_FILE_ENABLED: true
-#      BACKUP_ENABLED: ${BACKUP_ENABLED:-true}
-#      BACKUP_INTERVAL: ${BACKUP_INTERVAL:-24h}
-#      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-7}
-#    volumes:
-#      - ./CPA/keeper-data:/data
-#    restart: unless-stopped
-#    logging:
-#      driver: json-file
-#      options:
-#        max-size: "20m"
-#        max-file: "5"
+  # ssh -L 8317:localhost:8317 nixos-vps-dev
+  # http://localhost:8317/management.html
+  cpa:
+    image: eceasy/cli-proxy-api:latest
+    container_name: cli-proxy-api
+    ports:
+      - "127.0.0.1:8317:8317"
+    volumes:
+      # 注释掉ro，为了可以在CPA面板修改后，直接同步到本地配置（符合我的本地使用需求，因为我连 ak和sk都没配置）
+      - ./CPA/config.yaml:/CLIProxyAPI/config.yaml:ro
+      - ./CPA/auth-dir:/root/.cli-proxy-api
+      - cpa_plugins:/CLIProxyAPI/plugins
+    networks:
+      - default
+      - edge
+    restart: unless-stopped
+    # Why: 复用 AxonHub 的 OOM 教训（AxonHub 曾 4.4G RAM + 3.3G swap 后崩了 dockerd）。
+    mem_limit: 1g
+    memswap_limit: 1g
+    # Why: CPA 镜像没有 wget/curl（Debian 基础镜像）。
+    #   CPA 无 /health 端点；改用 bash TCP 连接确认端口监听。
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 3 bash -c ': > /dev/tcp/localhost/8317'"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+
+  # Grok Register Lite — Grok 账号注册机
+  #
+  # ssh -L 8788:localhost:8788 nixos-vps-dev
+  # http://localhost:8788/admin
+  register-lite:
+    image: puritan3116/groklite8:latest
+    container_name: grok-register-lite
+    ports:
+      - "127.0.0.1:8788:8788"
+    shm_size: "1gb"
+    security_opt:
+      - seccomp:unconfined
+    volumes:
+      - grok2api-data:/data
+    environment:
+      TZ: Asia/Shanghai
+
+      # Lite 模式
+      GROK_REGISTER_LITE: "1"
+      GROK_REGISTER_LITE_HOST: "0.0.0.0"
+      GROK_REGISTER_LITE_PORT: "8788"
+      GROK_REGISTER_LITE_DATA_DIR: "/data"
+      GROK_REGISTER_LITE_DB: "/data/register_lite.sqlite3"
+      GROK_REGISTER_LITE_OUTPUT_DIR: "/data/outputs"
+      GROK2API_AUTH_FILE: "/data/outputs/grok2api_auth.json"
+
+      # 管理员
+      GROK_REGISTER_ADMIN_BASE_PATH: "/admin"
+      GROK_REGISTER_ADMIN_BOOTSTRAP_PASSWORD: ${DEFAULT_SK}
+      GROK_REGISTER_ADMIN_FORCE_RESET: "1"
+
+      # 内联过盾（Camoufox + Turnstile Solver）
+      GROK_REGISTER_ALLOW_PRIVATE_URLS: "1"
+      GROK_REGISTER_ALLOW_HTTP_URLS: "1"
+      GROK2API_CAPTCHA_PROVIDER: "local"
+      CAPTCHA_PROVIDER: "local"
+      GROK2API_INLINE_SOLVER: "1"
+      GROK2API_LOCAL_SOLVER_URL: "http://127.0.0.1:5072"
+      LOCAL_SOLVER_URL: "http://127.0.0.1:5072"
+      TURNSTILE_HOST: "127.0.0.1"
+      TURNSTILE_PORT: "5072"
+      TURNSTILE_THREAD: ${TURNSTILE_THREAD:-1}
+      TURNSTILE_BROWSER_TYPE: "camoufox"
+      TURNSTILE_LAZY: "1"
+      TURNSTILE_IDLE_SEC: "180"
+      TURNSTILE_BROWSER_AUTO_FETCH: "1"
+      XDG_CACHE_HOME: "/data/cache"
+      PLAYWRIGHT_BROWSERS_PATH: "/data/cache/ms-playwright"
+
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8788/admin/api/session"]
+      interval: 30s
+      timeout: 5s
+      start_period: 90s
+      retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
 
 
 networks:
@@ -207,3 +246,5 @@ volumes:
   axonhub_data:
   postgres_data:
   9router-data:
+  grok2api-data:
+  cpa_plugins:
