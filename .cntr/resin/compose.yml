@@ -1,0 +1,49 @@
+---
+
+# Resin — intelligent proxy pool gateway
+# https://github.com/Resinat/Resin
+
+name: resin
+
+services:
+  resin:
+    image: ghcr.io/resinat/resin:latest
+    container_name: resin
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:2260:2260"
+    environment:
+      TZ: Asia/Shanghai
+      RESIN_AUTH_VERSION: "V1"
+      RESIN_ADMIN_TOKEN: ${DEFAULT_SK:?DEFAULT_SK is required}
+      RESIN_PROXY_TOKEN: ${DEFAULT_SK:?DEFAULT_SK is required}
+      RESIN_LISTEN_ADDRESS: 0.0.0.0
+      RESIN_PORT: 2260
+      # Request log SQLite 体积：默认 512MB × 5 ≈ 2.5GB，个人/小盘收紧
+      RESIN_REQUEST_LOG_DB_MAX_MB: "128"
+      RESIN_REQUEST_LOG_DB_RETAIN_COUNT: "3"
+      # RESIN_PROXY_BYPASS: 命中后由 Resin 本机直连，不走代理池节点。
+      # 支持精确主机名 / *? 通配 / CIDR / 特殊标记 <local>，用 ; 分隔。
+      # - localhost / 127.0.0.0/8 / ::1: 本机回环（IPv4 + IPv6）
+      # - 10.0.0.0/8: 私网 A 类（RFC1918）
+      # - 172.16.0.0/12: 私网 B 类，含 Docker 默认 bridge 等（172.16–172.31）
+      # - 192.168.0.0/16: 私网 C 类（家用/内网路由常见）
+      # - 100.64.0.0/10: Tailscale/CGNAT 段（100.64–100.127），比 100.* 更精确
+      # - 169.254.0.0/16: 链路本地（无 DHCP 时的自分配地址，少见）
+      # - <local>: 无点号主机名（如 postgres、redis 这类 Docker DNS 名）
+      RESIN_PROXY_BYPASS: "localhost;127.0.0.0/8;::1;10.0.0.0/8;172.16.0.0/12;192.168.0.0/16;100.64.0.0/10;169.254.0.0/16;<local>"
+    volumes:
+      - ./data/cache:/var/cache/resin
+      - ./data/state:/var/lib/resin
+      - ./data/log:/var/log/resin
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:2260/healthz >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
