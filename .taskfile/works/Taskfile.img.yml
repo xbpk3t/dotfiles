@@ -53,14 +53,16 @@ tasks:
 
   webp:
     desc: convert jpg/png to webp
-    summary: "task -g img:webp [Q=85]"
+    summary: "task -g img:webp [Q=85] [KEEP=1]"
     dir: '{{.USER_WORKING_DIR}}'
     vars:
       WEBP_QUALITY: '{{if .Q}}{{.Q}}{{else}}{{.DEFAULT_WEBP_QUALITY}}{{end}}'
+      # KEEP=1 → --keep-source (validate-then-delete workflows); default still deletes sources
+      KEEP_FLAG: '{{if eq .KEEP "1"}}--keep-source{{end}}'
     preconditions:
       - sh: 'case "{{.WEBP_QUALITY}}" in ""|*[!0-9]*) exit 1 ;; *) [ "{{.WEBP_QUALITY}}" -ge 0 ] && [ "{{.WEBP_QUALITY}}" -le 100 ] ;; esac'
         msg: Q must be an integer between 0 and 100
     cmds:
       - task: _ensure:nu
       - task: _ensure:cwebp
-      - 'nu "{{.IMG_SCRIPT}}" webp --root "{{.USER_WORKING_DIR}}" --quality "{{.WEBP_QUALITY}}"'
+      - 'nu "{{.IMG_SCRIPT}}" webp --root "{{.USER_WORKING_DIR}}" --quality "{{.WEBP_QUALITY}}" {{.KEEP_FLAG}}'
