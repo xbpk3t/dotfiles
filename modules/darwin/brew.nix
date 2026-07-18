@@ -45,6 +45,7 @@ in
 
       "wechat"
       # "wechatwork"
+      "wetype"
 
       #"tailscale-app"
 
