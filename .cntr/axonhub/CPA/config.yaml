@@ -3,8 +3,9 @@ port: 8317
 auth-dir: "/root/.cli-proxy-api"
 # 下游客户端访问 CPA（/v1 等 OpenAI-compatible API）时使用的鉴权 key。
 # 典型调用方是 AxonHub / LiteLLM 等网关；不是 OAuth 的上游账号密钥。
-api-keys:
-  - "__CPA_API_KEY__"
+# 空列表：AxonHub（同 Docker 内网）调用 CPA 时不要求 api-key，网络隔离本身就是 auth。
+# 如果 CPA 启动报错要求非空，再改方案。
+api-keys: []
 remote-management:
   # 仅允许本机访问管理接口；配合内网部署降低暴露面。
   allow-remote: true
@@ -38,9 +39,13 @@ logging-to-file: true
 logs-max-total-size-mb: 1024
 # 错误日志文件最多保留数量，避免长期堆积。
 error-logs-max-files: 20
-# 为 cpa-usage-keeper 提供 usage 队列事件；若为 false，Keeper 将无统计数据可消费。
+# cpa-usage-keeper 已移除（2026-07-18），该选项不再消费。保留 true 不影响功能，留作备用。
 usage-statistics-enabled: true
 # 是否透传上游响应头到下游。默认关闭，降低兼容性噪音和信息暴露。
 passthrough-headers: false
 # 非流式请求的 keepalive 间隔秒数；0 表示关闭。
 nonstream-keepalive-interval: 0
+
+# [ywddd/grok-inspection: CPA plugin for background xAI/Grok account inspection](https://github.com/ywddd/grok-inspection)
+plugins:
+  enabled: true
