@@ -22,6 +22,9 @@
 # Dev
 .direnv/
 
+# Environment files
+**/.env
+
 # Build artifacts
 result
 result-*

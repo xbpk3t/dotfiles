@@ -10,7 +10,9 @@ services:
     command:
       # Container-name allowlist. Do not scan every container on the host.
       - axonhub
+      - 9router
       - rsshub
+      - resin
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
