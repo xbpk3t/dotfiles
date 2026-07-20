@@ -29,10 +29,9 @@
       # BROWSER = "chromium-browser";
       PNPM_HOME = "$HOME/.local/share/pnpm";
 
-      # Locale
+      # Locale（单源在 sessionVariables；交互 zsh 不再在 zsh-init 里 export）
       LANG = "en_US.UTF-8";
-      # LC_CTYPE = "en_US.UTF-8";
-      LC_CTYPE = "zh_CN.UTF-8";
+      LC_CTYPE = "en_US.UTF-8";
       LC_COLLATE = "C"; # Avoids locale lookup errors
     }
     // (lib.optionalAttrs pkgs.stdenv.isLinux {
@@ -70,10 +69,13 @@
       # hm没有该配置，暂存
       # histFile = "$HOME/.zsh_history";
 
-      # zsh 的 shell 选项设置（性能优化）
-      # 性能优化配置
-      # hm没有该配置，暂存
-      # enableGlobalCompInit = true;
+      # 覆盖 HM 默认 `compinit`：无 -C 时每次交互启动会重写 ~/.zcompdump（本机实测 ~300ms+）。
+      # -C 跳过 security check 并复用 dump；fpath 大变后若不生效：rm ~/.zcompdump && exec zsh
+      # 顺序锚点：completionInit/compinit ≈ 570 → carapace 600 → fzf-tab 650 → autosuggestions 700
+      completionInit = ''
+        autoload -Uz compinit
+        compinit -C -d "${config.home.homeDirectory}/.zcompdump"
+      '';
 
       # 为命令行着色（合法命令绿色、未知命令红色等）
       syntaxHighlighting = {
@@ -90,20 +92,18 @@
         enable = true;
         # 仅从历史里提示，避免与补全菜单冲突；若想更激进可加 "completion"
         strategy = [ "history" ];
-        highlight = "fg=cyans"; # 使用暗灰色，避免喧宾夺主
+        # 低调暗灰，避免喧宾夺主（原 fg=cyans 非法色名）
+        highlight = "fg=8";
       };
 
       # 结构化 zsh 选项配置
+      # 文件历史：接受 HM history 默认 share_history（勿再设 append_history，会被 NO_APPEND_HISTORY 盖掉）
+      # 历史搜索以 atuin 为准；hist_ignore_* 由下方 history 块处理
       setOptions = [
-        # 历史相关选项
-        "append_history" # 追加历史而不是覆盖
         "hist_verify" # 历史展开时先验证
-        "hist_ignore_dups" # 忽略重复命令
-        "hist_ignore_space" # 忽略以空格开头的命令
         "hist_no_store" # 不存储 history 命令本身
 
-        # 性能和便利性选项
-        "auto_cd" # 启用自动 cd 功能
+        # 便利性（autocd 已由 programs.zsh.autocd 开启，不在此重复 auto_cd）
         "correct" # 自动纠正命令拼写错误
         "cdable_vars" # 允许 cd 到变量名
         "check_jobs" # 退出时检查后台任务
@@ -114,8 +114,6 @@
         "pushd_ignore_dups" # 忽略 pushd 重复目录
         "pushd_silent" # 静默 pushd
         "auto_pushd" # 自动 pushd
-
-        # "checkwinsize" # 检查窗口大小变化 zsh没有该项，bash的专有option
       ];
 
       # !!! 注意把 shellAliases 放到hm里（来复用），而非放到 modules里
@@ -144,6 +142,7 @@
         "grep" = "rg";
 
         # 文件操作
+        # 覆盖 eza enableZshIntegration 的 mkDefault ll='eza -l'（要 -la）
         ll = "eza -la";
         la = "eza -a";
         lls = "eza -la --sort=size --reverse --total-size";
@@ -181,6 +180,7 @@
         v = "${editorMeta.command} .";
       };
 
+      # 启用后 HM 会设 SHARE_HISTORY 等；与 setOptions 对齐，搜索侧用 atuin
       history = {
         size = 10000;
         save = 10000;
