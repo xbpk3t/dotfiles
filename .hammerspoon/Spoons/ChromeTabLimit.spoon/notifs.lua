@@ -1,17 +1,17 @@
 --- === ChromeTabLimit Notifications ===
 ---
---- ChromeTabLimit 专用的提示包装器
---- 基于 hs.alert 屏显覆盖层，compact/mini 风格
+--- compact hs.alert；超限时长来自 shared_limit_alerts（与 Claude 对齐）
 
 local notifs = {}
 
-hs.alert.defaultStyle.textSize = 12
-hs.alert.defaultStyle.radius = 8
+local limits = dofile(hs.configdir .. "/Spoons/shared_limit_alerts.lua")
 
-local DEFAULT_DURATION = 3
+local COMPACT_STYLE = hs.fnutils.copy(hs.alert.defaultStyle)
+COMPACT_STYLE.textSize = 12
+COMPACT_STYLE.radius = 8
 
-function notifs.show(text, duration)
-  return hs.alert.show(text, duration or DEFAULT_DURATION)
+local function show(text, duration)
+  return hs.alert.show(text, COMPACT_STYLE, nil, duration or limits.shortAlertDuration)
 end
 
 function notifs.tabLimitExceeded(currentCount, maxCount, excessCount)
@@ -21,27 +21,27 @@ function notifs.tabLimitExceeded(currentCount, maxCount, excessCount)
     maxCount,
     excessCount
   )
-  return notifs.show(message, 5)
+  return show(message, limits.limitAlertDuration)
 end
 
 function notifs.tabsAutoClosed(closedCount)
-  return notifs.show(string.format("已自动关闭 %d 个标签页", closedCount))
+  return show(string.format("已自动关闭 %d 个标签页", closedCount))
 end
 
 function notifs.tabsCloseFailed()
-  return notifs.show("无法自动关闭标签页，请手动关闭", 5)
+  return show("无法自动关闭标签页，请手动关闭", limits.limitAlertDuration)
 end
 
 function notifs.enabled()
-  return notifs.show("ChromeTabLimit 已启用")
+  return show("ChromeTabLimit 已启用")
 end
 
 function notifs.disabled()
-  return notifs.show("ChromeTabLimit 已禁用")
+  return show("ChromeTabLimit 已禁用")
 end
 
 function notifs.status(statusText)
-  return notifs.show("状态信息:\n" .. statusText, 5)
+  return show("状态信息:\n" .. statusText, limits.limitAlertDuration)
 end
 
 return notifs

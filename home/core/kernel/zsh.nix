@@ -29,7 +29,7 @@
       # BROWSER = "chromium-browser";
       PNPM_HOME = "$HOME/.local/share/pnpm";
 
-      # Locale（单源在 sessionVariables；交互 zsh 不再在 zsh-init 里 export）
+      # Locale（单源在 sessionVariables；不在交互 zsh 片段里 export）
       LANG = "en_US.UTF-8";
       LC_CTYPE = "en_US.UTF-8";
       LC_COLLATE = "C"; # Avoids locale lookup errors
@@ -72,7 +72,17 @@
       # 覆盖 HM 默认 `compinit`：无 -C 时每次交互启动会重写 ~/.zcompdump（本机实测 ~300ms+）。
       # -C 跳过 security check 并复用 dump；fpath 大变后若不生效：rm ~/.zcompdump && exec zsh
       # 顺序锚点：completionInit/compinit ≈ 570 → carapace 600 → fzf-tab 650 → autosuggestions 700
+      # zstyle 无一等 option；社区主流写在 completionInit（compinit 前），见
+      # AmamiyaMion/flake homeModules/shells.nix、Frost-Phoenix modules/home/zsh/zsh.nix
       completionInit = ''
+        # 不区分大小写 + 子串匹配（前缀 → 右锚定 → 左右放开）
+        zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}' 'r:|=*' 'l:|=* r:|=*'
+        # 补全缓存（_store_cache 会 mkdir -p，无需预建目录）
+        zstyle ':completion:*' use-cache on
+        zstyle ':completion:*' cache-path "${config.home.homeDirectory}/.zsh/cache"
+        # Tab 菜单选择（fzf-tab 接管后影响变小，保留作无 fzf-tab 时的回退）
+        zstyle ':completion:*' menu select
+
         autoload -Uz compinit
         compinit -C -d "${config.home.homeDirectory}/.zcompdump"
       '';
@@ -189,8 +199,20 @@
       };
 
       # 使用新的 initContent 替代 deprecated 的 initExtraBeforeCompInit 和 initExtra
+      # zstyle 已迁到 completionInit；此处只放无法 alias / 无法 writeShellScript 的 shell 函数等。
       initContent = lib.mkMerge [
-        (lib.mkOrder 550 (builtins.readFile ./zsh-init.zsh))
+        # mkcd 必须是 shell 函数：若做成 writeShellScriptBin，cd 只影响子进程，进不了当前 shell。
+        # HM 无 programs.zsh.functions 一等 option，只能塞 initContent。
+        (lib.mkOrder 550 ''
+          # mkcd：创建目录并进入（纯 alias 无法带参 mkdir+cd；md=mkdir -p 见 shellAliases）
+          mkcd() {
+            if [[ $# -eq 0 ]]; then
+              echo "Usage: mkcd <directory>"
+              return 1
+            fi
+            mkdir -p "$1" && cd "$1" || return
+          }
+        '')
 
         # fzf-tab
         # fzf-tab 必须放在 compinit 之后、autosuggestions 之前。
