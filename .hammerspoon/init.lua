@@ -32,6 +32,34 @@ if not success2 then
   print("ChromeTabLimit 错误:", err2)
 end
 
+local successClaudeSession, errClaudeSession = pcall(function()
+  hs.loadSpoon("ClaudeSessionLimit")
+  spoon.ClaudeSessionLimit:start()
+end)
+if not successClaudeSession then
+  hs.alert.show("ClaudeSessionLimit 加载失败")
+  print("ClaudeSessionLimit 错误:", errClaudeSession)
+end
+
+-- 共享节拍：Chrome 先、Claude 后 → 同相位、同 duration、堆叠顺序固定
+local successLimitCoord, errLimitCoord = pcall(function()
+  local limits = dofile(hs.configdir .. "/Spoons/shared_limit_alerts.lua")
+  local function tickLimitSpoons()
+    if spoon.ChromeTabLimit then
+      spoon.ChromeTabLimit:checkNow()
+    end
+    if spoon.ClaudeSessionLimit then
+      spoon.ClaudeSessionLimit:checkNow()
+    end
+  end
+  hs.timer.doEvery(limits.checkInterval, tickLimitSpoons)
+  tickLimitSpoons()
+  hs.logger.new("init").i("limit coordinator started interval=" .. tostring(limits.checkInterval) .. "s")
+end)
+if not successLimitCoord then
+  print("limit coordinator 错误:", errLimitCoord)
+end
+
 local success3, err3 = pcall(function()
   hs.loadSpoon("HearingToggle")
   spoon.HearingToggle:start()
