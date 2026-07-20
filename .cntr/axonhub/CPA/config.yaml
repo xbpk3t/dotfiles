@@ -49,3 +49,8 @@ nonstream-keepalive-interval: 0
 # [ywddd/grok-inspection: CPA plugin for background xAI/Grok account inspection](https://github.com/ywddd/grok-inspection)
 plugins:
   enabled: true
+  dir: "plugins"
+  configs:
+    grok-inspection:
+      enabled: true
+      priority: 1

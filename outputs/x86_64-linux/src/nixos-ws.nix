@@ -24,6 +24,7 @@ let
       "modules/nixos/kernel"
       "modules/nixos/desktop/nvidia.nix"
       "modules/nixos/desktop"
+      "modules/nixos/infra/nix-tools.nix"
       "modules/nixos/infra/singbox-client.nix"
       "modules/nixos/infra/mihomo-client.nix"
     ];

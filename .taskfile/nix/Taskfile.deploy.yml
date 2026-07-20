@@ -49,31 +49,64 @@ tasks:
 
   vps:
     desc: "使用 rsync + SSH 部署 nixos-vps-dev（远程 eval/build，Mac 零负载）"
-    summary: "task nix:deploy:vps"
+    summary: |
+      从 Mac 一键部署到 nixos-vps-dev：rsync 源码 → SSH 远端 nixos-rebuild switch。
+      Mac 不做 eval/build；远端完成全部 4 步。
+
+      用法（在 Mac、dotfiles 仓库根目录）：
+        task nix:deploy:vps
+
+      覆盖默认值：
+        task nix:deploy:vps VPS_IP=192.129.183.26 VPS_USER=root VPS_DIR=/home/luck/Desktop/dotfiles
+
+      注意：
+        - 在 VPS 本机不要跑这个 task（会 rsync 到自己）；本机直接：
+          sudo nixos-rebuild switch --flake 'path:/home/luck/Desktop/dotfiles#nixos-vps-dev' --impure
+        - SSH 用 root 只为非交互 nixos-rebuild；源码路径仍落在 luck 的 $HOME/Desktop/dotfiles
+        - root 跑 flake 时必须用 path:（不能用 .# 或 git+file://），否则 libgit2 报
+          "repository path is not owned by current user"
+        - flake 属性必须加引号，否则远端 bash 会把 # 当注释
     dir: '{{.USER_WORKING_DIR}}'
     vars:
-      VPS_HOST: "nixos-vps-dev"
       VPS_IP: '{{.VPS_IP | default "192.129.183.26"}}'
+      # root：避免 luck + wheelNeedsPassword 挡非交互 rebuild
       VPS_USER: '{{.VPS_USER | default "root"}}'
-      VPS_DIR: '{{.VPS_DIR | default "~/dotfiles"}}'
-      FLAKE_ATTR: '{{.FLAKE_ATTR | default ".#nixos-vps-dev"}}'
+      # Why：不放 /root/dotfiles。你在 VPS 上实际用的是 luck 的 $HOME/Desktop/dotfiles，
+      #      与本机 Mac 的 ~/Desktop/dotfiles 对齐；root 只负责写/激活，不把仓库塞进 root home。
+      # What：写绝对路径（= luck 的 $HOME/Desktop/dotfiles），避免 ~ 在 rsync/ssh 下展开不一致。
+      VPS_DIR: '{{.VPS_DIR | default "/home/luck/Desktop/dotfiles"}}'
+      # rsync -a 会带上 Mac UID；最终属主交给 luck，交互 SSH 仍可读可改
+      VPS_CHOWN: '{{.VPS_CHOWN | default "luck:users"}}'
+      # Why：root 访问 luck 属主的 git 仓库时，`.#host` 会解析成 git+file:// 并触发
+      #      libgit2 ownership 检查失败。
+      # What：用 path: 把 flake 当普通目录，绕过 git ownership 检查。
+      FLAKE_ATTR: '{{.FLAKE_ATTR | default (printf "path:%s#nixos-vps-dev" .VPS_DIR)}}'
     cmds:
+      # Why：Task 的 vars 不会注入成 shell 环境变量，$VPS_* 为空会变成 rsync ... @:
+      # What：全程用 {{.VPS_*}} 模板展开。
       - |
-        echo "==> rsync dotfiles to $VPS_USER@$VPS_IP:$VPS_DIR ..."
+        set -euo pipefail
+        echo "==> rsync dotfiles to {{.VPS_USER}}@{{.VPS_IP}}:{{.VPS_DIR}} ..."
         rsync -avz --delete \
           --exclude='result' \
           --exclude='.direnv' \
+          --exclude='.ruff_cache' \
           "{{.USER_WORKING_DIR}}/" \
-          "$VPS_USER@$VPS_IP:$VPS_DIR/"
+          "{{.VPS_USER}}@{{.VPS_IP}}:{{.VPS_DIR}}/"
       - |
+        set -euo pipefail
         echo "==> chown + nixos-rebuild switch on VPS ..."
-        ssh -t "$VPS_USER@$VPS_IP" \
-          "chown -R $VPS_USER:$VPS_USER $VPS_DIR && \
-           cd $VPS_DIR && \
-           nixos-rebuild switch --flake $FLAKE_ATTR --impure"
+        # Why：远端 bash 会把未加引号的 # 当注释；root + .# 会撞 git ownership。
+        # What：--flake 用 path:{{.VPS_DIR}}#host 且整段单引号；树属主仍给 luck。
+        ssh -t "{{.VPS_USER}}@{{.VPS_IP}}" \
+          "set -euo pipefail; \
+           mkdir -p {{.VPS_DIR}}; \
+           chown -R {{.VPS_CHOWN}} {{.VPS_DIR}}; \
+           nixos-rebuild switch --flake '{{.FLAKE_ATTR}}' --impure"
       - |
+        set -euo pipefail
         echo "==> Done. VPS current generation:"
-        ssh "$VPS_USER@$VPS_IP" "nixos-version && uptime"
+        ssh "{{.VPS_USER}}@{{.VPS_IP}}" "nixos-version && uptime"
 
 # [2026-04-22] 注释掉，因为 default task 本身支持的 多选就已经覆盖掉这个单选profile 的需求了
 #  profile:

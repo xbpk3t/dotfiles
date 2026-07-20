@@ -61,7 +61,9 @@ in
 
           # https://x.com/xiangxiang103/status/2043612207175602671 cc 稳定不降智的技巧：换稳定性：关掉超长上下文、adaptive thinking、auto memory，确实更像“固定档位”了。适合长任务复现，但一般会牺牲一点探索效率。
           settings = {
+            # 默认 Model
             model = "deepseek-v4-flash[1m]";
+
             theme = "dark";
             # [2026-06-02] concise: 去除每 turn 的 Insight 框 + 原理展开，节省 30-50% 输出 token
             outputStyle = "concise";
@@ -169,10 +171,28 @@ in
               # [2026-04-29] 从 max -> xhigh，避免耗费太多token
               CLAUDE_CODE_EFFORT_LEVEL = "max";
 
-              # 三档模型映射：DS-V4 系列（[1m] = 1M context window）
-              ANTHROPIC_DEFAULT_OPUS_MODEL = "mimo-v2.5-pro[1m]";
-              ANTHROPIC_DEFAULT_SONNET_MODEL = "deepseek-v4-pro[1m]";
+              # 只把 compact 收到真实 500k，而不是一直撑到假 1M
+              # CLAUDE_CODE_AUTO_COMPACT_WINDOW = "500000";
+
+              # 模型映射（gateway: api.lucc.dev）
+              # - settings.model = deepseek-v4-flash[1m]  ← session 默认（本块上方，勿与 alias 混淆）
+              # - [1m] = CC 侧 1M context 标记；gateway /v1/models 为裸 id，grok-4.5 原生 500k 故不带 [1m]
+              # - /model best：有 Fable 权限才用 Fable，否则 Opus（两者均 pin 到 grok-4.5）
+              # - /model fable → FABLE；/model opus → OPUS；当前 FABLE 与 OPUS 同为 grok-4.5（刻意重复）
+
+              # 注意 grok-4.5 的context只有500k，但是如果不标注[1m]，claude默认只给200k，很影响使用。有个办法是添加 CLAUDE_CODE_AUTO_COMPACT_WINDOW，但是这里无所谓了
+              ANTHROPIC_DEFAULT_FABLE_MODEL = "grok-4.5[1m]";
+              ANTHROPIC_DEFAULT_OPUS_MODEL = "grok-4.5[1m]";
+              ANTHROPIC_DEFAULT_SONNET_MODEL = "mimo-v2.5-pro[1m]";
               ANTHROPIC_DEFAULT_HAIKU_MODEL = "deepseek-v4-flash[1m]";
+
+              # 用来在 /model picker 里多塞 1 条自定义模型，不替换 opus / sonnet / haiku / fable 那些内置 alias
+              # - CUSTOM 仅支持 1 条；其它可用 id 手输 /model：gpt-5.4, mimo-v2.5-tts, oc/*
+              #
+              # 之后可能换成 deepseek-v4-pro[1m]
+              ANTHROPIC_CUSTOM_MODEL_OPTION = "gpt-5.5";
+              ANTHROPIC_CUSTOM_MODEL_OPTION_NAME = "GPT-5.5";
+              ANTHROPIC_CUSTOM_MODEL_OPTION_DESCRIPTION = "OpenAI via gateway";
 
               # 可选：通过 gateway 时，减少系统 prompt 中客户端归因头变化，有助于 gateway 层 prompt cache 命中
               CLAUDE_CODE_ATTRIBUTION_HEADER = "0";
@@ -266,7 +286,8 @@ in
     # 模式：default — 工作站交互式审批
     (lib.mkIf (cfg.enable && cfg.permissionMode == "default") {
       programs.claude-code.settings.permissions = {
-        defaultMode = "plan";
+
+        defaultMode = "acceptEdits";
         additionalDirectories = [
           "~/Desktop/dotfiles"
           "~/Desktop/docs"

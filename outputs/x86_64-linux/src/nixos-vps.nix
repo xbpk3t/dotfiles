@@ -22,6 +22,7 @@ let
       "secrets/default.nix"
       "modules/nixos/kernel"
       "modules/nixos/devops/nixos-agent.nix"
+      "modules/nixos/infra/nix-tools.nix"
       "modules/nixos/infra/mihomo-server.nix"
       "modules/nixos/infra/singbox-server.nix"
       "modules/nixos/infra/tailscale-client.nix"
