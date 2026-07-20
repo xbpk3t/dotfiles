@@ -30,8 +30,14 @@ obj.maxTabs = 35
 
 --- ChromeTabLimit.checkInterval
 --- Variable
---- 检查间隔（秒）
+--- 自管 timer 时的检查间隔（秒）；共享 coordinator 时由 shared_limit_alerts 驱动
 obj.checkInterval = 30
+
+--- ChromeTabLimit.manageOwnTimer
+--- Variable
+--- false（默认）: 不创建周期 timer，由 init 共享节拍调用 checkNow()
+--- true: 兼容旧行为，spoon 自己 doEvery
+obj.manageOwnTimer = false
 
 --- ChromeTabLimit.chromeAppName
 --- Variable
@@ -173,32 +179,53 @@ end
 ---
 --- Returns:
 ---  * The ChromeTabLimit object
+--- ChromeTabLimit:checkNow()
+--- Method
+--- 立即执行一次检查（共享 coordinator / 热键 / Chrome launch 延迟回调）
+function obj:checkNow()
+  checkTabLimit()
+  return self
+end
+
 function obj:start()
   if not self.enabled then
     self.logger.i("ChromeTabLimit is disabled, not starting")
     return self
   end
 
-  -- 创建定时器
-  self.checkTimer = hs.timer.doEvery(self.checkInterval, checkTabLimit)
+  if self.checkTimer then
+    self.checkTimer:stop()
+    self.checkTimer = nil
+  end
 
-  -- 创建应用程序监听器
+  -- 自管 timer（默认 false，由 init 共享节拍驱动）
+  if self.manageOwnTimer then
+    self.checkTimer = hs.timer.doEvery(self.checkInterval, checkTabLimit)
+    checkTabLimit()
+  end
+
+  -- Chrome launch 后 2s 单独 check（可单独弹 Chrome，不带动 Claude）
+  if self.appWatcher then
+    self.appWatcher:stop()
+    self.appWatcher = nil
+  end
   self.appWatcher = hs.application.watcher.new(function(appName, eventType, appObject)
     if appName == self.chromeAppName then
       if eventType == hs.application.watcher.launched then
-        self.logger.i("Chrome launched, starting tab monitoring")
-        hs.timer.doAfter(2, checkTabLimit)
+        self.logger.i("Chrome launched, deferred tab check")
+        hs.timer.doAfter(2, function()
+          checkTabLimit()
+        end)
       elseif eventType == hs.application.watcher.terminated then
-        self.logger.i("Chrome terminated, stopping tab monitoring")
+        self.logger.i("Chrome terminated")
       end
     end
   end)
   self.appWatcher:start()
 
-  -- 立即执行一次检查
-  checkTabLimit()
-
-  self.logger.i("ChromeTabLimit started with max tabs: " .. self.maxTabs)
+  self.logger.i(
+    "ChromeTabLimit started maxTabs=" .. self.maxTabs .. " manageOwnTimer=" .. tostring(self.manageOwnTimer)
+  )
   return self
 end
 
@@ -293,7 +320,7 @@ function obj:bindHotkeys(mapping)
       self:toggle()
     end,
     check_now = function()
-      checkTabLimit()
+      self:checkNow()
     end,
     show_status = function()
       notifs.status(self:getStatus())
