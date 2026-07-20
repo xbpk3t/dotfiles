@@ -28,8 +28,9 @@ _: {
 
     AI = {
       cc-connect.enable = true;
-      codex.enable = true;
+      codex.enable = false;
       claude.enable = true;
+
       skills.enable = true;
       pi-agent.enable = true;
       mcp.isDesktop = true;
