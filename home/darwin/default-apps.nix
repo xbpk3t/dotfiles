@@ -21,6 +21,7 @@
   ## 同类操作放到同一个 activation 里，比如说都是用来设置 DefaultApps 的，那么就都放到这里。如果有 clearSomeCache、linkExternalConfig 等其他操作再拆到其他 activation
   home.activation.setDefaultApps = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     # [2026-05-23] ghostty -> cmux
-    run ${pkgs.duti}/bin/duti -s com.cmuxterm.app public.unix-executable all
+    # run ${pkgs.duti}/bin/duti -s com.cmuxterm.app public.unix-executable all
+    run ${pkgs.duti}/bin/duti -s com.mitchellh.ghostty public.unix-executable all
   '';
 }
