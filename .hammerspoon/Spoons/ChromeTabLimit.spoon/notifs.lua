@@ -1,17 +1,13 @@
 --- === ChromeTabLimit Notifications ===
 ---
---- compact hs.alert；超限时长来自 shared_limit_alerts（与 Claude 对齐）
+--- compact hs.alert（通过 shared_alerts）；超限时长来自 shared_limit_alerts
 
 local notifs = {}
-
+local alerts = dofile(hs.configdir .. "/Spoons/shared_alerts.lua")
 local limits = dofile(hs.configdir .. "/Spoons/shared_limit_alerts.lua")
 
-local COMPACT_STYLE = hs.fnutils.copy(hs.alert.defaultStyle)
-COMPACT_STYLE.textSize = 12
-COMPACT_STYLE.radius = 8
-
 local function show(text, duration)
-  return hs.alert.show(text, COMPACT_STYLE, nil, duration or limits.shortAlertDuration)
+  return alerts.show(text, duration or limits.shortAlertDuration)
 end
 
 function notifs.tabLimitExceeded(currentCount, maxCount, excessCount)
@@ -21,7 +17,7 @@ function notifs.tabLimitExceeded(currentCount, maxCount, excessCount)
     maxCount,
     excessCount
   )
-  return show(message, limits.limitAlertDuration)
+  return alerts.error(message, limits.limitAlertDuration)
 end
 
 function notifs.tabsAutoClosed(closedCount)
@@ -29,7 +25,7 @@ function notifs.tabsAutoClosed(closedCount)
 end
 
 function notifs.tabsCloseFailed()
-  return show("无法自动关闭标签页，请手动关闭", limits.limitAlertDuration)
+  return alerts.error("无法自动关闭标签页，请手动关闭", limits.limitAlertDuration)
 end
 
 function notifs.enabled()

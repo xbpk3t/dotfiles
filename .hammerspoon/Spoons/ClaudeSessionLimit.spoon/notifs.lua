@@ -1,21 +1,17 @@
 --- === ClaudeSessionLimit Notifications ===
 ---
---- compact hs.alert；超限时长来自 shared_limit_alerts（与 Chrome 对齐）
+--- compact hs.alert（通过 shared_alerts）；超限时长来自 shared_limit_alerts
 
 local notifs = {}
-
+local alerts = dofile(hs.configdir .. "/Spoons/shared_alerts.lua")
 local limits = dofile(hs.configdir .. "/Spoons/shared_limit_alerts.lua")
 
-local COMPACT_STYLE = hs.fnutils.copy(hs.alert.defaultStyle)
-COMPACT_STYLE.textSize = 12
-COMPACT_STYLE.radius = 8
-
 local function show(text, duration)
-  return hs.alert.show(text, COMPACT_STYLE, nil, duration or limits.shortAlertDuration)
+  return alerts.show(text, duration or limits.shortAlertDuration)
 end
 
 function notifs.sessionLimitExceeded(currentCount, maxCount, excessCount)
-  return show(
+  return alerts.error(
     string.format(
       "Claude session 过多！当前: %d 个，限制: %d 个，需关闭: %d 个",
       currentCount,
