@@ -29,11 +29,26 @@ let
     # 窗口左右内边距（px）。避免文字紧贴窗口边缘。
     window-padding-x = 4;
 
-    # ── macOS Tab ──────────────────────────────────────────────────
-    # macOS 原生 tab bar 显示在窗口左侧，视觉上接近 IDE 侧栏风格。
-    # 替代默认的顶部 tab 条，多 tab 场景下更易读。
-    # 选项: left | bottom | hidden
-    macos-tab-sidebar = "left";
+    # ── Theme ───────────────────────────────────────────────────────
+    # [2026-07-21] 对齐 cmux 终端配色。
+    #
+    # 背景：当 ~/.config/ghostty/config 里没有 theme / background / palette 时，
+    #   - Ghostty.app / ghostty 走内置默认（background=#282c34，偏蓝灰）
+    #   - cmux 会注入 managed default（等价 "Apple System Colors"，#1e1e1e 中性黑）
+    #     源码/字符串里写得很直白：
+    #     "No user theme or terminal colors, so cmux applies its managed default colors."
+    # 所以两边看起来不一致。显式声明 theme 后，Ghostty 与 cmux 共享同一份配色，
+    # cmux 的 managed default 让位。
+    #
+    # 跨平台：
+    #   "Apple System Colors" 只是 Ghostty 内置主题文件名（palette 文件），
+    #   随 Ghostty 的 themes 资源一起安装（macOS: App Resources；Linux: share/ghostty/themes），
+    #   不依赖任何 macOS API，Linux 上同样可用。名字带 Apple 只是配色风格参考系统色。
+    #
+    # 可选替代：
+    #   theme = "light:Apple System Colors Light,dark:Apple System Colors";  # 跟系统明暗
+    #   theme = "Catppuccin Mocha";  # 若要跟 Stylix (catppuccin-mocha) 统一
+    theme = "Apple System Colors";
 
     # ── Clipboard ───────────────────────────────────────────────────
     # 允许应用读取/写入/粘贴系统剪贴板。
@@ -56,9 +71,19 @@ let
     # 独立于 cmux 运行，作为 cmux agent cockpit 的"副终端"。
     # https://ghostty.org/docs/config/reference#quick-terminal-position
     quick-terminal-position = "right";
-    quick-terminal-size = "0.35";
+    # size 必须带单位（% 或 px）；裸数字（如 0.35）会报 error.MissingUnit。
+    # position=right/left 时主轴是宽度；top/bottom 时主轴是高度。
+    # Available since: 1.2.0
+    quick-terminal-size = "35%";
     quick-terminal-screen = "main";
-    quick-terminal-auto-hide = true;
+    # 键名是 autohide（连写），不是 auto-hide；写错会 unknown field。
+    quick-terminal-autohide = true;
+
+    # ── 已移除 / 无效字段（留档）──────────────────────────────────
+    # [2026-07-21] macos-tab-sidebar = "left";
+    #   Ghostty 1.3.x 无此配置项（unknown field）。macOS tab 相关可用：
+    #   window-show-tab-bar / macos-titlebar-style（tabs|transparent|hidden 等）。
+    #   我们不用 ghostty 管 tabs（交给 tmux/zellij），故不设。
 
     # ── 待定（注释掉供参考）─────────────────────────────────────────
     # background = "black";
