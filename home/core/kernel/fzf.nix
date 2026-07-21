@@ -39,13 +39,14 @@
     ];
 
     # File widget (CTRL-T) configuration
-    fileWidgetCommand = "fd --type f --hidden --follow --exclude .git --exclude node_modules";
+    fileWidget.command = "fd --type f --hidden --follow --exclude .git --exclude node_modules";
 
     # Directory widget (ALT-C) configuration
-    changeDirWidgetCommand = "fd --type d --hidden --follow --exclude .git --exclude node_modules";
+    changeDirWidget.command = "fd --type d --hidden --follow --exclude .git --exclude node_modules";
 
-    # History widget (CTRL-R) configuration
-    historyWidgetOptions = [
+    # History widget (CTRL-R) — 禁用 fzf 的 Ctrl-R，交给 atuin 接管
+    historyWidget.command = "";
+    historyWidget.options = [
       "--sort"
       "--exact"
     ];
