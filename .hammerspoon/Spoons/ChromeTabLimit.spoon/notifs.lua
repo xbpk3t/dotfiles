@@ -17,7 +17,7 @@ function notifs.tabLimitExceeded(currentCount, maxCount, excessCount)
     maxCount,
     excessCount
   )
-  return alerts.error(message, limits.limitAlertDuration)
+  return alerts.show(message, limits.limitAlertDuration)
 end
 
 function notifs.tabsAutoClosed(closedCount)
