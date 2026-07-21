@@ -1,95 +1,100 @@
---- === Shared Base Alerts ===
+--- === Shared Alerts ===
 ---
---- 全局底层 alert 系统处理模块
---- 提供基础的 alert 显示功能，供各个 Spoon 的包装器复用
----
+--- 统一 alert 系统。所有 Spoon 的 hs.alert 走这里，确保:
+--- - 风格一致（compact 12pt，不污染 hs.alert.defaultStyle）
+--- - 颜色分级（成功绿 / 错误红 / 信息灰 / 默认无偏移）
+--- - 异常隔离（pcall 包裹，不回抛）
 
 local alerts = {}
 
--- 默认配置
-local DEFAULT_DURATION = 3
+-- ====================================================================
+-- 私有：风格定义
+-- ====================================================================
 
-local DEFAULT_STYLE = hs.alert.defaultStyle
-local SUCCESS_STYLE = hs.fnutils.copy(DEFAULT_STYLE)
-local ERROR_STYLE = hs.fnutils.copy(DEFAULT_STYLE)
-local INFO_STYLE = hs.fnutils.copy(DEFAULT_STYLE)
+-- 基础 compact 风格（从全局默认 copy，不改原始对象）
+local COMPACT_STYLE = hs.fnutils.copy(hs.alert.defaultStyle)
+COMPACT_STYLE.textSize = 12
+COMPACT_STYLE.radius = 8
 
--- 轻量区分严重级别，避免影响可读性
-SUCCESS_STYLE.fillColor = { red = 0.12, green = 0.48, blue = 0.22, alpha = 0.9 }
+-- 分级风格（从 COMPACT_STYLE 继承，只改 fillColor）
+local SUCCESS_STYLE = hs.fnutils.copy(COMPACT_STYLE)
+SUCCESS_STYLE.fillColor = { red = 0.12, green = 0.48, blue = 0.22, alpha = 0.90 }
+
+local ERROR_STYLE = hs.fnutils.copy(COMPACT_STYLE)
 ERROR_STYLE.fillColor = { red = 0.62, green = 0.16, blue = 0.16, alpha = 0.92 }
+
+local INFO_STYLE = hs.fnutils.copy(COMPACT_STYLE)
 INFO_STYLE.fillColor = { red = 0.18, green = 0.18, blue = 0.22, alpha = 0.88 }
 
--- 私有函数：核心 alert 显示逻辑
-local function _showAlert(text, duration, style, screen)
-  duration = duration
-  if duration == nil then
-    duration = DEFAULT_DURATION
-  end
+local DEFAULT_DURATION = 3
 
-  local ok, id = pcall(function()
-    return hs.alert.show(text or "", style or DEFAULT_STYLE, screen, duration)
-  end)
+-- ====================================================================
+-- 私有：核心显示
+-- ====================================================================
 
-  if not ok then
-    print("Alert 显示失败: " .. tostring(text))
-    print("⚠ " .. tostring(text))
+local function _show(text, style, screen, duration)
+  if not text or text == "" then
     return nil
   end
-
+  local ok, id = pcall(hs.alert.show, text, style or COMPACT_STYLE, screen, duration or DEFAULT_DURATION)
+  if not ok then
+    print(string.format("Alert 显示失败: %s", tostring(text)))
+    return nil
+  end
   return id
 end
 
--- 公共 API：显示基础 alert
-function alerts.showAlert(text, duration, style, screen)
-  return _showAlert(text, duration, style, screen)
+-- ====================================================================
+-- 公共 API：按用途分类
+-- ====================================================================
+
+--- alerts.show(text, duration?, screen?)
+--- 默认 compact alert（无颜色偏移）
+function alerts.show(text, duration, screen)
+  return _show(text, COMPACT_STYLE, screen, duration)
 end
 
--- 显示默认 alert
-function alerts.showDefault(text, duration, screen)
-  return _showAlert(text, duration, DEFAULT_STYLE, screen)
+--- alerts.success(text, duration?, screen?)
+--- 绿色底，操作成功时使用
+function alerts.success(text, duration, screen)
+  return _show(text, SUCCESS_STYLE, screen, duration)
 end
 
--- 显示成功 alert
-function alerts.showSuccess(text, duration, screen)
-  return _showAlert(text, duration, SUCCESS_STYLE, screen)
+--- alerts.error(text, duration?, screen?)
+--- 红色底，操作失败或错误时使用
+function alerts.error(text, duration, screen)
+  return _show(text, ERROR_STYLE, screen, duration)
 end
 
--- 显示错误 alert
-function alerts.showError(text, duration, screen)
-  return _showAlert(text, duration, ERROR_STYLE, screen)
+--- alerts.info(text, duration?, screen?)
+--- 灰色底，中性信息提示
+function alerts.info(text, duration, screen)
+  return _show(text, INFO_STYLE, screen, duration)
 end
 
--- 显示信息 alert
-function alerts.showInfo(text, duration, screen)
-  return _showAlert(text, duration, INFO_STYLE, screen)
-end
+-- ====================================================================
+-- 兼容别名（供旧代码逐步迁移）
+-- ====================================================================
 
--- 关闭指定 alert
+alerts.showAlert = alerts.show
+alerts.showDefault = alerts.show
+alerts.showSuccess = alerts.success
+alerts.showError = alerts.error
+alerts.showInfo = alerts.info
+
+-- ====================================================================
+-- 工具函数
+-- ====================================================================
+
 function alerts.closeSpecific(id)
   if not id then
     return
   end
-  pcall(function()
-    hs.alert.closeSpecific(id)
-  end)
+  pcall(hs.alert.closeSpecific, id)
 end
 
--- 关闭全部 alert
 function alerts.closeAll()
-  pcall(function()
-    hs.alert.closeAll()
-  end)
-end
-
--- 获取默认配置（供其他模块使用）
-function alerts.getDefaults()
-  return {
-    duration = DEFAULT_DURATION,
-    defaultStyle = DEFAULT_STYLE,
-    successStyle = SUCCESS_STYLE,
-    errorStyle = ERROR_STYLE,
-    infoStyle = INFO_STYLE,
-  }
+  pcall(hs.alert.closeAll)
 end
 
 return alerts
