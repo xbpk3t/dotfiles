@@ -17,6 +17,8 @@ obj.license = "MIT - https://opensource.org/licenses/MIT"
 
 obj.logger = hs.logger.new("Hotkeys")
 
+local alerts = dofile(hs.configdir .. "/Spoons/shared_alerts.lua")
+
 -- 内部状态：保存 hotkey 引用以便 unbind
 obj._hotkeys = {}
 
@@ -47,7 +49,7 @@ local function launchApp(bundleID, label)
   return function()
     local ok, err = hs.application.launchOrFocusByBundleID(bundleID)
     if not ok then
-      hs.alert.show("无法启动 " .. label)
+      alerts.error("无法启动 " .. label)
       obj.logger.e("launchOrFocus failed for " .. bundleID .. ": " .. tostring(err))
     end
   end
@@ -77,7 +79,7 @@ local function chromeTabToMarkdownLink()
   ]])
 
   if not ok or not result then
-    hs.alert.show("Chrome 未运行或无活动标签页")
+    alerts.error("Chrome 未运行或无活动标签页")
     obj.logger.w("Chrome not running or no active tab")
     return
   end
@@ -86,14 +88,14 @@ local function chromeTabToMarkdownLink()
 
   local title, url = result:match("^(.-)\t(.+)$")
   if not title or not url then
-    hs.alert.show("无法获取标签页信息")
+    alerts.error("无法获取标签页信息")
     obj.logger.e("Failed to parse Chrome tab info: " .. tostring(result))
     return
   end
 
   local markdownLink = "[" .. title .. "](" .. url .. ")"
   hs.pasteboard.setContents(markdownLink)
-  hs.alert.show("已复制 Markdown 链接")
+  alerts.success("已复制 Markdown 链接")
   obj.logger.i("Copied markdown link: " .. markdownLink)
 end
 
