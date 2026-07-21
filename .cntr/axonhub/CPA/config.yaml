@@ -39,18 +39,23 @@ logging-to-file: true
 logs-max-total-size-mb: 1024
 # 错误日志文件最多保留数量，避免长期堆积。
 error-logs-max-files: 20
-# cpa-usage-keeper 已移除（2026-07-18），该选项不再消费。保留 true 不影响功能，留作备用。
+# usage 队列供 CPA Manager Plus Full Mode 消费（请求监控 / 成本分析）。
+# cpa-usage-keeper 已移除（2026-07-18）；改由 CPAMP 持久化。
 usage-statistics-enabled: true
+# 与官方 install-cpamp 生成配置对齐；队列事件保留秒数，便于 CPAMP 拉取。
+redis-usage-queue-retention-seconds: 60
 # 是否透传上游响应头到下游。默认关闭，降低兼容性噪音和信息暴露。
 passthrough-headers: false
 # 非流式请求的 keepalive 间隔秒数；0 表示关闭。
 nonstream-keepalive-interval: 0
 
-# [ywddd/grok-inspection: CPA plugin for background xAI/Grok account inspection](https://github.com/ywddd/grok-inspection)
+# [ywddd/grok-inspection](https://github.com/ywddd/grok-inspection)
+# 已禁用：改由 CPAMP Full Mode 做 xAI 账单巡检 / free-usage 24h 冷却（billing-first，非对话活测）。
+# .so 仍可留在 cpa_plugins volume，回滚时把 enabled 改回 true 即可。
 plugins:
-  enabled: true
+  enabled: false
   dir: "plugins"
   configs:
     grok-inspection:
-      enabled: true
+      enabled: false
       priority: 1
