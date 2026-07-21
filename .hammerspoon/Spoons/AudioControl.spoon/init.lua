@@ -17,6 +17,8 @@ obj.license = "MIT - https://opensource.org/licenses/MIT"
 
 obj.logger = hs.logger.new("AudioControl")
 
+local alerts = dofile(hs.configdir .. "/Spoons/shared_alerts.lua")
+
 --- AudioControl.trustedSSIDs
 --- Variable
 --- 受信任的 WiFi SSID 白名单（精确匹配，区分大小写）
@@ -92,7 +94,7 @@ local function notifySSIDUnavailable(details, force)
     return
   end
   obj.lastSSIDUnavailableNotifyAt = os.time()
-  hs.alert.show(
+  alerts.error(
     "AudioControl: Unable to read WiFi SSID.\nEnable Location Services for Hammerspoon in:\n"
       .. wifi.locationServicesHint(),
     4
