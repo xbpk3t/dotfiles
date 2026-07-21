@@ -8,9 +8,9 @@
 let
   cfg = config.modules.AI.claude;
   subagentSrc = "${pkgs.voltagent-subagents}";
-  # Herdr Claude integration (vendored v7). SessionStart reports session_id for
-  # resume_agents_on_restore. No-op outside Herdr panes (requires HERDR_ENV=1).
-  # Store path so we don't need programs.claude-code.hooks / integration install.
+  # Herdr Claude integration (vendored v7) — home/base/AI/hooks/herdr-agent-state.sh
+  # SessionStart reports session_id for resume_agents_on_restore; state is screen-detected.
+  # No-op outside Herdr panes (HERDR_ENV=1). Wired via HM settings, NOT `herdr integration install`.
   herdrAgentStateHook = pkgs.writeScript "herdr-agent-state.sh" (
     builtins.readFile ./hooks/herdr-agent-state.sh
   );
@@ -213,15 +213,15 @@ in
               CCX_AI_BASE_URL = "https://api.lucc.dev/v1";
             };
 
-            # Herdr: report Claude session id for native resume (state still screen-detected).
-            # command points at nix store script (see herdrAgentStateHook above).
+            # Herdr: SessionStart → session id for native resume (state still screen-detected).
+            # Do not run `herdr integration install claude` — this replaces that install path.
             hooks = {
               SessionStart = [
                 {
                   hooks = [
                     {
                       type = "command";
-                      command = "'${herdrAgentStateHook}' session";
+                      command = "${herdrAgentStateHook} session";
                     }
                   ];
                 }

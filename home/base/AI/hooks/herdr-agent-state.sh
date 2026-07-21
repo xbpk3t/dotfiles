@@ -1,7 +1,21 @@
 #!/bin/sh
 # Vendored from herdr Claude integration (HERDR_INTEGRATION_VERSION=7).
-# Managed by home-manager (home/base/devops/herdr-agent-state.sh + claude.nix).
-# Do not run `herdr integration install claude` against HM-managed settings.json.
+#
+# Source of truth (HM):
+#   home/base/AI/hooks/herdr-agent-state.sh  (this file)
+#   home/base/AI/claude.nix                  (SessionStart → nix store script)
+#
+# What this does:
+#   - SessionStart only: reports Claude session_id to Herdr for resume_agents_on_restore
+#   - Agent state (blocked/working/done/idle) still comes from Herdr screen detection
+#   - No-op outside Herdr panes (requires HERDR_ENV=1 + HERDR_SOCKET_PATH + HERDR_PANE_ID)
+#
+# Do NOT run on this machine:
+#   herdr integration install claude
+# settings.json is HM-managed (immutable nix store). Official install will EPERM and/or
+# drop a stale copy at ~/.claude/hooks/herdr-agent-state.sh that is NOT used by settings.
+# herdr integration status may still report that path — trust SessionStart in settings.json.
+#
 # HERDR_INTEGRATION_ID=claude
 # HERDR_INTEGRATION_VERSION=7
 
