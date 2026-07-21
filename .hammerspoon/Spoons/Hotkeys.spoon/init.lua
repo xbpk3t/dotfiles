@@ -40,9 +40,12 @@ obj._chrome = {
 local appHotkeys = {
   { key = "1", bundleID = "com.apple.finder", label = "Finder" },
   { key = "2", bundleID = "com.google.Chrome", label = "Chrome" },
+
   -- { key = "3", bundleID = "com.jetbrains.goland", label = "GoLand" },
   { key = "3", bundleID = "dev.zed.Zed", label = "Zed" },
-  { key = "0", bundleID = "com.cmuxterm.app", label = "Cmux" },
+
+  -- { key = "0", bundleID = "com.cmuxterm.app", label = "Cmux" },
+  { key = "0", bundleID = "com.mitchellh.ghostty", label = "Cmux" },
 }
 
 local function launchApp(bundleID, label)
