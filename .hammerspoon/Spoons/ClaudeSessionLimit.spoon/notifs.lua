@@ -11,7 +11,7 @@ local function show(text, duration)
 end
 
 function notifs.sessionLimitExceeded(currentCount, maxCount, excessCount)
-  return alerts.error(
+  return alerts.show(
     string.format(
       "Claude session 过多！当前: %d 个，限制: %d 个，需关闭: %d 个",
       currentCount,
