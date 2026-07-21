@@ -16,6 +16,8 @@ obj.license = "MIT - https://opensource.org/licenses/MIT"
 
 obj.logger = hs.logger.new("HearingToggle")
 
+local alerts = dofile(hs.configdir .. "/Spoons/shared_alerts.lua")
+
 obj.nuPath = "/etc/profiles/per-user/luck/bin/nu"
 obj.assetRoot = "/System/Library/AssetsV2/com_apple_MobileAsset_ComfortSoundsAssets"
 obj.soundFile = "/tmp/bgnoise/sound"
@@ -354,7 +356,7 @@ end
 
 function obj:status()
   local record = self:_statusRecord()
-  hs.alert.show(self:_statusMessage(record))
+  alerts.info(self:_statusMessage(record))
   self.logger.i(hs.inspect(record))
   return record
 end
