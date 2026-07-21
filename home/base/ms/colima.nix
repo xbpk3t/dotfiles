@@ -22,7 +22,15 @@ in
 
       profiles.default = {
         isActive = true;
-        isService = true;
+        # isService = LaunchAgent 登录自启 + KeepAlive 保活。
+        # 保持 false：日常用 `colima start --save-config=false` / `colima stop` 管生命周期即可；
+        # isActive / setDockerHost / settings 不受影响。
+        #
+        # [2026-07-21] 勿改回 true：true 时 HM 激活会 bootout→bootstrap
+        # org.nix-community.home.colima-default；colima -f 关 VM 慢于 HM 等待窗口，
+        # 易 Bootstrap I/O error 5，整次 nix-darwin/deploy-rs 激活失败并回滚。
+        # 见同文件上方「不建议 launchd 启动」注释。
+        isService = false;
         setDockerHost = true;
 
         settings = {
