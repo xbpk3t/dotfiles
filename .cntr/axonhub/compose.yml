@@ -7,6 +7,13 @@
 #   register-lite — Grok 账号注册机（仅 127.0.0.1:8788，SSH tunnel 管理）
 #     SSH: ssh -L 8788:localhost:8788 nixos-vps-dev
 #     注册完成后在「账号池」→ 导出 CPA → cp 到 CPA/auth-dir/
+#   cpa-manager-plus — CPA Full Mode 管理/可观测/xAI 巡检（仅 127.0.0.1:18317）
+#     SSH: ssh -L 18317:localhost:18317 nixos-vps-dev
+#     浏览器: http://localhost:18317/management.html
+#     Admin Key = ${DEFAULT_SK}；首次进面板配置 CPA：
+#       URL = http://cli-proxy-api:8317
+#       Management Key = 明文 DEFAULT_SK（与 CPA remote-management 对应）
+#     xAI 巡检为 billing-first（不调推理）；已禁用 ywddd/grok-inspection 插件。
 #
 # 9router 架构：AxonHub → http://9router:20128/v1 → 9router → proxy pool → OpenCode Zen
 #   分离理由：只有 ds4f 走 proxy pool，其他 model 直连不走 9router。
@@ -145,7 +152,8 @@ services:
     ports:
       - "127.0.0.1:8317:8317"
     volumes:
-      # 注释掉ro，为了可以在CPA面板修改后，直接同步到本地配置（符合我的本地使用需求，因为我连 ak和sk都没配置）
+      # :ro 防 CPA 启动/管理面写回时序列化丢掉声明式字段（如 plugins 段，LUC-260）。
+      # usage-statistics-enabled 在 config 里声明为 true 即可；CPAMP setup 不要靠 PUT 写回。
       - ./CPA/config.yaml:/CLIProxyAPI/config.yaml:ro
       - ./CPA/auth-dir:/root/.cli-proxy-api
       - cpa_plugins:/CLIProxyAPI/plugins
@@ -162,6 +170,67 @@ services:
       test: ["CMD-SHELL", "timeout 3 bash -c ': > /dev/tcp/localhost/8317'"]
       interval: 30s
       timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+
+  # CPA Manager Plus Full Mode — 管理面板 + usage 持久化 + xAI 账单巡检/冷却
+  #
+  # 架构：CPAMP → http://cli-proxy-api:8317（同 compose default 网络 DNS）
+  # 网络：仅 default，不进 edge；端口只绑 127.0.0.1，经 SSH tunnel 访问。
+  #
+  # Dashboard 访问：
+  #   ssh -L 18317:localhost:18317 nixos-vps-dev
+  #   http://localhost:18317/management.html
+  #   Admin Key = ${DEFAULT_SK}
+  #
+  # 首次 Setup（UI，不写进 env）：
+  #   1. 打开 management.html，用 Admin Key 登录
+  #   2. CPA URL = http://cli-proxy-api:8317
+  #   3. CPA Management Key = 明文 DEFAULT_SK（config 里是 bcrypt 哈希）
+  #   4. 确认 Monitoring / Auth Files / xAI 巡检可用
+  #
+  # 注意：
+  #   - 持久化 /data（usage.sqlite + data.key）；丢 data.key 则已存 Management Key 不可恢复
+  #   - 巡检是 billing-first，不是对话活测（原 grok-inspection 插件已禁用）
+  #   - 官方参考：docker-compose.manager.yml / installer Full Mode
+  cpamp:
+    image: seakee/cpa-manager-plus:latest
+    container_name: cpamp
+    ports:
+      - "127.0.0.1:18317:18317"
+    volumes:
+      - cpamp_data:/data
+    environment:
+      HTTP_ADDR: "0.0.0.0:18317"
+      USAGE_DB_PATH: /data/usage.sqlite
+      CPA_MANAGER_DATA_KEY_PATH: /data/data.key
+      # 与 register-lite / 运维习惯统一；明文来自宿主机 env DEFAULT_SK
+      CPA_MANAGER_ADMIN_KEY: ${DEFAULT_SK}
+      USAGE_COLLECTOR_MODE: auto
+      USAGE_RESP_QUEUE: usage
+      USAGE_RESP_POP_SIDE: right
+      USAGE_BATCH_SIZE: "100"
+      USAGE_POLL_INTERVAL_MS: "500"
+      USAGE_QUERY_LIMIT: "50000"
+      USAGE_CORS_ORIGINS: "*"
+    # 仅 default：与 CPA 同网即可解析 cli-proxy-api，不经 edge/Caddy
+    depends_on:
+      cpa:
+        condition: service_healthy
+    restart: unless-stopped
+    # Why: 复用 AxonHub/CPA 的 OOM 教训；Full Mode 有 SQLite + usage 采集，单独封顶。
+    mem_limit: 1g
+    memswap_limit: 1g
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:18317/health"]
+      interval: 10s
+      timeout: 3s
       retries: 3
       start_period: 40s
     logging:
@@ -248,3 +317,5 @@ volumes:
   9router-data:
   grok2api-data:
   cpa_plugins:
+  # Full Mode 持久化 usage.sqlite + data.key（与服务 mounts 名一致）
+  cpamp_data:
