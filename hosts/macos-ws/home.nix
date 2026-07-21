@@ -15,6 +15,7 @@ _: {
           homelab.enable = true;
         };
       };
+      herdr.enable = true;
     };
 
     desktop = {

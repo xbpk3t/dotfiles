@@ -23,4 +23,9 @@ dependencies:
       skills:
         - opencli-usage # 命令快速参考，用来插命令
         - opencli-browser # opencli browser 命令（驱动chrome做交互式操作）
+
+    - git: https://gitee.com/qiyisoft001/verify-chain.git
+    # 验证链(Verify Chain) — 三段式文章核查流程
+    # Critic/Verifier/Repairer 角色对抗式技术文章交叉验证
+      path: verify-chain
   claude:
