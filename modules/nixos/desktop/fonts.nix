@@ -1,5 +1,8 @@
 # 注意：本文件仅作为stylix的补充配置
 { pkgs, ... }:
+let
+  fontsData = import ../../../../modules/fonts.nix { inherit pkgs; };
+in
 {
   # 修复 Chromium/Electron 应用字体模糊问题
   # 启用 stem darkening 以改善小字体在深色背景下的渲染
@@ -16,41 +19,7 @@
     enableDefaultPackages = false;
     fontDir.enable = true;
 
-    packages = with pkgs; [
-      source-serif-pro
-      source-sans-pro
-
-      inter-nerdfont
-
-      # Monospace fonts (等宽字体)
-      jetbrains-mono
-
-      # Nerd fonts for terminal and programming
-      nerd-fonts.jetbrains-mono
-      nerd-fonts.fira-code
-
-      # Emoji fonts
-      noto-fonts-color-emoji
-
-      # Chinese fonts for CJK support
-      # 苹果苹方
-      # apple-pingfang
-      # 思源黑体
-      # noto-fonts-cjk-sans
-      # 思源宋体
-      # noto-fonts-cjk-serif
-      # Adobe 思源黑体
-      source-han-sans
-      lxgw-neoxihei
-      # wqy_zenhei # 文泉驿正黑
-      # wqy_microhei
-
-      # Additional fonts for better rendering
-      # terminus_font
-
-      liberation_ttf
-      dejavu_fonts
-    ];
+    packages = fontsData.linux;
 
     fontconfig = {
       # User defined default fonts
