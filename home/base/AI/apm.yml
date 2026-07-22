@@ -28,4 +28,10 @@ dependencies:
     # 验证链(Verify Chain) — 三段式文章核查流程
     # Critic/Verifier/Repairer 角色对抗式技术文章交叉验证
       path: verify-chain
+
+  # deja-history：上游无 remote skill URL（install 时本地生成 SKILL.md）。
+  # 正文 pin 在 apm-local/deja-history/（官方 v0.15.0 MCP guidance）。
+  # Claude-only 落地由 claude.nix home.file → ~/.claude/skills/deja-history/，
+  # 不走 agent-skills 共享 catalog（避免 Codex 也装上）。
+  # MCP：home/base/AI/mcp.nix 的 deja；无 hooks；索引手动 deja warmup。
   claude:
