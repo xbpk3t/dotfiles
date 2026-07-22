@@ -59,16 +59,12 @@ in
       # Font configuration
       fonts = {
         # Monospace font for terminals and code
+        # 统一使用 JetBrainsMono Nerd Font，与 Ghostty 保持一致。
+        # 注意：这里只影响 stylix 所覆盖的 GTK/Qt 应用外观，
+        # 不涉及字体安装 —— 安装走 NixOS/darwin 的 fonts.packages。
         monospace = {
-          # package = pkgs.nerd-fonts.jetbrains-mono;
-          # name = "JetBrainsMono Nerd Font Mono";
-
-          # https://linux.do/t/topic/8043/
-          # https://zhuanlan.zhihu.com/p/627059922
-
-          # 这款字体的核心优势在于“博采众长”。它深度融合了三款知名字体的优点：Noto Sans的清晰易读性、Iosevka的编程场景适配性以及思源黑体的中文显示美感。在标准缩放比例下，无论是10pt的终端显示，还是14pt的代码编辑器视图，Sarasa-Gothic都能保持字体边缘锐利、字符间距均匀，不会出现中文与英文错位、特殊符号模糊的问题——这正是很多编程字体在中文场景下的常见短板。 更值得一提的是，Sarasa Gothic并非单一字体，而是一个“字体家族”。它覆盖了文言文（CL）、简体中文（SC）、繁体中文（TC）、香港繁体（HC）、日语（J）、韩语（K）六种语言场景，同时针对不同使用场景开发了八大类优化版本，包括通用UI显示（Gothic）、界面适配（Ui）、编程专用（Mono）、 slab风格编程（MonoSlab）、终端场景（Term）、slab风格终端（TermSlab）、固定宽度（Fixed）、slab风格固定宽度（FixedSlab）。
-          package = pkgs.sarasa-gothic;
-          name = "Sarasa Mono SC";
+          package = pkgs.nerd-fonts.jetbrains-mono;
+          name = "JetBrainsMono Nerd Font Mono";
         };
 
         # UI文本 - 使用支持中文的字体

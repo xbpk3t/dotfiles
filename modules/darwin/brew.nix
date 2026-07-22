@@ -33,6 +33,8 @@ in
       "fetch"
       "mole"
       "dagu"
+
+      "vshulcz/tap/deja-vu"
     ];
 
     # 以下casks根据重要性排序

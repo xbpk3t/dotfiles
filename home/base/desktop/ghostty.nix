@@ -50,6 +50,23 @@ let
     #   theme = "Catppuccin Mocha";  # 若要跟 Stylix (catppuccin-mocha) 统一
     theme = "Apple System Colors";
 
+    # ── Font ────────────────────────────────────────────────────────
+    # 重复 font-family = 主字体 + 缺字 fallback（Ghostty 官方语义；多语言场景）。
+    # HM 侧用 list + listsAsDuplicateKeys，渲染成多行 font-family = ...
+    #
+    # 1) JetBrainsMono Nerd Font Mono
+    #    - 本机 ghostty +list-fonts 可见；stylix monospace 同名
+    #    - 用 Mono 变体（终端等宽）；不要写成裸 "JetBrainsMono Nerd Font"
+    # 2) PingFang SC
+    #    - CJK fallback；macOS 系统自带，Linux 侧本机已自行打包同名字体
+    #    - 非等宽，中文列宽可能略松，终端里可接受
+    font-family = [
+      "JetBrainsMono Nerd Font Mono"
+      "PingFang SC"
+    ];
+    # unicode：CJK/emoji 宽度更准（Ghostty 默认即此）；老程序光标错位再改 legacy
+    grapheme-width-method = "unicode";
+
     # ── Clipboard ───────────────────────────────────────────────────
     # 允许应用读取/写入/粘贴系统剪贴板。
     clipboard-read = "allow";
@@ -88,7 +105,6 @@ let
     # ── 待定（注释掉供参考）─────────────────────────────────────────
     # background = "black";
     # window-padding-color = "background";
-    # font-family = "0xProto";
     # font-size = 10;
     # mouse-hide-while-typing = true;
     # auto-update = "off";
