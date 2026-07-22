@@ -101,6 +101,21 @@ in
           default_tools_approval_mode = "approve";
         };
 
+        # deja-vu: local session-history MCP (recall / recall_context / blame / remember).
+        # Why declarative here instead of `deja install claude-code`:
+        # - HM owns MCP via mcp-servers-nix + programs.claude-code.enableMcpIntegration;
+        # - install would write imperative ~/.claude.json and fight Nix.
+        # No hooks (SessionStart/PreCompact/UserPromptSubmit): index refresh is manual
+        #   `deja warmup` / `deja index`. Skill guidance is separate (Claude-only SKILL.md).
+        # Binary: Homebrew short-term. MCP spawn often lacks interactive PATH → abs path.
+        # Follow-up: package deja-vu in flake and switch command to ${pkgs...}/bin/deja.
+        deja = {
+          command = "/opt/homebrew/bin/deja";
+          args = [ "mcp" ];
+          type = "stdio";
+          default_tools_approval_mode = "approve";
+        };
+
         # 这次选择它，不是因为它比 skill“更酷”，而是因为浏览器能力更适合作为 MCP 能力层接入。
         # upstream README 直接给出了 MCP 用法：`npx -y bb-browser --mcp`。
         # 与 chrome-devtools 的边界：

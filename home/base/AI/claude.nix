@@ -331,6 +331,8 @@ in
           "mcp__plugin_claude-code-home-manager_context7__*"
           # deepwiki 插件：公开 repo wiki 知识访问
           "mcp__plugin_claude-code-home-manager_deepwiki__*"
+          # deja-vu：跨 harness session 检索（mcp.nix 注册；HM 集成后的前缀）
+          "mcp__plugin_claude-code-home-manager_deja__*"
         ];
         ask = [
           "Bash(git push *)"
