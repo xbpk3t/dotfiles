@@ -19,6 +19,9 @@ _: {
       # Trial: parallel with cmux; Claude SessionStart hook is in modules.AI.claude (HM),
       # not `herdr integration install`. Bump llm-agents to upgrade herdr version.
       herdr.enable = true;
+      # PR TUI（nixpkgs）+ review-first diff（llm-agents）；herdr keys: ctrl+alt+p / d
+      ghui.enable = true;
+      hunk.enable = true;
     };
 
     desktop = {
