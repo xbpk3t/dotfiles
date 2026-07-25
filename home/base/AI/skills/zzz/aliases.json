@@ -1,0 +1,14 @@
+{
+  "3w3h": "analysis/3w3h",
+  "brk": "analysis/brk",
+  "judge": "analysis/judge",
+  "recall": "analysis/recall",
+  "stats-zzz": "analysis/stats-zzz",
+  "uu": "analysis/uu",
+  "choose": "choose",
+  "conclusion": "conclusion",
+  "repo": "repo/repo",
+  "search-repo": "repo/search-repo",
+  "table2yml": "repo/table2yml",
+  "vs": "repo/vs"
+}
