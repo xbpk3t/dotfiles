@@ -1,7 +1,10 @@
 {
   "3w3h": "analysis/3w3h",
+  "analogy": "analysis/analogy",
   "brk": "analysis/brk",
+  "diagram": "analysis/diagram",
   "judge": "analysis/judge",
+  "mapping": "analysis/mapping",
   "recall": "analysis/recall",
   "stats-zzz": "analysis/stats-zzz",
   "uu": "analysis/uu",
