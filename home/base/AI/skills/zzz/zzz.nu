@@ -16,13 +16,34 @@ def get-available [aliases: record] {
 }
 
 def log-hit [sub: string, file: string] {
-    let stats_file = $"($env.HOME)/.claude/zzz-stats.jsonl"
-    let entry = ({
-        sub: $sub
-        target: $file
-        ts: (date now | format date "%Y-%m-%dT%H:%M:%S%z")
-    } | to json)
-    try { $entry | save --append $stats_file } catch {|e|}
+    # Counter file (not jsonl): upsert count per subcommand.
+    # Fresh start: do not read ~/.claude/zzz-stats.jsonl if present.
+    let stats_file = $"($env.HOME)/.claude/zzz-stats.json"
+    let ts = (date now | format date "%Y-%m-%dT%H:%M:%S%z")
+    try {
+        let stats = (
+            if ($stats_file | path exists) {
+                open $stats_file
+            } else {
+                {}
+            }
+        )
+        let prev = ($stats | get --optional $sub)
+        let count = (
+            if $prev == null {
+                1
+            } else {
+                ($prev | get --optional count | default 0) + 1
+            }
+        )
+        let entry = {
+            count: $count
+            last_ts: $ts
+            target: $file
+        }
+        let updated = ($stats | upsert $sub $entry)
+        $updated | to json | save --force $stats_file
+    } catch {|e|}
 }
 
 def resolve-file [aliases: record, sub: string] {
