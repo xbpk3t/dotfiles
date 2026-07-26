@@ -27,6 +27,16 @@ if not success1 then
   print("AudioControl 错误:", err1)
 end
 
+-- 麦克风守卫：阻止蓝牙耳机被设为默认输入（避免 WeType/会议触发 HFP 音质）
+local successMicGuard, errMicGuard = pcall(function()
+  hs.loadSpoon("MicGuard")
+  spoon.MicGuard:start()
+end)
+if not successMicGuard then
+  alerts.error("MicGuard 加载失败")
+  print("MicGuard 错误:", errMicGuard)
+end
+
 local success2, err2 = pcall(function()
   hs.loadSpoon("ChromeTabLimit")
   alerts.success("ChromeTabLimit 加载成功")
