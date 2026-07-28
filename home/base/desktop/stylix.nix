@@ -107,6 +107,23 @@ in
         # helix本身有内置theme，比stylix提供的要好很多
         helix.enable = false;
 
+        # autoEnable=true 时 stylix 会给「所有已实现 target」写主题文件，
+        # 不检查本机是否安装对应 app。结果是 HOME 出现从未用过的路径，例如：
+        #   blender → ~/.config/blender/{3.0–4.5}/…/Stylix.xml
+        #   vencord → ~/.config/Vencord/themes/stylix.theme.css
+        #   forge   → ~/.config/forge/stylesheet/…（GNOME 扩展，mac 无关）
+        #   gedit / gtksourceview → ~/.local/share/…/styles/stylix.xml
+        #   gtk → gtk-3/4 css、.gtkrc、~/.themes/adw-gtk3、flatpak overrides
+        #   xresources → ~/.Xresources（mac 几乎无 X11 客户端）
+        # 本机不用这些，显式关掉。常用 target（bat/btop/k9s/…）仍走 autoEnable。
+        blender.enable = false;
+        vencord.enable = false;
+        forge.enable = false;
+        gedit.enable = false;
+        gtksourceview.enable = false;
+        gtk.enable = false;
+        xresources.enable = false;
+
         # 配置 Firefox profile names 以避免 stylix warning
         firefox.profileNames = [ "default" ];
       }

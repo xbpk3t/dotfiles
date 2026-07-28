@@ -773,7 +773,7 @@ let
     };
   };
 
-  # --- userKeymaps → keymaps.json ---
+  # --- userKeymaps → keymap.json（官方路径是单数；曾误写成 keymaps.json 导致未生效）---
   keymaps = [
     # 非 vim mode：只保留不依赖 vim 的快捷键
     {
@@ -1221,7 +1221,7 @@ in
           text = builtins.toJSON settings;
           force = true;
         };
-        ".config/zed/keymaps.json" = {
+        ".config/zed/keymap.json" = {
           text = builtins.toJSON keymaps;
           force = true;
         };
