@@ -826,13 +826,24 @@ let
         cmd-b = "workspace::ToggleRightDock";
       };
     }
-    # 禁用 CMD +/- 字体缩放快捷键（容易误触）
+    # Popup Search（Telescope 式模糊查找，Zed v1.9.0+）
+    # https://github.com/zed-industries/zed/pull/59604
+    {
+      bindings = {
+        "cmd-shift-f" = "text_finder::Toggle";
+      };
+    }
+    # 禁用 CMD +/-/0 字体缩放快捷键（容易误触）
     {
       context = "Workspace";
       bindings = {
-        "cmd-+" = null;
-        "cmd-=" = null;
+        # 标准美式键盘上，+ 是通过 Shift + = 打出来的
+        # 你按 Cmd + +，操作系统实际发送的是 Cmd + Shift + =
+        # - Zed 的默认快捷键绑定是 cmd-shift-= → workspace::IncreaseBufferFontSize，不是 cmd-+
+        # - 所以 "cmd-+" = null 匹配不到任何默认绑定，也就没生效
+        "cmd-shift-=" = null;
         "cmd--" = null;
+        "cmd-0" = null;
       };
     }
   ];

@@ -1,5 +1,6 @@
 {
   config,
+  editorMeta,
   lib,
   pkgs,
   ...
@@ -22,7 +23,8 @@ in
     home.packages = [ pkgs.ghui ];
 
     # 结构化 nix → JSON（同 pi-agent settings 思路）。
-    # workspace 默认 editorCommand 是 nvim；本机 GUI 主编辑为 Zed。
+    # editor 跟 host metadata（commonEditor.command = hx），避免 mac 写死 zed、
+    # Linux/VPS headless 打不开 GUI。
     # 不设 repoPaths：多机/多目录（Desktop/dotfiles 等）不宜绑死 ~/Code/:repo。
     home.file.".config/ghui/config.json" = {
       force = true;
@@ -30,7 +32,7 @@ in
         theme = "system";
         systemThemeAutoReload = true;
         showScrollbars = false;
-        editorCommand = "zed {{repoPath}}";
+        editorCommand = "${editorMeta.command} {{repoPath}}";
       };
     };
   };
