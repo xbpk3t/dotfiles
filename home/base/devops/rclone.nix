@@ -4,41 +4,40 @@
   ...
 }:
 let
-  # rclone.conf 是 INI，用 formats.ini，不用 programs.rclone.remotes（后者走 systemd/launchd 运行时写 mutable 文件，不进 home-manager-files，Darwin 上 还曾长期不落地；与本仓库「home.file 真纳管」惯例不一致）。
-  iniFormat = pkgs.formats.ini { };
+  # rclone.conf 是 INI。用 sops.templates 渲染含 AK/SK 的完整配置，
+  # 不走 programs.rclone.remotes（Darwin 上 launchd 弱收敛），
+  # 也不走 env_auth + sessionVariables（HM guard 导致子 shell 丢失 env）。
+  # 跟 mihomo/singbox 同一模式：sops 运行时注入密钥，不进 nix store。
+  rcloneConfPath = config.sops.templates."rclone.conf".path;
 in
 {
   home = {
     packages = [ pkgs.rclone ];
 
     # 配置路径: ~/.config/rclone/rclone.conf
-    # force：盖掉旧 launchd/手工留下的明文 conf，避免双轨。
-    # ⚠️  不把 AK/SK 写进 conf（会进 store）。密钥见下方 sessionVariables + env_auth。
+    # 用 mkOutOfStoreSymlink 指向 sops 渲染出来的路径（含 AK/SK），
+    # force 盖掉旧文件。不用 source = path 是因为 eval 时 sops 路径还不存在。
     # ⚠️  接受不 interactive：`rclone config` 会因 conf 为 store 软链而失败——改 remote 只改本文件。
     file.".config/rclone/rclone.conf" = {
       force = true;
-      source = iniFormat.generate "rclone.conf" {
-        r2 = {
-          type = "s3";
-          provider = "Cloudflare";
-          # 运行时从环境读凭证（见 sessionVariables 的 AWS_*）；不把 secret 写进 conf/store。
-          env_auth = true;
-          region = "auto";
-          endpoint = "https://96540bd100b82adba941163704660c31.r2.cloudflarestorage.com";
-          acl = "private";
-        };
-
-        # oss = {
-        #   type = "...";
-        # };
-      };
+      source = config.lib.file.mkOutOfStoreSymlink rcloneConfPath;
     };
+  };
 
-    # rclone s3 的 env_auth 认的是 AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY，
-    # 不是 cf.nix 里的短名 CF_R2_*（那些留给手工脚本）。同一 sops 源。
-    sessionVariables = {
-      AWS_ACCESS_KEY_ID = "$(cat ${config.sops.secrets.CF_R2_AK.path})";
-      AWS_SECRET_ACCESS_KEY = "$(cat ${config.sops.secrets.CF_R2_SK.path})";
-    };
+  # sops 运行时渲染完整 conf（含 AK/SK），不进 /nix/store。
+  # 渲染结果由 sops-install-secrets 写入 store 外路径，home.file 软链指向它。
+  # ${config.sops.placeholder.CF_R2_AK} 是 sops placeholder，激活时被替换为实际密钥值。
+  sops.templates."rclone.conf" = {
+    content = ''
+      [r2]
+      type = s3
+      provider = Cloudflare
+      env_auth = false
+      access_key_id = ${config.sops.placeholder.CF_R2_AK}
+      secret_access_key = ${config.sops.placeholder.CF_R2_SK}
+      region = auto
+      endpoint = https://96540bd100b82adba941163704660c31.r2.cloudflarestorage.com
+      acl = private
+    '';
   };
 }

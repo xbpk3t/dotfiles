@@ -145,6 +145,11 @@ in
       #    };
     };
 
+    # stylix 的 xresources target（stylix.targets.xresources.enable = false）
+    # 在此版本未完全生效，仍会设置 xresources.properties。HM 的 xresources 模块
+    # 无 enable 开关，有 properties 就会写出 .Xresources。直接覆盖为 null 阻止。
+    xresources.properties = lib.mkForce null;
+
     home.packages =
       with pkgs;
       optionals isLinux [
