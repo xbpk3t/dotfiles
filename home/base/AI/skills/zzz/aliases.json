@@ -5,6 +5,7 @@
   "diagram": "analysis/diagram",
   "judge": "analysis/judge",
   "mapping": "analysis/mapping",
+  "mapping-check": "analysis/mapping-check",
   "recall": "analysis/recall",
   "stats-zzz": "analysis/stats-zzz",
   "uu": "analysis/uu",

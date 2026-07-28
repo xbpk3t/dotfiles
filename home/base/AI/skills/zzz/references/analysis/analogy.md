@@ -6,7 +6,7 @@ description: 跨域生活隐喻助记；同一 case 贯穿细节（供 recall pi
 
 # analogy — 类比（生活隐喻）
 
-**是什么：** 跨域、偏生活的隐喻，降低记忆成本。  
+**是什么：** 跨域、偏生活的隐喻，降低记忆成本。
 **不是：** 异层同构（那是 `mapping`）、相关 topic 列表、竞品对比（那是 `vs`）。
 
 本 atom 通常由 `/zzz recall` 在用户**明确同意【类比】**后以 **sub-agent** 调用。也可单独 `/zzz analogy`（须有明确 topic / gap / 概念）。
