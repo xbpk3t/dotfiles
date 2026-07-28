@@ -20,7 +20,6 @@ description: 读取 zzz-stats.json，输出子命令频次与降级建议
 ```
 
 - 每次 `/zzz <name>` 路由成功：`count += 1`，更新 `last_ts` / `target`
-- **不读**旧的 `~/.claude/zzz-stats.jsonl`（若仍存在可手动删或留档；stats 与路由均忽略它）
 - 文件不存在：说明尚未有任何新格式调用记录 → 总次数 0
 
 ## 输出格式
