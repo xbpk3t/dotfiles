@@ -4,15 +4,15 @@
   "brk": "analysis/brk",
   "diagram": "analysis/diagram",
   "judge": "analysis/judge",
-  "mapping": "analysis/mapping",
   "mapping-check": "analysis/mapping-check",
+  "mapping": "analysis/mapping",
   "recall": "analysis/recall",
   "stats-zzz": "analysis/stats-zzz",
   "uu": "analysis/uu",
   "choose": "choose",
   "conclusion": "conclusion",
+  "explore": "repo/explore",
   "repo": "repo/repo",
-  "search-repo": "repo/search-repo",
   "table2yml": "repo/table2yml",
   "vs": "repo/vs"
 }
