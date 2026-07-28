@@ -23,9 +23,16 @@ in
 
   config = lib.mkIf cfg.enable {
 
-    home.packages = with inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}; [
-      herdr
-    ];
+    home.packages =
+      with inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
+      [
+        herdr
+      ]
+      ++ lib.optionals pkgs.stdenv.isDarwin [
+        # terminal-notifier: macOS 15+ 封锁了 osascript display notification，
+        # herdr 优先走 terminal-notifier 路径弹系统通知，fallback 到 osascript 无画面。
+        pkgs.terminal-notifier
+      ];
 
     # 配置路径: ~/.config/herdr/config.toml
     # 结构化 nix → TOML（相同思路参考 pi-agent toJSON）。
@@ -95,28 +102,45 @@ in
           # Agents 列表按 workspace 顺序排列
           agent_panel_sort = "spaces";
 
-          # ——— 通知：macOS 通知中心 ———
-          # "system"   → OS 原生（macOS Notification Center）
-          # "herdr"    → TUI 内弹条
+          # mouse_capture = true（默认）保持 herdr 鼠标 UI。
+          # 尝试 false 后确认不可用：选中复制(copy_on_select)依赖 mouse capture 创建 selection，
+          # 且滚轮会被终端拦截为 ↑/↓，Claude 收 ↑/↓ 翻历史而非翻 pane scrollback。
+          # 全键盘驱动不受 sidebar/tab 点击影响；Cmd-Click URL 用 prefix+[ 复制模式替代。
+          mouse_capture = true;
+
+          # ——— 通知 ———
+          # "system"   → OS 原生（macOS Notification Center，通过 terminal-notifier）
+          # "herdr"    → TUI 内弹条（Linux / headless / remote server 侧）
           # "terminal" → 委托外层终端（Ghostty）弹通知
           # "off"      → 关闭
-          # mouse_capture 保持默认 true：Cmd-click 开 URL 需 false，但会丢掉 herdr 鼠标 UI
+          # ⚠️ macOS 15+ 静默封锁了 osascript display notification（exit 0 不报错），
+          #    herdr 内部优先级 terminal-notifier > osascript，所以需要安装
+          #    terminal-notifier 包（见上方 home.packages）才走通 system 路径。
           toast = {
-            delivery = "system";
+            delivery = if pkgs.stdenv.isDarwin then "system" else "herdr";
             delay_seconds = 1; # 防抖：状态持续 1s 后才弹通知
           };
         };
 
         # ——— 键位 / 自定义命令 ———
-        # 不用 workspace 的 omp/ghui 四格插件；agent cockpit 工具层全用 popup（A 除外）：
-        #   A: 当前 pane 右侧再开一格 claude
-        #   G: lazygit（stage/commit）
-        #   D: hunk diff（review-first；包+配置见 hunk.nix）
-        #   P: ghui PR（包+配置见 ghui.nix）
-        #   L: lazydocker（colima/compose；core/ms/lazydocker.nix）
-        #   Y: yazi（文件浏览；勿用 yy shell wrapper，popup 改不了外层 cwd）
-        #   T: btop（资源）
-        #   K: k9s（集群）
+        # 导航键分两层（参考 herdr --default-config 完整键列表）：
+        #
+        #   direct（无 prefix，高频）：ctrl+alt+letter
+        #     [ / ]  Agent 前后切换         u / i  Tab 前后切换
+        #     \     回跳上一个 pane          e      新 Tab
+        #     t     split right + claude    g      lazygit
+        #     d     hunk diff
+        #
+        #   prefix（ctrl+b + …，中/低频）：
+        #     h/j/k/l     pane 方向          x     关 pane
+        #     ,/.         prev/next ws       v/−    split
+        #     shift+1..9  跳 workspace       c      新 tab（或 ctrl+alt+e）
+        #     shift+r     reload config
+        #
+        # 注释掉的备选 popup（等需要时解开）：
+        #   b  btop（原 t 被 split claude 占）  p  ghui PR
+        #   l  lazydocker                         y  yazi
+        #   k  k9s
         #
         # 修饰：ctrl+alt+letter（无 prefix，一击）。
         # macOS 上 alt = Option 键；herdr/ghostty 配置里写 alt，物理键是 ⌥。
@@ -124,9 +148,32 @@ in
         # herdr 文档示例也把 ctrl+alt+n 标成 direct terminal-mode shortcut。
         # 残留风险：少数 IME/终端对 Option 组合键吞键 → 整层改 prefix+alt。
         keys = {
+          # ——— Agent 导航（高频 → direct key，无 prefix） ———
+          # `[` / `]` 直觉对应后退/前进；和 Ghostty ctrl+left_bracket 不冲突
+          previous_agent = "ctrl+alt+[";
+          next_agent = "ctrl+alt+]";
+
+          # ——— Tab 导航（高频 → direct key） ———
+          # u = ← / i = →（键盘位置直觉）；e = empty = 新 tab
+          previous_tab = "ctrl+alt+u";
+          next_tab = "ctrl+alt+i";
+          new_tab = "ctrl+alt+e";
+
+          # ——— Pane 跳转 ———
+          # 回跳到上一个活跃 pane（反斜杠 = "跳转"隐喻）
+          last_pane = "ctrl+alt+\\";
+
+          # ——— Workspace 切换（中频 → prefix 层） ———
+          # comma/period = 后退/前进（物理键位直觉）
+          previous_workspace = "prefix+comma";
+          next_workspace = "prefix+period";
+          # shift+1..9 区别于 tab 的 1..9
+          switch_workspace = "prefix+shift+1..9";
+
+          # ——— 自定义命令（popup / shell） ———
           command = [
             {
-              key = "ctrl+alt+a";
+              key = "ctrl+alt+t";
               type = "shell";
               description = "split right and run claude (cwd follows source pane)";
               # pane split 无「创建即 run」；先 split 拿 pane_id，再 pane run。
@@ -154,46 +201,46 @@ in
               width = "90%";
               height = "90%";
             }
-            {
-              key = "ctrl+alt+p";
-              type = "popup";
-              description = "ghui PR dashboard";
-              command = "ghui";
-              width = "90%";
-              height = "90%";
-            }
-            {
-              key = "ctrl+alt+l";
-              type = "popup";
-              description = "lazydocker floating popup";
-              command = "lazydocker";
-              width = "90%";
-              height = "90%";
-            }
-            {
-              key = "ctrl+alt+y";
-              type = "popup";
-              description = "yazi file manager";
-              command = "yazi";
-              width = "90%";
-              height = "90%";
-            }
-            {
-              key = "ctrl+alt+t";
-              type = "popup";
-              description = "btop resource monitor";
-              command = "btop";
-              width = "90%";
-              height = "90%";
-            }
-            {
-              key = "ctrl+alt+k";
-              type = "popup";
-              description = "k9s kubernetes dashboard";
-              command = "k9s";
-              width = "90%";
-              height = "90%";
-            }
+            # {
+            #   key = "ctrl+alt+p";
+            #   type = "popup";
+            #   description = "ghui PR dashboard";
+            #   command = "ghui";
+            #   width = "90%";
+            #   height = "90%";
+            # }
+            # {
+            #   key = "ctrl+alt+l";
+            #   type = "popup";
+            #   description = "lazydocker floating popup";
+            #   command = "lazydocker";
+            #   width = "90%";
+            #   height = "90%";
+            # }
+            # {
+            #   key = "ctrl+alt+y";
+            #   type = "popup";
+            #   description = "yazi file manager";
+            #   command = "yazi";
+            #   width = "90%";
+            #   height = "90%";
+            # }
+            # {
+            #   key = "ctrl+alt+b";
+            #   type = "popup";
+            #   description = "btop resource monitor (ctrl+alt+t 被 split claude 占用，改 b)";
+            #   command = "btop";
+            #   width = "90%";
+            #   height = "90%";
+            # }
+            # {
+            #   key = "ctrl+alt+k";
+            #   type = "popup";
+            #   description = "k9s kubernetes dashboard";
+            #   command = "k9s";
+            #   width = "90%";
+            #   height = "90%";
+            # }
           ];
         };
 
@@ -203,8 +250,9 @@ in
 
           # macOS 上 Claude 隐藏光标时，修复 IME 候选窗口不跟随的问题。
           # 副作用：vim 普通模式下会多一个光标。
-          reveal_hidden_cursor_for_cjk_ime = true;
-          cjk_ime_agents = [ "claude" ];
+          # Linux / remote server 无本机 IME 候选窗，关掉避免无意义副作用。
+          reveal_hidden_cursor_for_cjk_ime = pkgs.stdenv.isDarwin;
+          cjk_ime_agents = lib.optionals pkgs.stdenv.isDarwin [ "claude" ];
         };
 
       }; # source
