@@ -14,6 +14,8 @@ pipeline:
 
 或者说，在什么情况下应用。逐点告诉我，我自己评估一下。
 
+（尚无候选、或还想找 peer/上位覆盖：先 `/zzz explore`，再回到本步。）
+
 ---
 
 完成上述了解后，再参考 [references/analysis/3w3h.md](references/analysis/3w3h.md) 做进一步的 3W3H 结构化分析。
