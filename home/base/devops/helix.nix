@@ -14,6 +14,8 @@ in
       theme = "monokai";
 
       editor = {
+        # 启用 true color（终端颜色正确渲染）
+        true-color = true;
         color-modes = true;
         bufferline = "multiple";
 
@@ -32,6 +34,16 @@ in
         lsp = {
           display-messages = true;
           display-inlay-hints = true;
+        };
+
+        # 左侧边栏：diff 变更 | 诊断 | 行号 | 间隔
+        gutters = {
+          layout = [
+            "diff"
+            "diagnostics"
+            "line-numbers"
+            "spacer"
+          ];
         };
 
         indent-guides = {
@@ -83,6 +95,8 @@ in
         idle-timeout = 0;
         completion-trigger-len = 1;
         line-number = "relative";
+        # 光标始终居中，无需手动滚屏
+        scrolloff = 99999;
         file-picker.hidden = false;
         file-picker.ignore = false;
 
@@ -127,6 +141,15 @@ in
           left = "goto_previous_buffer";
           right = "goto_next_buffer";
 
+          # gg 系：文件首/尾
+          g = {
+            j = "goto_file_end";
+            k = "goto_file_start";
+          };
+
+          # G 跳到最后一行
+          "G" = "goto_last_line";
+
           "#" = "toggle_comments";
           c = "change_selection_noyank";
           d = "delete_selection_noyank";
@@ -163,11 +186,13 @@ in
           "Y" = ":clipboard-yank";
           tab = "extend_parent_node_end";
           S-tab = "extend_parent_node_start";
-          gj = "goto_last_line";
-          gk = "goto_file_start";
+          # select mode 自动继承 normal 键位，g j / g k 已在 normal 定义
         };
         insert = {
-          "jk" = "normal_mode";
+          # 双击 j 退回 normal 模式（替代之前的 jk 非法绑定）
+          j = {
+            j = "normal_mode";
+          };
           "A-h" = "move_char_left";
           "A-j" = "move_line_down";
           "A-k" = "move_line_up";
