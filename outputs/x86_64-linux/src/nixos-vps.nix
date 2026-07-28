@@ -32,7 +32,20 @@ let
       "hosts/${name}/home.nix"
       "secrets/default.nix"
       "home/core"
+      # agent cockpit (pointwise — not whole home/base/devops)
       "home/base/devops/rclone.nix"
+      "home/base/devops/herdr.nix"
+      "home/base/devops/ghui.nix"
+      "home/base/devops/hunk.nix"
+      "home/base/devops/yazi.nix" # herdr ctrl+alt+y
+      # helix.nix reads modules.langs.lsp.packages — import option def; leave lsp.enable false
+      "home/base/langs/lsp.nix"
+      "home/base/devops/helix.nix" # ghui/yazi/$EDITOR → hx; herdr popup open paths
+      # k9s (+ kubectl toolchain). VPS already runs k3s; herdr ctrl+alt+k.
+      "home/base/ms/k8s.nix"
+      # Claude + shared skills (herdr ctrl+alt+a / resume_agents_on_restore hook)
+      "home/base/AI/claude.nix"
+      "home/base/AI/skills.nix"
     ];
   };
 
