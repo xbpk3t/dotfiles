@@ -137,7 +137,7 @@ role: meta | derive | sol | cost | case | l3
 | 用户确认 | 父 agent 动作 |
 |----------|----------------|
 | 要类比 | 起 sub-agent 跑 `analogy`（`nu …/zzz.nu … analogy` → Read body）；只传 topic、本题、gap、统一 case 约束 |
-| 要 mapping | 起 sub-agent 跑 `mapping`；强调 **topic 级先、qs 级步骤对应** |
+| 要 mapping | 起 sub-agent 跑 `mapping`（见下「recall 内 mapping」） |
 | 都不要 | `skipped: analogy — 用户未确认` / `skipped: mapping — 用户未确认` |
 | 只要其一 | 另一项 skipped |
 
@@ -147,11 +147,22 @@ role: meta | derive | sol | cost | case | l3
   - [analogy.md](analogy.md)
   - [mapping.md](mapping.md)
 
-### mapping 分层（父 agent 验收时核对）
+### recall 内 mapping（确认后 sub-agent；**禁止落盘**）
 
-- **topic**：整体控制结构同构
-- **qs**：仅本题机制/步骤对应；禁止 qs 另起无关域整套 mapping
-- **类比**：同一 case 贯穿；禁止多工具 mechanism 拼盘
+1. Sub-agent **只**执行 `mapping.md` body；topic 级先、qs 挂已选轴。
+2. **默认只跑拍 A：** 只输出会话 artifact（`mapping.md` §4.1）`topic-map` + `qs-map` + 差分闸。
+3. **拍 B（抓手环）** 仅当用户明确要抽主轴/抓手/更多 case，或上下文已有 ≥2 条同轴 ok map——见 `mapping.md` §4.4；仍只会话输出 `handle`/`candidates`，candidate 不得直接当 ok。
+4. **禁止落盘：** 不写 `data/gh`、不写任何 `*.yml` / 矩阵表、不改 wiki；本轮映射仅存在于对话。
+5. 父 agent 验收（缺则打回或标不合格，禁止心算补全）：
+   - 有 `layer_kind: cross|instance`
+   - 有 **`score: 1–5`**（每条有效 topic-map 一个分；禁止省略、禁止无脑 3）
+   - `score >= 4` 时有一句 score 依据
+   - instance / 半轴有 `boundary`；建议有负迁移
+   - **差分闸：** 有 `继承` / `新变量` / `失效点`；instance 的新变量与失效点不得敷衍；`score >= 4` 时新变量或失效点至少一格有实质内容
+   - 若跑了拍 B：handle 来自 ≥2 ok map；有结构/适用范围/反例或边界；candidates 标待验证
+   - 非 D/I/K/P/C/S；非 qs 另起炉灶；非拼盘；非「XX 不就是 YY」空还原
+6. 汇合后 **原样展示** artifact；用户若另说「写入库存表」才出 recall 流程、另议落盘——**默认 recall 永不落 mapping 盘**。
+7. 用户闭卷 maps 若只有标签等价（「不就是 XX」）→ 批改按 **假 maps / 还原陷阱** 处理，可追问新变量，不因「沾边」给分。
 
 ### 展开（仅当用户要【展开】）
 
@@ -168,6 +179,6 @@ role: meta | derive | sol | cost | case | l3
 ## next
 - 下一题方向: …
 - 建议回看 mdscc 键: … | spine: inferred/authoritative
-- write: 默认不写 data/gh
+- write: 默认不写 data/gh；mapping 默认不落盘
 - skip: …
 ```
