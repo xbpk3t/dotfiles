@@ -4,12 +4,18 @@
 #
 # 依赖 host shell 环境中的 ACTIONS_RUNNER_TOKEN 变量（经由 sops +
 # home.sessionVariables 注入），不依赖 .env 文件。
+#
+# 重要：必须 DISABLE_AUTO_UPDATE + 钉死 image tag。
+# runner 进程内 self-update 会改写容器可写层的 /actions-runner/bin，
+# 半截失败会导致 bin 缺失、exit 127 崩溃循环（GitHub 侧 runners=0）。
+# 升级方式：改 image tag → pull → compose up -d，不要让容器内自更新。
 
 name: actions-runner
 
 services:
   runner:
-    image: myoung34/github-runner:latest
+    # 钉版本，勿用 latest（避免与上游 self-update 不同步）
+    image: myoung34/github-runner:2.336.0
     container_name: actions-runner
     restart: unless-stopped
     environment:
@@ -28,6 +34,9 @@ services:
       #   执行 apt install / docker 等需要 root 的操作，避免权限问题。
       #   自托管 VPS 是信任环境，开 true 省心；安全敏感场景建议关掉。
       RUN_AS_ROOT: "true"
+      # 关掉 runner 进程内自动升级（传给 config.sh --disableupdate）。
+      # 任意 truthy 值均可；升级请改上面的 image tag 后 recreate。
+      DISABLE_AUTO_UPDATE: "true"
     volumes:
       - runner_data:/tmp/runner
       - ~/.opencli/xiaoyuzhou.json:/root/.opencli/xiaoyuzhou.json

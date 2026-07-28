@@ -221,7 +221,7 @@ let
       "DOMAIN-SUFFIX,alipay.com,DIRECT"
       "DOMAIN-SUFFIX,qq.com,DIRECT"
       "DOMAIN-SUFFIX,weibo.com,DIRECT"
-      "DOMAIN-SUFFIX,zhihu.com,DIRECT"
+      "DOMAIN-SUFFIX,zhihu.com,REJECT"
       "DOMAIN-SUFFIX,jd.com,DIRECT"
       "DOMAIN-SUFFIX,163.com,DIRECT"
       "DOMAIN-SUFFIX,netease.com,DIRECT"
