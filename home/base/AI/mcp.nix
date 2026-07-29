@@ -140,6 +140,7 @@ in
       LINEAR_API_KEY = "$(cat ${config.sops.secrets.API_LINEAR.path})";
       TAVILY_API_KEY = "$(cat ${config.sops.secrets.API_TAVILY.path})";
       EXA_API_KEY = "$(cat ${config.sops.secrets.API_EXA.path})";
+      KEENABLE_API_KEY = "$(cat ${config.sops.secrets.API_KEENABLE.path})";
     };
   };
 }
