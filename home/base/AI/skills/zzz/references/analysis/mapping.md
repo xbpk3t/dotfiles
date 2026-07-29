@@ -158,6 +158,8 @@ scope: A | A+B
 | topic | 整体主轴一句 + 对应 | 不要十个无关域 |
 | qs | 挂在已选 topic 轴上逐步对应 | 禁止 qs 另起整域 mapping |
 
+**qs-map 质量规范：** 默认填充 **≥2 对** 实质问题对应（本题疑惑 ↔ 对端等价问法），而非简单写 `none`。仅当 topic 已单轴完全展开、无额外问题可映射时才写 `none`。问题对应应瞄准控制环中的判定/分支/边界条件（如「链路是否拥塞？↔ 服务是否过载？」），而非产品功能罗列。
+
 无 topic 上下文时先补「本题所属结构」一行。
 
 ---
@@ -166,12 +168,27 @@ scope: A | A+B
 
 ### 4.1 会话 artifact（默认；**recall 只走这一轨**）
 
+**注意两问确认段：** artifact 中 **必须** 在 `### 对齐` 前显式列出 `### 两问确认` 小节（见下方模板），写明 Q-iso pass/fail 理由和 Q-layer 判定结果。禁止跳过直接写对齐。
+
 **可读性优先：** 用 Markdown 小标题 + 短列表 + 步骤编号；**禁止**把全部字段塞进一个巨大 `topic-map:` / YAML 墙（难扫读）。字段仍须齐全，用加粗标签行即可。
 
 ```text
 ## artifact
 step: mapping
 status: ok | skipped
+
+**Q-iso：** yes | no
+**Q-layer：** cross | instance | reject
+
+### 两问确认
+
+**Q-iso（同一套控制结构、≥3步含判定/失败？）:** pass | fail
+- 理由：…
+- fail → 不写 mapping，输出原因
+
+**Q-layer：** cross | instance | 拒绝类
+- 拒绝类 → 硬拒绝（见 §5 毒码），不写 active score
+- instance → valid，score 从严；boundary 写清只对齐哪条环
 
 ### 对齐（拍 A）
 
@@ -233,10 +250,8 @@ status: ok | skipped
 | 5 | 拍B未把 candidate 当 ok（无B则 n/a） | |
 | 6 | 本轮零写文件 | |
 
-### next（推进 hint，必给；只列 1～3 条可执行选项）
-- 推荐：…          # 根据「用法 workflow」阶段表选一条主推
-- 可选：…
-- 可停：消化失效点/负迁移
+### next（推进 hint，必给；必须用「用法 workflow」阶段 1 的推进 hint 表格式，禁止自由文本或列表）
+从阶段 1 表中选一行主推即可，不必全列；默认不可 blank。
 ```
 
 **差分闸（anti「XX 不就是 YY」）：**
