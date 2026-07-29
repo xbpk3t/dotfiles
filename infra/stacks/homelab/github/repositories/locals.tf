@@ -71,6 +71,7 @@ locals {
         "CF_ACCOUNT_ID",
         "CF_API_TOKEN",
         "EXA_API_KEY",
+        "KEENABLE_API_KEY",
         "PAT",
         "QUANT_SYNC_TOKEN",
         "R2_ACCOUNT",

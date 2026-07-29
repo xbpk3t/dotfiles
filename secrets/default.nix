@@ -114,6 +114,7 @@ in
       DOCKER_HUB_TOKEN = mkUserSecret "API/docker_hub";
       API_TAVILY = mkUserSecret "API/tavily";
       API_EXA = mkUserSecret "API/exa";
+      API_KEENABLE = mkUserSecret "API/keenable";
       API_TMDB = mkUserSecret "API/tmdb";
       FEISHU_APP_SECRET = mkUserSecret "API/feishu";
 
