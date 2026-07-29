@@ -24,7 +24,7 @@ putting secret material into Terraform state.
 
 Current inventory:
 
-- `docs`: `CF_ACCOUNT_ID`, `CF_API_TOKEN`, `EXA_API_KEY`, `PAT`,
+- `docs`: `CF_ACCOUNT_ID`, `CF_API_TOKEN`, `EXA_API_KEY`, `KEENABLE_API_KEY`, `PAT`,
   `QUANT_SYNC_TOKEN`, `R2_ACCOUNT`, `R2_AK`, `R2_KEY`, `RESEND_TOKEN`,
   `TAVILY_API_KEY`, `TOKEN`
 - `zzz`: `CF_ACCOUNT_ID`, `CF_API_TOKEN`

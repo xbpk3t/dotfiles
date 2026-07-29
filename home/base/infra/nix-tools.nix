@@ -54,6 +54,8 @@
       # 树状查看依赖（替代 nix-store --query --requisites）
       # tags(desc): 依赖分析 > 依赖树 > store查询
       nix-tree
+
+      nix-converter
     ];
 
   programs.zsh.shellAliases = {

@@ -23,16 +23,9 @@ in
 
   config = lib.mkIf cfg.enable {
 
-    home.packages =
-      with inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
-      [
-        herdr
-      ]
-      ++ lib.optionals pkgs.stdenv.isDarwin [
-        # terminal-notifier: macOS 15+ 封锁了 osascript display notification，
-        # herdr 优先走 terminal-notifier 路径弹系统通知，fallback 到 osascript 无画面。
-        pkgs.terminal-notifier
-      ];
+    home.packages = with inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}; [
+      herdr
+    ];
 
     # 配置路径: ~/.config/herdr/config.toml
     # 结构化 nix → TOML（相同思路参考 pi-agent toJSON）。
