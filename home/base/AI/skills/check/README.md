@@ -1,7 +1,7 @@
-# 验证链（Verify Chain）Skill
+# Check Skill
 
 > Vendored from [qiyisoft001/verify-chain](https://gitee.com/qiyisoft001/verify-chain) (pin a7506f2).
-> Local changes (LUC-284): all artifacts go under `/tmp/verify-chain/`, never workspace `.verify-chain-tmp`.
+> Local changes (LUC-284): all artifacts go under `/tmp/check/`, never workspace `.check-tmp`.
 
 ## 这是什么
 
@@ -17,7 +17,7 @@
 ### 触发
 
 ```
-/verify-chain
+/check
 ```
 或直接说 "帮我验证这篇文章" / "核查一下文章内容有没有错误"。
 
@@ -25,7 +25,7 @@
 
 | 模式 | 命令 | 说明 |
 |------|------|------|
-| 全自动 | `/verify-chain` | 提取 → 核查 → 修复 → 报告，一气呵成 |
+| 全自动 | `/check` | 提取 → 核查 → 修复 → 报告，一气呵成 |
 | 先审再改 | "先审再改，验证文章" | 核查完成后暂停，等你审核再决定修什么 |
 | 只查不改 | "只查不改，验证文章" | 只输出核查报告，不修改文章 |
 | 重点检查 | "重点检查命令参数，验证文章" | 将关注点传递给 Critic |
@@ -35,14 +35,14 @@
 所有中间物与终产物写入：
 
 ```
-/tmp/verify-chain/YYYYMMDD-<slug>/
+/tmp/check/YYYYMMDD-<slug>/
 ├── assertions.md              # Critic（可选落盘）
 ├── verification-results.md    # Verifier 汇总（可选落盘）
 ├── article-verified.md        # 修复后文章
 └── verification-report.md     # 完整核查报告
 ```
 
-- **不写**工作区 / 文章旁 / `.verify-chain-tmp`
+- **不写**工作区 / 文章旁 / `.check-tmp`
 - 同日同 slug **覆盖**该目录
 - `/tmp` 重启可能清空，属预期
 
@@ -56,7 +56,7 @@
 ## 文件结构
 
 ```
-verify-chain/
+check/
 ├── SKILL.md              # 入口 + 流程编排 + 落盘规则
 ├── prompts/
 │   ├── critic.md         # Critic 系统提示词
