@@ -1,9 +1,9 @@
 ---
-name: verify-chain
+name: check
 description: 验证链 — 角色对抗式技术文章交叉验证。写完IT文章后，Critic 提取关键断言并生成核查问题，多个 Verifier SubAgent 独立上下文联网验证，Repairer 自动修复。用于规避 AI 幻觉、知识过时、信息遗漏。
 ---
 
-# 验证链（Verify Chain）
+# Check
 
 > Vendored from gitee.com/qiyisoft001/verify-chain (pin a7506f2) with local path policy for LUC-284.
 
@@ -13,7 +13,7 @@ description: 验证链 — 角色对抗式技术文章交叉验证。写完IT文
 - "验证这篇文章"、"核查文章内容"、"check 文章"、"verify article"
 - "检查有没有错误"、"帮我审稿"
 - 写完一篇 IT 技术文章后主动询问是否需要验证
-- 用户提到 `/verify` 或 `/验证链`
+- 用户提到 `/check` 或 `/验证链`
 
 ## 适用场景
 
@@ -33,12 +33,29 @@ description: 验证链 — 角色对抗式技术文章交叉验证。写完IT文
 
 ### 目录规则
 
-1. **根目录**：`/tmp/verify-chain/`（不存在则创建）
-2. **本次 run 目录**：`/tmp/verify-chain/YYYYMMDD-<slug>/`
+1. **根目录**：`/tmp/check/`（不存在则创建）
+2. **本次 run 目录**：`/tmp/check/YYYYMMDD-<slug>/`
    - `YYYYMMDD`：本机本地日期（如 `20260723`）
    - `<slug>`：源文章文件名去掉扩展名后规范化为 `[a-z0-9-]`，截断约 40 字符；无文件名时用短标题 slug 或 `article`
 3. **同日同 slug 再跑：覆盖**该目录内容（先写新文件，不另开子目录）
 4. 开始阶段 1 前先 `mkdir -p` 本次 run 目录
+
+### 阶段 0：预编排计划
+
+所有子阶段开始前，先输出一份编排计划（不启动任何检索或生成）。计划应包括：
+
+| 计划项 | 说明 |
+|--------|------|
+| **Run 绝对路径** | 按目录规则计算 |
+| **源文章概况** | 全文长度、核心陈述数、技术领域 |
+| **断言预算** | 预估算断言数量及预期类别分布 |
+| **用户模式** | 全自动 / 先审再改 / 只查不改 |
+| **并发计划** | 断言数决定：≤5 全并行，>15 分批（每批 ≤10） |
+| **预定义核查路径** | 每个断言预估算联网搜索关键词方向 |
+| **修复分级策略** | 按下方修复分级表确认各级处置方式 |
+| **禁止事项** | 按当前模式确认不触犯 |
+
+执行计划本身可不落盘，但作为后续阶段的路标应编排成文。
 
 ### 必须写入 run 目录的文件
 
@@ -53,7 +70,7 @@ description: 验证链 — 角色对抗式技术文章交叉验证。写完IT文
 
 ### 禁止
 
-- **禁止**在 cwd、仓库根、文章旁创建 `.verify-chain-tmp` 或任何 hidden 工作区目录
+- **禁止**在 cwd、仓库根、文章旁创建 `.check-tmp` 或任何 hidden 工作区目录
 - **禁止**默认把终稿写回 wiki/docs 或源文章同目录
 - **禁止**仅用相对路径文件名落盘（如直接 `./article-verified.md`）——必须用上述绝对路径
 - 仅当用户**明确指定**写回路径时，才额外复制/写入该路径
@@ -63,9 +80,9 @@ description: 验证链 — 角色对抗式技术文章交叉验证。写完IT文
 报告阶段除摘要外，必须列出本次产物的**绝对路径**列表，例如：
 
 ```
-产物目录: /tmp/verify-chain/20260723-kde-vs-gnome/
-- /tmp/verify-chain/20260723-kde-vs-gnome/verification-report.md
-- /tmp/verify-chain/20260723-kde-vs-gnome/article-verified.md
+产物目录: /tmp/check/20260723-kde-vs-gnome/
+- /tmp/check/20260723-kde-vs-gnome/verification-report.md
+- /tmp/check/20260723-kde-vs-gnome/article-verified.md
 ```
 
 ## 执行流程
@@ -82,9 +99,12 @@ description: 验证链 — 角色对抗式技术文章交叉验证。写完IT文
 
 **输出解析**：从 Critic 的输出中解析出每个断言的结构化数据（编号、原文摘录、类别、核查问题、建议核查路径）。
 
-如果 Critic 返回的断言数量 < 5，重新执行一次 Critic，要求它更仔细地审查。
+如果 Critic 返回的断言数量 < 5：
+  - **长文章（正文 ≥ 500 字）**：重新执行一次 Critic，要求它更仔细地逐句审查。
+  - **短文章（正文 < 500 字）**：接受合理偏少的断言数（如 2-4 条），不强制重执。在报告中备注「文章简短，断言数合理」即可。
+  - **任何情况**：禁止为凑数的制造无意义断言。每个断言必须有明确的原文依据和独立的核查价值。
 
-有断言列表后写入：`/tmp/verify-chain/YYYYMMDD-<slug>/assertions.md`。
+有断言列表后写入：`/tmp/check/YYYYMMDD-<slug>/assertions.md`。
 
 ### 阶段 2：Verifier — 并行交叉验证
 
@@ -107,7 +127,7 @@ SubAgent 需携带联网搜索能力
 - 如果断言数量较多（>15），可分批启动（每批 10 个）
 
 **输出收集**：等待所有 SubAgent 完成后，按编号收集核查结果，写入
-`/tmp/verify-chain/YYYYMMDD-<slug>/verification-results.md`。
+`/tmp/check/YYYYMMDD-<slug>/verification-results.md`。
 
 ### 阶段 3：Repairer — 自动修复
 
@@ -121,7 +141,7 @@ SubAgent 需携带联网搜索能力
 
 **筛选输入**：只将有问题的核查结果（⚠️ 不完整 / ❌ 错误 / ❓ 无法确定）传给 Repairer。✅ 准确的断言不需要修复。
 
-将修复后全文写入：`/tmp/verify-chain/YYYYMMDD-<slug>/article-verified.md`。
+将修复后全文写入：`/tmp/check/YYYYMMDD-<slug>/article-verified.md`。
 
 ### 阶段 4：报告
 
@@ -139,8 +159,8 @@ SubAgent 需携带联网搜索能力
 3. **待人工确认项**：❓ 无法确定的内容
 
 4. **输出文件（绝对路径）**：
-   - `/tmp/verify-chain/YYYYMMDD-<slug>/article-verified.md`：修复后的文章
-   - `/tmp/verify-chain/YYYYMMDD-<slug>/verification-report.md`：完整核查报告（含所有断言 + 核查结论 + 来源）
+   - `/tmp/check/YYYYMMDD-<slug>/article-verified.md`：修复后的文章
+   - `/tmp/check/YYYYMMDD-<slug>/verification-report.md`：完整核查报告（含所有断言 + 核查结论 + 来源）
    - 同目录下其他中间物（若有）
 
 完整报告正文写入 `verification-report.md`（绝对路径如上）。
@@ -159,4 +179,15 @@ SubAgent 需携带联网搜索能力
 3. **联网优先**：所有核查必须基于联网搜索结果，不得仅凭模型内置知识
 4. **权威来源**：严格区分可信来源和内容农场，宁缺毋滥
 5. **最小修复**：只改有问题的部分，保持原文风格
-6. **工作区清洁**：产物只进 `/tmp/verify-chain/`，不污染用户仓库或 cwd
+6. **工作区清洁**：产物只进 `/tmp/check/`，不污染用户仓库或 cwd
+
+**修复分级矩阵**：为每级制定明确的处置策略：
+
+| 严重度 | 含义 | 处置 | 修复范围 |
+|--------|------|------|---------|
+| ❌ 错误 | 与权威来源直接矛盾的事实性错误 | **必须修复** — 原文替换为正确表述，附脚注引用 | 仅改有误的句子 |
+| ⚠️ 不完整 | 部分正确但缺少版本上下文、前提条件或例外情况 | **补充修复** — 添加限定说明、版本号或脚注 | 扩展相关句子或添加段落 |
+| ❓ 无法确定 | 搜索结果矛盾或来源不可靠 | **不动原文** — 标记为「待人工确认」，在报告中列出详细矛盾点 | 不动，仅输出报告 |
+| ✅ 准确 | 全部权威来源证实无误 | **不处理** — 保持原文 | 无 |
+
+**最小修复原则**：只改有问题的部分，不重构、不润色、不重写原文风格。
