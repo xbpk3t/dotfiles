@@ -4,6 +4,9 @@
 #
 # 同文件包含：
 #   9router — ds4f proxy pool 转发 sidecar（仅 127.0.0.1:20228，SSH tunnel 管理）
+#   resin — 自建 proxy pool 网关，替代 Vercel/CF relay（仅 127.0.0.1:2260）
+#     9router → resin:2260（HTTP 正向代理）→ proxy node → OpenCode Zen
+#     Dashboard: ssh -L 2260:localhost:2260 nixos-vps-dev → http://localhost:2260
 #   register-lite — Grok 账号注册机（仅 127.0.0.1:8788，SSH tunnel 管理）
 #     SSH: ssh -L 8788:localhost:8788 nixos-vps-dev
 #     注册完成后在「账号池」→ 导出 CPA → cp 到 CPA/auth-dir/
@@ -15,10 +18,13 @@
 #       Management Key = 明文 DEFAULT_SK（与 CPA remote-management 对应）
 #     xAI 巡检为 billing-first（不调推理）；已禁用 ywddd/grok-inspection 插件。
 #
-# 9router 架构：AxonHub → http://9router:20128/v1 → 9router → proxy pool → OpenCode Zen
+# 9router 架构：AxonHub → http://9router:20128/v1 → 9router → Resin → proxy node → OpenCode Zen
 #   分离理由：只有 ds4f 走 proxy pool，其他 model 直连不走 9router。
-#   9router 不暴露公网（127.0.0.1:20228），Dashboard 通过 SSH tunnel 访问。
-#   Docker 内部 DNS 解析 9router 主机名，无需 TAILSCALE_IP / edge network。
+#   9router/Resin 不暴露公网，Dashboard 均通过 SSH tunnel 访问。
+#   Resin 接入方式：
+#     HTTP 正向代理：9router pool → 通过 resin:2260（HTTP CONNECT）→ 代理节点
+#     反向代理（备选）：http://resin:2260/<token>/<Platform>/<protocol>/<target>
+#   Docker 内部 DNS 解析 resin/9router 主机名。
 
 services:
   axonhub:
@@ -97,20 +103,21 @@ services:
 
   # 9router sidecar — 仅为 ds4f 提供 proxy pool 转发能力
   #
-  # 架构：AxonHub → http://9router:20128/v1 → 9router → proxy pool → OpenCode Zen
-  # 网络：只绑 127.0.0.1，仅用于 SSH tunnel 后本机调 Dashboard 配 proxy pool。
-  #       9router 和 AxonHub 在同一个 Docker internal network 内，直接 DNS 解析。
+  # 架构：AxonHub → http://9router:20128/v1 → 9router → Resin → proxy node → OpenCode Zen
+  # 网络：只绑 127.0.0.1，Dashboard 通过 SSH tunnel 访问。
+  #       9router/Resin/AxonHub 在同一 Docker internal network，直接 DNS 解析。
   #
   # Dashboard 访问：
   #   ssh -L 20228:localhost:20228 nixos-vps-dev
   #   然后浏览器打开 http://localhost:20228
   #
-  # 使用方法：
-  #   1. 浏览器连 Dashboard → Proxy Pools → 新建 pool（填入你的代理列表）
-  #   2. Providers → OpenCode Zen → 绑定这个 pool
-  #   3. AxonHub 新建 channel，type=OpenAI，base_url=http://9router:20128/v1
-  #   4. AxonHub 把 ds4f 模型映射到这个 channel
-  #   5. 其他 channel（pro/gpt-5.5 等）直连 upstream，不走 9router
+  # 使用方法（Resin 版）：
+  #   1. 浏览器连 Resin Dashboard → 订阅管理 → 添加 proxy 订阅 URL
+  #   2. 浏览器连 9router Dashboard → Proxy Pools → 新建 pool → 节点填 http://resin:2260
+  #   3. Providers → OpenCode Zen → 绑定这个 pool
+  #   4. AxonHub 新建 channel，type=OpenAI，base_url=http://9router:20128/v1
+  #   5. AxonHub 把 ds4f 模型映射到这个 channel
+  #   6. 其他 channel（pro/gpt-5.5 等）直连 upstream，不走 9router
   9router:
     image: decolua/9router:latest
     container_name: 9router
@@ -137,6 +144,60 @@ services:
 
       BASE_URL: http://localhost:20228
       NEXT_PUBLIC_BASE_URL: http://localhost:20228
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+
+  # Resin — 自建智能代理池网关
+  #
+  # 架构：9router → resin:2260（HTTP 正向代理）→ proxy node → OpenCode Zen
+  # 用途：替代 Vercel/CF relay proxy pool，用自建 proxy 订阅提升 ds4f 成功率
+  #
+  # Dashboard 访问：
+  #   ssh -L 2260:localhost:2260 nixos-vps-dev
+  #   浏览器打开 http://localhost:2260
+  #
+  # 集成方式（9router 侧）：
+  #   9router Dashboard → Proxy Pools → 新建 pool
+  #   pool 节点填入 http://resin:2260（Resin 的 HTTP 正向代理入口）
+  #   或反向代理 URL：http://resin:2260/<token>/Default/https/opencode.ai
+  #
+  # 首次使用：
+  #   1. 浏览器连 Dashboard → 订阅管理 → 添加 proxy 订阅 URL
+  #   2. Proxy Pools → 新建 pool → 节点填 http://resin:2260
+  #   3. Providers → OpenCode Zen → 绑定这个 pool
+  #   4. 9router 自动将 ds4f 请求通过 Resin 转发
+  resin:
+    image: ghcr.io/resinat/resin:latest
+    container_name: resin
+    restart: unless-stopped
+    # 仅本地暴露，Dashboard 通过 SSH tunnel 访问
+    ports:
+      - "127.0.0.1:2260:2260"
+    environment:
+      TZ: Asia/Shanghai
+      RESIN_AUTH_VERSION: "V1"
+      RESIN_ADMIN_TOKEN: ${DEFAULT_SK:?DEFAULT_SK is required}
+      RESIN_PROXY_TOKEN: ${DEFAULT_SK:?DEFAULT_SK is required}
+      RESIN_LISTEN_ADDRESS: 0.0.0.0
+      RESIN_PORT: 2260
+      # Request log SQLite 体积：默认 512MB × 5 ≈ 2.5GB，收紧
+      RESIN_REQUEST_LOG_DB_MAX_MB: "128"
+      RESIN_REQUEST_LOG_DB_RETAIN_COUNT: "3"
+      RESIN_PROXY_BYPASS: "localhost;127.0.0.0/8;::1;10.0.0.0/8;172.16.0.0/12;192.168.0.0/16;100.64.0.0/10;169.254.0.0/16;<local>"
+    volumes:
+      - ./resin/cache:/var/cache/resin
+      - ./resin/state:/var/lib/resin
+      - ./resin/log:/var/log/resin
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:2260/healthz >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
     logging:
       driver: json-file
       options:
