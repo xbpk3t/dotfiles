@@ -100,8 +100,20 @@
       # 相较 modules 缺少 async
       autosuggestion = {
         enable = true;
-        # 仅从历史里提示，避免与补全菜单冲突；若想更激进可加 "completion"
-        strategy = [ "history" ];
+        # HM schema 只允许内置三种：history | completion | match_prev_cmd
+        # （types.enum，不能写 "atuin"，否则 eval 直接挂）
+        # https://github.com/nix-community/home-manager/blob/master/modules/programs/zsh/default.nix
+        #
+        # atuin 侧：`atuin init zsh` 会注册 _zsh_autosuggest_strategy_atuin，
+        # 并自动把 "atuin" 插到 ZSH_AUTOSUGGEST_STRATEGY 最前面：
+        #   已有 strategy → ("atuin" $existing...)
+        #   未设 strategy → ("atuin")
+        # 见 https://github.com/atuinsh/atuin/blob/main/crates/atuin/src/shell/atuin.zsh
+        # 所以这里只写 history 作 fallback；最终运行时是 atuin → history。
+        # 若想更激进可再加 "completion"。
+        strategy = [
+          "history"
+        ];
         # 低调暗灰，避免喧宾夺主（原 fg=cyans 非法色名）
         highlight = "fg=8";
       };

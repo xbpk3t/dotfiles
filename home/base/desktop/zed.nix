@@ -833,15 +833,20 @@ let
         "cmd-shift-f" = "text_finder::Toggle";
       };
     }
-    # 禁用 CMD +/-/0 字体缩放快捷键（容易误触）
+    # 禁用 Cmd+/-/0 字体缩放（容易误触）。
+    # 默认绑定（default-macos.json，无 context）：
+    #   cmd-= / cmd-+ → zed::IncreaseBufferFontSize
+    #   cmd--         → zed::DecreaseBufferFontSize
+    #   cmd-0         → zed::ResetBufferFontSize
+    # 注意：
+    # - 键名是 cmd-= / cmd-+，不是 cmd-shift-=（macOS key equivalents 下 Cmd+Shift+= 也映射为 cmd-+）
+    # - 必须同样不写 context：无 context 的默认绑定优先级最低层，Workspace 下的 null 压不住它
+    # - null 才能真正 unbind；user keymap 后加载覆盖
+    # 文档：https://zed.dev/docs/key-bindings
     {
-      context = "Workspace";
       bindings = {
-        # 标准美式键盘上，+ 是通过 Shift + = 打出来的
-        # 你按 Cmd + +，操作系统实际发送的是 Cmd + Shift + =
-        # - Zed 的默认快捷键绑定是 cmd-shift-= → workspace::IncreaseBufferFontSize，不是 cmd-+
-        # - 所以 "cmd-+" = null 匹配不到任何默认绑定，也就没生效
-        "cmd-shift-=" = null;
+        "cmd-=" = null;
+        "cmd-+" = null;
         "cmd--" = null;
         "cmd-0" = null;
       };
