@@ -15,7 +15,7 @@ let
   # homeManagerConfiguration 用 pkgs 参数；不要把 pkgs 再塞进 extraSpecialArgs，
   # 否则与 HM 内部 _module.args.pkgs 冲突。
   extraSpecialArgs = builtins.removeAttrs specialArgs [ "pkgs" ];
-  pkgs = specialArgs.pkgs;
+  inherit (specialArgs) pkgs;
 in
 home-manager.lib.homeManagerConfiguration {
   inherit pkgs;
