@@ -3,6 +3,9 @@ let
   # Import all library functions
   macosSystem = import ./macos.nix;
   nixosSystem = import ./nixos.nix;
+  # linux-sm 平行轨：standalone Home Manager + system-manager
+  homeStandalone = import ./home-standalone.nix;
+  systemManager = import ./system-manager.nix;
   # 提供统一的节点 ID / host meta 生成器
   node = import ./node-id.nix { inherit lib; };
   inventory = import ./inventory { inherit lib; };
@@ -36,6 +39,8 @@ in
   inherit
     macosSystem
     nixosSystem
+    homeStandalone
+    systemManager
     node
     inventory
     attrs
