@@ -7,7 +7,7 @@ set -euo pipefail
 CONTAINER="${CONTAINER:-linux-sm-lab}"
 # 宿主上的 flake 工作树（Phase 未合入主 clone 时用 dotfiles-sm）
 FLAKE_SRC="${FLAKE_SRC:-}"
-if [[ -z "${FLAKE_SRC}" ]]; then
+if [[ -z ${FLAKE_SRC} ]]; then
   if [[ -f /home/luck/Desktop/dotfiles-sm/flake.nix ]]; then
     FLAKE_SRC=/home/luck/Desktop/dotfiles-sm
   elif [[ -f /home/luck/Desktop/dotfiles/flake.nix ]]; then
@@ -52,7 +52,7 @@ need_host() {
 ensure_container_running() {
   local state
   state="$(incus list "${CONTAINER}" -c s --format csv)"
-  if [[ "${state}" != "RUNNING" ]]; then
+  if [[ ${state} != "RUNNING" ]]; then
     log "starting ${CONTAINER}"
     incus start "${CONTAINER}"
   fi
@@ -129,14 +129,14 @@ sync_flake() {
     --exclude='docs' \
     --exclude='.ruff_cache' \
     --exclude='.direnv' \
-    -cf - . \
-    | cexec bash -c "tar -C ${CT_FLAKE}.partial -xf - && rm -rf ${CT_FLAKE} && mv ${CT_FLAKE}.partial ${CT_FLAKE} && chown -R ${USERNAME}:${USERNAME} ${CT_FLAKE}"
+    -cf - . |
+    cexec bash -c "tar -C ${CT_FLAKE}.partial -xf - && rm -rf ${CT_FLAKE} && mv ${CT_FLAKE}.partial ${CT_FLAKE} && chown -R ${USERNAME}:${USERNAME} ${CT_FLAKE}"
   cbash "test -f ${CT_FLAKE}/flake.nix && echo flake_ok"
 }
 
 # 4) sops age key（与 secrets/default.nix linux path 一致；正式验收见 phase3-sops.sh）
 sync_age_key() {
-  if [[ ! -f "${HOST_AGE_KEY}" ]]; then
+  if [[ ! -f ${HOST_AGE_KEY} ]]; then
     log "WARN: no HOST_AGE_KEY at ${HOST_AGE_KEY}; sops activation may fail (run phase3-sops.sh)"
     return 0
   fi
