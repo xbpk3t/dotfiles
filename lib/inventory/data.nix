@@ -59,6 +59,10 @@ in
       user = commonUser;
       time = commonTime;
       editor = commonEditor;
+      # linux-sm 试验床：仅本节点开 Incus（I1 + P-b）。
+      # enable 只装 daemon；首次 deploy 后在机上 `incus admin init --minimal`，
+      # 再 launch Debian 系统容器。不要写进全局 kernel/vm.nix。
+      incus.enable = true;
       networking = {
         # 目标机默认公网出口，由 `ip -o route show default` 确认为 ens3。
         externalInterface = "ens3";
