@@ -26,7 +26,7 @@ USERNAME="${USERNAME:-luck}"
 # 与宿主 luck 对齐（HM 不强制 uid，但 POC 约定 U3）
 CT_UID="${CT_UID:-1000}"
 CT_GID="${CT_GID:-1000}"
-# 宿主 age key（sops 激活需要）；Phase 3 再收敛正式流程
+# 宿主 age key（sops 激活需要）；正式可重复流程见 phase3-sops.sh
 HOST_AGE_KEY="${HOST_AGE_KEY:-/home/luck/.config/sops/age/keys.txt}"
 
 log() { printf '+ %s\n' "$*"; }
@@ -134,16 +134,17 @@ sync_flake() {
   cbash "test -f ${CT_FLAKE}/flake.nix && echo flake_ok"
 }
 
-# 4) sops age key（Phase 2 POC：拷宿主 key；无 key 则 switch 可能在 install-secrets 失败）
+# 4) sops age key（与 secrets/default.nix linux path 一致；正式验收见 phase3-sops.sh）
 sync_age_key() {
   if [[ ! -f "${HOST_AGE_KEY}" ]]; then
-    log "WARN: no HOST_AGE_KEY at ${HOST_AGE_KEY}; sops activation may fail"
+    log "WARN: no HOST_AGE_KEY at ${HOST_AGE_KEY}; sops activation may fail (run phase3-sops.sh)"
     return 0
   fi
-  log "install age key for ${USERNAME} (POC from host)"
+  log "install age key for ${USERNAME} → ~/.config/sops/age/keys.txt"
   local ct_key_dir="/home/${USERNAME}/.config/sops/age"
   cexec bash -c "mkdir -p ${ct_key_dir} && chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}/.config"
-  incus file push "${HOST_AGE_KEY}" "${CONTAINER}${ct_key_dir}/keys.txt"
+  incus file push --uid "${CT_UID}" --gid "${CT_GID}" --mode 0600 \
+    "${HOST_AGE_KEY}" "${CONTAINER}${ct_key_dir}/keys.txt"
   cexec bash -c "chown ${USERNAME}:${USERNAME} ${ct_key_dir}/keys.txt && chmod 600 ${ct_key_dir}/keys.txt"
 }
 
@@ -210,7 +211,7 @@ post_activate_sops() {
         systemctl --user start sops-nix.service || true
       ls /home/${USERNAME}/.config/sops-nix/secrets 2>/dev/null | head -5 || true
     else
-      echo 'WARN: no user bus; sops deferred (Phase 3)' >&2
+      echo 'WARN: no user bus; sops deferred — run phase3-sops.sh' >&2
     fi
   " || log "WARN: post_activate_sops non-fatal"
 }
