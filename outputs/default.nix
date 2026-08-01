@@ -117,6 +117,9 @@ let
       nodes = lib.attrsets.mergeAttrsList (map (it: it.deploy.nodes or { }) outputs);
     };
     nixosConfigurations = lib.attrsets.mergeAttrsList (map (it: it.nixosConfigurations or { }) outputs);
+    # linux-sm 平行轨
+    homeConfigurations = lib.attrsets.mergeAttrsList (map (it: it.homeConfigurations or { }) outputs);
+    systemConfigs = lib.attrsets.mergeAttrsList (map (it: it.systemConfigs or { }) outputs);
     packages = lib.attrsets.mergeAttrsList (map (it: it.packages or { }) outputs);
   };
 
@@ -155,7 +158,7 @@ let
     nodes = lib.attrsets.mergeAttrsList (map (it: it.deploy.nodes or { }) currentSystemValues);
   };
 
-  # flake 顶层需要汇总后的 darwin/nixos/deploy outputs。
+  # flake 顶层需要汇总后的 darwin/nixos/deploy/linux-sm outputs。
   mergedNixosConfigurations = lib.attrsets.mergeAttrsList (
     map (it: it.nixosConfigurations or { }) architectureOutputValues
   );
@@ -164,6 +167,12 @@ let
   );
   mergedDeployNodes = lib.attrsets.mergeAttrsList (
     map (it: it.deploy.nodes or { }) architectureOutputValues
+  );
+  mergedHomeConfigurations = lib.attrsets.mergeAttrsList (
+    map (it: it.homeConfigurations or { }) architectureOutputValues
+  );
+  mergedSystemConfigs = lib.attrsets.mergeAttrsList (
+    map (it: it.systemConfigs or { }) architectureOutputValues
   );
 in
 {
@@ -213,6 +222,8 @@ in
       #
       # 命名约定：
       #   `host-eval-<hostname>`，便于 `nix flake check` 输出中肉眼定位。
+      # Phase 1：不把 homeConfigurations / systemConfigs 纳入 host-eval（避免
+      # 跨系统/慢路径；linux-sm milestone 用显式 nix eval）。
       hostEvalChecks =
         let
           arch = architectureOutput;
@@ -263,5 +274,8 @@ in
       nodes = mergedDeployNodes;
     };
     nixosConfigurations = mergedNixosConfigurations;
+    # linux-sm 平行轨出口
+    homeConfigurations = mergedHomeConfigurations;
+    systemConfigs = mergedSystemConfigs;
   };
 }
