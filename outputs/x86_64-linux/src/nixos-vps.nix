@@ -55,6 +55,15 @@ let
 
   mkNodeModule =
     name: node:
+    let
+      username = node.user.username or "luck";
+      # Why not `// incusLab` with nested networking.*：
+      # attrset `//` 是浅合并。右边若带 `networking.nftables` 会整表替换左边的
+      # `networking`，把 hostName 冲掉 → 回落到 hosts 里 mkDefault "nixos-vps" →
+      # singboxForHost 按错名查 inventory 报 attribute 'nixos-vps' missing。
+      # mkIf 挂在同一 module 的分项上，由 module 系统做深合并。
+      incusOn = node.incus.enable or false;
+    in
     {
       # 变更项都放到 inventory，避免散落在各个 hosts
       networking.hostName = node.hostName or name;
@@ -64,6 +73,12 @@ let
         domain = node.tailscale.derpDomain;
         inherit (node) acmeEmail;
       };
+
+      # Incus lab（I1+P-b）：最小 enable，无 preseed；init 在目标机手跑。
+      virtualisation.incus.enable = lib.mkIf incusOn true;
+      networking.nftables.enable = lib.mkIf incusOn true;
+      networking.firewall.trustedInterfaces = lib.mkIf incusOn [ "incusbr0" ];
+      users.users.${username}.extraGroups = lib.mkIf incusOn [ "incus-admin" ];
     }
     // lib.optionalAttrs (node ? k3s) {
       modules.extra.k3s = node.k3s;
