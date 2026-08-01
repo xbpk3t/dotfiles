@@ -13,7 +13,7 @@ set -euo pipefail
 
 CONTAINER="${CONTAINER:-linux-sm-lab}"
 FLAKE_SRC="${FLAKE_SRC:-}"
-if [[ -z "${FLAKE_SRC}" ]]; then
+if [[ -z ${FLAKE_SRC} ]]; then
   if [[ -f /home/luck/Desktop/dotfiles-sm/flake.nix ]]; then
     FLAKE_SRC=/home/luck/Desktop/dotfiles-sm
   elif [[ -f /home/luck/Desktop/dotfiles/flake.nix ]]; then
@@ -36,26 +36,28 @@ CT_AGE_DIR="/home/${USERNAME}/.config/sops/age"
 CT_AGE_KEY="${CT_AGE_DIR}/keys.txt"
 # 验证用：至少一个 user secret（勿用 root-only 系统 secret 作为唯一目标；这里用 GITHUB_TOKEN）
 VERIFY_SECRET="${VERIFY_SECRET:-GITHUB_TOKEN}"
-CT_SECRET_LINK="/home/${USERNAME}/.config/sops-nix/secrets/${VERIFY_SECRET}"
 SYNC_FLAKE="${SYNC_FLAKE:-1}"
 RUN_HM_SWITCH="${RUN_HM_SWITCH:-1}"
 
 log() { printf '+ %s\n' "$*"; }
-die() { echo "error: $*" >&2; exit 1; }
+die() {
+  echo "error: $*" >&2
+  exit 1
+}
 cexec() { incus exec "${CONTAINER}" -- "$@"; }
 cbash() { incus exec "${CONTAINER}" -- bash -lc "$*"; }
 
 need_host() {
   command -v incus >/dev/null || die "incus not found (run on nixos-vps-dev)"
   incus info "${CONTAINER}" >/dev/null || die "container ${CONTAINER} missing"
-  [[ -f "${HOST_AGE_KEY}" ]] || die "HOST_AGE_KEY missing: ${HOST_AGE_KEY}"
+  [[ -f ${HOST_AGE_KEY} ]] || die "HOST_AGE_KEY missing: ${HOST_AGE_KEY}"
   [[ -f "${FLAKE_SRC}/flake.nix" ]] || die "FLAKE_SRC=${FLAKE_SRC} is not a flake"
 }
 
 ensure_container_running() {
   local state
   state="$(incus list "${CONTAINER}" -c s --format csv)"
-  if [[ "${state}" != "RUNNING" ]]; then
+  if [[ ${state} != "RUNNING" ]]; then
     log "starting ${CONTAINER}"
     incus start "${CONTAINER}"
   fi
@@ -110,7 +112,7 @@ ensure_user_systemd() {
 
 # 3) 可选：同步 flake（与 phase2 相同 tar 管道；默认开，保证 secrets.nix 与脚本一致）
 sync_flake() {
-  [[ "${SYNC_FLAKE}" == "1" ]] || {
+  [[ ${SYNC_FLAKE} == "1" ]] || {
     log "skip flake sync (SYNC_FLAKE=${SYNC_FLAKE})"
     return 0
   }
@@ -123,14 +125,14 @@ sync_flake() {
     --exclude='docs' \
     --exclude='.ruff_cache' \
     --exclude='.direnv' \
-    -cf - . \
-    | cexec bash -c "tar -C ${CT_FLAKE}.partial -xf - && rm -rf ${CT_FLAKE} && mv ${CT_FLAKE}.partial ${CT_FLAKE} && chown -R ${USERNAME}:${USERNAME} ${CT_FLAKE}"
+    -cf - . |
+    cexec bash -c "tar -C ${CT_FLAKE}.partial -xf - && rm -rf ${CT_FLAKE} && mv ${CT_FLAKE}.partial ${CT_FLAKE} && chown -R ${USERNAME}:${USERNAME} ${CT_FLAKE}"
   cbash "test -f ${CT_FLAKE}/flake.nix && echo flake_ok"
 }
 
 # 4) home-manager switch（激活脚本会触发 sops-install-secrets / sops-nix.service）
 hm_switch() {
-  [[ "${RUN_HM_SWITCH}" == "1" ]] || {
+  [[ ${RUN_HM_SWITCH} == "1" ]] || {
     log "skip hm switch (RUN_HM_SWITCH=${RUN_HM_SWITCH})"
     return 0
   }
