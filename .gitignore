@@ -55,3 +55,6 @@ __pycache__/
 # APM dependencies
 apm_modules/
 apm.lock.yaml
+
+# local notes — not part of flake tree commits
+docs/
