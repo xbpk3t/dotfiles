@@ -21,7 +21,7 @@ home-manager.lib.homeManagerConfiguration {
   inherit pkgs;
   extraSpecialArgs = extraSpecialArgs // {
     # 约定备份后缀（非 HM 官方 option）；CLI: home-manager switch -b hm.bak
-    linuxSmBackupFileExtension = backupFileExtension;
+    smBackupFileExtension = backupFileExtension;
   };
   modules = home-modules ++ [
     # 与 NixOS/Darwin 内嵌 HM 主线一致：nix-index wrapper + 预生成 database

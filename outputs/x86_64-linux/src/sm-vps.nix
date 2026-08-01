@@ -6,8 +6,8 @@
   ...
 }@args:
 let
-  name = "linux-sm-lab";
-  group = "linux-sm";
+  name = "sm-vps-lab";
+  group = "sm-vps";
   system = "x86_64-linux";
   node = mylib.inventory.${group}.${name};
   specialArgs = mkSpecialArgs system node;

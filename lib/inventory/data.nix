@@ -59,7 +59,7 @@ in
       user = commonUser;
       time = commonTime;
       editor = commonEditor;
-      # linux-sm 试验床：仅本节点开 Incus（I1 + P-b）。
+      # sm-vps 试验床：仅本节点开 Incus（I1 + P-b）。
       # enable 只装 daemon；首次 deploy 后在机上 `incus admin init --minimal`，
       # 再 launch Debian 系统容器。不要写进全局 kernel/vm.nix。
       incus.enable = true;
@@ -206,11 +206,12 @@ in
     };
   };
 
-  # linux-sm 平行轨（非 NixOS）：standalone HM + system-manager。
-  # 试验床：nixos-vps-dev 上 Incus 系统容器名 linux-sm-lab（Debian 12）。
-  linux-sm = {
-    linux-sm-lab = {
-      hostName = "linux-sm-lab";
+  # sm-vps 平行轨（非 NixOS）：system-manager + standalone HM。
+  # commit scope: sm；hosts/ 角色目录: hosts/sm-vps。
+  # 试验床：nixos-vps-dev 上 Incus 容器（实例名仍为 linux-sm-lab，可另 rename）。
+  sm-vps = {
+    sm-vps-lab = {
+      hostName = "sm-vps-lab";
       stateVersion = "24.11";
       system = "x86_64-linux";
       user = commonUser;
@@ -218,8 +219,8 @@ in
       editor = commonEditor;
       # Phase 1 仅 inventory 元数据；SSH/primaryIp 等 Phase 5 deploy 再填。
       lab = {
-        # 宿主：nixos-vps-dev；容器：Incus 系统容器名
         host = "nixos-vps-dev";
+        # Incus 实例名（与 flake 节点名 sm-vps-lab 可不同）
         container = "linux-sm-lab";
         note = "Incus system container on nixos-vps-dev (Debian 12, PID1=systemd)";
       };

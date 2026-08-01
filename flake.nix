@@ -99,7 +99,7 @@ rec {
     nixt.url = "github:nix-community/nixt";
     nix-unit.url = "github:nix-community/nix-unit";
 
-    # system-manager: 非 NixOS Linux 的系统级声明管理（linux-sm 平行轨）
+    # system-manager: 非 NixOS Linux 的系统级声明管理（sm-vps 平行轨）
     system-manager = {
       url = "github:numtide/system-manager";
       inputs.nixpkgs.follows = "nixpkgs";

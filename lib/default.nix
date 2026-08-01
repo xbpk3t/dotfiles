@@ -3,7 +3,7 @@ let
   # Import all library functions
   macosSystem = import ./macos.nix;
   nixosSystem = import ./nixos.nix;
-  # linux-sm 平行轨：standalone Home Manager + system-manager
+  # sm-vps 平行轨：standalone Home Manager + system-manager
   homeStandalone = import ./home-standalone.nix;
   systemManager = import ./system-manager.nix;
   # 提供统一的节点 ID / host meta 生成器

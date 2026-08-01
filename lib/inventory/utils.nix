@@ -39,7 +39,7 @@ in
   "nixos-homelab" = groupOrEmpty "nixos-homelab";
   "nixos-ws" = groupOrEmpty "nixos-ws";
   "macos-ws" = groupOrEmpty "macos-ws";
-  "linux-sm" = groupOrEmpty "linux-sm";
+  "sm-vps" = groupOrEmpty "sm-vps";
 
   singboxForHost =
     inventory: hostName:
