@@ -19,10 +19,21 @@
   };
   chrome-devtools-mcp = {
     pname = "chrome-devtools-mcp";
-    version = "1.4.0";
+    version = "1.6.0";
     src = fetchurl {
-      url = "https://registry.npmjs.org/chrome-devtools-mcp/-/chrome-devtools-mcp-1.4.0.tgz";
-      sha256 = "sha256-0tRNmnPaSZIILB8WhfvEoTaUF2cNSplI0w7L70FBmZk=";
+      url = "https://registry.npmjs.org/chrome-devtools-mcp/-/chrome-devtools-mcp-1.6.0.tgz";
+      sha256 = "sha256-HmMsLZcUtPgrTPq077nOV1CFx1/+XpdyODEprwEsnIQ=";
+    };
+  };
+  herdr-focus-notify = {
+    pname = "herdr-focus-notify";
+    version = "a7d17a532304e285a791749cb5d7b706b6a7ecb9";
+    src = fetchFromGitHub {
+      owner = "yankewei";
+      repo = "herdr-focus-notify";
+      rev = "a7d17a532304e285a791749cb5d7b706b6a7ecb9";
+      fetchSubmodules = false;
+      sha256 = "sha256-7BATIkzFFDD64yhqKu4vGCemeHg2iNULpKr+zQ0FekQ=";
     };
   };
   launchk = {

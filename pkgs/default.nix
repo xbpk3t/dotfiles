@@ -10,6 +10,9 @@ in
   chrome-devtools-mcp = pkgs.callPackage ./chrome-devtools-mcp {
     inherit sources;
   };
+  herdr-focus-notify = pkgs.callPackage ./herdr-focus-notify {
+    inherit sources;
+  };
   launchk = pkgs.callPackage ./launchk {
     inherit sources;
   };
