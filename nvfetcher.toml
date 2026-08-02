@@ -37,3 +37,11 @@ fetch.github = "chenhg5/cc-connect"
 # 后续上游打 tag 后可切回 src.github_tag。
 src.manual = "5983fe3b4ea2785335ac1712c4aa1ac4e13a8fa2"
 fetch.github = "VoltAgent/awesome-claude-code-subagents"
+
+[herdr-focus-notify]
+# Herdr plugin：agent blocked/done 时发 macOS 可点击通知（依赖 alerter，brew 管理）。
+# 无 release 产物，从源码构建（buildRustPackage）。
+# 上游无 tag，用 manual 固定 commit（当前 herdr plugin install 用的 a7d17a5）；
+# 之后要升级时改这个 hash 再跑 nvfetcher。
+src.manual = "a7d17a532304e285a791749cb5d7b706b6a7ecb9"
+fetch.github = "yankewei/herdr-focus-notify"

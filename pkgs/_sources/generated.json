@@ -29,11 +29,32 @@
         "pinned": false,
         "src": {
             "name": null,
-            "sha256": "sha256-0tRNmnPaSZIILB8WhfvEoTaUF2cNSplI0w7L70FBmZk=",
+            "sha256": "sha256-HmMsLZcUtPgrTPq077nOV1CFx1/+XpdyODEprwEsnIQ=",
             "type": "url",
-            "url": "https://registry.npmjs.org/chrome-devtools-mcp/-/chrome-devtools-mcp-1.4.0.tgz"
+            "url": "https://registry.npmjs.org/chrome-devtools-mcp/-/chrome-devtools-mcp-1.6.0.tgz"
         },
-        "version": "1.4.0"
+        "version": "1.6.0"
+    },
+    "herdr-focus-notify": {
+        "cargoLock": null,
+        "date": null,
+        "extract": null,
+        "name": "herdr-focus-notify",
+        "passthru": null,
+        "pinned": false,
+        "src": {
+            "deepClone": false,
+            "fetchSubmodules": false,
+            "leaveDotGit": false,
+            "name": null,
+            "owner": "yankewei",
+            "repo": "herdr-focus-notify",
+            "rev": "a7d17a532304e285a791749cb5d7b706b6a7ecb9",
+            "sha256": "sha256-7BATIkzFFDD64yhqKu4vGCemeHg2iNULpKr+zQ0FekQ=",
+            "sparseCheckout": [],
+            "type": "github"
+        },
+        "version": "a7d17a532304e285a791749cb5d7b706b6a7ecb9"
     },
     "launchk": {
         "cargoLock": null,

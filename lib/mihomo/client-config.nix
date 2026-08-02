@@ -216,7 +216,7 @@ let
 
       # 国内大站直连
       "DOMAIN-SUFFIX,baidu.com,DIRECT"
-      "DOMAIN-SUFFIX,bilibili.com,DIRECT"
+      # "DOMAIN-SUFFIX,bilibili.com,DIRECT"
       "DOMAIN-SUFFIX,taobao.com,DIRECT"
       "DOMAIN-SUFFIX,alipay.com,DIRECT"
       "DOMAIN-SUFFIX,qq.com,DIRECT"
@@ -224,6 +224,7 @@ let
       "DOMAIN-SUFFIX,jd.com,DIRECT"
       "DOMAIN-SUFFIX,163.com,DIRECT"
       "DOMAIN-SUFFIX,netease.com,DIRECT"
+
       # REJECT
       "DOMAIN-SUFFIX,zhihu.com,REJECT"
       "DOMAIN-SUFFIX,bilibili.com,REJECT"
