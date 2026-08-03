@@ -268,10 +268,17 @@ in
 
           ANTHROPIC_BASE_URL = "https://api.lucc.dev";
           ANTHROPIC_AUTH_TOKEN = "$(cat ${config.sops.secrets.LLM_AxonHub.path})";
+
+          # AnyRouter 备用 key（cc-any alias 用）
+          LLM_ANY_TOKEN = "$(cat ${config.sops.secrets.LLM_ANY_TOKEN.path})";
         };
         shellAliases = {
           # 默认 alias 保持权限模型生效，避免和 settings.permissions.defaultMode 冲突。
           cc = "claude";
+
+          # AnyRouter 通道：默认仍走 AxonHub，需要时用 cc-any 显式切换。
+          # 已验证可用：claude-opus-5[1m] + https://anyrouter.top（AnyRouter 只认 CC 客户端 + [1m] 后缀）
+          cc-any = "ANTHROPIC_BASE_URL=https://anyrouter.top ANTHROPIC_AUTH_TOKEN=$LLM_ANY_TOKEN claude --model 'claude-opus-5[1m]'";
 
           # [2026-05-01] 注释掉了，默认cc直接bypassPermissions
           # 兜底逃生开关：仅在明确需要跳过权限确认时手动使用。
