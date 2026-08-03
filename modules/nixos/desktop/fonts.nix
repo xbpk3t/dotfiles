@@ -1,7 +1,7 @@
 # 注意：本文件仅作为stylix的补充配置
 { pkgs, ... }:
 let
-  fontsData = import ../../../../modules/fonts.nix { inherit pkgs; };
+  fontsData = import ../../../modules/fonts.nix { inherit pkgs; };
 in
 {
   # 修复 Chromium/Electron 应用字体模糊问题

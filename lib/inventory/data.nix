@@ -206,6 +206,20 @@ in
     };
   };
 
+  # nixos-usb：便携 U 盘系统（GNOME desktop），跨机器即插即用。
+  # 部署/代理都走 tailnet（primaryIp 是 tailnet IP，插到任意机器都能 SSH 到）。
+  nixos-usb = {
+    nixos-usb = {
+      hostName = "nixos-usb";
+      stateVersion = "24.11";
+      primaryIp = "100.87.217.1";
+      ssh.user = "luck";
+      user = commonUser;
+      time = commonTime;
+      editor = commonEditor;
+    };
+  };
+
   # sm-vps 平行轨（非 NixOS）：system-manager + standalone HM。
   # commit scope: sm；hosts/ 角色目录: hosts/sm-vps。
   # 试验床：nixos-vps-dev 上 Incus 容器（实例名仍为 linux-sm-lab，可另 rename）。
