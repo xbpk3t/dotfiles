@@ -25,7 +25,8 @@ in
 
       displayManager.gdm = {
         enable = true;
-        wayland = true;
+        # GNOME 50: gdm.wayland 选项已移除（Wayland 默认且不可关）
+        # wayland = true;
       };
 
       desktopManager = {
