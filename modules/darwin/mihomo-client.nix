@@ -17,7 +17,6 @@ let
       lib
       pkgs
       ;
-    inherit (cfg) wildUrl;
     selfProviderTemplateName = "mihomo-self-provider.yaml";
   };
   configPath = config.sops.templates."mihomo-client.yaml".path;
@@ -42,44 +41,10 @@ let
     '';
   };
 
-  wildUpdater = pkgs.writeShellApplication {
-    name = "mihomo-wild-updater";
-    runtimeInputs = with pkgs; [
-      coreutils
-      curl
-    ];
-    text = ''
-      mkdir -p /var/lib/mihomo/providers
-      tmp="$(mktemp /var/lib/mihomo/providers/wild-fetched.yaml.XXXXXX)"
-      trap 'rm -f "$tmp"' EXIT
-
-      if curl -fsSLo "$tmp" --connect-timeout 15 --max-time 60 "${cfg.wildUrl}"; then
-        if [ -s "$tmp" ]; then
-          chmod 0644 "$tmp"
-          mv "$tmp" /var/lib/mihomo/providers/wild-fetched.yaml
-          trap - EXIT
-          exit 0
-        fi
-        echo "wild provider fetch returned empty content" >&2
-      fi
-
-      exit 1
-    '';
-  };
 in
 {
   options.modules.networking.mihomo = {
     enable = mkEnableOption "mihomo TUN proxy daemon";
-    wildUrl = mkOption {
-      type = lib.types.str;
-      default = "http://${
-        mylib.inventory."nixos-vps"."nixos-vps-dev".tailscale.ip
-      }:3001/admin/download/collection/wild?target=ClashMeta";
-      description = ''
-        Sub-Store wild provider subscription URL。
-        默认指向 nixos-vps-dev 的 sub-store（tailscale 内网，admin path 固定 /admin）。
-      '';
-    };
   };
 
   config = mkIf cfg.enable {
@@ -116,21 +81,6 @@ in
       };
     };
 
-    # 独立 system daemon：后台 best-effort 拉取 wild provider 数据。
-    # 不和 mihomo-tun 启动路径混在一起，避免 Tailscale 内网 URL 不可达时阻塞 TUN。
-    # 成功时原子替换缓存；失败只留下日志/exit code，保留旧缓存并不影响 mihomo。
-    launchd.daemons.mihomo-wild-updater = {
-      serviceConfig = {
-        Label = "local.mihomo.wild-updater";
-        ProgramArguments = [
-          "${wildUpdater}/bin/mihomo-wild-updater"
-        ];
-        RunAtLoad = true;
-        StartInterval = 1800;
-        WorkingDirectory = "/var/lib/mihomo";
-        StandardOutPath = "/Users/${username}/Library/Logs/mihomo-wild-updater.log";
-        StandardErrorPath = "/Users/${username}/Library/Logs/mihomo-wild-updater.log";
-      };
-    };
+    # wild provider 由 mihomo 原生 http provider 自行拉取（interval 1800），无需外部 daemon。
   };
 }
