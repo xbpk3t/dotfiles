@@ -49,7 +49,12 @@ in
   # 在 Darwin + Determinate Nix 场景下，/etc/static/nix/nix.custom.conf 更新后，
   # 偶发会出现 nix-daemon 仍沿用旧配置（典型症状：忽略 cache.numtide.com 并退回本地编译）。
   # 这里通过配置文件 hash 变更检测，做到“仅在必要时”重启 daemon。
-  system.activationScripts.restartNixDaemonIfConfigChanged.text = lib.mkAfter ''
+  #
+  # 注意：必须挂在 extraActivation（而非自定义 activationScripts 名）下。
+  # nix-darwin 26.11 的 system.activationScripts.script.text 是静态模板，
+  # 只拼接内置脚本 + extraActivation；用户自定义名（如 restartNixDaemonIfConfigChanged）
+  # 不会被渲染进最终 activate，导致脚本从未执行（表现为 /var/db/determinate-nix/ 不存在）。
+  system.activationScripts.extraActivation.text = lib.mkAfter ''
     set -eu
 
     # 优先使用 Determinate Nix 生成的 static 配置；不存在时回退到标准 nix.conf。

@@ -50,7 +50,7 @@ def resolve-file [aliases: record, sub: string] {
     $aliases | get --optional $sub
 }
 
-def main [skill_dir: string, subcommand: string] {
+def main [skill_dir: string, subcommand: string, topic?: string] {
     let sub = ($subcommand | str trim | str lowercase)
     let ref_dir = ($skill_dir | path join "references")
     let aliases = (get-aliases $skill_dir)
@@ -61,6 +61,18 @@ def main [skill_dir: string, subcommand: string] {
         if ($target | path exists) {
             log-hit $sub $file
             print $"references/($file).md"
+
+            # strike 特例：把 topic 传给 counter 脚本，返回当前 turn 状态
+            if $sub == "strike" and $topic != null {
+                let counter = ($skill_dir | path join "strike.nu")
+                let state = (open $"($env.HOME)/.claude/strike-state.json" | default {active:false,topic:"",turn:0})
+                # topic 变了 → 新 topic；没变（或未激活）→ submit 延续/激活
+                if $state.active and $state.topic == $topic {
+                    print (nu $counter submit $topic | str trim)
+                } else {
+                    print (nu $counter new $topic | str trim)
+                }
+            }
             return
         }
     }

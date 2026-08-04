@@ -17,49 +17,52 @@
 {
   # ── 0. Root 文件系统：跨机器用 partlabel，不写死 UUID ──
   # U 盘插到任何机器上，/dev/disk/by-partlabel/NIXOS_ROOT 都能解析到根分区
-  fileSystems."/" = {
-    device = "/dev/disk/by-partlabel/NIXOS_ROOT";
-    fsType = "ext4";
-    options = [ "noatime" ];
-  };
-  fileSystems."/boot" = {
-    device = "/dev/disk/by-partlabel/ESP";
-    fsType = "vfat";
-    options = [
-      "fmask=0077"
-      "dmask=0077"
-    ];
+  fileSystems = {
+    "/" = {
+      device = "/dev/disk/by-partlabel/NIXOS_ROOT";
+      fsType = "ext4";
+      options = [ "noatime" ];
+    };
+
+    "/boot" = {
+      device = "/dev/disk/by-partlabel/ESP";
+      fsType = "vfat";
+      options = [
+        "fmask=0077"
+        "dmask=0077"
+      ];
+    };
+
+    "/var/log" = {
+      device = "tmpfs";
+      fsType = "tmpfs";
+      options = [ "mode=0755" ];
+    };
+    "/var/tmp" = {
+      device = "tmpfs";
+      fsType = "tmpfs";
+      options = [ "mode=0755" ];
+    };
+
+    "/mnt/data" = {
+      device = "/dev/disk/by-partlabel/DATA";
+      fsType = "exfat";
+      options = [
+        "noatime"
+        "nofail" # 数据盘不在时不阻塞启动
+      ];
+    };
   };
   swapDevices = [ ]; # U 盘不用磁盘 swap（保护寿命，用 zram）
 
-  # ── 1. 保护 U 盘寿命：频繁写入目录放内存 ──
-  boot.tmp.useTmpfs = true; # /tmp → tmpfs
-  fileSystems."/var/log" = {
-    device = "tmpfs";
-    fsType = "tmpfs";
-    options = [ "mode=0755" ];
-  };
-  fileSystems."/var/tmp" = {
-    device = "tmpfs";
-    fsType = "tmpfs";
-    options = [ "mode=0755" ];
-  };
-  # 日志压缩 + 限量（U 盘空间宝贵）
-  services.journald.extraConfig = ''
-    Compress=yes
-    SystemMaxUse=200M
-    SystemKeepFree=100M
-    MaxRetentionSec=7day
-  '';
+  boot = {
+    # ── 1. 保护 U 盘寿命：频繁写入目录放内存 ──
+    tmp.useTmpfs = true; # /tmp → tmpfs
 
-  # ── 2. 数据分区自动挂载（exFAT）──
-  boot.supportedFilesystems = [ "exfat" ];
-  fileSystems."/mnt/data" = {
-    device = "/dev/disk/by-partlabel/DATA";
-    fsType = "exfat";
-    options = [
-      "noatime"
-      "nofail" # 数据盘不在时不阻塞启动
+    # ── 2. 数据分区自动挂载（exFAT）──
+    supportedFilesystems = [ "exfat" ];
+    kernelParams = [
+      "usbcore.autosuspend=-1" # USB 设备不自动挂起（避免掉盘）
     ];
   };
 
@@ -70,15 +73,22 @@
     options = lib.mkForce "--delete-older-than 7d";
   };
 
-  # ── 4. GDM 自动登录（即插即用）──
-  services.displayManager.autoLogin = {
-    enable = true;
-    user = userMeta.username;
-  };
+  services = {
+    # ── 4. GDM 自动登录（即插即用）──
+    displayManager.autoLogin = {
+      enable = true;
+      user = userMeta.username;
+    };
 
-  # ── 5. U 盘性能/寿命优化 ──
-  services.fstrim.enable = true; # 支持 TRIM 的盘定期回收
-  boot.kernelParams = [
-    "usbcore.autosuspend=-1" # USB 设备不自动挂起（避免掉盘）
-  ];
+    # ── 5. U 盘性能/寿命优化 ──
+    fstrim.enable = true; # 支持 TRIM 的盘定期回收
+
+    # 日志压缩 + 限量（U 盘空间宝贵）
+    journald.extraConfig = ''
+      Compress=yes
+      SystemMaxUse=200M
+      SystemKeepFree=100M
+      MaxRetentionSec=7day
+    '';
+  };
 }
