@@ -3,7 +3,6 @@
   "analogy": "analysis/analogy",
   "brk": "analysis/brk",
   "diagram": "analysis/diagram",
-  "judge": "analysis/judge",
   "mapping-check": "analysis/mapping-check",
   "mapping": "analysis/mapping",
   "recall": "analysis/recall",
@@ -11,8 +10,13 @@
   "uu": "analysis/uu",
   "choose": "choose",
   "conclusion": "conclusion",
+  "nix-um": "nix/nix-um",
   "explore": "repo/explore",
   "repo": "repo/repo",
   "table2yml": "repo/table2yml",
-  "vs": "repo/vs"
+  "tools-eval": "repo/tools-eval",
+  "vs": "repo/vs",
+  "strike-sub": "wiki/strike-sub",
+  "strike": "wiki/strike",
+  "write-prpt": "write-prpt"
 }
