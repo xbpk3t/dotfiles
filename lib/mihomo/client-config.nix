@@ -36,11 +36,11 @@ let
   #    把 zashboard 这类 store path 的 GC 追踪搞断。
   yamlFmt = pkgs.formats.yaml { };
   secrets = {
-    uuid = config.sops.placeholder.SINGBOX_UUID;
-    publicKey = config.sops.placeholder.SINGBOX_PUB_KEY;
-    shortId = config.sops.placeholder.SINGBOX_ID;
-    password = config.sops.placeholder.SINGBOX_PWD;
-    clashSecret = config.sops.placeholder.SINGBOX_CLASH_SK;
+    uuid = config.sops.placeholder.PROXY_UUID;
+    publicKey = config.sops.placeholder.PROXY_PUB_KEY;
+    shortId = config.sops.placeholder.PROXY_ID;
+    password = config.sops.placeholder.PROXY_PWD;
+    clashSecret = config.sops.placeholder.PROXY_CLASH_SK;
   };
 
   outbounds = import ./outbounds.nix {
@@ -53,15 +53,59 @@ let
       ;
   };
 
-  localDnsServers = [
+  anyDnsServers = [
     "223.5.5.5"
     "119.29.29.29"
   ];
 
   # 参考 iKuuu_V2.yaml / 雷霆.yaml 的静态模板结构
-  # 节点不再硬编码进 proxies，而是拆成两个 provider：
+  # 节点不再硬编码进 proxies，而是拆成两类 provider：
   #   self —— file provider，由 selfProviderContent 渲染到 providers/self.yaml
-  #   wild —— file provider，由外部 daemon 定期 curl 拉取到 providers/wild-fetched.yaml
+  #   wild —— http provider，mihomo 直接从各机场订阅 URL 拉取
+  #
+  # 订阅源自动发现：sops secrets 里所有 SUB_<NAME> 即一个机场源（key=源名，value=URL），
+  # provider 名取 NAME 小写。新增机场只改 sops（secrets.yaml + secrets/default.nix），
+  # 此处与 host 零改动。
+  #
+  # 订阅域名直连 + 排除代理：否则 mihomo 的 TUN + MATCH,Manual 兜底会把
+  # 机场订阅域名也代理掉 → provider 拉订阅走自己 → DNS 自环 → EOF 拉取失败 → 全部节点挂。
+  # 这些域名同时加入 fake-ip-filter，让解析直接走真实 DNS 而非 FakeIP。
+  subDomains = lib.lists.unique (
+    map (s: (builtins.elemAt (lib.splitString "/" (lib.removePrefix "https://" s.url)) 0)) wildSources
+  );
+  subDomainRules = map (d: "DOMAIN-SUFFIX,${d},DIRECT") subDomains;
+  subDomainFakeIpFilter = map (d: "*.${d}") subDomains;
+  wildSources = lib.attrsets.mapAttrsToList (name: _: {
+    name = lib.strings.toLower (lib.strings.removePrefix "SUB_" name);
+    url = config.sops.placeholder.${name};
+  }) (lib.attrsets.filterAttrs (name: _: lib.strings.hasPrefix "SUB_" name) config.sops.secrets);
+
+  # 每源一个独立 provider，策略组层面 use 合并成单一 Wild 池
+  mkWildProvider = src: {
+    type = "http";
+    inherit (src) url;
+    # mihomo 缓存目录，http provider 拉取失败时保留上次成功内容
+    path = "/var/lib/mihomo/providers/${src.name}.yaml";
+    interval = 1800;
+    health-check = {
+      enable = true;
+      url = "https://cp.cloudflare.com/generate_204";
+      interval = 600;
+    };
+    # Quick Setting Operator 等价物：强制所有节点 udp + skip-cert-verify
+    override = {
+      udp = true;
+      skip-cert-verify = true;
+    };
+  };
+
+  wildProviders = lib.listToAttrs (
+    map (s: {
+      inherit (s) name;
+      value = mkWildProvider s;
+    }) wildSources
+  );
+  wildNames = map (s: s.name) wildSources;
   configAttrset = {
     mode = "rule";
     log-level = "warning";
@@ -97,13 +141,14 @@ let
         "*.tailscale.io"
         "ts.net"
         "*.ts.net"
-      ];
+      ]
+      ++ subDomainFakeIpFilter;
       nameserver-policy = {
-        "+.tailscale.com" = localDnsServers;
-        "+.tailscale.io" = localDnsServers;
-        "+.ts.net" = localDnsServers;
+        "+.tailscale.com" = anyDnsServers;
+        "+.tailscale.io" = anyDnsServers;
+        "+.ts.net" = anyDnsServers;
       };
-      default-nameserver = localDnsServers;
+      default-nameserver = anyDnsServers;
       nameserver = [
         "https://doh.pub/dns-query"
         "https://dns.alidns.com/dns-query"
@@ -129,17 +174,8 @@ let
           interval = 300;
         };
       };
-      wild = {
-        type = "file";
-        path = "/var/lib/mihomo/providers/wild-fetched.yaml";
-        interval = 1800;
-        health-check = {
-          enable = true;
-          url = "https://cp.cloudflare.com/generate_204";
-          interval = 600;
-        };
-      };
-    };
+    }
+    // wildProviders;
 
     proxy-groups = [
       {
@@ -162,7 +198,7 @@ let
       {
         name = "Wild";
         type = "url-test";
-        use = [ "wild" ];
+        use = wildNames;
         url = "https://cp.cloudflare.com/generate_204";
         interval = 3600;
       }
@@ -179,66 +215,68 @@ let
       }
     ];
 
-    rules = [
-      # 私网直连
-      "IP-CIDR,127.0.0.0/8,DIRECT"
-      "IP-CIDR,10.0.0.0/8,DIRECT"
-      "IP-CIDR,172.16.0.0/12,DIRECT"
-      "IP-CIDR,192.168.0.0/16,DIRECT"
-      "IP-CIDR,100.64.0.0/10,DIRECT"
-      "IP-CIDR,224.0.0.0/4,DIRECT"
+    rules =
+      subDomainRules
+      ++ [
+        # 私网直连
+        "IP-CIDR,127.0.0.0/8,DIRECT"
+        "IP-CIDR,10.0.0.0/8,DIRECT"
+        "IP-CIDR,172.16.0.0/12,DIRECT"
+        "IP-CIDR,192.168.0.0/16,DIRECT"
+        "IP-CIDR,100.64.0.0/10,DIRECT"
+        "IP-CIDR,224.0.0.0/4,DIRECT"
 
-      # SSH 避免回环（mihomo TUN 下的 SSH 流量走代理会导致循环依赖）
-      "DST-PORT,22,DIRECT"
+        # SSH 避免回环（mihomo TUN 下的 SSH 流量走代理会导致循环依赖）
+        "DST-PORT,22,DIRECT"
 
-      # 代理节点 IP 直连（避免流量经代理再回连自己）
-    ]
-    ++ (map (s: "IP-CIDR,${s.server}/32,DIRECT,no-resolve") servers)
-    ++ [
-      # 必须代理的站点（统一走 Manual，由用户在 UI 上选 Self/Wild/Auto）
-      "DOMAIN-SUFFIX,openai.com,Manual"
-      "DOMAIN-SUFFIX,chatgpt.com,Manual"
-      "DOMAIN-SUFFIX,grok.com,Manual"
-      "DOMAIN-SUFFIX,github.com,Manual"
-      "DOMAIN-SUFFIX,githubusercontent.com,Manual"
-      "DOMAIN-SUFFIX,githubassets.com,Manual"
-      "DOMAIN-SUFFIX,google.com,Manual"
-      "DOMAIN-SUFFIX,youtube.com,Manual"
-      "DOMAIN-SUFFIX,ytimg.com,Manual"
-      "DOMAIN-SUFFIX,twimg.com,Manual"
-      "DOMAIN-SUFFIX,docker.com,Manual"
-      "DOMAIN-SUFFIX,linux.do,Manual"
-      "DOMAIN-SUFFIX,cache.nixos.org,Manual"
+        # 代理节点 IP 直连（避免流量经代理再回连自己）
+      ]
+      ++ (map (s: "IP-CIDR,${s.server}/32,DIRECT,no-resolve") servers)
+      ++ [
+        # 必须代理的站点（统一走 Manual，由用户在 UI 上选 Self/Wild/Auto）
+        "DOMAIN-SUFFIX,openai.com,Manual"
+        "DOMAIN-SUFFIX,chatgpt.com,Manual"
+        "DOMAIN-SUFFIX,grok.com,Manual"
+        "DOMAIN-SUFFIX,github.com,Manual"
+        "DOMAIN-SUFFIX,githubusercontent.com,Manual"
+        "DOMAIN-SUFFIX,githubassets.com,Manual"
+        "DOMAIN-SUFFIX,google.com,Manual"
+        "DOMAIN-SUFFIX,youtube.com,Manual"
+        "DOMAIN-SUFFIX,ytimg.com,Manual"
+        "DOMAIN-SUFFIX,twimg.com,Manual"
+        "DOMAIN-SUFFIX,docker.com,Manual"
+        "DOMAIN-SUFFIX,linux.do,Manual"
+        "DOMAIN-SUFFIX,cache.nixos.org,Manual"
 
-      # CN 域名直连
-      "DOMAIN-SUFFIX,cn,DIRECT"
-      "DOMAIN-KEYWORD,-cn,DIRECT"
+        # CN 域名直连
+        "DOMAIN-SUFFIX,cn,DIRECT"
+        "DOMAIN-KEYWORD,-cn,DIRECT"
 
-      # 国内大站直连
-      "DOMAIN-SUFFIX,baidu.com,DIRECT"
-      # "DOMAIN-SUFFIX,bilibili.com,DIRECT"
-      "DOMAIN-SUFFIX,taobao.com,DIRECT"
-      "DOMAIN-SUFFIX,alipay.com,DIRECT"
-      "DOMAIN-SUFFIX,qq.com,DIRECT"
-      "DOMAIN-SUFFIX,weibo.com,DIRECT"
-      "DOMAIN-SUFFIX,jd.com,DIRECT"
-      "DOMAIN-SUFFIX,163.com,DIRECT"
-      "DOMAIN-SUFFIX,netease.com,DIRECT"
+        # 国内大站直连
+        "DOMAIN-SUFFIX,baidu.com,DIRECT"
+        # "DOMAIN-SUFFIX,bilibili.com,DIRECT"
+        "DOMAIN-SUFFIX,taobao.com,DIRECT"
+        "DOMAIN-SUFFIX,alipay.com,DIRECT"
+        "DOMAIN-SUFFIX,qq.com,DIRECT"
+        "DOMAIN-SUFFIX,weibo.com,DIRECT"
+        "DOMAIN-SUFFIX,jd.com,DIRECT"
+        "DOMAIN-SUFFIX,163.com,DIRECT"
+        "DOMAIN-SUFFIX,netease.com,DIRECT"
 
-      # REJECT
-      "DOMAIN-SUFFIX,zhihu.com,REJECT"
-      "DOMAIN-SUFFIX,bilibili.com,REJECT"
+        # REJECT
+        "DOMAIN-SUFFIX,zhihu.com,REJECT"
+        "DOMAIN-SUFFIX,bilibili.com,REJECT"
 
-      # GEOIP CN 直连
-      "GEOIP,CN,DIRECT"
+        # GEOIP CN 直连
+        "GEOIP,CN,DIRECT"
 
-      # 本地域名直连
-      "DOMAIN-SUFFIX,local,DIRECT"
-      "DOMAIN-SUFFIX,lan,DIRECT"
+        # 本地域名直连
+        "DOMAIN-SUFFIX,local,DIRECT"
+        "DOMAIN-SUFFIX,lan,DIRECT"
 
-      # 兜底
-      "MATCH,Manual"
-    ];
+        # 兜底
+        "MATCH,Manual"
+      ];
   };
 
   # 这两段 readFile + yamlFmt.generate 仍然属于 IFD（import-from-derivation）：

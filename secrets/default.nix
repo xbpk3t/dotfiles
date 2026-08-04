@@ -91,14 +91,23 @@ in
       LLM_AxonHub = mkUserSecret "LLM/AxonHub";
       LLM_ANY_TOKEN = mkUserSecret "LLM/AnyRouter";
 
-      # singbox
-      SINGBOX_UUID = mkRootSecret "singbox/UUID";
-      SINGBOX_PRI_KEY = mkRootSecret "singbox/pri_key";
-      SINGBOX_PUB_KEY = mkRootSecret "singbox/pub_key";
-      SINGBOX_ID = mkRootSecret "singbox/id";
-      SINGBOX_PWD = mkRootSecret "singbox/pwd";
-      SINGBOX_FLYINGBIRD = mkRootSecret "singbox/flyingbird";
-      SINGBOX_CLASH_SK = mkRootSecret "singbox/clash_secret";
+      # proxy（自持代理节点凭据，singbox server + mihomo self provider 共用）
+      PROXY_UUID = mkRootSecret "proxy/UUID";
+      PROXY_PRI_KEY = mkRootSecret "proxy/pri_key";
+      PROXY_PUB_KEY = mkRootSecret "proxy/pub_key";
+      PROXY_ID = mkRootSecret "proxy/id";
+      PROXY_PWD = mkRootSecret "proxy/pwd";
+      PROXY_FLYINGBIRD = mkRootSecret "proxy/flyingbird";
+      PROXY_CLASH_SK = mkRootSecret "proxy/clash_secret";
+
+      # sub（机场订阅，挂在 proxy 下）：key = 源名，value = 订阅 URL（含 token）。
+      # 新增机场 = 这里加一条 SUB_<NAME> + secrets.yaml 加 proxy.sub.<name>，mihomo 自动发现。
+      #
+      # [DOGEGG流量站](https://traffic.dogegg.online/)
+      #
+      SUB_DOGEGG = mkRootSecret "proxy/sub/dogegg";
+      SUB_DOING = mkRootSecret "proxy/sub/doing";
+      SUB_IKUUU = mkRootSecret "proxy/sub/ikuuu";
 
       # Shared API tokens
       # youtubeApiKey = mkUserSecret "youtube/api_key";

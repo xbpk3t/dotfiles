@@ -44,15 +44,15 @@ let
         listen_port = port;
         users = [
           {
-            uuid = config.sops.placeholder.SINGBOX_UUID;
+            uuid = config.sops.placeholder.PROXY_UUID;
             flow = "xtls-rprx-vision";
           }
         ];
         reality-config = {
           dest = "${handshakeServer}:443";
-          private-key = config.sops.placeholder.SINGBOX_PRI_KEY;
+          private-key = config.sops.placeholder.PROXY_PRI_KEY;
           short-id = [
-            config.sops.placeholder.SINGBOX_ID
+            config.sops.placeholder.PROXY_ID
           ];
           server-names = [
             handshakeServer
@@ -66,7 +66,7 @@ let
         listen_port = hy2Port;
         users = [
           {
-            password = config.sops.placeholder.SINGBOX_PWD;
+            password = config.sops.placeholder.PROXY_PWD;
           }
         ];
         tls = {
@@ -84,7 +84,7 @@ let
         users = [
           {
             username = "1";
-            uuid = config.sops.placeholder.SINGBOX_UUID;
+            uuid = config.sops.placeholder.PROXY_UUID;
             alterId = 0;
           }
         ];
@@ -100,7 +100,7 @@ let
         listen = "::";
         port = tuicPort;
         users = {
-          "${config.sops.placeholder.SINGBOX_UUID}" = config.sops.placeholder.SINGBOX_PWD;
+          "${config.sops.placeholder.PROXY_UUID}" = config.sops.placeholder.PROXY_PWD;
         };
         certificate = "/var/lib/acme/${tuicDomain}/fullchain.pem";
         private-key = "/var/lib/acme/${tuicDomain}/key.pem";
@@ -115,7 +115,7 @@ let
         listen = "::";
         port = anytlsPort;
         users = {
-          default = config.sops.placeholder.SINGBOX_PWD;
+          default = config.sops.placeholder.PROXY_PWD;
         };
         certificate = "/var/lib/acme/${anytlsDomain}/fullchain.pem";
         private-key = "/var/lib/acme/${anytlsDomain}/key.pem";

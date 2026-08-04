@@ -33,32 +33,32 @@ let
   secrets =
     if pkgs.stdenv.isDarwin then
       {
-        uuid = config.sops.placeholder.SINGBOX_UUID;
-        publicKey = config.sops.placeholder.SINGBOX_PUB_KEY;
-        shortId = config.sops.placeholder.SINGBOX_ID;
-        clashSecret = config.sops.placeholder.SINGBOX_CLASH_SK;
-        flyingbirdPassword = config.sops.placeholder.SINGBOX_FLYINGBIRD;
-        password = config.sops.placeholder.SINGBOX_PWD;
+        uuid = config.sops.placeholder.PROXY_UUID;
+        publicKey = config.sops.placeholder.PROXY_PUB_KEY;
+        shortId = config.sops.placeholder.PROXY_ID;
+        clashSecret = config.sops.placeholder.PROXY_CLASH_SK;
+        flyingbirdPassword = config.sops.placeholder.PROXY_FLYINGBIRD;
+        password = config.sops.placeholder.PROXY_PWD;
       }
     else
       {
         uuid = {
-          _secret = config.sops.secrets.SINGBOX_UUID.path;
+          _secret = config.sops.secrets.PROXY_UUID.path;
         };
         publicKey = {
-          _secret = config.sops.secrets.SINGBOX_PUB_KEY.path;
+          _secret = config.sops.secrets.PROXY_PUB_KEY.path;
         };
         shortId = {
-          _secret = config.sops.secrets.SINGBOX_ID.path;
+          _secret = config.sops.secrets.PROXY_ID.path;
         };
         clashSecret = {
-          _secret = config.sops.secrets.SINGBOX_CLASH_SK.path;
+          _secret = config.sops.secrets.PROXY_CLASH_SK.path;
         };
         flyingbirdPassword = {
-          _secret = config.sops.secrets.SINGBOX_FLYINGBIRD.path;
+          _secret = config.sops.secrets.PROXY_FLYINGBIRD.path;
         };
         password = {
-          _secret = config.sops.secrets.SINGBOX_PWD.path;
+          _secret = config.sops.secrets.PROXY_PWD.path;
         };
       };
 
