@@ -65,7 +65,7 @@ in
               users = [
                 {
                   uuid = {
-                    _secret = config.sops.secrets.SINGBOX_UUID.path;
+                    _secret = config.sops.secrets.PROXY_UUID.path;
                   };
                   flow = "xtls-rprx-vision";
                 }
@@ -85,12 +85,12 @@ in
 
                   # 从 sops 文件读入
                   private_key = {
-                    _secret = config.sops.secrets.SINGBOX_PRI_KEY.path;
+                    _secret = config.sops.secrets.PROXY_PRI_KEY.path;
                   };
 
                   # short_id 允许多个，这里只用一个
                   short_id = [
-                    { _secret = config.sops.secrets.SINGBOX_ID.path; }
+                    { _secret = config.sops.secrets.PROXY_ID.path; }
                   ];
                 };
               };
@@ -107,7 +107,7 @@ in
                 {
                   name = "default";
                   uuid = {
-                    _secret = config.sops.secrets.SINGBOX_UUID.path;
+                    _secret = config.sops.secrets.PROXY_UUID.path;
                   };
                   alterId = 0;
                 }
@@ -136,7 +136,7 @@ in
               users = [
                 {
                   password = {
-                    _secret = config.sops.secrets.SINGBOX_PWD.path;
+                    _secret = config.sops.secrets.PROXY_PWD.path;
                   };
                 }
               ];
@@ -161,10 +161,10 @@ in
                 {
                   name = "default";
                   uuid = {
-                    _secret = config.sops.secrets.SINGBOX_UUID.path;
+                    _secret = config.sops.secrets.PROXY_UUID.path;
                   };
                   password = {
-                    _secret = config.sops.secrets.SINGBOX_PWD.path;
+                    _secret = config.sops.secrets.PROXY_PWD.path;
                   };
                 }
               ];
@@ -192,7 +192,7 @@ in
                 {
                   name = "default";
                   password = {
-                    _secret = config.sops.secrets.SINGBOX_PWD.path;
+                    _secret = config.sops.secrets.PROXY_PWD.path;
                   };
                 }
               ];
