@@ -95,4 +95,69 @@ in
         path = deployLib.activate.nixos nixosConfiguration;
       };
     };
+
+  # sm-vps 平行轨（非 NixOS）的 deploy-rs 节点构造。
+  # 与 deployRsNode 的区别：
+  #   - 两个 profile：`system`（system-manager）与 `home`（standalone HM）
+  #   - `system` 用 activate.custom 包 system-manager-engine 的 activate（需 root → user = "root"）
+  #   - `home` 用 activate.home-manager（以 SSH 用户激活用户 profile）
+  #   - 默认 remoteBuild = false（R3：本机构建 + nix copy；跳板/目标机通常无本地 build 收益）
+  # 设计约束（与主航道隔离）：
+  #   - 不修改 deployRsNode 的 activate.nixos 语义
+  #   - system profile 的 user 固定为 root（sm 激活写 /etc、systemd、/var/lib）
+  #     → deploy-rs 在 sshUser != root 时自动用 `sudo <user>` 包装（容器内 luck 有 NOPASSWD sudo）
+  #   - profilesOrder 默认先 system 后 home（先建系统态再收敛用户态）
+  deploySmHmNode =
+    {
+      name,
+      node,
+      # system-manager toplevel（config.build.toplevel）
+      systemToplevel,
+      # standalone HM 的 activationPackage（homeConfigurations.<name>.activationPackage）
+      homeActivationPackage,
+      deployLib,
+      defaultSshUser ? "luck",
+      defaultSshPort ? null,
+      remoteBuild ? false,
+      profilesOrder ? [
+        "system"
+        "home"
+      ],
+    }:
+    let
+      ssh = node.ssh or { };
+      host = ssh.host or (primaryHostForNode name node);
+      sshUser = ssh.user or defaultSshUser;
+      sshPort = ssh.port or defaultSshPort;
+      extraOpts = ssh.opts or [ ];
+      sshOpts =
+        extraOpts
+        ++ lib.optionals (sshPort != null) [
+          "-p"
+          (toString sshPort)
+        ];
+      # sm 引擎激活：deploy-rs 先 nix-env --set 把 $PROFILE 指向 toplevel，
+      # 再运行 activate 脚本；引擎读 $PROFILE 下的 etc/services 描述并落地。
+      # 注意：sm 引擎本身不依赖 nix 命令（activate 只跑 preActivationAssertions + 应用状态）。
+      smActivate = "$PROFILE/bin/system-manager-engine --store-path $PROFILE activate";
+    in
+    {
+      # What：部署目标地址（IP/域名/别名）。
+      # Why：与 deployRsNode 一致，由 inventory 的 ssh.host/primaryIp 推导。
+      hostname = host;
+      inherit sshUser sshOpts remoteBuild;
+      profiles = {
+        # 系统轨：sm 激活必须 root（写 /etc、systemd、/var/lib/system-manager）。
+        system = {
+          user = "root";
+          path = deployLib.activate.custom systemToplevel smActivate;
+        };
+        # 用户轨：standalone HM 以 SSH 用户（luck）激活用户 profile。
+        home = {
+          user = sshUser;
+          path = deployLib.activate.home-manager homeActivationPackage;
+        };
+      };
+      inherit profilesOrder;
+    };
 }
