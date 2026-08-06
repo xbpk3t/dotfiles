@@ -1,0 +1,47 @@
+---
+# wiki-digest.yml
+# 把 wiki/inbox.md 攒够的 URL 交给 docs-cli digest。
+# 计数用 xurls（只匹配 https?:// 等带 scheme 的 URL，markdown 链接正合适）。
+# 阈值：inbox 内 URL >= THRESHOLD 才跑 digest，否则整条 DAG skip。
+# 测 corner case 时传 DRY_RUN=1：digest 步改为 echo，不会真触发 AI 任务。
+# 注意：dagu 2.10 顶层 DAG 不能定义 name（name 来自文件名），name 仅 subDAG 用。
+description: "Digest wiki/inbox.md once it accumulates >= THRESHOLD URLs (xurls count)"
+schedule: "0 22 * * *"
+max_active_runs: 1
+
+env:
+  WORKSPACE: /Users/luck/Desktop/docs
+  INBOX: /Users/luck/Desktop/docs/wiki/inbox.md
+  THRESHOLD: "2"
+  # DRY_RUN: "1"   # 取消注释即为 dry-run：digest 只打印不真正执行
+
+steps:
+  - id: count
+    name: count
+    description: "Step 1/2: 用 xurls 统计 inbox 内 URL 数量并打印"
+    run: |
+      N=0
+      if [ -f "$INBOX" ]; then
+        N=$(xurls "$INBOX" 2>/dev/null | grep -c . || true)
+      else
+        echo "inbox 不存在: $INBOX" >&2
+      fi
+      echo "inbox=$INBOX"
+      echo "urls=$N threshold=$THRESHOLD"
+
+  - id: digest
+    name: digest
+    description: "Step 2/2: 满足阈值才跑 task wiki:digest，否则 skip"
+    depends:
+      - count
+    preconditions:
+      - condition: |
+          [ -f "$INBOX" ] \
+          && [ "$(xurls "$INBOX" 2>/dev/null | grep -c . || true)" -ge "$THRESHOLD" ]
+    run: |
+      if [ "${DRY_RUN:-0}" = "1" ]; then
+        echo "[dry-run] urls >= $THRESHOLD，本应执行: task wiki:digest"
+        exit 0
+      fi
+      cd "$WORKSPACE"
+      task wiki:digest

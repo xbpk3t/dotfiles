@@ -1,0 +1,116 @@
+---
+# deadlink-loop.yml — DAG 名由文件名决定（dagu 2.10+ 顶层不能定义 name）
+description: Monthly deadlink scan → AI analyze → human approve → auto delete
+schedule: "0 0 1 * *"
+max_active_runs: 1
+
+env:
+  WORKSPACE: /Users/luck/Desktop/docs
+  DEADLINK_DIR: /tmp/xbpk3t-docs-deadlink
+
+steps:
+  - id: scan
+    name: scan
+    description: "Step 1/7: Run lychee + OpenCLI to find verified dead links"
+    run: |
+      cd $WORKSPACE
+      nu .github/taskfile/scripts/deadlink.nu \
+        --data-dirs '["data"]' \
+        --output-dir $DEADLINK_DIR \
+        --skip-domains '["blog.lucc.dev","supjav.com","fandom.com","missav.ai","missav.live"]'
+    working_dir: /Users/luck/Desktop/docs
+    timeout_sec: 7200
+    continue_on:
+      exit_code: 2
+      mark_success: true
+
+  - id: check_deadlinks
+    name: check_deadlinks
+    description: "Step 2/7: Check if deadlinks were found; skip downstream if none"
+    run: |
+      REPORT="$DEADLINK_DIR/deadlink-report.json"
+      if [ -f "$REPORT" ] && jq -e '.summary.verified_dead > 0' "$REPORT" > /dev/null 2>&1; then
+        echo "verified_dead: $(jq '.summary.verified_dead' "$REPORT")"
+        exit 0
+      else
+        echo "No deadlinks found. Skipping downstream."
+        exit 0
+      fi
+    depends:
+      - scan
+
+  - id: ai_analyze
+    name: ai_analyze
+    description: "Step 3/7: AI reads deadlink report and produces deletion proposal"
+    run: |
+      cd $WORKSPACE
+      nu .github/taskfile/scripts/deadlink-ai-analyze.nu
+    working_dir: /Users/luck/Desktop/docs
+    depends:
+      - check_deadlinks
+    preconditions:
+      - condition: |
+          [ -f "$DEADLINK_DIR/deadlink-report.json" ] && \
+          jq -e '.summary.verified_dead > 0' "$DEADLINK_DIR/deadlink-report.json" > /dev/null 2>&1
+
+  - id: generate_script
+    name: generate_script
+    description: "Step 4/7: Generate verified sed script from AI proposal"
+    run: |
+      cd $WORKSPACE
+      nu .github/taskfile/scripts/deadlink-generate-script.nu
+    working_dir: /Users/luck/Desktop/docs
+    depends:
+      - ai_analyze
+
+  - id: human_gate
+    name: human_gate
+    description: "Step 5/7: Review deadlink proposal and approve or reject"
+    action: noop
+    depends:
+      - generate_script
+    preconditions:
+      - condition: |
+          [ -f "$DEADLINK_DIR/deadlink-review.md" ]
+    approval:
+      prompt: |
+        ## Deadlink 清理审批
+
+        请审查 `deadlink-review.md` 中的 deadlink 列表。
+
+        - **Approve**: 自动执行 sed 删除所有 ✅ 标记的 deadlink URL
+        - **Reject**: 本次不处理，保留所有文件不变
+
+        ✅ 标记的条目会自动删除（已验证唯一性和行号准确性）。
+        ❌ 标记的条目不会自动处理，需要你手动介入。
+
+  - id: apply
+    name: apply
+    description: "Step 6/7: Execute verified deletion script"
+    run: |
+      SCRIPT="$DEADLINK_DIR/verified-deletion-script.sh"
+      if [ -f "$SCRIPT" ] && [ -s "$SCRIPT" ]; then
+        bash "$SCRIPT"
+        echo "Applied $(grep -c '^sed' "$SCRIPT") deletions"
+      else
+        echo "No deletion script found or empty — nothing to apply"
+      fi
+    depends:
+      - human_gate
+
+  - id: recheck_commit
+    name: recheck_commit
+    description: "Step 7/7: Recheck and commit changes"
+    run: |
+      cd $WORKSPACE
+      lychee --cache --max-cache-age 0h data/**/*.yml --format summary 2>&1 | tail -5
+      git add -A
+      if ! git diff --cached --quiet; then
+        git commit -m "chore: monthly deadlink cleanup ($(date +%Y-%m))"
+        echo "Committed deadlink cleanup"
+      else
+        echo "No changes to commit"
+      fi
+    working_dir: /Users/luck/Desktop/docs
+    depends:
+      - apply
