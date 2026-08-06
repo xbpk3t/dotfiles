@@ -37,6 +37,7 @@ in
       "vshulcz/tap/deja-vu"
 
       "vjeantet/tap/alerter"
+      "mq"
     ];
 
     # 以下casks根据重要性排序
