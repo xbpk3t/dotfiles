@@ -81,3 +81,14 @@ description: <短说明>    # 可选
 pipeline:                # 仅 composite 必填且非空
   - <依赖 name>
 ```
+
+## 配套文件
+
+本 skill 目录下包含以下脚本和数据文件（由主流程自动调用，通常无需手动操作）：
+
+| 文件 | 用途 |
+|------|------|
+| `zzz.nu` | 路由执行入口；SKILL.md 中通过 `nu <skill_dir>/zzz.nu <skill_dir> <name>` 调用 |
+| `gen-aliases.nu` | 别名生成器；扫描 `references/` 下所有 `.md` 的 frontmatter，校验后写 `aliases.json`。在 references 下增删改 prompt 后执行：`cd <skill_dir> && nu gen-aliases.nu` |
+| `aliases.json` | 路由映射表；`zzz.nu` 启动时读取，将 `name` 映射到 `references/<path>.md`，由 `gen-aliases.nu` 生成 |
+| `strike.nu` | 计数器脚本；strike 流程中追踪当前 turn 数，数据存储于 `/tmp/zzz/strike/` |

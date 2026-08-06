@@ -1,3 +1,9 @@
+---
+name: imp-triangle
+role: atom
+description: 快好省不可能三角（性能-质量-成本）归类引导
+---
+
 # ImpossibleTriangle
 
 好，那还是经典的 快好省不可能三角（性能-质量-成本）
