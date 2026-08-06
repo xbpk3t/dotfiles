@@ -41,6 +41,8 @@ _: {
       codex.enable = false;
       claude.enable = true;
 
+      dagu.enable = true;
+
       skills.enable = true;
       pi-agent.enable = true;
       mcp.isDesktop = true;

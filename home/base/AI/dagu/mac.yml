@@ -1,0 +1,16 @@
+---
+
+description: "mac 日常维护相关"
+schedule: "0 0 1 * *" # 每月一次（每月 1 号 0 点）
+max_active_runs: 1
+
+
+
+steps:
+
+  - id: upgrade_brew
+    run: task -g brew
+
+
+  - id: cleanup_mac
+    run: mole cleanup

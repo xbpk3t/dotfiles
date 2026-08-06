@@ -9,6 +9,7 @@
     ./mcp.nix
     ./codex.nix
     ./claude.nix
+    ./dagu.nix
     ./pi-agent.nix
     ./skills.nix
   ];
