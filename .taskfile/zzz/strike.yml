@@ -1,0 +1,21 @@
+---
+version: "3"
+
+tasks:
+  strike:
+    desc: "通过 herdr 批量深潜：按 h2 拆 md → 各 pane 独立 agent → 输 DONE 后自动 uu + conclusion + export + close pane"
+    summary: |
+      Usage:
+        task zzz:strike <md文件> <h2标题1,h2标题2,...> [NUM=5]
+      Examples:
+        # 处理前 5 个 topic
+        task zzz:strike ~/Desktop/docs/wiki/temp.md "old-coder,ddd,bug 录屏 skills"
+        # 只处理前 3 个
+        task zzz:strike ~/Desktop/docs/wiki/temp.md "old-coder,ddd,bug 录屏 skills" NUM=3
+    silent: true
+    vars:
+      MD_FILE: '{{.CLI_ARGS | splitList " " | first }}'
+      TOPICS: '{{.CLI_ARGS | splitList " " | rest | join "," }}'
+      NUM: '5'
+    cmds:
+      - nu '{{.USER_WORKING_DIR}}/scripts/herdr-strike.nu' '{{.MD_FILE}}' '{{.TOPICS}}' --num '{{.NUM}}'
