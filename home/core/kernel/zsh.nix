@@ -165,9 +165,9 @@
 
         # 文件操作
         # 覆盖 eza enableZshIntegration 的 mkDefault ll='eza -l'（要 -la）
+        ls = "/bin/ls";
         ll = "eza -la";
-        la = "eza -a";
-        lls = "eza -la --sort=size --reverse --total-size";
+
         "md" = "mkdir -p";
         "rd" = "rmdir";
 
