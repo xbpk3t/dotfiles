@@ -209,7 +209,7 @@ services:
   # http://localhost:8317/management.html
   cpa:
     image: eceasy/cli-proxy-api:latest
-    container_name: cli-proxy-api
+    container_name: cpa
     ports:
       - "127.0.0.1:8317:8317"
     volumes:
