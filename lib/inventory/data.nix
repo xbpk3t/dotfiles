@@ -231,7 +231,22 @@ in
       user = commonUser;
       time = commonTime;
       editor = commonEditor;
-      # Phase 1 仅 inventory 元数据；SSH/primaryIp 等 Phase 5 deploy 再填。
+      # Phase 5：deploy-rs 目标 = Incus 容器（经宿主 nixos-vps-dev ProxyJump）。
+      # - host：容器 incusbr0 内网 IP；Mac 无法直连，靠 -J 宿主转发。
+      # - user：容器内 luck（与宿主同名；容器有 NOPASSWD sudo，供 sm 系统 profile 用 root 激活）。
+      # - ssh.host 也可改用 lab.container 名 + ProxyJump 后由宿主 incus exec 转，
+      #   但 deploy-rs 需要 nix-daemon over SSH，必须走真 IP + ssh-ng。
+      ssh = {
+        host = "10.87.171.92";
+        user = "luck";
+        # ProxyJump：Mac → nixos-vps-dev → 容器。
+        # 注：宿主 luck 到容器的 SSH 仍要 luck 能 SSH 到 10.87.171.92
+        #   （Phase 5 bootstrap 需先把 Mac pubkey 放进容器 authorized_keys）。
+        opts = [
+          "-J"
+          "luck@192.129.183.26"
+        ];
+      };
       lab = {
         host = "nixos-vps-dev";
         # Incus 实例名（与 flake 节点名 sm-vps-lab 可不同）

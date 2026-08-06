@@ -47,6 +47,36 @@ tasks:
 #    cmds:
 #      - '{{.NODES_CMD}}'
 
+  sm:
+    desc: "deploy-rs 部署 sm-vps 平行轨（sm + standalone HM 双 profile）"
+    summary: |
+      从 Mac 用 deploy-rs 部署到非 NixOS 目标（当前试验床：nixos-vps-dev 上 Incus 容器）。
+
+      用法（在 Mac、dotfiles 仓库根目录）：
+        task nix:deploy:sm
+
+      部署内容（deploy.nodes.<node>，见 outputs/x86_64-linux/src/sm-vps.nix）：
+        - profiles.system → system-manager（custom activate，root）
+        - profiles.home   → standalone HM（activate.home-manager，luck）
+        - profilesOrder   先 system 后 home
+        - remoteBuild=false（本机构建 + nix copy，R3）
+
+      前置（bootstrap，一次性，不入库）：
+        1. 目标机能 SSH：Mac pubkey 已进容器 luck 的 authorized_keys
+           （当前试验床经 ProxyJump：ssh -J luck@192.129.183.26 luck@10.87.171.92）
+        2. 目标机已装多用户 Nix（nix-daemon 运行中）——Phase 2 bootstrap 已做
+        3. 容器内 luck 有 NOPASSWD sudo（sm 系统 profile 用 root 激活）
+      前置检查：
+        ssh -J luck@192.129.183.26 luck@10.87.171.92 'id; sudo -n true; systemctl is-active nix-daemon'
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - |
+        set -euo pipefail
+        # 多选支持：默认全部 sm-vps 节点；也可显式指定（task nix:deploy:sm NODE=sm-vps-lab）
+        node="{{.NODE | default "sm-vps-lab"}}"
+        echo "==> deploy-rs .#${node} (sm + HM)"
+        {{.DEPLOY_RS_CMD}} ".#${node}" -- --impure
+
   vps:
     desc: "使用 rsync + SSH 部署 nixos-vps-dev（远程 eval/build，Mac 零负载）"
     summary: |

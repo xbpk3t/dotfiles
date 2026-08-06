@@ -49,8 +49,19 @@ let
       }
     ];
   };
+  # Phase 5：deploy-rs 双 profile 节点（system=sm / home=HM）。
+  deployNode = mylib.inventory.deploySmHmNode {
+    inherit name node;
+    systemToplevel = systemConfig.config.build.toplevel;
+    # homeConfigurations 值本身带顶层 activationPackage（deploy-rs activate.home-manager 期望）。
+    homeActivationPackage = homeConfig;
+    deployLib = inputs."deploy-rs".lib.${system};
+    # R3：本机构建 + nix copy，不在容器内构建。
+    remoteBuild = false;
+  };
 in
 {
   homeConfigurations.${name} = homeConfig;
   systemConfigs.${name} = systemConfig;
+  deploy.nodes.${name} = deployNode;
 }
