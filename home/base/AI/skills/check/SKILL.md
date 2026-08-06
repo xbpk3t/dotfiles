@@ -79,7 +79,7 @@ description: 验证链 — 角色对抗式技术文章交叉验证。写完IT文
 
 报告阶段除摘要外，必须列出本次产物的**绝对路径**列表，例如：
 
-```
+```text
 产物目录: /tmp/check/20260723-kde-vs-gnome/
 - /tmp/check/20260723-kde-vs-gnome/verification-report.md
 - /tmp/check/20260723-kde-vs-gnome/article-verified.md
@@ -89,7 +89,7 @@ description: 验证链 — 角色对抗式技术文章交叉验证。写完IT文
 
 ### 阶段 1：Critic — 断言提取
 
-```
+```text
 使用 Critic System Prompt（prompts/critic.md）
 输入：完整文章 Markdown
 输出：10-20 个关键断言，按 6 类标注
@@ -108,7 +108,7 @@ description: 验证链 — 角色对抗式技术文章交叉验证。写完IT文
 
 ### 阶段 2：Verifier — 并行交叉验证
 
-```
+```text
 使用 Verifier System Prompt（prompts/verifier.md）
 对每个断言启动一个独立 SubAgent
 SubAgent 需携带联网搜索能力
@@ -131,7 +131,7 @@ SubAgent 需携带联网搜索能力
 
 ### 阶段 3：Repairer — 自动修复
 
-```
+```text
 使用 Repairer System Prompt（prompts/repairer.md）
 输入：原始文章全文 + 所有核查结果
 输出：修复报告 + 修复后文章
