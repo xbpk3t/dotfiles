@@ -9,6 +9,13 @@
 
   home.packages = with pkgs; [
     launchk
+
+    # ── Fonts (required by Ghostty) ────────────────────────────────────
+    # JetBrainsMono Nerd Font: primary terminal font on macOS.
+    # Linux side already has this in modules/nixos/desktop/fonts.nix.
+    # PingFang SC is macOS system built-in, no package needed.
+    # Cf. ghostty.nix: font-family = "JetBrainsMono Nerd Font"
+    nerd-fonts.jetbrains-mono
   ];
 
   # 让 hm 生成并管理 ~/Applications/Home Manager Apps 下的 .app，之前需要使用 mac-app-util 这个flake来实现该操作，现在hm本身支持该操作了
