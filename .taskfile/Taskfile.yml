@@ -46,6 +46,11 @@ includes:
     taskfile: works/Taskfile.yml
     flatten: true
 
+  # zzz (herdr-strike 等)
+  zzz:
+    taskfile: zzz/strike.yml
+    flatten: true
+
 
 
 
