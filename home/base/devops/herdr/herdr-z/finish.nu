@@ -71,17 +71,16 @@ def find-agent-by-pane [
 # 等 claude 完成当前回合
 def wait-idle [pane_id: string, --timeout: int = 600000]: nothing -> bool {
     try {
-        ^herdr wait agent-status $pane_id --status idle --timeout $timeout
+        ^herdr agent wait $pane_id --until idle --timeout $timeout
         true
     } catch {
         false
     }
 }
 
-# 发送 slash 命令并提交 (回车)
+# 发送 slash 命令并提交 (prompt 自带提交语义, 无需再派 Enter)
 def send-slash [pane_id: string, cmd: string]: nothing -> nothing {
-    ^herdr agent send $pane_id $cmd | ignore
-    ^herdr pane send-keys $pane_id Enter | ignore
+    ^herdr agent prompt $pane_id $cmd | ignore
 }
 
 # 执行 ccx export 一次, 返回完整结果

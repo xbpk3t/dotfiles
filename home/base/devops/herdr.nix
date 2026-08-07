@@ -43,9 +43,10 @@ in
       # manifest_path/plugin_root（nix 相对路径 resolve 到 store）指向同一位置。
       #
       # ⚠️ 声明式纪律：改插件 enable/disable 需改 nix → rebuild；禁止手动跑
-      #    herdr plugin install/link/uninstall/enable/disable（会覆盖 plugins.json）。
+      #    herdr plugin install/link/uninstall/enable/disable（会写 store symlink 失败报错）。
       #
-      # 换插件后生效方式：重启 herdr server（reload-config 只重读 config.toml，不碰 plugins.json）。
+      # 生效无需重启：server 每次 plugin list/action list 都从磁盘重读 plugins.json；
+      #    reload-config 只重读 config.toml，不碰 plugins.json。
       file = {
         # ——— herdr 插件注册表（声明式） ———
         # ~/.config/herdr/plugins.json 是唯一事实来源：herdr 直接读它，server 启动不重写，无需 link。
@@ -56,8 +57,8 @@ in
         # 路径写法：本地插件用 nix 相对路径 → 构建时 store 化；focus-notify 用 ${pkgs.herdr-focus-notify}。
         #
         # ⚠️ 声明式纪律：状态仅此一份，改 enable/disable 需改 nix → rebuild；
-        #    禁止手动跑 herdr plugin install/link/uninstall/enable/disable（会覆盖本文件）。
-        #    换插件后生效：重启 herdr server（reload-config 只重读 config.toml，不碰 plugins.json）。
+        #    禁止手动跑 herdr plugin install/link/uninstall/enable/disable（会写 store symlink 失败报错）。
+        #    生效无需重启：server 每次 plugin list/action list 都重读本文件。
         ".config/herdr/plugins.json" = {
           force = true;
           text = builtins.toJSON [
