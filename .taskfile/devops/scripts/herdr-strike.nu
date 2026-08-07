@@ -1,24 +1,21 @@
 #!/usr/bin/env nu
-# herdr-strike.nu — 通过 herdr 批量深潜学习
+# herdr-strike.nu — 按 temp.md 的 h2 分发到独立 herdr workspace + claude pane
 #
 # 用法:
-#   nu herdr-strike.nu <md文件> <"h2标题1,h2标题2,...">
+#   nu herdr-strike.nu <md文件> <"h2标题1,h2标题2,..."> [--num N]
 #
 # 流程:
 #   1. ^mq 按指定 h2 标题提取每节内容（展示给你看, 供你在 pane 里粘贴）
 #   2. 为每个 topic 建 herdr workspace + 在 docs 项目内启动 claude（自动拿 sid）
 #   3. 你在 herdr TUI 里切各 pane 自由深潜
-#   4. 聊完输 DONE → 脚本 wait 到后自动触发 uu / conclusion / ccx export, 并关 pane
+#   4. 收尾: 各 pane 深潜完, 用 herdr-z plugin 的 finish action 逐 pane 收尾
+#      （uu + conclusion + ccx export + close pane）— 本脚本只负责分发, 不等待收尾。
 #
 # 前置条件:
 #   - herdr server 在运行
 #   - mq 已安装
 
-let DONE_MARKER    = 'DONE'
-let EXPORT_DIR     = '/tmp/herdr-strike-export'
 let PROJECT_DIR    = '/Users/luck/Desktop/docs'
-let UU_PROMPT_PATH = ($env.HOME | path join 'Desktop/dotfiles/home/base/AI/skills/zzz/references/analysis/uu.md')
-let CONCLUSION_PROMPT_PATH = ($env.HOME | path join 'Desktop/dotfiles/home/base/AI/skills/zzz/references/conclusion.md')
 
 # ─── 辅助：用 ^mq 提取指定 h2 的 section 内容 ───
 def get-sections [
@@ -90,77 +87,6 @@ def create-topic-pane [
     }
 }
 
-# ─── 辅助：ccx export + 自动重试（ccx 偶尔 AI 分类失败, 重试可自助恢复） ───
-def ccx-export-with-retry [
-    sid: string
-    topic: string
-    --attempts: int = 3
-    --delay: duration = 3sec
-]: nothing -> record<ok: bool export_path: string error: string> {
-    mut last = {ok: false, export_path: '', error: ''}
-    for i in 1..$attempts {
-        let res = (^ccx session export --session $sid --output-dir $EXPORT_DIR o+e>| complete)
-        let out = ($res.stdout | str trim)
-        if $res.exit_code == 0 {
-            let path = ($out | str replace 'Exported session to ' '' | str trim)
-            return {ok: true, export_path: $path, error: ''}
-        }
-        $last = {ok: false, export_path: '', error: $out}
-        if $i < $attempts {
-            print $'  ↻ ($topic): ccx 第($i)/($attempts)次失败, 等待 ($delay) 重试...'
-            sleep $delay
-        }
-    }
-    $last
-}
-
-# ─── 辅助：等待单个 pane 的 marker 等自动 uu / conclusion / export ───
-def process-pane [
-    pane: record<topic: string pane_id: string sid: string>
-]: nothing -> record<topic: string status: string export_path: string> {
-    let pane_id = $pane.pane_id
-    let topic   = $pane.topic
-    let sid     = $pane.sid
-
-    # 1. wait marker: 精准匹配「单独一行 DONE」（regex 锚定, 避免误伤正文里的 done）
-    let matched = try {
-        herdr wait output $pane_id --match "^DONE$" --regex --timeout 7200000
-        true
-    } catch {
-        print $'  ⚠️ ($topic): marker 超时'
-        false
-    }
-
-    if not $matched {
-        return {topic: $topic, status: 'timeout', export_path: ''}
-    }
-
-    # 2. 触发 uu: 让 pane 里的 claude 自己 cat 读取 prompt 文件后执行
-    herdr agent send $pane_id $"cat ($UU_PROMPT_PATH)" | ignore
-    sleep 2sec
-
-    # 3. 触发 conclusion: 同上
-    herdr agent send $pane_id $"cat ($CONCLUSION_PROMPT_PATH)" | ignore
-    sleep 2sec
-
-    # 4. ccx export + 自动重试（AI 分类偶尔失败, 重试可自助恢复）
-    mkdir $EXPORT_DIR | ignore
-    let ccx = (ccx-export-with-retry $sid $topic)
-    if not $ccx.ok {
-        print $'  ⚠️ ($topic): ccx export 最终失败'
-        let err_preview = ($ccx.error | str substring 0..120)
-        if ($err_preview | is-not-empty) {
-            print $'    错误: ($err_preview)'
-        }
-        return {topic: $topic, status: 'export-fail', export_path: ''}
-    }
-
-    # 5. 收尾: 自动关闭 pane（session 内容已由 ccx 落盘, pane 无需保留）
-    herdr pane close $pane_id | ignore
-
-    {topic: $topic, status: 'done', export_path: $ccx.export_path}
-}
-
 # ─── 主入口 ───
 def main [
     md_file: string        # markdown 文件路径
@@ -208,24 +134,14 @@ def main [
     print ''
     print $'━━━ 已创建 ($active | length) 个 pane, 切到 herdr TUI 开始深潜 ━━━'
     print $'把对应 topic 的资料贴给每个 claude, 自由追问深潜'
-    print $'聊完输: ($DONE_MARKER)'
-    print $'导出目录: ($EXPORT_DIR)'
+    print ''
+    print $'深潜完成后, 逐个用 herdr-z 收尾:'
+    print $'  herdr plugin action invoke herdr-z.finish   # 对当前焦点 pane 收尾'
+    print $'  （或绑定快捷键直接触发）'
     print '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
-
-    # 3. 并行等所有 pane 吐 marker
     print ''
-    print '⏳ 等待 marker...'
-
-    let completed = ($active | par-each {|p|
-        let result = process-pane $p
-        print $'  ✅ ($p.topic): ($result.status)'
-        $result
-    } | collect)
-
-    # 4. 汇总
-    print ''
-    print '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
-    print '📦 所有 topic 处理完成!'
-    print '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
-    $completed | select topic status export_path
+    print '📊 各 pane 信息（供定位）:'
+    $active | each {|p|
+        print $'  ($p.topic): pane=($p.pane_id) sid=($p.sid)'
+    }
 }

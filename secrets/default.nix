@@ -51,16 +51,9 @@ in
         "${platform.homePath}/${username}/.config/sops/age/keys.txt";
 
     age.sshKeyPaths = [ ]; # Disable SSH key import
-    # gnupg.home = null 只能阻止把 SSH key 导入 GPG 时使用固定 home，并不会禁掉 SSH→GPG import 本身
-    # （manifest 顶层 sshKeyPaths 默认仍为 [/etc/ssh/ssh_host_rsa_key]）。
-    # 只要还有 sshKeyPaths，sops-install-secrets 每次激活都会在 /run/secrets.d 挂载点下
-    # 建 gpg keyring home（mkdir gpg<timestamp> → permission denied）导致 deploy 失败。
-    # 这里显式清空 gnupg.sshKeyPaths，彻底跳过 gpg keyring 初始化（本机 secrets 全部走 age）。
-    gnupg = {
-      home = null;
-      sshKeyPaths = [ ]; # Disable SSH→GPG import (was default /etc/ssh/ssh_host_rsa_key)
-    }; # Disable GPG key import
+    gnupg.home = null;
 
+    
     # [2026-01-24]
     # context: 把dotfiles从homelab迁回mac之后，发现secrets无法在本地生成到 $HOME/.config/sops-nix/secrets. 导致所有服务都挂掉了。
     #
@@ -87,6 +80,10 @@ in
       # 同时具体 read all & write all 权限的token，为了方便 terraform 使用
       CF_TOKEN_READ_WRITE_ALL = mkUserSecret "cf/token/read_all";
       # CF_TOKEN_DNS = mkUserSecret "cf/token/DNS";
+
+      # Cloudflare Tunnel 管理 token（Cloudflare Tunnel:Edit 权限，账户级）。
+      # 用于 herdr-mobile-relay 的命名隧道（cc.lucc.dev）创建 + DNS 路由。
+      CF_TUNNEL_TOKEN = mkUserSecret "cf/token/tunnel";
 
       CF_WORKERS_CFP = mkUserSecret "cf/workers/cfp";
 
