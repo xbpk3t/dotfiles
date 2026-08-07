@@ -45,3 +45,10 @@ fetch.github = "VoltAgent/awesome-claude-code-subagents"
 # 之后要升级时改这个 hash 再跑 nvfetcher。
 src.manual = "a7d17a532304e285a791749cb5d7b706b6a7ecb9"
 fetch.github = "yankewei/herdr-focus-notify"
+
+[herdr-reviewer-src]
+# herdr plugin：code review 工具（persiyanov/herdr-reviewr）。
+# 二进制走 release asset（4 平台 × 独立 sha256，见 pkgs/herdr-reviewer/default.nix 内 assetBySystem/binaryHashes），
+# nvfetcher 这里只锁源码 tag —— 升级时 src 与包内 version/asset/hash 三处同步 bump。
+src.github_tag = "persiyanov/herdr-reviewr"
+fetch.github = "persiyanov/herdr-reviewr"
