@@ -96,7 +96,11 @@ stdenv.mkDerivation rec {
     license = licenses.mit;
     # 与仓库 supportedSystems（outputs/default.nix）对齐；
     # assetBySystem 缺失的平台会在这里显式 throw，而不是静默 skip。
-    platforms = [ "aarch64-darwin" "aarch64-linux" "x86_64-linux" ];
+    platforms = [
+      "aarch64-darwin"
+      "aarch64-linux"
+      "x86_64-linux"
+    ];
     mainProgram = "herdr-reviewr";
   };
 }
