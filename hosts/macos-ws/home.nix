@@ -38,7 +38,7 @@ _: {
 
     AI = {
       cc-connect.enable = true;
-      codex.enable = false;
+      codex.enable = true;
       claude.enable = true;
 
       dagu.enable = true;

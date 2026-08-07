@@ -53,16 +53,13 @@ def create-topic-pane [
     #    create 返回值里直接含 workspace_id 和 root_pane.pane_id, 省两步查询
     let created = (herdr workspace create --cwd $PROJECT_DIR --label $topic
         | from json
-        | get result.workspace)
-    let ws_id = $created.workspace_id
+        | get result)
+    let ws_id = $created.workspace.workspace_id
 
-    # 2. 取 workspace 的默认 root pane 的 pane_id
-    let root = (herdr api snapshot
-        | from json
-        | get result.snapshot.panes
-        | where workspace_id == $ws_id
-        | last)
-    let pane_id = ($root | get pane_id)
+    # 2. 直接取 workspace 的 root pane 的 pane_id（返回结构里就是 root_pane,
+    #    不用 snapshot 里按 workspace 过滤再取 last —— 后者在已有多个 pane 时会取错）
+    let root = $created.root_pane
+    let pane_id = ($root.pane_id)
 
     # 3. 若 pane 还没跑 claude, 启动它（项目内启动无需交互确认）
     if ($root.agent? | default '?') != 'claude' {
