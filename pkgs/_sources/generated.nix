@@ -36,6 +36,17 @@
       sha256 = "sha256-7BATIkzFFDD64yhqKu4vGCemeHg2iNULpKr+zQ0FekQ=";
     };
   };
+  herdr-reviewer-src = {
+    pname = "herdr-reviewer-src";
+    version = "v0.29.0";
+    src = fetchFromGitHub {
+      owner = "persiyanov";
+      repo = "herdr-reviewr";
+      rev = "v0.29.0";
+      fetchSubmodules = false;
+      sha256 = "sha256-xr9V9rJjT3RMir/luIn09eo2bXuw5Fxn3lkHHZXAOTA=";
+    };
+  };
   launchk = {
     pname = "launchk";
     version = "launchk-0.3.1";
