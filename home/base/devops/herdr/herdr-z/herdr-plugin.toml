@@ -1,0 +1,11 @@
+id = "herdr-z"
+name = "Herdr Z — Session Finisher"
+version = "0.1.0"
+min_herdr_version = "0.7.3"
+description = "结束 herdr session 的收尾工具：/zzz uu → /zzz conclusion → ccx export"
+platforms = ["macos"]
+
+[[actions]]
+id = "finish"
+title = "Finish session (uu + conclusion + ccx export)"
+command = ["nu", "./finish.nu"]

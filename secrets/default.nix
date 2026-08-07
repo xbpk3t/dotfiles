@@ -51,7 +51,15 @@ in
         "${platform.homePath}/${username}/.config/sops/age/keys.txt";
 
     age.sshKeyPaths = [ ]; # Disable SSH key import
-    gnupg.home = null; # Disable GPG key import
+    # gnupg.home = null 只能阻止把 SSH key 导入 GPG 时使用固定 home，并不会禁掉 SSH→GPG import 本身
+    # （manifest 顶层 sshKeyPaths 默认仍为 [/etc/ssh/ssh_host_rsa_key]）。
+    # 只要还有 sshKeyPaths，sops-install-secrets 每次激活都会在 /run/secrets.d 挂载点下
+    # 建 gpg keyring home（mkdir gpg<timestamp> → permission denied）导致 deploy 失败。
+    # 这里显式清空 gnupg.sshKeyPaths，彻底跳过 gpg keyring 初始化（本机 secrets 全部走 age）。
+    gnupg = {
+      home = null;
+      sshKeyPaths = [ ]; # Disable SSH→GPG import (was default /etc/ssh/ssh_host_rsa_key)
+    }; # Disable GPG key import
 
     # [2026-01-24]
     # context: 把dotfiles从homelab迁回mac之后，发现secrets无法在本地生成到 $HOME/.config/sops-nix/secrets. 导致所有服务都挂掉了。
