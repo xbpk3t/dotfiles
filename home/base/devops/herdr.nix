@@ -36,7 +36,7 @@ in
           pkgs.herdr-focus-notify
           # herdr-reviewr：code review 插件（读 agent 写的 diff + 行内评论）。
           # store 路径已由下方 plugins.json 记录引用强制保留；这里进 PATH 便于直接调试二进制。
-          pkgs.herdr-reviewer
+          pkgs.herdr-reviewr
         ];
 
       # ——— herdr 插件声明式接入 ———
@@ -104,12 +104,12 @@ in
               plugin_id = "persiyanov.reviewr";
               name = "Reviewr";
               version = "0.29.0";
-              # store 插件：manifest_path/plugin_root 用 ${pkgs.herdr-reviewer} 绝对路径。
+              # store 插件：manifest_path/plugin_root 用 ${pkgs.herdr-reviewr} 绝对路径。
               # manifest 里 pane command 是 $HERDR_PLUGIN_ROOT/bin/herdr-reviewr（server 打开
               # pane 时注入 HERDR_PLUGIN_ROOT），actions/events 相对路径 bash herdr/pane.sh
               # 的 cwd = plugin_root —— 两条都原样保留，不要改成绝对 store 路径（rebuild 会变）。
-              manifest_path = "${pkgs.herdr-reviewer}/plugin/herdr-plugin.toml";
-              plugin_root = "${pkgs.herdr-reviewer}/plugin";
+              manifest_path = "${pkgs.herdr-reviewr}/plugin/herdr-plugin.toml";
+              plugin_root = "${pkgs.herdr-reviewr}/plugin";
               enabled = true;
               # NOTE: events（worktree.created 自动 open）已在上游 herdr-plugin.toml 声明，
               # herdr 加载时从 manifest 重新解析补全 → 这里不重复写。

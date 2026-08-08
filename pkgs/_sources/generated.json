@@ -56,11 +56,11 @@
         },
         "version": "a7d17a532304e285a791749cb5d7b706b6a7ecb9"
     },
-    "herdr-reviewer-src": {
+    "herdr-reviewr-src": {
         "cargoLock": null,
         "date": null,
         "extract": null,
-        "name": "herdr-reviewer-src",
+        "name": "herdr-reviewr-src",
         "passthru": null,
         "pinned": false,
         "src": {
