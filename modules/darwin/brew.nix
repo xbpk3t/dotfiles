@@ -50,7 +50,7 @@ in
 
       "wechat"
       # "wechatwork"
-      "wetype"
+      # "wetype"
 
       #"tailscale-app"
 

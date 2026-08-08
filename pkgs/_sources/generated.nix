@@ -36,8 +36,8 @@
       sha256 = "sha256-7BATIkzFFDD64yhqKu4vGCemeHg2iNULpKr+zQ0FekQ=";
     };
   };
-  herdr-reviewr-src = {
-    pname = "herdr-reviewr-src";
+  herdr-reviewr = {
+    pname = "herdr-reviewr";
     version = "v0.29.0";
     src = fetchFromGitHub {
       owner = "persiyanov";

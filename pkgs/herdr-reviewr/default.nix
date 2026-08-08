@@ -5,12 +5,12 @@
   fetchurl,
 }:
 let
-  # ——— 上游源码 checkout（nvfetcher 管 source，见 nvfetcher.toml [herdr-reviewr-src]） ———
+  # ——— 上游源码 checkout（nvfetcher 管 source，见 nvfetcher.toml [herdr-reviewr]） ———
   # 只用来取 herdr-plugin.toml + herdr/（pane.sh ~400 行，手写不可行）。
   # 声明式接入下 herdr 永不执行 [[build]]（herdr 源码 cli/plugin.rs:210，
   # build 只在 `herdr plugin install` 触发；且 build 前后 manifest 必须不可变），
   # 所以 src 里只需这两个路径，install.sh 不复制、不执行。
-  source = sources.herdr-reviewr-src;
+  source = sources.herdr-reviewr;
 
   # ——— 4 平台预编译 release asset（system → asset 名） ———
   # asset 是 tar.gz（内含单文件 herdr-reviewr），sha256 sidecar = tar.gz 文件本身 hash。
