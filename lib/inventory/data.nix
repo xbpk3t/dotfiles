@@ -26,6 +26,30 @@ in
     };
   };
 
+  nod-am = {
+    nod-am = {
+      hostName = "nod-am";
+      # NOD release-24.05 对应 stateVersion 24.05（enum 上限，见 NOD version.nix）
+      stateVersion = "24.05";
+      # NOD 用户 uid/gid：必须与真机 `id nix-on-droid` 一致
+      # Why: deploy-rs 远程部署会生成错误 uid，必须显式固定（issue #94）
+      user = commonUser // {
+        uid = 0; # TODO: 真机 `id nix-on-droid` 后填入
+        gid = 0; # TODO: 真机 `id nix-on-droid` 后填入
+      };
+      time = commonTime;
+      editor = commonEditor;
+      # deploy-rs 走 tailscale IP 连接（与 nixos-vps 同模式）
+      tailscale = {
+        ip = "100.123.207.1";
+      };
+      ssh = {
+        user = "nix-on-droid";
+        port = 8022; # nix-on-droid sshd 默认端口
+      };
+    };
+  };
+
   nixos-ws = {
     nixos-ws = {
       hostName = "nixos-ws";
@@ -95,6 +119,15 @@ in
       tailscale = {
         ip = "100.101.189.7";
         derpDomain = "derp-nixos-vps-dev.lucc.dev";
+      };
+      # exit node（手机翻墙出口）需要的 sysctl 追加。
+      # kernel/sysctl.nix 用 mkForce 接管 sysctl，这里在 mkForce 里 merge 追加。
+      sysctlExtras = rec {
+        "net.ipv4.ip_forward" = "1";
+        "net.ipv6.conf.all.forwarding" = "1";
+        # 让转发的包绕过 rp_filter。只关 tailscale0（exit 转发接口），
+        # 不关 all（保留其它接口的 anti-spoofing 防护）。
+        "net.ipv4.conf.tailscale0.rp_filter" = "0";
       };
       singbox = {
         label = "LA-RN";
