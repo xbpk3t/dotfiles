@@ -51,7 +51,34 @@ locals {
 
   # ACL 规则
   acl = {
-    grants = [{ src = ["*"], dst = ["*"], ip = ["*"] }]
+    # 基础连通：全网全通（保持现状）
+    # 注意：授予 autogroup:internet 才能用 exit node。
+    # 默认不给全线的 exit 权限，仅手机单独开放 → 其他设备行为不变。
+    grants = [
+      # 全网互通（不含 exit——exit 由下一规则授权）
+      { src = ["*"], dst = ["*"], ip = ["*"] },
+      # 仅手机可用 exit node 走互联网（翻墙）
+      # 手机 Tailscale 角色名统一为 nod-am（手机节点需在 Tailscale 里改名 nod-am）
+      # Tailscale ACL 地址格式要求 user@host（裸 hostname 400 invalid address）
+      {
+        src = ["xbpk3t@nod-am"]
+        dst = ["autogroup:internet"]
+        ip  = ["*"]
+      }
+    ]
+    # 自动批准 exit node（无需 tag）：
+    # - exitNode: 用户（节点 owner）广告 exit node 时自动批准
+    # - routes: 自动批准该用户广告的 0.0.0.0/0 路由（exit node 路由）
+    # 用用户身份（xbpk3t）而非 tag —— 单用户 tailnet 无 churn 风险，更简单。
+    # 注意：autoApprover 只在新广告时生效；已存在的广告需手动在控制台启用或重新 up。
+    autoApprovers = {
+      # tailnet owner 的 loginName（API 确认）：xbpk3t@github
+      exitNode = ["xbpk3t@github"]
+      routes = {
+        "0.0.0.0/0" = ["xbpk3t@github"]
+        "::/0"      = ["xbpk3t@github"]
+      }
+    }
     ssh = [{
       action = "check"
       src    = ["autogroup:member"]

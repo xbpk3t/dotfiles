@@ -120,15 +120,6 @@ in
         ip = "100.101.189.7";
         derpDomain = "derp-nixos-vps-dev.lucc.dev";
       };
-      # exit node（手机翻墙出口）需要的 sysctl 追加。
-      # kernel/sysctl.nix 用 mkForce 接管 sysctl，这里在 mkForce 里 merge 追加。
-      sysctlExtras = rec {
-        "net.ipv4.ip_forward" = "1";
-        "net.ipv6.conf.all.forwarding" = "1";
-        # 让转发的包绕过 rp_filter。只关 tailscale0（exit 转发接口），
-        # 不关 all（保留其它接口的 anti-spoofing 防护）。
-        "net.ipv4.conf.tailscale0.rp_filter" = "0";
-      };
       singbox = {
         label = "LA-RN";
         server = primaryIp;

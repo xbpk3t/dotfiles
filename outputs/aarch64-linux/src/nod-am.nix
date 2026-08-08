@@ -1,9 +1,8 @@
 {
   inputs,
   mylib,
-  lib,
   ...
-}@args:
+}:
 let
   name = "nod-am";
   # host 元数据来自 inventory（分组 nod-am，节点 nod-am）
@@ -40,9 +39,7 @@ let
   # deploy-rs 激活 helper（upstream wiki 正宗写法）
   activateNixOnDroid =
     configuration:
-    inputs.deploy-rs.lib.aarch64-linux.activate.custom
-      configuration.activationPackage
-      "${configuration.activationPackage}/activate";
+    inputs.deploy-rs.lib.aarch64-linux.activate.custom configuration.activationPackage "${configuration.activationPackage}/activate";
 
   # deploy-rs 节点：从 Mac 通过 tailscale IP push 到手机
   # 手机端 NOD 内跑 userspace tailscale，注册到同一 tailnet
@@ -52,7 +49,10 @@ let
       sshUser = node.ssh.user;
       user = node.ssh.user;
       magicRollback = true;
-      sshOpts = [ "-p" (toString node.ssh.port) ];
+      sshOpts = [
+        "-p"
+        (toString node.ssh.port)
+      ];
       path = activateNixOnDroid nodConfig;
     };
   };

@@ -53,7 +53,6 @@ in
     age.sshKeyPaths = [ ]; # Disable SSH key import
     gnupg.home = null;
 
-    
     # [2026-01-24]
     # context: 把dotfiles从homelab迁回mac之后，发现secrets无法在本地生成到 $HOME/.config/sops-nix/secrets. 导致所有服务都挂掉了。
     #

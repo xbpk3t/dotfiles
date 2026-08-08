@@ -1,12 +1,8 @@
 {
   pkgs,
   lib,
-  stateVersion,
   ...
 }:
-let
-  hostName = "nod-am";
-in
 {
   # why this? 手机本机 Nix 终端环境，作为移动端 SSH client 使用
   # 与 nixos-avf 的区别：
