@@ -13,15 +13,6 @@ tasks:
     summary: |
       Usage:
         task herdr:strike [<md文件>] <h2标题1,h2标题2,...> [NUM=5]
-      Examples:
-        # 默认 md (~/Desktop/docs/wiki/temp.md) + 指定 h2
-        task herdr:strike "old-coder,ddd,bug 录屏 skills"
-        # 指定 md + h2
-        task herdr:strike ~/Desktop/docs/wiki/temp.md "old-coder,ddd,bug 录屏 skills"
-        # 指定 md + h2 + 只取前 3 个 topic
-        task herdr:strike ~/Desktop/docs/wiki/temp.md "old-coder,ddd" -- 3
-      Notes:
-        - 第一个 CLI 参数若为现有 .md 文件则当作 MD_FILE，否则整体当 h2 列表
     silent: true
     vars:
       # 第一参是 md 文件用；否则默认 temp.md
@@ -38,4 +29,21 @@ tasks:
       - sh: command -v herdr
         msg: "缺少依赖: herdr"
     cmds:
-      - nu '{{.HERDR_SCRIPTS_DIR}}/herdr-strike.nu' '{{.MD_FILE}}' '{{.TOPICS}}' --num '{{.NUM}}'
+      - nu '{{.HERDR_SCRIPTS_DIR}}/herdr/strike.nu' '{{.MD_FILE}}' '{{.TOPICS}}' --num '{{.NUM}}'
+
+  finish:
+    desc: "herdr 收尾：对目标 pane 执行 uu + conclusion + ccx export + close（脚本强制版）"
+    summary: |
+      Usage:
+        task herdr:finish                       # 收尾当前焦点/匹配的 pane
+        task herdr:finish <pane_id>             # 收尾指定 pane
+    silent: true
+    vars:
+      PANE: '{{default "" .CLI_ARGS}}'
+    preconditions:
+      - sh: command -v herdr
+        msg: "缺少依赖: herdr (需 herdr server 运行中)"
+      - sh: command -v ccx
+        msg: "缺少依赖: ccx"
+    cmds:
+      - nu '{{.HERDR_SCRIPTS_DIR}}/herdr/finish.nu' '{{.CLI_ARGS}}'

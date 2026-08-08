@@ -12,5 +12,5 @@ includes:
   test: ./Taskfile.test.yml
 
 tasks:
-  nvfetcher:
+  nvf:
     cmd: nvfetcher -c nvfetcher.toml -o pkgs/_sources
