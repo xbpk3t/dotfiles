@@ -21,6 +21,11 @@ in
   options.modules.networking.tailscale = {
     enable = mkEnableOption "Tailscale client (WireGuard-based mesh VPN) on this host";
 
+    # 多角色：本机作为 exit node（转发出口）。
+    # 开启后：useRoutingFeatures=server + --advertise-exit-node。
+    # 批准由控制面（autoApprovers）+ 使用侧 grants 管理，模块不关心。
+    exitNode = mkEnableOption "Advertise this host as a Tailscale exit node";
+
     derper = {
       enable = mkEnableOption "Tailscale DERP server on this host";
 
@@ -79,10 +84,15 @@ in
       services.tailscale = {
         enable = true;
         package = pkgs.tailscale;
-        # Keep it as a regular client; enables subnet/exit-node routing only when needed.
-        useRoutingFeatures = "client";
         openFirewall = true;
         authKeyFile = config.sops.secrets.TAILSCALE_AUTH_KEY.path;
+        # 多角色：基础 client；exitNode 开启时提升为 "server"（开 ip_forward，exit node 必备）。
+        # 纯 if（求值期）而非 mkIf（合并期）：mkIf false 会 fallback 到 NixOS 默认 "none"，
+        # 丢掉 client 语义（rp_filter strict）——nixos-usb 等只开 enable 的 host 会回归。
+        # 用 if 显式二选一：exitNode → server，否则 client。
+        useRoutingFeatures = if cfg.exitNode then "server" else "client";
+        # exitNode 时广播自己是出口。
+        extraUpFlags = lib.mkIf cfg.exitNode [ "--advertise-exit-node" ];
       };
 
       environment.shellAliases = {
