@@ -1,0 +1,41 @@
+---
+version: "3"
+
+# 脚本目录相对本文件定位，不依赖 USER_WORKING_DIR
+vars:
+  HERDR_SCRIPTS_DIR: '{{.TASKFILE_DIR}}/scripts'
+
+dir: '{{.USER_WORKING_DIR}}'
+
+tasks:
+  strike:
+    desc: "通过 herdr 批量深潜：按 h2 拆 md → 各 pane 独立 agent；收尾用 herdr-z finish（uu + conclusion + export + close pane）"
+    summary: |
+      Usage:
+        task herdr:strike [<md文件>] <h2标题1,h2标题2,...> [NUM=5]
+      Examples:
+        # 默认 md (~/Desktop/docs/wiki/temp.md) + 指定 h2
+        task herdr:strike "old-coder,ddd,bug 录屏 skills"
+        # 指定 md + h2
+        task herdr:strike ~/Desktop/docs/wiki/temp.md "old-coder,ddd,bug 录屏 skills"
+        # 指定 md + h2 + 只取前 3 个 topic
+        task herdr:strike ~/Desktop/docs/wiki/temp.md "old-coder,ddd" -- 3
+      Notes:
+        - 第一个 CLI 参数若为现有 .md 文件则当作 MD_FILE，否则整体当 h2 列表
+    silent: true
+    vars:
+      # 第一参是 md 文件用；否则默认 temp.md
+      MD_FILE: '{{.CLI_ARGS | splitList " " | first | default "~/Desktop/docs/wiki/temp.md"}}'
+      # 去掉第一参的其余部分
+      TOPICS: '{{.CLI_ARGS | splitList " " | rest | join ","}}'
+      NUM: '{{default "5" .NUM}}'
+    preconditions:
+      - test -n '{{.TOPICS}}'
+      - sh: test -f '{{.MD_FILE}}'
+        msg: "md 文件不存在: {{.MD_FILE}}"
+      - sh: command -v mq
+        msg: "缺少依赖: mq"
+      - sh: command -v herdr
+        msg: "缺少依赖: herdr"
+    cmds:
+      - nu '{{.HERDR_SCRIPTS_DIR}}/herdr-strike.nu' '{{.MD_FILE}}' '{{.TOPICS}}' --num '{{.NUM}}'

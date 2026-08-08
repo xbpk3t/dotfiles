@@ -12,6 +12,12 @@
     # overrideLocalDns = true;
   };
 
+  # 与 nixos 版 tailscale-client 一致：tailscale 启用时提供 tss 快捷 alias。
+  # darwin 版 enable 硬编码 true（模块被 import 即服务启用），alias 跟随服务。
+  environment.shellAliases = {
+    tss = "tailscale";
+  };
+
   # nix-darwin 的 services.tailscale 没有 authKeyFile 选项（不同于 NixOS）。
   # macOS 上 tailscaled 只负责运行 daemon，认证需要额外执行 tailscale up。
   # 用 activationScript 在每次 darwin-rebuild 后自动 pre-auth（已登录则跳过）。

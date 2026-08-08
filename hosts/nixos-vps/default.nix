@@ -120,6 +120,10 @@ in
     networking = {
       tailscale = {
         enable = true;
+        # 多角色：既是 client + derper，又是 exit node（手机翻墙出口）。
+        # 具体 services.tailscale 配置集中在 modules/nixos/infra/tailscale-client.nix。
+        # exitNode 是裸 bool option（模块内 mkEnableOption 顶层）。
+        exitNode = true;
         derper = {
           enable = true;
           acmeEmail = userMeta.mail;

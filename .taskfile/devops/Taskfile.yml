@@ -6,3 +6,4 @@ includes:
   pc: ./Taskfile.pre-commit.yml
   rclone: ./Taskfile.rclone.yml
   android: ./Taskfile.android.yml
+  herdr: ./Taskfile.herdr.yml

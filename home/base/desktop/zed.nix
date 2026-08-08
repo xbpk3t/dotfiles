@@ -87,6 +87,9 @@ let
     # 默认使用JB的键位
     base_keymap = "JetBrains";
 
+    # 禁止自动更新（默认 true）
+    auto_update = false;
+
     # https://zed.dev/docs/vim
     vim_mode = false;
 
