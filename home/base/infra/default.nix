@@ -11,6 +11,5 @@
     openssl
     age
     sops
-
   ];
 }
