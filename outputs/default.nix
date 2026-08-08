@@ -117,6 +117,10 @@ let
       nodes = lib.attrsets.mergeAttrsList (map (it: it.deploy.nodes or { }) outputs);
     };
     nixosConfigurations = lib.attrsets.mergeAttrsList (map (it: it.nixosConfigurations or { }) outputs);
+    # nix-on-droid（手机本机 Nix 用户态，proot）
+    nixOnDroidConfigurations = lib.attrsets.mergeAttrsList (
+      map (it: it.nixOnDroidConfigurations or { }) outputs
+    );
     # sm-vps 平行轨
     homeConfigurations = lib.attrsets.mergeAttrsList (map (it: it.homeConfigurations or { }) outputs);
     systemConfigs = lib.attrsets.mergeAttrsList (map (it: it.systemConfigs or { }) outputs);
@@ -164,6 +168,9 @@ let
   );
   mergedDarwinConfigurations = lib.attrsets.mergeAttrsList (
     map (it: it.darwinConfigurations or { }) architectureOutputValues
+  );
+  mergedNixOnDroidConfigurations = lib.attrsets.mergeAttrsList (
+    map (it: it.nixOnDroidConfigurations or { }) architectureOutputValues
   );
   mergedDeployNodes = lib.attrsets.mergeAttrsList (
     map (it: it.deploy.nodes or { }) architectureOutputValues
@@ -274,6 +281,8 @@ in
       nodes = mergedDeployNodes;
     };
     nixosConfigurations = mergedNixosConfigurations;
+    # nix-on-droid（手机本机 Nix 用户态）
+    nixOnDroidConfigurations = mergedNixOnDroidConfigurations;
     # sm-vps 平行轨出口
     homeConfigurations = mergedHomeConfigurations;
     systemConfigs = mergedSystemConfigs;

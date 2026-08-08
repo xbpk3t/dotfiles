@@ -41,6 +41,8 @@ in
   "nixos-usb" = groupOrEmpty "nixos-usb";
   "macos-ws" = groupOrEmpty "macos-ws";
   "sm-vps" = groupOrEmpty "sm-vps";
+  # nod-am（手机本机 Nix 用户态，nix-on-droid）
+  "nod-am" = groupOrEmpty "nod-am";
 
   singboxForHost =
     inventory: hostName:
