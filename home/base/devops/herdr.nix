@@ -25,19 +25,16 @@ in
 
     home = {
 
-      packages =
-        with inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
-        [
-          herdr
-        ]
-        ++ lib.optionals pkgs.stdenv.isDarwin [
-          # herdr-focus-notify：agent blocked/done 时弹 macOS 可点击通知。
-          # 依赖 alerter（brew 管理，HERDR_FOCUS_NOTIFY_NOTIFIER 指向 /opt/homebrew/bin/alerter）。
-          pkgs.herdr-focus-notify
-          # herdr-reviewr：code review 插件（读 agent 写的 diff + 行内评论）。
-          # store 路径已由下方 plugins.json 记录引用强制保留；这里进 PATH 便于直接调试二进制。
-          pkgs.herdr-reviewr
-        ];
+      # ⚠️ herdr 插件包（herdr-focus-notify / herdr-reviewr）不进 home.packages：
+      #   buildEnv 会把每个包的输出合并成一个 tree，两个包都带 plugin/ 目录
+      #   （herdr-plugin.toml 在 plugin/ 根），同名 subpath 冲突报错
+      #   （"two given paths contain a conflicting subpath"）。
+      #   保活不依赖 home.packages：plugins.json 的 ${pkgs.herdr-xxx}/plugin/...
+      #   字符串插值已形成 store path context，不会被 GC。
+      #   如需脱离 herdr 单跑 reviewr（README 支持），用 nix shell / nix path 拿二进制。
+      packages = with inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}; [
+        herdr
+      ];
 
       # ——— herdr 插件声明式接入 ———
       # ~/.config/herdr/plugins.json 是唯一事实来源，home.file 直接声明生成。
@@ -145,6 +142,20 @@ in
           };
         };
 
+        ".config/herdr/plugins/config/persiyanov.reviewr/config.toml" = {
+          force = true;
+          source = tomlFormat.generate "herdr-reviewr-config.toml" {
+            # popup
+            toggle_placement = "overlay";
+            # 关掉 worktree.created 自动 open：overlay 不被 auto-open 支持（README：
+            # "New worktrees auto-open only split and tab"），且手动 toggle 才符合 popup 预期。
+            auto_open = false;
+            # 其余 key 用默认：
+            #   theme / base_branches / default_scope / navigator_position / toggle_direction
+            #   github_host / [keybindings] —— 需要的再补，别加未知 key（会整文件无效）。
+          };
+        };
+
         # 配置路径: ~/.config/herdr/config.toml
         # 结构化 nix → TOML（相同思路参考 pi-agent toJSON）。
         # ⚠️  Nix 注释不会带入生成的 TOML 文件。
@@ -234,25 +245,6 @@ in
             };
 
             # ——— 键位 / 自定义命令 ———
-            # 导航键分两层（参考 herdr --default-config 完整键列表）：
-            #
-            #   direct（无 prefix，高频）：ctrl+alt+letter
-            #     [ / ]  Agent 前后切换         u / i  Tab 前后切换
-            #     \     回跳上一个 pane          e      新 Tab
-            #     t     split right + claude    g      lazygit
-            #     d     hunk diff              r      reviewr pane（toggle）
-            #
-            #   prefix（ctrl+b + …，中/低频）：
-            #     h/j/k/l     pane 方向          x     关 pane
-            #     ,/.         prev/next ws       v/−    split
-            #     shift+1..9  跳 workspace       c      新 tab（或 ctrl+alt+e）
-            #     shift+r     reload config
-            #
-            # 注释掉的备选 popup（等需要时解开）：
-            #   b  btop（原 t 被 split claude 占）  p  ghui PR
-            #   l  lazydocker                         y  yazi
-            #   k  k9s
-            #
             # 修饰：ctrl+alt+letter（无 prefix，一击）。
             # macOS 上 alt = Option 键；herdr/ghostty 配置里写 alt，物理键是 ⌥。
             # 不用 ctrl+shift：那是 Ghostty chrome 带（c/v 剪贴板、字号、inspector）。
@@ -265,7 +257,7 @@ in
               next_agent = "ctrl+alt+]";
 
               # ——— Tab 导航（高频 → direct key） ———
-              # u = ← / i = →（键盘位置直觉）；e = empty = 新 tab
+              # u = ← / i = →（键盘位置直觉）；e `= empty = 新 tab
               previous_tab = "ctrl+alt+u";
               next_tab = "ctrl+alt+i";
               new_tab = "ctrl+alt+e";
