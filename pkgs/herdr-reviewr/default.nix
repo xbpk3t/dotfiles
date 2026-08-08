@@ -5,12 +5,12 @@
   fetchurl,
 }:
 let
-  # ——— 上游源码 checkout（nvfetcher 管 source，见 nvfetcher.toml [herdr-reviewer-src]） ———
+  # ——— 上游源码 checkout（nvfetcher 管 source，见 nvfetcher.toml [herdr-reviewr-src]） ———
   # 只用来取 herdr-plugin.toml + herdr/（pane.sh ~400 行，手写不可行）。
   # 声明式接入下 herdr 永不执行 [[build]]（herdr 源码 cli/plugin.rs:210，
   # build 只在 `herdr plugin install` 触发；且 build 前后 manifest 必须不可变），
   # 所以 src 里只需这两个路径，install.sh 不复制、不执行。
-  source = sources.herdr-reviewer-src;
+  source = sources.herdr-reviewr-src;
 
   # ——— 4 平台预编译 release asset（system → asset 名） ———
   # asset 是 tar.gz（内含单文件 herdr-reviewr），sha256 sidecar = tar.gz 文件本身 hash。
@@ -35,17 +35,17 @@ let
   system = stdenv.hostPlatform.system;
   asset =
     assetBySystem.${system}
-      or (throw "herdr-reviewer: unsupported system ${system} (asset map has ${toString (builtins.attrNames assetBySystem)})");
+      or (throw "herdr-reviewr: unsupported system ${system} (asset map has ${toString (builtins.attrNames assetBySystem)})");
   binaryHash =
     binaryHashes.${asset}
-      or (throw "herdr-reviewer: no binary hash for asset ${asset} — release sidecar missing?");
+      or (throw "herdr-reviewr: no binary hash for asset ${asset} — release sidecar missing?");
 in
 stdenv.mkDerivation rec {
   # ——— 打包策略（按仓库打包流程图） ———
   # 有 release 产物 → fetchurl 直接消费（不重建 Rust，与 llm-agents packages/herdr fromBinary 同思路）：
   #   - asset 内含单文件二进制（tar -xzf 解包，见上 fetchzip 禁用说明）
   #   - manifest/pane.sh 从源码 checkout 取（pane.sh ~400 行不可手写）
-  pname = "herdr-reviewer";
+  pname = "herdr-reviewr";
   inherit version;
 
   # ——— 二进制（当前平台，由 assetBySystem 映射） ———
