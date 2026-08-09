@@ -276,7 +276,7 @@ in
               # ——— 自定义命令（popup / shell） ———
               command = [
                 {
-                  key = "ctrl+alt+t";
+                  key = "ctrl+alt+p";
                   type = "shell";
                   description = "split right and run claude (cwd follows source pane)";
                   # pane split 无「创建即 run」；先 split 拿 pane_id，再 pane run。
@@ -287,6 +287,16 @@ in
                     pid=$(printf '%s' "$out" | jq -r '.result.pane.pane_id // empty')
                     [ -n "$pid" ] && "$B" pane run "$pid" claude
                   '';
+                }
+                {
+                  # 内置 scratch terminal：临时操作弹窗（官方文档示例写法）。
+                  # 命令退出即消失；不持久会话——需要持久再上 herdr-floax 插件。
+                  key = "ctrl+alt+t";
+                  type = "popup";
+                  description = "scratch terminal (popup shell)";
+                  command = "exec \"\${SHELL:-sh}\"";
+                  width = "80%";
+                  height = "80%";
                 }
                 {
                   key = "ctrl+alt+g";
@@ -304,6 +314,7 @@ in
                   width = "90%";
                   height = "90%";
                 }
+
                 {
                   key = "prefix+p";
                   type = "plugin_action";
