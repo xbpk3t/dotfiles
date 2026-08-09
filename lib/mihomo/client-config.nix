@@ -112,7 +112,7 @@ let
     ipv6 = true;
     external-controller = "0.0.0.0:9090";
     secret = secrets.clashSecret;
-    external-ui = "${pkgs.zashboard}/share/zashboard";
+    external-ui = "${pkgs.zashboard}";
     mixed-port = 7890;
     allow-lan = true;
     bind-address = "*";
