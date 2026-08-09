@@ -25,6 +25,11 @@ nixpkgs.lib.nixosSystem {
     ++ [
       nixos-generators.nixosModules.all-formats
     ]
+    # 舰队拓扑图（README 用）：所有 NixOS host 注入 nix-topology 模块，
+    # 让 topology 能自动提取各 host 的接口/服务信息。
+    ++ [
+      inputs.nix-topology.nixosModules.topology
+    ]
     ++ (lib.optionals ((lib.lists.length home-modules) > 0) [
       home-manager.nixosModules.home-manager
       {
