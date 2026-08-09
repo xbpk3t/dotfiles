@@ -79,6 +79,12 @@ rec {
       # inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # nix-topology: 从 flake 的 nixosConfigurations 自动生成舰队拓扑 SVG
+    nix-topology = {
+      url = "github:oddlama/nix-topology";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     "deploy-rs" = {
       url = "github:serokell/deploy-rs";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -154,6 +160,10 @@ rec {
           }
         )
         ./outputs
+      ]
+      ++ [
+        # flake-parts module: 提供 perSystem `topology` 配置，用于 README 舰队拓扑图。
+        inputs.nix-topology.flakeModule
       ];
     };
 }
