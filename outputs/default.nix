@@ -272,6 +272,18 @@ in
       # hostEvalChecks 负责「flake 输出的每个 host 都能完整求值」的契约。
       checks = deployChecks // libChecks // hostEvalChecks;
 
+      # 舰队拓扑图（README 用）：nix-topology 自动从 nixosConfigurations 提取节点，
+      # 配合 topology.nix 手写的网络/外部设备，渲染成 SVG。
+      topology = {
+        modules = [
+          ../topology.nix
+          {
+            # 注入当前 system 的 nixosConfigurations，让 nix-topology 自动提取主机接口/服务。
+            nixosConfigurations = architectureOutput.nixosConfigurations or { };
+          }
+        ];
+      };
+
       inherit (architectureOutput) packages;
     };
 

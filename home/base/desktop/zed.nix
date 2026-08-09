@@ -26,7 +26,7 @@ let
   };
 
   exts = {
-    # MAYBE[2026-01-18]: 判断是否要
+    # MAYBE: [2026-01-18] 判断是否要
     # [The possibility to add custom language servers in configuration only · zed-industries/zed · Discussion #24092 · GitHub](https://github.com/zed-industries/zed/discussions/24092)
 
     "nix" = true;
@@ -59,6 +59,7 @@ let
     "make" = true;
     "sql" = true;
     "terraform" = true;
+    # [thedadams/zed-comment: A comment extension for the Zed editor](https://github.com/thedadams/zed-comment)
     "comment" = true;
     "log" = true;
     "oxc" = true;
