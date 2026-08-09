@@ -37,7 +37,6 @@ _: {
     };
 
     AI = {
-      cc-connect.enable = true;
       codex.enable = true;
       claude.enable = true;
 

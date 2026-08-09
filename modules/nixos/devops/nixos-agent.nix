@@ -102,7 +102,6 @@
                     permissionMode = "yolo";
                   };
                   skills.enable = true;
-                  cc-connect.enable = true;
                 };
                 infra = {
                   nh.enable = true;
