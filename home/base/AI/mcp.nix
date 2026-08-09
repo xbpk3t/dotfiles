@@ -46,11 +46,9 @@ in
         # - `--autoConnect` 依赖 chrome://inspect/#remote-debugging 的握手与授权弹窗，实际更脆；
         # - 当前机器上的默认 Chrome 暴露的 9222 端点并不是标准可消费的 DevTools discovery 接口；
         # - 让 MCP 自己启动独立 profile 的 Chrome，是 upstream 默认路径，也更容易验证是否工作正常。
-        # 这里继续调用仓库内自打包的 `pkgs.chrome-devtools-mcp`，而不是 `npx ...@latest`。
-        # Why:
-        # - 这个仓库已经有自维护 `pkgs/` 入口，适合把常用 MCP server 纳入 declarative 管理；
-        # - upstream npm tarball 已经带预编译产物，直接打包发布物比每次运行时走 npx 下载更稳，也更符合当前仓库的打包选型；
-        # - 版本升级统一交给 nvfetcher，避免 MCP 启动时再发生隐式在线更新。
+        # 继续用仓库内自打包的 `pkgs.chrome-devtools-mcp`。
+        # NUR trev repo 虽有同版本（1.6.0），但其 meta.platforms 只声明 linux，
+        # 不支持本机 aarch64-darwin；自打包版本 platforms.unix 全平台可用。
         # Desktop-only MCPs: require browser/GUI environment.
         # Add new desktop-only servers inside this mkIf block.
         "chrome-devtools" = lib.mkIf cfg.isDesktop {
