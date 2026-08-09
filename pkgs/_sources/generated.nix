@@ -6,17 +6,6 @@
   dockerTools,
 }:
 {
-  cc-connect = {
-    pname = "cc-connect";
-    version = "v1.4.1";
-    src = fetchFromGitHub {
-      owner = "chenhg5";
-      repo = "cc-connect";
-      rev = "v1.4.1";
-      fetchSubmodules = false;
-      sha256 = "sha256-Spm1OB0z7+E0JvWOtBAtUrRHiEc+aPjBYVHy0zc7ww4=";
-    };
-  };
   chrome-devtools-mcp = {
     pname = "chrome-devtools-mcp";
     version = "1.6.0";
