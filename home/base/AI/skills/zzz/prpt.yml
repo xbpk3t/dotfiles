@@ -1,0 +1,107 @@
+---
+frontmatter:
+  # pipeline:
+  #   - brk
+  #   - diagram
+  #   - vs
+
+
+  name: <stem> # filename stem**（路由名）
+  role: atom | composite # 如果是 composite，则 pipeline 为 required
+  description: <功能一句话>；<边界/依赖> # 这个是给自己看的，而非用来作为trigger
+  pipeline: [list] # 仅 composite
+  pipeline-mode: serial    # serial | parallel | mixed
+  status: active           # active | draft | deprecated
+  is-save: bool # 是否落盘
+
+  # pipeline: [name]                  # require-if-composite
+  # pipeline-mode: serial             # optional（默认 serial）
+
+  # 默认每启用步 sub-agent，父 agent 只编排汇总
+  #
+  # 这里其实有个问题，pipeline 应该是 多prpt，但是顺序执行，而非并行。那么是否应该给 并行prpt 再做个key？还是说怎么设计？
+  #
+  #
+  # 避免 loop hell，gen 做环检测 （cli要去处理的）
+  #
+  # - **改完 prompt 后 `nu gen-aliases.nu`**
+  # 其实原本就有这个 nu gen 的逻辑，那么现在改成YAML，无非就是把gen补充一个 YAML -> md 的逻辑
+  #
+  # 需要可以最终可以直接根据YAML去画出prpt之间依赖关系图
+
+
+
+
+# <name> — <中文功能名>
+# 这个不需要，我不需要 heading-1
+
+# required
+what:
+  is:
+  not:
+
+
+# 入口闸门（先答，不满足则不进入）
+# optional
+gate:
+  - qs: <问什么>
+    fail: <不满足则怎样>
+
+# optional
+constraint:
+  must:
+    - dddd
+  must-not:
+    - dddd
+  # 反模式
+  # 暂时不需要
+  # anti-pat:
+
+
+
+
+
+# optional
+input:                     # 输入要求
+  required: [种子必给等]
+  optional: [...]
+
+# optional
+workflow:                  # 阶段化流程（复杂 prompt）
+  - phase: <阶段名>        # 宏观板块（Phase）
+    gate: <进入条件>       # 可选
+    desc: <做什么>         # 可选
+    steps:                 # 可选：该 phase 内的微观动作（Step）
+      - <具体动作 1>
+      - <具体动作 2>
+
+
+
+
+# optional（高频）
+output:                    # 输出契约（强制）
+  format: <artifact | yaml | table | md>
+  template: |
+    <输出模板 codeblock>
+  fields: [字段语义表]
+  # optional
+  few-shot:
+
+
+
+
+
+
+# optional
+self-check:
+  - <检查项 yes/no>
+
+
+
+# optional key（高频）
+# 条件式推进（交付必给）
+hint:
+  # - "recall: <建议闭卷练哪条 L1 / 哪道 qs 向>"
+  # - "deepen: <hti 某条 / diagram / vs / uu …>"
+  # - "write: <是否值得回写 data/gh 某字段；默认不自动写>"
+  # - "skip: <本轮可明确不做的>"

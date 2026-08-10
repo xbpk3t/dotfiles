@@ -1,0 +1,41 @@
+frontmatter:
+  name: stats-zzz
+  role: atom
+  description: 读取 zzz-stats.json，输出子命令频次与降级建议
+# - 由 `zzz.nu` 的 `log-hit` 写入；本 prompt 只负责读与建议
+# - 需要重置统计时：删除或清空 `~/.claude/zzz-stats.json` 即可
+
+
+what:
+  is: 读取 `~/.claude/zzz-stats.json`（**JSON counter**，按 sub 直接改 `count`），给出排行和建议。
+
+
+
+
+input:
+  source: "~/.claude/zzz-stats.json"
+  required: true
+
+
+
+
+
+
+output:
+  format: table
+  struct:
+    - key: rank
+      val: 1
+    - key: prompt
+      val: <prompt-name>
+    - key: count
+      val: 42
+    - key: pct
+      val: 23%
+    - name: last_ts
+    - key: sug
+      val: <keep / promote / demote / drop>
+  rules:
+    - "**Top 5 且 > 10%**：保持为可见入口"
+    - "**count < 3 且 占比 < 1%**：建议设为 dot file 降级"
+    - "**0 次**（aliases 有但 json 无键）：可考虑删除或观察"
