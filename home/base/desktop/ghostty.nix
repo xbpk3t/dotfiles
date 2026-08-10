@@ -114,7 +114,7 @@ let
     # resize-overlay = "never";
 
     # ── Keybind ─────────────────────────────────────────────────────
-    # NOTE(ghostty): not using ghostty for splits or tabs so nearly
+    # NOTE: [ghostty] not using ghostty for splits or tabs so nearly
     # all default binds conflict Hypr, nvim, or zellij.
     keybind = [
       # ── 调试 ──
