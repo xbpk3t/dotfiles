@@ -1,18 +1,22 @@
 {
-  inputs,
+  config,
   lib,
   ...
-}:
-let
+}: let
+  inherit (config.lib.topology) mkInternet mkRouter mkConnection;
   icon = name: ./assets/topology-icons/${name}.svg;
-in
-{
+in {
   # 全局拓扑定义：声明网络与外部设备；
   # 主机节点信息由 nix-topology 从 nixosConfigurations 自动提取
   # （见 outputs/default.nix 的 topology.modules 注入）。
   #
-  # C 版（全图标模式）：所有节点渲染为紧凑图标 + 名称，
-  # 图面干净，适合 README 展示舰队全貌。
+  # 参考 TheMaxMur/NixOS-Configuration 的写法：
+  #   mkInternet / mkRouter / mkConnection
+  # 让 README 的拓扑图能看出真实链路（Internet → VPS/家庭路由 → 各设备）。
+  #
+  # 注意：nixos-avf / nixos-ws / nixos-homelab / nixos-vps 等 NixOS 主机
+  # 由 nixosConfigurations 自动提取；这里只显式定义网络、虚拟节点，
+  # 以及不在 NixOS 配置里的设备（macOS / nix-on-droid / sm-vps）。
   networks = {
     tailnet = {
       name = "Tailnet";
@@ -29,59 +33,73 @@ in
   };
 
   nodes = {
-    # —— 主机：全部用紧凑图标 ——
+    # —— 自动提取的 NixOS 主机：补接口定义（host 用 NetworkManager/DHCP，无静态接口）——
+    # 注意：这些节点由 nixosConfigurations 自动提取，这里只补 interfaces，
+    # 不会与自动字段冲突（原节点无 interfaces）。
     nixos-ws = {
-      name = "🖥️ NixOS Workstation";
-      deviceType = lib.mkForce "desktop";
-      hardware = {
-        info = "AMD Ryzen desktop, Nvidia GPU";
-        image = icon "desktop";
-      };
-      renderer.preferredType = "image";
       interfaces = {
         eth0 = { network = "lan"; };
+        tailscale0 = { network = "tailnet"; };
       };
     };
     nixos-homelab = {
-      name = "🏠 Homelab";
-      deviceType = lib.mkForce "nixos";
-      hardware = {
-        info = "NixOS server, k3s node";
-        image = icon "nixos";
-      };
-      renderer.preferredType = "image";
       interfaces = {
-        eth0 = { network = "tailnet"; };
+        eth0 = { network = "lan"; };
         tailscale0 = { network = "tailnet"; };
       };
     };
     nixos-vps-dev = {
-      name = "☁️ VPS Dev";
-      deviceType = lib.mkForce "cloud-server";
-      hardware = {
-        info = "Public VPS, incus + k3s";
-        image = icon "cloud-server";
-      };
-      renderer.preferredType = "image";
       interfaces = {
         ens3 = { network = "wan"; };
         tailscale0 = { network = "tailnet"; };
       };
     };
     nixos-vps-svc = {
-      name = "☁️ VPS Service";
-      deviceType = lib.mkForce "cloud-server";
-      hardware = {
-        info = "Public VPS, k3s service";
-        image = icon "cloud-server";
-      };
-      renderer.preferredType = "image";
       interfaces = {
         ens3 = { network = "wan"; };
         tailscale0 = { network = "tailnet"; };
       };
     };
-    # macOS 走 nix-darwin，不在 NixOS config 里，手动完整定义
+
+    # —— 互联网节点：连接所有公网出口 ——
+    internet = mkInternet {
+      connections = [
+        (mkConnection "nixos-vps-dev" "ens3")
+        (mkConnection "nixos-vps-svc" "ens3")
+        (mkConnection "sm-vps" "eth0")
+      ];
+    };
+
+    # —— 家庭路由（虚拟节点，把 LAN 设备收拢）——
+    router = mkRouter "Home Router" {
+      info = "Router (NAT)";
+      image = icon "router";
+
+      interfaceGroups = [
+        ["wan1"]
+        ["eth1"]
+      ];
+
+      interfaces = {
+        eth1 = {
+          network = "lan";
+        };
+        wan1 = {
+          network = "wan";
+        };
+      };
+
+      connections = {
+        eth1 = [
+          (mkConnection "nixos-ws" "eth0")
+          (mkConnection "macos-ws" "en0")
+          (mkConnection "nixos-usb" "eth0")
+        ];
+        wan1 = mkConnection "internet" "*";
+      };
+    };
+
+    # —— 家庭设备（显示名带 emoji，直接 attrset 而非 mkDevice）——
     macos-ws = {
       name = "🍎 Mac Workstation";
       deviceType = lib.mkForce "laptop";
@@ -91,11 +109,12 @@ in
       };
       renderer.preferredType = "image";
       interfaces = {
-        en0 = { network = "lan"; };
+        en0 = {
+          network = "lan";
+        };
       };
     };
 
-    # —— 便携/设备：紧凑图标 ——
     nixos-usb = {
       name = "🔌 USB Live System";
       deviceType = lib.mkForce "device";
@@ -105,9 +124,13 @@ in
       };
       renderer.preferredType = "image";
       interfaces = {
-        eth0 = { network = "lan"; };
+        eth0 = {
+          network = "lan";
+        };
       };
     };
+
+    # —— 便携/设备：不在 NixOS 配置里 ——
     nod-am = {
       name = "📱 Nix-on-Droid";
       deviceType = lib.mkForce "device";
@@ -117,9 +140,12 @@ in
       };
       renderer.preferredType = "image";
       interfaces = {
-        wlan0 = { network = "wan"; };
+        wlan0 = {
+          network = "wan";
+        };
       };
     };
+
     sm-vps = {
       name = "🧪 sm-vps Lab";
       deviceType = lib.mkForce "cloud-server";
@@ -129,7 +155,9 @@ in
       };
       renderer.preferredType = "image";
       interfaces = {
-        eth0 = { network = "wan"; };
+        eth0 = {
+          network = "wan";
+        };
       };
     };
   };
