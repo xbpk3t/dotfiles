@@ -2,10 +2,11 @@
   config,
   lib,
   ...
-}: let
+}:
+let
   inherit (config.lib.topology) mkInternet mkRouter mkConnection;
-  icon = name: ./assets/topology-icons/${name}.svg;
-in {
+in
+{
   # 全局拓扑定义：声明网络与外部设备；
   # 主机节点信息由 nix-topology 从 nixosConfigurations 自动提取
   # （见 outputs/default.nix 的 topology.modules 注入）。
@@ -18,11 +19,6 @@ in {
   # 由 nixosConfigurations 自动提取；这里只显式定义网络、虚拟节点，
   # 以及不在 NixOS 配置里的设备（macOS / nix-on-droid / sm-vps）。
   networks = {
-    tailnet = {
-      name = "Tailnet";
-      # Tailscale 网络（100.x）
-      cidrv4 = "100.0.0.0/8";
-    };
     lan = {
       name = "Home LAN";
       cidrv4 = "192.168.0.0/16";
@@ -38,26 +34,40 @@ in {
     # 不会与自动字段冲突（原节点无 interfaces）。
     nixos-ws = {
       interfaces = {
-        eth0 = { network = "lan"; };
-        tailscale0 = { network = "tailnet"; };
+        eth0 = {
+          network = "lan";
+        };
       };
     };
     nixos-homelab = {
       interfaces = {
-        eth0 = { network = "lan"; };
-        tailscale0 = { network = "tailnet"; };
+        eth0 = {
+          network = "lan";
+        };
+      };
+    };
+    # nixos-usb：自动提取（deviceType=nixos → snowflake 图标 + card），
+    # 只补 hardware.info 和 eth0 接口；NetworkManager 模式提取不到接口
+    nixos-usb = {
+      hardware.info = "Portable USB NixOS";
+      interfaces = {
+        eth0 = {
+          network = "lan";
+        };
       };
     };
     nixos-vps-dev = {
       interfaces = {
-        ens3 = { network = "wan"; };
-        tailscale0 = { network = "tailnet"; };
+        ens3 = {
+          network = "wan";
+        };
       };
     };
     nixos-vps-svc = {
       interfaces = {
-        ens3 = { network = "wan"; };
-        tailscale0 = { network = "tailnet"; };
+        ens3 = {
+          network = "wan";
+        };
       };
     };
 
@@ -73,11 +83,10 @@ in {
     # —— 家庭路由（虚拟节点，把 LAN 设备收拢）——
     router = mkRouter "Home Router" {
       info = "Router (NAT)";
-      image = icon "router";
 
       interfaceGroups = [
-        ["wan1"]
-        ["eth1"]
+        [ "wan1" ]
+        [ "eth1" ]
       ];
 
       interfaces = {
@@ -92,22 +101,21 @@ in {
       connections = {
         eth1 = [
           (mkConnection "nixos-ws" "eth0")
-          (mkConnection "macos-ws" "en0")
+          (mkConnection "nixos-homelab" "eth0")
           (mkConnection "nixos-usb" "eth0")
+          (mkConnection "macos-ws" "en0")
+          (mkConnection "nod-am" "wlan0")
+          (mkConnection "nixos-avf" "eth0")
         ];
         wan1 = mkConnection "internet" "*";
       };
     };
 
-    # —— 家庭设备（显示名带 emoji，直接 attrset 而非 mkDevice）——
+    # —— 家庭设备（host 名作节点名；注释里写明角色说明）——
+    # macos-ws：macOS 工作站（MacBook M4 Pro）
     macos-ws = {
-      name = "🍎 Mac Workstation";
       deviceType = lib.mkForce "laptop";
-      hardware = {
-        info = "Apple Silicon MacBook";
-        image = icon "laptop";
-      };
-      renderer.preferredType = "image";
+      hardware.info = "MacBook M4 Pro";
       interfaces = {
         en0 = {
           network = "lan";
@@ -115,14 +123,11 @@ in {
       };
     };
 
-    nixos-usb = {
-      name = "🔌 USB Live System";
-      deviceType = lib.mkForce "device";
-      hardware = {
-        info = "Portable USB NixOS";
-        image = icon "nixos";
-      };
-      renderer.preferredType = "image";
+    # nixos-avf：Android AVF 虚拟机里的 NixOS（开发机 remote server），
+    # 自动提取（deviceType=nixos → card + Fail2Ban 服务），
+    # 只补 hardware.info 和 eth0 接口；网络由 AVF 虚拟化提供（virtio-net，走宿主手机网络）
+    nixos-avf = {
+      hardware.info = "NixOS on Android AVF";
       interfaces = {
         eth0 = {
           network = "lan";
@@ -131,29 +136,21 @@ in {
     };
 
     # —— 便携/设备：不在 NixOS 配置里 ——
+    # nod-am：Android 手机（Nix-on-Droid）
     nod-am = {
-      name = "📱 Nix-on-Droid";
       deviceType = lib.mkForce "device";
-      hardware = {
-        info = "Android phone";
-        image = icon "switch";
-      };
-      renderer.preferredType = "image";
+      hardware.info = "Nix-on-Droid (Android)";
       interfaces = {
         wlan0 = {
-          network = "wan";
+          network = "lan";
         };
       };
     };
 
+    # sm-vps：system-manager 实验 VPS
     sm-vps = {
-      name = "🧪 sm-vps Lab";
       deviceType = lib.mkForce "cloud-server";
-      hardware = {
-        info = "system-manager lab";
-        image = icon "cloud";
-      };
-      renderer.preferredType = "image";
+      hardware.info = "system-manager lab";
       interfaces = {
         eth0 = {
           network = "wan";
