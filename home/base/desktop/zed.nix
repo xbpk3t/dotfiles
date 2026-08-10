@@ -866,8 +866,9 @@ let
       "args" = [
         "--vimgrep" # 输出包含 行/列 的格式，便于跳转
         "--hyperlink-format=file://{path}:{line}:{column}" # 生成带行列的超链接
+        "-e FIXME:"
         "-e TODO:"
-        "-e PLAN:"
+        "-e NOTE:"
         "-e MAYBE:"
         "." # 搜索起点（当前工作区根目录）
       ];
