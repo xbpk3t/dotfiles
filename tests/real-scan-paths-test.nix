@@ -5,7 +5,10 @@ let
   mylib = import ../lib/default.nix { inherit lib; };
 
   # 使用当前仓库里真实存在、并且确实通过 `scanPaths` 聚合 imports 的目录。
-  baseModulesPath = ../modules/nixos/base;
+  # 注：`modules/nixos/base` 已在重构中拆走（base 逻辑并入 home/base），
+  # 该路径不存在；这里改用同样用 scanPaths 合同聚合的 modules/nixos/kernel
+  # （含 core.nix / security.nix，default.nix 应被排除）。
+  baseModulesPath = ../modules/nixos/kernel;
 
   # 使用真实的 scanPaths 函数
   scanResult = mylib.scanPaths baseModulesPath;
