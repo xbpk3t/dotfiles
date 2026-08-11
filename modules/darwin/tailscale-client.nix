@@ -29,8 +29,4 @@
       ${pkgs.tailscale}/bin/tailscale up --authkey="$(cat ${config.sops.secrets.TAILSCALE_AUTH_KEY.path})"
     fi
   '';
-
-  environment.shellAliases = {
-    tss = "tailscale";
-  };
 }

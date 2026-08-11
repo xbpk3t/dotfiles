@@ -61,24 +61,50 @@ in
         #    生效无需重启：server 每次 plugin list/action list 都重读本文件。
         ".config/herdr/plugins.json" = {
           force = true;
-          text = builtins.toJSON [
-            {
-              plugin_id = "herdr-z";
-              name = "Herdr Z";
-              version = "0.1.0";
-              manifest_path = "${toString ./herdr/herdr-z}/herdr-plugin.toml";
-              plugin_root = toString ./herdr/herdr-z;
-              enabled = true;
-            }
-            {
-              plugin_id = "jt.command-palette";
-              name = "Command Palette";
-              version = "0.1.0";
-              manifest_path = "${toString ./herdr/herdr-plugins-palette}/herdr-plugin.toml";
-              plugin_root = toString ./herdr/herdr-plugins-palette;
-              enabled = true;
-            }
-            {
+          # ── 平台条件插件 ──────────────────────────────────────────────
+          # focus-notify 是 macOS-only（meta.platforms = aarch64-darwin）：Linux host
+          # （如 nixos-vps）启用 herdr 时注册它会让 `nix flake check` 的 host-eval
+          # 在跨架构求值时报「包不支持当前 platform」。故仅 darwin 时并入数组。
+          # ───────────────────────────────────────────────────────────────
+          text = builtins.toJSON (
+            [
+              {
+                plugin_id = "herdr-z";
+                name = "Herdr Z";
+                version = "0.1.0";
+                manifest_path = "${toString ./herdr/herdr-z}/herdr-plugin.toml";
+                plugin_root = toString ./herdr/herdr-z;
+                enabled = true;
+              }
+              {
+                plugin_id = "jt.command-palette";
+                name = "Command Palette";
+                version = "0.1.0";
+                manifest_path = "${toString ./herdr/herdr-plugins-palette}/herdr-plugin.toml";
+                plugin_root = toString ./herdr/herdr-plugins-palette;
+                enabled = true;
+              }
+              {
+                plugin_id = "persiyanov.reviewr";
+                name = "Reviewr";
+                version = "0.29.0";
+                # store 插件：manifest_path/plugin_root 用 ${pkgs.herdr-reviewr} 绝对路径。
+                # manifest 里 pane command 是 $HERDR_PLUGIN_ROOT/bin/herdr-reviewr（server 打开
+                # pane 时注入 HERDR_PLUGIN_ROOT），actions/events 相对路径 bash herdr/pane.sh
+                # 的 cwd = plugin_root —— 两条都原样保留，不要改成绝对 store 路径（rebuild 会变）。
+                manifest_path = "${pkgs.herdr-reviewr}/plugin/herdr-plugin.toml";
+                plugin_root = "${pkgs.herdr-reviewr}/plugin";
+                enabled = true;
+                # NOTE: events（worktree.created 自动 open）已在上游 herdr-plugin.toml 声明，
+                # herdr 加载时从 manifest 重新解析补全 → 这里不重复写。
+                # 对比 focus-notify：它的 events 是 nix 侧手写 manifest 里才有的
+                # （上游不持有），所以才需要显式给出。
+              }
+            ]
+            # focus-notify 是 macOS-only（meta.platforms = aarch64-darwin）：Linux
+            # host（如 nixos-vps）启用 herdr 时不注册，否则 `nix flake check` 的
+            # host-eval 会在跨架构求值时因「包不支持当前 platform」失败。
+            ++ lib.optional pkgs.stdenv.isDarwin {
               plugin_id = "herdr-focus-notify";
               name = "Herdr Focus Notify";
               version = "0.3.6";
@@ -97,23 +123,7 @@ in
                 }
               ];
             }
-            {
-              plugin_id = "persiyanov.reviewr";
-              name = "Reviewr";
-              version = "0.29.0";
-              # store 插件：manifest_path/plugin_root 用 ${pkgs.herdr-reviewr} 绝对路径。
-              # manifest 里 pane command 是 $HERDR_PLUGIN_ROOT/bin/herdr-reviewr（server 打开
-              # pane 时注入 HERDR_PLUGIN_ROOT），actions/events 相对路径 bash herdr/pane.sh
-              # 的 cwd = plugin_root —— 两条都原样保留，不要改成绝对 store 路径（rebuild 会变）。
-              manifest_path = "${pkgs.herdr-reviewr}/plugin/herdr-plugin.toml";
-              plugin_root = "${pkgs.herdr-reviewr}/plugin";
-              enabled = true;
-              # NOTE: events（worktree.created 自动 open）已在上游 herdr-plugin.toml 声明，
-              # herdr 加载时从 manifest 重新解析补全 → 这里不重复写。
-              # 对比 focus-notify：它的 events 是 nix 侧手写 manifest 里才有的
-              # （上游不持有），所以才需要显式给出。
-            }
-          ];
+          );
         };
 
         # ——— 本地插件目录映射 ———

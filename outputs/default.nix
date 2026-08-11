@@ -235,11 +235,16 @@ in
         let
           arch = architectureOutput;
           allHosts = (arch.nixosConfigurations or { }) // (arch.darwinConfigurations or { });
+          # builtins.seq 先把 `system.build.toplevel.drvPath` 求值到 WHNF（这必须完整
+          # eval 整个 host 配置，正是契约检查的核心），再返回固定字面量。
+          # Why: 若直接把 `drvPath`（带 store context）传给 runCommandLocal，会被当成
+          # build input 而真的去构建整台系统（nix flake check 每次构建上万 derivations）。
+          # seq 剥离 context → check 只做 eval，秒级完成；同理也不会残留 unused binding。
           mkHostEval =
             name: cfg:
-            pkgs.runCommandLocal "host-eval-${name}" {
-              drvPath = toString cfg.config.system.build.toplevel.drvPath;
-            } ''echo "$drvPath" > $out'';
+            pkgs.runCommandLocal "host-eval-${name}" { } (
+              builtins.seq cfg.config.system.build.toplevel.drvPath ''echo "eval-ok" > $out''
+            );
         in
         lib.mapAttrs' (name: cfg: lib.nameValuePair "host-eval-${name}" (mkHostEval name cfg)) allHosts;
     in
