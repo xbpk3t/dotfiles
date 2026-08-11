@@ -12,6 +12,8 @@
 #   - `language: golang` hooks（betteralign / nilaway / go-test）由 pre-commit 自行
 #     `go install` 进隔离环境，**不需要**在这里提供 Go 工具链
 #   - `tofu` 在 nixpkgs 的包名是 `opentofu`（二进制名才是 tofu）
+#   - treefmt 的 formatter（stylua/taplo/kdlfmt/shfmt/terramate/nixfmt）必须齐全，
+#     否则 treefmt hook 在 CI 会报 "formatter command not found"（treefmt.toml 声明即依赖）
 #   - 其余与 pre-commit config 的 entry 同名
 { pkgs }:
 with pkgs;
@@ -23,15 +25,21 @@ with pkgs;
   gitleaks
   golangci-lint
   hadolint
+  kdlfmt
   markdownlint-cli
+  nixfmt
   opentofu
   pre-commit
   prettier
   python3Packages.pre-commit-hooks
   ruff
   shellcheck
+  shfmt
   statix
+  stylua
   stylelint
+  taplo
+  terramate
   treefmt
   yamllint
 ]
