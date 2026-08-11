@@ -277,6 +277,15 @@ in
       # hostEvalChecks 负责「flake 输出的每个 host 都能完整求值」的契约。
       checks = deployChecks // libChecks // hostEvalChecks;
 
+      # 开发环境：CI 与本地共享同一套工具，保证 pre-commit / linter 行为一致。
+      # 工具清单唯一来源是 lib/precommit-tools.nix（与 home.packages 共用，见
+      # home/base/devops/default.nix），加/换 linter 只改一处。
+      # 用法：CI 里 `nix develop -c pre-commit run --all-files`；本地 `nix develop` 亦可。
+      devShells.default = pkgs.mkShell {
+        name = "dotfiles-dev";
+        packages = mylib.precommitTools { inherit pkgs; };
+      };
+
       # 舰队拓扑图（README 用）：nix-topology 自动从 nixosConfigurations 提取节点，
       # 配合 topology.nix 手写的网络/外部设备，渲染成 SVG。
       topology = {

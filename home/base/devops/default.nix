@@ -4,20 +4,22 @@
   config,
   ...
 }:
+with pkgs;
 {
   home.packages =
-    with pkgs;
-    [
+    # pre-commit 依赖工具集（单一事实来源 lib/precommit-tools.nix，与 CI devShell 共用）
+    mylib.precommitTools { inherit pkgs; }
+
+    ++ [
       # 分类1：质量检查与规范化
       # 用nix的mkOutOfStoreSymlink代替了
       # dotbot
 
-      # tags(desc): 代码质量 > 提交钩子 > 自动化
-      pre-commit
+      # tags(desc): 代码质量 > URL提取检查 > 文本分析
       prek
+      pre-commit
       python3Packages.pre-commit-hooks
 
-      # tags(desc): 代码质量 > URL提取检查 > 文本分析
       xurls
       # tags(desc): 代码质量 > 链接校验 > 文档检查
       lychee

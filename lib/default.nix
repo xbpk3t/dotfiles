@@ -13,6 +13,8 @@ let
   AI = import ./AI.nix { inherit lib; };
   vpsSysctl = import ./vps-sysctl.nix { inherit lib; };
   nixCacheSettings = import ./nix-cache-settings.nix;
+  # pre-commit 依赖工具集（单一事实来源，devShell 与 home.packages 共用）
+  precommitTools = import ./precommit-tools.nix;
 
   # use path relative to the root of the project
   relativeToRoot = lib.path.append ../.;
@@ -47,6 +49,7 @@ in
     AI
     vpsSysctl
     nixCacheSettings
+    precommitTools
     facter
     scanPaths
     relativeToRoot
