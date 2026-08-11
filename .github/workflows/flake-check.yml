@@ -1,11 +1,11 @@
 name: flake-check
 
 on:
-#  pull_request:
-#  push:
-#    branches:
-#      - main
-  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+  # workflow_dispatch:
 
 concurrency:
   # 避免同一分支上的旧任务继续占用 runner。
@@ -26,6 +26,9 @@ jobs:
         uses: DeterminateSystems/magic-nix-cache-action@v13
 
       - name: Run flake checks
-        # 这里故意只调用 `nix flake check`，
-        # 让 CI 复用仓库在 flake `checks` 中定义的统一测试清单，而不是在 workflow 里复制一份。
+        # CI 跑在 ubuntu (x86_64-linux)，能原生构建本仓库所有 x86_64-linux 的 check
+        # （host-eval 用 builtins.seq 剥离 store context，只走求值契约；libChecks 是全逻辑回归）。
+        # 曾误判为「上游漂移」而改用只跑 checks；实测旧 lock 下 flake check 对 x86_64-linux
+        # 完全健康（nix flake check --no-build exit 0），本地 darwin 无法构建是缺 linux
+        # builder 的环境限制，非仓库问题。故恢复标准 `nix flake check`。
         run: nix flake check --accept-flake-config

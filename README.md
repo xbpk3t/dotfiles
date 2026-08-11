@@ -1,6 +1,11 @@
-# 🎯 luck's dotfiles
+# dotfiles
 
-> Personal Nix dotfiles — NixOS / macOS / Other Distro (debian) / Android fleet managed as a single flake.
+[![flake-check](https://github.com/xbpk3t/dotfiles/actions/workflows/flake-check.yml/badge.svg)](https://github.com/xbpk3t/dotfiles/actions/workflows/flake-check.yml)
+
+
+
+---
+
 
 ![topology](./topology.svg)
 
@@ -14,14 +19,3 @@
 | Secrets | [sops-nix](https://github.com/Mic92/sops-nix) |
 | Non-NixOS | [system-manager](https://github.com/numtide/system-manager) |
 | Pack | [nvfetcher](https://github.com/berberman/nvfetcher) (self-maintained `pkgs/`) |
-
-## Hosts
-
-- **nixos-ws** — desktop workstation (GNOME)
-- **nixos-homelab** — homelab server (k3s)
-- **nixos-vps-dev / nixos-vps-svc** — public VPS (k3s, incus)
-- **nixos-usb** — portable USB live system
-- **nixos-avf** — NixOS in Android AVF VM
-- **nod-am** — Android phone (Nix-on-Droid)
-- **macos-ws** — macOS (MacBook M4 Pro)
-- **sm-vps** — system-manager lab on VPS
