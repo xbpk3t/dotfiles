@@ -58,11 +58,8 @@ in
 {
   nixosConfigurations.${name} = nixosConfig;
   deploy.nodes.${name} = deployNode;
-  packages =
-    let
-      isoName = "${name}-iso";
-    in
-    {
-      ${isoName} = nixosConfig.config.system.build.isoImage;
-    };
+  # 注：删除了原来的 `nixos-usb-iso` package —— 它引用 `config.system.build.isoImage`，
+  # 但该 host 从未启用 nixos-generators 的 ISO 模块，选项不存在，`nix flake check` 求值
+  # packages 时必挂。仓库里也没有任何地方使用这个 package；如需可烧录 ISO 产物，应接入
+  # nixos-generators 模块（flake.nix 已有该 input）另行实现，而非在 host 上写死坏引用。
 }
