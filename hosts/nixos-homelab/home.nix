@@ -16,6 +16,10 @@ _: {
       skills.enable = false;
     };
 
+    ms = {
+      k8s.enable = true;
+    };
+
     devops.ssh = {
       enable = true;
       hosts = {

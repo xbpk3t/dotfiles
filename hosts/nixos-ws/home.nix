@@ -5,6 +5,10 @@ _: {
       networking.enable = true;
     };
 
+    ms = {
+      k8s.enable = true;
+    };
+
     desktop = {
       stylix.enable = true;
 

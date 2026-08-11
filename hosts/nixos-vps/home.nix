@@ -5,6 +5,10 @@ _: {
       networking.enable = true;
     };
 
+    ms = {
+      k8s.enable = true;
+    };
+
     devops = {
       herdr.enable = true;
       ghui.enable = true;
