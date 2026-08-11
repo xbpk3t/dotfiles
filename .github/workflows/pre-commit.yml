@@ -1,0 +1,33 @@
+name: pre-commit
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  # workflow_dispatch:
+
+concurrency:
+  # 避免同一分支上的旧任务继续占用 runner。
+  group: pre-commit-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v19
+
+      - name: Enable Nix cache
+        uses: DeterminateSystems/magic-nix-cache-action@v13
+
+      - name: Run pre-commit hooks
+        # 与本地 `.pre-commit-config.yaml` 完全同源：devShell 工具清单来自
+        # lib/precommit-tools.nix（本地 home-manager 也引用同一份）。
+        # 注意：CI 默认只跑 `pre-commit` stage 的 hooks；commit-msg / pre-push
+        # stage（commitizen 等）不属于文件级 lint，需要时另行显式触发。
+        run: nix develop -c pre-commit run --all-files --show-diff-on-failure

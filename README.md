@@ -1,6 +1,7 @@
 # dotfiles
 
 [![flake-check](https://github.com/xbpk3t/dotfiles/actions/workflows/flake-check.yml/badge.svg)](https://github.com/xbpk3t/dotfiles/actions/workflows/flake-check.yml)
+[![pre-commit](https://github.com/xbpk3t/dotfiles/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/xbpk3t/dotfiles/actions/workflows/pre-commit.yml)
 
 
 
