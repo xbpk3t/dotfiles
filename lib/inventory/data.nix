@@ -283,5 +283,22 @@ in
         note = "Incus system container on nixos-vps-dev (Debian 12, PID1=systemd)";
       };
     };
+    # 真机（Phase 8）：腾讯云 Debian 13 VPS，root 密码登录起步。
+    # 非 NixOS 轨的「真机验证」目标——裸 distro 上走 bootstrap → Nix → HM → sm。
+    # 注意：TC 云主机无 cloud-init 可用（机器已建好），走 SSH bootstrap 路径。
+    sm-vps-tc = {
+      hostName = "sm-vps-tc";
+      stateVersion = "24.11";
+      system = "x86_64-linux";
+      user = commonUser;
+      time = commonTime;
+      editor = commonEditor;
+      # bootstrap 后 SSH 目标：luck + 公网 IP（root 密码登录仅用于首次建用户）。
+      # opts 留空 = 直连（无 ProxyJump；公网可达）。
+      ssh = {
+        host = "43.156.103.43";
+        user = "luck";
+      };
+    };
   };
 }
