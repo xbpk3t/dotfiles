@@ -75,10 +75,11 @@ else
   RSSH "bash -lc 'export DEBIAN_FRONTEND=noninteractive; curl -fsSL https://tailscale.com/install.sh | sh'"
 fi
 if [[ -n ${TS_AUTHKEY_FILE} && -f ${TS_AUTHKEY_FILE} ]]; then
+  # 去换行后经 root push 到 luck home，以 luck+sudo 执行 tailscale up。
   SSHPASS="${ROOT_PASS}" sshpass -e scp -o StrictHostKeyChecking=accept-new \
-    "${TS_AUTHKEY_FILE}" "root@${HOST}:/root/.ts-authkey"
-  RSSH "chmod 600 /root/.ts-authkey"
-  RSSH "tailscale up --authkey-file=/root/.ts-authkey || tailscale up --authkey=\$(cat /root/.ts-authkey); rm -f /root/.ts-authkey; tailscale status | head -6"
+    "${TS_AUTHKEY_FILE}" "root@${HOST}:/tmp/ts-authkey-clean"
+  RSSH "tr -d '\n' < /tmp/ts-authkey-clean > /home/${USERNAME}/.ts-authkey && chown ${USERNAME}:${USERNAME} /home/${USERNAME}/.ts-authkey && chmod 600 /home/${USERNAME}/.ts-authkey && rm -f /tmp/ts-authkey-clean"
+  LSSH "sudo -n tailscale up --authkey='file:/home/${USERNAME}/.ts-authkey' && rm -f /home/${USERNAME}/.ts-authkey && tailscale status | head -6"
 else
   log "WARN: no TS_AUTHKEY_FILE; 请手动 tailscale up"
 fi

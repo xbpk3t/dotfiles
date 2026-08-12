@@ -185,12 +185,16 @@ else
   '"
 fi
 if [[ -n ${TS_AUTHKEY_FILE} && -f ${TS_AUTHKEY_FILE} ]]; then
-  # authkey 经 scp 送 root，up 后删除（不入库、不留盘）
+  # authkey 经 scp 送 luck（root 密码登录可能已被锁），去换行后 tailscale up，用完即删。
+  # 注意：flag 是 --authkey="file:<path>"（没有 --authkey-file）；key 文件必须无末尾换行，
+  # 否则 tailscale 报 "invalid key: API key does not exist"。
+  # 传 key 给 luck（同机，root 有 sudo，走 root 侧 push 到 luck home 即可）。
   SSHPASS="${ROOT_PASS}" sshpass -e scp \
     -o StrictHostKeyChecking=accept-new \
-    "${TS_AUTHKEY_FILE}" "root@${HOST}:/root/.ts-authkey"
-  RSSH "chmod 600 /root/.ts-authkey"
-  RSSH "tailscale up --authkey-file=/root/.ts-authkey || tailscale up --authkey=\$(cat /root/.ts-authkey); rm -f /root/.ts-authkey; tailscale status | head -5"
+    "${TS_AUTHKEY_FILE}" "root@${HOST}:/tmp/ts-authkey-clean"
+  RSSH "tr -d '\n' < /tmp/ts-authkey-clean > /home/${USERNAME}/.ts-authkey && chown ${USERNAME}:${USERNAME} /home/${USERNAME}/.ts-authkey && chmod 600 /home/${USERNAME}/.ts-authkey && rm -f /tmp/ts-authkey-clean"
+  # 以 luck 执行 tailscale（sudo），无需 root 密码登录
+  LSSH "sudo -n tailscale up --authkey='file:/home/${USERNAME}/.ts-authkey' && rm -f /home/${USERNAME}/.ts-authkey && tailscale status | head -6"
 else
   log "WARN: no TS_AUTHKEY_FILE; tailscale up 请手动执行（交互登录）"
 fi
