@@ -91,7 +91,8 @@ let
     # size 必须带单位（% 或 px）；裸数字（如 0.35）会报 error.MissingUnit。
     # position=right/left 时主轴是宽度；top/bottom 时主轴是高度。
     # Available since: 1.2.0
-    quick-terminal-size = "35%";
+    # [2026-08-13] 35% -> 45% 因为btop之类的TUI会要求 min-size
+    quick-terminal-size = "45%";
     quick-terminal-screen = "main";
     # 键名是 autohide（连写），不是 auto-hide；写错会 unknown field。
     quick-terminal-autohide = true;
