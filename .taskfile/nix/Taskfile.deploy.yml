@@ -74,6 +74,14 @@ tasks:
         node="{{.NODE | default "sm-vps-tc"}}"
         echo "==> deploy-rs .#${node} (sm + HM)"
         {{.DEPLOY_RS_CMD}} ".#${node}" -- --impure
+      - |
+        set -euo pipefail
+        node="{{.NODE | default "sm-vps-tc"}}"
+        # 切 luck shell 到 zsh（HM 激活后 zsh 可用；bootstrap 建用户时用 bash）
+        # 幂等：已是 zsh 则跳过
+        host="{{.NODE_HOST | default "43.156.103.43"}}"
+        ssh -o BatchMode=yes -o ConnectTimeout=15 "luck@${host}" \
+          'current=$(getent passwd luck | cut -d: -f7); if [ "$current" != "$HOME/.nix-profile/bin/zsh" ]; then sudo -n usermod -s /home/luck/.nix-profile/bin/zsh luck; echo "shell -> zsh"; else echo "shell already zsh"; fi'
 
   smoke:
     desc: "sm-vps 部署后 smoke check（验证 etc/unit/secret/tailnet/SSH）"
