@@ -1,6 +1,7 @@
 # sm-vps 真机 bootstrap（Ansible 版）。
-# 替代 phase8-real.sh。目标：已有 SSH 的裸 Debian/Ubuntu → luck + Determinate Nix
-# + standalone HM + system-manager + tailscale + sops + sshd 硬化。
+# 替代 phase8-real.sh。目标：已有 SSH 的裸 Debian/Ubuntu → luck 用户 + Determinate Nix
+# + 基础配置（sshd 硬化、age key、deploy-rs 前置）+ 可选 tailscale。
+# HM/system-manager 收敛不在这里——走 deploy-rs（S3，remote_build 不需目标机 flake 源码）。
 #
 # 用法（在仓库根）：
 #   ansible-galaxy collection install -r hosts/sm-vps/ansible/requirements.yml
@@ -9,15 +10,17 @@
 #     hosts/sm-vps/ansible/bootstrap.yml --ask-pass
 #   # 或 root 密码走环境变量（不交互）：
 #   ANSIBLE_PASSWORD='<root密码>' ansible-playbook ... bootstrap.yml
+#   # bootstrap 后首次激活：task nix:deploy:sm NODE=<node>；验证：task nix:deploy:smoke
 #
-# 设计原则（与 phase8 对齐）：
-#   - 尽量幂等模块（user/copy/package/authorized_key/synchronize）
-#   - 只允许 shell 的步骤：Determinate Nix 安装、HM/sm switch（无官方模块）
+# 设计原则：
+#   - 尽量幂等模块（user/copy/package/authorized_key/deb822/systemd）
+#   - 只允许 shell 的步骤：Determinate Nix 安装（无官方模块）；HM/sm switch 不在 bootstrap
 #   - 分 play 表达「自锁保护」：P0 建用户 → P1 验证 luck → P4 才锁 sshd
 #
 # Play 连接身份：
 #   P0/P2/P4 = root+密码（ansible_user=root，来自 --ask-pass / ANSIBLE_PASSWORD）
 #   P1/P3    = luck+key（inventory 默认连接）
+# tags：bootstrap-p0..p4 分 play；--tags bootstrap-p3 只跑 luck 身份的重跑路径
 ---
 - name: "P0  preflight + 建 luck 用户/sudoers/SSH key（root 身份）"
   hosts: sm_vps
@@ -179,10 +182,12 @@
         mode: "0440"
         validate: "visudo -cf %s"
 
-    - name: 2o deploy-rs 前置：/etc/environment 加 nix PATH（幂等，幂等追加）
+    - name: 2o deploy-rs 前置：/etc/environment 加 nix PATH（幂等，替换已有 PATH 行）
       ansible.builtin.lineinfile:
         path: /etc/environment
-        line: 'PATH=/nix/var/nix/profiles/default/bin:/usr/local/bin:/usr/bin:/bin:/usr/games'
+        # regexp 匹配任意 PATH 行（Debian 出厂自带，可能带引号）→ 替换而非追加第二条
+        regexp: '^PATH='
+        line: 'PATH=/nix/var/nix/profiles/default/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
         create: true
         state: present
 
