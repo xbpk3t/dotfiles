@@ -22,6 +22,7 @@
 - name: "P0  preflight + 建 luck 用户/sudoers/SSH key（root 身份）"
   hosts: sm_vps
   gather_facts: true
+  tags: [bootstrap-p0, bootstrap-full]
   vars:
     ansible_user: root
     ansible_ssh_private_key_file: ""
@@ -64,11 +65,11 @@
         runas: ALL
         nopassword: true
         state: present
-      # 若 collection 不可用，回退到 copy + visudo（见 files/sudoers-luck）
 
 - name: "P1  验证 luck+key 登录（连接成功即证明；失败整场中止）"
   hosts: sm_vps
   gather_facts: false
+  tags: [bootstrap-p1, bootstrap-full]
   tasks:
     - name: 1e luck 能登录（能跑 task = key auth 通过）
       ansible.builtin.command: id
@@ -78,9 +79,10 @@
       ansible.builtin.command: sudo -n true
       changed_when: false
 
-- name: "P2  装 Determinate Nix + rsync flake + age key + linger（root 身份）"
+- name: "P2  装 Determinate Nix + age key + linger + bus 等待（root 身份）"
   hosts: sm_vps
   gather_facts: true
+  tags: [bootstrap-p2, bootstrap-full]
   vars:
     ansible_user: root
     ansible_ssh_private_key_file: ""
@@ -106,30 +108,8 @@
         creates: /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
       register: nix_install
 
-    - name: 2d rsync flake 源码（synchronize 幂等）
-      ansible.posix.synchronize:
-        src: "{{ sm_flake_src }}/"
-        dest: "{{ sm_remote_flake }}/"
-        delete: true
-        rsync_opts:
-          - "--exclude=.git"
-          - "--exclude=.claude"
-          - "--exclude=.worktrees"
-          - "--exclude=result"
-          - "--exclude=results"
-          - "--exclude=docs"
-          - "--exclude=.ruff_cache"
-          - "--exclude=.direnv"
-          - "--exclude=.apm"
-          - "--exclude=.tms"
-
-    - name: 2e flake 属主交给 luck
-      ansible.builtin.file:
-        path: "{{ sm_remote_flake }}"
-        owner: "{{ sm_user }}"
-        group: "{{ sm_user }}"
-        recurse: true
-        state: directory
+    # HM/sm 收敛走 deploy-rs（remote_build，不需目标机 flake 源码）。
+    # 因此不再 rsync flake 到目标机（与「删远端树 + deploy-rs 唯一入口」一致）。
 
     - name: 2f 用户 age key 目录
       ansible.builtin.file:
@@ -174,9 +154,24 @@
         name: "user@{{ sm_uid }}.service"
         state: started
 
-- name: "P3  standalone HM + system-manager + tailscale + sops（luck 身份）"
+    - name: 2l 等用户 DBus socket（HM activation 的 user unit 依赖它）
+      ansible.builtin.wait_for:
+        path: "/run/user/{{ sm_uid }}/bus"
+        state: present
+        timeout: 15
+
+    - name: 2m push tailscale authkey（若提供；去换行，用后真机删除）
+      ansible.builtin.copy:
+        src: "{{ sm_ts_authkey_src }}"
+        dest: /root/.ts-authkey
+        mode: "0600"
+      when: sm_ts_authkey_src | length > 0
+      register: ts_authkey_pushed
+
+- name: "P3  tailscale（luck 身份；HM/sm/sops 走 deploy-rs）"
   hosts: sm_vps
-  gather_facts: false
+  gather_facts: true   # 3c/4b 用 ansible_distribution/ansible_os_family，必须 gather
+  tags: [bootstrap-p3]
   environment:
     HOME: "/home/{{ sm_user }}"
     USER: "{{ sm_user }}"
@@ -184,21 +179,12 @@
     DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ sm_uid }}/bus"
     HOME_MANAGER_BACKUP_EXT: "{{ sm_hm_backup_ext }}"
   tasks:
-    - name: 3a standalone HM switch（无可避免 shell；用完整 nix 路径避 PATH 问题）
-      ansible.builtin.command:
-        cmd: "/nix/var/nix/profiles/default/bin/nix run github:nix-community/home-manager/{{ sm_hm_rev }} -- switch --flake {{ sm_remote_flake }}#{{ sm_node }} -b {{ sm_hm_backup_ext }}"
-        chdir: "{{ sm_remote_flake }}"
-      register: hm_switch
-      changed_when: false   # HM switch 每次重跑（无幂等信号），标记不变更
-
-    - name: 3b system-manager switch（root 激活；sudo -n + 完整 nix 路径）
-      ansible.builtin.command:
-        cmd: "sudo -n /nix/var/nix/profiles/default/bin/nix run github:numtide/system-manager/{{ sm_sm_rev }} -- switch --flake {{ sm_remote_flake }}#{{ sm_node }}"
-        chdir: "{{ sm_remote_flake }}"
-      become: true
-      become_user: root
-      register: sm_switch
-      changed_when: false
+    # HM/system-manager 收敛不在这里做——它需要远端 flake 树（已删），
+    # 且 deploy-rs remote_build 是唯一正确入口（S3 打通，不依赖远端树）。
+    # bootstrap 完成后首次激活：task nix:deploy:sm NODE={{ sm_node }}
+    - name: 3a 提示 HM/sm 首次激活走 deploy-rs（非阻塞）
+      ansible.builtin.debug:
+        msg: "bootstrap 完成。HM/system-manager 激活走 deploy-rs: task nix:deploy:sm NODE={{ sm_node }}"
 
     - name: 3c tailscale 官方 repo 添加（幂等；deb822 格式）
       ansible.builtin.deb822_repository:
@@ -218,23 +204,30 @@
         state: present
       become: true
 
-    - name: 3e tailscale up（若未登录；authkey 从文件读，用后删除）
+    - name: 3e0 检查 tailscale 状态文件（决定是否要 up；state 是 root 属主）
+      ansible.builtin.stat:
+        path: /var/lib/tailscale/tailscaled.state
+      register: tailscaled_state
+      become: true
+
+    - name: 3e tailscale up（仅当已 push authkey 且未登录；用后删文件）
       ansible.builtin.command:
         cmd: "tailscale up --authkey=file:/root/.ts-authkey && rm -f /root/.ts-authkey"
-        creates: /var/lib/tailscale/tailscaled.state
       become: true
-      when: ts_authkey is defined
+      when:
+        - sm_ts_authkey_src | length > 0
+        - not tailscaled_state.stat.exists
 
-    - name: 3f sops 验证（用户 secret 可读）
-      ansible.builtin.command:
-        cmd: "test -r ~/.config/sops-nix/secrets/{{ sm_verify_secret }} && test -s ~/.config/sops-nix/secrets/{{ sm_verify_secret }}"
-      register: sops_check
-      changed_when: false
-      ignore_errors: true
+    # sops secrets 由 HM 的 sops 模块在 deploy-rs 激活时生成（bootstrap 阶段还没有）。
+    # 验证走 deploy-rs 后的 smoke：task nix:deploy:smoke NODE={{ sm_node }}
+    - name: 3f 提示 sops 验证走 deploy-rs smoke（非阻塞）
+      ansible.builtin.debug:
+        msg: "sops 验证走 deploy-rs smoke: task nix:deploy:smoke NODE={{ sm_node }}"
 
 - name: "P4  锁 sshd（root 身份；仅在 luck 已验证后）"
   hosts: sm_vps
   gather_facts: true
+  tags: [bootstrap-p4, bootstrap-full]
   vars:
     ansible_user: root
     ansible_ssh_private_key_file: ""
@@ -255,8 +248,8 @@
         state: reloaded
       register: sshd_reload
 
-    - name: 4c 锁后回归验证（luck 仍可登录）
-      ansible.builtin.command: ssh -o BatchMode=yes -o ConnectTimeout=10 "{{ sm_user }}@{{ inventory_hostname }}" "id"
+    - name: 4c 锁后回归验证（luck 仍可登录；用 ansible_host 而非 inventory 名，且 accept-new）
+      ansible.builtin.command: ssh -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new "{{ sm_user }}@{{ ansible_host }}" "id"
       delegate_to: localhost
       register: post_lock
       changed_when: false

@@ -9,12 +9,10 @@ sm_groups:
   - sudo            # Debian/Ubuntu 管理组；RHEL 系改 wheel（distro 适配点）
 sm_shell: /bin/bash
 
-# flake 相关
+# flake 相关（HM/sm 收敛走 deploy-rs，不需要目标机 flake 源码树）
 sm_node: sm-vps-tc   # 覆盖：每台机器在 inventory 里设 sm_node=<hostname>
-sm_remote_flake: "/home/{{ sm_user }}/Desktop/dotfiles"
-sm_flake_src: "{{ playbook_dir }}/../../.."   # 仓库根（hosts/sm-vps/ansible → 仓库根）
 
-# 锁定驱动版本（与 flake.lock 对齐）
+# 锁定驱动版本（与 flake.lock 对齐；bootstrap 阶段保留作参考）
 sm_hm_rev: a1645f407776
 sm_sm_rev: 48d47346e0c6
 sm_hm_backup_ext: hm.bak
@@ -33,3 +31,7 @@ sm_sshd_dropin: /etc/ssh/sshd_config.d/99-sm-hardening.conf
 
 # sops 验证 secret
 sm_verify_secret: GITHUB_TOKEN
+
+# tailscale authkey（一次性；可选）。若设置，bootstrap 会 push 到真机并 tailscale up。
+# 本地路径（不入库），如 /tmp/ts-authkey-clean。用后真机自动删除。
+sm_ts_authkey_src: ""   # 留空则跳过 tailscale up（可后续手动）
