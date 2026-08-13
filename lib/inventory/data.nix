@@ -307,5 +307,22 @@ in
         ];
       };
     };
+    # ── 加新真机模板 ──────────────────────────────────────────────
+    # sm-vps-<名字> = {
+    #   hostName = "sm-vps-<名字>";   # 与节点名一致（/etc/sm-vps-managed 的 node=）
+    #   stateVersion = "24.11";
+    #   system = "x86_64-linux";
+    #   user = commonUser;
+    #   time = commonTime;
+    #   editor = commonEditor;
+    #   ssh = {
+    #     host = "<公网IP>";
+    #     user = "luck";               # bootstrap 建的用户
+    #     opts = [ "-o" "ServerAliveInterval=30" "-o" "ServerAliveCountMax=20" ]; # 跨境 keepalive
+    #   };
+    # };
+    # 然后：ROOT_PASS='<初始密码>' HOST=<IP> NODE=sm-vps-<名字> \
+    #   ./hosts/sm-vps/bootstrap/phase8-real.sh
+    # 之后 deploy：task nix:deploy:sm NODE=sm-vps-<名字>，验证：task nix:deploy:smoke NODE=sm-vps-<名字>
   };
 }
