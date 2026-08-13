@@ -9,7 +9,9 @@
 {
   _file = ./sshd.nix;
 
-  # 与 phase8-real.sh 手工硬化一致，但声明化。
+  # ⚠️ 与 hosts/sm-vps/ansible/bootstrap.yml 的 P4/4a 写同一路径。
+  # 这里是稳态接管（sm switch 后生效），Ansible 是 day-0 自锁。
+  # 两边内容必须保持一致；改任何一侧要同步另一侧，否则 last-writer-wins 漂移。
   environment.etc."ssh/sshd_config.d/99-sm-hardening.conf".text = ''
     PermitRootLogin no
     PasswordAuthentication no

@@ -160,24 +160,36 @@
         state: present
         timeout: 15
 
-    - name: 2m push tailscale authkey（若提供；去换行，用后真机删除）
+    - name: 2m push tailscale authkey（若提供；trim 去换行——否则 tailscale 报 invalid key）
       ansible.builtin.copy:
-        src: "{{ sm_ts_authkey_src }}"
         dest: /root/.ts-authkey
+        content: "{{ lookup('file', sm_ts_authkey_src) | trim }}"
         mode: "0600"
       when: sm_ts_authkey_src | length > 0
       register: ts_authkey_pushed
 
+    # deploy-rs 激活前置（Taskfile.deploy.yml 声明）：
+    #   - sudo secure_path 含 nix（deploy-rs 用 sudo root 激活，PATH 被重置）
+    #   - /etc/environment 含 nix（ssh-ng 的非登录 shell 需要）
+    # 这两条不在，deploy-rs 激活会 nix-env: command not found（Phase 8 实测坑）。
+    - name: 2n deploy-rs 前置：sudo secure_path 加 nix（幂等）
+      ansible.builtin.copy:
+        dest: /etc/sudoers.d/99-nix-path
+        content: 'Defaults secure_path="/nix/var/nix/profiles/default/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"'
+        mode: "0440"
+        validate: "visudo -cf %s"
+
+    - name: 2o deploy-rs 前置：/etc/environment 加 nix PATH（幂等，幂等追加）
+      ansible.builtin.lineinfile:
+        path: /etc/environment
+        line: 'PATH=/nix/var/nix/profiles/default/bin:/usr/local/bin:/usr/bin:/bin:/usr/games'
+        create: true
+        state: present
+
 - name: "P3  tailscale（luck 身份；HM/sm/sops 走 deploy-rs）"
   hosts: sm_vps
-  gather_facts: true   # 3c/4b 用 ansible_distribution/ansible_os_family，必须 gather
-  tags: [bootstrap-p3]
-  environment:
-    HOME: "/home/{{ sm_user }}"
-    USER: "{{ sm_user }}"
-    XDG_RUNTIME_DIR: "/run/user/{{ sm_uid }}"
-    DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ sm_uid }}/bus"
-    HOME_MANAGER_BACKUP_EXT: "{{ sm_hm_backup_ext }}"
+  gather_facts: true   # 3c 用 ansible_distribution/ansible_os_family
+  tags: [bootstrap-p3, bootstrap-full]
   tasks:
     # HM/system-manager 收敛不在这里做——它需要远端 flake 树（已删），
     # 且 deploy-rs remote_build 是唯一正确入口（S3 打通，不依赖远端树）。
@@ -210,13 +222,20 @@
       register: tailscaled_state
       become: true
 
-    - name: 3e tailscale up（仅当已 push authkey 且未登录；用后删文件）
+    - name: 3e1 检查 authkey 是否已 push（跨 play：2m 在 P2，重跑 P3 时可能没有）
+      ansible.builtin.stat:
+        path: /root/.ts-authkey
+      register: ts_authkey_state
+      become: true
+
+    - name: 3e tailscale up（仅当 authkey 已 push 且未登录；用后删文件）
       ansible.builtin.command:
         cmd: "tailscale up --authkey=file:/root/.ts-authkey && rm -f /root/.ts-authkey"
       become: true
       when:
         - sm_ts_authkey_src | length > 0
         - not tailscaled_state.stat.exists
+        - ts_authkey_state.stat.exists
 
     # sops secrets 由 HM 的 sops 模块在 deploy-rs 激活时生成（bootstrap 阶段还没有）。
     # 验证走 deploy-rs 后的 smoke：task nix:deploy:smoke NODE={{ sm_node }}
@@ -232,6 +251,9 @@
     ansible_user: root
     ansible_ssh_private_key_file: ""
   tasks:
+    # ⚠️ 与 modules/sm/sshd.nix 的 environment.etc."ssh/sshd_config.d/99-sm-hardening.conf"
+    # 写同一路径。这里是 day-0 自锁（bootstrap 必须立即生效），sm 是稳态接管。
+    # 两边内容必须保持一致；改任何一侧要同步另一侧，否则 last-writer-wins 漂移。
     - name: 4a sshd 硬化 drop-in（copy + validate）
       ansible.builtin.copy:
         dest: "{{ sm_sshd_dropin }}"
