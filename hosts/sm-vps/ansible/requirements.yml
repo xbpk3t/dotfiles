@@ -1,0 +1,7 @@
+# sm-vps Ansible 依赖的 galaxy collections。
+# 安装：cd hosts/sm-vps/ansible && ansible-galaxy collection install -r requirements.yml
+collections:
+  # sudoers 模块（写 /etc/sudoers.d 更声明式）
+  - name: community.general
+  # synchronize 模块（rsync flake）
+  - name: ansible.posix
