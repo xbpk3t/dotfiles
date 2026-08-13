@@ -77,11 +77,27 @@ tasks:
       - |
         set -euo pipefail
         node="{{.NODE | default "sm-vps-tc"}}"
+        # host 从 inventory 推导（N5：不再硬编码；NODE_HOST 可覆盖）
+        host="{{.NODE_HOST | default ""}}"
+        if [ -z "$host" ]; then
+          host="$(nix eval --impure --raw ".#deploy.nodes.${node}.hostname")"
+        fi
         # 切 luck shell 到 zsh（HM 激活后 zsh 可用；bootstrap 建用户时用 bash）
-        # 幂等：已是 zsh 则跳过
-        host="{{.NODE_HOST | default "43.156.103.43"}}"
+        # 幂等：已是 zsh 则跳过。见 modules/sm/shells.nix 关于声明化登录 shell 的说明。
         ssh -o BatchMode=yes -o ConnectTimeout=15 "luck@${host}" \
           'current=$(getent passwd luck | cut -d: -f7); if [ "$current" != "$HOME/.nix-profile/bin/zsh" ]; then sudo -n usermod -s /home/luck/.nix-profile/bin/zsh luck; echo "shell -> zsh"; else echo "shell already zsh"; fi'
+      - |
+        set -euo pipefail
+        node="{{.NODE | default "sm-vps-tc"}}"
+        host="{{.NODE_HOST | default ""}}"
+        if [ -z "$host" ]; then
+          host="$(nix eval --impure --raw ".#deploy.nodes.${node}.hostname")"
+        fi
+        # N6：sm 只落地 drop-in（journald/logind/sshd 的 /etc/systemd/*.conf.d、
+        # sshd_config.d），运行中的服务不会自动重读——reload/restart 让 drop-in 生效。
+        # sshd 用 reload（不中断会话）；journald/logind 用 restart（drop-in 需重启才读）。
+        ssh -o BatchMode=yes -o ConnectTimeout=15 "luck@${host}" \
+          'sudo -n systemctl reload ssh 2>/dev/null || true; sudo -n systemctl restart systemd-journald; sudo -n systemctl restart systemd-logind; echo "drop-ins reloaded"'
 
   smoke:
     desc: "sm-vps 部署后 smoke check（验证 etc/unit/secret/tailnet/SSH）"
@@ -105,8 +121,11 @@ tasks:
       - |
         set -euo pipefail
         node="{{.NODE}}"
-        # 从 inventory 推导 host（当前 sm-vps-tc 直连公网 IP）
-        host="43.156.103.43"
+        # host 从 inventory 推导（N5：不再硬编码）
+        host="{{.NODE_HOST | default ""}}"
+        if [ -z "$host" ]; then
+          host="$(nix eval --impure --raw ".#deploy.nodes.${node}.hostname")"
+        fi
         echo "==> smoke check ${node} (${host})"
         ssh -o BatchMode=yes -o ConnectTimeout=15 "luck@${host}" 'bash -lc "
           set -euo pipefail
@@ -117,6 +136,7 @@ tasks:
           echo \"[5] sops secrets: \$(ls ~/.config/sops-nix/secrets/ 2>/dev/null | wc -l)\"
           echo \"[6] tailscale: \$(sudo -n tailscale status 2>/dev/null | head -1)\"
           echo \"[7] sshd hardened: \$(grep -c PermitRootLogin /etc/ssh/sshd_config.d/99-sm-hardening.conf 2>/dev/null || echo 0)\"
+          echo \"[8] mihomo: \$(systemctl is-active mihomo 2>/dev/null || echo disabled)\"
         "'
 
 # [2026-04-22] 注释掉，因为 default task 本身支持的 多选就已经覆盖掉这个单选profile 的需求了

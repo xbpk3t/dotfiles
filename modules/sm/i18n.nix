@@ -4,7 +4,7 @@
 #   NixOS 的 time.timeZone      → environment.etc."timezone"（glibc 读取）
 #
 # 这是 sm-vps 基线能力（locale/timezone 必需），不做配置化开关。
-{ timeMeta, ... }:
+{ pkgs, timeMeta, ... }:
 {
   _file = ./i18n.nix;
 
@@ -23,8 +23,18 @@
     LC_ALL = "en_US.UTF-8";
   };
 
-  # ── timezone：/etc/timezone 指向 zoneinfo（distro tzdata 读取）──
-  # 对应 NixOS time.timeZone；用 sm 的 hostMeta.time 传递时区。
-  # 用 text 写入时区名（VPS 通常已由 cloud-init 设好）。
-  environment.etc."timezone".text = timeMeta.timeZone;
+  # ── timezone：Debian 实际生效靠 /etc/localtime（symlink），/etc/timezone 供 tzdata 工具读。
+  # 镜像预置两者均为 Asia/Shanghai；但 sm 若只声明 /etc/timezone，激活时会被
+  # "Unmanaged path already exists" 跳过 → 声明静默失效、改 config 不传播
+  # （对抗式审查 N6 类，本轮实测确认）。因此：
+  #   - /etc/timezone：replaceExisting 覆盖（text 写时区名）
+  #   - /etc/localtime：显式指向 nix store 的 tzdata zoneinfo（replaceExisting 覆盖镜像 symlink）
+  environment.etc."timezone" = {
+    text = timeMeta.timeZone;
+    replaceExisting = true;
+  };
+  environment.etc."localtime" = {
+    source = "${pkgs.tzdata}/share/zoneinfo/${timeMeta.timeZone}";
+    replaceExisting = true;
+  };
 }
