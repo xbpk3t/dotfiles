@@ -32,3 +32,14 @@ jobs:
         # 完全健康（nix flake check --no-build exit 0），本地 darwin 无法构建是缺 linux
         # builder 的环境限制，非仓库问题。故恢复标准 `nix flake check`。
         run: nix flake check --accept-flake-config
+
+      - name: Check flake.lock health
+        # flake-checker：只读检查三个 nixpkgs 输入的锁文件健康（非阻断，默认 exit 0）。
+        # condition 覆盖 check-* 三项：受支持分支 && 新鲜度 <45 天 && NixOS org。
+        # 45 天阈值与 update-flake-lock 的月度刷新节奏对齐（月刷 → 整月常绿）。
+        # send-statistics: false 关闭遥测。
+        uses: DeterminateSystems/flake-checker-action@main
+        with:
+          nixpkgs-keys: nixpkgs,nixpkgs-darwin,nixpkgs-stable
+          condition: "supportedRefs.contains(gitRef) && numDaysOld < 45 && owner == 'NixOS'"
+          send-statistics: false
