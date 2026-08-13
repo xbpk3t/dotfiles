@@ -7,7 +7,7 @@
 
   home.packages = with pkgs; [
     # CICD
-    # ansible  # Temporarily disabled due to hash mismatch in ncclient dependency
+    ansible # Temporarily disabled due to hash mismatch in ncclient dependency
 
     opentofu
 

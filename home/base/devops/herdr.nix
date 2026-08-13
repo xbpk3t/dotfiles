@@ -234,6 +234,22 @@ in
               # Agents 列表按 workspace 顺序排列
               agent_panel_sort = "spaces";
 
+              # ——— 侧栏 agents 行：首行显示 pane/tab 名（手动改名后同步显示） ———
+              # 手动改名键位：prefix+shift+t（tab）/ prefix+shift+p（pane）/ prefix+shift+w（workspace）
+              # 内置 token：state_icon / state_text / workspace / tab / pane / agent /
+              #             terminal_title / terminal_title_stripped
+              sidebar = {
+                agents = {
+                  rows = [
+                    [
+                      "state_icon"
+                      "tab"
+                    ] # 首行 = 手动改的 pane/tab 名（亮色）
+                    [ "agent" ] # 次行 = agent 类型（claude）
+                  ];
+                };
+              };
+
               # mouse_capture = true（默认）保持 herdr 鼠标 UI。
               # 尝试 false 后确认不可用：选中复制(copy_on_select)依赖 mouse capture 创建 selection，
               # 且滚轮会被终端拦截为 ↑/↓，Claude 收 ↑/↓ 翻历史而非翻 pane scrollback。

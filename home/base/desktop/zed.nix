@@ -759,6 +759,18 @@ let
               #   能避免在括号内自动插入空格（减少你不想要的风格改动）。
               bracketSpacing = false;
             };
+            # WHAT: 把 zzz prompt 的 prpt.schema.json 关联到 references/**/*.yml，
+            #       让 yaml-language-server 在编辑时提供 schema 补全+校验。
+            # WHY: schema 物理放在 docs-alfred（skx 的 source of truth，已 go:embed）；
+            #       这里用 ${config.home.homeDirectory} 在构建期解析出各机器的绝对路径
+            #       （本机 /Users/luck、homelab /home/luck），避免硬编码用户名导致的移植问题。
+            #       glob **/zzz/references/**/*.yml 同时覆盖 dotfiles 主目录与 .worktrees 布局。
+            schemas = {
+              "${config.home.homeDirectory}/Desktop/docs-alfred/cmd/skx/schema/prpt.schema.json" = [
+                "**/zzz/references/**/*.yml"
+              ];
+            };
+            schemaStore.enable = false;
           };
         };
       };

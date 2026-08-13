@@ -1,5 +1,6 @@
 # dotfiles
 
+[![NixOS](https://img.shields.io/badge/NixOS-5277C3?logo=nixos&logoColor=white)](https://nixos.org)
 [![flake-check](https://github.com/xbpk3t/dotfiles/actions/workflows/flake-check.yml/badge.svg)](https://github.com/xbpk3t/dotfiles/actions/workflows/flake-check.yml)
 [![pre-commit](https://github.com/xbpk3t/dotfiles/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/xbpk3t/dotfiles/actions/workflows/pre-commit.yml)
 
@@ -19,4 +20,4 @@
 | Deploy | [deploy-rs](https://github.com/serokell/deploy-rs) |
 | Secrets | [sops-nix](https://github.com/Mic92/sops-nix) |
 | Non-NixOS | [system-manager](https://github.com/numtide/system-manager) |
-| Pack | [nvfetcher](https://github.com/berberman/nvfetcher) (self-maintained `pkgs/`) |
+| Pack | [nvfetcher](https://github.com/berberman/nvfetcher) |
