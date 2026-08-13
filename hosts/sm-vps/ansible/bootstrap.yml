@@ -35,7 +35,6 @@
         that:
           - ansible_facts.os_family in ['Debian', 'RedHat']
         fail_msg: "sm-vps 仅支持 Debian/Ubuntu/RHEL 系（systemd）"
-      when: ansible_os_family is defined
 
     - name: 1a 建用户组（GID 避开常见云厂商预建 UID 1000）
       ansible.builtin.group:
