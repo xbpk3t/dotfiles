@@ -12,5 +12,6 @@
     ./sshd.nix
     ./nix-conf.nix
     ./tailscale.nix
+    ./sops.nix
   ];
 }
