@@ -7,7 +7,8 @@
 #   systemd.services.mihomo → 手写 unit（sm 能力面）
 # 不做 services.resolved（NixOS 特有）；mihomo TUN 已 hijack DNS。
 #
-# enable 开关：config.modules.sm.mihomo.enable（默认 false，由 hosts/sm-vps/default.nix 开启）
+# enable 开关：config.services.mihomo-client.enable（服务角色开关，默认 false）
+# 对齐 nixos 轨 services.mihomo-server.enable / services.singbox-server.enable 命名。
 {
   config,
   lib,
@@ -16,12 +17,12 @@
   ...
 }:
 let
-  cfg = config.modules.sm.mihomo;
+  cfg = config.services.mihomo-client;
 in
 {
   _file = ./mihomo.nix;
 
-  options.modules.sm.mihomo = {
+  options.services.mihomo-client = {
     enable = lib.mkEnableOption "mihomo proxy client (sm-vps)";
   };
 

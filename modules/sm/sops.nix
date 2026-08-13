@@ -9,13 +9,9 @@
 #   因此这里手动声明 root secrets（复用 secrets.yaml 同一份加密文件），
 #   isSystemConfig 语义由 mkRootSecret 显式保证（owner=root）。
 #
-# enable 开关：config.modules.sm.sops.enable（默认 false）。
-# 注意：imports（sops-nix 模块）始终加载——mihomo 等模块也依赖它；
-# 只有 secrets 配置 + sops-install-secrets 服务受 enable 控制。
+# 这是 sm-vps 基线能力（secrets 注入是其他服务的依赖），不做配置化开关。
 {
   inputs,
-  lib,
-  config,
   ...
 }:
 let
@@ -32,49 +28,45 @@ in
 {
   _file = ./sops.nix;
 
-  options.modules.sm.sops.enable = lib.mkEnableOption "系统 sops（root secrets）";
-
   imports = [
     # sops-nix 的 NixOS 模块（非我们 modules/nixos/**；sm 官方测试证明可用）
     inputs.sops-nix.nixosModules.sops
   ];
 
-  config = lib.mkIf config.modules.sm.sops.enable {
-    sops = {
-      # 与 secrets.yaml 同一份加密文件（reuse secrets/default.nix 的 defaultSopsFile）
-      defaultSopsFile = ./../../secrets/secrets.yaml;
+  sops = {
+    # 与 secrets.yaml 同一份加密文件（reuse secrets/default.nix 的 defaultSopsFile）
+    defaultSopsFile = ./../../secrets/secrets.yaml;
 
-      # age key：系统 sops 独立于 HM 用户 sops。放 /etc/sops/age/keys.txt（持久，
-      # 不在 tmpfs；bootstrap 时放置）。不用 /run（重启丢失）。
-      age.keyFile = "/etc/sops/age/keys.txt";
-      age.generateKey = false;
+    # age key：系统 sops 独立于 HM 用户 sops。放 /etc/sops/age/keys.txt（持久，
+    # 不在 tmpfs；bootstrap 时放置）。不用 /run（重启丢失）。
+    age.keyFile = "/etc/sops/age/keys.txt";
+    age.generateKey = false;
 
-      # 系统 root secrets（对应 secrets/default.nix 里所有 mkRootSecret）
-      secrets = {
-        # proxy（自持代理节点凭据）
-        PROXY_UUID = mkRootSecret "proxy/UUID";
-        PROXY_PRI_KEY = mkRootSecret "proxy/pri_key";
-        PROXY_PUB_KEY = mkRootSecret "proxy/pub_key";
-        PROXY_ID = mkRootSecret "proxy/id";
-        PROXY_PWD = mkRootSecret "proxy/pwd";
-        PROXY_FLYINGBIRD = mkRootSecret "proxy/flyingbird";
-        PROXY_CLASH_SK = mkRootSecret "proxy/clash_secret";
-        # sub（机场订阅）
-        SUB_DOGEGG = mkRootSecret "proxy/sub/dogegg";
-        SUB_DOING = mkRootSecret "proxy/sub/doing";
-        SUB_IKUUU = mkRootSecret "proxy/sub/ikuuu";
-        # k3s
-        K3S_TOKEN = mkRootSecret "k3s/token";
-        # Tailscale
-        TAILSCALE_AUTH_KEY = mkRootSecret "tailscale/auth_key";
-      };
+    # 系统 root secrets（对应 secrets/default.nix 里所有 mkRootSecret）
+    secrets = {
+      # proxy（自持代理节点凭据）
+      PROXY_UUID = mkRootSecret "proxy/UUID";
+      PROXY_PRI_KEY = mkRootSecret "proxy/pri_key";
+      PROXY_PUB_KEY = mkRootSecret "proxy/pub_key";
+      PROXY_ID = mkRootSecret "proxy/id";
+      PROXY_PWD = mkRootSecret "proxy/pwd";
+      PROXY_FLYINGBIRD = mkRootSecret "proxy/flyingbird";
+      PROXY_CLASH_SK = mkRootSecret "proxy/clash_secret";
+      # sub（机场订阅）
+      SUB_DOGEGG = mkRootSecret "proxy/sub/dogegg";
+      SUB_DOING = mkRootSecret "proxy/sub/doing";
+      SUB_IKUUU = mkRootSecret "proxy/sub/ikuuu";
+      # k3s
+      K3S_TOKEN = mkRootSecret "k3s/token";
+      # Tailscale
+      TAILSCALE_AUTH_KEY = mkRootSecret "tailscale/auth_key";
     };
+  };
 
-    # sops-install-secrets 挂在 sysinit-reactivation.target 前触发（sm 引擎启动它）。
-    # 注意：不设 sops.environment（避免与 sm systemd PATH 冲突；默认 PATH 够用）。
-    systemd.services.sops-install-secrets = {
-      before = [ "sysinit-reactivation.target" ];
-      requiredBy = [ "sysinit-reactivation.target" ];
-    };
+  # sops-install-secrets 挂在 sysinit-reactivation.target 前触发（sm 引擎启动它）。
+  # 注意：不设 sops.environment（避免与 sm systemd PATH 冲突；默认 PATH 够用）。
+  systemd.services.sops-install-secrets = {
+    before = [ "sysinit-reactivation.target" ];
+    requiredBy = [ "sysinit-reactivation.target" ];
   };
 }

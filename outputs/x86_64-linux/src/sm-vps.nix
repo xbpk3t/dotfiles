@@ -52,9 +52,9 @@ let
           inherit lib;
         };
         system-modules = [
-          # 角色装配清单（hosts/<role>/default.nix：声明各 sm 能力开关）
+          # 角色装配清单（hosts/<role>/default.nix：声明服务角色，如 services.mihomo-client.enable）
           (mylib.relativeToRoot "hosts/${group}/default.nix")
-          # sm 模块树（各模块读 modules.*.enable 开关）
+          # sm 模块树（基线能力直接 enable；服务角色读 services.*.enable）
           (mylib.relativeToRoot "modules/sm")
           {
             nixpkgs.hostPlatform = system;
