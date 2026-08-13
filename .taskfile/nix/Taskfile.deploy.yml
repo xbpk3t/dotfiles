@@ -50,32 +50,66 @@ tasks:
   sm:
     desc: "deploy-rs 部署 sm-vps 平行轨（sm + standalone HM 双 profile）"
     summary: |
-      从 Mac 用 deploy-rs 部署到非 NixOS 目标（当前试验床：nixos-vps-dev 上 Incus 容器）。
+      从 Mac 用 deploy-rs 部署到非 NixOS 目标（真机 sm-vps-tc 或试验床 sm-vps-lab）。
 
       用法（在 Mac、dotfiles 仓库根目录）：
-        task nix:deploy:sm
+        task nix:deploy:sm                       # 默认全部 sm-vps 节点
+        task nix:deploy:sm NODE=sm-vps-tc        # 指定真机
 
       部署内容（deploy.nodes.<node>，见 outputs/x86_64-linux/src/sm-vps.nix）：
         - profiles.system → system-manager（custom activate，root）
         - profiles.home   → standalone HM（activate.home-manager，luck）
         - profilesOrder   先 system 后 home
-        - remoteBuild=false（本机构建 + nix copy，R3）
+        - remoteBuild=true（目标机构建，Mac 零闭包下载）
 
       前置（bootstrap，一次性，不入库）：
-        1. 目标机能 SSH：Mac pubkey 已进容器 luck 的 authorized_keys
-           （当前试验床经 ProxyJump：ssh -J luck@192.129.183.26 luck@10.87.171.92）
-        2. 目标机已装多用户 Nix（nix-daemon 运行中）——Phase 2 bootstrap 已做
-        3. 容器内 luck 有 NOPASSWD sudo（sm 系统 profile 用 root 激活）
-      前置检查：
-        ssh -J luck@192.129.183.26 luck@10.87.171.92 'id; sudo -n true; systemctl is-active nix-daemon'
+        1. 目标机能 SSH：Mac pubkey 已进目标机 luck 的 authorized_keys
+        2. 目标机已装多用户 Nix（nix-daemon 运行中）
+        3. sudo PATH 含 nix（/etc/sudoers.d/99-nix-path）+ /etc/environment 含 nix
+           （否则 deploy-rs 激活时 nix-env 找不到）
     dir: '{{.USER_WORKING_DIR}}'
     cmds:
       - |
         set -euo pipefail
-        # 多选支持：默认全部 sm-vps 节点；也可显式指定（task nix:deploy:sm NODE=sm-vps-lab）
-        node="{{.NODE | default "sm-vps-lab"}}"
+        node="{{.NODE | default "sm-vps-tc"}}"
         echo "==> deploy-rs .#${node} (sm + HM)"
         {{.DEPLOY_RS_CMD}} ".#${node}" -- --impure
+
+  smoke:
+    desc: "sm-vps 部署后 smoke check（验证 etc/unit/secret/tailnet/SSH）"
+    summary: |
+      deploy-rs 部署到真机后，SSH 进去验证关键状态是否都绿。
+
+      用法：
+        task nix:deploy:smoke NODE=sm-vps-tc
+
+      验证项：
+        - SSH 服务 active（确认 sm 没破坏 sshd）
+        - sm flag 文件（/etc/sm-vps-managed）node= 正确
+        - sm marker unit active
+        - HM profile 生效（~/.nix-profile）
+        - sops secrets 数量 > 0
+        - tailscale 在线
+    dir: '{{.USER_WORKING_DIR}}'
+    vars:
+      NODE: '{{.NODE | default "sm-vps-tc"}}'
+    cmds:
+      - |
+        set -euo pipefail
+        node="{{.NODE}}"
+        # 从 inventory 推导 host（当前 sm-vps-tc 直连公网 IP）
+        host="43.156.103.43"
+        echo "==> smoke check ${node} (${host})"
+        ssh -o BatchMode=yes -o ConnectTimeout=15 "luck@${host}" 'bash -lc "
+          set -euo pipefail
+          echo \"[1] SSH: \$(systemctl is-active ssh)\"
+          echo \"[2] sm flag: \$(grep node= /etc/sm-vps-managed 2>/dev/null || echo MISSING)\"
+          echo \"[3] sm unit: \$(systemctl is-active sm-vps-managed-marker)\"
+          echo \"[4] HM: \$(readlink ~/.nix-profile | head -c 30)...\"
+          echo \"[5] sops secrets: \$(ls ~/.config/sops-nix/secrets/ 2>/dev/null | wc -l)\"
+          echo \"[6] tailscale: \$(sudo -n tailscale status 2>/dev/null | head -1)\"
+          echo \"[7] sshd hardened: \$(grep -c PermitRootLogin /etc/ssh/sshd_config.d/99-sm-hardening.conf 2>/dev/null || echo 0)\"
+        "'
 
 # [2026-04-22] 注释掉，因为 default task 本身支持的 多选就已经覆盖掉这个单选profile 的需求了
 #  profile:
