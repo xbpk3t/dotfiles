@@ -9,6 +9,8 @@
 #
 # enable 开关：config.services.mihomo-client.enable（服务角色开关，默认 false）
 # 对齐 nixos 轨 services.mihomo-server.enable / services.singbox-server.enable 命名。
+# 依赖：sops.templates 渲染（mihomo-client.yaml 由 sops-install-secrets 生成）——
+# 隐含依赖 modules/sm/sops.nix（基线 enable）。若未来 sops 可关，mihomo 需先确认。
 {
   config,
   lib,

@@ -50,7 +50,7 @@ tasks:
   sm:
     desc: "deploy-rs 部署 sm-vps 平行轨（sm + standalone HM 双 profile）"
     summary: |
-      从 Mac 用 deploy-rs 部署到非 NixOS 目标（真机 sm-vps-tc 或试验床 sm-vps-lab）。
+      从 Mac 用 deploy-rs 部署到非 NixOS 目标（真机 sm-vps-tc）。
 
       用法（在 Mac、dotfiles 仓库根目录）：
         task nix:deploy:sm                       # 默认全部 sm-vps 节点

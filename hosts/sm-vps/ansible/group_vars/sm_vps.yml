@@ -17,6 +17,8 @@ sm_nix_trusted_users: "root {{ sm_user }}"
 sm_nix_experimental: "nix-command flakes"
 
 # sops / age key
+# 默认 Darwin 的 sops 路径（公钥 age10prwj4… 才是 secrets.yaml 接收方）。
+# 注意：若在 Linux 跳板跑 bootstrap，改用 ~/.config/sops/age/keys.txt 或显式 SM_AGE_KEY_SRC。
 sm_age_key_src: "{{ lookup('env', 'HOME') }}/Library/Application Support/sops/age/keys.txt"
 sm_age_key_dest: "/home/{{ sm_user }}/.config/sops/age/keys.txt"
 sm_sys_age_key_dest: /etc/sops/age/keys.txt   # 系统 sops 用（S5）

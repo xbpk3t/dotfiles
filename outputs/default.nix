@@ -233,6 +233,10 @@ in
       #   - nixosConfigurations / darwinConfigurations：config.system.build.toplevel.drvPath
       #   - systemConfigs（sm）：config.build.toplevel.drvPath
       #   - homeConfigurations（standalone HM）：activationPackage.drvPath
+      # 注意：host-eval 只覆盖「当前求值 system」（architectureOutput = architectureOutputs.${system}）。
+      #   例如 sm-vps-tc 是 x86_64-linux，它在 Darwin 上求值 flake check 时不会生成
+      #   host-eval-sm-vps-tc（只有 x86_64-linux 的 check 才会）。CI 若跑在 Darwin，
+      #   sm 轨的 eval 门禁不会触发——需在 x86_64-linux 的 job 上才有意义。
       hostEvalChecks =
         let
           arch = architectureOutput;
