@@ -6,7 +6,11 @@
 # - HM 本版本的 home.shell 仅控制 shell 集成（rc 文件），不写 /etc/passwd；
 # - userborn 直接管理 bootstrap 已建的 luck 用户风险高（可能重置 sudo 组、锁死 NOPASSWD）；
 #   故登录 shell 仍由 deploy:sm 任务的 usermod 设置，这里只把 zsh 路径注册进合法 shell 列表。
-{ ... }:
+{ userMeta, ... }:
+let
+  # 登录 shell 路径：由 userMeta 推导，避免硬编码 luck（对抗式审查低风险遗留）。
+  shellPath = "/home/${userMeta.username}/.nix-profile/bin/zsh";
+in
 {
   _file = ./shells.nix;
 
@@ -22,7 +26,7 @@
       /usr/bin/rbash
       /usr/bin/dash
       # nix home-manager profile 的 zsh（deploy:sm 的 usermod 所设登录 shell）
-      /home/luck/.nix-profile/bin/zsh
+      ${shellPath}
     '';
     replaceExisting = true;
   };

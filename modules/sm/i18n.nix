@@ -37,4 +37,8 @@
     source = "${pkgs.tzdata}/share/zoneinfo/${timeMeta.timeZone}";
     replaceExisting = true;
   };
+
+  # ⚠️ /etc/localtime 已由 sm 接管（store 符号链接）：不要运行
+  # `dpkg-reconfigure tzdata`——dpkg 会尝试重管 localtime/timezone，与 store
+  # 链接冲突（对抗式审查低风险遗留，通常不会触发；时区一律经 config 声明）。
 }
