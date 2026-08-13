@@ -53,13 +53,14 @@ command -v sshpass >/dev/null || die "sshpass not found"
 [[ -f ${FLAKE_SRC}/flake.lock ]] || die "FLAKE_SRC=${FLAKE_SRC} missing flake.lock"
 
 # SSH helpers（root 用密码，luck 用 key）
+# ServerAliveInterval：跨境链路下防止长任务（rsync/HM switch）被空闲断连。
 RSSH() {
   SSHPASS="${ROOT_PASS}" sshpass -e ssh \
-    -o StrictHostKeyChecking=accept-new -o ConnectTimeout=20 \
+    -o StrictHostKeyChecking=accept-new -o ConnectTimeout=30 -o ServerAliveInterval=15 \
     "root@${HOST}" "$@"
 }
 LSSH() {
-  ssh -o BatchMode=yes -o ConnectTimeout=20 -o StrictHostKeyChecking=accept-new \
+  ssh -o BatchMode=yes -o ConnectTimeout=30 -o ServerAliveInterval=15 -o StrictHostKeyChecking=accept-new \
     "${USERNAME}@${HOST}" "$@"
 }
 
@@ -119,7 +120,7 @@ log "rsync flake -> ${REMOTE_FLAKE}"
 RSSH "mkdir -p ${REMOTE_FLAKE}"
 # 排除重目录与本地专属；保留 secrets/（sops 需要）与 .cntr（home/core/devops/cntr.nix 引用）。
 SSHPASS="${ROOT_PASS}" sshpass -e rsync -a --delete \
-  -e "ssh -o StrictHostKeyChecking=accept-new" \
+  -e "ssh -o StrictHostKeyChecking=accept-new -o ServerAliveInterval=15" \
   --exclude='.git' --exclude='.claude' --exclude='.worktrees' \
   --exclude='result' --exclude='results' --exclude='docs' \
   --exclude='.ruff_cache' --exclude='.direnv' \

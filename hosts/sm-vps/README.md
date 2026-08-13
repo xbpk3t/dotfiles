@@ -8,8 +8,7 @@
 # bootstrap：
 #   hosts/sm-vps/bootstrap/phase2-hm.sh   — (lab) Determinate Nix + standalone HM switch
 #   hosts/sm-vps/bootstrap/phase3-sops.sh — (lab) 用户向 sops
-#   hosts/sm-vps/bootstrap/phase8-real.sh — (真机) SSH 直连全流程 bootstrap
-#   hosts/sm-vps/bootstrap/phase8-resume.sh — (真机) 中断后增量续跑
+#   hosts/sm-vps/bootstrap/phase8-real.sh — (真机) SSH 直连全流程 bootstrap（幂等，可重复跑）
 #
 # 真机 bootstrap 要点（sm-vps-tc）：
 #   ROOT_PASS='<初始root密码>' ./hosts/sm-vps/bootstrap/phase8-real.sh
