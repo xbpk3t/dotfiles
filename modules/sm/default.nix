@@ -15,5 +15,6 @@
     ./sops.nix
     ./systemd.nix
     ./i18n.nix
+    ./mihomo.nix
   ];
 }
