@@ -1,0 +1,43 @@
+name: update-flake-lock
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 每月 1 日 03:27 UTC 自动刷新一次；避开整点/半点减少撞车。
+    - cron: '27 3 1 * *'
+
+concurrency:
+  # 避免同一分支上的旧任务继续占用 runner。
+  group: update-flake-lock-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lockfile:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        # update-flake-lock v3+ 不再自动安装 Nix，需先装支持 flakes 的 Nix。
+        # 与 flake-check / pre-commit workflow 保持一致，复用 nix-installer-action@v19。
+        uses: DeterminateSystems/nix-installer-action@v19
+
+      - name: Update flake.lock (nixpkgs / nixpkgs-darwin / nixpkgs-stable)
+        # 只刷 nixpkgs 三个输入；home-manager / darwin / determinate 等浮动输入保持手动控制。
+        # 节奏与 flake-check 里的 flake-checker 45 天阈值对齐（月刷 → 整月常绿）。
+        # token 用 PAT（UPDATE_FLAKE_LOCK_PAT）而非 GITHUB_TOKEN：
+        #   - PR 以 PAT 属主身份开启 → 能正常触发 flake-check / pre-commit 的 pull_request CI；
+        #   - 用 GITHUB_TOKEN 开的 PR 默认不会触发 CI（GitHub 防递归机制）。
+        # PAT 最低权限：fine-grained 限 xbpk3t/dotfiles 的 Contents R/W + Pull requests R/W；
+        # 或 classic PAT 仅勾 `repo` scope。
+        uses: DeterminateSystems/update-flake-lock@main
+        with:
+          inputs: nixpkgs nixpkgs-darwin nixpkgs-stable
+          pr-title: "flake.lock: Update nixpkgs inputs"
+          token: ${{ secrets.UPDATE_FLAKE_LOCK_PAT }}
