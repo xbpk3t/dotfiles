@@ -1,5 +1,5 @@
-# sm-vps 组变量：与 phase8-real.sh 的默认值对齐。
-# 这些是每台 sm-vps 机器共享的 bootstrap 参数（Nix/HM/sm 版本、用户、路径）。
+# sm-vps 组变量：bootstrap 参数（用户、Nix、age key、tailscale、sshd）。
+# HM/sm 收敛走 deploy-rs（不在这里配；驱动版本由 flake.lock 管）。
 
 # 用户
 sm_user: luck
@@ -9,13 +9,8 @@ sm_groups:
   - sudo            # Debian/Ubuntu 管理组；RHEL 系改 wheel（distro 适配点）
 sm_shell: /bin/bash
 
-# flake 相关（HM/sm 收敛走 deploy-rs，不需要目标机 flake 源码树）
+# 节点（HM/sm 收敛走 deploy-rs，不需要目标机 flake 源码树）
 sm_node: sm-vps-tc   # 覆盖：每台机器在 inventory 里设 sm_node=<hostname>
-
-# 锁定驱动版本（与 flake.lock 对齐；bootstrap 阶段保留作参考）
-sm_hm_rev: a1645f407776
-sm_sm_rev: 48d47346e0c6
-sm_hm_backup_ext: hm.bak
 
 # Nix 安装参数（Determinate installer）
 sm_nix_trusted_users: "root {{ sm_user }}"
@@ -28,9 +23,6 @@ sm_sys_age_key_dest: /etc/sops/age/keys.txt   # 系统 sops 用（S5）
 
 # sshd 硬化
 sm_sshd_dropin: /etc/ssh/sshd_config.d/99-sm-hardening.conf
-
-# sops 验证 secret
-sm_verify_secret: GITHUB_TOKEN
 
 # tailscale authkey（一次性；可选）。若设置，bootstrap 会 push 到真机并 tailscale up。
 # 本地路径（不入库），如 /tmp/ts-authkey-clean。用后真机自动删除。
