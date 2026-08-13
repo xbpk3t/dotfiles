@@ -46,6 +46,7 @@ let
             hostMeta
             userMeta
             timeMeta
+            pkgs
             ;
           inherit lib;
         };
