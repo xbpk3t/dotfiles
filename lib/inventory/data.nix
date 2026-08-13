@@ -253,39 +253,10 @@ in
   # commit scope: sm；hosts/ 角色目录: hosts/sm-vps。
   # 试验床：nixos-vps-dev 上 Incus 容器（实例名仍为 linux-sm-lab，可另 rename）。
   sm-vps = {
-    sm-vps-lab = {
-      hostName = "sm-vps-lab";
-      stateVersion = "24.11";
-      system = "x86_64-linux";
-      user = commonUser;
-      time = commonTime;
-      editor = commonEditor;
-      # Phase 5：deploy-rs 目标 = Incus 容器（经宿主 nixos-vps-dev ProxyJump）。
-      # - host：容器 incusbr0 内网 IP；Mac 无法直连，靠 -J 宿主转发。
-      # - user：容器内 luck（与宿主同名；容器有 NOPASSWD sudo，供 sm 系统 profile 用 root 激活）。
-      # - ssh.host 也可改用 lab.container 名 + ProxyJump 后由宿主 incus exec 转，
-      #   但 deploy-rs 需要 nix-daemon over SSH，必须走真 IP + ssh-ng。
-      ssh = {
-        host = "10.87.171.92";
-        user = "luck";
-        # ProxyJump：Mac → nixos-vps-dev → 容器。
-        # 注：宿主 luck 到容器的 SSH 仍要 luck 能 SSH 到 10.87.171.92
-        #   （Phase 5 bootstrap 需先把 Mac pubkey 放进容器 authorized_keys）。
-        opts = [
-          "-J"
-          "luck@192.129.183.26"
-        ];
-      };
-      lab = {
-        host = "nixos-vps-dev";
-        # Incus 实例名（与 flake 节点名 sm-vps-lab 可不同）
-        container = "linux-sm-lab";
-        note = "Incus system container on nixos-vps-dev (Debian 12, PID1=systemd)";
-      };
-    };
     # 真机（Phase 8）：腾讯云 Debian 13 VPS，root 密码登录起步。
     # 非 NixOS 轨的「真机验证」目标——裸 distro 上走 bootstrap → Nix → HM → sm。
     # 注意：TC 云主机无 cloud-init 可用（机器已建好），走 SSH bootstrap 路径。
+    # （原 sm-vps-lab Incus 试验床已废弃，容器已删，2026-08-13）
     sm-vps-tc = {
       hostName = "sm-vps-tc";
       stateVersion = "24.11";
