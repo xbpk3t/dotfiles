@@ -12,7 +12,7 @@ let
 
   # 为组内每个节点生成一套出口：
   #   homeConfigurations.<name> — standalone HM（home/core + secrets）
-  #   systemConfigs.<name>      — system-manager（modules/system 薄模块）
+  #   systemConfigs.<name>      — system-manager（modules/sm 薄模块）
   #   deploy.nodes.<name>       — deploy-rs 双 profile（system=sm / home=HM）
   # 同一文件产出全部节点，靠 outputs/default.nix 的 mergeRoleOutputList 合并。
   mkNode =
@@ -49,7 +49,7 @@ let
           inherit lib;
         };
         system-modules = [
-          (mylib.relativeToRoot "modules/system")
+          (mylib.relativeToRoot "modules/sm")
           {
             nixpkgs.hostPlatform = system;
             # 允许在 Debian 等非白名单 distro 上 eval/后续 switch（Phase 4）
