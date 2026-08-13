@@ -13,5 +13,7 @@
     ./nix-conf.nix
     ./tailscale.nix
     ./sops.nix
+    ./systemd.nix
+    ./i18n.nix
   ];
 }

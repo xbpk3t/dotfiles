@@ -45,6 +45,7 @@ let
             mylib
             hostMeta
             userMeta
+            timeMeta
             ;
           inherit lib;
         };
