@@ -155,6 +155,9 @@ in
       # Why：与 deployRsNode 一致，由 inventory 的 ssh.host/primaryIp 推导。
       hostname = host;
       inherit sshUser sshOpts remoteBuild;
+      # 关 magic rollback（Phase 8 真机实测：sm/HM 激活确认超时导致每次都回滚，
+      # 新 generation 不生效）。sm 激活失败会自己报错，不需要 deploy-rs 的 canary 自动回滚。
+      magicRollback = false;
       profiles = {
         # 系统轨：sm 激活必须 root（写 /etc、systemd、/var/lib/system-manager）。
         system = {
