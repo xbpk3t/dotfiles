@@ -77,26 +77,35 @@ tasks:
       - |
         set -euo pipefail
         node="{{.NODE | default "sm-vps-tc"}}"
-        # host 从 inventory 推导（N5：不再硬编码；NODE_HOST 可覆盖）
+        # host/user 从 inventory 推导（N5：不再硬编码；NODE_HOST/NODE_USER 可覆盖）
         host="{{.NODE_HOST | default ""}}"
+        user="{{.NODE_USER | default ""}}"
         if [ -z "$host" ]; then
           host="$(nix eval --impure --raw ".#deploy.nodes.${node}.hostname")"
         fi
-        # 切 luck shell 到 zsh（HM 激活后 zsh 可用；bootstrap 建用户时用 bash）
+        if [ -z "$user" ]; then
+          user="$(nix eval --impure --raw ".#deploy.nodes.${node}.sshUser")"
+        fi
+        # 切登录 shell 到 zsh（HM 激活后 zsh 可用；bootstrap 建用户时用 bash）
         # 幂等：已是 zsh 则跳过。见 modules/sm/shells.nix 关于声明化登录 shell 的说明。
-        ssh -o BatchMode=yes -o ConnectTimeout=15 "luck@${host}" \
-          'current=$(getent passwd luck | cut -d: -f7); if [ "$current" != "$HOME/.nix-profile/bin/zsh" ]; then sudo -n usermod -s /home/luck/.nix-profile/bin/zsh luck; echo "shell -> zsh"; else echo "shell already zsh"; fi'
+        shell_path="/home/${user}/.nix-profile/bin/zsh"
+        ssh -o BatchMode=yes -o ConnectTimeout=15 "${user}@${host}" \
+          "current=\$(getent passwd ${user} | cut -d: -f7); if [ \"\$current\" != \"${shell_path}\" ]; then sudo -n usermod -s ${shell_path} ${user}; echo \"shell -> zsh\"; else echo \"shell already zsh\"; fi"
       - |
         set -euo pipefail
         node="{{.NODE | default "sm-vps-tc"}}"
         host="{{.NODE_HOST | default ""}}"
+        user="{{.NODE_USER | default ""}}"
         if [ -z "$host" ]; then
           host="$(nix eval --impure --raw ".#deploy.nodes.${node}.hostname")"
+        fi
+        if [ -z "$user" ]; then
+          user="$(nix eval --impure --raw ".#deploy.nodes.${node}.sshUser")"
         fi
         # N6：sm 只落地 drop-in（journald/logind/sshd 的 /etc/systemd/*.conf.d、
         # sshd_config.d），运行中的服务不会自动重读——reload/restart 让 drop-in 生效。
         # sshd 用 reload（不中断会话）；journald/logind 用 restart（drop-in 需重启才读）。
-        ssh -o BatchMode=yes -o ConnectTimeout=15 "luck@${host}" \
+        ssh -o BatchMode=yes -o ConnectTimeout=15 "${user}@${host}" \
           'sudo -n systemctl reload ssh 2>/dev/null || true; sudo -n systemctl restart systemd-journald; sudo -n systemctl restart systemd-logind; echo "drop-ins reloaded"'
 
   smoke:
@@ -121,13 +130,17 @@ tasks:
       - |
         set -euo pipefail
         node="{{.NODE}}"
-        # host 从 inventory 推导（N5：不再硬编码）
+        # host/user 从 inventory 推导（N5：不再硬编码；NODE_HOST/NODE_USER 可覆盖）
         host="{{.NODE_HOST | default ""}}"
+        user="{{.NODE_USER | default ""}}"
         if [ -z "$host" ]; then
           host="$(nix eval --impure --raw ".#deploy.nodes.${node}.hostname")"
         fi
+        if [ -z "$user" ]; then
+          user="$(nix eval --impure --raw ".#deploy.nodes.${node}.sshUser")"
+        fi
         echo "==> smoke check ${node} (${host})"
-        ssh -o BatchMode=yes -o ConnectTimeout=15 "luck@${host}" 'bash -lc "
+        ssh -o BatchMode=yes -o ConnectTimeout=15 "${user}@${host}" 'bash -lc "
           set -euo pipefail
           echo \"[1] SSH: \$(systemctl is-active ssh)\"
           echo \"[2] sm flag: \$(grep node= /etc/sm-vps-managed 2>/dev/null || echo MISSING)\"
