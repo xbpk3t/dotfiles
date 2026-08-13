@@ -1,0 +1,262 @@
+# sm-vps 真机 bootstrap（Ansible 版）。
+# 替代 phase8-real.sh。目标：已有 SSH 的裸 Debian/Ubuntu → luck + Determinate Nix
+# + standalone HM + system-manager + tailscale + sops + sshd 硬化。
+#
+# 用法（在仓库根）：
+#   ansible-galaxy collection install -r hosts/sm-vps/ansible/requirements.yml
+#   # 首次（需 root 密码）：
+#   ansible-playbook -i hosts/sm-vps/ansible/inventory/sm_vps.ini \
+#     hosts/sm-vps/ansible/bootstrap.yml --ask-pass
+#   # 或 root 密码走环境变量（不交互）：
+#   ANSIBLE_PASSWORD='<root密码>' ansible-playbook ... bootstrap.yml
+#
+# 设计原则（与 phase8 对齐）：
+#   - 尽量幂等模块（user/copy/package/authorized_key/synchronize）
+#   - 只允许 shell 的步骤：Determinate Nix 安装、HM/sm switch（无官方模块）
+#   - 分 play 表达「自锁保护」：P0 建用户 → P1 验证 luck → P4 才锁 sshd
+#
+# Play 连接身份：
+#   P0/P2/P4 = root+密码（ansible_user=root，来自 --ask-pass / ANSIBLE_PASSWORD）
+#   P1/P3    = luck+key（inventory 默认连接）
+---
+- name: "P0  preflight + 建 luck 用户/sudoers/SSH key（root 身份）"
+  hosts: sm_vps
+  gather_facts: true
+  vars:
+    ansible_user: root
+    ansible_ssh_private_key_file: ""
+  tasks:
+    - name: 0a 目标必须是 systemd 发行版（sm 引擎硬前提）
+      ansible.builtin.assert:
+        that:
+          - ansible_facts.os_family in ['Debian', 'RedHat']
+        fail_msg: "sm-vps 仅支持 Debian/Ubuntu/RHEL 系（systemd）"
+      when: ansible_os_family is defined
+
+    - name: 1a 建用户组（GID 避开常见云厂商预建 UID 1000）
+      ansible.builtin.group:
+        name: "{{ sm_user }}"
+        gid: "{{ sm_gid }}"
+        state: present
+
+    - name: 1b 建用户（uid/gid/shell/home）
+      ansible.builtin.user:
+        name: "{{ sm_user }}"
+        uid: "{{ sm_uid }}"
+        group: "{{ sm_user }}"
+        groups: "{{ sm_groups }}"
+        append: true
+        shell: "{{ sm_shell }}"
+        create_home: true
+        state: present
+
+    - name: 1c push Mac 公钥（authorized_keys）
+      ansible.posix.authorized_key:
+        user: "{{ sm_user }}"
+        key: "{{ lookup('file', '~/.ssh/id_ed25519.pub') }}"
+        state: present
+
+    - name: 1d NOPASSWD sudo（community.general.sudoers，声明式）
+      community.general.sudoers:
+        name: "{{ sm_user }}-nopasswd"
+        user: "{{ sm_user }}"
+        commands: ALL
+        runas: ALL
+        nopassword: true
+        state: present
+      # 若 collection 不可用，回退到 copy + visudo（见 files/sudoers-luck）
+
+- name: "P1  验证 luck+key 登录（连接成功即证明；失败整场中止）"
+  hosts: sm_vps
+  gather_facts: false
+  tasks:
+    - name: 1e luck 能登录（能跑 task = key auth 通过）
+      ansible.builtin.command: id
+      register: luck_id
+      changed_when: false
+    - name: 1f NOPASSWD sudo 生效
+      ansible.builtin.command: sudo -n true
+      changed_when: false
+
+- name: "P2  装 Determinate Nix + rsync flake + age key + linger（root 身份）"
+  hosts: sm_vps
+  gather_facts: true
+  vars:
+    ansible_user: root
+    ansible_ssh_private_key_file: ""
+  tasks:
+    - name: 2a 安装前置包（curl/ca-certificates/xz/rsync；package 跨发行版）
+      ansible.builtin.package:
+        name:
+          - curl
+          - ca-certificates
+          - xz-utils
+          - rsync
+        state: present
+
+    - name: 2b 下载 Determinate Nix 安装器
+      ansible.builtin.get_url:
+        url: https://install.determinate.systems/nix
+        dest: /tmp/nix-installer.sh
+        mode: "0755"
+
+    - name: 2c 安装 Determinate Nix（幂等：已装则跳过）
+      ansible.builtin.command:
+        cmd: "sh /tmp/nix-installer.sh install --no-confirm --extra-conf 'trusted-users = {{ sm_nix_trusted_users }}' --extra-conf 'experimental-features = {{ sm_nix_experimental }}'"
+        creates: /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+      register: nix_install
+
+    - name: 2d rsync flake 源码（synchronize 幂等）
+      ansible.posix.synchronize:
+        src: "{{ sm_flake_src }}/"
+        dest: "{{ sm_remote_flake }}/"
+        delete: true
+        rsync_opts:
+          - "--exclude=.git"
+          - "--exclude=.claude"
+          - "--exclude=.worktrees"
+          - "--exclude=result"
+          - "--exclude=results"
+          - "--exclude=docs"
+          - "--exclude=.ruff_cache"
+          - "--exclude=.direnv"
+          - "--exclude=.apm"
+          - "--exclude=.tms"
+
+    - name: 2e flake 属主交给 luck
+      ansible.builtin.file:
+        path: "{{ sm_remote_flake }}"
+        owner: "{{ sm_user }}"
+        group: "{{ sm_user }}"
+        recurse: true
+        state: directory
+
+    - name: 2f 用户 age key 目录
+      ansible.builtin.file:
+        path: "{{ sm_age_key_dest | dirname }}"
+        owner: "{{ sm_user }}"
+        group: "{{ sm_user }}"
+        mode: "0700"
+        state: directory
+
+    - name: 2g push 用户 age key（HM sops）
+      ansible.builtin.copy:
+        src: "{{ sm_age_key_src }}"
+        dest: "{{ sm_age_key_dest }}"
+        owner: "{{ sm_user }}"
+        group: "{{ sm_user }}"
+        mode: "0600"
+
+    - name: 2h 系统 age key 目录（系统 sops S5）
+      ansible.builtin.file:
+        path: "{{ sm_sys_age_key_dest | dirname }}"
+        owner: root
+        group: root
+        mode: "0700"
+        state: directory
+
+    - name: 2i push 系统 age key
+      ansible.builtin.copy:
+        src: "{{ sm_age_key_src }}"
+        dest: "{{ sm_sys_age_key_dest }}"
+        owner: root
+        group: root
+        mode: "0600"
+
+    - name: 2j enable-linger（用户 systemd；无原生模块，用 shell + 幂等）
+      ansible.builtin.command:
+        cmd: "loginctl enable-linger {{ sm_user }}"
+        creates: "/var/lib/systemd/linger/{{ sm_user }}"
+      register: linger_out
+
+    - name: 2k 拉起用户 systemd 实例
+      ansible.builtin.systemd:
+        name: "user@{{ sm_uid }}.service"
+        state: started
+
+- name: "P3  standalone HM + system-manager + tailscale + sops（luck 身份）"
+  hosts: sm_vps
+  gather_facts: false
+  environment:
+    HOME: "/home/{{ sm_user }}"
+    USER: "{{ sm_user }}"
+    XDG_RUNTIME_DIR: "/run/user/{{ sm_uid }}"
+    DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ sm_uid }}/bus"
+    HOME_MANAGER_BACKUP_EXT: "{{ sm_hm_backup_ext }}"
+  tasks:
+    - name: 3a standalone HM switch（无可避免 shell；用完整 nix 路径避 PATH 问题）
+      ansible.builtin.command:
+        cmd: "/nix/var/nix/profiles/default/bin/nix run github:nix-community/home-manager/{{ sm_hm_rev }} -- switch --flake {{ sm_remote_flake }}#{{ sm_node }} -b {{ sm_hm_backup_ext }}"
+        chdir: "{{ sm_remote_flake }}"
+      register: hm_switch
+      changed_when: false   # HM switch 每次重跑（无幂等信号），标记不变更
+
+    - name: 3b system-manager switch（root 激活；sudo -n + 完整 nix 路径）
+      ansible.builtin.command:
+        cmd: "sudo -n /nix/var/nix/profiles/default/bin/nix run github:numtide/system-manager/{{ sm_sm_rev }} -- switch --flake {{ sm_remote_flake }}#{{ sm_node }}"
+        chdir: "{{ sm_remote_flake }}"
+      become: true
+      become_user: root
+      register: sm_switch
+      changed_when: false
+
+    - name: 3c tailscale 官方 repo 添加（幂等；deb822 格式）
+      ansible.builtin.deb822_repository:
+        name: tailscale
+        types: [deb]
+        uris: "https://pkgs.tailscale.com/stable/{{ ansible_distribution | lower }}"
+        suites: "{{ ansible_distribution_release }}"
+        components: [main]
+        signed_by: "https://pkgs.tailscale.com/stable/{{ ansible_distribution | lower }}/{{ ansible_distribution_release }}.gpg"
+        state: present
+      when: ansible_os_family == 'Debian'
+      become: true
+
+    - name: 3d 安装 tailscale 包
+      ansible.builtin.package:
+        name: tailscale
+        state: present
+      become: true
+
+    - name: 3e tailscale up（若未登录；authkey 从文件读，用后删除）
+      ansible.builtin.command:
+        cmd: "tailscale up --authkey=file:/root/.ts-authkey && rm -f /root/.ts-authkey"
+        creates: /var/lib/tailscale/tailscaled.state
+      become: true
+      when: ts_authkey is defined
+
+    - name: 3f sops 验证（用户 secret 可读）
+      ansible.builtin.command:
+        cmd: "test -r ~/.config/sops-nix/secrets/{{ sm_verify_secret }} && test -s ~/.config/sops-nix/secrets/{{ sm_verify_secret }}"
+      register: sops_check
+      changed_when: false
+      ignore_errors: true
+
+- name: "P4  锁 sshd（root 身份；仅在 luck 已验证后）"
+  hosts: sm_vps
+  gather_facts: true
+  vars:
+    ansible_user: root
+    ansible_ssh_private_key_file: ""
+  tasks:
+    - name: 4a sshd 硬化 drop-in（copy + validate）
+      ansible.builtin.copy:
+        dest: "{{ sm_sshd_dropin }}"
+        content: |
+          PermitRootLogin no
+          PasswordAuthentication no
+          KbdInteractiveAuthentication no
+        mode: "0644"
+        validate: "sshd -t -f %s"
+
+    - name: 4b 重载 sshd（服务名随发行版）
+      ansible.builtin.systemd:
+        name: "{{ 'ssh' if ansible_os_family == 'Debian' else 'sshd' }}"
+        state: reloaded
+      register: sshd_reload
+
+    - name: 4c 锁后回归验证（luck 仍可登录）
+      ansible.builtin.command: ssh -o BatchMode=yes -o ConnectTimeout=10 "{{ sm_user }}@{{ inventory_hostname }}" "id"
+      delegate_to: localhost
+      register: post_lock
+      changed_when: false
