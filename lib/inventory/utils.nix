@@ -103,7 +103,9 @@ in
   #   - 两个 profile：`system`（system-manager）与 `home`（standalone HM）
   #   - `system` 用 activate.custom 包 system-manager-engine 的 activate（需 root → user = "root"）
   #   - `home` 用 activate.home-manager（以 SSH 用户激活用户 profile）
-  #   - 默认 remoteBuild = false（R3：本机构建 + nix copy；跳板/目标机通常无本地 build 收益）
+  #   - 默认 remoteBuild = true（与 deployRsNode 对齐：在目标机构建，Mac 零闭包下载。
+  #     对抗验证：deploy-rs remote_build 用 nix copy -s --derivation + nix build --store ssh-ng://，
+  #     本地 store 仅增量 eval 产物。R3 旧决策（false）是为容器跳板时代，真机应走 remote_build。）
   # 设计约束（与主航道隔离）：
   #   - 不修改 deployRsNode 的 activate.nixos 语义
   #   - system profile 的 user 固定为 root（sm 激活写 /etc、systemd、/var/lib）
@@ -120,7 +122,7 @@ in
       deployLib,
       defaultSshUser ? "luck",
       defaultSshPort ? null,
-      remoteBuild ? false,
+      remoteBuild ? true,
       profilesOrder ? [
         "system"
         "home"
@@ -140,8 +142,13 @@ in
         ];
       # sm 引擎激活：deploy-rs 先 nix-env --set 把 $PROFILE 指向 toplevel，
       # 再运行 activate 脚本；引擎读 $PROFILE 下的 etc/services 描述并落地。
-      # 注意：sm 引擎本身不依赖 nix 命令（activate 只跑 preActivationAssertions + 应用状态）。
-      smActivate = "$PROFILE/bin/system-manager-engine --store-path $PROFILE activate";
+      # 关键坑（Phase 8 实测）：
+      # 1. --store-path 是 activate 子命令的参数（sm 1.1.0 语法），不是顶层参数。
+      # 2. $PROFILE 是 /nix/var/nix/profiles/system 的 symlink 链（system -> system-1-link ->
+      #    /nix/store/...），sm 引擎 TryFrom<PathBuf> 遇到「相对 symlink 目标」会报
+      #    "not in nix store: system-1-link"。必须 readlink -f 解析到真实 store 路径。
+      # 引擎本身不依赖 nix 命令（activate 只跑 preActivationAssertions + 应用状态）。
+      smActivate = "REAL=\$(readlink -f \$PROFILE) && \$PROFILE/bin/system-manager-engine activate --store-path \$REAL";
     in
     {
       # What：部署目标地址（IP/域名/别名）。
