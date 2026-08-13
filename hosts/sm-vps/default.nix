@@ -9,9 +9,12 @@
 # 对齐 nixos-vps/default.nix 的 services.singbox-server.enable / mihomo-server.enable。
 {
   # 服务角色（对齐 nixos-vps/default.nix 的 server/client 区分）：
-  # sm-vps 做代理客户端（出网），不做 server（server 是长期机职责，singbox-server
-  # 属 D3 未实现，sm 轨暂不声明）。
-  services.mihomo-client.enable = true;
+  # sm-vps-tc 在 SGP（新加坡），公网直通，不需要代理客户端出网。
+  # mihomo-client 此前为试验性开启；client-config.nix 的 allow-lan + bind-address="*"
+  # 会在直连公网的 VPS 上形成无认证开放代理暴露面（对抗式审查 S1），故禁用。
+  # 模块保留：未来若在国内 VPS 上启用代理客户端，需按「loopback bind + TUN /
+  # tailnet bind + lan-allowed-ips 白名单」方式收紧（见 modules/sm/mihomo.nix 注释）。
+  services.mihomo-client.enable = false;
 
   # 基础能力由 modules/sm 直接 enable（无开关）：
   #   sops（secrets 注入）、sshd 硬化、systemd（journald/logind）、i18n、tailscale。

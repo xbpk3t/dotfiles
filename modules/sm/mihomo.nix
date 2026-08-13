@@ -7,6 +7,17 @@
 #   systemd.services.mihomo → 手写 unit（sm 能力面）
 # 不做 services.resolved（NixOS 特有）；mihomo TUN 已 hijack DNS。
 #
+# ⚠️ 安全提醒（对抗式审查 S1/S3）：client-config.nix 是桌面/LAN 形态
+# （allow-lan=true + bind-address="*" + mixed-port 无认证）。把它原样跑到
+# 直连公网的 VPS 上，会把 7890/9090 变成公网开放代理暴露面；且 TUN 需要
+# CAP_NET_ADMIN（否则 tun/auto-route/dns-hijack 静默失效）。因此在公网 VPS 上
+# 启用时，必须 host 级收紧：
+#   1) 绑定 loopback + allow-lan=false（仅 VPS 自身出网，走 TUN 透明代理），或
+#   2) 绑定 tailnet/私网 IP + lan-allowed-ips 白名单（喂给信任客户端）
+#   3) external-controller 绑 127.0.0.1（远程管理走 SSH 隧道）
+# 并给 serviceConfig 补 AmbientCapabilities/CapabilityBoundingSet = CAP_NET_ADMIN。
+# sm-vps-tc（SGP 直连公网）当前禁用本模块，见 hosts/sm-vps/default.nix。
+#
 # enable 开关：config.services.mihomo-client.enable（服务角色开关，默认 false）
 # 对齐 nixos 轨 services.mihomo-server.enable / services.singbox-server.enable 命名。
 # 依赖：sops.templates 渲染（mihomo-client.yaml 由 sops-install-secrets 生成）——
