@@ -20,9 +20,10 @@ let
     let
       specialArgs = mkSpecialArgs system node;
 
-      # standalone HM：仅 home/core 最小；sops 由 homeStandalone 挂模块（eval 需要）。
+      # standalone HM：home/core 最小 + 角色 home.nix（对齐 nixos 轨 hosts/<role>/home.nix）。
       # secrets/default.nix 提供 sops.secrets.* 定义，否则 home/core 引用 path 会失败。
       homeModules = map mylib.relativeToRoot [
+        "hosts/${group}/home.nix"
         "home/core"
         "secrets/default.nix"
       ];
@@ -51,6 +52,9 @@ let
           inherit lib;
         };
         system-modules = [
+          # 角色装配清单（hosts/<role>/default.nix：声明各 sm 能力开关）
+          (mylib.relativeToRoot "hosts/${group}/default.nix")
+          # sm 模块树（各模块读 modules.*.enable 开关）
           (mylib.relativeToRoot "modules/sm")
           {
             nixpkgs.hostPlatform = system;
