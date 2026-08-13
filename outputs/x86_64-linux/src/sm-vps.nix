@@ -65,8 +65,7 @@ let
         # homeConfigurations 值本身带顶层 activationPackage（deploy-rs activate.home-manager 期望）。
         homeActivationPackage = homeConfig;
         deployLib = inputs."deploy-rs".lib.${system};
-        # R3：本机构建 + nix copy，不在容器内构建。
-        remoteBuild = false;
+        # 默认 remoteBuild = true（目标机构建，Mac 零闭包下载）。这里不显式传，用构造器默认。
       };
     in
     {
