@@ -8,6 +8,50 @@
 let
   cfg = config.modules.devops.herdr;
   tomlFormat = pkgs.formats.toml { };
+
+  # ——— sidebar agent 行配色：文字显式提亮到可读对比度 ———
+  # 背景：catppuccin 暗字层(overlay)在抬高的选中行底色上只有 ~2:1，读不清。
+  #   首行 tab（pane 名）：text #cdd6f4 + bold    → base 11.3:1 / 选中行 5.4:1
+  #   terminal_title_stripped（任务名）：subtext1 #bac2de → 9.3 / 4.4 :1
+  #   agent（类型）：subtext0 #a6adc8              → 7.4 / 3.5 :1
+  sidebarAgentRows = [
+    [
+      "state_icon"
+      {
+        token = "tab";
+        fg = "#cdd6f4";
+        bold = true;
+      }
+    ]
+    [
+      {
+        token = "agent";
+        fg = "#a6adc8";
+      }
+    ]
+  ];
+  sidebarAgentRowsTitle = [
+    [
+      "state_icon"
+      {
+        token = "tab";
+        fg = "#cdd6f4";
+        bold = true;
+      }
+    ]
+    [
+      {
+        token = "terminal_title_stripped";
+        fg = "#bac2de";
+      }
+    ]
+    [
+      {
+        token = "agent";
+        fg = "#a6adc8";
+      }
+    ]
+  ];
 in
 {
   # host:
@@ -189,8 +233,8 @@ in
                 # pane 边框 / 导航高亮（mauve）
                 accent = "#f5c2e7";
                 # sidebar spaces/agents 当前选中行底色：
-                # Catppuccin blue #89b4fa 叠 mocha base ~32%，清楚但不晃眼
-                surface_dim = "#435275";
+                # 压暗一档 #3b4a6b（原 #435275 上暗字 ~2:1 读不清），给 sidebar 文字留对比度余量
+                surface_dim = "#3b4a6b";
               };
             };
 
@@ -234,19 +278,18 @@ in
               # Agents 列表按 workspace 顺序排列
               agent_panel_sort = "spaces";
 
-              # ——— 侧栏 agents 行：首行显示 pane/tab 名（手动改名后同步显示） ———
-              # 手动改名键位：prefix+shift+t（tab）/ prefix+shift+p（pane）/ prefix+shift+w（workspace）
-              # 内置 token：state_icon / state_text / workspace / tab / pane / agent /
-              #             terminal_title / terminal_title_stripped
+              # 侧栏 agents：首行 = pane/tab 名（手动 prefix+shift+t 改名）。
+              # 会写 OSC 终端标题的主流 agent（claude/codex/grok，herdr 探测配置用 osc_title 佐证）
+              # 额外一行 terminal_title_stripped：自动显示任务名/ai-title（无则显示兜底标题）。
+              # opencode/gemini/pi/cursor/copilot 不写 OSC 标题 → 走通用 rows，不加。
               sidebar = {
                 agents = {
-                  rows = [
-                    [
-                      "state_icon"
-                      "tab"
-                    ] # 首行 = 手动改的 pane/tab 名（亮色）
-                    [ "agent" ] # 次行 = agent 类型（claude）
-                  ];
+                  rows = sidebarAgentRows;
+                  rows_by_agent = {
+                    claude = sidebarAgentRowsTitle;
+                    codex = sidebarAgentRowsTitle;
+                    grok = sidebarAgentRowsTitle;
+                  };
                 };
               };
 
