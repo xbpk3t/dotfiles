@@ -240,9 +240,7 @@ in
       hostEvalChecks =
         let
           arch = architectureOutput;
-          allHosts =
-            (arch.nixosConfigurations or { })
-            // (arch.darwinConfigurations or { });
+          allHosts = (arch.nixosConfigurations or { }) // (arch.darwinConfigurations or { });
           allSystems = arch.systemConfigs or { };
           allHomes = arch.homeConfigurations or { };
           # builtins.seq 先把目标 drvPath 求值到 WHNF（这必须完整 eval 整个配置，
@@ -252,26 +250,22 @@ in
           # seq 剥离 context → check 只做 eval，秒级完成；同理也不会残留 unused binding。
           mkEvalCheck =
             prefix: drvPath:
-            pkgs.runCommandLocal "${prefix}" { } (
-              builtins.seq drvPath ''echo "eval-ok" > $out''
-            );
+            pkgs.runCommandLocal "${prefix}" { } (builtins.seq drvPath ''echo "eval-ok" > $out'');
           mkHostEval =
             name: cfg:
-            lib.nameValuePair
-              "host-eval-${name}"
-              (mkEvalCheck "host-eval-${name}" cfg.config.system.build.toplevel.drvPath);
+            lib.nameValuePair "host-eval-${name}" (
+              mkEvalCheck "host-eval-${name}" cfg.config.system.build.toplevel.drvPath
+            );
           # sm systemConfigs：config.build.toplevel（与 nixos 结构一致）
           mkSystemEval =
             name: cfg:
-            lib.nameValuePair
-              "host-eval-${name}"
-              (mkEvalCheck "host-eval-${name}" cfg.config.build.toplevel.drvPath);
+            lib.nameValuePair "host-eval-${name}" (
+              mkEvalCheck "host-eval-${name}" cfg.config.build.toplevel.drvPath
+            );
           # standalone HM：顶层 activationPackage（deploy-rs activate.home-manager 期望的结构）
           mkHomeEval =
             name: cfg:
-            lib.nameValuePair
-              "hm-eval-${name}"
-              (mkEvalCheck "hm-eval-${name}" cfg.activationPackage.drvPath);
+            lib.nameValuePair "hm-eval-${name}" (mkEvalCheck "hm-eval-${name}" cfg.activationPackage.drvPath);
         in
         (lib.mapAttrs' mkHostEval allHosts)
         // (lib.mapAttrs' mkSystemEval allSystems)

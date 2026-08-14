@@ -10,7 +10,6 @@
 #
 # 因此：Nix 守护配置归 Determinate（bootstrap 的 --extra-conf 写 nix.custom.conf），
 # sm 不声明 nix.settings，避免「声明了但不生效」或「覆写 Determinate」的坑。
-{ ... }:
-{
+_: {
   _file = ./nix-conf.nix;
 }

@@ -9,36 +9,38 @@
   _file = ./i18n.nix;
 
   # ── locale：en_US.UTF-8 ──
-  environment.variables = {
-    LANG = "en_US.UTF-8";
-    LC_ADDRESS = "en_US.UTF-8";
-    LC_IDENTIFICATION = "en_US.UTF-8";
-    LC_MEASUREMENT = "en_US.UTF-8";
-    LC_MONETARY = "en_US.UTF-8";
-    LC_NAME = "en_US.UTF-8";
-    LC_NUMERIC = "en_US.UTF-8";
-    LC_PAPER = "en_US.UTF-8";
-    LC_TELEPHONE = "en_US.UTF-8";
-    LC_TIME = "en_US.UTF-8";
-    LC_ALL = "en_US.UTF-8";
-  };
+  environment = {
+    variables = {
+      LANG = "en_US.UTF-8";
+      LC_ADDRESS = "en_US.UTF-8";
+      LC_IDENTIFICATION = "en_US.UTF-8";
+      LC_MEASUREMENT = "en_US.UTF-8";
+      LC_MONETARY = "en_US.UTF-8";
+      LC_NAME = "en_US.UTF-8";
+      LC_NUMERIC = "en_US.UTF-8";
+      LC_PAPER = "en_US.UTF-8";
+      LC_TELEPHONE = "en_US.UTF-8";
+      LC_TIME = "en_US.UTF-8";
+      LC_ALL = "en_US.UTF-8";
+    };
 
-  # ── timezone：Debian 实际生效靠 /etc/localtime（symlink），/etc/timezone 供 tzdata 工具读。
-  # 镜像预置两者均为 Asia/Shanghai；但 sm 若只声明 /etc/timezone，激活时会被
-  # "Unmanaged path already exists" 跳过 → 声明静默失效、改 config 不传播
-  # （对抗式审查 N6 类，本轮实测确认）。因此：
-  #   - /etc/timezone：replaceExisting 覆盖（text 写时区名）
-  #   - /etc/localtime：显式指向 nix store 的 tzdata zoneinfo（replaceExisting 覆盖镜像 symlink）
-  environment.etc."timezone" = {
-    text = timeMeta.timeZone;
-    replaceExisting = true;
-  };
-  environment.etc."localtime" = {
-    source = "${pkgs.tzdata}/share/zoneinfo/${timeMeta.timeZone}";
-    replaceExisting = true;
-  };
+    # ── timezone：Debian 实际生效靠 /etc/localtime（symlink），/etc/timezone 供 tzdata 工具读。
+    # 镜像预置两者均为 Asia/Shanghai；但 sm 若只声明 /etc/timezone，激活时会被
+    # "Unmanaged path already exists" 跳过 → 声明静默失效、改 config 不传播
+    # （对抗式审查 N6 类，本轮实测确认）。因此：
+    #   - /etc/timezone：replaceExisting 覆盖（text 写时区名）
+    #   - /etc/localtime：显式指向 nix store 的 tzdata zoneinfo（replaceExisting 覆盖镜像 symlink）
+    etc."timezone" = {
+      text = timeMeta.timeZone;
+      replaceExisting = true;
+    };
+    etc."localtime" = {
+      source = "${pkgs.tzdata}/share/zoneinfo/${timeMeta.timeZone}";
+      replaceExisting = true;
+    };
 
-  # ⚠️ /etc/localtime 已由 sm 接管（store 符号链接）：不要运行
-  # `dpkg-reconfigure tzdata`——dpkg 会尝试重管 localtime/timezone，与 store
-  # 链接冲突（对抗式审查低风险遗留，通常不会触发；时区一律经 config 声明）。
+    # ⚠️ /etc/localtime 已由 sm 接管（store 符号链接）：不要运行
+    # `dpkg-reconfigure tzdata`——dpkg 会尝试重管 localtime/timezone，与 store
+    # 链接冲突（对抗式审查低风险遗留，通常不会触发；时区一律经 config 声明）。
+  };
 }
