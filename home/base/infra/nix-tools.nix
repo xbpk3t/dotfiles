@@ -56,6 +56,8 @@
       nix-tree
 
       nix-converter
+
+      fh
     ];
 
   programs.zsh.shellAliases = {

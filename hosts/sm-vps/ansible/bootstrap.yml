@@ -106,7 +106,15 @@
 
     - name: 2c 安装 Determinate Nix（幂等：已装则跳过）
       ansible.builtin.command:
-        cmd: "sh /tmp/nix-installer.sh install --no-confirm --extra-conf 'trusted-users = {{ sm_nix_trusted_users }}' --extra-conf 'experimental-features = {{ sm_nix_experimental }}'"
+        argv:
+          - sh
+          - /tmp/nix-installer.sh
+          - install
+          - --no-confirm
+          - --extra-conf
+          - "trusted-users = {{ sm_nix_trusted_users }}"
+          - --extra-conf
+          - "experimental-features = {{ sm_nix_experimental }}"
         creates: /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
       register: nix_install
 
@@ -189,6 +197,7 @@
         line: 'PATH=/nix/var/nix/profiles/default/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
         create: true
         state: present
+        mode: "0644"
 
 - name: "P3  tailscale（luck 身份；HM/sm/sops 走 deploy-rs）"
   hosts: sm_vps
@@ -236,6 +245,7 @@
       ansible.builtin.command:
         cmd: "tailscale up --authkey=file:/root/.ts-authkey && rm -f /root/.ts-authkey"
       become: true
+      changed_when: true
       when:
         - sm_ts_authkey_src | length > 0
         - not tailscaled_state.stat.exists

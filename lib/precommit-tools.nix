@@ -42,4 +42,5 @@ with pkgs;
   terramate
   treefmt
   yamllint
+  ansible-lint
 ]

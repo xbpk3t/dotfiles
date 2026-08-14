@@ -300,3 +300,15 @@ repos:
         types: [nix]
         args: [--edit]
         exclude: pkgs/_sources/ # 这个文件不应该修改
+
+  # - repo: local
+  #   hooks:
+  #     - id: ansible-lint
+  #       name: ansible-lint
+  #       # 只 lint 真正的 ansible 项目（hosts/sm-vps/ansible/）。
+  #       # 无参运行依赖根 .ansible-lint 的 exclude_paths（否则内置严格 yamllint 默认值
+  #       # 会扫全仓库非 ansible 的 YAML）；这里显式传路径 + files 过滤双保险。
+  #       entry: ansible-lint hosts/sm-vps/ansible/
+  #       language: system
+  #       pass_filenames: false
+  #       files: ^hosts/sm-vps/ansible/
