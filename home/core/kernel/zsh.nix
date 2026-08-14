@@ -17,6 +17,9 @@
     # PATH 使用 home.sessionPath（由 zsh 模块在 .zprofile 中加载，避免系统 PATH 覆盖问题）
     # 参考 home-manager PR #9356（已合并，修复了 #2991）
     sessionPath = [
+      # HM 用户 profile bin：非 NixOS 机器（sm 轨）上系统 PATH 不含 ~/.nix-profile/bin，
+      # 不加则 HM 装的工具（fzf/zsh 插件等）登录后不可用（Phase 8 真机坑）。
+      "$HOME/.nix-profile/bin"
       "$HOME/go/bin"
       "$HOME/.bun/bin"
       # [2026-05-16] pnpm >= 11 的 global-bin-dir 默认为 $PNPM_HOME/bin

@@ -229,24 +229,53 @@ in
       #
       # 命名约定：
       #   `host-eval-<hostname>`，便于 `nix flake check` 输出中肉眼定位。
-      # Phase 1：不把 homeConfigurations / systemConfigs 纳入 host-eval（避免
-      # 跨系统/慢路径；sm-vps milestone 用显式 nix eval）。
+      # 覆盖三类出口（S4 起含 sm 轨）：
+      #   - nixosConfigurations / darwinConfigurations：config.system.build.toplevel.drvPath
+      #   - systemConfigs（sm）：config.build.toplevel.drvPath
+      #   - homeConfigurations（standalone HM）：activationPackage.drvPath
+      # 注意：host-eval 只覆盖「当前求值 system」（architectureOutput = architectureOutputs.${system}）。
+      #   例如 sm-vps-tc 是 x86_64-linux，它在 Darwin 上求值 flake check 时不会生成
+      #   host-eval-sm-vps-tc（只有 x86_64-linux 的 check 才会）。CI 若跑在 Darwin，
+      #   sm 轨的 eval 门禁不会触发——需在 x86_64-linux 的 job 上才有意义。
       hostEvalChecks =
         let
           arch = architectureOutput;
-          allHosts = (arch.nixosConfigurations or { }) // (arch.darwinConfigurations or { });
-          # builtins.seq 先把 `system.build.toplevel.drvPath` 求值到 WHNF（这必须完整
-          # eval 整个 host 配置，正是契约检查的核心），再返回固定字面量。
+          allHosts =
+            (arch.nixosConfigurations or { })
+            // (arch.darwinConfigurations or { });
+          allSystems = arch.systemConfigs or { };
+          allHomes = arch.homeConfigurations or { };
+          # builtins.seq 先把目标 drvPath 求值到 WHNF（这必须完整 eval 整个配置，
+          # 正是契约检查的核心），再返回固定字面量。
           # Why: 若直接把 `drvPath`（带 store context）传给 runCommandLocal，会被当成
           # build input 而真的去构建整台系统（nix flake check 每次构建上万 derivations）。
           # seq 剥离 context → check 只做 eval，秒级完成；同理也不会残留 unused binding。
+          mkEvalCheck =
+            prefix: drvPath:
+            pkgs.runCommandLocal "${prefix}" { } (
+              builtins.seq drvPath ''echo "eval-ok" > $out''
+            );
           mkHostEval =
             name: cfg:
-            pkgs.runCommandLocal "host-eval-${name}" { } (
-              builtins.seq cfg.config.system.build.toplevel.drvPath ''echo "eval-ok" > $out''
-            );
+            lib.nameValuePair
+              "host-eval-${name}"
+              (mkEvalCheck "host-eval-${name}" cfg.config.system.build.toplevel.drvPath);
+          # sm systemConfigs：config.build.toplevel（与 nixos 结构一致）
+          mkSystemEval =
+            name: cfg:
+            lib.nameValuePair
+              "host-eval-${name}"
+              (mkEvalCheck "host-eval-${name}" cfg.config.build.toplevel.drvPath);
+          # standalone HM：顶层 activationPackage（deploy-rs activate.home-manager 期望的结构）
+          mkHomeEval =
+            name: cfg:
+            lib.nameValuePair
+              "hm-eval-${name}"
+              (mkEvalCheck "hm-eval-${name}" cfg.activationPackage.drvPath);
         in
-        lib.mapAttrs' (name: cfg: lib.nameValuePair "host-eval-${name}" (mkHostEval name cfg)) allHosts;
+        (lib.mapAttrs' mkHostEval allHosts)
+        // (lib.mapAttrs' mkSystemEval allSystems)
+        // (lib.mapAttrs' mkHomeEval allHomes);
     in
     {
       # flake apps:
