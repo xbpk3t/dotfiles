@@ -16,14 +16,12 @@
 }:
 let
   # 与 secrets/default.nix 的 mkRootSecret 一致：系统 root secret，owner=root。
-  mkRootSecret =
-    key:
-    {
-      inherit key;
-      mode = "0400";
-      owner = "root";
-      group = "root";
-    };
+  mkRootSecret = key: {
+    inherit key;
+    mode = "0400";
+    owner = "root";
+    group = "root";
+  };
 in
 {
   _file = ./sops.nix;

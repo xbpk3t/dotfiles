@@ -7,8 +7,7 @@
 #
 # 这是 sm-vps 基线能力（tailnet 身份），但系统服务本身由 bootstrap 管理，
 # 本模块只是说明，不产生实际配置。
-{ ... }:
-{
+_: {
   _file = ./tailscale.nix;
 
   # 预留：若未来要 sm 接管，需先处理 tailscaled.service 的 unmanaged 冲突，

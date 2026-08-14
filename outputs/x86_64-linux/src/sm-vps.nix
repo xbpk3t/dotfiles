@@ -87,9 +87,7 @@ let
       nodeOutputs = mkNode name nodes.${name};
     in
     {
-      homeConfigurations =
-        (acc.homeConfigurations or { })
-        // nodeOutputs.homeConfigurations;
+      homeConfigurations = (acc.homeConfigurations or { }) // nodeOutputs.homeConfigurations;
       systemConfigs = (acc.systemConfigs or { }) // nodeOutputs.systemConfigs;
       deploy = {
         nodes = (acc.deploy.nodes or { }) // nodeOutputs.deploy.nodes;

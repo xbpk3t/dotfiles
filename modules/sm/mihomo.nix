@@ -44,7 +44,12 @@ in
       # 完整复用 client-config.nix（与 nixos 轨同一份代理正确性逻辑）。
       # 路径：modules/sm/mihomo.nix → 上 2 层到仓库根 → lib/mihomo/client-config.nix
       client = import ../../lib/mihomo/client-config.nix {
-        inherit config mylib lib pkgs;
+        inherit
+          config
+          mylib
+          lib
+          pkgs
+          ;
         selfProviderTemplateName = "mihomo-self-provider.yaml";
       };
     in
@@ -83,7 +88,10 @@ in
       systemd.services.mihomo = {
         enable = true;
         description = "mihomo proxy client";
-        after = [ "network-online.target" "sops-install-secrets.service" ];
+        after = [
+          "network-online.target"
+          "sops-install-secrets.service"
+        ];
         wants = [ "network-online.target" ];
         serviceConfig = {
           Type = "simple";

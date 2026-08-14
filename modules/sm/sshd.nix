@@ -7,8 +7,7 @@
 # 不接管服务单元 → 不 mask 不冲突，可反复 switch 收敛。
 #
 # 这是 sm-vps 基线能力（安全硬化必需），不做配置化开关。
-{ ... }:
-{
+_: {
   _file = ./sshd.nix;
 
   # ⚠️ 与 hosts/sm-vps/ansible/bootstrap.yml 的 P4/4a 写同一路径。
