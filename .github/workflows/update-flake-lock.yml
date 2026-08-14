@@ -24,20 +24,33 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Nix
-        # update-flake-lock v3+ 不再自动安装 Nix，需先装支持 flakes 的 Nix。
-        # 与 flake-check / pre-commit workflow 保持一致，复用 nix-installer-action@v19。
+        # 需要 flake 支持的 Nix。与 flake-check / pre-commit 一致，复用 nix-installer-action@v19。
         uses: DeterminateSystems/nix-installer-action@v19
 
-      - name: Update flake.lock (nixpkgs / nixpkgs-darwin / nixpkgs-stable)
-        # 只刷 nixpkgs 三个输入；home-manager / darwin / determinate 等浮动输入保持手动控制。
-        # 节奏与 flake-check 里的 flake-checker 45 天阈值对齐（月刷 → 整月常绿）。
+      - name: Recreate flake.lock (全部输入)
+        # --recreate-lock-file：丢弃旧锁、按 flake.nix 重新解析全部输入。
+        # 为什么用 recreate 而不是 --update-input：
+        #   顶层 nixpkgs 在本仓对 `--update-input nixpkgs` 结构性失效（预存问题），
+        #   recreate 是唯一可靠刷新它的路径；顺带把其它输入也统一刷新。
+        # 只写 flake.lock、不 commit；交由下方 create-pull-request 统一提交并开【单个】PR。
+        run: nix flake lock --recreate-lock-file
+
+      - name: Open single PR
         # token 用 PAT（UPDATE_FLAKE_LOCK_PAT）而非 GITHUB_TOKEN：
         #   - PR 以 PAT 属主身份开启 → 能正常触发 flake-check / pre-commit 的 pull_request CI；
         #   - 用 GITHUB_TOKEN 开的 PR 默认不会触发 CI（GitHub 防递归机制）。
-        # PAT 最低权限：fine-grained 限 xbpk3t/dotfiles 的 Contents R/W + Pull requests R/W；
-        # 或 classic PAT 仅勾 `repo` scope。
-        uses: DeterminateSystems/update-flake-lock@main
+        # PAT 最低权限：fine-grained 限 xbpk3t/dotfiles 的 Contents R/W + Pull requests R/W。
+        # 若 recreate 无任何变化（所有输入已最新），create-pull-request 不会开 PR，属正常。
+        uses: peter-evans/create-pull-request@v8
         with:
-          inputs: nixpkgs nixpkgs-darwin nixpkgs-stable
-          pr-title: "flake.lock: Update nixpkgs inputs"
           token: ${{ secrets.UPDATE_FLAKE_LOCK_PAT }}
+          branch: update_flake_lock_action
+          delete-branch: true
+          commit-message: "flake.lock: Recreate (all inputs)"
+          title: "flake.lock: Recreate all inputs"
+          body: |
+            Automated by `nix flake lock --recreate-lock-file`.
+
+            - 全量刷新所有输入（含顶层 nixpkgs —— 它在本仓对 `--update-input` 失效，recreate 是唯一可靠路径）
+            - 节奏：每月 1 日自动触发，也可手动 workflow_dispatch
+            - 合并前请确认 CI 全绿；若某些输入升级导致问题，可关闭本 PR 或挑拣后手动合并
