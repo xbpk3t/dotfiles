@@ -32,9 +32,29 @@ TIMEOUT_SECS="3600"        # per-tool hard timeout
 CONNECT_TIMEOUT="10"       # curl/wget connect timeout
 MAX_TIME="60"              # curl/wget per download max time
 ECS_INSTALL_FLAVOR="short" # short|raw|cdn|cnb
+UPLOAD="false"             # false: don't upload report (privacy); --upload prints a paste.spiritlhl.net URL
 ECS_ARGS_EXTRA=()
 NET_ARGS_EXTRA=()
 IP_ARGS_EXTRA=()
+
+# Debian/Ubuntu: when deps are missing, NetQuality/IPQuality run
+#   apt-get install -y jq curl imagemagick mtr-tiny iperf3 stun bc procps
+# `apt-get -y` auto-answers apt's own "continue?" prompt but NOT debconf's, so the
+# iperf3 package's debconf question "Start Iperf3 as a daemon automatically?"
+# (iperf3/start_daemon) pops an interactive whiptail Yes/No box that hangs the run.
+# Two layers are needed because Debian's sudo (env_reset) strips DEBIAN_FRONTEND
+# on `sudo apt-get install` runs when the script runs as a non-root user:
+#   1) export DEBIAN_FRONTEND=noninteractive  -> covers direct / root apt runs
+#   2) debconf-set-selections for iperf3       -> on-disk, survives the sudo path
+# Both are harmless no-ops on non-Debian distros (no debconf there).
+export DEBIAN_FRONTEND="${DEBIAN_FRONTEND:-noninteractive}"
+if command -v debconf-set-selections >/dev/null 2>&1; then
+  if [[ ${EUID:-$(id -u)} -ne 0 ]]; then
+    printf 'iperf3 iperf3/start_daemon boolean false\n' | sudo -n debconf-set-selections 2>/dev/null || true
+  else
+    printf 'iperf3 iperf3/start_daemon boolean false\n' | debconf-set-selections 2>/dev/null || true
+  fi
+fi
 
 # ---- utils ----
 ts() { date +"%Y-%m-%d %H:%M:%S"; }
@@ -145,6 +165,9 @@ Options:
   --ecs-install <short|raw|cdn|cnb>
                          ecs installer source (default: short)
 
+  --upload               Upload ecs report and print a paste.spiritlhl.net share URL
+  --no-upload            Do not upload (default; privacy)
+
   --ecs-args "<...>"     Extra args passed to goecs (example: "--ecs-args '-speed=false -diskm dd'")
   --net-args "<...>"     Extra args passed to NetQuality
   --ip-args "<...>"      Extra args passed to IPQuality
@@ -241,6 +264,15 @@ parse_args() {
       shift 2
       ;;
 
+    --upload)
+      UPLOAD="true"
+      shift
+      ;;
+    --no-upload)
+      UPLOAD="false"
+      shift
+      ;;
+
     -h | --help)
       usage
       exit 0
@@ -293,7 +325,13 @@ run_ecs() {
 
     # Run: disable menu, disable upload (privacy), set language.
     # goecs supports -menu=false -upload=false -l zh/en.:contentReference[oaicite:5]{index=5}
-    run_with_timeout "$TIMEOUT_SECS" goecs -menu=false -upload=false -l "$LANG" "${ECS_ARGS_EXTRA[@]}"
+    # When run as a non-root user, goecs.sh cannot write /usr/bin|/usr/local/bin and
+    # keeps the binary in cwd as ./goecs — so fall back to it when bare `goecs` is absent.
+    goecs_bin="goecs"
+    if ! command -v goecs >/dev/null 2>&1 && [[ -x ./goecs ]]; then
+      goecs_bin="./goecs"
+    fi
+    run_with_timeout "$TIMEOUT_SECS" "$goecs_bin" -menu=false -upload="$UPLOAD" -l "$LANG" "${ECS_ARGS_EXTRA[@]}"
   ) > >(tee "$out_txt") 2> >(tee "$out_log" >&2) || return 1
 
   return 0
