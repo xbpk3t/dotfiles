@@ -35,11 +35,14 @@ jobs:
 
       - name: Check flake.lock health
         # flake-checker：只读检查三个 nixpkgs 输入的锁文件健康（非阻断，默认 exit 0）。
-        # condition 覆盖 check-* 三项：受支持分支 && 新鲜度 <45 天 && NixOS org。
-        # 45 天阈值与 update-flake-lock 的月度刷新节奏对齐（月刷 → 整月常绿）。
+        # condition 覆盖 check-* 三项：
+        #   - 新鲜度 <45 天（与 update-flake-lock 月度刷新节奏对齐）
+        #   - owner 大小写不敏感（lock 里 NixOS / nixos 混用，`owner == 'NixOS'` 会误报小写输入）
+        # 刻意不用 supportedRefs.contains()：释放版二进制的 supportedRefs 运行时行为不可靠，
+        #   在本仓会让三个输入全部误报违规；纯新鲜度 + owner 校验更稳。
         # send-statistics: false 关闭遥测。
         uses: DeterminateSystems/flake-checker-action@main
         with:
           nixpkgs-keys: nixpkgs,nixpkgs-darwin,nixpkgs-stable
-          condition: "supportedRefs.contains(gitRef) && numDaysOld < 45 && owner == 'NixOS'"
+          condition: "numDaysOld < 45 && (owner == 'NixOS' || owner == 'nixos')"
           send-statistics: false

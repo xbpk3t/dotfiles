@@ -10,7 +10,11 @@ rec {
     # - 公网 VPS 通过 host metadata 单独切到 stable package set，减少滚动更新风险
     # - channel 选择只在 host 边界发生，不引入全局双通道抽象层
     nixpkgs-darwin.url = "github:nixos/nixpkgs/nixpkgs-unstable";
-    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    # nixpkgs：声明与真实解析对齐。Nix 在本 flake 图里对顶层 nixpkgs 实际解析为 nixos-unstable
+    # （lock 的 original.ref 即如此），保持声明一致避免 flake.nix 与 flake.lock 的 ref 漂移。
+    # 注意：`nix flake lock --update-input nixpkgs` 对顶层 nixpkgs 结构性失效（本仓预存问题），
+    # 需要刷新时手动 `nix flake lock --recreate-lock-file`。
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-26.05";
 
     # home-manager, used for managing user configuration
