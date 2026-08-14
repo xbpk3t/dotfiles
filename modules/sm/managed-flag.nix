@@ -1,8 +1,9 @@
 # 可验证系统态：/etc/sm-vps-managed + 简单 oneshot unit（幂等 switch 证明）。
-# 不接 tailscale/sshd——容器内网络/sshd 易踩坑；flag 文件足够验收 T2。
+# 不接 tailscale/sshd——sm 轨的模块树保持薄；tailscale 由官方脚本在 bootstrap 处理（Phase 8）。
 {
   pkgs,
   lib,
+  hostMeta,
   ...
 }:
 {
@@ -11,8 +12,8 @@
   environment.etc."sm-vps-managed" = {
     mode = "0644";
     text = ''
-      # Managed by system-manager (sm-vps Phase 4 T2). Do not edit by hand.
-      node=sm-vps-lab
+      # Managed by system-manager (sm-vps). Do not edit by hand.
+      node=${hostMeta.hostName}
       role=sm-vps
       phase=4
       marker=sm-vps-managed
