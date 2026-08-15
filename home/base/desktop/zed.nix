@@ -759,16 +759,42 @@ let
               #   能避免在括号内自动插入空格（减少你不想要的风格改动）。
               bracketSpacing = false;
             };
-            # WHAT: 把 zzz prompt 的 prpt.schema.json 关联到 references/**/*.yml，
+            # WHAT: 把 docs-alfred 的 schema（prpt / gh / goods / books）用 raw URL 关联到对应 YAML，
             #       让 yaml-language-server 在编辑时提供 schema 补全+校验。
-            # WHY: schema 物理放在 docs-alfred（skx 的 source of truth，已 go:embed）；
-            #       这里用 ${config.home.homeDirectory} 在构建期解析出各机器的绝对路径
-            #       （本机 /Users/luck、homelab /home/luck），避免硬编码用户名导致的移植问题。
-            #       glob **/zzz/references/**/*.yml 同时覆盖 dotfiles 主目录与 .worktrees 布局。
+            # WHY: schema 直接走 docs-alfred main 分支的 raw URL（source of truth，
+            #       已 go:embed 进 data-cli/skx）；URL 与机器无关，mac/homelab 不再需要
+            #       ${config.home.homeDirectory} 解析本地路径。
+            # GLOB: yaml-language-server 用 picomatch(bash:true) 对完整 file URI 做匹配，
+            #       默认不穿透隐藏目录（[2026-08-14] 实测），因此：
+            #       - prpt 需显式加 .worktrees pattern，否则 worktree 下的 references 匹配不到
+            #       - goods 需 .* pattern 命中隐藏的 .goods.*.yml
+            #       - gh/goods/books 数据在 docs 仓库 data/ 下（无 worktree），普通 glob 即可
+            #       - ntl 只匹配非隐藏文件：.jav.yml/.asmr.yml 是扁平/含 url:null，不满足 books schema
+            #         （隐藏文件本就不被 glob 命中，这里也刻意不补 .* pattern）
+            # NOTE [2026-08-15] LUC-376 已解决：gh/goods/books 三个 URL 均已 200。
+            #       但 schema 内容更新（books publishAt→int、goods name/price→string）待 commit+push
+            #       到 main 后才会生效——在此之前 yaml-language-server 用旧版，本地 int publishAt 会被
+            #       flag（预期过渡噪音，推送后消失）。
             schemas = {
-              "${config.home.homeDirectory}/Desktop/docs-alfred/cmd/skx/schema/prpt.schema.json" = [
-                "**/zzz/references/**/*.yml"
-              ];
+              "https://raw.githubusercontent.com/xbpk3t/docs-alfred/refs/heads/main/cmd/skx/schema/prpt.schema.json" =
+                [
+                  "**/zzz/references/**/*.yml"
+                  "**/.worktrees/**/zzz/references/**/*.yml"
+                ];
+              "https://raw.githubusercontent.com/xbpk3t/docs-alfred/refs/heads/main/internal/gh/schema/gh.schema.json" =
+                [
+                  "**/data/gh/**/*.yml"
+                ];
+              "https://raw.githubusercontent.com/xbpk3t/docs-alfred/refs/heads/main/internal/gh/schema/goods.schema.json" =
+                [
+                  "**/data/goods/**/*.yml"
+                  "**/data/goods/**/.*.yml"
+                ];
+              "https://raw.githubusercontent.com/xbpk3t/docs-alfred/refs/heads/main/internal/gh/schema/books.schema.json" =
+                [
+                  "**/data/books/**/*.yml"
+                  "**/data/ntl/**/*.yml"
+                ];
             };
             schemaStore.enable = false;
           };
@@ -802,25 +828,20 @@ let
       };
     }
     {
-      context = "Terminal";
-      bindings = {
-        ctrl-h = "workspace::ActivatePaneLeft";
-        ctrl-l = "workspace::ActivatePaneRight";
-        ctrl-k = "workspace::ActivatePaneUp";
-        ctrl-j = "workspace::ActivatePaneDown";
-      };
-    }
-    {
       context = "ProjectPanel && not_editing";
       bindings = {
         a = "project_panel::NewFile";
         A = "project_panel::NewDirectory";
         r = "project_panel::Rename";
-        d = "project_panel::Delete";
+        # [2026-08-14] d 从永久删除改为移入废纸篓（与 JetBrains 默认 backspace=Trash 一致）
+        d = [
+          "project_panel::Trash"
+          { skip_prompt = false; }
+        ];
         x = "project_panel::Cut";
         c = "project_panel::Copy";
         p = "project_panel::Paste";
-        q = "workspace::ToggleRightDock";
+        # [2026-08-14] q（ToggleRightDock）已移除：单键是 vim 误触高发区，且右 dock 由 ctrl+7/ctrl+8 统一管
         ctrl-h = "workspace::ActivatePaneLeft";
         ctrl-l = "workspace::ActivatePaneRight";
         ctrl-k = "workspace::ActivatePaneUp";
@@ -836,10 +857,28 @@ let
         "ctrl-w j" = "workspace::ActivatePaneDown";
       };
     }
+    # [2026-08-14]
+    # cmd-b：编辑器内由 JetBrains base keymap 绑为 GoToDefinition（Editor 层更深，优先），
+    # Workspace 层 null 防止回落默认的 ToggleLeftDock，让 cmd-b 只有单一语义。
+    # 原 cmd-shift-w → git::Worktree 已删除：默认无 context 绑定 CloseWindow 更深，绑了也不生效且会关窗。
+    # 右键 dock 整体开关仍可用默认 cmd-alt-b / cmd-r；面板开关见下方 ctrl+数字。
     {
       context = "Workspace";
       bindings = {
-        cmd-b = "workspace::ToggleRightDock";
+        "cmd-b" = null;
+      };
+    }
+    # [2026-08-14] 面板开关统一为 ctrl+数字
+    # 避免 hs 占用的 cmd+1/2/3/0，也不用 cmd+num（=切App）语义
+    # 无 context = 上下文树最深层 → 覆盖默认 Pane 层的 ctrl+num=pane 切换
+    # ctrl+1=项目(左) ctrl+7=outline(右) ctrl+8=终端(右) ctrl+9=git(左)
+    # 旧 cmd+7 / alt+f12 保留作第二入口
+    {
+      bindings = {
+        "ctrl-1" = "project_panel::ToggleFocus";
+        "ctrl-7" = "outline_panel::ToggleFocus";
+        "ctrl-8" = "terminal_panel::Toggle";
+        "ctrl-9" = "git_panel::ToggleFocus";
       };
     }
     # Popup Search（Telescope 式模糊查找，Zed v1.9.0+）
