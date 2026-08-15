@@ -25,6 +25,8 @@
     # tags(desc): 代码质量 > YAML规范 > Lint
     yamllint
     # tags(desc): 代码质量 > Markdown规范 > Lint
+
+    miller
   ];
 
   # Deploy linter configs globally from .github/linters/
