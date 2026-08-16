@@ -8,6 +8,16 @@ frontmatter:
     - analogy
     - mapping
 
+pipeline:
+  analogy:
+    when: "用户明确确认要类比（批改/收敛后询问步）"
+    merge: "对话展示 artifact"
+    required: false
+  mapping:
+    when: "用户明确确认要 mapping（recall 内默认只拍 A，禁止落盘）"
+    merge: "对话展示 artifact"
+    required: false
+
 what:
   is: |
     闭卷召回：出题 → 停等作答 → 批改(0/1/2 + gap) → [gap 未闭合] 最多 1–2 轮追问 verify
@@ -86,6 +96,7 @@ workflow:
       - "用户确认要类比：起 sub-agent 跑 analogy（只传 topic、本题、gap、统一 case 约束）"
       - "用户确认要 mapping：起 sub-agent 跑 mapping；默认只跑拍 A（只输出会话 artifact：topic-map + qs-map + 差分闸）；拍 B（抓手环）仅当用户明确要抽主轴/抓手/更多 case 或上下文已有 ≥2 条同轴 ok map，仍只会话输出"
       - "两步无数据依赖时可并行"
+      - "输出 pipeline ledger（enabled / skipped / merged 三栏，见 SKILL.md）；未确认的步必落 skipped 栏，禁止散文跳过"
       - "父 agent 汇合后展示 artifact；禁止与 artifact 矛盾或心算重写长文"
       - "mapping sub-agent 只执行 mapping.yml body；禁止落盘（不写 data/gh、不写任何 *.yml / 矩阵表、不改 wiki）"
       - "父 agent 验收 mapping artifact：有 layer_kind: cross|instance；有 score: 1–5（每条有效 topic-map 一个分，禁止省略、禁止无脑 3）；score >= 4 时有一句 score 依据；instance / 半轴有 boundary，建议有负迁移；差分闸有继承/新变量/失效点（instance 的新变量与失效点不得敷衍，score >= 4 时至少一格有实质）；若跑拍 B：handle 来自 ≥2 ok map、有结构/适用范围/反例或边界、candidates 标待验证；非 D/I/K/P/C/S；非 qs 另起炉灶；非拼盘；非「XX 不就是 YY」空还原"

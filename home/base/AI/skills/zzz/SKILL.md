@@ -72,6 +72,27 @@ status: ok | skipped
 ... 该步具体输出 ...
 ```
 
+#### 编排台账（pipeline ledger）— composite 强制
+
+composite 交付时**必须**在末尾输出编排台账，对 frontmatter **每个 pl-\* 步逐一表态**：
+
+```text
+## pipeline ledger
+enabled:
+  - brk
+skipped:
+  - name: vs
+    reason: 无竞品
+  - name: diagram
+    reason: 纯概念，无运行时链路
+merged:
+  - brk → hti#breakdown
+```
+
+- 每个 pl-\* 步**必须**落在 `enabled` / `skipped` / `merged` 之一，**禁止散文跳过**
+- 触发判定看 `pipeline` section 的 `when`；`required: true` 的步要么跑 sub-agent、要么 merged 已有 artifact，**绝不静默缺**
+- `skipped` 必须有 `reason`；`merged` 写清并入点（如 `hti#breakdown`）
+
 ---
 
 ## Frontmatter 约定（references 下各 prompt）
@@ -86,12 +107,13 @@ pl-serial:               # 仅 composite；串行依赖 name 列表
   - <依赖 name>
 ```
 
+composite 还需在顶层加 `pipeline:` section，声明每个 pl-\* 步的触发（when）/合并（merge）/是否必跑（required），见 `prpt.schema.json` 描述。
+
 ## 配套文件
 
 本 skill 目录下包含以下数据文件（由 `skx` 处理，通常无需手动操作）：
 
 | 文件 | 用途 |
 |------|------|
-| `references/**/*.yml` | prompt 的 source of truth（schema 见 `prpt.yml`） |
-| `prpt.yml` | schema；`skx check` 以它为唯一准绳校验 |
+| `references/**/*.yml` | prompt 的 source of truth（schema = docs-alfred `cmd/skx/schema/prpt.schema.json`，`go:embed` 进 skx） |
 | `SKILL.md` | 本文件；路由由 `skx route` 执行 |

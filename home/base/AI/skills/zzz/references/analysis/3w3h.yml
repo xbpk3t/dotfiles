@@ -19,7 +19,21 @@ what:
 
 input:
   params:
-    - mode: default | heavy   # 由 /zzz 3w3h <mode> 双参数传入；缺省 = default（auto 按内容决定是否触发 pipeline）
+    - mode: default | heavy   # 由 /zzz 3w3h <mode> 双参数传入；缺省 = default（不触发 pipeline，仅讲解）；heavy = 按 pipeline.when 强制触发命中步
+
+pipeline:
+  brk:
+    when: "hti 含【breakdown】或需要定义式"
+    merge: "hti#breakdown"
+    required: true
+  diagram:
+    when: "有明确运行时链路"
+    merge: "hti"
+    required: false
+  vs:
+    when: "存在竞品 或含【技术选型】"
+    merge: "why 选型项答案 + 单独列出对比表"
+    required: false
 
 constraint:
   must:
@@ -39,10 +53,12 @@ workflow:
       - 正文讲解可用结构化散文/表（六字段语义见 output.template）
       - 输出 YAML codeblock（强制 QA 形）
   - phase: Pipeline 合并（heavy）
-    gate: mode == heavy（或 auto 且本轮有 pipeline 触发条件）
+    gate: mode == heavy
     steps:
-      - 对 frontmatter pipeline 中本轮启用的 name，必须各起独立 sub-agent
+      - 按 pipeline section 的 when 判定本轮命中哪些步；命中步各起独立 sub-agent
+      - "required: true 的步即使未触发也要跑或硬引用已有 artifact，绝不静默缺"
       - 父 agent 只编排与汇总；不得与 step artifact 矛盾，不得默默丢步
+      - 输出必须带 pipeline ledger（enabled / skipped / merged 三栏，见 SKILL.md）
       - 合并后输出完整 YAML
 
 
@@ -96,15 +112,11 @@ output:
 
     每个字段至少 3 条（建议 3–5）。
 
-    ### Pipeline 合并（须 sub-agent）
+    ### Pipeline 合并（须 sub-agent + ledger）
 
-    对 frontmatter `pipeline` 中本轮启用的 name，**必须**各起独立 sub-agent（见 `SKILL.md`）。
-
-    | 触发 | 步 | 并入 |
-    |------|-----|------|
-    | `【breakdown】` / 需定义式 | `brk` | hti 对应 item 的 `# 答案` |
-    | 有明确运行时链路 | `diagram` | hti；纯概念可 `skipped: diagram — 无运行时链路` |
-    | `【技术选型】` / 有竞品 | `vs` | why 选型项答案 + **单独列出对比表**；无竞品可 skipped |
+    按 `pipeline` section 的 `when` 判定命中步；命中步各起独立 sub-agent（见 `SKILL.md`）。
+    执行后**必须**输出 pipeline ledger（enabled / skipped / merged 三栏，见 `SKILL.md`）。
+    每个 pl-* 步必落一栏，禁止散文跳过；required 步不静默缺。
 
     父 agent **只**编排与汇总；不得与 step artifact 矛盾，不得默默丢步。
 

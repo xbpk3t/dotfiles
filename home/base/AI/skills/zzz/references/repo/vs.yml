@@ -7,6 +7,12 @@ frontmatter:
   pl-serial:
     - table2yml
 
+pipeline:
+  table2yml:
+    when: "对比表已产出（vs 之后串行）"
+    merge: "输出 YAML codeblock"
+    required: true
+
 what:
   is: |
     给我画个 table 进行对比。慎重选择对比项，并告诉我为什么你做出这个判断。
@@ -35,7 +41,7 @@ workflow:
       - 每格 ✅/❌ + 一句事实依据
   - phase: 输出 YAML
     steps:
-      - 执行 [table2yml](table2yml.md)，输出相应 YAML codeblock
+      - 执行 table2yml sub-agent（pipeline 步，见 pipeline section），输出相应 YAML codeblock
   - phase: 结论
     steps:
       - 若目标是 X，倾向 Y，因为 …
