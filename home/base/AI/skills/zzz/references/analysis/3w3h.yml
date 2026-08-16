@@ -3,10 +3,9 @@
 frontmatter:
   name: 3w3h
   role: composite
-  description: 3W3H 结构化分析；pipeline 含 brk、diagram、vs（触发细节见正文）
-  pipeline:
+  desc: 3W3H 结构化分析；pipeline 含 brk、vs（触发细节见正文）
+  pl-parallel:
     - brk
-    - diagram
     - vs
 
 what:

@@ -3,8 +3,8 @@
 frontmatter:
   name: vs
   role: composite
-  description: 同类竞品逐项 ✅❌ 对比；pipeline 含 table2yml
-  pipeline:
+  desc: 同类竞品逐项 ✅❌ 对比；pipeline 含 table2yml
+  pl-serial:
     - table2yml
 
 what:

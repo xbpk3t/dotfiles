@@ -3,7 +3,7 @@
 frontmatter:
   name: TableCate
   role: atom
-  description: 多 repo 分类、代表选型与评分（hidden，供 cross-ref）
+  desc: 多 repo 分类、代表选型与评分（hidden，供 cross-ref）
 
 what:
   is: 对当前讨论的多个 repo 做分类 → 选代表 → 评分。

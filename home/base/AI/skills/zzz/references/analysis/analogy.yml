@@ -3,7 +3,7 @@
 frontmatter:
   name: analogy
   role: atom
-  description: 跨域生活隐喻助记；同一 case 贯穿细节（供 recall pipeline）
+  desc: 跨域生活隐喻助记；同一 case 贯穿细节（供 recall pipeline）
 
 what:
   is: 跨域、偏生活的隐喻，降低记忆成本。 # 通常由 /zzz recall 在用户明确同意【类比】后以 sub-agent 调用；也可单独 /zzz analogy（须有明确 topic / gap / 概念）。
@@ -29,7 +29,7 @@ constraint:
 
 
 output:
-  format: artifact
+  format: md
   template: |
     ## artifact
     step: analogy
@@ -44,7 +44,7 @@ output:
     2.
     …
 
-  few-shot:
+  few-shot: |
     同一「约会/关系」case 贯穿时的密度参考（可换 case，不要换成分散工具清单）：
 
     - 高可用：有很多备胎，失恋了也能迅速谈恋爱

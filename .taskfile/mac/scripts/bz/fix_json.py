@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Read JSON from stdin, try to parse, attempt repair if needed, output fixed JSON or exit 1."""
 
-import sys
 import json
+import sys
 
 
 def fix_json(s: str) -> str:

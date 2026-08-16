@@ -3,7 +3,8 @@
 frontmatter:
   name: uu
   role: atom
-  description: 挖掘 unknown unknowns；单独使用，不进默认 pipeline
+  desc: 挖掘 unknown unknowns；单独使用，不进默认 pipeline
+
 
 what:
   is: 挖掘本 session 讨论 topic 相关的 unknown unknowns（用户以为自己知道、实际有盲区的点）。

@@ -1,7 +1,9 @@
+---
+
 frontmatter:
   name: brk
   role: atom
-  description: 技术定义 X = A + B + C；可被 3w3h 硬引用
+  desc: 技术定义 X = A + B + C；可被 3w3h 硬引用
 
 what:
   is: |
@@ -18,13 +20,6 @@ constraint:
   must-not:
     - 禁止写伪定义（组件不能对应实际机制）
 
-few-shot:
-  type: codeblock
-  examples: |
-    - LSM = AOF + 稀疏索引
-    - Redis MSR = PSYNC + RESP buffer
-    - LRU = linked-list + HashMap
-    - LevelDB = SkipList（MemTable）+ WAL（顺序写日志）+ SSTable（分层有序文件）+ Compaction（分层合并）
 
 output:
   format: md
@@ -46,3 +41,8 @@ output:
 
     ## 边界（可选 1–2 条）
     - 这个定义**不**包含 X：因为它是 Y
+  few-shot: |
+      - LSM = AOF + 稀疏索引
+      - Redis MSR = PSYNC + RESP buffer
+      - LRU = linked-list + HashMap
+      - LevelDB = SkipList（MemTable）+ WAL（顺序写日志）+ SSTable（分层有序文件）+ Compaction（分层合并）

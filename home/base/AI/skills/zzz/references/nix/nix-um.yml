@@ -4,7 +4,7 @@
 frontmatter:
   name: nix-um
   role: atom
-  description: 定期巡检本地未纳管配置（Unified Management），产出 P0/P1 两档分级清单；可手动触发的周期任务
+  desc: 定期巡检本地未纳管配置（Unified Management），产出 P0/P1 两档分级清单；可手动触发的周期任务
 
 what:
   is: |
@@ -34,9 +34,8 @@ workflow:
   - phase: 判断标准（纳管 = 声明 + 落盘收敛）
     steps:
       - "先确定当前 HM generation（后续查收敛的基准）：readlink ~/.zshrc → /nix/store/...-home-manager-files/.zshrc，该 store 路径即当前 generation 的 hm-files"
-      - ｜
+      - |
         对每个候选路径执行三查（每查都给出可直接执行的命令，不得臆测基准值）：
-        ```
         1. 查声明：是否有对应 nix 模块 / HM option？
           - 先 ls -la <path> 看是否已软链（已软链 → 声明必然有，查落盘/收敛即可）
           - 未软链 → 用文件名 stem grep（nix 里路径常拼接）：grep -r \"<stem>\" ~/Desktop/dotfiles/home/base/
@@ -48,7 +47,6 @@ workflow:
           - 对软链候选：readlink <path> 的 store 片段，与 readlink ~/.zshrc 的 store 片段对比——一致 → 收敛；不一致 → 收敛失败
           - 对 sops 渲染候选：stat -f \"%Sm\" <path> mtime 是否晚于最近一次 activate
           - rclone 案（mtime 停在 7/21 而 activate 在 7/28）就是收敛失败
-        ```
       - "三查全过 → 已在 nix（不在输出中）；声明有但不落盘/不收敛 → 弱收敛 → 标 P0"
     gate: 候选列表已分出
   - phase: 判断补充规则
@@ -100,15 +98,16 @@ output:
     - 现状：...
     - 判断依据：...
     - 建议动作：...
-  fields:
+
+    # 单条项格式
+    - 现状：一句话描述实态（普通文件 mode 0600 / store 软链 / 孤儿文件）
+    - 判断依据：三查结果摘要 + 定性结论（声明有/落盘否/收敛否 → 弱收敛）
+    - 建议动作：对应的下一步（消双轨：合并进 zed.nix / 纳入 xxx.nix）
+  struct:
     - key: P0
       val: 该进且有害（泄漏/双轨/明文），要动，拆 follow-up issue
     - key: P1
       val: 该进但无害（纯配置、无泄漏），低风险该进但不急
-  item-format: |
-    - 现状：一句话描述实态（普通文件 mode 0600 / store 软链 / 孤儿文件）
-    - 判断依据：三查结果摘要 + 定性结论（声明有/落盘否/收敛否 → 弱收敛）
-    - 建议动作：对应的下一步（消双轨：合并进 zed.nix / 纳入 xxx.nix）
 
 self-check:
   - 所有 P0 项都有拆 issue 建议？

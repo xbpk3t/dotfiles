@@ -3,7 +3,7 @@
 frontmatter:
   name: imp-triangle # ImpossibleTriangle
   role: atom
-  description: 快好省不可能三角（性能-质量-成本）归类引导
+  desc: 快好省不可能三角（性能-质量-成本）归类引导
 
 
 what:
@@ -20,5 +20,7 @@ workflow:
 output:
   format: table
   struct:
-    - name: 分类
-    - name: item
+    - key: 分类
+      val: <分类名>
+    - key: item
+      val: <条目值>

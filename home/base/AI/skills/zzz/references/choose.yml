@@ -3,7 +3,7 @@
 frontmatter:
   name: choose
   role: atom
-  description: Grill me 对齐入口；先对齐再 PLAN/写码
+  desc: Grill me 对齐入口；先对齐再 PLAN/写码
 
 what:
   is: |

@@ -1,7 +1,7 @@
 frontmatter:
   name: write-prpt
   role: atom
-  description: 编写/重构 prompt skill；产出符合 prpt.yml 全量 schema 的完整 YAML；先对齐信息再开工
+  desc: 编写/重构 prompt skill；产出符合 prpt.yml 全量 schema 的完整 YAML；先对齐信息再开工
   is-save: true
 
 
@@ -19,10 +19,11 @@ workflow:
   - phase: Gate A 初判（该不该写）
     steps:
       - 强制显式输出：无论信息是否充分，回答里必须显式写出 Gate A 判断（该写/不该写/需 drill + 依据），禁止默默判断后默认执行
-      - "输出格式：##
+      - |
+        输出格式：##
         ## Gate A 判断
         verdict: 该写 | 不该写 | 需 drill
-        依据: <一句话理由>"
+        依据: <一句话理由>
       - 判断依据（该不该写 = 值不值得 skill 化）：固定工作流/格式转换/决策辅助 → 该写；主观创作 → 边缘；一次性/临时 → 不该写
       - 初判分支：信息已足+明显不该写 → 直接挡；信息已足+该写 → 跳终判确认；信息不足 → 进 Gate 1 drill
   - phase: Gate 1 信息量（不足 → drill me）
@@ -62,4 +63,3 @@ hint:
     then: nu gen-aliases.nu（在 dotfiles 侧跑；active 需 rebuild）
   - if: 用户确认落盘到 references
     then: 写入 $HOME/.claude/skills/zzz/references/ 并测路由
-  - default: 停
