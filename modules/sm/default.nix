@@ -26,5 +26,7 @@
     ./shells.nix
     ./gc.nix
     ./mihomo.nix
+    ./fail2ban.nix
+    ./sudoers.nix
   ];
 }

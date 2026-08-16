@@ -1,0 +1,11 @@
+--- a/fail2ban/server/asyncserver.py
++++ b/fail2ban/server/asyncserver.py
+@@ -216,4 +216,7 @@
+ 	def handle_accept(self):
+ 		try:
+-			conn, addr = self.accept()
++			conn = self.accept()
++			if conn is None:
++				return
++			conn, addr = conn
+ 		except Exception as e: # pragma: no cover
