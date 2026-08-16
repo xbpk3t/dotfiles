@@ -4,19 +4,15 @@ frontmatter:
   desc: >
     闭卷召回：出题→作答→批改→gap 收敛；类比/mapping 仅用户确认后 sub-agent。
     Teach=3w3h / Test=mdscc（双切，不并）。不写 recall 落盘、不改 data/gh。
-  pl-parallel:
-    - analogy
-    - mapping
 
 pipeline:
-  analogy:
-    when: "用户明确确认要类比（批改/收敛后询问步）"
-    merge: "对话展示 artifact"
-    required: false
-  mapping:
-    when: "用户明确确认要 mapping（recall 内默认只拍 A，禁止落盘）"
-    merge: "对话展示 artifact"
-    required: false
+  parallel:
+    - name: analogy
+      when: "用户明确确认要类比（批改/收敛后询问步）"
+      merge: "对话展示 artifact"
+    - name: mapping
+      when: "用户明确确认要 mapping（recall 内默认只拍 A，禁止落盘）"
+      merge: "对话展示 artifact"
 
 what:
   is: |

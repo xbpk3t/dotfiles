@@ -3,10 +3,7 @@
 frontmatter:
   name: 3w3h
   role: composite
-  desc: 3W3H 结构化分析；pipeline 含 brk、vs（触发细节见正文）
-  pl-parallel:
-    - brk
-    - vs
+  desc: 3W3H 结构化分析；pipeline 并行 brk/vs/diagram（触发/合并见 pipeline section）
 
 what:
   is: |
@@ -22,18 +19,17 @@ input:
     - mode: default | heavy   # 由 /zzz 3w3h <mode> 双参数传入；缺省 = default（不触发 pipeline，仅讲解）；heavy = 按 pipeline.when 强制触发命中步
 
 pipeline:
-  brk:
-    when: "hti 含【breakdown】或需要定义式"
-    merge: "hti#breakdown"
-    required: true
-  diagram:
-    when: "有明确运行时链路"
-    merge: "hti"
-    required: false
-  vs:
-    when: "存在竞品 或含【技术选型】"
-    merge: "why 选型项答案 + 单独列出对比表"
-    required: false
+  parallel:
+    - name: brk
+      when: "hti 含【breakdown】或需要定义式"
+      merge: "hti#breakdown"
+      required: true
+    - name: diagram
+      when: "有明确运行时链路"
+      merge: "hti"
+    - name: vs
+      when: "存在竞品 或含【技术选型】"
+      merge: "why 选型项答案 + 单独列出对比表"
 
 constraint:
   must:

@@ -3,15 +3,14 @@
 frontmatter:
   name: vs
   role: composite
-  desc: 同类竞品逐项 ✅❌ 对比；pipeline 含 table2yml
-  pl-serial:
-    - table2yml
+  desc: 同类竞品逐项 ✅❌ 对比；pipeline 串行 table2yml
 
 pipeline:
-  table2yml:
-    when: "对比表已产出（vs 之后串行）"
-    merge: "输出 YAML codeblock"
-    required: true
+  serial:
+    - name: table2yml
+      when: "对比表已产出（vs 之后串行）"
+      merge: "输出 YAML codeblock"
+      required: true
 
 what:
   is: |
