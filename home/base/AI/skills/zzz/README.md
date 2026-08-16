@@ -11,7 +11,7 @@ alfred snippets 里的。为了在 export 的 markdown 里不出现大段重复�
 - `name` 必须等于 **filename stem**（路由名 = 文件名）。
 - `role`: `atom` | `composite`（先二分即可）。
 - `desc`: 短说明（多行用 `|` 块）。
-- composite 的 fan-out 步声明在顶层 `pipeline` section（parallel/serial + when/merge/required），单一 source。
+- composite 用 `workflow` 组织阶段；phase 的 `steps` 里用 `{kind: prompt, name}` 串行调度其他 prompt（sub-agent）。适用性/并入规则在 constraint 与 output。
 
 ```yaml
 # atom
@@ -26,12 +26,14 @@ desc: …
 name: 3w3h
 role: composite
 desc: …
-pipeline:
-  parallel:
-    - name: brk
-      when: "hti 含【breakdown】"
-      merge: "hti#breakdown"
-      required: true
+workflow:
+  - phase: Pipeline 合并
+    steps:
+      - 普通操作...
+      - kind: prompt
+        name: brk
+      - kind: prompt
+        name: vs
 ---
 ```
 
@@ -42,11 +44,11 @@ pipeline:
 `skx route` 跳过 hidden（dot-prefixed）的 `.yml`，如 `.TableCate.yml`。
 hidden 仅作为 cross-reference 目标供其他 prompt 引用，不直接可路由。
 
-## cross-reference / pipeline
+## cross-reference / dispatch
 
-- composite 的 fan-out 步声明在 `pipeline` section（parallel/serial）；每个步的 `when` 写何时执行 / `required` 写是否必跑。
-- **凡 pipeline 非空：默认每个启用步单独 sub-agent，父 agent 只编排与汇总**（见 `SKILL.md`）。
-- soft 后续只写在 body（如 repo 文末可参考 vs），不进 pipeline，不自动 fan-out。
+- composite 的 dispatch 步声明在 workflow 的 steps（`{kind: prompt, name}`）；适用性规则在 constraint，产物并入位置在 output。
+- **凡有 dispatch 步：默认每个启用步单独 sub-agent（串行），父 agent 只编排与汇总**（见 `SKILL.md`）。
+- soft 后续只写在 body（如 repo 文末可参考 vs），不写成 dispatch 步，不自动 fan-out。
 - 嵌套 composite：子步仍走 sub-agent；纯格式变换（如 vs→table2yml）可在同一 vs-agent 内串跑以免丢表。
 - 避免 loop hell；`skx graph` 做环检测。
 
@@ -54,7 +56,7 @@ hidden 仅作为 cross-reference 目标供其他 prompt 引用，不直接可路
 
 - **3w3h** = Teach / 说明切（讲清楚）；YAML 项强制 `【kw】问题？ # 答案`，文末给 `## next`。
 - **mdscc** = Test / 闭卷骨架（meta/derive/sol/cost/case）；**不并进** 3w3h。
-- **recall** = composite：出题批改 + gap 收敛；pipeline.parallel = [analogy, mapping]，仅用户确认后 sub-agent。
+- **recall** = composite：出题批改 + gap 收敛；dispatch = [analogy, mapping]（kind: prompt），仅用户确认后 sub-agent。
 
 ## 统计
 

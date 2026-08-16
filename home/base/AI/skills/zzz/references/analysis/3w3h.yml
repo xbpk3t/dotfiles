@@ -3,7 +3,7 @@
 frontmatter:
   name: 3w3h
   role: composite
-  desc: 3W3H 结构化分析；pipeline 并行 brk/vs/diagram（触发/合并见 pipeline section）
+  desc: 3W3H 结构化分析；heavy 模式串行调度 brk/diagram/vs（适用性见 constraint，并入见 output）
 
 what:
   is: |
@@ -16,20 +16,7 @@ what:
 
 input:
   params:
-    - mode: default | heavy   # 由 /zzz 3w3h <mode> 双参数传入；缺省 = default（不触发 pipeline，仅讲解）；heavy = 按 pipeline.when 强制触发命中步
-
-pipeline:
-  parallel:
-    - name: brk
-      when: "hti 含【breakdown】或需要定义式"
-      merge: "hti#breakdown"
-      required: true
-    - name: diagram
-      when: "有明确运行时链路"
-      merge: "hti"
-    - name: vs
-      when: "存在竞品 或含【技术选型】"
-      merge: "why 选型项答案 + 单独列出对比表"
+    - mode: default | heavy   # 由 /zzz 3w3h <mode> 双参数传入；缺省 = default（不跑 dispatch，仅讲解）；heavy = 串行跑本 phase 的 dispatch 步（适用性见 constraint）
 
 constraint:
   must:
@@ -37,6 +24,7 @@ constraint:
     - 字段顺序：why → what → ww → htu → hti → hto
     - 所有字段值必须为数组
     - 每字段至少 3 条（建议 3–5）
+    - "dispatch 适用性：brk 必有（hti 的【breakdown】项是格式必需）；diagram 仅当有明确运行时链路；vs 仅当存在竞品 或含【技术选型】。不适用 → ledger 记 skipped + reason，禁止散文跳过"
   must-not:
     - "禁止嵌套 key（如 自建中继: xxx → 【自建中继】…）"
     - "禁止 # 右侧再写问题"
@@ -51,11 +39,16 @@ workflow:
   - phase: Pipeline 合并（heavy）
     gate: mode == heavy
     steps:
-      - 按 pipeline section 的 when 判定本轮命中哪些步；命中步各起独立 sub-agent
-      - "required: true 的步即使未触发也要跑或硬引用已有 artifact，绝不静默缺"
+      - "按 constraint 的适用性规则，对本 phase 每个 dispatch 步判定跑/跳过；命中者起 sub-agent"
       - 父 agent 只编排与汇总；不得与 step artifact 矛盾，不得默默丢步
-      - 输出必须带 pipeline ledger（enabled / skipped / merged 三栏，见 SKILL.md）
+      - 输出 pipeline ledger（enabled / skipped / merged 三栏，见 SKILL.md）；每个 dispatch 步必落一栏
       - 合并后输出完整 YAML
+      - kind: prompt
+        name: brk
+      - kind: prompt
+        name: diagram
+      - kind: prompt
+        name: vs
 
 
 output:
@@ -108,11 +101,13 @@ output:
 
     每个字段至少 3 条（建议 3–5）。
 
-    ### Pipeline 合并（须 sub-agent + ledger）
+    ### Dispatch 并入（sub-agent + ledger）
 
-    按 `pipeline` section 的 `when` 判定命中步；命中步各起独立 sub-agent（见 `SKILL.md`）。
-    执行后**必须**输出 pipeline ledger（enabled / skipped / merged 三栏，见 `SKILL.md`）。
-    每个 pl-* 步必落一栏，禁止散文跳过；required 步不静默缺。
+    workflow 的 `kind: prompt` 步串行起 sub-agent（见 `SKILL.md`）；适用性见 constraint，产物并入位置：
+    - **brk** → hti 的 `【breakdown】` 项答案（结构必需，绝不静默缺）
+    - **diagram** → hti（运行时链路产物，合并进架构/流程条目）
+    - **vs** → why 选型项答案 + **单独列出对比表**（放在 YAML codeblock 之后）
+    执行后**必须**输出 pipeline ledger（enabled / skipped / merged 三栏，见 `SKILL.md`），每个 dispatch 步必落一栏，禁止散文跳过。
 
     父 agent **只**编排与汇总；不得与 step artifact 矛盾，不得默默丢步。
 

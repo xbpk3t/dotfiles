@@ -5,15 +5,6 @@ frontmatter:
     闭卷召回：出题→作答→批改→gap 收敛；类比/mapping 仅用户确认后 sub-agent。
     Teach=3w3h / Test=mdscc（双切，不并）。不写 recall 落盘、不改 data/gh。
 
-pipeline:
-  parallel:
-    - name: analogy
-      when: "用户明确确认要类比（批改/收敛后询问步）"
-      merge: "对话展示 artifact"
-    - name: mapping
-      when: "用户明确确认要 mapping（recall 内默认只拍 A，禁止落盘）"
-      merge: "对话展示 artifact"
-
 what:
   is: |
     闭卷召回：出题 → 停等作答 → 批改(0/1/2 + gap) → [gap 未闭合] 最多 1–2 轮追问 verify
@@ -51,6 +42,7 @@ constraint:
     - "禁止未明确同意前输出类比列表正文、mapping 展开、或长讲解"
     - "禁止用 /sigma 替代本 skill"
     - "不写 recall 落盘、不改 data/gh；mapping 默认不落盘"
+    - "dispatch 适用性：analogy/mapping 仅当用户在批改/收敛后明确确认才跑；未确认 → ledger 记 skipped + reason（禁止首轮跑）"
 
 workflow:
   - phase: 0 坐标系（双切，不并）
@@ -87,10 +79,14 @@ workflow:
       - "默认都不做；可多选：是否需要【类比】（→ pipeline analogy）？是否需要【mapping】（→ pipeline mapping）？是否需要就 gap 做简短【展开】（父 agent 短讲，不走 pipeline）？"
       - "未明确同意前，禁止输出类比列表正文、mapping 展开、或长讲解"
   - phase: 5 Pipeline：analogy / mapping（须 sub-agent）
-    gate: "用户明确确认某步；未确认 → skipped: <name> — 用户未确认"
+    gate: "用户明确确认某步；未确认 → ledger 记 skipped: <name> — 用户未确认"
     steps:
-      - "用户确认要类比：起 sub-agent 跑 analogy（只传 topic、本题、gap、统一 case 约束）"
-      - "用户确认要 mapping：起 sub-agent 跑 mapping；默认只跑拍 A（只输出会话 artifact：topic-map + qs-map + 差分闸）；拍 B（抓手环）仅当用户明确要抽主轴/抓手/更多 case 或上下文已有 ≥2 条同轴 ok map，仍只会话输出"
+      - "对下列 dispatch 步（kind: prompt）逐一按适用性判定：用户确认才跑；未确认 → ledger 记 skipped + reason"
+      - "mapping 默认只跑拍 A（只输出会话 artifact：topic-map + qs-map + 差分闸）；拍 B（抓手环）仅当用户明确要抽主轴/抓手/更多 case 或上下文已有 ≥2 条同轴 ok map，仍只会话输出"
+      - kind: prompt
+        name: analogy
+      - kind: prompt
+        name: mapping
       - "两步无数据依赖时可并行"
       - "输出 pipeline ledger（enabled / skipped / merged 三栏，见 SKILL.md）；未确认的步必落 skipped 栏，禁止散文跳过"
       - "父 agent 汇合后展示 artifact；禁止与 artifact 矛盾或心算重写长文"
