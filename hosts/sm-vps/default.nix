@@ -16,6 +16,11 @@
   # tailnet bind + lan-allowed-ips 白名单」方式收紧（见 modules/sm/mihomo.nix 注释）。
   services.mihomo-client.enable = false;
 
+  # sing-box server（vless-reality，SGP 出网代理服务端）。
+  # 对抗式搜索：直接 import nixpkgs services.sing-box 模块（sm 支持 systemd.packages/utils），
+  # 见 modules/sm/singbox.nix。端口 8443，INPUT policy 已 ACCEPT；需腾讯云安全组放行 8443。
+  services.singbox-server.enable = true;
+
   # 基础能力由 modules/sm 直接 enable（无开关）：
   #   sops（secrets 注入）、sshd 硬化、systemd（journald/logind）、i18n、tailscale。
   # 不需要在这里声明——modules/sm 无条件启用它们。

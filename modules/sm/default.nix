@@ -28,5 +28,6 @@
     ./mihomo.nix
     ./fail2ban.nix
     ./sudoers.nix
+    ./singbox.nix
   ];
 }
