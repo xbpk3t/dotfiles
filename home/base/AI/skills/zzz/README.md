@@ -63,4 +63,5 @@ hidden 仅作为 cross-reference 目标供其他 prompt 引用，不直接可路
 
 - 定期跑 `skx stats` 看频次，低频可 hidden 或删。
 - 保证 prompts 质量与使用频率。
-- 改完 prompt 后：`skx check --dir <skill_dir>/references` 校验。
+- 改完 prompt 后：`skx check`（默认校验部署后的 `~/.claude/skills/zzz/references`）。
+  改源码未 rebuild 前用 `skx check --dir <repo>/home/base/AI/skills/zzz`，或设 `export SKX_DIR=<repo 路径>` 免敲。
