@@ -58,14 +58,17 @@ in
   #   / "Connection closed by authenticating user <IP> [preauth]"
   # 形式进 auth.log（扫描器正是这种，实测 30+ 次/10min）。默认 normal mode 匹配不到 → 永不 ban。
   # aggressive mode 才匹配这些 preauth 断开/超时模式。
-  # maxretry=5：比 nixos 轨的 3 放宽，避免 deploy 期间自身 SSH 瞬断（<5 次/10min）被误ban。
+  # maxretry=10：扫描器每 10min 命中 30+ 次照样秒 ban；但把我方（公网动态 IP）在扫描器
+  # 洪泛期间的 SSH 瞬断误计排除在自锁半径外（实测 30min 我方仅 2 次，阈值 10 安全）。
+  # ignoreip 加 tailnet CGNAT 段（100.64.0.0/10）：tailnet 通道访问不被误 ban（兜底逃生口）。
   environment.etc."fail2ban/jail.d/00-sm.conf".text = ''
     [DEFAULT]
     bantime = 1h
+    ignoreip = 127.0.0.1/8 ::1 100.64.0.0/10
 
     [sshd]
     enabled = true
-    maxretry = 5
+    maxretry = 10
     backend = auto
     mode = aggressive
   '';
