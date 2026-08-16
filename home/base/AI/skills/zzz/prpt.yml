@@ -1,7 +1,6 @@
 ---
 
 frontmatter:
-  # frontmatter 是扁平键（写进 .md 的 --- 块顶层，gen-aliases.nu 按列 0 读取 name/role）
   name: <stem>            # 必填；等于文件名 stem（路由名）
   role: atom              # 必填；可选值 atom | composite；composite 时 pl-serial/pl-parallel 至少一个非空
   desc: <功能一句话>；<边界/依赖>   # 给自己看，非 trigger；多行用 | 块
@@ -9,13 +8,12 @@ frontmatter:
     - <name>
   pl-serial:              # 仅 composite；串行依赖 name 列表
     - <name>
-  is-save: false          # 是否落盘 .md（默认 false；true 表示渲染后写回 references/）
   # status: active        # active | draft | deprecated（省略即 active）
 
   # 说明：
-  # - 渲染器 `skx render` 把 frontmatter 原样输出到 .md 的 --- 块顶层。
+  # - prompts 直接以 .yml 形态被 route/Read，无渲染层。
   # - 依赖图从 pl-serial + pl-parallel 提取边（composite），环检测覆盖所有边。
-  # - 改完 prompt 后 `skx render` 重新生成 references/**/*.md；`skx check` 校验。
+  # - 改完 prompt 后 `skx check` 校验 schema；`skx graph` 看依赖/环。
 
 
 

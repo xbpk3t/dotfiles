@@ -1,0 +1,100 @@
+frontmatter:
+  name: mapping-check
+  role: atom
+  desc: 只验收 mapping artifact 是否合规；不重写 map；标准唯一服从 mapping.yml
+
+what:
+  is: |
+    对已有 mapping 输出做 pass/fail 检查（形态、闸门、毒码、拍 B、落盘）。
+    标准唯一来源：同目录 mapping.yml。本文只列检查项，不另立规则；mapping.yml 与本文冲突时以 mapping.yml 为准。
+    输入：用户粘贴的完整 mapping 输出（含拍 A；若有拍 B 一并贴）。可声明「仅 A」或「A+B」。
+  not: |
+    不是第二套 mapping；不联网核查技术事实；默认不重做 map。
+    不读、不依赖外部盘点/库存路径；不对照「标准答案内容是否与某次历史 run 一致」，只验契约。
+
+constraint:
+  must:
+    - "只验收：输出 verdict + checklist；禁止默默重写整份 topic-map"
+    - "用户明确要求「按 must_fix 修一版」时，可另开 /zzz mapping 或极短修补说明，本步仍先给检查结果"
+    - "内容质量（步骤是否真同构）若明显假：标 fail + 毒码/廉价还原；不做技术论文"
+  must-not:
+    - "禁止落盘"
+    - "禁止默默重写整份 topic-map"
+    - "不读、不依赖外部盘点/库存路径"
+    - "在本 artifact 里贴一整份「优化后的 mapping」，unless 用户本轮明确要求修复"
+
+workflow:
+  - phase: 拍 A（必查）
+    steps:
+      - |
+        按序检查，pass 条件：
+        A1 形态：有 `## artifact` / `step: mapping` / `status`
+        A2 主轴字段：有结构/另一层/主轴（或等价清晰表述）
+        A3 layer_kind：`cross` 或 `instance`
+        A4 score：整数 1–5；未省略；未见无脑固定 3 的敷衍（结合 A5）
+        A5 score≥4：有一句 score 依据（或等价「为何不是 ±1」）
+        A6 boundary：有；半轴/instance 非空话
+        A7 差分闸：有继承 / 新变量 / 失效点；instance 的新变量与失效点有实质
+        A8 score≥4 差分：新变量或失效点至少一格实质（不能双「无」糊弄）
+        A9 步骤/Q-iso：≥3 步味，含判定或失败/终止；非空「开始-中间-结束」
+        A10 毒码/还原：无 D/I/K/P/C/S；无「不就是」无步骤
+        A11 单主轴：无多机制拼盘
+        A12 落盘：声称或迹象写了 yml/data/gh → fail（本检查场景默认禁落盘）
+  - phase: 拍 B（仅当输入含 handle/candidates 或用户声明 A+B）
+    gate: "输入含 handle/candidates 或用户声明 A+B；否则输出 拍B: skipped — 输入无抓手块"
+    steps:
+      - "B1 触发合理：有 ≥2 源或用户明确要求；非无故灌抓手"
+      - "B2 handle：名/结构/来自/score/适用范围/反例或边界"
+      - "B3 来自：≥2 个已对齐 case"
+      - "B4 candidates：存在则标待验证；未写成 status ok 的完整 map"
+      - "B5 next：有回炉/改 handle 意向"
+  - phase: 输出（可读优先）
+    steps:
+      - "输出 artifact（见 output.template），verdict 判定：pass=必查项全过；pass_with_nits=必查过仅建议；fail=任一项必查失败"
+
+output:
+  format: md
+  template: |
+    ## artifact
+    step: mapping-check
+    status: pass | pass_with_nits | fail
+    scope: A | A+B
+
+    ### 结论
+    一句：是否可当合规 mapping 输出。
+
+    ### 检查表
+    | id | 结果 | 备注 |
+    |----|------|------|
+
+    ### 必须修（fail 时）
+    - …
+
+    ### 建议（nits，不单独导致 fail）
+    - …
+
+    ### 毒码命中
+    无 | D/I/K/P/C/S + 摘录
+
+    ### 落盘
+    pass | fail
+
+    ### next（推进 hint）
+    - fail → 按 must_fix 再 /zzz mapping；且先别拍 B
+    - pass_with_nits → 可改 nits 或忽略；然后：再 map 对端 / 拍 B（若已 ≥2 同轴）/ 停
+    - pass → 同「用法 workflow」：再 map | 拍 B | 停（不必再 check）
+
+self-check:
+  - 已输出 verdict + checklist，未默默重写整份 topic-map？
+  - 检查表覆盖了拍 A（A1–A12）必查项？
+  - 输入含拍 B 时覆盖了 B1–B5？
+  - 未依赖外部盘点/库存路径？
+  - 未落盘？
+
+hint:
+  - if: fail
+    then: 按 must_fix 再 /zzz mapping；且先别拍 B
+  - if: pass_with_nits
+    then: 可改 nits 或忽略；然后再 map 对端 / 拍 B（若已 ≥2 同轴）/ 停
+  - if: pass
+    then: 同 mapping 用法 workflow：再 map | 拍 B | 停（不必再 check）
