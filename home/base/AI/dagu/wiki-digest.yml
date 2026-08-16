@@ -5,6 +5,7 @@
 # 阈值：inbox 内 URL >= THRESHOLD 才跑 digest，否则整条 DAG skip。
 # 测 corner case 时传 DRY_RUN=1：digest 步改为 echo，不会真触发 AI 任务。
 # 注意：dagu 2.10 顶层 DAG 不能定义 name（name 来自文件名），name 仅 subDAG 用。
+name: wiki-digest
 description: "Digest wiki/inbox.md once it accumulates >= THRESHOLD URLs (xurls count)"
 schedule: "0 22 * * *"
 max_active_runs: 1
