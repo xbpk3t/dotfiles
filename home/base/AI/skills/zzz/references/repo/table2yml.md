@@ -1,13 +1,60 @@
 ---
-name: table2yml
-role: atom
-description: 把对比 table 落成扁平 YAML codeblock（选型 xxx.table.yml 用）
+frontmatter:
+  name: table2yml
+  role: atom
+  desc: 把 md 对比表格转扁平 YAML codeblock（用 miller，不用 AI 心算）
 ---
 
-# table2yml
+## what
 
-将上文对比表格转为扁平 YAML codeblock。格式如下：
+**是什么：**
 
+用 miller 把用户粘贴的 md 对比表格转成扁平 YAML list（`- name: <第一列值>`，其余列标题作 key）。
+
+**不是：**
+
+不是 AI 心算转换（会漂移/幻觉）
+不是 json/csv 转换
+不做多表拆分（一次一个表）
+
+## constraint
+
+### must
+
+1. 第一列必须重命名为 `name`（`rename <第一列>,name`）
+2. 值保持字符串，不手动加引号（miller 输出即合法 YAML）
+3. 只在输出中标良 YAML codeblock（````yaml ````）
+
+### must-not
+
+1. 禁止 AI 手写 YAML（必须走 miller 命令）
+2. 禁止嵌套 key（key 仅一层）
+
+## workflow
+
+### 落盘表格
+
+1. 把用户消息里的 md 表格原样写入临时文件 `/tmp/t2yml.md`（含表头行）
+
+### miller 转换
+
+1. 用 `nix run nixpkgs#miller -- --m2y rename <第一列>,name /tmp/t2yml.md` 生成 YAML
+2. 列名含特殊字符直接按原文（rename 逗号分隔 `<列>,name`）
+3. 输出包裹在 ````yaml ```` codeblock
+
+### 无表格处理
+
+**gate:** 用户消息中没有 md 表格
+
+1. 回复「请输入 Markdown 对比表格」并等待用户粘贴
+
+## output
+
+**format:** yaml
+
+**few-shot:**
+
+```markdown
 ```yaml
 - name: Rod
   性能: "更优（解码按需）"
@@ -33,31 +80,4 @@ description: 把对比 table 落成扁平 YAML codeblock（选型 xxx.table.yml 
   跨浏览器支持: "仅Chromium"
   最佳适用场景: "简单Chrome操作"
 ```
-
-输出规则：
-
-输入格式：
-- 支持 Markdown 管道表（`| ... |`），第一行为列标题，后续行为数据行。
-- 每个单元格去除首尾空白及管道符。
-
-输出格式：
-- 始终包裹在 ` ```yaml ``` ` 代码块中。
-- 相邻 `- name:` 条目之间空一行分隔。
-
-映射规则：
-- 表格第一列（如「特性」「语言」）→ YAML 的 `name`
-- 第二列及之后的列标题 → YAML key（保留原中文）
-- 每个数据行 → 一个 YAML list entry（`- name:` 开头）
-- 每行对应列的值 → 对应 key 的 value（字符串，双引号包裹）
-
-1. key 仅一层（禁止嵌套），value 均为字符串，禁止空字符串。引号格式参考上方示例。
-2. 多行/多项 value 用多行字符串，每行以 `- ` 开头（注意 `-` 后需空格）。
-3. name 为第一个 key。
-4. 如有 url/doc，紧随 name 之后；无则省略。
-5. 除 name/url/doc 外，所有 key 使用中文（除非另有标注）。
-
-## 输入定位
-
-- 表格来源：用户当前消息中粘贴的 Markdown 表格（用 `|` 竖线分隔的文本块），不是对话历史中的旧消息。
-- 识别方式：在用户输入中查找连续的 `| ... | ... |` 行，首行表头，后续行数据。如果消息中有代码块包裹的表格，也解析其中的 `|` 分隔内容。
-- 无表格时：如果用户输入中没有发现 Markdown 表格，则回复「请输入 Markdown 对比表格」并等待用户粘贴。
+```

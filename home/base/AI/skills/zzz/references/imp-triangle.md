@@ -1,21 +1,37 @@
 ---
-name: imp-triangle
-role: atom
-description: 快好省不可能三角（性能-质量-成本）归类引导
+frontmatter:
+  name: imp-triangle
+  role: atom
+  desc: 快好省不可能三角（性能-质量-成本）归类引导
 ---
 
-# ImpossibleTriangle
+## what
 
-好，那还是经典的 快好省不可能三角（性能-质量-成本）
+**是什么：**
 
----
+快好省不可能三角（性能-质量-成本）——牺牲 1 个满足 2 个
 
-按照上面这个不可能三角，重新归类
+**不是：**
 
-通常不可能三角，都是牺牲1个，满足2个
+不是万能分类法；只针对"比较项归类"场景
 
----
+## workflow
 
-先把上面的这些比较项，按照EQC进行拆分
+### EQC 拆分
 
-然后再把这些terminal按照EQ、EC、QC进行分类
+把上述比较项按 EQC（性能/质量/成本）拆分
+
+### EQ/EC/QC 分类
+
+把 <item> 按 EQ、EC、QC 分类
+
+## output
+
+**format:** table
+
+**struct:**
+
+- key: 分类
+  val: <分类名>
+- key: item
+  val: <条目值>

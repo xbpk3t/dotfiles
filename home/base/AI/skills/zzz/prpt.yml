@@ -1,0 +1,105 @@
+---
+
+frontmatter:
+  # frontmatter 是扁平键（写进 .md 的 --- 块顶层，gen-aliases.nu 按列 0 读取 name/role）
+  name: <stem>            # 必填；等于文件名 stem（路由名）
+  role: atom              # 必填；可选值 atom | composite；composite 时 pl-serial/pl-parallel 至少一个非空
+  desc: <功能一句话>；<边界/依赖>   # 给自己看，非 trigger；多行用 | 块
+  pl-parallel:            # 仅 composite；并行依赖 name 列表
+    - <name>
+  pl-serial:              # 仅 composite；串行依赖 name 列表
+    - <name>
+  is-save: false          # 是否落盘 .md（默认 false；true 表示渲染后写回 references/）
+  # status: active        # active | draft | deprecated（省略即 active）
+
+  # 说明：
+  # - 渲染器 `skx render` 把 frontmatter 原样输出到 .md 的 --- 块顶层。
+  # - 依赖图从 pl-serial + pl-parallel 提取边（composite），环检测覆盖所有边。
+  # - 改完 prompt 后 `skx render` 重新生成 references/**/*.md；`skx check` 校验。
+
+
+
+
+# <name> — <中文功能名>
+# 这个不需要，我不需要 heading-1
+
+# required
+what:
+  is: <一句话说明它是什么>
+  not: <一句话说明它不是什么>
+
+
+# 入口闸门（先答，不满足则不进入）
+# optional
+gate:
+  - qs: <问什么>
+    fail: <不满足则怎样>
+
+# optional
+constraint:
+  must:
+    - <约束 1>
+  must-not:
+    - <反约束 1>
+  # 反模式
+  # 暂时不需要
+  # anti-pat:
+
+
+
+
+# optional
+input:
+  source: <filepath>
+  params:
+    - key: <示例 key>
+
+  # required: [种子必给等]
+  # optional: [...]
+
+
+
+
+# optional
+workflow:                  # 阶段化流程（复杂 prompt）
+  - phase: <阶段名>        # 宏观板块（Phase）
+    gate: <进入条件>       # 可选
+    desc: <做什么>         # 可选
+    steps:                 # 可选：该 phase 内的微观动作（Step）
+      - <具体动作 1>
+      - <具体动作 2>
+
+
+
+
+# optional（高频）
+output:                    # 输出契约（强制）
+  format: yaml             # 可选值 yaml | table | md
+  struct:
+    - key: <fields name>
+      val: <示例或该字段enum值>
+  template: |
+    <输出模板 codeblock>
+  # fields: [字段语义表]
+  # optional
+  few-shot: <示例输入输出>
+
+
+
+
+# optional
+self-check:
+  - <检查项 yes/no>
+
+
+
+
+# optional key（高频）
+# 条件式推进（交付必给）
+hint:
+  - if: <条件>
+    then: <则做 X>
+  # - "recall: <建议闭卷练哪条 L1 / 哪道 qs 向>"
+  # - "deepen: <hti 某条 / diagram / vs / uu …>"
+  # - "write: <是否值得回写 data/gh 某字段；默认不自动写>"
+  # - "skip: <本轮可明确不做的>"

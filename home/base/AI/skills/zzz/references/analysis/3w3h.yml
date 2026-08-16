@@ -1,0 +1,154 @@
+---
+
+frontmatter:
+  name: 3w3h
+  role: composite
+  desc: 3W3H 结构化分析；pipeline 含 brk、vs（触发细节见正文）
+  pl-parallel:
+    - brk
+    - vs
+
+what:
+  is: |
+    3W3H 结构化分析：Why → What ↔ When/where? / How to use? / How to implement? / How to optimize?
+    帮我结合 3W3H 介绍。并非每部分只有一个问题，可以有多个。
+    坐标系：3w3h = Teach/说明切（讲清楚）；闭卷骨架与主 role 在 mdscc（Test），不并进本 skill；需要召回时用 /zzz recall。
+  not: |
+    不是闭卷测试（那是 mdscc / recall）
+    不是只给散文讲解（最终必须 YAML 强制 QA 形）
+
+input:
+  params:
+    - mode: default | heavy   # 由 /zzz 3w3h <mode> 双参数传入；缺省 = default（auto 按内容决定是否触发 pipeline）
+
+constraint:
+  must:
+    - 包含 6 个固定字段：why / what / ww / htu / hti / hto
+    - 字段顺序：why → what → ww → htu → hti → hto
+    - 所有字段值必须为数组
+    - 每字段至少 3 条（建议 3–5）
+  must-not:
+    - "禁止嵌套 key（如 自建中继: xxx → 【自建中继】…）"
+    - "禁止 # 右侧再写问题"
+    - "禁止只有关键词没有问题、或只有问题没有 # 答案"
+    - 禁止副作用写盘（产物只在对话里）
+
+workflow:
+  - phase: 讲解（default 主路径）
+    steps:
+      - 正文讲解可用结构化散文/表（六字段语义见 output.template）
+      - 输出 YAML codeblock（强制 QA 形）
+  - phase: Pipeline 合并（heavy）
+    gate: mode == heavy（或 auto 且本轮有 pipeline 触发条件）
+    steps:
+      - 对 frontmatter pipeline 中本轮启用的 name，必须各起独立 sub-agent
+      - 父 agent 只编排与汇总；不得与 step artifact 矛盾，不得默默丢步
+      - 合并后输出完整 YAML
+
+
+output:
+  format: yaml
+  template: |
+    在讲解与 pipeline 合并之后，再给一个 YAML codeblock。
+
+    ### 强制结构
+
+    - 包含 6 个固定字段：`why`、`what`、`ww`、`htu`、`hti`、`hto`
+    - 字段顺序：why → what → ww → htu → hti → hto
+    - 所有字段值必须为 **数组**
+    - **禁止**嵌套 key（如 `自建中继: xxx` → `【自建中继】…`）
+
+    ### 数组项格式（钉死）
+
+    每一项必须是：
+
+    ```text
+    【关键词】问题？ # 答案
+    ```
+
+    | 位置 | 内容 |
+    |------|------|
+    | `【】` 内 | 核心关键词（短） |
+    | `【】` 后到 `#` 前 | **问题**（问句） |
+    | `#` 后 | **答案**（简要回答） |
+
+    - **禁止** `#` 右侧再写问题
+    - **禁止**只有关键词没有问题、或只有问题没有 `# 答案`（`【breakdown】` 等 pipeline 占位在合并后也要填成完整 QA，或写成 `【breakdown】组件贡献是什么？ # X = A + B + …`）
+
+    ### 字段语义
+
+    - `why`：为什么要用？（痛点 + 价值）
+    - `what`：这是什么？（功能定义 + 技术分类）
+    - `ww`：什么时候用？（适用场景 + 局限性）
+    - `htu`：怎么上手？（选型决策 → 安装配置 → 基本使用）
+    - `hti`：怎么实现的？（核心原理 → 架构流程 → 关键实现）
+    - `hto`：怎么优化？（性能 → 坑 → 安全 → 运维）
+
+    ### 边界
+
+    - **htu** = 使用者视角「怎么装怎么用」
+    - **hti** = 开发者视角「内部怎么实现」
+    - **hto** = 运维者视角「怎么更好用」
+
+    同话题：htu 讲 CLI 用法，hti 讲架构原理，hto 讲性能坑。
+
+    ### 数量
+
+    每个字段至少 3 条（建议 3–5）。
+
+    ### Pipeline 合并（须 sub-agent）
+
+    对 frontmatter `pipeline` 中本轮启用的 name，**必须**各起独立 sub-agent（见 `SKILL.md`）。
+
+    | 触发 | 步 | 并入 |
+    |------|-----|------|
+    | `【breakdown】` / 需定义式 | `brk` | hti 对应 item 的 `# 答案` |
+    | 有明确运行时链路 | `diagram` | hti；纯概念可 `skipped: diagram — 无运行时链路` |
+    | `【技术选型】` / 有竞品 | `vs` | why 选型项答案 + **单独列出对比表**；无竞品可 skipped |
+
+    父 agent **只**编排与汇总；不得与 step artifact 矛盾，不得默默丢步。
+
+    **禁止副作用写盘：** 不要把 diagram/讲解写进 `zzz/references/**` 或 skill 目录；产物只在对话里（或用户明确指定的路径）。
+
+
+  few-shot: |
+    - topic: <topic-name>
+      why:
+        - 【meta】这个技术属于哪个更大的范畴？ # 分布式数据面 / 存储引擎子系统
+        - 【存在之必要】这个场景下到底要解决什么问题？ # 无公网 IP 时服务器无法直连
+        - 【技术选型】相较于严格对标的服务/工具，核心优势是什么？ # （先 vs 再摘要）更低运维面 + 足够的一致性
+      what:
+        - 【核心功能】一句话它是做什么的？ # …
+        - 【技术分类】属于哪个技术范畴？ # …
+        - 【关键特性】区别于同类的核心差异是什么？ # …
+      ww:
+        - 【适用场景】最适合在什么情况下使用？ # …
+        - 【不适用场景】什么情况下不该用？ # …
+        - 【前置条件】使用需要什么前提？ # …
+      htu:
+        - 【选型决策】根据什么条件判断该用哪个？ # …
+        - 【快速开始】最小可用的安装和配置步骤是什么？ # …
+        - 【基本使用】日常最常用的操作方式是什么？ # …
+      hti:
+        - 【breakdown】标识性技术组合是什么？ # X = A + B + C
+        - 【核心原理】工作机制是什么？ # …
+        - 【架构流程】关键链路数据怎么转？ # （有链路则先 diagram 再摘要）
+        - 【关键实现】最值得了解的实现细节是什么？ # …
+      hto:
+        - 【性能优化】哪些配置或手段能提升性能？ # …
+        - 【避坑指南】新手最容易踩的坑是什么？ # …
+        - 【运维建议】长期维护要注意什么？ # …
+
+
+
+hint:
+  # <建议闭卷练哪条 L1 / 哪道 qs 向>
+  - if: 交付末尾
+    then: recall
+
+  # write: <是否值得回写 data/gh 某字段；默认不自动写>
+  - if: 是否写回到 data/gh
+    then: write
+  # deepen: <hti 某条 / diagram / vs / uu …>
+  - if: 是否深挖
+    then: deep
