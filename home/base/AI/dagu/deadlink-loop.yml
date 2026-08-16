@@ -1,5 +1,6 @@
 ---
 # deadlink-loop.yml — DAG 名由文件名决定（dagu 2.10+ 顶层不能定义 name）
+name: deadlink
 description: Monthly deadlink scan → AI analyze → human approve → auto delete
 schedule: "0 0 1 * *"
 max_active_runs: 1
