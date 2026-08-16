@@ -1,15 +1,14 @@
 frontmatter:
   name: write-prpt
   role: atom
-  desc: 编写/重构 prompt skill；产出符合 prpt.yml 全量 schema 的完整 YAML；先对齐信息再开工
-  is-save: true
+  desc: 编写/重构 prompt skill；产出符合 prpt 全量 schema 的完整 YAML；先对齐信息再开工
 
 
 
 what:
   is: |
-    根据用户需求，编写或重构一个 prompt，产出符合 prpt.yml（zzz 全量 key 模板）的完整 YAML 文件，可直接放入 references/ 作为 source of truth。
-    以 prpt.yml 为唯一准绳，不 inline YAML 模板。
+    根据用户需求，编写或重构一个 prompt，产出符合 prpt.schema.json（zzz 全量 schema）的完整 YAML 文件，可直接放入 references/ 作为 source of truth。
+    以 prpt.schema.json 为唯一准绳，不 inline YAML 模板。
   not: |
     不是优化已有 prompt 的性能（那是 SkillOpt / skill-creator）
     不是编写 skill harness（zzz.nu、gen-aliases.nu 等）
@@ -39,9 +38,9 @@ workflow:
       - 信息充足时初判"该写"→ 直接跳终判确认，不能跳过终判
   - phase: 执行写作
     steps:
-      - 先 Read prpt.yml（zzz 根目录 `../prpt.yml`，与 references/ 同级）——它为唯一准绳/全量 key 模板
-      - 按 prpt.yml 的全量 key schema 组织产出 YAML，只保留实际需要的 key
-      - 只使用 prpt.yml 里的 key；不 inline 模板
+      - 先 Read prpt.schema.json（WebFetch raw URL https://raw.githubusercontent.com/xbpk3t/docs-alfred/main/cmd/skx/schema/prpt.schema.json）——它为唯一准绳/全量结构；描述里含每个字段的必填/可选与语义
+      - 按 prpt.schema.json 的 properties 组织产出 YAML，只保留实际需要的 key
+      - 只使用 prpt.schema.json 里的 key；不 inline 模板
       - 语言适配（Gate 3）：默认中文；用户明确指定则用对应语言
   - phase: 输出与落盘
     steps:
@@ -52,14 +51,14 @@ workflow:
 constraint:
   must:
     - 链式调用其它 prpt 时必须引用该 prpt 的文件本身（相对链接），按完整格式执行；禁止只转述规则/只提名字/把规则抄进本文件
-    - 产出必须符合 prpt.yml 的 schema（全量 key）
+    - 产出必须符合 prpt.schema.json（全量 properties）
   must-not:
     - 禁止不显式输出 Gate A 判断就开工
-    - 禁止 inline YAML 模板（引用 prpt.yml 文件）
+    - 禁止 inline YAML 模板（引用 prpt.yml——模板已并入 schema 描述，不引用已删除的文件）
 
 
 hint:
   - if: 产出完成
-    then: nu gen-aliases.nu（在 dotfiles 侧跑；active 需 rebuild）
+    then: skx check 校验；skx graph 看依赖/环
   - if: 用户确认落盘到 references
     then: 写入 $HOME/.claude/skills/zzz/references/ 并测路由
