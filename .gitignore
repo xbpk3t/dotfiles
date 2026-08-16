@@ -59,11 +59,5 @@ apm.lock.yaml
 # local notes — not part of flake tree commits
 docs/
 
-# zzz skill — skx 渲染产物（references/*.yml 生成的 .md），不入库。
-# 渲染在 rebuild 后由 `skx render` 手动执行；保留无 .yml 源的遗留 .md。
+# zzz skill — references 只存 .yml（prompt 源）；.md 不入库（render 已移除，遗留已清）
 home/base/AI/skills/zzz/references/**/*.md
-!home/base/AI/skills/zzz/references/analysis/.mapping-check.md
-!home/base/AI/skills/zzz/references/analysis/.diagram.md
-!home/base/AI/skills/zzz/references/analysis/.mapping.md
-!home/base/AI/skills/zzz/references/analysis/.recall.md
-!home/base/AI/skills/zzz/references/repo/.explore.md

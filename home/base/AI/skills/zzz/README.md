@@ -36,8 +36,8 @@ pl-parallel:
 
 ## dot file 约定
 
-默认不读取 `.md` 作为路由入口（`skx route` 跳过 hidden）。
-hidden file 仅作为 cross-reference 目标，供其他 prompt 引用。
+`skx route` 跳过 hidden（dot-prefixed）的 `.yml`，如 `.TableCate.yml`。
+hidden 仅作为 cross-reference 目标供其他 prompt 引用，不直接可路由。
 
 ## cross-reference / pipeline
 

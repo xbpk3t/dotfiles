@@ -1,0 +1,122 @@
+frontmatter:
+  name: recall
+  role: composite
+  desc: >
+    闭卷召回：出题→作答→批改→gap 收敛；类比/mapping 仅用户确认后 sub-agent。
+    Teach=3w3h / Test=mdscc（双切，不并）。不写 recall 落盘、不改 data/gh。
+  pl-parallel:
+    - analogy
+    - mapping
+
+what:
+  is: |
+    闭卷召回：出题 → 停等作答 → 批改(0/1/2 + gap) → [gap 未闭合] 最多 1–2 轮追问 verify
+    → 询问 类比 / mapping / 展开 → 用户确认后 fan-out pipeline sub-agent → 合并 → next hint。
+    坐标：3w3h = Teach/说明切；mdscc = Test/闭卷骨架（主 role = meta | derive | sol | cost | case | l3）；kind = topic 持有策略；qs = 题面细节（不挂完整 mdscc 五键）。
+  not: |
+    不是先讲、先搜标准答案全文、先贴 mdscc 答案。
+    不是 roadmap/profile 落盘、HTML、跨 session resume、完整 diagnose 问卷。
+    不是用 /sigma 替代本 skill（sigma 不认 kind/mdscc/maps）。
+    不写 recall 落盘、不改 data/gh。
+
+gate:
+  - qs: 用户是否已交卷（出题后是否轮到批改）？
+    fail: "出题后停止等待，不批改、不跑 analogy/mapping；首轮结束时声明 pipeline 未启用（skipped: analogy/mapping — 用户未确认（出题阶段））"
+
+constraint:
+  must:
+    - "出题：每轮优先 1 题；用户明确要求多题再多抛（批改仍逐题）。题源：当前 topic、data/gh 的 qs/ww/3w3h 条目、或用户指定范围。有上下文时标明来源；声明建议的主 role（只给 role 词，不泄露答案要点）。"
+    - "发出题面后附答题格式（role/上挂/闭卷-meta/闭卷-本题/可选-maps），然后停止等待"
+    - "首轮出题结束时（用户尚未作答）必须声明 pipeline 未启用，例如 skipped: analogy — 用户未确认（出题阶段）/ skipped: mapping — 用户未确认（出题阶段）；禁止首轮跑 analogy/mapping，也禁止完全不提 pipeline 状态"
+    - "上挂仪式：批改必查是否挂到对的 topic/层；role 是否 mdscc 主 role（3w3h 仅副）"
+    - "主 role 用 mdscc；3w3h 只作副标签（例：role: sol（副 hti））；l3 = 跨挂/maps 向，题面是 ops/CLI/监控时批改禁止建议改 mdscc.meta"
+    - "meta 必须是一句第一性原理式问题；禁止 FAQ / 步骤 / 监控清单"
+    - "批改必查：上挂仪式、role、case 绝对化（禁止「凡 XX 品类都要/都不要」用需求语言）、题面关键词是否答全、过满表述（方向半对也要降分并点破）；骨架建议最多口头一句，默认不写 data/gh / wiki"
+    - "仅在用户交卷后批改；可轻量核对硬事实；网络不可用则标 offline，不挡批改"
+    - "gap = 本轮 0/1 分点对应的可修正缺口（role/上挂/关键词/绝对化/假 maps），不是「整章不会」"
+    - "收敛：1–2 问/轮、针对 gap 追问、mastery 后再下一题；gap 非空且未声明跳过时最多 1–2 轮定向追问（只问不灌答案）；Mastery 门槛=本题达 2 分或用户明确「跳过/下一题」；追问用尽仍 <2 标 mastery: open"
+    - "批改/收敛后必做询问：默认都不做，可多选（类比→pipeline analogy / mapping→pipeline mapping / 就 gap 做简短展开（父 agent 短讲，不走 pipeline））"
+    - "用户确认要类比/mapping：起 sub-agent 跑对应 pipeline 步；只传 topic、本题、gap、统一 case 约束；两步无数据依赖时可并行；父 agent 汇合后展示 artifact，禁止与 artifact 矛盾或心算重写长文"
+    - "用户写 maps「不知道/想知道」时：批改里可先给一句合格 maps 供对照；要展开多条同构或类比表，必须走询问 + pipeline"
+  must-not:
+    - "禁止先讲、先搜标准答案全文、先贴 mdscc 答案"
+    - "禁止父 agent 在用户未确认时输出类比/mapping 长文，或未起 sub-agent 却伪造 pipeline 产物"
+    - "禁止把 mdscc 并进 3w3h；重叠是提炼关系（meta←why，case←ww），不是字段别名"
+    - "禁止未明确同意前输出类比列表正文、mapping 展开、或长讲解"
+    - "禁止用 /sigma 替代本 skill"
+    - "不写 recall 落盘、不改 data/gh；mapping 默认不落盘"
+
+workflow:
+  - phase: 0 坐标系（双切，不并）
+    steps:
+      - |
+        层职责：3w3h=Teach/说明切（副标签最多）；mdscc=Test/闭卷骨架（主 role = meta | derive | sol | cost | case | l3）；kind=topic 持有策略（影响是否强依赖已有 mdscc）；qs=题面细节（不挂完整 mdscc 五键）。
+      - "topic 级 meta 全 topic 共用一条；qs 没有自己的 mdscc.meta"
+      - "若 data/gh 无 mdscc：可从 why/ww/qs 推断临时 spine，标明 spine: inferred；主 role 词表仍用 mdscc，不要改考 3w3h 六字段当主 role"
+  - phase: 1 出题
+    steps:
+      - "每轮优先 1 题；用户明确要求多题再多抛（批改仍逐题）"
+      - "题源：当前 topic、data/gh 的 qs / ww / 3w3h 条目、或用户指定范围"
+      - "有上下文时标明来源（如「来自 ww」「来自 qs」）；声明建议的主 role（只给 role 词，不泄露答案要点）"
+      - "发出题面后附答题格式，然后停止等待"
+      - "答题格式：role（meta|derive|sol|cost|case|l3）/ 上挂: <topic>（<kind>）/ 闭卷-meta（该 topic 元问题，一句）/ 闭卷-本题（直接回答题面）/ 可选-maps（一句异层同构；不会就写「无」或「想知道」）"
+      - "首轮出题结束时（用户尚未作答）必须声明 pipeline 未启用（skipped: analogy/mapping — 用户未确认（出题阶段））；禁止首轮跑 analogy/mapping，也禁止完全不提 pipeline 状态"
+  - phase: 2 批改
+    gate: 用户交卷后
+    steps:
+      - "仅在用户交卷后进行；可轻量核对硬事实；网络不可用则标 offline，不挡批改"
+      - |
+        分数与 gap（score-driven）：0=方向错、当 FAQ/清单、零关键词、空白 → 必有 gap（列条）；1=方向有但与骨架/题面错位、绝对化、漏关键词 → 列具体 gap；2=主 role 合理 + 贴 meta 精神 + 本题在点上 → gap 可空或 polish。
+      - "必查：上挂仪式（是否挂到对的 topic/层）；role（是否 mdscc 主 role，3w3h 仅副）；case 绝对化（禁止「凡 XX 品类都要/都不要」，用需求语言）；题面关键词是否答全；过满表述（方向半对也要降分并点破）；骨架建议最多口头一句，默认不写 data/gh / wiki"
+      - "批改输出：逐题 role、meta/上挂、本题贴题与否、maps 质量、分 0/1/2、gap 列表（可空）；多题：总分表 + 本轮习惯结论"
+      - "用户写 maps「不知道/想知道」时：批改里可先给一句合格 maps 供对照；要展开多条同构或类比表，必须走第 4 步询问 + pipeline"
+  - phase: 3 收敛（sigma-inspired mini loop）
+    steps:
+      - "取：1–2 问/轮、针对 gap 追问、mastery 后再下一题。不取：roadmap/profile 落盘、HTML、跨 session resume、完整 diagnose 问卷。"
+      - "若本题 gap 非空且用户未声明跳过：最多 1–2 轮定向追问（只问不灌答案），再根据新答更新分与 gap"
+      - "Mastery 门槛：本题达 2 分，或用户明确「跳过/下一题」→ 才出下一题"
+      - "追问轮次用尽仍 <2：在批改结论中标 mastery: open，进入第 4 步询问（类比/mapping/展开）帮助补 gap，不要假装已掌握"
+  - phase: 4 询问（批改/收敛后必做）
+    steps:
+      - "默认都不做；可多选：是否需要【类比】（→ pipeline analogy）？是否需要【mapping】（→ pipeline mapping）？是否需要就 gap 做简短【展开】（父 agent 短讲，不走 pipeline）？"
+      - "未明确同意前，禁止输出类比列表正文、mapping 展开、或长讲解"
+  - phase: 5 Pipeline：analogy / mapping（须 sub-agent）
+    gate: "用户明确确认某步；未确认 → skipped: <name> — 用户未确认"
+    steps:
+      - "用户确认要类比：起 sub-agent 跑 analogy（只传 topic、本题、gap、统一 case 约束）"
+      - "用户确认要 mapping：起 sub-agent 跑 mapping；默认只跑拍 A（只输出会话 artifact：topic-map + qs-map + 差分闸）；拍 B（抓手环）仅当用户明确要抽主轴/抓手/更多 case 或上下文已有 ≥2 条同轴 ok map，仍只会话输出"
+      - "两步无数据依赖时可并行"
+      - "父 agent 汇合后展示 artifact；禁止与 artifact 矛盾或心算重写长文"
+      - "mapping sub-agent 只执行 mapping.yml body；禁止落盘（不写 data/gh、不写任何 *.yml / 矩阵表、不改 wiki）"
+      - "父 agent 验收 mapping artifact：有 layer_kind: cross|instance；有 score: 1–5（每条有效 topic-map 一个分，禁止省略、禁止无脑 3）；score >= 4 时有一句 score 依据；instance / 半轴有 boundary，建议有负迁移；差分闸有继承/新变量/失效点（instance 的新变量与失效点不得敷衍，score >= 4 时至少一格有实质）；若跑拍 B：handle 来自 ≥2 ok map、有结构/适用范围/反例或边界、candidates 标待验证；非 D/I/K/P/C/S；非 qs 另起炉灶；非拼盘；非「XX 不就是 YY」空还原"
+      - "汇合后原样展示 artifact；用户若另说「写入库存表」才出 recall 流程、另议落盘——默认 recall 永不落 mapping 盘"
+      - "用户闭卷 maps 若只有标签等价（「不就是 XX」）→ 批改按假 maps / 还原陷阱处理，可追问新变量，不因「沾边」给分"
+      - "展开（仅当用户要【展开】）：只针对 gap 短讲；禁止整章重讲；禁止偷渡未确认的类比/mapping 长文"
+  - phase: 6 本轮结束与 next
+    steps:
+      - "点头项（pipeline / 展开）输出完即收束"
+      - "同对话续练：可针对 gap 再出 1 题（仍闭卷）。无跨 session 自动 resume"
+      - "输出 ## next：下一题方向 / 建议回看 mdscc 键（spine: inferred/authoritative）/ write: 默认不写 data/gh；mapping 默认不落盘 / skip"
+
+output:
+  format: md
+  struct:
+    - key: 批改输出
+      val: 逐题 role、meta/上挂、贴题与否、maps 质量、分 0/1/2、gap 列表
+    - key: next
+      val: 下一题方向 + mdscc 键 + write/skip
+
+self-check:
+  - 首轮结束时声明了 pipeline 未启用（skipped）？
+  - 未在用户确认前输出类比/mapping 长文？
+  - 批改给了分 0/1/2 + gap 列表？
+  - Mastery 门槛严格（2 分或明确跳过才下一题）？
+  - 未落盘、未改 data/gh？
+
+hint:
+  - if: 本题 gap 非空且用户未跳过
+    then: 最多 1–2 轮定向追问（只问不灌答案），再更新分与 gap
+  - if: 追问用尽仍 <2 分
+    then: "标 mastery: open，进入询问（类比/mapping/展开）补 gap"
+  - if: 用户确认要类比或 mapping
+    then: 起 sub-agent 跑对应 pipeline 步，汇合后原样展示 artifact

@@ -1,7 +1,7 @@
 ---
 name: zzz
 description: >
-  个人 prompt 路由：/zzz <name> 对应 references/**/<name>.md（name 等于文件名 stem）。
+  个人 prompt 路由：/zzz <name> 对应 references/**/<name>.yml（name 等于文件名 stem）。
   composite 在 frontmatter 声明 pl-serial/pl-parallel（依赖 name 列表）；atom 不声明。
   凡有 pl-* 依赖的 composite，必须对启用的每一步起 sub-agent（见正文）。
   stats 写入 ~/.claude/zzz-stats.json（counter）；3w3h=Teach，recall/mdscc=Test。
@@ -14,7 +14,7 @@ description: >
 
 1. 确定 skill 目录（`<skill_dir>`）
 2. 执行：`skx route --dir <skill_dir>/references <name>`
-3. 读取脚本返回的 .md 绝对路径，Read 该文件
+3. 读取脚本返回的 .yml 绝对路径，Read 该文件
 4. 读取该文件的 frontmatter + body，并按下方 **role** 规则执行
 
 若 `skx route` 返回 `ERROR: unknown` 或 name 无法识别：列出可用 name，不再执行其它逻辑。
@@ -41,7 +41,7 @@ description: >
 1. 读 composite 的 frontmatter（`pl-serial`/`pl-parallel` 列表）+ body（触发条件、可跳过规则、最终输出格式）
 2. 判定本轮哪些依赖 name **启用**（body 可允许跳过，例如：无竞品 → 跳过 `vs`；**用户未确认** → 跳过 `analogy`/`mapping` 等 consent 步）。**未启用 ≠ 忘了跑**：必须显式 `skipped: <name> — <原因>`，禁止静默省略。
 3. 对每个 **启用** 的 name **单独**起 sub-agent：
-   - 解析路径：`skx route --dir <skill_dir>/references <step_name>`，再 Read 对应 md
+   - 解析路径：`skx route --dir <skill_dir>/references <step_name>`，再 Read 对应 yml
    - 要求该 sub-agent **只**执行该步 prompt 的 body，且 topic/输入与父任务一致
    - 步骤之间无数据依赖时，**优先并行** fan-out
 4. **汇合（barrier）：** 等全部 step agent 结束，收集各自 artifact
@@ -84,7 +84,6 @@ pl-parallel:             # 仅 composite；并行依赖 name 列表
   - <依赖 name>
 pl-serial:               # 仅 composite；串行依赖 name 列表
   - <依赖 name>
-is-save: bool            # 可选；是否落盘 .md
 ```
 
 ## 配套文件

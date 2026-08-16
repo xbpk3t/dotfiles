@@ -1,0 +1,171 @@
+frontmatter:
+  name: mapping
+  role: atom
+  desc: 异层同构；用法 workflow+next；Q-iso→score/差分闸；可选抓手环；topic→qs
+
+what:
+  is: |
+    找到与对象「同一套控制结构」的另一端，并写出「步骤或判定的一一对应」，用来迁移理解与动作（结构类比 / 同构启发式，不是演绎必然真）。
+    纪律：map 为了迁移动作，不是为了结束好奇。先 Q-iso 对齐，再写清继承 / 新变量 / 失效点；没有差分的「不就是」= 降噪，不是理解。
+    两拍：默认拍 A=对齐（单次 map）；仅在触发时拍 B=抓手环（多 map → 抽主轴/问题型 → 候选再回炉）。单次 map ≠ 已完成归纳；抽抓手才是跨例收束。
+    本 atom 可由 /zzz mapping 单独调用，或由 /zzz recall 在用户确认【mapping】后以 sub-agent 调用。
+    规则全部写在本文；不依赖任何外部盘点文件或库存路径。
+  not: |
+    不是目录邻接、depends-on、「和 X 有关」、生活段子（→ analogy）、规范↔实现、原语↔使用者、调用栈上下游冒充同构。
+    不是廉价还原（「XX 不就是 YY」——只有标签等价、无步骤环、无差分）。
+    不是「有点感觉就 /zzz mapping，完事必 /zzz mapping-check」。
+    不是每个 ok 的 topic-map 都默认填 score:3（或任何固定分）。
+
+gate:
+  - qs: Q-iso（主）——同一套控制结构？能否 ≥3 步一一对应（须含判定/状态转移/失败分支，禁止空「开始-中间-结束」）？
+    fail: 不写 mapping
+  - qs: Q-layer（辅）——A cross / B instance / 拒绝类？
+    fail: 拒绝类 → 硬拒绝（见毒码），不写 active score；B → valid，score 从严自判
+
+constraint:
+  must:
+    - "两问确认段：artifact 中必须在「对齐」前显式列出「两问确认」小节，写明 Q-iso pass/fail 理由和 Q-layer 判定结果；禁止跳过直接写对齐"
+    - "四问验收：①≥3 步可对齐且含判定或失败/终止语义；②去掉产品专名后仍能讲通；③是「使用/实现/调用」还是「重演控制逻辑」？前三者 → D/I/K；④是否单主轴？多机制 → P"
+    - "对齐之后仍须过差分闸（继承/新变量/失效点）：只有「同」、零新变量 → 压分或不合格（防「不就是」躺平）"
+    - "差分闸条件：凡 status: ok → 继承、新变量、失效点三格都要有（机会或动作可选）；layer_kind: instance → 新变量、失效点禁止敷衍，皮不同必须写出操作/语义差；score >= 4 → 新变量或失效点至少一格有实质内容（不能双「无」）；仅有主轴相同、新变量空洞 → 压分（通常 ≤2）或不合格；只有命名等价、无步骤环 → 拒绝（见不合格/近 S），不是低分 valid"
+    - "score（1–5，严格，无默认）：含义=本条/本行 mapping 的 Q-iso 可信度，不是 gh 实用分、recall 答题 0/1/2、技术重要度。5=canonical（cross、四问全过、几乎无裂缝）；4=cross 稳可有轻 boundary；3=成立但有界（instance/半轴/明显裂缝，boundary 必读）；2=弱慎作锚点；1=极弱优先 skipped/注释"
+    - "score 纪律：每个 ok 的 topic-map 以及每个库存 active name 必填 score，禁止省略；禁止默认填 3（或任何固定分），据证据自判，吃不准压分；5 极稀缺，instance 原则上到不了 5；半轴通常 ≤3；毒码命中 → 拒绝不用 score:1 冒充 valid；score >= 4 时加一行 score依据（一句，说明为何不是 ±1）；与 gh 实用 score 禁止默认相等；差分闸未过 → 压分不得装 canonical"
+    - "topic/qs：topic=整体主轴一句 + 对应（不要十个无关域）；qs=挂在已选 topic 轴上逐步对应（禁止 qs 另起整域 mapping）。qs-map 质量规范：默认填充 ≥2 对实质问题对应（本题疑惑 ↔ 对端等价问法），而非简单写 none；仅当 topic 已单轴完全展开、无额外问题可映射时才写 none。问题对应瞄准控制环中的判定/分支/边界条件，而非产品功能罗列。无 topic 上下文时先补「本题所属结构」一行"
+    - "拍 B 硬规则：拍 A 未过（Q-iso 失败）→ 禁止拍 B；抓手必须来自 ≥2 个已 ok 的 map，禁止从一句「不就是」起飞；candidates 不是 valid map，每个候选须再跑拍 A，或标 status: candidate 并写「待 Q-iso」；候选变 ok → 仍过差分闸；出现反例 → 改 handle 或缩小适用范围，禁止硬塞；recall 默认只拍 A，用户加要抓手/更多 case 时才拍 B，仍禁止落盘"
+    - "可读性优先：用 Markdown 小标题 + 短列表 + 步骤编号；禁止把全部字段塞进一个巨大 topic-map / YAML 墙。字段仍须齐全，用加粗标签行即可"
+    - "推进 hint：拍 A ok 后模型必须在 artifact 末给出 next（用户选一条）"
+  must-not:
+    - "毒码硬拒绝（D/I/K/P/C/S）：D=依赖原语无独立环（hash↔Git）；I=实现/算法实例假对端（Raft↔etcd-raft；BBR 当 TCP-CC 对端 row）；K=栈上下游（list-watch↔etcd Watch）；P=拼盘（熔断+DAG 一行）；C=硬套轴/列（CAS 表塞悲观幂等）；S=无环邻接（「见其它 topic」）。S ≠ 同目录；同目录且 Q-iso 过 → instance"
+    - "廉价还原（无步骤、无差分的「XX 不就是 YY」）按 S 或直接不合格处理，不要打成 valid map"
+    - "禁止对「只有名词、无步骤」的主题硬 map"
+    - "禁止每次 map 后强制 mapping-check；按需，信自检则停"
+    - "禁止一条 map 就拍 B（需 ≥2 同轴 ok 或用户明确要）"
+    - "禁止把 candidate 当已学会（必须再拍 A）"
+    - "未触发却灌 handle/candidates；从 0～1 条 map 伪造抓手；把 candidate 直接当 ok map"
+    - "recall / 未要求落盘：只输出 artifact 结构，禁止写任何文件、禁止改 data/gh、禁止写 *.mapping.table.yml"
+
+workflow:
+  - phase: 用法 workflow（深入学某技术时怎么用）
+    steps:
+      - "总览：0 够用理解（spine）→ 1 拍A 单次 map → 2 自检 →（可选）3 mapping-check → 4 再 map 1～2 对端 →（≥2 同轴 ok）5 拍B 抓手 → 6 候选再拍A →（可选）7 落库存表（默认不做）"
+      - "不是「有点感觉就 /zzz mapping，完事必 /zzz mapping-check」；是「先有可对齐的控制结构 → 默认只拍 A → check 按需 → 多例再抓手」"
+  - phase: 阶段 0 — 前置（mapping 之前）
+    steps:
+      - "调用本 atom 前，用户/对话里应已有一句控制结构 spine（读什么、判什么、写什么、失败怎么办）。来源可以是：已读文档、/zzz recall 批改后的 gap、/zzz 3w3h / brk 等——不强制某条命令，但禁止对「只有名词、无步骤」的主题硬 map"
+      - "推进 hint：next: 用一句话写出本题控制环，再 /zzz mapping；对端可指定或让模型提案 1 个 cross"
+  - phase: 阶段 1 — 拍 A（默认主路径）
+    steps:
+      - "调用形态：/zzz mapping；topic: <技术/机制>；（可选）对端: <另一层> | 请提案 1 个 cross 对端；只要拍 A；禁止落盘"
+      - "输出：§4.1「对齐」+ ### self-check + ### next（推进 hint，必给）"
+      - "推进 hint（拍 A ok 后模型必须在 artifact 末给出，用户选一条）：差分闸虚/score 不稳/自检有 no → /zzz mapping-check（贴上全文）→ 按 must_fix 再 map；自检全 yes 且想加深 → 再 /zzz mapping 换另一个对端（优先 cross；或 instance 扩簇）；已有 ≥2 同轴 ok → /zzz mapping 并写明请开拍 B 抽抓手；只想助记 → /zzz analogy（与 mapping 分职，非必须）；默认 → 停，消化失效点/负迁移，勿连打 check"
+  - phase: 阶段 2 — mapping-check（按需，非每步必跑）
+    steps:
+      - "要跑：改过 mapping 契约后的回归；score≥4 想当锚点；自检存疑；准备落盘前。可跳：自检扎实的日常拍 A；纯探索草稿"
+      - "调用形态：/zzz mapping-check；scope: A | A+B；（粘贴完整 mapping 输出）"
+      - "推进 hint（check 后）：fail → 按 must_fix 再 /zzz mapping，不要先抽抓手；pass → 回到阶段 1 表：再 map 对端 / 拍 B / 停"
+  - phase: 阶段 3 — 拍 B 抓手环（可选）
+    gate: "触发（用户明确要抽主轴/抓手/问题型/再铺 case/学 1 当 N；或已有 ≥2 条同轴 status: ok 的 map；或用户直接给出 instance 簇要求收束）"
+    steps:
+      - "用户在指令里写清「请拍 B」或「抽抓手」，避免误开"
+      - "对每个 candidate：单独再 /zzz mapping 拍 A（或标 skipped）"
+      - "反例 → 改 handle，禁止硬塞"
+      - "需要归档 → 用户明确「写入库存表」才落盘（默认不落）"
+  - phase: 阶段 4 — 与 recall 的关系
+    steps:
+      - "闭卷练 + 偶尔 map → /zzz recall → 确认【mapping】→ 只拍 A、不落盘；父 agent 验收字段"
+      - "系统做迁移/抓手 → 直接 /zzz mapping（不必先 recall）"
+      - "recall 后还要抓手 → 用户追加「请拍 B」；仍不落盘"
+  - phase: 常见误用
+    steps:
+      - "无 spine 就 map → 先阶段 0；每次 map 后强制 check → 按需，信自检则停；一条 map 就拍 B → ≥2 同轴 ok 或用户明确要；candidate 当已学会 → 必须再拍 A；「不就是 YY」当 map → 假 maps，补步骤+差分"
+
+output:
+  format: md
+  template: |
+    ## artifact
+    step: mapping
+    status: ok | skipped
+
+    **Q-iso：** yes | no
+    **Q-layer：** cross | instance | reject
+
+    ### 两问确认
+
+    **Q-iso（同一套控制结构、≥3步含判定/失败？）:** pass | fail
+    - 理由：…
+    - fail → 不写 mapping，输出原因
+
+    **Q-layer：** cross | instance | 拒绝类
+    - 拒绝类 → 硬拒绝（见毒码），不写 active score
+    - instance → valid，score 从严；boundary 写清只对齐哪条环
+
+    ### 对齐（拍 A）
+
+    **主轴：** … ↔ …
+    **layer_kind：** cross | instance
+    **score：** 1–5
+    **score依据：** …              # 仅 score>=4 必填
+    **boundary：** …
+
+    **结构（本题）：** 1–2 句
+    **结构（对端）：** 1–2 句
+
+    **步骤对应（≥3 步，含判定/失败）：**
+    1. … ↔ …
+    2. … ↔ …
+    3. … ↔ …
+
+    **差分闸**
+    - **继承：** …
+    - **新变量：** …
+    - **失效点：** …
+    - **机会或动作：** …            # 可选
+
+    **可迁移：** …
+    **负迁移：** …
+
+    **qs-map：** none | 下列
+    - （本题）… ↔ （对端）…
+
+    ### 抓手环（拍 B，仅触发时；否则整节省略）
+
+    **handle**
+    - **名：** …  **结构：** …  **来自：** case1, case2
+    - **score：** …  **score依据：** …  # score>=4 时
+    - **适用范围：** …  **反例或边界：** …
+
+    **candidates**（非 ok map）
+    | case | 为何像 | 待验证 |
+
+    **next**：…
+
+    ### self-check
+    | # | 项 | yes/no |
+    | 1 | 单主轴、无拼盘 | |
+    | 2 | layer_kind 未灌分 | |
+    | 3 | 非廉价还原 | |
+    | 4 | 差分闸有实质 | |
+    | 5 | 拍B未把 candidate 当 ok（无B则 n/a） | |
+    | 6 | 本轮零写文件 | |
+
+    ### next（推进 hint，必给；用「用法 workflow」阶段 1 的推进 hint 表格式，禁止自由文本或列表）
+
+self-check:
+  - 单主轴、无拼盘？
+  - layer_kind 未灌分（A→cross，B→instance，拒绝→硬拒绝）？
+  - 非廉价还原（无步骤无差分的「不就是」不通过）？
+  - 差分闸有实质（ok 必有继承/新变量/失效点）？
+  - 拍 B 未把 candidate 当 ok（无 B 则 n/a）？
+  - 本轮零写文件？
+
+hint:
+  - if: 差分闸虚、score 不稳、自检有 no
+    then: /zzz mapping-check（贴上全文）→ 按 must_fix 再 map
+  - if: 自检全 yes 且想加深
+    then: 再 /zzz mapping 换另一个对端（优先 cross；或 instance 扩簇）
+  - if: 已有 ≥2 同轴 ok
+    then: /zzz mapping 并写明请开拍 B 抽抓手
+  - if: 只想助记
+    then: /zzz analogy（与 mapping 分职，非必须）
+  - if: 默认
+    then: 停；消化失效点 / 负迁移，勿连打 check
