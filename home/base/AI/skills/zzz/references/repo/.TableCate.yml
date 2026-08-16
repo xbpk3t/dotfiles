@@ -1,0 +1,37 @@
+---
+
+frontmatter:
+  name: TableCate
+  role: atom
+  desc: 多 repo 分类、代表选型与评分（hidden，供 cross-ref）
+
+what:
+  is: 对当前讨论的多个 repo 做分类 → 选代表 → 评分。
+  not: |
+    不是单个 repo 深入分析（那是 repo / 3w3h）
+    不是竞品逐项对比（那是 vs）
+
+workflow:
+  - phase: 分类
+    steps:
+      - 帮我对以上这些 repo 进行分类
+  - phase: 选代表
+    steps:
+      - 从每个分类中选最好/最主流/功能最全面的 repo（能覆盖同分类其他 repo 的功能）
+      - 用 table 列出：分类、代表 repo、同分类内可被替代的 repo
+  - phase: 评分
+    steps:
+      - 按 5 分制打综合分（依据：「是否主流」「是否实用」），评分尽量均匀
+      - 用 table 列出，按 score desc 排序；评分 < 4 需说明为何不实用
+
+output:
+  format: table
+  struct:
+    - key: 分类
+      val: <分类名>
+    - key: 代表 repo
+      val: <最优 repo>
+    - key: 可替代
+      val: <同分类内其他 repo>
+    - key: score
+      val: <1-5>

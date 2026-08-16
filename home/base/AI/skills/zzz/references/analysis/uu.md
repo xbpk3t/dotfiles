@@ -1,19 +1,41 @@
 ---
-name: uu
-role: atom
-description: 挖掘 unknown unknowns；单独使用，不进默认 pipeline
+frontmatter:
+  name: uu
+  role: atom
+  desc: 挖掘 unknown unknowns；单独使用，不进默认 pipeline
 ---
 
-# unknown unknowns
+## what
 
-关于本 session 讨论的这个 topic 相关内容
+**是什么：**
 
-你觉得我可能还有哪些 unknown unknowns?
+挖掘本 session 讨论 topic 相关的 unknown unknowns（用户以为自己知道、实际有盲区的点）。
 
-**开场规则**：在切入主题前，先以一句简短段落认可用户已了解的知识层次（如"基于你刚了解了 X，以下是更深层的盲区"或"你以为自己已经掌握了 X，但实际情况更复杂"）。这建立"你以为知道 vs 实际不知道"的张力，为全文对比框架定调。
+**不是：**
 
-## Response Structure
+不是知识讲解（那是 3w3h）
+不是竞品对比（那是 vs）
+不是决策建议（那是 choose）
 
+## constraint
+
+### must
+
+1. 每个要点按"已知表象 → 真相反差"三层结构展开
+2. 结尾必须同时给跨主题对比表 + 三条立刻能做的验证命令
+3. 使用"你以为 X 但实际 Y"对比框架贯穿全文
+
+### must-not
+
+1. 禁止在结尾引入文中未出现的新盲点
+
+## output
+
+**format:** md
+
+**template:**
+
+```markdown
 按以下框架组织回答：
 
 ### 1. 主题分类
@@ -47,3 +69,4 @@ description: 挖掘 unknown unknowns；单独使用，不进默认 pipeline
 - 一个交叉对比的代码示例展示"你以为正确" vs "实际正确"的写法
 
 让用户从"被动阅读"变成"主动验证"。
+```
