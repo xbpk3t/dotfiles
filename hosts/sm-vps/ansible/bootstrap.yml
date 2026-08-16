@@ -90,12 +90,10 @@
     ansible_ssh_private_key_file: ""
   tasks:
     - name: 2a 安装前置包（curl/ca-certificates/xz/rsync；package 跨发行版）
+      # 包名参数化：sm_bootstrap_packages（group_vars 默认 Debian：xz-utils）。
+      # RHEL 系覆盖为 xz（实测 B：AlmaLinux 9 无 xz-utils 包）。
       ansible.builtin.package:
-        name:
-          - curl
-          - ca-certificates
-          - xz-utils
-          - rsync
+        name: "{{ sm_bootstrap_packages }}"
         state: present
 
     - name: 2b 下载 Determinate Nix 安装器
@@ -211,7 +209,9 @@
         components: [main]
         signed_by: "https://pkgs.tailscale.com/stable/{{ ansible_distribution | lower }}/{{ ansible_distribution_release }}.gpg"
         state: present
-      when: ansible_os_family == 'Debian'
+      when:
+        - sm_ts_authkey_src | length > 0   # 只有要 tailscale 才配 repo
+        - ansible_os_family == 'Debian'
       become: true
 
     - name: 3d 安装 tailscale 包
@@ -219,6 +219,7 @@
         name: tailscale
         state: present
       become: true
+      when: sm_ts_authkey_src | length > 0   # 不配 authkey = 不要 tailscale，跳过（B 实测 RHEL 无此包）
 
     - name: 3e0 检查 tailscale 状态文件（决定是否要 up；state 是 root 属主）
       ansible.builtin.stat:

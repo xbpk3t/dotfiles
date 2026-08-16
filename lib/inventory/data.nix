@@ -278,6 +278,29 @@ in
         ];
       };
     };
+    # 多 distro 验证（B）：nixos-vps-dev 上 Incus 的 AlmaLinux 9 容器。
+    # 实验性质：验证 sm 轨在 RHEL 系能 bootstrap + deploy（allowAnyDistro/@sudo→wheel/xz 包名）。
+    # 走 ProxyJump（容器在 nixos-vps-dev 的 incusbr0 内网）。
+    sm-vps-distro = {
+      hostName = "sm-vps-distro";
+      stateVersion = "24.11";
+      system = "x86_64-linux";
+      user = commonUser;
+      time = commonTime;
+      editor = commonEditor;
+      ssh = {
+        host = "10.87.171.201";
+        user = "luck";
+        opts = [
+          "-o"
+          "ProxyJump=luck@192.129.183.26"
+          "-o"
+          "ServerAliveInterval=30"
+          "-o"
+          "ServerAliveCountMax=20"
+        ];
+      };
+    };
     # ── 加新真机模板 ──────────────────────────────────────────────
     # sm-vps-<名字> = {
     #   hostName = "sm-vps-<名字>";   # 与节点名一致（/etc/sm-vps-managed 的 node=）

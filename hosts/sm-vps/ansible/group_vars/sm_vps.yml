@@ -9,6 +9,13 @@ sm_groups:
   - sudo            # Debian/Ubuntu 管理组；RHEL 系改 wheel（distro 适配点）
 sm_shell: /bin/bash
 
+# bootstrap P2a 前置包（distro 适配点：Debian xz-utils vs RHEL xz）
+sm_bootstrap_packages:
+  - curl
+  - ca-certificates
+  - xz-utils
+  - rsync
+
 # 节点（HM/sm 收敛走 deploy-rs，不需要目标机 flake 源码树）
 sm_node: sm-vps-tc   # 覆盖：每台机器在 inventory 里设 sm_node=<hostname>
 
