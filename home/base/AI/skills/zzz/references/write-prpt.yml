@@ -14,6 +14,9 @@ what:
     不是编写 skill harness（zzz.nu、gen-aliases.nu 等）
     不是项目管理（那是 issue 的事）
 
+input:
+  source: https://raw.githubusercontent.com/xbpk3t/docs-alfred/refs/heads/main/cmd/skx/schema/prpt.schema.json
+
 workflow:
   - phase: Gate A 初判（该不该写）
     steps:
@@ -38,7 +41,7 @@ workflow:
       - 信息充足时初判"该写"→ 直接跳终判确认，不能跳过终判
   - phase: 执行写作
     steps:
-      - 先 Read prpt.schema.json（WebFetch raw URL https://raw.githubusercontent.com/xbpk3t/docs-alfred/main/cmd/skx/schema/prpt.schema.json）——它为唯一准绳/全量结构；描述里含每个字段的必填/可选与语义
+      - 先 WebFetch `input.source` 的 prpt.schema.json——它为唯一准绳/全量结构；描述里含每个字段的必填/可选与语义
       - 按 prpt.schema.json 的 properties 组织产出 YAML，只保留实际需要的 key
       - 只使用 prpt.schema.json 里的 key；不 inline 模板
       - 语言适配（Gate 3）：默认中文；用户明确指定则用对应语言

@@ -1,7 +1,7 @@
 ---
 name: zzz
 description: >
-  个人 prompt 路由：/zzz <name> 对应 references/**/<name>.yml（name 等于文件名 stem）。
+  个人 prompt 路由：/zzz <name> [param...] 对应 references/**/<name>.yml（name 等于文件名 stem；参数透传见正文）。
   composite 用 workflow 组织阶段；phase 的 steps 里用 {kind: prompt, name} 串行调度其他 prompt（sub-agent）。
   凡有 dispatch 步的 composite，必须对每个启用的步起 sub-agent（见正文）。
   stats 写入 ~/.claude/zzz-stats.json（counter）；3w3h=Teach，recall/mdscc=Test。
@@ -10,16 +10,23 @@ description: >
 
 # /zzz — 个人 Prompt 路由
 
-用户调用 `/zzz <name>` 时，按下列步骤路由到对应模板：
+用户调用 `/zzz <name> [param...]` 时，按下列步骤路由到对应模板：
 
 1. 确定 skill 目录（`<skill_dir>`）
-2. 执行：`skx route --dir <skill_dir>/references <name>`
-3. 读取脚本返回的 .yml 绝对路径，Read 该文件
-4. 读取该文件的 frontmatter + body，并按下方 **role** 规则执行
+2. 解析参数：**第一个 token = 路由名 `<name>`**；剩余为 `<param...>`（如 `/zzz 3w3h heavy` → name=`3w3h`，param=`heavy`）
+3. 执行：`skx route --dir <skill_dir>/references <name>`（**只传 name**，参数不进 route）
+4. 读取脚本返回的 .yml 绝对路径，Read 该文件
+5. 读取该文件的 frontmatter + body，并按下方 **role** 规则执行；`<param...>` 原样进入执行上下文
 
 若 `skx route` 返回 `ERROR: unknown` 或 name 无法识别：列出可用 name，不再执行其它逻辑。
 
 统计（counter）由 `skx route` 自动写入 `~/.claude/zzz-stats.json`（array 结构）；查看排行/降级建议用 `skx stats`。
+
+### 参数透传约定
+
+- `/zzz <name> [param...]` 是**通用机制**：route 只吃 name，多余参数原样进入执行上下文（不落 stats、不参与路由）
+- 参数语义由**目标 prompt 自己的 `input.params` 声明**（如 `3w3h.yml` 的 `mode: default | heavy`）；未声明 params 的 prompt 忽略多余参数
+- **禁止**在 SKILL.md 为单个 prompt 加参数特判（旧 `zzz.nu` 的 strike 特例即此反模式）；需要参数就把语义写进该 prompt 的 `input.params`
 
 ---
 
