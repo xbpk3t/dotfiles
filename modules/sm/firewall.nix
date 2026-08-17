@@ -40,6 +40,9 @@
     # 放行服务端口
     -A INPUT -p tcp --dport 22 -j ACCEPT
     -A INPUT -p tcp --dport 8443 -j ACCEPT
+    # derper（C2）：DERP TCP 10043 + STUN UDP 10078
+    -A INPUT -p tcp --dport 10043 -j ACCEPT
+    -A INPUT -p udp --dport 10078 -j ACCEPT
     # 其余拒绝并记录
     -A INPUT -j LOG --log-prefix "sm-input-dropped: " --log-level 4
     -A INPUT -j DROP

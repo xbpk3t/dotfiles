@@ -30,5 +30,6 @@
     ./sudoers.nix
     ./singbox.nix
     ./firewall.nix
+    ./derper.nix
   ];
 }
