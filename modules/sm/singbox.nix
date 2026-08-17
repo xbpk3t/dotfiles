@@ -103,7 +103,9 @@ in
       wants = [ "network-online.target" ];
       serviceConfig = {
         Type = "simple";
-        ExecStart = "${pkgs.sing-box}/bin/sing-box run -c ${config.sops.templates."sing-box-config.json".path}";
+        ExecStart = "${pkgs.sing-box}/bin/sing-box run -c ${
+          config.sops.templates."sing-box-config.json".path
+        }";
         Restart = "on-failure";
         RestartSec = "10s";
         # 与 sm 其他服务一致的最小加固

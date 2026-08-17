@@ -14,21 +14,23 @@
   # 会在直连公网的 VPS 上形成无认证开放代理暴露面（对抗式审查 S1），故禁用。
   # 模块保留：未来若在国内 VPS 上启用代理客户端，需按「loopback bind + TUN /
   # tailnet bind + lan-allowed-ips 白名单」方式收紧（见 modules/sm/mihomo.nix 注释）。
-  services.mihomo-client.enable = false;
+  services = {
+    mihomo-client.enable = false;
 
-  # sing-box server（vless-reality，SGP 出网代理服务端）。
-  # 对抗式搜索：直接 import nixpkgs services.sing-box 模块（sm 支持 systemd.packages/utils），
-  # 见 modules/sm/singbox.nix。端口 8443，INPUT policy 已 ACCEPT；需腾讯云安全组放行 8443。
-  services.singbox-server.enable = true;
+    # sing-box server（vless-reality，SGP 出网代理服务端）。
+    # 对抗式搜索：直接 import nixpkgs services.sing-box 模块（sm 支持 systemd.packages/utils），
+    # 见 modules/sm/singbox.nix。端口 8443，INPUT policy 已 ACCEPT；需腾讯云安全组放行 8443。
+    singbox-server.enable = true;
 
-  # derper（C2）：SGP DERP 中继，声明式（lego DNS-01 证书 + systemd unit）。
-  # 需要 DNS 记录 derp-sm-vps-tc.lucc.dev → 公网 IP（TF 控制面）+ CF token（sm sops）。
-  services.derper.enable = true;
+    # derper（C2）：SGP DERP 中继，声明式（lego DNS-01 证书 + systemd unit）。
+    # 需要 DNS 记录 derp-sm-vps-tc.lucc.dev → 公网 IP（TF 控制面）+ CF token（sm sops）。
+    derper.enable = true;
 
-  # 状态页（C3）：nginx fleet 状态（SGP 视角），status.lucc.dev:8080
-  services.status-page.enable = true;
+    # 状态页（C3）：nginx fleet 状态（SGP 视角），status.lucc.dev:8080
+    status-page.enable = true;
 
-  # 基础能力由 modules/sm 直接 enable（无开关）：
-  #   sops（secrets 注入）、sshd 硬化、systemd（journald/logind）、i18n、tailscale。
-  # 不需要在这里声明——modules/sm 无条件启用它们。
+    # 基础能力由 modules/sm 直接 enable（无开关）：
+    #   sops（secrets 注入）、sshd 硬化、systemd（journald/logind）、i18n、tailscale。
+    # 不需要在这里声明——modules/sm 无条件启用它们。
+  };
 }
