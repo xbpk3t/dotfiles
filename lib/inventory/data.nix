@@ -278,6 +278,29 @@ in
         ];
       };
     };
+    # 共享机（共用 VPS；腾讯云香港 103.79.184.82）。
+    # - shared = true：sm 系统侧只保留 managed-flag（其余基线全部关闭），
+    #   HM 用裁剪集（不 import home/core 全量，避免 zsh/gh/cntr 引用 sops）。
+    # - ssh 连接：root 密码登录起步，bootstrap 建 luck 后走 luck+key。
+    sm-vps-hk = {
+      hostName = "sm-vps-hk";
+      stateVersion = "24.11";
+      system = "x86_64-linux";
+      user = commonUser;
+      time = commonTime;
+      editor = commonEditor;
+      shared = true;
+      ssh = {
+        host = "103.79.184.82";
+        user = "luck";
+        opts = [
+          "-o"
+          "ServerAliveInterval=30"
+          "-o"
+          "ServerAliveCountMax=20"
+        ];
+      };
+    };
     # ── 加新真机模板 ──────────────────────────────────────────────
     # sm-vps-<名字> = {
     #   hostName = "sm-vps-<名字>";   # 与节点名一致（/etc/sm-vps-managed 的 node=）

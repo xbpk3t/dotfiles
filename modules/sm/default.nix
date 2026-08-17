@@ -10,23 +10,37 @@
 # timezone 就是栽在这个坑上——声明了但没生效，见 i18n.nix）。
 # 因此：声明任何 distro 已存在的路径（/etc/timezone、/etc/localtime、/etc/shells、
 # /etc/nftables.conf、/etc/ssh/ssh_config 等）都必须显式 replaceExisting=true。
-{ ... }:
+{
+  lib,
+  isShared ? false,
+  ...
+}:
 {
   _file = ./default.nix;
+
+  # 共享机（shared=true）裁剪：基线能力按 host 显式选择。
+  # 设计：isShared 由 outputs/.../sm-vps.nix 透传（node.shared 派生），
+  # 各模块内用 lib.mkIf (!isShared) 关闭影响他人的全局副作用。
+  # 这里不额外声明选项；各模块自行读 isShared。
 
   imports = [
     ./packages.nix
     ./managed-flag.nix
     ./sshd.nix
     ./nix-conf.nix
-    ./tailscale.nix
-    ./sops.nix
     ./systemd.nix
     ./i18n.nix
     ./shells.nix
     ./gc.nix
-    ./mihomo.nix
     ./fail2ban.nix
     ./sudoers.nix
+  ]
+  ++ lib.optionals (!isShared) [
+    # sops.nix：系统 sops（root secrets）。shared 不放主 key → 整个模块不 import。
+    # mihomo.nix：无条件引用 sops.templates，shared 无 sops → 也不 import。
+    # tailscale.nix：shared 不上 tailnet（避免开全局转发 + advertising exit node）。
+    ./sops.nix
+    ./mihomo.nix
+    ./tailscale.nix
   ];
 }
