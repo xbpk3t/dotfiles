@@ -58,6 +58,9 @@ in
       K3S_TOKEN = mkRootSecret "k3s/token";
       # Tailscale
       TAILSCALE_AUTH_KEY = mkRootSecret "tailscale/auth_key";
+      # ACME（derper 证书 DNS-01）：CF token（复用 secrets/default.nix 的 acme/cloudflare_env）。
+      # email 用 userMeta.mail（inventory），不进 sops。
+      ACME_CF_ENV = mkRootSecret "acme/cloudflare_env";
     };
   };
 

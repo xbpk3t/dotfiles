@@ -21,6 +21,10 @@
   # 见 modules/sm/singbox.nix。端口 8443，INPUT policy 已 ACCEPT；需腾讯云安全组放行 8443。
   services.singbox-server.enable = true;
 
+  # derper（C2）：SGP DERP 中继，声明式（lego DNS-01 证书 + systemd unit）。
+  # 需要 DNS 记录 derp-sm-vps-tc.lucc.dev → 公网 IP（TF 控制面）+ CF token（sm sops）。
+  services.derper.enable = true;
+
   # 基础能力由 modules/sm 直接 enable（无开关）：
   #   sops（secrets 注入）、sshd 硬化、systemd（journald/logind）、i18n、tailscale。
   # 不需要在这里声明——modules/sm 无条件启用它们。
