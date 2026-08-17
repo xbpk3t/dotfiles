@@ -7,17 +7,25 @@
 # 不接管服务单元 → 不 mask 不冲突，可反复 switch 收敛。
 #
 # 这是 sm-vps 基线能力（安全硬化必需），不做配置化开关。
-_: {
+{
+  lib,
+  isShared ? false,
+  ...
+}:
+{
   _file = ./sshd.nix;
 
   # ⚠️ 与 hosts/sm-vps/ansible/bootstrap.yml 的 P4/4a 写同一路径。
   # 这里是稳态接管（sm switch 后生效），Ansible 是 day-0 自锁。
   # 两边内容必须保持一致；改任何一侧要同步另一侧，否则 last-writer-wins 漂移。
-  environment.etc."ssh/sshd_config.d/99-sm-hardening.conf".text = ''
-    PermitRootLogin no
-    PasswordAuthentication no
-    KbdInteractiveAuthentication no
-  '';
+  # 共享机（shared=true）：不写 drop-in，避免锁 root 密码登录（别人失联）。
+  environment.etc."ssh/sshd_config.d/99-sm-hardening.conf" = lib.mkIf (!isShared) {
+    text = ''
+      PermitRootLogin no
+      PasswordAuthentication no
+      KbdInteractiveAuthentication no
+    '';
+  };
 
   # 说明：tailscaled / sshd 系统服务本身仍由 distro 管理，
   # sm 只声明配置 drop-in，避免 services.openssh 的 mask 事故。

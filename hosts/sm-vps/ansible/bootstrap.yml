@@ -128,6 +128,7 @@
         owner: "{{ sm_user }}"
         group: "{{ sm_user }}"
         mode: "0600"
+      when: not sm_shared | default(false)
 
     - name: 2h 系统 age key 目录（系统 sops S5）
       ansible.builtin.file:
@@ -144,6 +145,7 @@
         owner: root
         group: root
         mode: "0600"
+      when: not sm_shared | default(false)
 
     - name: 2j enable-linger（用户 systemd；无原生模块，用 shell + 幂等）
       ansible.builtin.command:
@@ -194,6 +196,8 @@
   hosts: sm_vps
   gather_facts: true   # 3c 用 ansible_distribution/ansible_os_family
   tags: [bootstrap-p3, bootstrap-full]
+  # 共享机（sm_shared=true）：不引入 tailscale 组件（不加 repo、不装包、不 up）。
+  # Play 不支持 when，3a/3f 提示保留，3c-3e 加 when 守卫。
   tasks:
     # HM/system-manager 收敛不在这里做——它需要远端 flake 树（已删），
     # 且 deploy-rs remote_build 是唯一正确入口（S3 打通，不依赖远端树）。
@@ -211,7 +215,9 @@
         components: [main]
         signed_by: "https://pkgs.tailscale.com/stable/{{ ansible_distribution | lower }}/{{ ansible_distribution_release }}.gpg"
         state: present
-      when: ansible_os_family == 'Debian'
+      when:
+        - not sm_shared | default(false)
+        - ansible_os_family == 'Debian'
       become: true
 
     - name: 3d 安装 tailscale 包
@@ -219,24 +225,28 @@
         name: tailscale
         state: present
       become: true
+      when: not sm_shared | default(false)
 
     - name: 3e0 检查 tailscale 状态文件（决定是否要 up；state 是 root 属主）
       ansible.builtin.stat:
         path: /var/lib/tailscale/tailscaled.state
       register: tailscaled_state
       become: true
+      when: not sm_shared | default(false)
 
     - name: 3e1 检查 authkey 是否已 push（跨 play：2m 在 P2，重跑 P3 时可能没有）
       ansible.builtin.stat:
         path: /root/.ts-authkey
       register: ts_authkey_state
       become: true
+      when: not sm_shared | default(false)
 
     - name: 3e tailscale up（仅当 authkey 已 push 且未登录；用后删文件）
       ansible.builtin.command:
         cmd: "tailscale up --authkey=file:/root/.ts-authkey && rm -f /root/.ts-authkey"
       become: true
       when:
+        - not sm_shared | default(false)
         - sm_ts_authkey_src | length > 0
         - not tailscaled_state.stat.exists
         - ts_authkey_state.stat.exists
@@ -251,6 +261,8 @@
   hosts: sm_vps
   gather_facts: true
   tags: [bootstrap-p4, bootstrap-full]
+  # 共享机（sm_shared=true）：不锁 sshd（别人可能仍靠 root 密码登录）。
+  # Play 不支持 when，改为每个 task 加 when 守卫（4a-4c）。
   vars:
     ansible_user: root
     ansible_ssh_private_key_file: ""
@@ -267,15 +279,18 @@
           KbdInteractiveAuthentication no
         mode: "0644"
         validate: "sshd -t -f %s"
+      when: not sm_shared | default(false)
 
     - name: 4b 重载 sshd（服务名随发行版）
       ansible.builtin.systemd:
         name: "{{ 'ssh' if ansible_os_family == 'Debian' else 'sshd' }}"
         state: reloaded
       register: sshd_reload
+      when: not sm_shared | default(false)
 
     - name: 4c 锁后回归验证（luck 仍可登录；用 ansible_host 而非 inventory 名，且 accept-new）
       ansible.builtin.command: ssh -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new "{{ sm_user }}@{{ ansible_host }}" "id"
       delegate_to: localhost
       register: post_lock
       changed_when: false
+      when: not sm_shared | default(false)

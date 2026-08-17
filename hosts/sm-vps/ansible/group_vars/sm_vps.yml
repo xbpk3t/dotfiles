@@ -9,6 +9,10 @@ sm_groups:
   - sudo            # Debian/Ubuntu 管理组；RHEL 系改 wheel（distro 适配点）
 sm_shell: /bin/bash
 
+# 共享机（共用 VPS）：true 时跳过 sshd 锁、不复制主 age key。
+# 按节点在 inventory 覆盖。
+sm_shared: false
+
 # 节点（HM/sm 收敛走 deploy-rs，不需要目标机 flake 源码树）
 sm_node: sm-vps-tc   # 覆盖：每台机器在 inventory 里设 sm_node=<hostname>
 
