@@ -29,5 +29,6 @@
     ./fail2ban.nix
     ./sudoers.nix
     ./singbox.nix
+    ./firewall.nix
   ];
 }
