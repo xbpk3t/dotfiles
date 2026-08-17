@@ -25,6 +25,9 @@
   # 需要 DNS 记录 derp-sm-vps-tc.lucc.dev → 公网 IP（TF 控制面）+ CF token（sm sops）。
   services.derper.enable = true;
 
+  # 状态页（C3）：nginx fleet 状态（SGP 视角），status.lucc.dev:8080
+  services.status-page.enable = true;
+
   # 基础能力由 modules/sm 直接 enable（无开关）：
   #   sops（secrets 注入）、sshd 硬化、systemd（journald/logind）、i18n、tailscale。
   # 不需要在这里声明——modules/sm 无条件启用它们。

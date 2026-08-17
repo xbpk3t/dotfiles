@@ -31,5 +31,6 @@
     ./singbox.nix
     ./firewall.nix
     ./derper.nix
+    ./status-page.nix
   ];
 }
