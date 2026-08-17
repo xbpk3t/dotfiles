@@ -61,7 +61,10 @@ in
       enable = true;
       description = "Tailscale DERP relay server";
       wantedBy = [ "system-manager.target" ];
-      after = [ "network.target" "sm-derper-certs.service" ];
+      after = [
+        "network.target"
+        "sm-derper-certs.service"
+      ];
       requires = [ "sm-derper-certs.service" ];
       serviceConfig = {
         Type = "simple";
