@@ -1,3 +1,0 @@
-[leader.e]
-help = "Edit file"
-send = ["$", "jj edit $change_id && $VISUAL $file", "enter"]
