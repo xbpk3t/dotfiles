@@ -1,8 +1,8 @@
 ---
 version: "3"
 
-
-
+includes:
+  vps: ./Taskfile.vps.yml
 
 
   # - sar <type> <type-param> <interval> <count> # Only type parameter is required, others are optional. Types: e.g. CPU, memory, network. Type parameters: some types have parameters, some don't. DEV here represents monitoring network card information. Time interval represents how many seconds to sample data, 1 here means 1 second. Count represents the number of samples. For example, if time interval is 3 and sample count is 4, the sar command will block for 12 seconds
