@@ -1,6 +1,4 @@
-# APM global skill manifest — managed by Nix (home.file)
-# Run `apm install -g` after rebuild to sync dependencies.
-# ~/.apm/apm.lock is APM's runtime artifact; not managed here.
+---
 
 name: apm-global
 version: 0.1.0
@@ -24,6 +22,14 @@ dependencies:
         - opencli-usage # 命令快速参考，用来插命令
         - opencli-browser # opencli browser 命令（驱动chrome做交互式操作）
 
+
+
+    # [沉梦昂志 on X: "DeepSeek harness @tianyi 崔神主导的 project 里面有这样一个 skill https://t.co/r15B4Roq0r 整个开发过程每提交数个 PR 之后就会使用此方法进行一轮简化，累计删除了数十万行代码 我让 codex 将其 deepseek harness 特化部分去除后修改为 https://t.co/ADvXqorsv4" / X](https://x.com/XchenEvan/status/2089268107269529657)
+    # [deepseek-harness/.agents/skills/dsh-find-simplifications/SKILL.md at master · deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness/blob/master/.agents/skills/dsh-find-simplifications/SKILL.md)
+    # 尝试后发现这个搭配cc的simplify使用不错
+    - git: https://github.com/Yevanchen/reclaim-code-entropy.git
+      skills:
+        - reclaim-code-entropy
 
   # deja-history：上游无 remote skill URL（install 时本地生成 SKILL.md）。
   # 正文 pin 在 apm-local/deja-history/（官方 v0.15.0 MCP guidance）。
