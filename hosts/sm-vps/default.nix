@@ -6,7 +6,7 @@
 # 由 modules/sm 直接 enable（不配置化）。这里只声明「服务角色」：
 #   services.mihomo-client.enable   — 代理客户端（可选）
 #   services.singbox-server.enable  — 代理服务端（sm-vps 默认不做，长期机才做）
-# 对齐 nixos-vps/default.nix 的 services.singbox-server.enable / mihomo-server.enable。
+# 对齐 nixos-vps/default.nix 的 modules.infra.singbox-server.enable / mihomo-server.enable。
 {
   lib,
   isShared ? false,
