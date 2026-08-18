@@ -21,7 +21,6 @@ let
       "hosts/${name}/default.nix"
       "secrets/default.nix"
       "modules/nixos/kernel"
-      "modules/nixos/devops/nixos-agent.nix"
       "modules/nixos/infra/nix-tools.nix"
       "modules/nixos/infra/mihomo-server.nix"
       "modules/nixos/infra/singbox-server.nix"
@@ -84,7 +83,7 @@ let
       virtualisation.incus.enable = lib.mkIf incusOn true;
       users.users.${username}.extraGroups = lib.mkIf incusOn [ "incus-admin" ];
 
-      modules.extra.k3s = lib.mkIf (node ? k3s) node.k3s;
+      modules.ms.k3s = lib.mkIf (node ? k3s) node.k3s;
     };
 
   mkNodeRole =

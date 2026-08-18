@@ -6,7 +6,7 @@
 }:
 let
   inherit (lib) mkIf mkMerge;
-  cfg = config.modules.extra.k3s;
+  cfg = config.modules.ms.k3s;
   inherit (cfg) role;
   tokenPath = config.sops.secrets.K3S_TOKEN.path;
   isServer = role == "server";
@@ -30,7 +30,7 @@ let
   flannelIfaceIP = if cfg.nodeIP != "" then cfg.nodeIP else cfg.serverIP;
 in
 {
-  options.modules.extra.k3s = with lib; {
+  options.modules.ms.k3s = with lib; {
     enable = mkEnableOption "Enable k3s (server/agent)";
 
     role = mkOption {

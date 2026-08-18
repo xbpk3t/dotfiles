@@ -13,7 +13,7 @@ _: {
     };
 
     # Sudo configuration
-    sudo.extraConfig = builtins.readFile ./sudo.conf;
+    sudo.extraConfig = builtins.readFile ../infra/sudo.conf;
 
     # Certificate management
     pki = {
