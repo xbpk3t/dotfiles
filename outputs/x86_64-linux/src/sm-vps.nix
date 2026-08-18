@@ -58,7 +58,6 @@ let
         // {
           inherit system specialArgs;
           home-modules = homeModules;
-          backupFileExtension = "hm.bak";
         }
       );
 

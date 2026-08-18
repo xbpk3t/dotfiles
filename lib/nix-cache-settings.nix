@@ -19,10 +19,4 @@ let
 in
 {
   inherit substituters trustedPublicKeys;
-
-  # 预渲染成 nix.conf 需要的空格分隔格式，避免在业务模块重复拼接字符串。
-  asNixConf = {
-    substituters = builtins.concatStringsSep " " substituters;
-    trustedPublicKeys = builtins.concatStringsSep " " trustedPublicKeys;
-  };
 }

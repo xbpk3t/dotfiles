@@ -4,10 +4,6 @@
   genSpecialArgs,
   home-modules ? [ ],
   specialArgs ? (genSpecialArgs system),
-  # standalone 无 home.backupFileExtension option；激活时用
-  # `home-manager switch -b <ext>` 或 HOME_MANAGER_BACKUP_EXT。
-  # 参数保留供 Phase 2/5 activate 脚本/deploy profile 读取。
-  backupFileExtension ? "hm.bak",
   ...
 }:
 let
@@ -19,10 +15,7 @@ let
 in
 home-manager.lib.homeManagerConfiguration {
   inherit pkgs;
-  extraSpecialArgs = extraSpecialArgs // {
-    # 约定备份后缀（非 HM 官方 option）；CLI: home-manager switch -b hm.bak
-    smBackupFileExtension = backupFileExtension;
-  };
+  inherit extraSpecialArgs;
   modules = home-modules ++ [
     # 与 NixOS/Darwin 内嵌 HM 主线一致：nix-index wrapper + 预生成 database
     inputs.nix-index-database.homeModules.default
