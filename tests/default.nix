@@ -14,11 +14,10 @@ let
     pkgs.writeText "${name}.json" (builtins.toJSON testResult.testResults);
 in
 {
-  # 纯逻辑测试：验证 `scanPaths` 的过滤规则是否符合预期。
-  scan-paths = mkEvalCheck "scan-paths-test" ./scan-paths-test.nix;
-
   # 真实目录测试：验证仓库里的 services tree 仍然满足 `scanPaths` 的契约。
-  real-scan-paths = mkEvalCheck "real-scan-paths-test" ./real-scan-paths-test.nix;
+  # 注：原 mock 版（scan-paths-test.nix）已删除——real 版对真实目录断言，
+  #     并且直接调用 mylib.scanPaths，是更强的契约。
+  scan-paths = mkEvalCheck "real-scan-paths-test" ./real-scan-paths-test.nix;
 
   # 代理协议生成：验证 singbox / mihomo outbounds 会为新增协议生成节点。
   proxy-outbounds = mkEvalCheck "proxy-outbounds-test" ./proxy-outbounds-test.nix;

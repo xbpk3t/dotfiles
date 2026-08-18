@@ -7,10 +7,7 @@ let
   homeStandalone = import ./home-standalone.nix;
   systemManager = import ./system-manager.nix;
   # 提供统一的节点 ID / host meta 生成器
-  node = import ./node-id.nix { inherit lib; };
   inventory = import ./inventory { inherit lib; };
-  attrs = import ./attrs.nix { inherit lib; };
-  AI = import ./AI.nix { inherit lib; };
   vpsSysctl = import ./vps-sysctl.nix { inherit lib; };
   nixCacheSettings = import ./nix-cache-settings.nix;
   # pre-commit 依赖工具集（单一事实来源，devShell 与 home.packages 共用）
@@ -43,10 +40,7 @@ in
     nixosSystem
     homeStandalone
     systemManager
-    node
     inventory
-    attrs
-    AI
     vpsSysctl
     nixCacheSettings
     precommitTools

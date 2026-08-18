@@ -11,4 +11,3 @@ includes:
   fw: ./Taskfile.firewall.yml
   nmap: ./Taskfile.nmap.yml
   curl: ./Taskfile.curl.yml
-  proxy: ./Taskfile.proxy.yml
