@@ -152,8 +152,7 @@ in
       user = commonUser;
       time = commonTime;
       editor = commonEditor;
-      # 与 dev 同为 virtio VPS（hosts/nixos-vps/default.nix 的 nixos-agent
-      # 容器需要 externalInterface 才能配置 NAT）；真实出口确认过是 ens3。
+      # 与 dev 同为 virtio VPS；真实公网出口确认过是 ens3。
       networking = {
         externalInterface = "ens3";
       };

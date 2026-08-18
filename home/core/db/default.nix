@@ -33,6 +33,6 @@
 
     csvkit
 
-    postgrest
+    # postgrest
   ];
 }

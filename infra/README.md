@@ -23,12 +23,13 @@
 
 ```text
 infra/
-  inventory/
   minio/
     tf-s3-backend/
     loki/
   stacks/
 ```
+
+> 注：inventory 为本地盘点产物，不入仓库（见 `infra/AGENTS.md`）。
 
 ## 为什么是 Terramate
 
@@ -79,15 +80,15 @@ infra/stacks/vps/cloudflare/zone/
 
 1. 先做 inventory，不直接做重构
 2. 按 provider / account / project / region 导出资源列表
-3. 把导出结果放进 `inventory/<date>/`
+3. 把导出结果放进本地被忽略的 `infra/.inventory/<date>/`（不提交）
 4. 标记哪些资源已经由 IaC 管，哪些还是手工资源
 5. 先纳管高价值资源：DNS、对象存储、网络、IAM
 6. 最后再用 import / generated config 作为迁移草稿，而不是直接当最终代码
 
-推荐 inventory 目录：
+推荐 inventory 目录（本地，不入仓库）：
 
 ```text
-infra/inventory/2026-03-26/
+infra/.inventory/2026-03-26/
   cloudflare/
   minio/
   aws/
@@ -139,7 +140,7 @@ terramate run --tags layer-infra -- tofu plan
 
 下一步应该优先做下面两件事之一：
 
-- 建第一版 `inventory/<date>/` 盘点清单
+- 建第一版 `infra/.inventory/<date>/` 盘点清单
 - 把第一个“新”基础设施 stack 放到 `stacks/` 下，验证目录约定
 
 不要在这一步先做大规模抽模块。
