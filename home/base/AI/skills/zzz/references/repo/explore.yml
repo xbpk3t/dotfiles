@@ -1,40 +1,76 @@
+---
 frontmatter:
   name: explore
   role: atom
-  desc: 替代方案探索；seed-aware；两波 fan-out 并搜；关系标签 peer/covers
+  desc: 替代方案探索；seed-aware；类别路由 + 四通道并搜；peer/covers 标签 + 质量底线；batch 模式并行
 
 what:
   is: |
     替代/备选/同类型的探索：将一个具体工具/框架/方案作为 seed，做波次 fan-out 搜索。
     两波而不是一波（先发散找候选，再以 IKEA / FH 视角找出路和定位）。
+    第一波用四个数据通道并搜（ossinsight / GitHub 反推 / 变体级联 / Sourcegraph），
+    每个候选必须带"为什么同类"的证据与来源 URL。
+    batch 模式：多个 seed 时每个 seed 一个 sub-agent 并行跑，主 agent 只汇总。
   not: |
     不是按目录惯性只搜 GitHub tag / awesome-list。
     不是 seed 套 seed（仅带一次 name）。
     不是主动展开单个候选的深度分析（那是 repo / vs 的事）。
+    不是全量 slop 打分（那是 repo-discovery 式重流程，本 prompt 只做轻量质量底线）。
+
+input:
+  params:
+    - mode: single | batch   # 缺省 = single（单 seed 完整跑）；batch = 多 seed 每 seed 一个 sub-agent 并行，主 agent 汇总
 
 constraint:
   must:
     - "seed 必给：用户输入的具体工具/框架/方案"
     - "仅带一次 name（seed name），不可 seed 套 seed"
     - "从问题域出发搜解决方案，而非只搜 GitHub tag / awesome-list"
-    - "并行：每波各路搜索并发跑"
-    - "输出固定结构"
+    - "第一波四通道并行（同 seed 内并发请求）：ossinsight / GitHub 反推 / 变体级联 / Sourcegraph，每通道 2～5 个候选"
+    - "每个候选必须带来源 URL + 一句'为什么同类'（共享 topic / 同 collection / 生态同源）"
+    - "质量底线：fork/star 比 <5% 标记假 star 嫌疑；2 年未更新标注 inactive；零 tool-call 候选打回"
+    - "batch 模式：每个 seed 起一个独立 sub-agent 并行执行完整 explore，主 agent 只做结果汇总；禁止串行"
+    - "输出固定结构（含 search log）"
   must-not:
     - "不主动展开单个候选的深度分析（那是 repo / vs 的事）"
+    - "禁止零 tool-call 的候选（防训练数据幻觉，无 URL 验证即打回）"
+    - "禁止超过 1000 结果不切分（GitHub 单查询上限，用 stars: 区间二分）"
+    - "禁止 C1 无 collection 时空转阻塞（标记 N/A 降级，见 workflow C1）"
 
 workflow:
-  - phase: 第一波：发散（候选挖掘）
+  - phase: 模式判定
+    gate: 无
     steps:
-      - "从以下各视角并行拉候选，每视角 2～5 个，优先满足多项的：1 同问题域解决（同一问题域的不同解法）；2 竞品替代（直接竞品/生态位重叠）；3 同类抽象层级（抽象层级和定位接近，不限语言生态）；4 升级/降级（更重型 all-in-one/商业 或 更轻量 embeddable/库级）；5 相邻生态集成（seed 所在生态圈的集成/互补工具）"
-      - "输出 ## Wave 1 — 候选 表格：候选 | 视角 | 关系 | 一句话"
-      - "去重：只保留命中 ≥2 个视角的候选；禁止同视角内保留定位近似的"
+      - "mode == batch → 每个 seed 起一个独立 sub-agent 并行执行本 prompt（phase 1~4），全部收齐后合并去重汇总；mode == single → 以下 phase 1~4 单线程完整跑"
+  - phase: 类别路由（先声明策略，用户可纠偏）
+    steps:
+      - "判断 seed 属于哪类，选查询策略：能力类（找能做的事）→ gh search code \"<kw>\" --filename SKILL.md 或 plugin.json；库/框架类（通用）→ GitHub Search 多 topic 交集；生僻/名字花哨 → code search 兜底；结果 >1000 → stars: 区间二分切分"
+      - "若是库/框架类：记下 seed 的 topics + primary_language，供后续通道复用"
+  - phase: 第一波：四通道并行（候选挖掘）
+    steps:
+      - "C1 数据管道（ossinsight）：get-repo-collections?repoId=<seed数字id> 拿 collectionId → collection-*-history-rank 拿同 collection repo 列表（带年度排名）。无 collection 映射（data:[]）时标记 N/A 不阻塞，可降级到 trending-repos?period=past_week&language=<seed语言> 补候选"
+      - "C2 反推查询（GitHub API）：从 seed 的 description/topics/README 生成 6 类查询（描述短语 / topic:A+topic:B / 同义扩展 / 领域+语言 / 功能改写 / category 上溯），每类 1 条，加 stars:>500"
+      - "C3 变体级联（GitHub API）：同一意图生成 4-5 个关键词变体（含同义词），从长到短级联，最短核心名词兜底。每语言重复仅当 seed 语言生态明显时。无 stars 过滤档（兜底捞长尾）只取前 3 且逐个过质量底线"
+      - "C4 生态补充（Sourcegraph）：repo:has.topic(<seed topic>) type:repo fork:no display=3 保守值，按 stars 过滤，补 GitHub 索引遗漏。SSE 流空/超时 → fallback 到 GitHub topic search（topic:<seed topic>+stars:>500）"
+      - "四通道并发请求（C1/C2/C3/C4 同时发，收齐后合并），每通道输出 2～5 个候选，全部带来源 URL"
+  - phase: 第一波合并：去重 + 标签 + 质量底线
+    gate: 四通道候选已产出
+    steps:
+      - "去重：按 repo 名合并四通道结果，标注来源通道"
+      - "只保留命中 ≥2 视角的候选；禁止同视角内保留定位近似的"
       - "关系标签：peer = 同层可替换（问题域、职责定位、输入输出相当）；covers = 比 seed 更全面（范围包含 seed 且不止）"
+      - "质量底线过滤：fork/star 比 <5% 标记假 star 嫌疑；2 年未更新标注 inactive；零 tool-call 候选打回"
+      - "输出 ## Wave 1 — 候选 表格：候选 | 视角 | 关系 | 证据(为什么同类) | 来源URL（URL 指向 repo 本身 github.com/<owner>/<repo>）"
   - phase: 第二波：IKEA / FH 定位
     gate: 第一波候选已产出
     steps:
       - "FH 视角反问：一句反问「你其实不是想要 A，而是想要 …？」；若无明显线索写「定位待补」"
       - "宜家效应检查：为什么目前是此 seed（顺手/生态锁定/历史决定）；seed 的隐形成本（维护/集成/认知/迁移）；真需要替换吗（替换成本 > 实际差距时建议留守）"
-      - "输出 ## Wave 2 — 定位：seed 定位（反问/隐形成本/是否推荐换）+ 候选快筛表（推荐场景/不建议场景/迁移成本/备注）+ 最终建议（一句）"
+      - "输出 ## Wave 2 — 定位：seed 定位（反问/隐形成本/是否推荐换）+ 候选快筛表（推荐场景/不建议场景/迁移成本/备注）+ 最终建议（一句）。无强替代时给留守卡片：留守理由 + 何时才值得再看替代"
+  - phase: search log
+    gate: 全部候选已产出
+    steps:
+      - "输出 ## Search Log：查询策略数 / 候选数 / 过滤数 / URL 验证数，供用户重跑或调阈值；通道级失败（C1 N/A / C4 fallback）在此显式记录"
 
 output:
   format: table
@@ -46,8 +82,9 @@ output:
   template: |
     ## Wave 1 — 候选
 
-    | 候选 | 视角 | 关系 | 一句话 |
-    |------|------|------|--------|
+    | 候选 | 视角 | 关系 | 证据(为什么同类) | 来源URL |
+    |------|------|------|-----------------|---------|
+    | <name> | <编号> | <peer/covers> | <共享topic/同collection/生态同源> | <github.com/owner/repo> |
 
     ## Wave 2 — 定位
 
@@ -62,8 +99,19 @@ output:
 
     最终建议：<一句结论>
 
+    （无强替代时：留守卡片 + 何时值得再看替代）
+
+    ## Search Log
+
+    - 查询策略数：<N>（类型路由 + C1~C4 各通道查询数）
+    - 候选数：<N> / 过滤后：<N>
+    - URL 验证数：<N>/<N>
+    - 通道失败记录：C1 N/A / C4 fallback …
+
 hint:
   - if: 输出了 peer 候选
     then: 提示 /zzz vs 做对比分析
   - if: 用户选定方向后需深入
     then: 提示 /zzz repo 做仓库分析
+  - if: 质量底线标记了假 star 嫌疑候选
+    then: 提示用户该候选需人工复核或替换

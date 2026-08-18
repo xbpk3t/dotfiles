@@ -1,0 +1,71 @@
+---
+# frontmatter:
+#   name: open-urls
+#   role: atom
+#   desc: 批量打开 URL —— curl 并发快速扫描,失败项 opencli 浏览器并发兜底验证,仅 alive 的用系统打开命令即时交付。 # 日常调研可能有几十个 URL,懒得逐个手动点开
+
+
+# what:
+#   is: 批量验证并打开 URL。curl 并发快速扫描,成功即立即打开交付;失败/可疑项再经 opencli browser 并发兜底验证,判定 alive 的继续打开。全程并发,不线性等待。
+#   not: 不是全流程浏览器驱动;不做 GitHub API 特判;不做死链清理。
+
+# constraint:
+#   must:
+#     - "全程并发,禁止串行:curl 并发扫描;curl 通过(2xx/3xx)立即打开交付,不必等全部扫完"
+#     - "两层验证:curl 非 2xx/3xx 的失败/可疑项必须 opencli fallback(并发 ≤4,独立 session),不得直接丢弃或直接打开"
+#     - "三档判定(alive / verified_dead / inconclusive);仅 alive 打开;inconclusive 单列待人工确认,不得当 dead 丢弃"
+#     - "交付统一用系统打开命令:macOS 用 open \"URL\",Linux 用 xdg-open \"URL\";每个 URL 独立新标签页"
+#   must-not:
+#     - "禁止 curl 判失败后不 fallback 直接丢弃(可能误杀 private repo / 限流 / 反爬)"
+#     - "禁止用 opencli 交付标签页(只用于验证),禁止未经验证直接打开"
+
+# workflow:
+#   - phase: 并发扫描
+#     steps:
+#       - "并发跑 curl -sIL --max-time 10 取最终状态码;2xx/3xx → alive,立即系统打开交付;其余(4xx/5xx/timeout/网络错误)→ fallback 候选"
+#       - "去重;curl 全部结束前不阻塞,边扫边开"
+
+#   - phase: 并发兜底
+#     steps:
+#       - "对候选并发(≤4,独立 session):opencli browser <session> open <url> 后 eval 探针读取页面 navigation responseStatus + innerText 长度与前 260 字符;验证完 close session"
+#       - "判定:命令报网络/DNS/TLS 错误或 responseStatus 400..=599 → verified_dead;无可靠状态但页面文本 ≥80 字符且不含 404/not found/forbidden 字样 → alive(立即打开);其余 → inconclusive"
+
+#   - phase: 汇报
+#     steps:
+#       - "只输出失败部分:verified_dead 列表 + inconclusive 待确认列表 + 一行摘要(通过 X/Y,已打开 X 个标签页;dead M,待确认 N)"
+
+# self-check:
+#   - "curl 与 opencli 均并发执行,没有串行逐个等超时"
+#   - "curl 失败的每一项都经过了 opencli fallback"
+#   - "inconclusive 没有混入打开或丢弃"
+#   - "只有 alive 的 URL 被系统打开命令打开;摘要计数与分组一致"
+
+frontmatter:
+  name: open-urls
+  role: atom
+  desc: 批量打开 URL —— 不做存活检测,直接逐个用系统打开命令交付新标签页。
+
+what:
+  is: 批量打开 URL。对每个 URL 直接用系统打开命令打开,不做任何存活检测或验证。
+  not: 不做死链检测;不做 GitHub API 特判;不用 opencli;不清理死链。
+
+constraint:
+  must:
+    - "对每个 URL 直接用系统打开命令"
+    - "每个 URL 独立新标签页,禁止同 tab 跳转"
+    - "逐个依次打开,不用等待任何检测"
+  must-not:
+    - "禁止任何存活检测(curl / opencli / HEAD 请求 / 验证流程)——直接开"
+
+workflow:
+  - phase: 打开
+    steps:
+      - "逐个对 URL 执行系统打开命令（macOS 用 open,Linux 用 xdg-open (按当前平台二选一)），不检测、不等待"
+
+  # - phase: 汇报
+  #   steps:
+  #     - "一行摘要:已打开 X 个标签页;若用户提供了 URL 总数,给出比例"
+
+self-check:
+  - "没有执行任何 curl/opencli/检测命令"
+  - "每个 URL 都被系统打开命令打开了一次"
