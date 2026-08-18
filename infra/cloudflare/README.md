@@ -18,11 +18,11 @@ Cloudflare 先走 `inventory -> ownership -> import/adopt -> managed stacks` 的
 
 ## 目录职责
 
-- `infra/scripts/cloudflare-inventory.sh`
-  - 只读盘点脚本
+- `infra/.taskfile/cloudflare-inventory.nu`
+  - 只读盘点脚本（nushell，经 `task tf:cf:inventory` 调用）
   - 从 API 拉 raw JSON 快照
-- `infra/inventory/<date>/cloudflare/`
-  - 每次盘点的输出
+- `infra/.inventory/<date>/cloudflare/`
+  - 每次盘点的输出（本地产物，不入仓库，见 `infra/AGENTS.md`）
   - 用于对齐当前真实状态
 - `infra/stacks/homelab/cloudflare/`
   - 已经收编进 OpenTofu/Terramate 的正式 stack
@@ -54,13 +54,13 @@ export CF_API_TOKEN="..."
 export CF_ACCOUNT_ID="..."
 export CF_ZONE_ID="..."
 
-./infra/scripts/cloudflare-inventory.sh
+task tf:cf:inventory   # 或直接 nu infra/.taskfile/cloudflare-inventory.nu
 ```
 
-输出目录默认是：
+输出目录默认是（本地产物，不入仓库）：
 
 ```text
-infra/inventory/YYYY-MM-DD/cloudflare/
+infra/.inventory/YYYY-MM-DD/cloudflare/
 ```
 
 ## 当前边界
