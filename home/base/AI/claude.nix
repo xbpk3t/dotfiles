@@ -191,9 +191,13 @@ in
               # - /model fable → FABLE；/model opus → OPUS；当前 FABLE 与 OPUS 同为 grok-4.5（刻意重复）
 
               # 注意 grok-4.5 的context只有500k，但是如果不标注[1m]，claude默认只给200k，很影响使用。有个办法是添加 CLAUDE_CODE_AUTO_COMPACT_WINDOW，但是这里无所谓了
-              ANTHROPIC_DEFAULT_FABLE_MODEL = "grok-4.5[1m]";
-              ANTHROPIC_DEFAULT_OPUS_MODEL = "grok-4.5[1m]";
-              ANTHROPIC_DEFAULT_SONNET_MODEL = "mimo-v2.5-pro[1m]";
+              # ANTHROPIC_DEFAULT_FABLE_MODEL = "grok-4.5[1m]";
+              # ANTHROPIC_DEFAULT_OPUS_MODEL = "grok-4.5[1m]";
+              # ANTHROPIC_DEFAULT_SONNET_MODEL = "mimo-v2.5-pro[1m]";
+
+              ANTHROPIC_DEFAULT_FABLE_MODEL = "deepseek-v4-flash[1m]";
+              ANTHROPIC_DEFAULT_OPUS_MODEL = "deepseek-v4-flash[1m]";
+              ANTHROPIC_DEFAULT_SONNET_MODEL = "deepseek-v4-flash[1m]";
               ANTHROPIC_DEFAULT_HAIKU_MODEL = "deepseek-v4-flash[1m]";
 
               # 用来在 /model picker 里多塞 1 条自定义模型，不替换 opus / sonnet / haiku / fable 那些内置 alias
