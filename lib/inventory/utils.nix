@@ -155,12 +155,13 @@ in
       # Why：与 deployRsNode 一致，由 inventory 的 ssh.host/primaryIp 推导。
       hostname = host;
       inherit sshUser sshOpts remoteBuild;
-      # magic rollback：Phase 8 因激活确认超时（deploy-rs 默认 confirmTimeout=30s，
-      # sm/HM 的 remote_build 激活耗时远超此值）导致每次都回滚、新 generation 不生效，
-      # 一度关闭。第二轮对抗式审查（N2）指出这使部署失去自动回滚安全网；
-      # 现将 confirmTimeout 提到 600s 后重开 magicRollback。若再出现误回滚，
-      # 回退为 false 并排查 canary 机制（deploy-rs confirmTimeout 单位=秒，见 README）。
-      magicRollback = true;
+      # magic rollback：deploy-rs 0.1.0 的 canary 确认机制有确认竞态 bug——
+      # home-manager 激活成功（远端已删 canary）后确认命令再删一次会失败并整节点
+      # 回滚（实测：Activation succeeded → rm canary No such file → 误回滚）。
+      # 关闭它：sm 激活失败本来就是报错（不静默半挂），home 激活幂等可重试；
+      # 相比"激活成功被误回滚"，"失败不自动回滚"的代价更小（留手动重试）。
+      # 若未来 deploy-rs 修了 canary 竞态，可考虑重开（deploy-rs confirmTimeout 单位=秒）。
+      magicRollback = false;
       confirmTimeout = 600;
       profiles = {
         # 系统轨：sm 激活必须 root（写 /etc、systemd、/var/lib/system-manager）。

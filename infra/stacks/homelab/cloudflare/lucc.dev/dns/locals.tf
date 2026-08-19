@@ -79,6 +79,16 @@ locals {
       comment  = "Tailscale DERP (LA)"
       priority = null
     }
+    derp-sm-vps-tc = {
+      id       = null
+      name     = "derp-sm-vps-tc.lucc.dev"
+      type     = "A"
+      content  = "43.156.103.43"
+      ttl      = 1
+      proxied  = false
+      comment  = "Tailscale DERP (SGP)"
+      priority = null
+    }
 
     blog = {
       id       = "442d7dbf738b136ce33fea1048c4331c"
