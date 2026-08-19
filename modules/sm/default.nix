@@ -23,6 +23,13 @@
   # 各模块内用 lib.mkIf (!isShared) 关闭影响他人的全局副作用。
   # 这里不额外声明选项；各模块自行读 isShared。
 
+  # ⚠️ 模块导入与 isShared（system-manager 的 option 存在性检查不解析 mkIf 条件，
+  # 定义无论真假都会注册）：
+  #   - 常驻组（下方）：option 永远存在（singbox/derper/status-page 用 mkEnableOption），
+  #     config 内依赖 sops 的块用 lib.mkIf (config ? sops) 门控，shared 下不求值。
+  #   - optionals (!isShared)：sops/tailscale/mihomo 的「配置主体」只在非共享机生效；
+  #     sops.nix 整体不 import（其 option 消失），服务角色 config 有 sops 引用时
+  #     借用 (config ? sops) 守卫避免未知属性。
   imports = [
     ./packages.nix
     ./managed-flag.nix
@@ -34,17 +41,20 @@
     ./gc.nix
     ./fail2ban.nix
     ./sudoers.nix
-    ./singbox.nix
     ./firewall.nix
+    ./singbox.nix
     ./derper.nix
     ./status-page.nix
   ]
   ++ lib.optionals (!isShared) [
-    # sops.nix：系统 sops（root secrets）。shared 不放主 key → 整个模块不 import。
-    # mihomo.nix：无条件引用 sops.templates，shared 无 sops → 也不 import。
-    # tailscale.nix：shared 不上 tailnet（避免开全局转发 + advertising exit node）。
-    ./sops.nix
+    # mihomo.nix / tailscale.nix — 非共享机才启用配置主体（见各自文件内部的
+    # mkIf (!isShared) / 依赖 sops 的门控）；option 声明在常驻 import 里，shared 下
+    # 依旧可引用（如 hosts 文件的 services.*.enable = mkIf (!isShared) ...）。
     ./mihomo.nix
     ./tailscale.nix
-  ];
+  ]
+  # sops.nix 常驻：sops-nix 模块（声明 sops.* options）无条件 import——
+  # shared 下 option 存在但配置为空（sops = mkIf (!isShared) {...}），
+  # 服务角色模块的 config.sops.* 引用不会因 option 缺失而报错。
+  ++ [ ./sops.nix ];
 }

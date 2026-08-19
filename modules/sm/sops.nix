@@ -31,8 +31,9 @@ in
 {
   _file = ./sops.nix;
 
-  imports = lib.optionals (!isShared) [
-    # sops-nix 的 NixOS 模块（非我们 modules/nixos/**；sm 官方测试证明可用）
+  # sops-nix 模块常驻 import：声明 sops.* options（shared 下 option 存在但无定义，
+  # 服务角色模块的 config.sops.* 引用可安全求值）。配置主体仍按 !isShared 门控。
+  imports = [
     inputs.sops-nix.nixosModules.sops
   ];
 
