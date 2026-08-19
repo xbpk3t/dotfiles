@@ -16,8 +16,7 @@ tasks:
       - task: '{{.TASK}}'
     vars:
       TASK:
-        sh: gum choose sync-docs-images bisync-scratches
-        msg: 选择待上传的bucket
+        sh: gum choose --header "选择待上传的bucket" sync-docs-images bisync-scratches
 
   sync:
     internal: true
