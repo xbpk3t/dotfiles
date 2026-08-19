@@ -18,7 +18,7 @@
 # 并给 serviceConfig 补 AmbientCapabilities/CapabilityBoundingSet = CAP_NET_ADMIN。
 # sm-vps-tc（SGP 直连公网）当前禁用本模块，见 hosts/sm-vps/default.nix。
 #
-# enable 开关：config.services.mihomo-client.enable（服务角色开关，默认 false）
+# enable 开关：config.modules.networking.mihomo.enable（服务角色开关，默认 false）
 # 对齐 nixos 轨 modules.infra.mihomo-server.enable / modules.infra.singbox-server.enable 命名。
 # 依赖：sops.templates 渲染（mihomo-client.yaml 由 sops-install-secrets 生成）——
 # 隐含依赖 modules/sm/sops.nix（基线 enable）。若未来 sops 可关，mihomo 需先确认。
@@ -30,15 +30,15 @@
   ...
 }:
 let
-  cfg = config.services.mihomo-client;
+  cfg = config.modules.networking.mihomo;
 in
 {
   _file = ./mihomo.nix;
 
-  # 显式默认关闭：hosts/sm-vps/default.nix 曾声明 services.mihomo-client.enable = false
+  # 显式默认关闭：hosts/sm-vps/default.nix 曾声明 modules.networking.mihomo.enable = false
   # （直连公网 VPS 上无认证开放代理暴露面，S1）；该声明在 shared 下因模块不 import
   # 引发 unknown option。默认值收进模块自身后 hosts 无需再声明。
-  options.services.mihomo-client = {
+  options.modules.networking.mihomo = {
     enable = lib.mkOption {
       type = lib.types.bool;
       default = false;

@@ -2,7 +2,7 @@
 # sm 官方适配 services.nginx（upstream/nixpkgs 模块薄封装），可直接用。
 # 状态数据：systemd timer 定期跑 `tailscale status --json` → 生成 fleet.json，
 # nginx 静态提供（SGP 视角看 fleet 在线状态）。
-# 这是「服务角色」，走 services.status-page.enable 开关。
+# 这是「服务角色」，走 modules.infra.status-page.enable 开关。
 {
   config,
   lib,
@@ -11,14 +11,14 @@
 }:
 with lib;
 let
-  cfg = config.services.status-page;
+  cfg = config.modules.infra.status-page;
   domain = "status.lucc.dev";
   stateDir = "/var/lib/status-page";
 in
 {
   _file = ./status-page.nix;
 
-  options.services.status-page = {
+  options.modules.infra.status-page = {
     enable = mkEnableOption "nginx status page for fleet (SGP)";
   };
 

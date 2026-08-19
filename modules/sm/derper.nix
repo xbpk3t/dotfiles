@@ -6,7 +6,7 @@
 #   - DNS 记录：TF 控制面（infra/stacks/.../tailscale/），声明式
 #   - 防火墙：sm-firewall 已放行（10043/10078 需加入）
 #
-# 这是「服务角色」，走 services.derper.enable 开关（对齐 nixos 轨命名），由 hosts/sm-vps 启用。
+# 这是「服务角色」，走 modules.infra.derper.enable 开关（对齐 nixos 轨命名），由 hosts/sm-vps 启用。
 {
   config,
   lib,
@@ -16,7 +16,7 @@
 }:
 with lib;
 let
-  cfg = config.services.derper;
+  cfg = config.modules.infra.derper;
   domain = "derp-sm-vps-tc.lucc.dev";
   port = 10043;
   stunPort = 10078;
@@ -25,7 +25,7 @@ in
 {
   _file = ./derper.nix;
 
-  options.services.derper = {
+  options.modules.infra.derper = {
     enable = mkEnableOption "Tailscale DERP relay server on this host";
   };
 

@@ -10,7 +10,7 @@
 #   - 只做 vless-reality（Reality 握手用公网站点，无需 ACME 证书/域名）；
 #     vmess/hy2/tuic/anytls 需要真实域名证书，SGP 临时机不做。
 #
-# 这是「服务角色」，走 services.singbox-server.enable 开关（对齐
+# 这是「服务角色」，走 modules.infra.singbox-server.enable 开关（对齐
 # hosts/sm-vps/default.nix 注释），由 hosts/sm-vps 启用。
 {
   config,
@@ -20,7 +20,7 @@
 }:
 with lib;
 let
-  cfg = config.services.singbox-server;
+  cfg = config.modules.infra.singbox-server;
   port = 8443;
   # 伪装握手目标（Reality 标准做法，选稳定大站）
   handshakeServer = "www.bing.com";
@@ -28,7 +28,7 @@ in
 {
   _file = ./singbox.nix;
 
-  options.services.singbox-server = {
+  options.modules.infra.singbox-server = {
     enable = mkEnableOption "sing-box server (vless-reality) on sm";
   };
 
@@ -40,7 +40,7 @@ in
 
     # sops 模板：sing-box 配置运行时渲染（placeholder → 真实 secret）。
     # 依赖 modules/sm/sops.nix（基线 enable）。输出路径 = template.path。
-    sops.templates."sing-box-config.json" = lib.mkIf (config ? sops) {
+    sops.templates."sing-box-config.json" = {
       content = builtins.toJSON {
         log.level = "info";
 
