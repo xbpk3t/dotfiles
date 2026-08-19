@@ -1,6 +1,7 @@
 _: {
   modules = {
     infra = {
+      nix-tools.enable = true;
       nh.enable = true;
       networking.enable = true;
     };
@@ -22,6 +23,10 @@ _: {
       # PR TUI（nixpkgs）+ review-first diff（llm-agents）；herdr keys: ctrl+alt+p / d
       ghui.enable = true;
       hunk.enable = true;
+      # fastfetch 在 Darwin 会拉入 apple-sdk-15.5（~481M 独有闭包），默认关闭；
+      # 需要 fetcher 时打开。
+      fastfetch.enable = false;
+      diagram.enable = true;
     };
 
     desktop = {
@@ -52,6 +57,7 @@ _: {
     };
 
     ms = {
+      docker-cli.enable = true;
       colima.enable = true;
     };
   };

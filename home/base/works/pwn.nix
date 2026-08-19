@@ -1,48 +1,62 @@
 {
+  config,
   lib,
   pkgs,
   ...
 }:
+let
+  cfg = config.modules.works.pwn;
+in
 {
-  home.packages =
-    with pkgs;
-    [
-      # === Red Team / 红队 ===
+  # host:
+  #   modules.works.pwn.enable = true;
+  #
+  # ⚠️ 安全/红队工具较重：metasploit ~938M、impacket ~89M、gophish ~16M。按需开启。
+  options.modules.works.pwn = with lib; {
+    enable = mkEnableOption "security/pwn tools (metasploit / impacket / gophish / chisel)";
+  };
 
-      # 渗透测试框架
-      metasploit
+  config = lib.mkIf cfg.enable {
+    home.packages =
+      with pkgs;
+      [
+        # === Red Team / 红队 ===
 
-      # 社会工程
-      gophish
+        # 渗透测试框架
+        # metasploit
 
-      # 拿信-windows
-      mimikatz
+        # 社会工程
+        gophish
 
-      python313Packages.impacket
+        # 拿信-windows
+        mimikatz
 
-      chisel
-    ]
-    ++ lib.optionals pkgs.stdenv.isLinux [
-      # 分类1：AD Internal Pentest（Linux-only）
-      # bloodhound # tags(desc): 信息收集 > AD域 > 可视化分析
+        python313Packages.impacket
 
-      # 分类1：Hash 破解（Linux-only）
-      # johnny # tags(desc): 密码破解 > GUI > John前端
+        chisel
+      ]
+      ++ lib.optionals pkgs.stdenv.isLinux [
+        # 分类1：AD Internal Pentest（Linux-only）
+        # bloodhound # tags(desc): 信息收集 > AD域 > 可视化分析
 
-      # 分类2：在线爆破（Linux-only）
-      # crowbar # tags(desc): 暴力破解 > 在线服务 > RDP/SSH
+        # 分类1：Hash 破解（Linux-only）
+        # johnny # tags(desc): 密码破解 > GUI > John前端
 
-      # 分类4：专项破解（Linux-only）
-      # veracrypt # tags(desc): 专项破解 > VeraCrypt > 卷密码
-    ]
-    ++ lib.optionals pkgs.stdenv.isLinux [
-      # 分类2：隧道 & 后渗透（Linux-only）
-      # ligolo-ng # tags(desc): 隧道代理 > 网络层 > 反向代理
-    ]
-    ++ lib.optionals pkgs.stdenv.isLinux [
-      # === Blue / 蓝队防御 ===
+        # 分类2：在线爆破（Linux-only）
+        # crowbar # tags(desc): 暴力破解 > 在线服务 > RDP/SSH
 
-      # 入侵检测
-      snort
-    ];
+        # 分类4：专项破解（Linux-only）
+        # veracrypt # tags(desc): 专项破解 > VeraCrypt > 卷密码
+      ]
+      ++ lib.optionals pkgs.stdenv.isLinux [
+        # 分类2：隧道 & 后渗透（Linux-only）
+        # ligolo-ng # tags(desc): 隧道代理 > 网络层 > 反向代理
+      ]
+      ++ lib.optionals pkgs.stdenv.isLinux [
+        # === Blue / 蓝队防御 ===
+
+        # 入侵检测
+        snort
+      ];
+  };
 }
