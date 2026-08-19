@@ -56,8 +56,7 @@ tasks:
       - task: '{{.TASK}}'
     vars:
       TASK:
-        sh: gum choose apps:check apps:install debloat:check debloat:apply diag:debloat:log diag:debloat:jobs diag:debloat:battery diag:debloat:full
-        msg: 选择 mobile 任务
+        sh: gum choose --header "选择 mobile 任务" apps:check apps:install debloat:check debloat:apply diag:debloat:log diag:debloat:jobs diag:debloat:battery diag:debloat:full
 
   apps:check:
     desc: 检查 apps.yml 中声明的 app 是否已安装
