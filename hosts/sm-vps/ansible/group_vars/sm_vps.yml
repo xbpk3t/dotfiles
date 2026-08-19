@@ -9,6 +9,13 @@ sm_groups:
   - sudo            # Debian/Ubuntu 管理组；RHEL 系改 wheel（distro 适配点）
 sm_shell: /bin/bash
 
+# bootstrap P2a 前置包（distro 适配点：Debian xz-utils vs RHEL xz）
+sm_bootstrap_packages:
+  - curl
+  - ca-certificates
+  - xz-utils
+  - rsync
+
 # 共享机（共用 VPS）：true 时跳过 sshd 锁、不复制主 age key。
 # 按节点在 inventory 覆盖。
 sm_shared: false

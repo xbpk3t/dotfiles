@@ -23,6 +23,14 @@
   # 各模块内用 lib.mkIf (!isShared) 关闭影响他人的全局副作用。
   # 这里不额外声明选项；各模块自行读 isShared。
 
+  # 全部模块常驻 import（option 声明永远存在）：
+  #   - 命名统一为 modules.* 布局（对齐 darwin/nixos 轨）：
+  #       modules.networking.* — 客户端（mihomo）
+  #       modules.infra.*       — 服务端/服务角色（singbox-server/derper/status-page）
+  #   - isShared 差异收敛到「config 主体」：各模块内部用 lib.mkIf (!isShared) /
+  #     lib.mkIf (config ? sops) 门控依赖 sops/tailscale 的部分，shared 下不求值。
+  #   - system-manager 的 option 存在性检查不解析 mkIf 条件（定义无论真假都会注册），
+  #     因此 option 必须常驻；hosts 文件的 enable 开关也统一 modules.* 命名。
   imports = [
     ./packages.nix
     ./managed-flag.nix
@@ -34,13 +42,12 @@
     ./gc.nix
     ./fail2ban.nix
     ./sudoers.nix
-  ]
-  ++ lib.optionals (!isShared) [
-    # sops.nix：系统 sops（root secrets）。shared 不放主 key → 整个模块不 import。
-    # mihomo.nix：无条件引用 sops.templates，shared 无 sops → 也不 import。
-    # tailscale.nix：shared 不上 tailnet（避免开全局转发 + advertising exit node）。
+    ./firewall.nix
     ./sops.nix
     ./mihomo.nix
     ./tailscale.nix
+    ./singbox.nix
+    ./derper.nix
+    ./status-page.nix
   ];
 }

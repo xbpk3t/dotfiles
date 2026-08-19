@@ -90,12 +90,10 @@
     ansible_ssh_private_key_file: ""
   tasks:
     - name: 2a 安装前置包（curl/ca-certificates/xz/rsync；package 跨发行版）
+      # 包名参数化：sm_bootstrap_packages（group_vars 默认 Debian：xz-utils）。
+      # RHEL 系覆盖为 xz（实测 B：AlmaLinux 9 无 xz-utils 包）。
       ansible.builtin.package:
-        name:
-          - curl
-          - ca-certificates
-          - xz-utils
-          - rsync
+        name: "{{ sm_bootstrap_packages }}"
         state: present
 
     - name: 2b 下载 Determinate Nix 安装器
