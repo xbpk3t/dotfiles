@@ -32,13 +32,22 @@ in
           gs = "stash";
           gp = "pull";
           lg = "log --graph --pretty=format:'%Cred%h%Creset - %C(yellow)%d%Creset %s %C(green)(%cr)%C(bold blue) <%an>%Creset' --abbrev-commit";
-          st = "status";
+          # st = "status";
           # 选中历史 commit → --fixup → 自动 autosquash rebase，全程零交互（EDITOR=true 跳过编辑器）
           # fixup = ''!f() { TARGET=$(git rev-parse "$1"); git commit --fixup=$TARGET ''${@:2} && EDITOR=true git rebase -i --autostash --autosquash $TARGET^; }; f'';
 
           # 提交中断后直接用上次的 message 重来（复用 .git/COMMIT_EDITMSG）
           # commit-reuse-message = ''!git commit --edit --file "$(git rev-parse --git-dir)"/COMMIT_EDITMSG'';
+
+          # 当前 worktree 相对 main 多的 commits(主要答案)
+          # git log main..HEAD --oneline
+          # # 要是想看反过来,main 比这个分支多的
+          # git log HEAD..main --oneline
+          # # 如果 main 分支的本地引用是旧的,用远端的最新状态更准
+          # git log origin/main..HEAD --oneline
+          wt-diff = "log main..HEAD --oneline";
         };
+
         user = {
           name = "xbpk3t";
           email = mail;

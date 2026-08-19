@@ -21,10 +21,9 @@ let
       "hosts/${name}/default.nix"
       "secrets/default.nix"
       "modules/nixos/kernel"
-      "modules/nixos/infra/homelab.nix"
+      "modules/nixos/infra"
 
       "modules/nixos/desktop/nvidia.nix"
-      "modules/nixos/infra/singbox-client.nix"
       "modules/nixos/ms/k3s.nix"
     ];
     home-modules = map mylib.relativeToRoot [
@@ -44,7 +43,7 @@ let
       networking.hostName = node.hostName or name;
     }
     // lib.optionalAttrs (node ? k3s) {
-      modules.extra.k3s = node.k3s;
+      modules.ms.k3s = node.k3s;
     };
 
   mkNodeRole =

@@ -6,7 +6,12 @@
 # 由 modules/sm 直接 enable（不配置化）。这里只声明「服务角色」：
 #   services.mihomo-client.enable   — 代理客户端（可选）
 #   services.singbox-server.enable  — 代理服务端（sm-vps 默认不做，长期机才做）
-# 对齐 nixos-vps/default.nix 的 services.singbox-server.enable / mihomo-server.enable。
+# 对齐 nixos-vps/default.nix 的 modules.infra.singbox-server.enable / mihomo-server.enable。
+{
+  lib,
+  isShared ? false,
+  ...
+}:
 {
   # 服务角色（对齐 nixos-vps/default.nix 的 server/client 区分）：
   # sm-vps-tc 在 SGP（新加坡），公网直通，不需要代理客户端出网。
@@ -14,12 +19,15 @@
   # 会在直连公网的 VPS 上形成无认证开放代理暴露面（对抗式审查 S1），故禁用。
   # 模块保留：未来若在国内 VPS 上启用代理客户端，需按「loopback bind + TUN /
   # tailnet bind + lan-allowed-ips 白名单」方式收紧（见 modules/sm/mihomo.nix 注释）。
+  # shared 下 mihomo 模块不 import（options 不存在），条件定义避免 unknown option。
+  # 基础能力由 modules/sm 直接 enable（无开关）：
+  #   sops（secrets 注入）、sshd 硬化、systemd（journald/logind）、i18n、tailscale。
+  # 不需要在这里声明——modules/sm 无条件启用它们。
   services = {
     mihomo-client.enable = false;
 
     # sing-box server（vless-reality，SGP 出网代理服务端）。
-    # 对抗式搜索：直接 import nixpkgs services.sing-box 模块（sm 支持 systemd.packages/utils），
-    # 见 modules/sm/singbox.nix。端口 8443，INPUT policy 已 ACCEPT；需腾讯云安全组放行 8443。
+    # 端口 8443，INPUT policy 已 ACCEPT；需腾讯云安全组放行 8443。
     singbox-server.enable = true;
 
     # derper（C2）：SGP DERP 中继，声明式（lego DNS-01 证书 + systemd unit）。
@@ -29,8 +37,8 @@
     # 状态页（C3）：nginx fleet 状态（SGP 视角），status.lucc.dev:8080
     status-page.enable = true;
 
-    # 基础能力由 modules/sm 直接 enable（无开关）：
-    #   sops（secrets 注入）、sshd 硬化、systemd（journald/logind）、i18n、tailscale。
-    # 不需要在这里声明——modules/sm 无条件启用它们。
+    # 共享机（shared=true）：userborn 会重写 /etc/passwd 并把 root shell 指向 store bash，
+    # 影响他人 root 登录体验；关闭（shared 下不管理用户）。
+    userborn.enable = lib.mkIf isShared false;
   };
 }

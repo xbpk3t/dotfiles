@@ -69,9 +69,9 @@ in
 
         # UI文本 - 使用支持中文的字体
         # sansSerif = {
-        #   # 苹果苹方作为默认 UI 字体
-        #   package = pkgs.apple-pingfang;
-        #   name = "PingFang SC";
+        #   # 苹果苹方作为默认 UI 字体（包已移除，如需用回需重新添加 pkgs.apple-pingfang）
+        #   # package = pkgs.apple-pingfang;
+        #   # name = "PingFang SC";
         # };
 
         # # 正式文本（比如浏览器文本）- 使用支持中文的字体

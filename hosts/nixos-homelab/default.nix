@@ -79,6 +79,13 @@ in
       tailscale.enable = true;
     };
 
+    infra = {
+      avahi.enable = true;
+      guix.enable = true;
+      btrbk.enable = true;
+      nix-tools.enable = true;
+    };
+
     systemd.manager.watchdog = {
       # homelab 机器也偏无人值守，启用 systemd Manager watchdog 作为死机自愈兜底。
       # 若将来需要按硬件单独调 Runtime/Reboot/KExec 超时，直接在该 host 调整参数即可。
@@ -88,7 +95,7 @@ in
     # 私网 homelab：显式关闭内置防火墙
     security.enableFirewall = false;
 
-    extra = {
+    ms = {
       # k3s 控制面：只设置 enable/role，其它配置在模块内固化
       k3s = {
         enable = true;

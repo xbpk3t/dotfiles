@@ -7,7 +7,7 @@
 }:
 with lib;
 let
-  cfg = config.services.singbox-server;
+  cfg = config.modules.infra.singbox-server;
   port = singbox.vlessPort or 8443;
   # 伪装握手目标域名（随便换一个稳定的大站都行）
   handshakeServer = "www.bing.com";
@@ -32,7 +32,7 @@ let
   inherit (userMeta) mail;
 in
 {
-  options.services.singbox-server = {
+  options.modules.infra.singbox-server = {
     enable = mkEnableOption "sing-box server (Reality)";
   };
 

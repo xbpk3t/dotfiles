@@ -58,8 +58,6 @@ rec {
       inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
 
-    nixos-hardware.url = "github:nixos/nixos-hardware";
-
     nix-index-database = {
       url = "github:nix-community/nix-index-database";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -91,11 +89,6 @@ rec {
 
     "deploy-rs" = {
       url = "github:serokell/deploy-rs";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    nixos-wsl = {
-      url = "github:nix-community/nixos-wsl/main";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

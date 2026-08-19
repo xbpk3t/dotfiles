@@ -5,7 +5,7 @@
 # 所有原生应用（Font Book、Safari 等）均可发现。
 { pkgs, ... }:
 let
-  fontsData = import ../../modules/fonts.nix { inherit pkgs; };
+  fontsData = import ../../../modules/fonts.nix { inherit pkgs; };
 in
 {
   fonts.packages = fontsData.cross;
