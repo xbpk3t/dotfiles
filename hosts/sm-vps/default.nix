@@ -19,26 +19,22 @@
   # 会在直连公网的 VPS 上形成无认证开放代理暴露面（对抗式审查 S1），故禁用。
   # 模块保留：未来若在国内 VPS 上启用代理客户端，需按「loopback bind + TUN /
   # tailnet bind + lan-allowed-ips 白名单」方式收紧（见 modules/sm/mihomo.nix 注释）。
-  # shared 下 mihomo 模块不 import（options 不存在），条件定义避免 unknown option。
   # 基础能力由 modules/sm 直接 enable（无开关）：
   #   sops（secrets 注入）、sshd 硬化、systemd（journald/logind）、i18n、tailscale。
   # 不需要在这里声明——modules/sm 无条件启用它们。
-  services = {
-    mihomo-client.enable = false;
+  #
+  # 服务角色仅对非共享机启用：mihomo/singbox/derper/status-page 的模块依赖
+  # sops/tailscale（modules/sm/default.nix 仅在 !isShared 组 import），shared 下
+  # option 不存在，因此整块用 mkIf (!isShared) 包裹（定义随条件丢弃，避免 unknown option）。
+  # 共享机是他人共用的 VPS，不跑代理服务端/中继/状态页。
+  # system-manager 的 option 存在性检查不解析 mkIf 条件（定义无论真假都会注册），
+  # 因此按 host 条件化必须拆成多个「services.*」定义块——shared 下服务角色模块
+  # 不 import（option 不存在），此处只能定义 userborn（nixpkgs 常驻模块提供）。
+  services.derper.enable = lib.mkIf (!isShared) true;
+  services.singbox-server.enable = lib.mkIf (!isShared) true;
+  services.status-page.enable = lib.mkIf (!isShared) true;
 
-    # sing-box server（vless-reality，SGP 出网代理服务端）。
-    # 端口 8443，INPUT policy 已 ACCEPT；需腾讯云安全组放行 8443。
-    singbox-server.enable = true;
-
-    # derper（C2）：SGP DERP 中继，声明式（lego DNS-01 证书 + systemd unit）。
-    # 需要 DNS 记录 derp-sm-vps-tc.lucc.dev → 公网 IP（TF 控制面）+ CF token（sm sops）。
-    derper.enable = true;
-
-    # 状态页（C3）：nginx fleet 状态（SGP 视角），status.lucc.dev:8080
-    status-page.enable = true;
-
-    # 共享机（shared=true）：userborn 会重写 /etc/passwd 并把 root shell 指向 store bash，
-    # 影响他人 root 登录体验；关闭（shared 下不管理用户）。
-    userborn.enable = lib.mkIf isShared false;
-  };
+  # 共享机（shared=true）：userborn 会重写 /etc/passwd 并把 root shell 指向 store bash，
+  # 影响他人 root 登录体验；关闭（shared 下不管理用户）。
+  services.userborn.enable = lib.mkIf isShared false;
 }

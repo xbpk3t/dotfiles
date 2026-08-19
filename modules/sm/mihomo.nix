@@ -35,8 +35,15 @@ in
 {
   _file = ./mihomo.nix;
 
+  # 显式默认关闭：hosts/sm-vps/default.nix 曾声明 services.mihomo-client.enable = false
+  # （直连公网 VPS 上无认证开放代理暴露面，S1）；该声明在 shared 下因模块不 import
+  # 引发 unknown option。默认值收进模块自身后 hosts 无需再声明。
   options.services.mihomo-client = {
-    enable = lib.mkEnableOption "mihomo proxy client (sm-vps)";
+    enable = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Enable mihomo proxy client (sm-vps). Default off — on a public-facing VPS an open unauthenticated proxy is an exposure (S1).";
+    };
   };
 
   config = lib.mkIf cfg.enable (

@@ -33,11 +33,14 @@ in
   };
 
   config = mkIf cfg.enable {
+    # 服务角色仅对非共享机启用（hosts/sm-vps/default.nix 用 mkIf (!isShared) 包住
+    # services.*，shared 下不启用）；sops 模块在 shared 下不 import，config.sops.*
+    # 不可用——但本 config 块在 enable=false（shared）时整体不求值，安全。
     environment.systemPackages = [ pkgs.sing-box ];
 
     # sops 模板：sing-box 配置运行时渲染（placeholder → 真实 secret）。
     # 依赖 modules/sm/sops.nix（基线 enable）。输出路径 = template.path。
-    sops.templates."sing-box-config.json" = {
+    sops.templates."sing-box-config.json" = lib.mkIf (config ? sops) {
       content = builtins.toJSON {
         log.level = "info";
 
@@ -92,6 +95,8 @@ in
       mode = "0400";
     };
 
+    # sops 模块在 shared 下不 import（config.sops.* 不存在）；本 config 块仅在
+    # cfg.enable（= !isShared 且 hosts 启用）时求值，shared 下整体跳过。
     systemd.services.sing-box = {
       enable = true;
       description = "sing-box server (vless-reality)";
