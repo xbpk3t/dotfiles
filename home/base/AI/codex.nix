@@ -134,6 +134,11 @@ in
         CONTEXT7_API_KEY = "$(cat ${config.sops.secrets.API_CONTEXT7.path})";
 
         LLM_AxonHub = "$(cat ${config.sops.secrets.LLM_AxonHub.path})";
+
+        # ccx session export 配置
+        CCX_WIKI_ROOT = "/Users/luck/Desktop/docs/wiki";
+        CCX_AI_MODEL = "deepseek-v4-flash";
+        CCX_AI_BASE_URL = "https://api.lucc.dev/v1";
       };
       shellAliases = {
       };

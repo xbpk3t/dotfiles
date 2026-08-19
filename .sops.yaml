@@ -22,7 +22,3 @@ creation_rules:
           - *age_key
     # Don't encrypt the entire file, only specific keys
     unencrypted_suffix: _unencrypted
-  - path_regex: \.cntr/metapi/\.env\.sops$
-    key_groups:
-      - age:
-          - *age_key

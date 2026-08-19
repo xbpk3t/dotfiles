@@ -191,9 +191,13 @@ in
               # - /model fable → FABLE；/model opus → OPUS；当前 FABLE 与 OPUS 同为 grok-4.5（刻意重复）
 
               # 注意 grok-4.5 的context只有500k，但是如果不标注[1m]，claude默认只给200k，很影响使用。有个办法是添加 CLAUDE_CODE_AUTO_COMPACT_WINDOW，但是这里无所谓了
-              ANTHROPIC_DEFAULT_FABLE_MODEL = "grok-4.5[1m]";
-              ANTHROPIC_DEFAULT_OPUS_MODEL = "grok-4.5[1m]";
-              ANTHROPIC_DEFAULT_SONNET_MODEL = "mimo-v2.5-pro[1m]";
+              # ANTHROPIC_DEFAULT_FABLE_MODEL = "grok-4.5[1m]";
+              # ANTHROPIC_DEFAULT_OPUS_MODEL = "grok-4.5[1m]";
+              # ANTHROPIC_DEFAULT_SONNET_MODEL = "mimo-v2.5-pro[1m]";
+
+              ANTHROPIC_DEFAULT_FABLE_MODEL = "deepseek-v4-flash[1m]";
+              ANTHROPIC_DEFAULT_OPUS_MODEL = "deepseek-v4-flash[1m]";
+              ANTHROPIC_DEFAULT_SONNET_MODEL = "deepseek-v4-flash[1m]";
               ANTHROPIC_DEFAULT_HAIKU_MODEL = "deepseek-v4-flash[1m]";
 
               # 用来在 /model picker 里多塞 1 条自定义模型，不替换 opus / sonnet / haiku / fable 那些内置 alias
@@ -212,6 +216,10 @@ in
               # CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
 
               # ccx session export 配置
+              # [2026-08-17] 注意这部分配置没有复用，而是在codex.nix 也写了一份。因为
+              # - 如果 cc 都是从终端启动（cc alias / 手动开终端再跑）→ cc 进程会继承 shell 的 sessionVariables → 可以只写 sessionVariables 一份，settings env 那三行删掉即可。
+              # - 如果 cc 有 launchd/daemon/后台任务 启动（不经过 shell）→ 只能靠 settings
+              # env，必须保留两份。
               CCX_WIKI_ROOT = "/Users/luck/Desktop/docs/wiki";
               CCX_AI_MODEL = "deepseek-v4-flash";
               CCX_AI_BASE_URL = "https://api.lucc.dev/v1";

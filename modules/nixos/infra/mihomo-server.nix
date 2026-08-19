@@ -8,7 +8,7 @@
 }:
 with lib;
 let
-  cfg = config.services.mihomo-server;
+  cfg = config.modules.infra.mihomo-server;
   port = singbox.vlessPort or 8443;
   handshakeServer = "www.bing.com";
   inventory = mylib.inventory."nixos-vps";
@@ -139,7 +139,7 @@ let
   };
 in
 {
-  options.services.mihomo-server = {
+  options.modules.infra.mihomo-server = {
     enable = mkEnableOption "mihomo server (VLESS+Reality + Hysteria2 inbound)";
   };
 

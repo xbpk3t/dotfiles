@@ -10,8 +10,13 @@
 #   isSystemConfig 语义由 mkRootSecret 显式保证（owner=root）。
 #
 # 这是 sm-vps 基线能力（secrets 注入是其他服务的依赖），不做配置化开关。
+# 共享机（shared=true）：系统 sops 整个关闭，不放主 age key 到 /etc/sops/age。
+# 原因：keys.txt 是 secrets.yaml 全量解密钥匙；共享机上他人有 root 密码，
+#       cat 一下就是全量泄露。共享机如需 secret，走 HM 专用 key + 独立小文件。
 {
   inputs,
+  lib,
+  isShared ? false,
   ...
 }:
 let
@@ -26,12 +31,12 @@ in
 {
   _file = ./sops.nix;
 
-  imports = [
+  imports = lib.optionals (!isShared) [
     # sops-nix 的 NixOS 模块（非我们 modules/nixos/**；sm 官方测试证明可用）
     inputs.sops-nix.nixosModules.sops
   ];
 
-  sops = {
+  sops = lib.mkIf (!isShared) {
     # 与 secrets.yaml 同一份加密文件（reuse secrets/default.nix 的 defaultSopsFile）
     defaultSopsFile = ./../../secrets/secrets.yaml;
 
@@ -66,7 +71,7 @@ in
 
   # sops-install-secrets 挂在 sysinit-reactivation.target 前触发（sm 引擎启动它）。
   # 注意：不设 sops.environment（避免与 sm systemd PATH 冲突；默认 PATH 够用）。
-  systemd.services.sops-install-secrets = {
+  systemd.services.sops-install-secrets = lib.mkIf (!isShared) {
     before = [ "sysinit-reactivation.target" ];
     requiredBy = [ "sysinit-reactivation.target" ];
   };

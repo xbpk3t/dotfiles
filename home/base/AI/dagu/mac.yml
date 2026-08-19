@@ -15,3 +15,7 @@ steps:
 
   - id: cleanup_mac
     run: mole cleanup
+
+  # colima 日常用完即关；仅在运行中才 prune（docker 镜像/build cache 约 4G 可回收）
+  - id: docker_prune
+    run: colima status >/dev/null 2>&1 && docker system prune -af --filter "until=168h" || true

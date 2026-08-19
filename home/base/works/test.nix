@@ -3,7 +3,7 @@
   home.packages = with pkgs; [
     k6
 
-    # vegeta
+    vegeta
     # speedtest-cli
 
     # hyperfine

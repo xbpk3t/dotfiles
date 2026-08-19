@@ -6,12 +6,12 @@
   ...
 }:
 let
-  cfg = config.modules.extra.android-tools.enable;
+  cfg = config.modules.infra.android-tools.enable;
   inherit (lib) mkEnableOption mkIf;
   inherit (userMeta) username;
 in
 {
-  options.modules.extra.android-tools.enable =
+  options.modules.infra.android-tools.enable =
     mkEnableOption "Android platform tools (adb/fastboot) with udev rules";
 
   config = mkIf cfg {

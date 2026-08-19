@@ -55,6 +55,8 @@ in
         _FXShowPosixPathInTitle = true;
         QuitMenuItem = true;
         AppleShowAllExtensions = true;
+        # 30 天自动清空废纸篓，防止废纸篓长期占盘（原生声明式）
+        FXRemoveOldTrashItems = true;
       };
 
       # Global settings

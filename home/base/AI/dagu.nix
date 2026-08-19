@@ -66,9 +66,18 @@ in
       # DAG 定义：逐文件 source = ./dagu/*.yml。HM 单文件会摊平成 <hash>-hm_<file>
       # store 文件，dagu 用 symlink 解析终点 basename 派生 DAG 名 → 名字带 hash 前缀
       # （超 40 字符会校验失败）。待改用"目录源 + 顶层 out-of-store symlink"修复。
-      ".dagu/dags/deadlink-loop.yml".source = ./dagu/deadlink-loop.yml;
-      ".dagu/dags/wiki-digest.yml".source = ./dagu/wiki-digest.yml;
-      ".dagu/dags/mac.yml".source = ./dagu/mac.yml;
+      ".dagu/dags/deadlink-loop.yml" = {
+        source = ./dagu/deadlink-loop.yml;
+        force = true;
+      };
+      ".dagu/dags/wiki-digest.yml" = {
+        source = ./dagu/wiki-digest.yml;
+        force = true;
+      };
+      ".dagu/dags/mac.yml" = {
+        source = ./dagu/mac.yml;
+        force = true;
+      };
     };
 
     # dagu scheduler 常驻（自动按 schedule 触发）—— user 级 launchd agent，因为 dagu 要读

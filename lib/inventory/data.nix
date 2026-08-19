@@ -152,8 +152,7 @@ in
       user = commonUser;
       time = commonTime;
       editor = commonEditor;
-      # 与 dev 同为 virtio VPS（hosts/nixos-vps/default.nix 的 nixos-agent
-      # 容器需要 externalInterface 才能配置 NAT）；真实出口确认过是 ens3。
+      # 与 dev 同为 virtio VPS；真实公网出口确认过是 ens3。
       networking = {
         externalInterface = "ens3";
       };
@@ -294,6 +293,29 @@ in
         opts = [
           "-o"
           "ProxyJump=luck@192.129.183.26"
+          "-o"
+          "ServerAliveInterval=30"
+          "-o"
+          "ServerAliveCountMax=20"
+        ];
+      };
+    };
+    # 共享机（共用 VPS；腾讯云香港 103.79.184.82）。
+    # - shared = true：sm 系统侧只保留 managed-flag（其余基线全部关闭），
+    #   HM 用裁剪集（不 import home/core 全量，避免 zsh/gh/cntr 引用 sops）。
+    # - ssh 连接：root 密码登录起步，bootstrap 建 luck 后走 luck+key。
+    sm-vps-hk = {
+      hostName = "sm-vps-hk";
+      stateVersion = "24.11";
+      system = "x86_64-linux";
+      user = commonUser;
+      time = commonTime;
+      editor = commonEditor;
+      shared = true;
+      ssh = {
+        host = "103.79.184.82";
+        user = "luck";
+        opts = [
           "-o"
           "ServerAliveInterval=30"
           "-o"

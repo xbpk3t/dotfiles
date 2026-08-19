@@ -20,24 +20,49 @@ let
     let
       specialArgs = mkSpecialArgs system node;
 
+      # 共享机（shared = true）：HM 裁剪集 + 系统 sops 白名单空。
+      # 与 dedicated 的差异见 hosts/sm-vps/default.nix 注释与 modules/sm/sops.nix。
+      isShared = node.shared or false;
+
       # standalone HM：home/core 最小 + 角色 home.nix（对齐 nixos 轨 hosts/<role>/home.nix）。
       # secrets/default.nix 提供 sops.secrets.* 定义，否则 home/core 引用 path 会失败。
-      homeModules = map mylib.relativeToRoot [
-        "hosts/${group}/home.nix"
-        "home/core"
-        "secrets/default.nix"
-      ];
+      homeModules = map mylib.relativeToRoot (
+        if isShared then
+          [
+            "hosts/${group}/home-shared.nix"
+            # 裁剪集：不 import home/core（其 scanPaths 会带进 zsh/gh/cntr → sops）
+            # 显式 import 无 sops 引用的模块
+            "home/core/init.nix"
+            "home/core/infra/nh.nix"
+            "home/core/infra/networking.nix"
+            "home/core/kernel/fzf.nix"
+            "home/core/devops/git.nix"
+            "home/core/devops/btop.nix"
+            "home/core/devops/fastfetch.nix"
+            "home/core/devops/lazygit.nix"
+            "home/core/devops/journalctl.nix"
+            "home/core/devops/taskfile.nix"
+            "home/core/db/default.nix"
+            "home/core/ms/default.nix"
+          ]
+        else
+          [
+            "hosts/${group}/home.nix"
+            "home/core"
+            "secrets/default.nix"
+          ]
+      );
 
       homeConfig = mylib.homeStandalone (
         args
         // {
           inherit system specialArgs;
           home-modules = homeModules;
-          backupFileExtension = "hm.bak";
         }
       );
 
       # system-manager：platform + 极简占位；不 import modules/nixos/**
+      # 共享机额外传 isShared，供 modules/sm 按 shared 分支裁剪（见 default.nix）。
       systemConfig = mylib.systemManager {
         inherit inputs;
         specialArgs = {
@@ -49,7 +74,10 @@ let
             timeMeta
             pkgs
             ;
-          inherit lib;
+          inherit
+            lib
+            isShared
+            ;
         };
         system-modules = [
           # 角色装配清单（hosts/<role>/default.nix：声明服务角色，如 services.mihomo-client.enable）
