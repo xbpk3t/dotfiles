@@ -1,48 +1,55 @@
 frontmatter:
   name: diagram
   role: atom
-  desc: how-it-works 图入口；委托 diagram-picker（图种/工具/源文件/SVG）；产出供 3w3h hti 合并的 artifact
+  desc: diagram 唯一入口；how-it-works 运行时图 + 固定命名/位置纪律；委托 diagram-picker；产出供 3w3h hti 合并的 artifact
 
 what:
   is: |
-    为当前 topic 画「一张」说明「怎么 work」的运行时图，并交给 3w3h / 用户阅读。
-    本步不「自建画图引擎」，委托 diagram-picker。
+    画「一张」说明「怎么 work」的运行时图并交付（源码 + 可选图注/边界），或直接生成源码走固定命名。
+    本步优先委托 diagram-picker；渲染由前端运行时（/api/diagram + Kroki/CDN）处理，不强制本地渲染 SVG。
   not: |
     不是自建画图引擎。
     不是构件分解（那是 brk）。
-    不是无图注、无边界的裸图。
+    不是无图注、无边界的裸图（能产时必产）。
+    不是本地 SVG 渲染管线（前端运行时渲染；SVG 不纳入 Git）。
 
 gate:
   - qs: diagram-picker skill 当前 session 是否可用？
-    fail: "走 fallback（图前择型 → Mermaid 输出），在 artifact 声明 picker: unavailable"
+    fail: "走 fallback（图前择型 → Mermaid 源码输出），在 artifact 声明 picker: unavailable"
 
 constraint:
   must:
-    - "必须调用 Skill 工具尝试加载 diagram-picker；不可因「推测不可用」跳过调用。确认不可用后（Skill 调用被拒绝或不可见）才走 fallback"
-    - "向 diagram-picker 传入至少：intent: how-it-works；topic / 要回答的问题（一句）；用户若指定图种或工具，原样转发"
-    - "要求 diagram-picker 完成：选图种 → 选工具 → 写源文件 → 渲染 SVG → Type choice + Captions(3–5) + Out of scope"
-    - "artifact 块必须输出在本对话的回复正文中，不可写入文件；父 agent 需要从对话中读取本块合并入 3w3h"
-    - "fallback 时：在输出 Mermaid 图之前，先明确回答图种（sequence/state/flowchart）与工具（mermaid/plantuml/d2）择型表及理由"
+    - "输出目录必须是 docs-images/.diagram/(repo 根)"
+    - "命名必须 <name>.<tool>.<diagram>.<ext>(例 repomix-runtime.mermaid.flowchart.mmd);<name> 用用户提供或英文 slug;SVG 同名同 stem 但扩展名不同"
+    - "复杂度上限: 约 ≤12 msg(sequence) 或 ≤12 nodes(flow/state);更大就收窄问题并注明剪掉的内容"
+    - "每个 participant/node 必须标;edge/message 带动词;禁止无标签箭头;语法最小 ASCII,不加不必要样式"
+    - "渲染默认不做(前端 /api/diagram + Kroki/CDN 运行时渲染);仅当调用方明确要求本地 SVG 时,才用 references/rendering.yaml 的 fallback 命令"
+    - "用户显式指定类型/工具时优先,除非与 references/diagram-defaults.yaml 冲突"
+    - "本步必须调用 Skill 工具尝试加载 diagram-picker;不可因「推测不可用」跳过调用。确认不可用后(拒绝或不可见)才走 fallback"
+    - "向 diagram-picker 传入至少: intent: how-it-works; topic / 要回答的问题(一句);用户若指定图种或工具,原样转发"
+    - "artifact 块必须输出在本对话的回复正文中,不可写入文件;父 agent 需要从对话中读取本块合并入 3w3h"
+    - "fallback 时: 在输出 Mermaid 源码之前,先明确回答图种(sequence/state/flowchart)与工具(mermaid/plantuml/d2)择型表及理由"
   must-not:
     - "在 zzz 内再维护一套与 diagram-picker 重复的「图种→工具→渲染」规则"
-    - "无图注、无边界的裸图交差"
+    - "无图注、无边界、无 artifact 的裸图交差(至少 Type choice + captions 3-5 + out-of-scope,能产时必产)"
     - "把整份 3w3h / 全书架构塞进一张图"
-    - "不伪造 SVG 路径；不假装已渲染"
+    - "不伪造 SVG 路径;不假装已渲染"
+    - "禁止在 .diagram/ 内部使用点前缀文件名"
 
 workflow:
-  - phase: 执行（强制）
+  - phase: 执行(强制)
     steps:
-      - "加载并执行 skill：diagram-picker（当前 session 可用 skills 列表中的同名 skill）。必须调用 Skill 工具尝试加载；不可跳过。"
-      - "向 diagram-picker 传入至少 intent + topic/要回答的问题（一句）+ 用户指定的图种/工具"
-      - "要求 diagram-picker 按 workflow 完成：选图种 → 选工具 → 写源文件 → 渲染 SVG → Type choice + Captions(3–5) + Out of scope"
-      - "构件分解（X = A + B + C）不是本步；那是 brk。本步只跑运行时 / 协作 / 状态"
-  - phase: Fallback（diagram-picker 不可用）
+      - "加载并执行 skill: diagram-picker(当前 session 可用 skills 列表中的同名 skill)。必须调用 Skill 工具尝试加载;不可跳过。"
+      - "向 diagram-picker 传入至少 intent + topic/要回答的问题(一句)+ 用户指定的图种/工具"
+      - "要求 diagram-picker 按 workflow 完成: 选图种 → 选工具 → 写源文件 → 渲染(运行时/按需) → Type choice + Captions(3–5) + Out of scope(能产必产)"
+      - "构件分解(X = A + B + C)不是本步;那是 brk。本步只跑运行时 / 协作 / 状态"
+  - phase: Fallback(diagram-picker 不可用)
     gate: 本 session 找不到 diagram-picker
     steps:
-      - "Step 1 图前择型（必须，在画图前执行）：明确回答图种 sequence/state/flowchart 与工具 mermaid/plantuml/d2 的选择及一句理由。理由参考：sequence=时间线/协议/调用链；state=状态机/生命周期；flowchart=分支/决策/流程；工具仅 mermaid 可对话内渲染且不需额外环境。择型表在本步输出，不作为 artifact 的一部分。"
+      - "Step 1 图前择型(必须,在画图前执行): 明确回答图种 sequence/state/flowchart 与工具 mermaid/plantuml/d2 的选择及一句理由。理由参考: sequence=时间线/协议/调用链; state=状态机/生命周期; flowchart=分支/决策/流程;工具仅 mermaid 可对话内渲染且不需额外环境。择型表在本步输出,不作为 artifact 的一部分。"
       - "在 artifact 中声明 picker: unavailable"
-      - "Fallback：仅在对话内输出一张 Mermaid 图（sequence/state/flowchart 三选一，写清选型理由）+ 图注 3–5 + 故意不画的边界"
-      - "不伪造 SVG 路径；不假装已渲染"
+      - "Fallback: 仅输出一张 Mermaid 源码(sequence/state/flowchart 三选一,写清选型理由)+ 图注 3–5 + 故意不画的边界"
+      - "不伪造 SVG 路径;不假装已渲染"
 
 output:
   format: md
@@ -55,19 +62,18 @@ output:
     diagram_type: <sequence|state|flowchart|…>
     tool: <mermaid|plantuml|d2|…>
     source_path: <若有落盘源文件>
-    svg_path: <若有 SVG>
-    type_choice: <一句：为何此图种/工具>
+    type_choice: <一句: 为何此图种/工具>
     captions:
       - …
     out_of_scope:
       - …
 
 self-check:
-  - artifact 块已输出在对话正文（未写入文件）？
-  - 图注 3–5 与边界都有？
-  - 未在 zzz 内重复维护图种→工具→渲染规则？
-  - 未把整份 3w3h / 全书架构塞进一张图？
+  - artifact 块已输出在对话正文(未写入文件)?
+  - 图注 3–5 与边界都有(能产时必产)?
+  - 未在 zzz 内重复维护图种→工具→渲染规则?
+  - 未把整份 3w3h / 全书架构塞进一张图?
 
 hint:
   - if: diagram-picker 不可用
-    then: "走 fallback，先图前择型再输出 Mermaid；artifact 声明 picker: unavailable"
+    then: "走 fallback,先图前择型再输出 Mermaid 源码;artifact 声明 picker: unavailable"

@@ -36,17 +36,6 @@
       sha256 = "sha256-kS40fu57daPBUzUzEojOz2LrGzo90sYpeL3VCZK88X0=";
     };
   };
-  trzsz = {
-    pname = "trzsz";
-    version = "v1.2.0";
-    src = fetchFromGitHub {
-      owner = "trzsz";
-      repo = "trzsz-go";
-      rev = "v1.2.0";
-      fetchSubmodules = false;
-      sha256 = "sha256-CokZAXT61UKSsKnzE5mPMdAZecGX/8mgDkG4yDSat5M=";
-    };
-  };
   voltagent-subagents = {
     pname = "voltagent-subagents";
     version = "5983fe3b4ea2785335ac1712c4aa1ac4e13a8fa2";
