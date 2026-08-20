@@ -13,9 +13,6 @@ in
   herdr-reviewr = pkgs.callPackage ./herdr-reviewr {
     inherit sources;
   };
-  launchk = pkgs.callPackage ./launchk {
-    inherit sources;
-  };
   trzsz-go = pkgs.callPackage ./trzsz-go {
     inherit sources;
   };

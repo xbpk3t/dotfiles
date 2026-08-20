@@ -23,9 +23,6 @@ src.from_pattern = "^(v([0-9\\.]+))$"
 src.to_pattern = "\\1"
 fetch.github = "trzsz/trzsz-go"
 
-[launchk]
-src.github = "intellekthq/launchk"
-fetch.github = "intellekthq/launchk"
 
 [voltagent-subagents]
 # 社区 sub-agent 仓库暂无 release/tag，用 manual + latest commit hash 确保可复现。

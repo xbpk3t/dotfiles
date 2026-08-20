@@ -8,10 +8,10 @@
 {
   chrome-devtools-mcp = {
     pname = "chrome-devtools-mcp";
-    version = "1.6.0";
+    version = "1.7.0";
     src = fetchurl {
-      url = "https://registry.npmjs.org/chrome-devtools-mcp/-/chrome-devtools-mcp-1.6.0.tgz";
-      sha256 = "sha256-HmMsLZcUtPgrTPq077nOV1CFx1/+XpdyODEprwEsnIQ=";
+      url = "https://registry.npmjs.org/chrome-devtools-mcp/-/chrome-devtools-mcp-1.7.0.tgz";
+      sha256 = "sha256-iVczWGoOzhOEk3kMB+iwg7hXGx0gN6cxJDNNlo0QRtA=";
     };
   };
   herdr-focus-notify = {
@@ -27,24 +27,13 @@
   };
   herdr-reviewr = {
     pname = "herdr-reviewr";
-    version = "v0.29.0";
+    version = "v0.33.0";
     src = fetchFromGitHub {
       owner = "persiyanov";
       repo = "herdr-reviewr";
-      rev = "v0.29.0";
+      rev = "v0.33.0";
       fetchSubmodules = false;
-      sha256 = "sha256-xr9V9rJjT3RMir/luIn09eo2bXuw5Fxn3lkHHZXAOTA=";
-    };
-  };
-  launchk = {
-    pname = "launchk";
-    version = "launchk-0.3.1";
-    src = fetchFromGitHub {
-      owner = "intellekthq";
-      repo = "launchk";
-      rev = "launchk-0.3.1";
-      fetchSubmodules = false;
-      sha256 = "sha256-j9ZU3owYtbKBG4rxZG7GyWymYsFSGR9OJSV+21KBq/A=";
+      sha256 = "sha256-kS40fu57daPBUzUzEojOz2LrGzo90sYpeL3VCZK88X0=";
     };
   };
   trzsz = {
