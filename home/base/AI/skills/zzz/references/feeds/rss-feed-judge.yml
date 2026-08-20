@@ -1,0 +1,110 @@
+---
+
+frontmatter:
+  name: rss-feed-judge
+  role: atom
+  desc: 判定单个 RSS feed 是否符合收录标准；输出 pass/fail + 原因码 + 证据；批量筛选时循环调用；规则来源 LUC-321 / wiki/zzz/efficacy/feed管理/2026-07-31-bestblogs-rss-extraction-filtering.md
+
+what:
+  is: 给定一个 feed（URL 或 种子信息），抓取解析后按固定标准判定是否值得收录，输出结构化判定
+  not: 不做候选提取（OPML 解析是输入不是本 prompt 职责）；不做批量汇总；不输出 type YAML（那是后续环节）
+
+gate:
+  - qs: 是否已确认 URL 真实（来自 OPML xmlUrl 或可信模板）？
+    fail: 停止——禁止凭空构造 URL，若只有名字则先找到可信来源
+
+constraint:
+  must:
+    - URL 只信 OPML xmlUrl / 可信模板（xiaoyuzhou 用 rsshub 模板）；禁止凭记忆编造
+    - 频率必须实际 fetch 后统计，不许估计；窗口上限标注（wechat2rss≈10、YT≈15、XZ≈15），窗口条数≠真实 90d 发文
+    - 双条件判定：`n90≥10` 或（窗口满 ∧ last≤60d ∧ n≥8）→ 频率过；last>60d 或 unreachable → fail
+    - 质量轴：EOL / 更新慢 / 营销号 / AI-slop / 过吵，逐条打标；外部评级（如 Gino 高/中/低）只作弱参考，不得当主闸
+    - 已订阅/历史移除 → 直接 fail（already_subscribed / hist_removed），不算质量 fail；**仅当调用方提供了 existing_keys / hist_removed 时才判定**，未提供则跳过该判定
+    - dedupe 键：feed_url 全等（微信）/ channel_id（YT）/ podcast id（XZ）；des 名仅告警不自动 drop
+    - 大 body 截断：content:encoded 可能 1–4MB+，只截取前 2 条正文摘要(≤200 字)与标题样本给质量轴，不整篇喂
+    - 时区：RSS pubDate vs Atom published 时区可能不同（微信 +0800、YT/XZ 常 UTC），统一归一化后再算 last/n90
+  must-not:
+    - 禁止把窗口条数当真实活跃度（短窗≈10 时 ≥10≈「满窗」）
+    - 禁止用外部评级判定 pass/fail；禁止"评价正文有干货"即推荐
+    - 禁止用内容预测 last 日期或 posts 数
+    - 禁止把「窗口写满且高产」译成「n90=10」，只能记 window_full 与 lower_bound
+
+input:
+  params:
+    - {feed_url: 必填, 来源: OPML xmlUrl / rsshub 模板}
+    - {name: 可选, 用于 des 与去重}
+    - {media_type: rss | youtube | xiaoyuzhou, 影响窗口与去重键}
+    - {existing_keys: 可选, 已订阅的 feed/channel_id/xiaoyuzhou id 集合}
+    - {hist_removed: 可选, 历史移除名单（子串匹配）}
+
+workflow:
+  - phase: 抓取与解析
+    steps:
+      - 用 feed_url 实际 fetch（UA 合理、超时 30s、重试 ≤2 次）；失败 → unreachable fail
+      - 解析 item 数量与日期：RSS 用 pubDate、Atom 用 published（勿双计 updated）；日期统一归一化时区（微信 +0800、YT/XZ 常 UTC）
+      - 无日期 item 单列 `undated_items`，不计入 n90
+      - "大 body 截断: content:encoded 仅取前 2 条正文摘要(≤200 字/条)给质量轴，不整篇喂"
+      - "记录: total_items / 窗口上限 / n90 / last_date / 标题样本(≤20) / 正文摘要(≤2条×200字)"
+  - phase: 机械判定
+    steps:
+      - "去重: 仅当提供 existing_keys 时，feed_url 全等 / channel_id / xiaoyuzhou id 命中 → already_subscribed fail"
+      - "历史移除: 仅当提供 hist_removed 时，name 命中 → hist_removed fail"
+      - "频率 hybrid: n90≥10 或（窗口满 ∧ last≤60d ∧ n≥8）；last>60d → stale fail"
+      - "窗口标注: 输出 window_cap 与 n90 并存；窗口写满时 n90 只是 lower_bound，不许当作真实发文数"
+  - phase: 质量判定
+    steps:
+      - 对 EOL / 更新慢 / 营销号 / AI-slop / 过吵 五轴逐条给证据（标题样本/时间跨度/简介）
+      - 任一命中 → 对应原因码 fail；否则 pass
+      - 外部评级仅写入 note 字段，不改判定
+
+output:
+  format: yaml
+  struct:
+    - key: feed
+      val: 判定对象的 URL
+    - key: name
+      val: 名称
+    - key: verdict
+      val: "pass | fail"
+    - key: reason
+      val: "原因码: pass | low_frequency | stale | unreachable | already_subscribed | hist_removed | too_noisy | marketing | ai_slop | eol"
+    - key: evidence
+      val: 证据摘要
+    - key: n90
+      val: 90 天条目数（窗口满时为 lower_bound）
+    - key: undated_items
+      val: 无日期条目数, 不计入 n90
+    - key: last
+      val: 最后更新日期
+    - key: window_cap
+      val: 窗口上限
+    - key: note
+      val: 外部评级/备注, 不改判定
+  template: |
+    # 单条判定（循环调用，逐条输出）
+    - feed: <feed_url>
+      name: <name>
+      verdict: pass | fail
+      reason: <pass | low_frequency | stale | unreachable | already_subscribed | hist_removed | too_noisy | marketing | ai_slop | eol>
+      evidence: <一句话证据>
+      n90: <整数>
+      undated_items: <整数>
+      last: <日期>
+      window_cap: <10|15|null>
+      note: <外部评级/备注, 仅供人工参考>
+
+self-check:
+  - URL 是否只来自输入/模板，未编造
+  - n90 是否基于实际 fetch 而非估算
+  - 窗口上限是否已标注，未把窗口条数当活跃度
+  - 外部评级是否仅出现在 note，未影响 verdict
+  - 五轴质量判断是否逐条有证据
+  - 日期时区是否已统一归一化
+  - 无日期条目是否已单列 undated_items 未计入 n90
+  - 正文摘要是否已截断（未整篇内容喂给质量轴）
+
+hint:
+  - if: 需要批量筛选一批候选
+    then: 循环调用本 prompt，输出拼成表格；再做去重/汇总（全局 host 并发需控制：wechat2rss/rsshub 单 host 限流）
+  - if: 发现某 feed 判定摇摆
+    then: 检查窗口是否写满、last 是否贴近边界，人工复核

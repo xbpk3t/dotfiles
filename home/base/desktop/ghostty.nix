@@ -7,8 +7,6 @@
 with lib;
 let
   cfg = config.modules.desktop.ghostty;
-  cmuxCfg = config.modules.desktop.cmux;
-
   ghosttySettings = {
     # ── Scrollback ──────────────────────────────────────────────────
     # 滚动缓冲区行数。agent 输出较长时保证能回滚查看。
@@ -175,7 +173,7 @@ in
   # ghostty 或 cmux 任一启用即可触发 Ghostty 配置部署：
   #   - macOS: brew 管理 Ghostty.app，Nix 管理配置文件（供 cmux 共享）
   #   - Linux: programs.ghostty 完整管理（包 + 配置 + shell 集成）
-  config = mkIf (cfg.enable || (cmuxCfg.enable && pkgs.stdenv.isDarwin)) (mkMerge [
+  config = mkIf (cfg.enable || pkgs.stdenv.isDarwin) (mkMerge [
     # ─── macOS ──────────────────────────────────────────────
     # Ghostty 配置格式为 key=value（类似 env），直接用 generators.toKeyValue 渲染。
     # cmux (libghostty) 也读取同一份配置，见 cmux.nix。
