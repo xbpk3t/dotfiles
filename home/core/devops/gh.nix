@@ -22,13 +22,14 @@
       # 分页器设置
       pager = "less";
 
-      # 别名配置
+      # 注意用 gh 作为prefix来调用
       aliases = {
-        # 仓库相关
+        # PR
         co = "pr checkout";
         pv = "pr view";
         pc = "pr create";
         pm = "pr merge";
+        pcf = "pr create --fill";
 
         # Issue 相关
         iv = "issue view";

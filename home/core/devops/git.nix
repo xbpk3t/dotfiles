@@ -106,9 +106,6 @@ in
       # 分类1：Git 核心操作与协作流程
       # tags(desc): 核心工具链 > 版本控制 > Git
       git
-      # Git worktree 管理工具（AI 并行分支工作流很好用）
-      # tags(desc): 分支工作流 > worktree管理 > 并行开发
-      worktrunk
 
       # tags(desc): 大文件支持 > 版本控制 > Git生态
       git-lfs
@@ -147,30 +144,6 @@ in
   programs.diff-so-fancy = {
     enable = true;
     enableGitIntegration = true;
-  };
-
-  xdg.configFile."worktrunk/config.toml".text = builtins.readFile ./worktrunk.toml;
-
-  home.shellAliases = {
-    # why: 修改为 PR-first，所以添加本alias来简化操作
-    # what: 本来拼接 git status --short && wt step commit && git push -u origin HEAD && gh pr create --fill 这几条命令就行了，为啥要做一个 changes状态检查？
-    # 在做该操作时会遇到几个corner case: 1、最核心的就是“检查是否有 untracked 文件”，否则。2、当前是否在worktree（还是main? 3、gh pr create相关的，不确定是否重复创建PR以及PR状态不清晰）。这个alias就解决了前两个核心问题。第三个问题 gh pr create本身就已经做处理了。
-    # [2026-05-22] 移除 wt step commit：commit.stage = "none" 且 commit message 由 LLM 生成，与手动 commit 冲突
-    wtpr = ''
-      test -f "$(git rev-parse --show-toplevel 2>/dev/null)/.git" || {
-        echo "Error: not a linked worktree"
-        false
-      } &&
-      test -z "$(git status --porcelain)" || {
-        echo "Error: working tree not clean"
-        git status --short
-        false
-      } &&
-      git push -u origin HEAD &&
-      gh pr create --fill
-    '';
-    # 在用完 wtpr （PR merge）之后用来删除worktree（如果直接整合进去的话，可能会误删当前 worktree）
-    wtc = "wt remove";
   };
 
   xdg.configFile."glab-cli/aliases.yml".text = ''
