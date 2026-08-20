@@ -137,8 +137,6 @@ in
       # wild 订阅源由 sops 自动发现（SUB_* secrets → sub.<name>），host 无需配置
       mihomo.enable = true;
     };
-
-    # NOTE: zed-remote 配置在 home/extra/zed-remote.nix
   };
   # Allow user-space input remapping tools (xremap)
   # hardware.uinput.enable = true;

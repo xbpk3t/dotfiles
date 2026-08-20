@@ -56,27 +56,6 @@
         },
         "version": "v0.33.0"
     },
-    "trzsz": {
-        "cargoLock": null,
-        "date": null,
-        "extract": null,
-        "name": "trzsz",
-        "passthru": null,
-        "pinned": false,
-        "src": {
-            "deepClone": false,
-            "fetchSubmodules": false,
-            "leaveDotGit": false,
-            "name": null,
-            "owner": "trzsz",
-            "repo": "trzsz-go",
-            "rev": "v1.2.0",
-            "sha256": "sha256-CokZAXT61UKSsKnzE5mPMdAZecGX/8mgDkG4yDSat5M=",
-            "sparseCheckout": [],
-            "type": "github"
-        },
-        "version": "v1.2.0"
-    },
     "voltagent-subagents": {
         "cargoLock": null,
         "date": null,
