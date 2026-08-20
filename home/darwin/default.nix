@@ -8,7 +8,6 @@
   imports = [ ../base ] ++ mylib.scanPaths ./.;
 
   home.packages = with pkgs; [
-    launchk
 
     # ── Fonts (required by Ghostty) ────────────────────────────────────
     # JetBrainsMono Nerd Font: primary terminal font on macOS.

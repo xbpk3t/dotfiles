@@ -11,8 +11,6 @@
 # 因此：声明任何 distro 已存在的路径（/etc/timezone、/etc/localtime、/etc/shells、
 # /etc/nftables.conf、/etc/ssh/ssh_config 等）都必须显式 replaceExisting=true。
 {
-  lib,
-  isShared ? false,
   ...
 }:
 {

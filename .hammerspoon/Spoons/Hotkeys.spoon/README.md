@@ -10,7 +10,7 @@ Alfred CASK workflow 的 Hammerspoon 原生替代。
 | `⌘1` | 启动/切换 Finder | |
 | `⌘2` | 启动/切换 Chrome | |
 | `⌘3` | 启动/切换 GoLand | |
-| `⌘0` | 启动/切换 Cmux | |
+| `⌘0` | 启动/切换 Ghostty | |
 | `⌘⇧D` | Chrome tab → Markdown 链接 | 复制当前 tab 的 `[标题](url)` 到剪贴板 |
 | `⌘E` | Chrome Recent Tabs | 类似 IntelliJ `⌃⇥`，在两个最近标签页间 toggle |
 

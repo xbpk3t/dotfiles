@@ -24,9 +24,11 @@
   #   - modules 全部常驻 import（option 存在），shared 下配置主体由各模块内
   #     lib.mkIf (!isShared) 门控（依赖 sops/tailscale 的部分不求值）。
   #   - 这里只在 shared 下显式关闭 userborn（重写 /etc/passwd 影响他人 root 登录）。
-  modules.infra.singbox-server.enable = lib.mkIf (!isShared) true;
-  modules.infra.derper.enable = lib.mkIf (!isShared) true;
-  modules.infra.status-page.enable = lib.mkIf (!isShared) true;
+  modules.infra = {
+    singbox-server.enable = lib.mkIf (!isShared) true;
+    derper.enable = lib.mkIf (!isShared) true;
+    status-page.enable = lib.mkIf (!isShared) true;
+  };
 
   # 共享机（shared=true）：userborn 会重写 /etc/passwd 并把 root shell 指向 store bash，
   # 影响他人 root 登录体验；关闭（shared 下不管理用户）。
