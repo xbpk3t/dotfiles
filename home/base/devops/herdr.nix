@@ -113,14 +113,6 @@ in
           text = builtins.toJSON (
             [
               {
-                plugin_id = "herdr-z";
-                name = "Herdr Z";
-                version = "0.1.0";
-                manifest_path = "${toString ./herdr/herdr-z}/herdr-plugin.toml";
-                plugin_root = toString ./herdr/herdr-z;
-                enabled = true;
-              }
-              {
                 plugin_id = "jt.command-palette";
                 name = "Command Palette";
                 version = "0.1.0";
@@ -173,10 +165,6 @@ in
         # ——— 本地插件目录映射 ———
         # 每个插件一个子目录 (含 herdr-plugin.toml + 脚本), 整目录映射到
         # ~/.config/herdr/plugins/<name>/。manifest_path 靠 nix 相对路径 resolve 到 store。
-        ".config/herdr/plugins/herdr-z" = {
-          source = ./herdr/herdr-z;
-          force = true;
-        };
         ".config/herdr/plugins/herdr-plugins-palette" = {
           source = ./herdr/herdr-plugins-palette;
           force = true;
