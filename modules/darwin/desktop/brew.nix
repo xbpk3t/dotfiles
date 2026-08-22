@@ -82,5 +82,19 @@ in
       autoUpdate = false;
       upgrade = false;
     };
+
+    goPackages = [
+      # https://github.com/cage1016/ak
+      # 说明：goPackages 里不要带 `@latest`。nix-homebrew 会自动在 go install 后拼
+      # 一个版本后缀，若这里写 `@latest` 会拼成 `ak@latest@latest` 导致
+      # `unknown revision latest@latest` 安装失败（实测报错）。
+      "github.com/cage1016/ak"
+
+      "go.uber.org/mock/mockgen"
+
+      # https://github.com/ChimeraCoder/gojson
+      # "github.com/ChimeraCoder/gojson/gojson"
+    ];
+
   };
 }

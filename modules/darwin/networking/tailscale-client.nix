@@ -4,6 +4,7 @@
   ...
 }:
 {
+  # [services.tailscale - MyNixOS](https://mynixos.com/nix-darwin/options/services.tailscale)
   services.tailscale = {
     enable = true;
     # https://mynixos.com/nix-darwin/option/services.tailscale.overrideLocalDns
