@@ -99,7 +99,7 @@ def convert-to-webp-file [file_path: string, quality: int, keep_source: bool]: n
     if ($output_path | path exists) {
         print $'skip: ($output_path)'
     } else {
-        let ext = (($file_path | path parse | get extension) | str downcase)
+        let ext = (($file_path | path parse | get extension) | str lowercase)
 
         # 重要：png / jpg(jpeg) 统一走 lossy quality 模式。
         # JPG 原是有损格式，PNG 转 lossy webp 也能获得极大压缩比且肉眼几乎无差。
