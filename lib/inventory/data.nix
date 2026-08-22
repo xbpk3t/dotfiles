@@ -26,30 +26,6 @@ in
     };
   };
 
-  nod-am = {
-    nod-am = {
-      hostName = "nod-am";
-      # NOD release-24.05 对应 stateVersion 24.05（enum 上限，见 NOD version.nix）
-      stateVersion = "24.05";
-      # NOD 用户 uid/gid：必须与真机 `id nix-on-droid` 一致
-      # Why: deploy-rs 远程部署会生成错误 uid，必须显式固定（issue #94）
-      user = commonUser // {
-        uid = 0; # TODO: 真机 `id nix-on-droid` 后填入
-        gid = 0; # TODO: 真机 `id nix-on-droid` 后填入
-      };
-      time = commonTime;
-      editor = commonEditor;
-      # deploy-rs 走 tailscale IP 连接（与 nixos-vps 同模式）
-      tailscale = {
-        ip = "100.123.207.1";
-      };
-      ssh = {
-        user = "nix-on-droid";
-        port = 8022; # nix-on-droid sshd 默认端口
-      };
-    };
-  };
-
   nixos-ws = {
     nixos-ws = {
       hostName = "nixos-ws";

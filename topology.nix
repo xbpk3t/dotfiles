@@ -57,7 +57,7 @@ in
   #
   # 注意：nixos-avf / nixos-ws / nixos-homelab / nixos-vps 等 NixOS 主机
   # 由 nixosConfigurations 自动提取；这里只显式定义网络、虚拟节点，
-  # 以及不在 NixOS 配置里的设备（macOS / nix-on-droid / sm-vps）。
+  # 以及不在 NixOS 配置里的设备（macOS / sm-vps）。
   networks = {
     lan = {
       name = "Home LAN";
@@ -144,7 +144,6 @@ in
           (mkConnection "nixos-homelab" "eth0")
           (mkConnection "nixos-usb" "eth0")
           (mkConnection "macos-ws" "en0")
-          (mkConnection "nod-am" "wlan0")
           (mkConnection "nixos-avf" "eth0")
         ];
         wan1 = mkConnection "internet" "*";
@@ -177,18 +176,6 @@ in
     };
 
     # —— 便携/设备：不在 NixOS 配置里 ——
-    # nod-am：Android 手机（Nix-on-Droid）
-    nod-am = {
-      deviceType = lib.mkForce "device";
-      deviceIcon = "os.android";
-      hardware.info = "Nix-on-Droid (Android)";
-      interfaces = {
-        wlan0 = {
-          network = "lan";
-        };
-      };
-    };
-
     # sm-vps：system-manager 实验 VPS
     sm-vps = {
       deviceType = lib.mkForce "cloud-server";
