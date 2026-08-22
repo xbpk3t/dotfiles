@@ -98,13 +98,6 @@ rec {
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Nix-on-Droid: 手机本机 Nix 环境（终端 client，非 AVF VM）
-    # 用 release 分支对齐上游；跟随 nixpkgs 便于与仓库其它 host 统一。
-    nix-on-droid = {
-      url = "github:nix-community/nix-on-droid/release-24.05";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     # Nix unit testing tools
     nixt.url = "github:nix-community/nixt";
     nix-unit.url = "github:nix-community/nix-unit";
