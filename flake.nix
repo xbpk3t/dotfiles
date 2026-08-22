@@ -113,6 +113,10 @@ rec {
     inputs@{ flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
       imports = [
+        # nix-unit 的 flake-parts module：提供 perSystem.nix-unit.{inputs,tests}，
+        # 并自动生成 checks.<system>.nix-unit（随 `nix flake check` 一起跑）。
+        # Why: 用它把 host 元数据一致性断言挂进默认质量闸门，与现有写好的 mkEvalCheck 互补。
+        inputs.nix-unit.modules.flake.default
         (
           { lib, ... }:
           {

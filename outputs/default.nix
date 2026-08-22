@@ -293,6 +293,18 @@ in
       # hostEvalChecks 负责「flake 输出的每个 host 都能完整求值」的契约。
       checks = deployChecks // libChecks // hostEvalChecks;
 
+      # nix-unit：宿主元数据一致性断言（tests/nix-unit/host-metadata.nix），
+      # 由 nix-unit 的 flake-parts module 自动生成 checks.<system>.nix-unit，挂进 `nix flake check`。
+      # - `inputs`：把 flake 顶层 inputs 整组透传给 nix-unit 的运行期 re-eval。
+      #   Why: nix-unit 会在其 builder 的沙箱里重新求值 `self#tests.systems.<system>`，
+      #   未注入的 input 会被当作“需重新 fetch 的 flake”，而沙箱无网络 → 直接失败；
+      #   注入整组 inputs 就保证只在本机已 resolve 的 store 里取，零网络依赖。
+      # - `tests`：纯数据驱动生成的断言 suite（读取 lib/inventory/data.nix）.
+      nix-unit = {
+        inherit inputs;
+        tests = import ../tests/nix-unit/host-metadata.nix { };
+      };
+
       # 开发环境：CI 与本地共享同一套工具，保证 pre-commit / linter 行为一致。
       # 工具清单唯一来源是 lib/precommit-tools.nix（与 home.packages 共用，见
       # home/base/devops/default.nix），加/换 linter 只改一处。
