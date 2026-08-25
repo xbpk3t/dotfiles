@@ -7,8 +7,3 @@ stack {
     "tailscale",
   ]
 }
-
-globals {
-  terraform_root = "."
-  state_id       = "homelab/tailscale/tailnet"
-}

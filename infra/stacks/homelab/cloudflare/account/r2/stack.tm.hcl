@@ -9,8 +9,3 @@ stack {
     "r2",
   ]
 }
-
-globals {
-  terraform_root = "."
-  state_id       = "homelab/cloudflare/account/r2"
-}

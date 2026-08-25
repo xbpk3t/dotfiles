@@ -9,8 +9,3 @@ stack {
     "zone-lucc-dev",
   ]
 }
-
-globals {
-  terraform_root = "."
-  state_id       = "homelab/cloudflare/lucc.dev/email-routing"
-}
