@@ -338,22 +338,6 @@ function obj:prev()
   self:_startNoise(cycleSound(currentSound(), -1))
 end
 
-function obj:smartToggle()
-  -- Kept as a compatibility alias for older configs/scripts. We removed the
-  -- nowplaying-cli branch because the real-world playback path here is usually
-  -- a browser web player, which does not reliably publish a system now-playing
-  -- session on this machine. Dedicated white-noise hotkeys are less surprising.
-  self:toggle()
-end
-
-function obj:smartNext()
-  self:next()
-end
-
-function obj:smartPrev()
-  self:prev()
-end
-
 function obj:status()
   local record = self:_statusRecord()
   alerts.info(self:_statusMessage(record))

@@ -72,29 +72,4 @@ function alerts.info(text, duration, screen)
   return _show(text, INFO_STYLE, screen, duration)
 end
 
--- ====================================================================
--- 兼容别名（供旧代码逐步迁移）
--- ====================================================================
-
-alerts.showAlert = alerts.show
-alerts.showDefault = alerts.show
-alerts.showSuccess = alerts.success
-alerts.showError = alerts.error
-alerts.showInfo = alerts.info
-
--- ====================================================================
--- 工具函数
--- ====================================================================
-
-function alerts.closeSpecific(id)
-  if not id then
-    return
-  end
-  pcall(hs.alert.closeSpecific, id)
-end
-
-function alerts.closeAll()
-  pcall(hs.alert.closeAll)
-end
-
 return alerts

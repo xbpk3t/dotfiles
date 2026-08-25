@@ -10,17 +10,6 @@ local baseNotifs = dofile(hs.configdir .. "/Spoons/shared_notifs.lua")
 
 -- AudioControl 的默认标题
 local SPOON_NAME = "AudioControl"
-local DEFAULT_WITHDRAW_AFTER = baseNotifs.getDefaults().withdrawAfter
-
--- 发送基础通知
-function notifs.sendNotification(text, withdrawAfter, soundName)
-  return baseNotifs.sendNotification(SPOON_NAME, text, withdrawAfter, soundName)
-end
-
--- 发送默认通知
-function notifs.sendDefault(text, soundName)
-  return baseNotifs.sendDefaultNotification(SPOON_NAME, text, soundName)
-end
 
 -- 发送成功通知
 function notifs.sendSuccess(text, withdrawAfter)
@@ -66,11 +55,6 @@ end
 -- 状态通知
 function notifs.statusInfo(statusText)
   return notifs.sendInfo("状态: " .. statusText, 5)
-end
-
--- 获取默认配置
-function notifs.getDefaults()
-  return baseNotifs.getDefaults()
 end
 
 return notifs

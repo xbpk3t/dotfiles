@@ -33,12 +33,6 @@ obj.maxTabs = 35
 --- 自管 timer 时的检查间隔（秒）；共享 coordinator 时由 shared_limit_alerts 驱动
 obj.checkInterval = 30
 
---- ChromeTabLimit.manageOwnTimer
---- Variable
---- false（默认）: 不创建周期 timer，由 init 共享节拍调用 checkNow()
---- true: 兼容旧行为，spoon 自己 doEvery
-obj.manageOwnTimer = false
-
 --- ChromeTabLimit.chromeAppName
 --- Variable
 --- Chrome 应用程序名称
@@ -50,7 +44,6 @@ obj.chromeAppName = "Google Chrome"
 obj.autoCloseExcessTabs = false
 
 -- 内部状态
-obj.checkTimer = nil
 obj.appWatcher = nil
 
 local notifs = dofile(hs.configdir .. "/Spoons/ChromeTabLimit.spoon/notifs.lua")
@@ -193,17 +186,6 @@ function obj:start()
     return self
   end
 
-  if self.checkTimer then
-    self.checkTimer:stop()
-    self.checkTimer = nil
-  end
-
-  -- 自管 timer（默认 false，由 init 共享节拍驱动）
-  if self.manageOwnTimer then
-    self.checkTimer = hs.timer.doEvery(self.checkInterval, checkTabLimit)
-    checkTabLimit()
-  end
-
   -- Chrome launch 后 2s 单独 check（可单独弹 Chrome，不带动 Claude）
   if self.appWatcher then
     self.appWatcher:stop()
@@ -223,9 +205,7 @@ function obj:start()
   end)
   self.appWatcher:start()
 
-  self.logger.i(
-    "ChromeTabLimit started maxTabs=" .. self.maxTabs .. " manageOwnTimer=" .. tostring(self.manageOwnTimer)
-  )
+  self.logger.i("ChromeTabLimit started maxTabs=" .. self.maxTabs)
   return self
 end
 
@@ -239,11 +219,6 @@ end
 --- Returns:
 ---  * The ChromeTabLimit object
 function obj:stop()
-  if self.checkTimer then
-    self.checkTimer:stop()
-    self.checkTimer = nil
-  end
-
   if self.appWatcher then
     self.appWatcher:stop()
     self.appWatcher = nil

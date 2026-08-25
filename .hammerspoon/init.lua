@@ -10,8 +10,12 @@ hs.ipc = require("hs.ipc")
 
 local alerts = dofile(hs.configdir .. "/Spoons/shared_alerts.lua")
 
--- 持久 timer 引用，防止 Lua GC 回收 doEvery 创建的重复 timer
-local _timers = {}
+-- 持久 timer 容器引用，防止 Lua GC 回收 doEvery 创建的 timer。
+-- 必须挂到全局 _G：chunk-local 表在 init.lua 返回后会失去引用被回收，
+-- 导致 doEvery 创建的 timer 跟着失效（早期“语义参考”因此永不触发，两个 limit 一起哑）。
+-- 每次 reload 复用同一张全局表。
+local _timers = _G.__hs_timers or {}
+_G.__hs_timers = _timers
 
 -- ========================================
 -- 加载 Spoons
@@ -60,15 +64,27 @@ end
 local successLimitCoord, errLimitCoord = pcall(function()
   local limits = dofile(hs.configdir .. "/Spoons/shared_limit_alerts.lua")
   local function tickLimitSpoons()
+    -- 每个 spoon 单独 pcall 隔离：一个抛错不拖垮另一/整条链
     if spoon.ChromeTabLimit then
-      spoon.ChromeTabLimit:checkNow()
+      local ok, e = pcall(function()
+        spoon.ChromeTabLimit:checkNow()
+      end)
+      if not ok then
+        hs.logger.new("init").e("ChromeTabLimit tick 错误: " .. tostring(e))
+      end
     end
     if spoon.ClaudeSessionLimit then
-      spoon.ClaudeSessionLimit:checkNow()
+      local ok, e = pcall(function()
+        spoon.ClaudeSessionLimit:checkNow()
+      end)
+      if not ok then
+        hs.logger.new("init").e("ClaudeSessionLimit tick 错误: " .. tostring(e))
+      end
     end
   end
+  -- timer 引用落在全局表 _timers(= _G.__hs_timers)，防 GC
   _timers.coordinator = hs.timer.doEvery(limits.checkInterval, tickLimitSpoons)
-  tickLimitSpoons()
+  tickLimitSpoons() -- reload 后立即自检一次（超限则会当场弹 alert）
   hs.logger.new("init").i("limit coordinator started interval=" .. tostring(limits.checkInterval) .. "s")
 end)
 if not successLimitCoord then
