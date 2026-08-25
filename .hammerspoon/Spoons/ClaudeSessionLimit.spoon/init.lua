@@ -1,8 +1,8 @@
 --- === ClaudeSessionLimit ===
 ---
---- 监控 Claude Code interactive 活 session 数量，超出限制时 compact alert（仅提醒）
---- 计数权威：~/.claude/sessions + kind=interactive + pid 存活
---- fallback：绝对路径 claude agents --json（避开 cmux wrapper）
+--- 监控 Claude Code 活跃 session 数量，超出限制时 compact alert（仅提醒）
+--- 计数权威：herdr 原生 `agent list`（跨 workspace，且可经 --remote 覆盖远端 herdr server）
+--- 无 herdr 场景下计数为 0（不弹）
 
 local obj = {}
 obj.__index = obj
@@ -17,135 +17,76 @@ obj.logger = hs.logger.new("ClaudeSessionLimit")
 --- 是否启用
 obj.enabled = true
 --- 最大 interactive session 数
-obj.maxSessions = 12
---- 自管 timer 时的检查间隔；共享 coordinator 时由 shared_limit_alerts 驱动
+obj.maxSessions = 25
+--- 检查间隔（秒）；status 展示用，实际节拍由 init 共享 coordinator 驱动
 obj.checkInterval = 30
---- false（默认）: 不创建周期 timer，由 init 共享节拍调用 checkNow()
-obj.manageOwnTimer = false
---- Claude 活 session 登记目录
-obj.sessionsDir = (os.getenv("HOME") or "") .. "/.claude/sessions"
---- fallback CLI（绝对路径，避开 PATH 上的 cmux wrapper）
-obj.claudeBin = "/etc/profiles/per-user/luck/bin/claude"
---- 只计该 kind（批量 -p / daemon 等不计）
-obj.kindFilter = "interactive"
-
-obj.checkTimer = nil
+--- herdr CLI（绝对路径）
+obj.herdrBin = "/etc/profiles/per-user/luck/bin/herdr"
+--- 远端 herdr server 目标列表（`herdr --remote <t> agent list`）；空 = 只查本机
+obj.remoteTargets = {} -- e.g. {"user@host1"}
 
 local notifs = dofile(hs.configdir .. "/Spoons/ClaudeSessionLimit.spoon/notifs.lua")
 
-local function isPidAlive(pid)
-  if type(pid) ~= "number" or pid <= 0 then
-    return false
+--- 对单个 herdr target（nil = 本机 server）跑 `agent list`，返回 agent==claude 的条数。
+--- 返回 nil 表示该次查询失败（server 未起 / 目标不可达），由调用方决定累计策略。
+local function countClaudeFromHerdr(target)
+  local cmd
+  if target and target ~= "" then
+    cmd = string.format("%s --remote '%s' agent list 2>/dev/null", obj.herdrBin, target)
+  else
+    cmd = obj.herdrBin .. " agent list 2>/dev/null"
   end
-  local _, ok = hs.execute("/bin/kill -0 " .. pid .. " 2>/dev/null")
-  return ok == true
-end
 
---- 从 {pid, kind} 列表中统计 unique 存活 interactive
-local function countInteractiveEntries(entries)
-  local seen, count = {}, 0
-  for _, e in ipairs(entries) do
-    if e.kind == obj.kindFilter then
-      local pid = tonumber(e.pid)
-      if pid and not seen[pid] and isPidAlive(pid) then
-        seen[pid] = true
-        count = count + 1
-      end
+  local output, ok = hs.execute(cmd)
+  if not ok or not output or output == "" then
+    obj.logger.w("herdr agent list failed" .. (target and (" target=" .. target) or ""))
+    return nil
+  end
+
+  local decodedArr, data = pcall(hs.json.decode, output)
+  if not decodedArr or type(data) ~= "table" then
+    obj.logger.w("failed to parse herdr agent list output" .. (target and (" target=" .. target) or ""))
+    return nil
+  end
+
+  local agents = (data.result and type(data.result) == "table" and data.result.agents) or data.agents
+  if type(agents) ~= "table" then
+    obj.logger.w("herdr agent list: no agents array")
+    return nil
+  end
+
+  local count = 0
+  for _, a in ipairs(agents) do
+    if type(a) == "table" and a.agent == "claude" then
+      count = count + 1
     end
   end
   return count
 end
 
-local function readSessionFile(path)
-  -- io + decode；先做廉价结构预检，避免 hs.json.decode 对坏 JSON 往 console 打 LuaSkin ERROR
-  local fh = io.open(path, "r")
-  if not fh then
-    return nil
-  end
-  local content = fh:read("*a")
-  fh:close()
-  if not content or content == "" then
-    return nil
-  end
-  -- session 登记至少应含 "pid"；明显垃圾直接跳过
-  if not content:find('"pid"', 1, true) then
-    return nil
-  end
-  local ok, data = pcall(hs.json.decode, content)
-  if ok and type(data) == "table" then
-    return data
-  end
-  return nil
-end
-
-local function countFromSessionsDir()
-  local dir = obj.sessionsDir
-  if not dir or dir == "" or not hs.fs.attributes(dir, "mode") then
-    obj.logger.w("sessions dir missing: " .. tostring(dir))
-    return nil
-  end
-
-  local entries = {}
-  for name in hs.fs.dir(dir) do
-    if type(name) == "string" and name:sub(-5) == ".json" then
-      local data = readSessionFile(dir .. "/" .. name)
-      if data then
-        entries[#entries + 1] = {
-          kind = data.kind,
-          pid = data.pid or name:match("^(%d+)%.json$"),
-        }
-      else
-        obj.logger.d("skip bad session file: " .. name)
-      end
-    end
-  end
-  return countInteractiveEntries(entries)
-end
-
-local function countFromClaudeAgentsJson()
-  local bin = obj.claudeBin
-  if not bin or not hs.fs.attributes(bin, "mode") then
-    obj.logger.w("claudeBin not found: " .. tostring(bin))
-    return nil
-  end
-
-  -- 单引号包裹路径，避免空格/注入
-  local output, ok = hs.execute(string.format("'%s' agents --json 2>/dev/null", bin))
-  if not ok or not output or output == "" then
-    obj.logger.w("claude agents --json failed")
-    return nil
-  end
-
-  local decoded, data = pcall(hs.json.decode, output)
-  if not decoded or type(data) ~= "table" then
-    obj.logger.w("failed to parse claude agents --json")
-    return nil
-  end
-
-  local entries = {}
-  for _, e in ipairs(data) do
-    if type(e) == "table" then
-      entries[#entries + 1] = { kind = e.kind, pid = e.pid }
-    end
-  end
-  return countInteractiveEntries(entries)
-end
-
+--- 汇总：本机 + 各 remote target 的 claude session 数。
+--- 本机查询失败视为 0；某个 remote 查询失败记 log 但计入 0（不拖垮整体）。
 local function getInteractiveSessionCount()
-  local count = countFromSessionsDir()
-  if count ~= nil then
-    obj.logger.d("count(sessions dir)=" .. count)
-    return count
+  local total = 0
+
+  local localCount = countClaudeFromHerdr(nil)
+  if localCount ~= nil then
+    total = localCount
+  else
+    obj.logger.w("unable to count local herdr agents; treating as 0")
   end
 
-  count = countFromClaudeAgentsJson()
-  if count ~= nil then
-    obj.logger.d("count(agents --json)=" .. count)
-    return count
+  for _, target in ipairs(obj.remoteTargets or {}) do
+    local rc = countClaudeFromHerdr(target)
+    if rc ~= nil then
+      total = total + rc
+    else
+      obj.logger.w("unable to count remote herdr agents target=" .. tostring(target) .. "; treating as 0")
+    end
   end
 
-  obj.logger.w("unable to count sessions; treating as 0 (no alert)")
-  return 0
+  obj.logger.d("claude agent total(" .. #(obj.remoteTargets or {}) .. " remote)=" .. total)
+  return total
 end
 
 local function checkSessionLimit()
@@ -173,25 +114,11 @@ function obj:start()
     return self
   end
 
-  if self.checkTimer then
-    self.checkTimer:stop()
-    self.checkTimer = nil
-  end
-
-  if self.manageOwnTimer then
-    self.checkTimer = hs.timer.doEvery(self.checkInterval, checkSessionLimit)
-    checkSessionLimit()
-  end
-
-  self.logger.i("started maxSessions=" .. self.maxSessions .. " manageOwnTimer=" .. tostring(self.manageOwnTimer))
+  self.logger.i("started maxSessions=" .. self.maxSessions)
   return self
 end
 
 function obj:stop()
-  if self.checkTimer then
-    self.checkTimer:stop()
-    self.checkTimer = nil
-  end
   self.logger.i("stopped")
   return self
 end
@@ -217,12 +144,13 @@ function obj:getCount()
 end
 
 function obj:getStatus()
+  local remoteCount = #(self.remoteTargets or {})
   return string.format(
-    "ClaudeSessionLimit Status:\n启用: %s\n最大 session: %d\n检查间隔: %d秒\nkind 过滤: %s\n当前 interactive: %d",
+    "ClaudeSessionLimit Status:\n启用: %s\n最大 session: %d\n检查间隔: %d秒\n计数源: herdr (本地 + %d remote)\n当前 claude agent 数: %d",
     self.enabled and "是" or "否",
     self.maxSessions,
     self.checkInterval,
-    tostring(self.kindFilter),
+    remoteCount,
     getInteractiveSessionCount()
   )
 end

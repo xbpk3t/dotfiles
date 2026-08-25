@@ -24,9 +24,8 @@ updatedAt: 2026-05-17
 
 #### 设计
 
-- **生命周期托管**：Lua 通过 `hs.task` 直接持有 worker 进程，而非 detached shell / `nohup`
+- **生命周期托管**：Lua 通过 `hs.task` 直接持有 worker 进程，而非 `detached shell` / `nohup`
 - **输入兜底**：同时接住媒体键和 F7/F8/F9，兼容不同键盘模式下顶排键的输出行为
-- **兼容层**：`smartToggle` / `smartNext` / `smartPrev` 保留为别名，旧调用方无需修改
 
 
 

@@ -5,24 +5,21 @@ date: 2026-07-21
 
 ## 是什么
 
-监控 Claude Code **interactive** 活 session 数量的 Hammerspoon Spoon。
+监控 Claude Code **活跃** session 数量的 Hammerspoon Spoon。
 超过 `maxSessions` 时 compact alert（**只提醒，不杀进程**）。结构对齐 `ChromeTabLimit`。
 
 ## 计什么 / 不计什么
 
-**计入**：`~/.claude/sessions/<pid>.json` 中 `kind == "interactive"` 且 PID 存活（含 idle/busy/shell）。
+**计入**：`herdr agent list` 里 `agent == "claude"` 的条数，跨 workspace（本地 server + 每个 `remoteTargets` 经 `herdr --remote <t>` 累加），**不按 status 过滤**（idle/done/working/blocked 都算一个）。
 
 **不计**：
 
 | 类型 | 原因 |
 |------|------|
-| `kind=print` / `sdk` / 缺 kind | 非 interactive |
-| 死 PID 的 interactive 残留文件 | `kill -0` 失败 |
-| 同 PID 重复登记 | unique PID |
-| 会话内 Agent/Task 并行 | 不占新 registry |
-| 坏 JSON | 跳过，不计入 |
-
-Fallback：绝对路径 `claude agents --json`（避开 PATH 上的 cmux wrapper）。
+| 非 claude 的 agent（codex/gemini/…） | `agent != claude` |
+| 跑在 herdr 之外的 claude（非 herdr pane） | herdr 看不到 |
+| 某个 remote target 查询失败 | 记 log，计 0，不拖垮整体 |
+| herdr server 未运行 | 本机查询失败 → 计 0，不误弹 |
 
 ## 配置
 
@@ -31,9 +28,8 @@ Fallback：绝对路径 `claude agents --json`（避开 PATH 上的 cmux wrapper
 | `enabled` | `true` |
 | `maxSessions` | `12` |
 | `checkInterval` | `30` |
-| `sessionsDir` | `~/.claude/sessions` |
-| `claudeBin` | `/etc/profiles/per-user/luck/bin/claude` |
-| `kindFilter` | `"interactive"` |
+| `herdrBin` | `/etc/profiles/per-user/luck/bin/herdr` |
+| `remoteTargets` | `{}`（e.g. `{"user@host1"}`） |
 
 ## API
 
@@ -43,5 +39,5 @@ Fallback：绝对路径 `claude agents --json`（避开 PATH 上的 cmux wrapper
 
 - **不复用 `shared_notifs`**：那是 macOS Notification；Chrome/本 spoon 用 compact `hs.alert`。
 - **样式局部传入**：不改 `hs.alert.defaultStyle` 全局。
-- **计数权威是 Claude registry**，不是 cmux。
-- **共享节拍**：默认 `manageOwnTimer = false`，由 `init.lua` + `shared_limit_alerts.lua` 同相位调用 `checkNow()`；与 Chrome 超限 alert 同 duration（**5s**，对齐 Chrome 改 alert 后的 `tabLimitExceeded`）、先 Chrome 后 Claude。
+- **计数权威是 herdr**（agent runtime），不是 `~/.claude/sessions` 本地磁盘；天然含 remote（`herdr --remote`）。
+- **共享节拍**：由 `init.lua` + `shared_limit_alerts.lua` 同相位调用 `checkNow()`；与 Chrome 超限 alert 同 duration（**5s**）、先 Chrome 后 Claude。coordinator 的 timer 引用挂在全局 `_G.__hs_timers`（chunk-local 表会被 GC，导致两个 limit 一起哑）。

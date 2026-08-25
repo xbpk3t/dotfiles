@@ -62,13 +62,4 @@ function notifs.sendInfo(title, text, withdrawAfter)
   return _sendNotification(title, text, withdrawAfter, nil)
 end
 
--- 获取默认配置（供其他模块使用）
-function notifs.getDefaults()
-  return {
-    withdrawAfter = DEFAULT_WITHDRAW_AFTER,
-    successSound = SUCCESS_SOUND,
-    errorSound = ERROR_SOUND,
-  }
-end
-
 return notifs
