@@ -10,8 +10,3 @@ stack {
     "env-homelab",
   ]
 }
-
-globals {
-  terraform_root = "."
-  state_id       = "homelab/minio/tf-s3-backend"
-}

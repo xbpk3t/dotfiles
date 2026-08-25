@@ -8,8 +8,3 @@ stack {
     "repositories",
   ]
 }
-
-globals {
-  terraform_root = "."
-  state_id       = "homelab/github/repositories"
-}
