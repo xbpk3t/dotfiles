@@ -1,6 +1,6 @@
 --- === Shared Limit Alerts ===
 ---
---- ChromeTabLimit / ClaudeSessionLimit 共用节拍与超限 alert 时长
+--- ChromeTabLimit / HerdrLimit 共用节拍与超限 alert 时长
 --- init.lua 用 checkInterval 驱动共享 timer；两边 notifs 用 limitAlertDuration
 
 return {

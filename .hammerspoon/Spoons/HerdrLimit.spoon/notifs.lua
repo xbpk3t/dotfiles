@@ -1,4 +1,4 @@
---- === ClaudeSessionLimit Notifications ===
+--- === HerdrLimit Notifications ===
 ---
 --- compact hs.alert（通过 shared_alerts）；超限时长来自 shared_limit_alerts
 
@@ -13,7 +13,7 @@ end
 function notifs.sessionLimitExceeded(currentCount, maxCount, excessCount)
   return alerts.show(
     string.format(
-      "Claude session 过多！当前: %d 个，限制: %d 个，需关闭: %d 个",
+      "Agent session 过多！当前: %d 个，限制: %d 个，需关闭: %d 个",
       currentCount,
       maxCount,
       excessCount
@@ -23,11 +23,11 @@ function notifs.sessionLimitExceeded(currentCount, maxCount, excessCount)
 end
 
 function notifs.enabled()
-  return show("ClaudeSessionLimit 已启用")
+  return show("HerdrLimit 已启用")
 end
 
 function notifs.disabled()
-  return show("ClaudeSessionLimit 已禁用")
+  return show("HerdrLimit 已禁用")
 end
 
 function notifs.status(statusText)
