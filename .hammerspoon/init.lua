@@ -51,16 +51,16 @@ if not success2 then
   print("ChromeTabLimit 错误:", err2)
 end
 
-local successClaudeSession, errClaudeSession = pcall(function()
-  hs.loadSpoon("ClaudeSessionLimit")
-  spoon.ClaudeSessionLimit:start()
+local successHerdrLimit, errHerdrLimit = pcall(function()
+  hs.loadSpoon("HerdrLimit")
+  spoon.HerdrLimit:start()
 end)
-if not successClaudeSession then
-  alerts.error("ClaudeSessionLimit 加载失败")
-  print("ClaudeSessionLimit 错误:", errClaudeSession)
+if not successHerdrLimit then
+  alerts.error("HerdrLimit 加载失败")
+  print("HerdrLimit 错误:", errHerdrLimit)
 end
 
--- 共享节拍：Chrome 先、Claude 后 → 同相位、同 duration、堆叠顺序固定
+-- 共享节拍：Chrome 先、HerdrLimit 后 → 同相位、同 duration、堆叠顺序固定
 local successLimitCoord, errLimitCoord = pcall(function()
   local limits = dofile(hs.configdir .. "/Spoons/shared_limit_alerts.lua")
   local function tickLimitSpoons()
@@ -73,12 +73,12 @@ local successLimitCoord, errLimitCoord = pcall(function()
         hs.logger.new("init").e("ChromeTabLimit tick 错误: " .. tostring(e))
       end
     end
-    if spoon.ClaudeSessionLimit then
+    if spoon.HerdrLimit then
       local ok, e = pcall(function()
-        spoon.ClaudeSessionLimit:checkNow()
+        spoon.HerdrLimit:checkNow()
       end)
       if not ok then
-        hs.logger.new("init").e("ClaudeSessionLimit tick 错误: " .. tostring(e))
+        hs.logger.new("init").e("HerdrLimit tick 错误: " .. tostring(e))
       end
     end
   end
