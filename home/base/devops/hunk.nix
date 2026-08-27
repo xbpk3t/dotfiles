@@ -32,7 +32,6 @@ in
         # 跟终端明暗；不强制 catppuccin（herdr UI 另管）
         theme = "auto";
         mode = "auto"; # auto | split | stack
-        # 明确 git（本机不再以 jj 为主）
         vcs = "git";
         watch = false;
         exclude_untracked = false;

@@ -52,6 +52,7 @@ _: {
 
     langs = {
       lsp.enable = true;
+      pandoc.enable = true;
     };
 
     ms = {
