@@ -83,18 +83,20 @@ in
       upgrade = false;
     };
 
-    goPackages = [
-      # https://github.com/cage1016/ak
-      # 说明：goPackages 里不要带 `@latest`。nix-homebrew 会自动在 go install 后拼
-      # 一个版本后缀，若这里写 `@latest` 会拼成 `ak@latest@latest` 导致
-      # `unknown revision latest@latest` 安装失败（实测报错）。
-      "github.com/cage1016/ak"
+    # [2026-08-27] 不要用 brew 的 goPackages 来声明式管理，否则brew会自动安装 golang pkg（可能会跟nixpkgs的 golang version 冲突，导致很多问题）。另外 [programs.go.packages - MyNixOS](https://mynixos.com/home-manager/option/programs.go.packages) 也不是用来声明式管理 golang pkgs的。仅作记录。
+    #
+    # goPackages = [
+    #   # https://github.com/cage1016/ak
+    #   # 说明：goPackages 里不要带 `@latest`。nix-homebrew 会自动在 go install 后拼
+    #   # 一个版本后缀，若这里写 `@latest` 会拼成 `ak@latest@latest` 导致
+    #   # `unknown revision latest@latest` 安装失败（实测报错）。
+    #   "github.com/cage1016/ak"
 
-      "go.uber.org/mock/mockgen"
+    #   "go.uber.org/mock/mockgen"
 
-      # https://github.com/ChimeraCoder/gojson
-      # "github.com/ChimeraCoder/gojson/gojson"
-    ];
+    #   # https://github.com/ChimeraCoder/gojson
+    #   # "github.com/ChimeraCoder/gojson/gojson"
+    # ];
 
   };
 }
