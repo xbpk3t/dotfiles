@@ -37,6 +37,20 @@ in
             ];
           };
         };
+
+        # Tavily: 通用网页搜索 MCP（替代被第三方网关废掉的 Anthropic 服务端 WebSearch）。
+        # 走第三方 API，不经 Anthropic 后端 → DeepSeek 网关下照常可用。
+        # key 注入用 passwordCommand（进程启动时 wrap 一层注入），与 context7 同一规范，
+        # 不依赖 shell 是否导出了 TAVILY_API_KEY；勿改用 env 硬编码（store 可被任意读）。
+        tavily = {
+          enable = true;
+          passwordCommand = {
+            TAVILY_API_KEY = [
+              "cat"
+              config.sops.secrets.API_TAVILY.path
+            ];
+          };
+        };
       };
 
       settings.servers = {
@@ -59,6 +73,12 @@ in
 
         # context7 偏库/框架文档
         context7 = {
+          default_tools_approval_mode = "approve";
+        };
+
+        # Tavily 通用搜索：approve 免审批，与同文件其它 server 一致。
+        # tool 属 MCP（mcp__* 前缀），不在 claude.nix 的显式 allow 列表里时靠这里放行。
+        tavily = {
           default_tools_approval_mode = "approve";
         };
 
