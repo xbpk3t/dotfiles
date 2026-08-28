@@ -13,7 +13,7 @@ in
   #   modules.infra.nix-tools.enable = true;
 
   options.modules.infra.nix-tools = with lib; {
-    enable = mkEnableOption "Nix/NixOS dev tools (nvfecher / nixfmt / nixt / nix-unit / nix-tree 等)";
+    enable = mkEnableOption "Nix/NixOS dev tools (nvfecher / nixfmt / nix-unit / nix-tree 等)";
   };
 
   config = lib.mkIf cfg.enable {
@@ -45,10 +45,10 @@ in
         statix # nix 风格与常见陷阱检查
 
         # === nixpkgs开发 ===
-        # 两套 Nix 单元测试工具都保留，便于分别试用/迁移。
-        # tags(desc): 测试框架 > 单元测试 > Nix表达式
-        inputs.nixt.packages.${pkgs.stdenv.hostPlatform.system}.default
-        # tags(desc): 测试框架 > 单元测试 > Nix表达式
+        # Nix 单元测试工具（曾同时保留 nixt，装 ni 命令；nixt 依赖 divnix/std，
+        # 在 CI 的离线 flake-check 沙箱里会触发 github.com/divnix/std/archive 下载失败，
+        # 已于 2026-08 移除，最后 nix-unit —— checks.<sys>.nix-unit 自动生成，随 flake check 跑）。
+        # tags(说明): 测试框架 > 单元测试 > Nix表达式
         inputs.nix-unit.packages.${pkgs.stdenv.hostPlatform.system}.default
       ]
       ++ [
