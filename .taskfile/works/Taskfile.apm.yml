@@ -2,7 +2,9 @@
 version: "3"
 
 vars:
-  APM_PROJECT_DIR: '{{.TASKFILE_DIR}}/../..'
+  # APM 项目根 = 运行 task 时的当前目录（全局复用：docs / docs-alfred / dotfiles 各自有 apm.yml）
+  # 用 USER_WORKING_DIR 而非 TASKFILE_DIR，否则从其它项目/经 -g 展开时 TASKFILE_DIR 指向 taskfile 所在盘，找不到各项目的 apm.yml
+  APM_PROJECT_DIR: '{{.USER_WORKING_DIR}}'
 
 dir: '{{.APM_PROJECT_DIR}}'
 
@@ -22,6 +24,54 @@ dir: '{{.APM_PROJECT_DIR}}'
 #   apm view <pkg>        查看包元数据
 #   apm cache             管理本地缓存 (clear/list/info)
 #   apm mcp               管理 MCP servers
+
+
+
+# 安装与初始化
+#- apm install                                   # 按 manifest 安装依赖
+#- apm install --frozen                          # 按 lockfile 冻结安装（新机器首选）
+#- task works:apm                                # 收敛流: info → compile → update → prune → install
+#- task works:apm:check                          # 只读问诊: info → compile --validate → audit --ci
+
+# 查看与审计
+#- apm deps list                                 # 查看当前依赖
+#- apm deps tree                                 # 查看依赖树（看清 skill 从哪个 repo 进来）
+#- apm audit --ci                                # 安全 + 部署漂移审计
+#- task works:apm:check                          # 只读入口，等价于上面三条的问诊版
+
+# 升级
+#- apm outdated                                  # 看有哪些可升级
+#- apm update --dry-run                          # 先看升级计划，不落地
+#- apm update                                    # 真正刷新 apm.lock.yaml
+#- task works:apm                                # 收敛流里已含 update
+
+# 编译与校验
+#- apm compile --validate --local-only --target codex   # 只校验本地 .apm/ primitive 是否合法
+#- task works:apm:check                          # 只读入口，跑 compile --validate（不写产物）
+
+# 增删依赖
+#- apm install --target agent-skills owner/repo --skill foo   # 正式新增共享 skill repo
+#- apm uninstall owner/repo                      # 移除项目依赖
+#- apm prune                                     # 清理 manifest 之外的孤立依赖
+
+# 临时个人试用
+#- apm install -g owner/repo --skill foo         # 装到用户作用域试用，不污染项目 manifest
+#- apm uninstall -g owner/repo                   # 试完删除
+
+# 查看远端元数据
+#- apm view owner/repo versions                  # 查询远端分支/tag
+
+# 日常 workflow
+#- task works:apm:check                          # 新机器/提交前: 先看信号
+#- task works:apm                                # 日常维护: 收敛本地 instruction + 部署结果
+#- apm install -g owner/repo --skill foo && apm uninstall -g owner/repo   # 新 repo 先 -g 试，确认有价值再进 manifest
+
+# 决策速查
+#- apm install -g owner/repo --skill foo         # 临时试一个新 repo
+#- apm install --target agent-skills owner/repo --skill foo   # 让团队共享一个新 repo（提交 apm.yml + apm.lock.yaml）
+#- task works:apm                                # 新增本仓库自己的 skill 后收敛（先改 .apm/skills/<name>/SKILL.md）
+#- apm update                                    # 升级现有依赖（先 outdated + update --dry-run）
+#- apm uninstall owner/repo && apm prune         # 删掉不再需要的 repo
 
 tasks:
   # default 日常维护工作流
