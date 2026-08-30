@@ -75,7 +75,7 @@ in
     hardware.nvidia.enable = false;
 
     networking = {
-      singbox.enable = true;
+      mihomo-client.enable = true;
       tailscale.enable = true;
     };
 

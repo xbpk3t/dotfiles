@@ -3,7 +3,7 @@
 # 【职责边界】—— 只放"系统级、不归属单一 client"的部分；已有 coverage 不重复：
 #   - environment.shells / pathsToLink      → infra/users.nix（用户壳配置）
 #   - environment.shellAliases（tss）       → networking/tailscale-client.nix
-#   - environment.systemPackages（singbox） → networking/singbox-client.nix
+#   - environment.systemPackages（mihomo） → networking/mihomo-client.nix
 #
 # 【实机/基线依据】本文件每行均经
 #   `nix eval .#darwinConfigurations.macos-ws.config.environment.<x>`

@@ -130,12 +130,9 @@ in
       gnome.enable = true;
     };
     networking = {
-      # Sing-box proxy service
-      # Configuration file must be at /etc/sing-box/config.json
-      singbox.enable = true;
-      # Mihomo (Clash.Meta) proxy service
+      # Mihomo (Clash.Meta) proxy service (client)
       # wild 订阅源由 sops 自动发现（SUB_* secrets → sub.<name>），host 无需配置
-      mihomo.enable = true;
+      mihomo-client.enable = true;
     };
   };
   # Allow user-space input remapping tools (xremap)

@@ -4,11 +4,11 @@
 #
 # 关键：基础能力（sops/sshd/systemd/i18n/tailscale）是 sm-vps 的必要基线，
 # 由 modules/sm 直接 enable（不配置化）。这里只声明「服务角色」：
-#   modules.networking.mihomo.enable      — 代理客户端（可选，默认 false）
+#   modules.networking.mihomo-client.enable — 代理客户端（可选，默认 false）
 #   modules.infra.singbox-server.enable   — 代理服务端（sm-vps 默认不做，长期机才做）
 #   modules.infra.derper.enable           — DERP 中继（SGP）
 #   modules.infra.status-page.enable      — 状态页（SGP fleet）
-# 对齐 nixos-vps/default.nix 的 modules.infra.singbox-server.enable / mihomo-server.enable。
+# 对齐 nixos-vps/default.nix 的 modules.infra.singbox-server.enable。
 {
   lib,
   isShared ? false,

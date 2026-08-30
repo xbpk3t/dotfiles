@@ -7,7 +7,7 @@
 }:
 with lib;
 let
-  cfg = config.modules.networking.mihomo;
+  cfg = config.modules.networking.mihomo-client;
   client = import ../../../lib/mihomo/client-config.nix {
     inherit
       config
@@ -19,7 +19,7 @@ let
   };
 in
 {
-  options.modules.networking.mihomo = {
+  options.modules.networking.mihomo-client = {
     enable = mkEnableOption "mihomo proxy service";
   };
 
@@ -29,8 +29,8 @@ in
     # 2. 我们的 self provider 走 /run/secrets/rendered/，由 sops-nix 渲染，
     #    rendered 文件需要显式 owner（DynamicUser 没法在生成 sops 模板之前
     #    确定 UID）；
-    # 3. 与 modules/nixos/vps/mihomo-server.nix 保持一致——那边因为要持有
-    #    ACME 证书 group 也走了静态 user，复用同一套 user/group 简化运维。
+    # 3. 与 singbox-server 保持一致——那边因为要持有 ACME 证书 group
+    #    也走了静态 user，复用同一套 user/group 简化运维。
     users.users.mihomo = {
       isSystemUser = true;
       group = "mihomo";

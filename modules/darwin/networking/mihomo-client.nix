@@ -8,7 +8,7 @@
 }:
 with lib;
 let
-  cfg = config.modules.networking.mihomo;
+  cfg = config.modules.networking.mihomo-client;
   inherit (userMeta) username;
   client = import ../../../lib/mihomo/client-config.nix {
     inherit
@@ -43,7 +43,7 @@ let
 
 in
 {
-  options.modules.networking.mihomo = {
+  options.modules.networking.mihomo-client = {
     enable = mkEnableOption "mihomo TUN proxy daemon";
   };
 

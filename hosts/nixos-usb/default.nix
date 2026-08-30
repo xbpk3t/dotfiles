@@ -118,8 +118,8 @@ in
       gnome.enable = true;
     };
     networking = {
-      # 代理：singbox 走 tailnet 回自己 VPS 节点
-      singbox.enable = true;
+      # 代理：mihomo-client 走 tailnet 回自己 VPS 节点
+      mihomo-client.enable = true;
       # tailscale：跨机器 SSH/deploy 的基础（tailnet IP 固定）
       tailscale.enable = true;
     };

@@ -125,7 +125,6 @@ in
 
     infra = {
       singbox-server.enable = true;
-      mihomo-server.enable = false;
     };
   };
 
