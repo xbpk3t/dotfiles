@@ -27,7 +27,7 @@ let
       "modules/nixos/desktop"
       "modules/nixos/infra/nix-tools.nix"
       "modules/nixos/infra/tailscale-client.nix"
-      "modules/nixos/infra/singbox-client.nix"
+      "modules/nixos/infra/mihomo-client.nix"
     ];
     home-modules = map mylib.relativeToRoot [
       "secrets/default.nix"

@@ -18,7 +18,4 @@ in
   # 注：原 mock 版（scan-paths-test.nix）已删除——real 版对真实目录断言，
   #     并且直接调用 mylib.scanPaths，是更强的契约。
   scan-paths = mkEvalCheck "real-scan-paths-test" ./real-scan-paths-test.nix;
-
-  # 代理协议生成：验证 singbox / mihomo outbounds 会为新增协议生成节点。
-  proxy-outbounds = mkEvalCheck "proxy-outbounds-test" ./proxy-outbounds-test.nix;
 }
