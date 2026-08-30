@@ -119,10 +119,21 @@ in
             # 1) 先声明第三方 marketplace 来源（官方 marketplace 不需要声明）
             # 2) 再用 enabledPlugins 启用具体插件
             extraKnownMarketplaces = {
+              # ponytail = "lazy senior dev" 规则集（公开 GitHub 仓库 marketplace）
+              # 第三方来源才有必要声明；官方 `claude-plugins-official` 不需要。
+              # [2026-08-30] source 是 entry 外层对象，git/github 源模式下没有 url/source_url 老字段
+              ponytail = {
+                source = {
+                  source = "github";
+                  repo = "DietrichGebert/ponytail";
+                };
+                # 第三方 marketplace 默认 autoUpdate=false（不后台自动刷新）
+              };
             };
 
-            # 插件启用清单（键格式：plugin-name@marketplace-name）
+            # 插件启用清单（键格式：plugin-name@marketplace-name → bool）
             enabledPlugins = {
+              "ponytail@ponytail" = true;
             };
 
             env = {
@@ -197,16 +208,16 @@ in
 
               ANTHROPIC_DEFAULT_FABLE_MODEL = "deepseek-v4-flash[1m]";
               ANTHROPIC_DEFAULT_OPUS_MODEL = "deepseek-v4-flash[1m]";
-              ANTHROPIC_DEFAULT_SONNET_MODEL = "deepseek-v4-flash[1m]";
-              ANTHROPIC_DEFAULT_HAIKU_MODEL = "deepseek-v4-flash[1m]";
+              ANTHROPIC_DEFAULT_SONNET_MODEL = "hy3[1m]";
+              ANTHROPIC_DEFAULT_HAIKU_MODEL = "mimo[1m]";
 
               # 用来在 /model picker 里多塞 1 条自定义模型，不替换 opus / sonnet / haiku / fable 那些内置 alias
               # - CUSTOM 仅支持 1 条；其它可用 id 手输 /model：gpt-5.4, mimo-v2.5-tts, oc/*
               #
               # 之后可能换成 deepseek-v4-pro[1m]
               ANTHROPIC_CUSTOM_MODEL_OPTION = "gpt-5.5";
-              ANTHROPIC_CUSTOM_MODEL_OPTION_NAME = "GPT-5.5";
-              ANTHROPIC_CUSTOM_MODEL_OPTION_DESCRIPTION = "OpenAI via gateway";
+              # ANTHROPIC_CUSTOM_MODEL_OPTION_NAME = "GPT-5.5";
+              # ANTHROPIC_CUSTOM_MODEL_OPTION_DESCRIPTION = "OpenAI via gateway";
 
               # 可选：通过 gateway 时，减少系统 prompt 中客户端归因头变化，有助于 gateway 层 prompt cache 命中
               CLAUDE_CODE_ATTRIBUTION_HEADER = "0";
