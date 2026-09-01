@@ -24,7 +24,6 @@ in
       /usr/bin/bash
       /bin/rbash
       /usr/bin/rbash
-      /usr/bin/dash
       # nix home-manager profile 的 zsh（deploy:sm 的 usermod 所设登录 shell）
       ${shellPath}
     '';

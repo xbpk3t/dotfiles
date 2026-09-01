@@ -44,6 +44,18 @@ in
           enable = true;
         };
       };
+
+      # Nix Helper (nh)
+      # https://github.com/nix-community/nh
+      # https://mynixos.com/home-manager/options/programs.nh
+      nh = {
+        enable = true;
+        clean = {
+          enable = true;
+          extraArgs = "--keep-since 7d --keep 5";
+        };
+        flake = "${config.home.homeDirectory}/Desktop/dotfiles";
+      };
     };
   };
 }
