@@ -40,6 +40,9 @@ result-*
 **/logs/
 **/data/
 
+# caddy 运行时配置（证书 data/ 已由 **/data/ 覆盖；config/ 为运行时 caddy 配置）
+.cntr/caddy/config/
+
 # ignore 本项目里所有 checksum folder
 # 主要针对 taskfile checksum
 checksum/
