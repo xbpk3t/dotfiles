@@ -1,0 +1,54 @@
+version: "3"
+
+# macOS 存储清理（用户态）
+# root 权限清理（nix generations）走 launchd daemon（hosts/macos-ws/default.nix）。
+# 调度：dagu mac.yml 每月 1 号；也可手动 `task mac:cleanup`。
+
+tasks:
+  default:
+    desc: 清理 macOS 用户态缓存/临时文件
+    summary: "task mac:cleanup"
+    cmds:
+      - task: _go-cache
+      - task: _pnpm
+      - task: _go-tools-cache
+      - task: _browser-cache
+      - task: _temp-files
+      - task: _mole
+
+  _go-cache:
+    internal: true
+    desc: Go 编译缓存（~/Library/Caches/go-build，非 ~/go）
+    cmds:
+      - go clean -cache 2>/dev/null || true
+
+  _pnpm:
+    internal: true
+    desc: pnpm store（移除未引用包）+ 下载缓存
+    cmds:
+      - pnpm store prune 2>/dev/null || true
+      - rm -rf ~/Library/Caches/pnpm 2>/dev/null || true
+
+  _go-tools-cache:
+    internal: true
+    desc: Go 工具链缓存（gopls / golangci-lint）
+    cmds:
+      - rm -rf ~/Library/Caches/gopls ~/Library/Caches/golangci-lint 2>/dev/null || true
+
+  _browser-cache:
+    internal: true
+    desc: Chrome 浏览器缓存
+    cmds:
+      - rm -rf ~/Library/Caches/Google/Chrome 2>/dev/null || true
+
+  _temp-files:
+    internal: true
+    desc: 用户临时目录中 7 天前的文件（不碰运行中进程的）
+    cmds:
+      - find /private/var/folders -path "*/T/*" -type f -mtime +7 -delete 2>/dev/null || true
+
+  _mole:
+    internal: true
+    desc: mole cleanup（用户级缓存/残骸，无 TTY 自动非交互模式）
+    cmds:
+      - mole cleanup

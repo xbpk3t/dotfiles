@@ -106,7 +106,7 @@ tasks:
         # sshd_config.d），运行中的服务不会自动重读——reload/restart 让 drop-in 生效。
         # sshd 用 reload（不中断会话）；journald/logind 用 restart（drop-in 需重启才读）。
         ssh -o BatchMode=yes -o ConnectTimeout=15 "${user}@${host}" \
-          'sudo -n systemctl reload ssh 2>/dev/null || true; sudo -n systemctl restart systemd-journald; sudo -n systemctl restart systemd-logind; echo "drop-ins reloaded"'
+          'sudo -n systemctl reload ssh 2>/dev/null || sudo -n systemctl reload sshd 2>/dev/null || true; sudo -n systemctl restart systemd-journald; sudo -n systemctl restart systemd-logind; echo "drop-ins reloaded"'
 
   smoke:
     desc: "sm-vps 部署后 smoke check（验证 etc/unit/secret/tailnet/SSH）"
@@ -142,7 +142,7 @@ tasks:
         echo "==> smoke check ${node} (${host})"
         ssh -o BatchMode=yes -o ConnectTimeout=15 "${user}@${host}" 'bash -lc "
           set -euo pipefail
-          echo \"[1] SSH: \$(systemctl is-active ssh)\"
+          echo \"[1] SSH: \$(systemctl is-active ssh 2>/dev/null || systemctl is-active sshd 2>/dev/null || echo inactive)\"
           echo \"[2] sm flag: \$(grep node= /etc/sm-vps-managed 2>/dev/null || echo MISSING)\"
           echo \"[3] sm unit: \$(systemctl is-active sm-vps-managed-marker)\"
           echo \"[4] HM: \$(readlink ~/.nix-profile | head -c 30)...\"

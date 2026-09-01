@@ -104,7 +104,14 @@
 
     - name: 2c 安装 Determinate Nix（幂等：已装则跳过）
       ansible.builtin.command:
-        cmd: "sh /tmp/nix-installer.sh install --no-confirm --extra-conf 'trusted-users = {{ sm_nix_trusted_users }}' --extra-conf 'experimental-features = {{ sm_nix_experimental }}'"
+        cmd:
+          - sh /tmp/nix-installer.sh
+          - install
+          - --no-confirm
+          - --extra-conf
+          - "trusted-users = {{ sm_nix_trusted_users }}"
+          - --extra-conf
+          - "experimental-features = {{ sm_nix_experimental }}"
         creates: /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
       register: nix_install
 
@@ -184,10 +191,10 @@
     - name: 2o deploy-rs 前置：/etc/environment 加 nix PATH（幂等，替换已有 PATH 行）
       ansible.builtin.lineinfile:
         path: /etc/environment
-        # regexp 匹配任意 PATH 行（Debian 出厂自带，可能带引号）→ 替换而非追加第二条
         regexp: '^PATH='
         line: 'PATH=/nix/var/nix/profiles/default/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
         create: true
+        mode: "0644"
         state: present
 
 - name: "P3  tailscale（luck 身份；HM/sm/sops 走 deploy-rs）"
@@ -218,6 +225,18 @@
         - ansible_os_family == 'Debian'
       become: true
 
+    - name: 3c-rhel tailscale 官方 repo（RHEL 系；yum/dnf）
+      ansible.builtin.yum_repository:
+        name: tailscale
+        description: Tailscale stable
+        baseurl: "https://pkgs.tailscale.com/stable/centos/$releasever/$basearch"
+        gpgcheck: true
+        gpgkey: "https://pkgs.tailscale.com/stable/centos/$releasever/noarch/RPM-GPG-KEY-tailscale-com"
+        state: present
+      when:
+        - not sm_shared | default(false)
+        - ansible_os_family == 'RedHat'
+
     - name: 3d 安装 tailscale 包
       ansible.builtin.package:
         name: tailscale
@@ -243,6 +262,7 @@
       ansible.builtin.command:
         cmd: "tailscale up --authkey=file:/root/.ts-authkey && rm -f /root/.ts-authkey"
       become: true
+      changed_when: true
       when:
         - not sm_shared | default(false)
         - sm_ts_authkey_src | length > 0

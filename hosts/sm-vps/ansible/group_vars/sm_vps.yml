@@ -6,14 +6,14 @@ sm_user: luck
 sm_uid: 1001
 sm_gid: 1001
 sm_groups:
-  - sudo            # Debian/Ubuntu 管理组；RHEL 系改 wheel（distro 适配点）
+  - "{{ 'sudo' if ansible_os_family == 'Debian' else 'wheel' }}"
 sm_shell: /bin/bash
 
-# bootstrap P2a 前置包（distro 适配点：Debian xz-utils vs RHEL xz）
+# bootstrap P2a 前置包（跨发行版适配：Debian xz-utils / RHEL xz）
 sm_bootstrap_packages:
   - curl
   - ca-certificates
-  - xz-utils
+  - "{{ 'xz-utils' if ansible_os_family == 'Debian' else 'xz' }}"
   - rsync
 
 # 共享机（共用 VPS）：true 时跳过 sshd 锁、不复制主 age key。
