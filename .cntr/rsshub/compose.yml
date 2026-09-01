@@ -10,11 +10,7 @@ x-common-logging: &common-logging
     max-file: "3"
 
 x-common-restart: &common-restart
-  restart: "no"
-
-x-backend-network: &backend-network
-  networks:
-    - backend
+  restart: unless-stopped
 
 
 
@@ -23,8 +19,8 @@ services:
     image: diygod/rsshub:latest
     container_name: rsshub
     <<: *common-restart
-    ports:
-      - '1200:1200'
+    networks:
+      - edge
     environment:
       NODE_ENV: production
       CACHE_TYPE: memory
@@ -33,13 +29,15 @@ services:
       #      PROXY_URL_REGEX: (..)?(bilibili)(/.)?
       #      REDIS_URL: 'redis://redis:6379/'
       PUPPETEER_WS_ENDPOINT: 'ws://browserless:3000'
-      YOUTUBE_KEY: "${YOUTUBE_KEY}"
-      YUQUE_TOKEN: "${YUQUE_TOKEN}"
-      GITHUB_ACCESS_TOKEN: "${GITHUB_ACCESS_TOKEN}"
-      PIXIV_REFRESHTOKEN: "${PIXIV_REFRESHTOKEN}"
+      # 走 caddy 反代，不暴露端口；env 不走 .env，由 host 提供（GITHUB 复用宿主已有 token）
+      # sops 中以下 token 均空、对应 route 未使用 → 注释掉，需要某条 route 再放行
+      # YOUTUBE_KEY: "${YOUTUBE_KEY}"
+      # YUQUE_TOKEN: "${YUQUE_TOKEN}"
+      GITHUB_ACCESS_TOKEN: "${GITHUB_TOKEN}"
+      # PIXIV_REFRESHTOKEN: "${PIXIV_REFRESHTOKEN}"
       # BILIBILI_COOKIE_3461573033068685: ''
-      SPOTIFY_CLIENT_ID: "${SPOTIFY_CLIENT_ID}"
-      SPOTIFY_CLIENT_SECRET: "${SPOTIFY_CLIENT_SECRET}"
+      # SPOTIFY_CLIENT_ID: "${SPOTIFY_CLIENT_ID}"
+      # SPOTIFY_CLIENT_SECRET: "${SPOTIFY_CLIENT_SECRET}"
     depends_on:
       # - redis
       - browserless
@@ -50,6 +48,8 @@ services:
     image: browserless/chrome:1.43-chrome-stable
     container_name: rsshub-browserless
     <<: *common-restart
+    networks:
+      - edge
     ulimits:
       core:
         hard: 0
@@ -80,3 +80,8 @@ services:
 
 #volumes:
 #  redis:
+
+# caddy 的 external edge 网络，rsshub/browserless 加入以被 caddy 反代
+networks:
+  edge:
+    external: true

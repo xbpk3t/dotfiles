@@ -1,3 +1,7 @@
 api.lucc.dev {
 	reverse_proxy axonhub:8090
 }
+
+rsshub.lucc.dev {
+	reverse_proxy rsshub:1200
+}
