@@ -1,0 +1,41 @@
+frontmatter:
+  name: herdr
+  role: atom
+  desc: 把任务 publish 给 herdr 里其他 agent（codex/claude 等）：开 pane→start→prompt 委派链；只派发不回收
+
+what:
+  is: 当本会话决定把子任务委派给 herdr 中另一个 agent 时，用 herdr CLI 完成 开 pane → 启动 agent → 派活 的委派流程，确认已发布
+  not: 不是自动化脚本/调度框架；不负责 herdr 配置；不回收/回读子 agent 的最终结果
+
+gate:
+  - qs: 目标 pane 是否已创建并处于交互提示符（无前台命令/编辑器）？
+    fail: 先用 herdr pane split 创建 pane 并 wait-output 等 shell 落到提示符，再继续
+
+workflow:
+  - phase: 委派（publish）
+    steps:
+      - 确认子任务有明确交付物、可独立执行（有产出的活才派；否则留在本会话）
+      - "委派链：herdr pane split --current --direction right --no-focus → 取 .result.pane.pane_id → herdr pane wait-output <pid> --match '$'（等交互提示符）→ herdr agent start <kind> --pane <pid> → herdr agent prompt <name> '<任务>'（可选 --wait 确认已接收，不回收最终结果）"
+      - "句柄用 pane id：本次委派的稳定标识是返回的 pane id（name 在 agent 退出时清空），把它记进交付信息"
+      - 某步失败先 herdr agent get 查状态，不整链盲试
+
+constraint:
+  must-not:
+    - "禁止把委派当字面转述 echo 掉——本会话有 Bash + herdr，委派意图出现就必须实际执行委派链"
+
+output:
+  format: md
+  struct:
+    - key: 委派确认
+      val: agent kind/name + 任务摘要 + pane id
+
+self-check:
+  - 实际执行了 herdr CLI（非字面转述）？
+  - 委派链按序执行，pane id 正确传给 start / prompt？
+  - 没有越界去 read 回收结果？
+
+hint:
+  - if: 委派链某步失败
+    then: herdr agent get <name> 查状态后定向重试，不整链盲试
+  - if: 之后需要子 agent 的产出
+    then: 另行 read / 文件握手回收——本 prpt 只管 publish

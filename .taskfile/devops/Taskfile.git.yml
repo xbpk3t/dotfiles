@@ -52,15 +52,30 @@ tasks:
     preconditions:
       - sh: 'test -d .git || { echo "错误: 当前目录不是Git仓库"; exit 1; }'
     cmds:
-      - echo "================ 仓库概览 ================"
+      - echo "===== 仓库概览 ====="
       - git-quick-stats --detailed-git-stats
-      - echo "================ 贡献者排名 ================"
+      - echo "===== 贡献者排名 ====="
       - git-quick-stats --contributors
-      - echo "================ 文件活跃度分析 ================"
+      - echo "===== 文件活跃度分析 ====="
       - git effort --stale
       - echo "✅ Git仓库分析报告完成！"
       - npx code996
+
+      # [The Git Commands I Run Before Reading Any Code](https://piechowski.io/post/git-commands-before-reading-code/)
+      - echo "===== What Changes the Most =====" # 找出最近一年变更最多的文件，高变更且无人愿维护的文件是最大风险信号。
+      - 'git log --format=format: --name-only --since="1 year ago" | sort | uniq -c | sort -nr | head -20'
+      - echo "===== Who Built This =====" # 查看贡献者排名，若单人占比超 60% 则存在 bus factor；若核心贡献者已离开超过 6 个月，需立即向客户/团队预警。
+      - git shortlog -sn --no-merges
+      - echo "===== Where Do Bugs Cluster =====" # 定位 bug 密集文件，与高变更文件交叉对比得到最高风险代码。
+      - 'git log -i -E --grep="fix|bug|broken" --name-only --format='' | sort | uniq -c | sort -nr | head -20'
+      - echo "===== Is This Project Accelerating or Dying =====" # 按月统计提交数
+      - git log --format='%ad' --date=format:'%Y-%m' | sort | uniq -c
+      - echo "===== How Often Is the Team Firefighting =====" # 统计 revert/hotfix/emergency 频率。频繁回滚（每几周一次）表明团队不信任部署流程，零结果也可能意味着 commit message 不规范。
+      - git log --oneline --since="1 year ago" | grep -iE 'revert|hotfix|emergency|rollback'
+
     dir: '{{.USER_WORKING_DIR}}'
+
+
 
 
   # 怎么修改（上一次commit的，以及指定commit的） commit message? # git rebase -i：修改某次 commit 的 message。

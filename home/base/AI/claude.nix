@@ -115,6 +115,11 @@ in
             # 关掉后 git 工作流不受影响（CLAUDE.md 和 skills 里已有 git 指引）。
             includeGitInstructions = false;
 
+            # [2026-09-08] 不注册 claude-cli:// 深链 handler。
+            # 不设的话 macOS 会在首次发 prompt 时把 URL Handler.app 重建到
+            # ~/Applications/（约每 24h 一次，手动删不掉，见 anthropics/claude-code#41015）。
+            disableDeepLinkRegistration = "disable";
+
             # 走 Claude 原生插件生态：
             # 1) 先声明第三方 marketplace 来源（官方 marketplace 不需要声明）
             # 2) 再用 enabledPlugins 启用具体插件
@@ -155,6 +160,10 @@ in
 
               # 文件2建议：Nix 管 Claude Code 包版本，不需要它自己更新
               DISABLE_AUTOUPDATER = "1";
+              # [2026-09-08] 官方 marketplace（claude-plugins-official）默认在首次启动时
+              # 自动注册并后台刷新（autoUpdate=true），我们只用 ponytail 市场。
+              # 不设的话它会持续联网拉目录；需要时 /plugin 可手动加回。
+              CLAUDE_CODE_DISABLE_OFFICIAL_MARKETPLACE_AUTOINSTALL = "1";
               # 临时注释（LUC-334 实测）：CLAUDE_CODE_DISABLE_TERMINAL_TITLE=1 会禁掉
               # Claude 的 OSC 终端标题更新，而 herdr 的 osc_title_working 规则依赖它
               # 检测 working 状态（issue #1630）。不设则 agent 状态永远 stuck 在 idle，

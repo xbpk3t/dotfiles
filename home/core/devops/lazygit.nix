@@ -4,12 +4,18 @@
   ...
 }:
 {
-  home.packages = with pkgs; [
-    lazygit
-    # 新增 delta 以支持 side-by-side diff
-    # lazygit 对 delta 依赖
-    delta
-  ];
+  home = {
+    packages = with pkgs; [
+      lazygit
+      # 新增 delta 以支持 side-by-side diff
+      # lazygit 对 delta 依赖
+      delta
+    ];
+
+    shellAliases = {
+      lzg = "lazygit";
+    };
+  };
 
   programs.lazygit = {
     enable = true;
