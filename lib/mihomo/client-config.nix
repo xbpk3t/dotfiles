@@ -264,8 +264,8 @@ let
         "DOMAIN-SUFFIX,netease.com,DIRECT"
 
         # REJECT
-        "DOMAIN-SUFFIX,zhihu.com,REJECT"
-        "DOMAIN-SUFFIX,bilibili.com,REJECT"
+        # "DOMAIN-SUFFIX,zhihu.com,REJECT"
+        # "DOMAIN-SUFFIX,bilibili.com,REJECT"
 
         # GEOIP CN 直连
         "GEOIP,CN,DIRECT"

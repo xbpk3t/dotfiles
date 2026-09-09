@@ -34,6 +34,7 @@
         restartService = "{{ .DockerCompose }} restart {{ .Service.Name }}";
         up = "{{ .DockerCompose }} up -d";
         down = "{{ .DockerCompose }} down";
+        # 危险：-v 会删除 compose 声明的 named volumes（postgres_data 等），有状态服务禁用于日常，仅明确要清空数据时用
         downWithVolumes = "{{ .DockerCompose }} down --volumes";
         upService = "{{ .DockerCompose }} up -d {{ .Service.Name }}";
         startService = "{{ .DockerCompose }} start {{ .Service.Name }}";
@@ -41,7 +42,8 @@
         serviceLogs = "{{ .DockerCompose }} logs --since=60m --follow {{ .Service.Name }}";
         viewServiceLogs = "{{ .DockerCompose }} logs --follow {{ .Service.Name }}";
         rebuildService = "{{ .DockerCompose }} up -d --build {{ .Service.Name }}";
-        recreateService = "{{ .DockerCompose }} up -d --force-recreate {{ .Service.Name }}";
+        # 内置 `R` 菜单的 Recreate 选项用的就是此模板：带上 --remove-orphans 清掉旧 compose 遗留容器，不删数据卷
+        recreateService = "{{ .DockerCompose }} up -d --force-recreate --remove-orphans {{ .Service.Name }}";
         allLogs = "{{ .DockerCompose }} logs --tail=300 --follow";
         viewAlLogs = "{{ .DockerCompose }} logs";
         dockerComposeConfig = "{{ .DockerCompose }} config";
@@ -50,6 +52,17 @@
       };
 
       customCommands = {
+        services = [
+          {
+            name = "safe-upgrade (pull + recreate + remove orphans)";
+            attach = true;
+            shell = true;
+            # 安全升级：拉新镜像 → 重建应用最新配置 → 清孤儿容器；不会删 named volumes
+            command = "{{ .DockerCompose }} pull {{ .Service.Name }} && {{ .DockerCompose }} up -d --force-recreate --remove-orphans {{ .Service.Name }}";
+            serviceNames = [ ];
+          }
+        ];
+
         containers = [
           {
             name = "inspect-ip (all containers)";

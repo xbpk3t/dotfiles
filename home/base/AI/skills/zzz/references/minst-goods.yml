@@ -1,0 +1,116 @@
+---
+frontmatter:
+  name: minst-goods
+  role: atom
+  desc: 极简主义物品管理决策：审计（默认）+ 购物决策（候选 X）；基于 goods 数据 + OnePacker 基准
+
+what:
+  is: |
+    基于 data/goods + OnePacker 基准，做物品审计（summary + 可精简清单 + 校准）或购物决策。
+    一个决策流，两种触发：默认审计，提供候选 X 时追加购物决策。
+  not: |
+    不写盘（除用户确认后回写）；不做数据迁移（那是 data-cli 的事）。
+    不把评价文本/选购复盘当弃用信号；不把 food/consumables 计入 OnePacker 决策。
+
+gate:
+  - qs: data-cli goods using 能否正常执行？
+    fail: 报错退出，不自行臆测数据
+  - qs: data-cli goods dump 能否正常执行？
+    fail: 缺数据源则停止，提示用户先补数据
+
+# input:
+#   source: |
+#     data-cli goods using
+#     data-cli goods dump
+#     data-cli dump gh --tag zzz --type ss --topic goods
+#   params:
+#     - candidate: string | null
+
+constraint:
+  must:
+    - 数据提取必须走代码（data-cli goods using / goods dump / dump gh），不手工贴数据
+    - food/consumables 不计入 OnePacker 决策（即用即买）
+    - 审计只认两类硬信号（isUsing + 明确处置动词）和软信号（弱信号→建议关注）；评价文本/比较一律中性信息
+    - 替代方案必须具体到产品/方式，禁止空话
+    - 校准输出待确认清单，每条标注目标文件，确认后才回写
+    - 回写后重跑 data-cli goods using 验证一致性
+  must-not:
+    - 禁止未确认写盘
+    - 禁止把审计/购物当并行 pipeline（顺序依赖）
+    - 禁止把「比较、评价一般、选购复盘」当精简理由
+    - 禁止把验证失败的方案（hti 划掉记录）重新提出
+    - 禁止臆测替代方案（给不出具体产品 = 幻觉，必须承认）
+
+workflow:
+  - phase: 数据提取（确定性，走代码）
+    steps:
+      - data-cli goods using
+      - data-cli goods dump
+      - data-cli dump gh --tag zzz --type ss --topic goods
+
+  - phase: 模式分派
+    steps:
+      - |
+        if 候选 X → 审计 + 购物决策
+        else      → 审计
+
+  - phase: 审计
+    desc: |
+      3a. 状态纵览（summary）
+      - 当前 isUsing 物品总数、按 type 分组
+      - 与 OnePacker 基准对比
+      - 无 isUsing = 已不在用；无 endDate 仅表示「未卖掉/未标注」
+      - 明显在用却缺标记的（如 MBA M4）→ 单独列出，走代码确认
+
+      3b. 可精简清单（findings）——对抗式审查
+      - 前置：先读 hti/hti 划掉记录，已划掉方案不得再提
+      - 硬信号（→ 可精简）：处置动词 / 功能重复+用户表态 / 与基准冲突
+      - 软信号（→ 建议关注）：score≤2+负面评价 / 功能重叠无表态 / 消极词汇无升级
+      - 软信号格式：【建议关注】<物品> — <弱信号>。保留，建议确认。
+      - 审查含 topic 级（一物多用），覆盖须「功能完全等价+明确替代者」
+      - 输出：可精简 / 建议关注 / 可保留，每条带反证依据；拿不准一律保留
+
+      3c. 校准结论（calibration）
+      - A/B 采信规则：A 有数字→采信 A；B 有处置事件→采信 B；冲突→两列+依据；叙事体→提取结论标注推断
+      - 待确认清单：每条标注目标文件（data/goods/*.yml 或 ss.yml）
+      - 确认后 AI 回写，回写后重跑 data-cli goods using 验证
+
+  - phase: 购物决策
+    gate: 有候选 X
+    steps:
+      - 4a. 候选信息收集（规格：重量/尺寸/材质/价格；与已有物品对比；用户给或 websearch）
+      - 4b. 四层过滤 + 黑名单（需求/价格/收纳/清洁 + 绝不购买项）
+      - 4c. OnePacker 容量判断（候选能否进 pack / 替换后物品数是否减少）
+      - 4d. 决策输出（买/不买/替换 + 理由 + 依据规则）
+
+output:
+  format: md
+  template: |
+    ## artifact
+    step: audit | buy
+    status: ok | skipped
+    summary: <状态纵览（审计模式）>
+    findings: <可精简清单 + 建议关注清单>
+    calibration: <A vs B 差异 + 采信判断 + 待确认清单（含目标文件）>
+    buy_recommendation: <购物决策（候选模式）>
+
+self-check:
+  - 数据提取走代码（data-cli goods using / goods dump / dump gh）？
+  - food/consumables 不计入 OnePacker 决策？
+  - 校准区分 A（基准）vs B（记录），AI 综合判断而非机械 diff？
+  - 校准带待确认清单（含目标文件），未确认不回写？
+  - 购物决策过四层过滤 + 黑名单 + SFTA/REUSE？
+  - 有候选走购物，无则只审计？
+  - findings 区分硬信号（处置动词→可精简）与软信号（弱信号→建议关注）？
+  - 替代方案具体到产品/方式？
+  - 遵守数据约定（无 isUsing = 已退役）？
+  - 先读 hti 划掉记录，未把验证失败方案重新提出？
+  - 回写后重跑 data-cli 验证一致性？
+
+hint:
+  - if: 审计完成且有待确认清单
+    then: 等用户确认后再回写数据，不要自行修改
+  - if: 购物决策完成
+    then: 建议用户记录购买结果到 data/goods/（更新 isUsing + record）
+  - if: 校准发现 A/B 重大差异
+    then: 优先提示用户更新 OnePacker 基准（ss.yml）
