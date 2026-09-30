@@ -31,9 +31,19 @@ dependencies:
       skills:
         - reclaim-code-entropy
 
-  # deja-history：上游无 remote skill URL（install 时本地生成 SKILL.md）。
-  # 正文 pin 在 apm-local/deja-history/（官方 v0.15.0 MCP guidance）。
-  # Claude-only 落地由 claude.nix home.file → ~/.claude/skills/deja-history/，
-  # 不走 agent-skills 共享 catalog（避免 Codex 也装上）。
-  # MCP：home/base/AI/mcp.nix 的 deja；无 hooks；索引手动 deja warmup。
+    # [Wey Gu 古思为 on X: "我用的最多的就是 ceo plan skill...非执行性质的任务" / X](https://x.com/wey_gu/status/2083773126660477417)
+    # garrytan = Garry Tan (YC)。CEO/founder 模式 review：Step 0 前提挑战 + 四姿态 + adversarial 复核。
+    # 注意：SKILL.md 深度耦合 gstack 生态（office-hours/gbrain/telemetry/GSTACK REVIEW REPORT 输出），
+    # 用于概念/文章等非执行任务时按需剪枝，不必挂 gstack 全家桶。
+    - git: https://github.com/garrytan/gstack.git
+      skills:
+        - plan-ceo-review
+
+    # Cloudflare 官方六阶段源码审计：覆盖账本→isolated hunter→fresh verifier 推翻→三种裁决→独立复核。
+    # 触发描述由仓库内 SKILL.md frontmatter 原样提供，无需在 apm.yml 重写；显式要求 audit/pen-test 才跑全套，普通问题只走引导模式
+    - git: https://github.com/cloudflare/security-audit-skill.git
+      skills:
+        - security-audit # 全仓漏洞审计；无沙箱不执行目标代码
+
+
   claude:
