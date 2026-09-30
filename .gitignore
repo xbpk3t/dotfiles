@@ -59,8 +59,8 @@ __pycache__/
 apm_modules/
 apm.lock.yaml
 
-# local notes — not part of flake tree commits
-docs/
+# local notes — not part of flake tree commits（仅根目录 docs/，锚定防误伤嵌套 docs）
+/docs/
 
 # zzz skill — references 只存 .yml（prompt 源）；.md 不入库（render 已移除，遗留已清）
 home/base/AI/skills/zzz/references/**/*.md

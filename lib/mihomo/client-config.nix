@@ -171,7 +171,7 @@ let
         health-check = {
           enable = true;
           url = "https://cp.cloudflare.com/generate_204";
-          interval = 300;
+          interval = 60;
         };
       };
     }
@@ -193,7 +193,7 @@ let
         type = "url-test";
         use = [ "self" ];
         url = "https://cp.cloudflare.com/generate_204";
-        interval = 1800;
+        interval = 300;
       }
       {
         name = "Wild";

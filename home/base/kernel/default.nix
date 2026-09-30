@@ -42,6 +42,7 @@
 
       xh # curl 替代（Rust）
       httpie
+      httpyac
     ]
     ++ [
       curl
