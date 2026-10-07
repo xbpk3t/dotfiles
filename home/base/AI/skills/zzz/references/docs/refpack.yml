@@ -1,0 +1,91 @@
+---
+frontmatter:
+  name: refpack
+  role: atom
+  desc: 主题知识参考包 —— 给定 topic，自动汇集 data / wiki / blog 三源为「参考包」注入上下文。替代手动从 docs/data/gh、docs/wiki、docs/blog 三处复制。使用姿势：先把你头脑里的问题翻译成 topic 名（可逗号组合多个），refpack 不做问题→topic 的语义映射，也不回答任何问题。
+
+what:
+  is: |
+    针对一个（或多个，逗号分隔）topic，从三个数据源汇集知识参考：
+    - data: data-cli dump gh → topic 记录（htu/hti/hto/des/record）
+    - wiki: docs/wiki/<tag>/<type>/<topic>/ 的 summary.md + <topic>.md
+    - blog: topic 的 record 中带 url 的条目 → 本地 docs/blog/ 文章
+    输出固定结构的「参考包」，每条引用带来源路径/日期。产物只进对话上下文，不写盘。
+  not: |
+    不是结论/答案生成器 —— 输出是参考资料，事实需另行验证
+    不是 blog 全文检索：blog 收录权完全归 data YAML 的 record url 字段（curation），不做 grep
+    不抓取外部 URL（v1 只处理本地可解析的 blog）
+    不做别名/同义词；多 topic 用逗号显式给
+
+input:
+  params:
+    - topic: |
+        必填。要检索的主题（取决于用户给什么：topic 名直接给；若是完整问题 → 在输出末尾附「该问题建议的 topic 候选」清单，不自行猜 topic 执行）。
+        支持逗号分隔多 topic（如 `agent-fwk,agent-memory`）。
+        未知 topic 时输出可用 topic 前缀清单（前 20），不猜不改名。
+
+constraint:
+  must:
+    - "输出必须包含模板全部段落：标题、data、wiki、blog、coverage manifest，缺一段即失败"
+    - "template 即契约，段标题固定为：## 参考包: <topic> / ### data / ### wiki / ### blog / ### coverage manifest"
+    - "不是 source of truth：输出带「非结论来源」声明，每条引用必须带来源路径 + 日期"
+    - "record 数组中仅带 url 的条目进入 blog 引用；纯 des 条目（移除/变更历史）跳过并在 manifest 计数"
+    - "跳过含 `# [Archive` 的注释段；blog 同目录下不在 record 中的文件列入 manifest 未收录 candidates"
+    - "blog 域为 blog.lucc.dev（或同站域名）→ URL 尾段先按 frontmatter slug 精确匹配，未命中再按文件名包含尾段匹配 → docs/blog/ 全库匹配本地文件并读取；非本地域 → 保留 URL 不抓取，manifest 标 remote"
+    - "wiki 文件不存在则标记（absent），不报错中断；至少 topic 缺 <topic>.md 时只读 summary.md"
+    - "补防遗漏层：ls docs/blog/<tag>/<type>/（存在时），列文件名供用户确认未收录；注意该目录按 type 组织，候选文件可能属于其他 topic"
+  must-not:
+    - "禁止把收集到的资料当结论输出；必须声明『非结论来源』并带来源"
+    - "禁止藏着缺失：任一步失败/缺文件都要如实列进 manifest"
+    - "禁止把并集当证据：只读当前 topic 的 summary.md + <topic>.md"
+
+workflow:
+  - phase: 索引定位
+    desc: 先定位，再取数
+    steps:
+      - "数据根目录 = /Users/luck/Desktop/docs（data-cli 用相对路径 data/，必须在 docs 根执行）。工作目录不在 docs 时，先 cd 过去或将 --path 指向它"
+      - "执行 data-cli dump（无参）→ 全量索引（tag → types → topics）；对每个 topic 定位其 tag/type（多个命中取第一，mark 歧义）"
+      - "工具不可用/数据路径不符 → fallback：直接读取匹配 docs/data/gh/<tag>/*.yml 定位 topic"
+
+  - phase: 取数三源
+    desc: 有则取、无则记，不跳过
+    steps:
+      - "data：data-cli dump gh --tag <tag> --type <type> --topic <topic>（或 fallback 直接从 yml 提取）→ 按 kind 取字段：type → htu/hti/hto；repo → repo 数组；两类都有 record 数组（取其中带 url 的条目入 blog 步）"
+      - "wiki：读 docs/wiki/<tag>/<type>/<topic>/{summary.md,<topic>.md}"
+      - "blog：对 record 中每个 url 条目：blog 域 → slug 解析 → 本地匹配 → 读文件；否则标记 URL remote（附 date）"
+      - "防漏层：ls docs/blog/<tag>/<type>/（存在时）→ 列表与 record 收录集合比对"
+
+  - phase: 组装
+    steps:
+      - "按模板输出，格式即契约；topic 无任何数据，或 blog 全是 remote → manifest 中显式提示"
+
+# output:
+#   format: md
+#   template: |
+#     ## 参考包: <topic>
+#     > 参考资料，非结论来源。以下内容仅为语境对齐，事实需另行验证。
+
+#     ### data
+#     - **<topic>** (tag=<tag>, type=<type>, kind=<type|repo>)
+#       - type 类: htu / hti / hto 各条目摘录；repo 类: repo 数组（url + des）
+#       - 单条目超 ~2000 字符 → 仅留前 600 字符并标注（节选），防参考包动辄上万 token
+#       - record 中带 url 的条目在此列出（含 date/score/url）；纯 des 条目不列（跳过原因进 manifest）
+
+#     ### wiki
+#     - 来源: docs/wiki/<tag>/<type>/<topic>/{summary.md,<topic>.md}
+#     - 核心内容摘录（原样引用；文件缺失 → `(absent)`）
+
+#     ### blog
+#     - <标题> — <URL> | 本地: <路径> | <date>（remote 条目标 `remote`）
+#     - 无 → `- (无)`
+
+#     ### 覆盖清单 coverage manifest
+#     - 执行命令: `（实际执行的每条命令）`
+#     - 三源命中: data: 命中/缺 | wiki: 命中/absent | blog: N 篇 (URL 列表)
+#     - blog 未收录候选: docs/blog/<tag>/<type>/ 中不在 record 的文件名清单（该 type 目录含其他 topic 文章，仅供人工鉴别）
+
+self-check:
+  - "输出含全部分段：data / wiki / blog / coverage manifest"
+  - "manifest 与实际执行的命令一致（含 fallback / remote 标记）"
+  - "archive、移除/变更（无 url）条目未进入上下文"
+  - "未读 log.md、未做关键词抓取、未抓取外部 URL 内容"
