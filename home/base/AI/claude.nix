@@ -74,6 +74,11 @@ in
             # [2026-06-02] concise: 去除每 turn 的 Insight 框 + 原理展开，节省 30-50% 输出 token
             outputStyle = "concise";
 
+            # [Fullscreen rendering - Claude Code Docs](https://code.claude.com/docs/en/fullscreen)
+            # [2026-09-30] 固定 classic 渲染器，消灭每次启动的 "Try the new fullscreen renderer?" upsell。
+            # "default" = 经典主屏渲染器；想试新 flicker-free 全屏改成 "fullscreen"。
+            tui = "default";
+
             # [2026-09-29] cleanupPeriodDays 默认30天。根据mtime（而非ctime）判断。但是被我改成7天了，又因为这些session的 mtime本身就<7，所以没被清理掉。为了避免误删一些仍在用的session，改成60
             cleanupPeriodDays = 60;
 
