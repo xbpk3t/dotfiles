@@ -5,3 +5,7 @@ api.lucc.dev {
 rsshub.lucc.dev {
 	reverse_proxy rsshub:1200
 }
+
+as.lucc.dev {
+	reverse_proxy openlist:5244
+}

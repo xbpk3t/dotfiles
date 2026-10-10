@@ -19,6 +19,18 @@ locals {
       comment  = "AxonHub"
     }
 
+    as = {
+      id      = null
+      name    = "as.lucc.dev"
+      type    = "A"
+      content = "192.129.183.26"
+      ttl     = 1
+      # 开启cf橙云代理
+      proxied  = true
+      priority = null
+      comment  = "OpenList (ASMR)"
+    }
+
     grafana = {
       id       = "0a78e1bf7e0d58ac35378f3c7e117625"
       name     = "g.lucc.dev"
@@ -91,10 +103,10 @@ locals {
     }
 
     blog = {
-      id       = "442d7dbf738b136ce33fea1048c4331c"
+      id       = "db66877fcacde96aa9844c8a91ec3a16"
       name     = "blog.lucc.dev"
-      type     = "CNAME"
-      content  = "blog-cfg.pages.dev"
+      type     = "AAAA"
+      content  = "100::"
       ttl      = 1
       proxied  = true
       comment  = null
@@ -111,10 +123,10 @@ locals {
       priority = null
     }
     docs = {
-      id       = "1316b702e2113771137d9131d25f3d65"
+      id       = "056c4cc7e02dfac9d69c9ff02d522314"
       name     = "docs.lucc.dev"
-      type     = "CNAME"
-      content  = "docs-fq6.pages.dev"
+      type     = "AAAA"
+      content  = "100::"
       ttl      = 1
       proxied  = true
       comment  = null

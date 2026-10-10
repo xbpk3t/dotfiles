@@ -14,6 +14,7 @@ services:
       - rsshub
       - resin
       - cpa
+      - openlist
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:

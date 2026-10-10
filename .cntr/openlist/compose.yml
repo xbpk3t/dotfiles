@@ -1,15 +1,27 @@
 ---
 
-# docker-compose.yml
+name: openlist
+
 services:
   openlist:
-    image: 'openlistteam/openlist:latest'
+    image: openlistteam/openlist:latest
     container_name: openlist
     user: '0:0' # Please replace `0:0` with the actual user ID and group ID you want to use to run OpenList.
     volumes:
       - './data:/opt/openlist/data'
-    ports:
-      - '5244:5244'
+    # 对外统一走 caddy（edge 网络）反代 as.lucc.dev，不暴露端口（同 rsshub 等服务的处理）
+    networks:
+      - edge
     environment:
       - UMASK=022
     restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+# caddy 的 external edge 网络，openlist 加入以被 caddy 反代
+networks:
+  edge:
+    external: true
