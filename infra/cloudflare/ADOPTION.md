@@ -134,6 +134,15 @@ Terraform/OpenTofu 不是双向同步工具。
 - 等后续明确每个 Worker 的源码仓库、发布链路、secret ownership 之后
 - 再决定是否用 Wrangler / CI / Terraform 的哪一层作为唯一写入面
 
+### Worker 归属登记（暂不进 TF，但记录唯一写入面）
+
+- `cloudpaste-spa`（CloudPaste 一体化部署）
+  - 源码：`xbpk3t/CloudPaste`（fork 自 `ling-drag0n/CloudPaste`，fork 保持零改动）
+  - 唯一写入面：GitHub Actions `Deploy SPA CF Workers[一体化部署]`（wrangler deploy）
+  - `cloudpaste-db`（D1）：由该 CI 首次部署创建并持有，不进 TF d1 stack
+  - `f.lucc.dev`（custom domain）：Workers 侧管理；其自动创建的 DNS 记录不纳入 `lucc.dev/dns` stack（避免双写面）
+  - `cloudpaste`（R2 bucket）：例外归 TF `account/r2` stack（该 bucket 不由 CI 创建）
+
 ## 8. backend 策略
 
 Cloudflare stacks 当前统一使用 Cloudflare R2 作为 remote backend，而不是继续依赖旧的 MinIO/S3 落点。

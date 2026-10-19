@@ -26,9 +26,22 @@ locals {
     }
   }
 
+  # 由 TF 直接首建的新 bucket（greenfield，不生成 import 块）。
+  # 与 managed 的区别：managed 是“live 先存在 → import 收编”，created 是“TF 创建”。
+  r2_buckets_created = {
+    cloudpaste = {
+      name = "cloudpaste"
+      notes = {
+        crit  = "high"
+        owner = "xbpk3t/CloudPaste"
+        des   = "CloudPaste 临时文件服务存储"
+      }
+    }
+  }
+
   # 第一轮 adopt 已完成，待删 buckets 已经进入 state。
   # 这里清空 pending_delete，第二轮 plan/apply 就会对 live 执行 destroy。
   r2_buckets_pending_delete = {}
 
-  r2_buckets = merge(local.r2_buckets_managed, local.r2_buckets_pending_delete)
+  r2_buckets = merge(local.r2_buckets_managed, local.r2_buckets_created, local.r2_buckets_pending_delete)
 }
