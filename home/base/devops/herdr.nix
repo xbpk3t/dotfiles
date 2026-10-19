@@ -143,7 +143,7 @@ in
             ++ lib.optional pkgs.stdenv.isDarwin {
               plugin_id = "herdr-focus-notify";
               name = "Herdr Focus Notify";
-              version = "0.3.6";
+              version = "0.8.0";
               manifest_path = "${pkgs.herdr-focus-notify}/plugin/herdr-plugin.toml";
               plugin_root = "${pkgs.herdr-focus-notify}/plugin";
               enabled = true;

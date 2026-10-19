@@ -16,13 +16,13 @@
   };
   herdr-focus-notify = {
     pname = "herdr-focus-notify";
-    version = "a7d17a532304e285a791749cb5d7b706b6a7ecb9";
+    version = "v0.8.0";
     src = fetchFromGitHub {
       owner = "yankewei";
       repo = "herdr-focus-notify";
-      rev = "a7d17a532304e285a791749cb5d7b706b6a7ecb9";
+      rev = "v0.8.0";
       fetchSubmodules = false;
-      sha256 = "sha256-7BATIkzFFDD64yhqKu4vGCemeHg2iNULpKr+zQ0FekQ=";
+      sha256 = "sha256-/x772u1kge5ZDT674Vh7HWNsz3mUroxpFJahsVTp1Hk=";
     };
   };
   herdr-reviewr = {

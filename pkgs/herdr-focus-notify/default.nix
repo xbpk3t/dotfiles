@@ -17,12 +17,23 @@ rustPlatform.buildRustPackage rec {
   # 注意：plugin link 注册一次即可，状态在 ~/.local/state/herdr/plugins，不随 nix 重建。
 
   pname = "herdr-focus-notify";
-  version = "0.3.6";
+  version = "0.8.0";
 
   inherit (source) src;
 
-  # 上游无 tag，version 由 nvfetcher 固定 commit。
-  cargoHash = "sha256-tk5LORWI+R1DnYnAc/qGvrcJ6EnZJYlc1u/MmAXxsfY=";
+  # version 由 nvfetcher 跟踪上游 tag（见 nvfetcher.toml）；升级时同步 bump cargoHash。
+  cargoHash = "sha256-cbxDZOvKLeEZ3raq1nMGioOv3+0ZLXNkAQ/wP2oLazQ=";
+
+  # 上游 4 个集成用例依赖真实进程 spawn 时序（stub herdr/git 子进程 + 2s lookup
+  # 预算 + 假 socket server），在 nix 沙箱里不稳定（已实测 TMPDIR/串行均无效）；
+  # 上游 CI（普通 macOS 环境）全绿。这里只跳过这 4 个，其余 16 个照跑；
+  # 上游若改善沙箱兼容性可移除。
+  checkFlags = [
+    "--skip=a_hanging_agent_lookup_still_sends_the_notification_within_the_budget"
+    "--skip=a_hanging_worktree_lookup_delays_the_notification_by_the_budget_at_most"
+    "--skip=normal_notification_names_the_pane_and_never_requests_an_explanation"
+    "--skip=notification_content_click_runs_the_focus_helper"
+  ];
 
   # 组装 herdr plugin 目录：$out/plugin/herdr-plugin.toml
   # manifest 里 command 用 $out 绝对路径（herdr 对绝对路径不做 cwd join）。
@@ -31,15 +42,23 @@ rustPlatform.buildRustPackage rec {
     cat > "$out/plugin/herdr-plugin.toml" <<EOF
     id = "herdr-focus-notify"
     name = "Herdr Focus Notify"
-    version = "0.3.6"
-    min_herdr_version = "0.7.3"
+    version = "0.8.0"
+    min_herdr_version = "0.7.5"
     description = "Clickable desktop notifications that focus the relevant Herdr agent pane."
     platforms = ["macos"]
+
+    [[startup]]
+    command = ["$out/bin/herdr-focus-notify", "--cleanup"]
 
     [[actions]]
     id = "test"
     title = "Send test focus notification"
     command = ["$out/bin/herdr-focus-notify", "--test"]
+
+    [[actions]]
+    id = "clear-terminal-bindings"
+    title = "Clear saved terminal bindings"
+    command = ["$out/bin/herdr-focus-notify", "--clear-terminal-bindings"]
 
     [[events]]
     on = "pane.agent_status_changed"
