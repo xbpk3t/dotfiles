@@ -21,6 +21,9 @@ tasks:
     desc: "更新所有 flake 到最新版本，并查看更新内容"
     summary: "task -g update"
     cmds:
+      # 先把 nvfetcher 管的 pkgs source 一并刷新（version/src/hash 层），
+      # 再更新 nix flake inputs，两者一起进同一次提交。
+      - task: nix:nvf
       - nix flake update # nix flake update --flake ./nix
       - nix flake show
 

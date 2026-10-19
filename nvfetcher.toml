@@ -26,9 +26,10 @@ fetch.github = "VoltAgent/awesome-claude-code-subagents"
 [herdr-focus-notify]
 # Herdr plugin：agent blocked/done 时发 macOS 可点击通知（依赖 alerter，brew 管理）。
 # 无 release 产物，从源码构建（buildRustPackage）。
-# 上游无 tag，用 manual 固定 commit（当前 herdr plugin install 用的 a7d17a5）；
-# 之后要升级时改这个 hash 再跑 nvfetcher。
-src.manual = "a7d17a532304e285a791749cb5d7b706b6a7ecb9"
+# 上游自 v0.4.0 起有 tag，改用 github_tag 跟最新 release（与 herdr-reviewr 同款）；
+# 升级时 src 与包内 version/manifest/cargoHash 同步 bump。
+# herdr 0.9.x 需插件 >= v0.5.0（0.9 per-client focus 模型重写了通知判定）。
+src.github_tag = "yankewei/herdr-focus-notify"
 fetch.github = "yankewei/herdr-focus-notify"
 
 [herdr-reviewr]
