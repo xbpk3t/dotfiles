@@ -10,14 +10,15 @@
     enable = true;
 
     settings = {
-      # 保留一个低干扰的默认输出模板，适合平时手动抓取单个资源时直接复用。
-      output = "%(title)s [%(id)s].%(ext)s";
-
       # 只保留下载归档这种通用增量能力；字幕语言、下载器、媒体后处理交给具体场景显式声明。
       download-archive = "${config.xdg.stateHome}/yt-dlp-archive.log";
     };
 
     extraConfig = ''
+      # settings 序列化不给值加引号：带空格的模板会被拆成 --output 的参数 + 幽灵 URL 输入（exit 1）。
+      # 因此 output 模板必须放这里手动加引号。
+      --output "%(title)s [%(id)s].%(ext)s"
+
       # 只保留一个手动场景 alias，避免把字幕流水线不需要的默认行为重新绑回全局配置。
       --alias get-audio "-f ba --extract-audio --audio-format best --audio-quality 0"
     '';
