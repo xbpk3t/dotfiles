@@ -264,8 +264,9 @@ let
         "DOMAIN-SUFFIX,netease.com,DIRECT"
 
         # REJECT
-        "DOMAIN-SUFFIX,zhihu.com,REJECT"
-        "DOMAIN-SUFFIX,bilibili.com,REJECT"
+        # TODO: [2026-10-19] 之后需要针对不同hosts自定义rules，比如说 ws就REJECT zhihu 和 bz，但是用来跑agent的机器，则需要DIRECT这些DOMAIN
+        # "DOMAIN-SUFFIX,zhihu.com,REJECT"
+        # "DOMAIN-SUFFIX,bilibili.com,REJECT"
 
         # GEOIP CN 直连
         "GEOIP,CN,DIRECT"

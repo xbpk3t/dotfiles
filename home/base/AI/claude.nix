@@ -68,7 +68,7 @@ in
           # https://x.com/xiangxiang103/status/2043612207175602671 cc 稳定不降智的技巧：换稳定性：关掉超长上下文、adaptive thinking、auto memory，确实更像“固定档位”了。适合长任务复现，但一般会牺牲一点探索效率。
           settings = {
             # 默认 Model
-            model = "deepseek-v4-flash[1m]";
+            model = "deepseek-v4.1-flash[1m]";
 
             theme = "dark";
             # [2026-06-02] concise: 去除每 turn 的 Insight 框 + 原理展开，节省 30-50% 输出 token
@@ -222,9 +222,12 @@ in
               # ANTHROPIC_DEFAULT_OPUS_MODEL = "grok-4.5[1m]";
               # ANTHROPIC_DEFAULT_SONNET_MODEL = "mimo-v2.5-pro[1m]";
 
-              ANTHROPIC_DEFAULT_FABLE_MODEL = "deepseek-v4-flash[1m]";
+              ANTHROPIC_DEFAULT_FABLE_MODEL = "deepseek-v4.1-flash[1m]";
               ANTHROPIC_DEFAULT_OPUS_MODEL = "deepseek-v4-flash[1m]";
-              ANTHROPIC_DEFAULT_SONNET_MODEL = "hy3[1m]";
+
+              # ANTHROPIC_DEFAULT_SONNET_MODEL = "hy3[1m]";
+              # 默认用来做 bash分类器 的model
+              ANTHROPIC_DEFAULT_SONNET_MODEL = "deepseek-v4-flash[1m]";
               ANTHROPIC_DEFAULT_HAIKU_MODEL = "mimo[1m]";
 
               # 用来在 /model picker 里多塞 1 条自定义模型，不替换 opus / sonnet / haiku / fable 那些内置 alias
