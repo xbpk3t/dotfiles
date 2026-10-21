@@ -1,5 +1,6 @@
 {
   config,
+  globals,
   lib,
   pkgs,
   ...
@@ -26,7 +27,7 @@ in
       # Pi 的配置入口是 JSON 文件。settings.json 控制主 provider、theme 以及插件路径。
       file.".pi/agent/settings.json".text = builtins.toJSON {
         defaultProvider = "axonhub";
-        defaultModel = "gpt-5.5";
+        defaultModel = globals.models.gpt;
         theme = "dark";
 
         # packages 声明 Pi package spec（npm:、git:、本地路径），
@@ -60,10 +61,8 @@ in
             # Pi 的 resolveConfigValue 会把值当 env var 名查，找不到才作字面量
             apiKey = "LLM_AxonHub";
             models = [
-              { id = "gpt-5.5"; }
-              { id = "gpt-5.4"; }
-              { id = "deepseek-v4-pro"; }
-              { id = "deepseek-v4-flash"; }
+              { id = globals.models.gpt; }
+              { id = globals.models.dsf; }
             ];
           };
         };

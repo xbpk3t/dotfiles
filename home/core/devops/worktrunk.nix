@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, globals, ... }:
 let
   tomlFormat = pkgs.formats.toml { };
 in
@@ -52,12 +52,12 @@ in
         # MAX_THINKING_TOKENS=0  禁用 extended thinking
         # -p                    print 模式：从 stdin 读 prompt，输出到 stdout
         # --no-session-persistence  不保存会话历史
-        # --model               AxonHub 代理上实际存在的模型（deepseek-v4-flash 更快更省）
+        # --model               AxonHub 代理上实际存在的模型（globals.models.dsf 更快更省）
         # --tools ''            禁用所有工具（无需文件访问）
         # --disable-slash-commands  禁用 skills/slash commands
         # --setting-sources ''  不加载任何 settings 文件，避免侧信道干扰
         # --system-prompt ''    清空系统提示词，完全由 Worktrunk 的 prompt 模板驱动
-        command = "CLAUDECODE= MAX_THINKING_TOKENS=0 claude -p --no-session-persistence --model deepseek-v4-flash --tools '' --disable-slash-commands --setting-sources '' --system-prompt ''";
+        command = "CLAUDECODE= MAX_THINKING_TOKENS=0 claude -p --no-session-persistence --model ${globals.models.dsf} --tools '' --disable-slash-commands --setting-sources '' --system-prompt ''";
       };
     };
 
