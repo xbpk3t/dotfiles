@@ -37,7 +37,10 @@ let
         buildManPages = false;
         buildDocs = false;
       };
-      overlays = [ customPkgsOverlay ];
+      overlays = [
+        customPkgsOverlay
+        inputs.mcp-servers-nix.overlays.default
+      ];
     };
 
   mkPkgs = mkPkgsFrom inputs.nixpkgs;

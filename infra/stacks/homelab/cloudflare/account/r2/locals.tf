@@ -24,6 +24,17 @@ locals {
         des   = "docs-images"
       }
     }
+
+    # [2026-10-19] 由 docs-alfred 经 S3 API 先行创建（R2 access key 建桶），
+    # 待下次 apply 经 import 块收编；公开域名为 dw.lucc.dev（R2 侧绑定）。
+    docs-wiki = {
+      name = "docs-wiki"
+      notes = {
+        crit  = "medium"
+        owner = "xbpk3t/docs-alfred"
+        des   = "wiki digest 媒体产物（transcript 页/字幕/索引）"
+      }
+    }
   }
 
   # 第一轮 adopt 已完成，待删 buckets 已经进入 state。

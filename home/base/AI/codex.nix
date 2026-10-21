@@ -1,5 +1,6 @@
 {
   config,
+  globals,
   inputs,
   lib,
   pkgs,
@@ -7,7 +8,7 @@
 }:
 let
   cfg = config.modules.AI.codex;
-  codexDefaultModel = "gpt-5.5";
+  codexDefaultModel = globals.models.gpt;
   mcpServersForCodex =
     (inputs.mcp-servers-nix.lib.evalModule pkgs {
       inherit (config.mcp-servers)
@@ -137,7 +138,7 @@ in
 
         # ccx session export 配置
         CCX_WIKI_ROOT = "/Users/luck/Desktop/docs/wiki";
-        CCX_AI_MODEL = "deepseek-v4-flash";
+        CCX_AI_MODEL = globals.models.dsf;
         CCX_AI_BASE_URL = "https://api.lucc.dev/v1";
       };
       shellAliases = {

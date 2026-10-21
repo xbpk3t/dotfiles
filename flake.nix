@@ -130,6 +130,13 @@ rec {
                 projectDir = "/home/luck/Desktop/dotfiles";
               };
 
+              # Gateway 模型 id：claude/codex/worktrunk 共用，升级只改这里。
+              # 存裸 id；claude 的 alias 再拼 CC 侧 1M context 标记 [1m]。
+              models = {
+                dsf = "deepseek-v4.1-flash";
+                gpt = "gpt-5.5";
+              };
+
               networking.nameservers = [
                 "119.29.29.29"
                 "223.5.5.5"

@@ -6,14 +6,6 @@
   dockerTools,
 }:
 {
-  chrome-devtools-mcp = {
-    pname = "chrome-devtools-mcp";
-    version = "1.7.0";
-    src = fetchurl {
-      url = "https://registry.npmjs.org/chrome-devtools-mcp/-/chrome-devtools-mcp-1.7.0.tgz";
-      sha256 = "sha256-iVczWGoOzhOEk3kMB+iwg7hXGx0gN6cxJDNNlo0QRtA=";
-    };
-  };
   herdr-focus-notify = {
     pname = "herdr-focus-notify";
     version = "v0.8.0";

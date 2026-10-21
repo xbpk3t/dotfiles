@@ -1,5 +1,6 @@
 {
   config,
+  globals,
   lib,
   pkgs,
   inputs,
@@ -68,7 +69,7 @@ in
           # https://x.com/xiangxiang103/status/2043612207175602671 cc 稳定不降智的技巧：换稳定性：关掉超长上下文、adaptive thinking、auto memory，确实更像“固定档位”了。适合长任务复现，但一般会牺牲一点探索效率。
           settings = {
             # 默认 Model
-            model = "deepseek-v4.1-flash[1m]";
+            model = "${globals.models.dsf}[1m]";
 
             theme = "dark";
             # [2026-06-02] concise: 去除每 turn 的 Insight 框 + 原理展开，节省 30-50% 输出 token
@@ -212,29 +213,26 @@ in
               # CLAUDE_CODE_AUTO_COMPACT_WINDOW = "500000";
 
               # 模型映射（gateway: api.lucc.dev）
-              # - settings.model = deepseek-v4-flash[1m]  ← session 默认（本块上方，勿与 alias 混淆）
-              # - [1m] = CC 侧 1M context 标记；gateway /v1/models 为裸 id，grok-4.5 原生 500k 故不带 [1m]
-              # - /model best：有 Fable 权限才用 Fable，否则 Opus（两者均 pin 到 grok-4.5）
-              # - /model fable → FABLE；/model opus → OPUS；当前 FABLE 与 OPUS 同为 grok-4.5（刻意重复）
+              # - settings.model = deepseek-v4.1-flash[1m]  ← session 默认（本块上方，勿与 alias 混淆）
+              # - [1m] = CC 侧 1M context 标记；gateway /v1/models 为裸 id（grok-4.5 原生 500k 故不带 [1m]）
+              # - FABLE / OPUS / SONNET 均指向 deepseek-v4.1-flash[1m]（刻意重复）；HAIKU → mimo[1m]
 
               # 注意 grok-4.5 的context只有500k，但是如果不标注[1m]，claude默认只给200k，很影响使用。有个办法是添加 CLAUDE_CODE_AUTO_COMPACT_WINDOW，但是这里无所谓了
               # ANTHROPIC_DEFAULT_FABLE_MODEL = "grok-4.5[1m]";
               # ANTHROPIC_DEFAULT_OPUS_MODEL = "grok-4.5[1m]";
               # ANTHROPIC_DEFAULT_SONNET_MODEL = "mimo-v2.5-pro[1m]";
 
-              ANTHROPIC_DEFAULT_FABLE_MODEL = "deepseek-v4.1-flash[1m]";
-              ANTHROPIC_DEFAULT_OPUS_MODEL = "deepseek-v4-flash[1m]";
+              ANTHROPIC_DEFAULT_FABLE_MODEL = "${globals.models.dsf}[1m]";
+              ANTHROPIC_DEFAULT_OPUS_MODEL = "${globals.models.dsf}[1m]";
 
               # ANTHROPIC_DEFAULT_SONNET_MODEL = "hy3[1m]";
               # 默认用来做 bash分类器 的model
-              ANTHROPIC_DEFAULT_SONNET_MODEL = "deepseek-v4-flash[1m]";
+              ANTHROPIC_DEFAULT_SONNET_MODEL = "${globals.models.dsf}[1m]";
               ANTHROPIC_DEFAULT_HAIKU_MODEL = "mimo[1m]";
 
               # 用来在 /model picker 里多塞 1 条自定义模型，不替换 opus / sonnet / haiku / fable 那些内置 alias
               # - CUSTOM 仅支持 1 条；其它可用 id 手输 /model：gpt-5.4, mimo-v2.5-tts, oc/*
-              #
-              # 之后可能换成 deepseek-v4-pro[1m]
-              ANTHROPIC_CUSTOM_MODEL_OPTION = "gpt-5.5";
+              ANTHROPIC_CUSTOM_MODEL_OPTION = globals.models.gpt;
               # ANTHROPIC_CUSTOM_MODEL_OPTION_NAME = "GPT-5.5";
               # ANTHROPIC_CUSTOM_MODEL_OPTION_DESCRIPTION = "OpenAI via gateway";
 
@@ -251,7 +249,7 @@ in
               # - 如果 cc 有 launchd/daemon/后台任务 启动（不经过 shell）→ 只能靠 settings
               # env，必须保留两份。
               CCX_WIKI_ROOT = "/Users/luck/Desktop/docs/wiki";
-              CCX_AI_MODEL = "deepseek-v4-flash";
+              CCX_AI_MODEL = globals.models.dsf;
               CCX_AI_BASE_URL = "https://api.lucc.dev/v1";
             };
 
@@ -316,7 +314,7 @@ in
 
           # AnyRouter 通道：默认仍走 AxonHub，需要时用 cc-any 显式切换。
           # 已验证可用：claude-opus-5[1m] + https://anyrouter.top（AnyRouter 只认 CC 客户端 + [1m] 后缀）
-          cc-any = "ANTHROPIC_BASE_URL=https://anyrouter.top ANTHROPIC_AUTH_TOKEN=$LLM_ANY_TOKEN claude --model 'claude-opus-5[1m]'";
+          # cc-any = "ANTHROPIC_BASE_URL=https://anyrouter.top ANTHROPIC_AUTH_TOKEN=$LLM_ANY_TOKEN claude --model 'claude-opus-5[1m]'";
 
           # [2026-05-01] 注释掉了，默认cc直接bypassPermissions
           # 兜底逃生开关：仅在明确需要跳过权限确认时手动使用。
