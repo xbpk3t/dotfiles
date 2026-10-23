@@ -6,6 +6,7 @@ let
     "https://nix-community.cachix.org"
     "https://watersucks.cachix.org"
     "https://cache.numtide.com"
+    "https://herdr-nix.cachix.org"
   ];
 
   # 与 substituters 一一对应的 trusted public keys。
@@ -15,6 +16,7 @@ let
     "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
     "watersucks.cachix.org-1:6gadPC5R8iLWQ3EUtfu3GFrVY7X6I4Fwz/ihW25Jbv8="
     "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
+    "herdr-nix.cachix.org-1:UpdsQYx39PK0PToKQaa2EFq19Lsjs1M9Ho+X7VNt9gs="
   ];
 in
 {

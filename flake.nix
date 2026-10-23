@@ -64,6 +64,20 @@ rec {
     };
 
     llm-agents.url = "github:numtide/llm-agents.nix";
+
+    # herdr 官方预编译二进制（0.9.5；reviewr 0.47 要求 >= 0.9.3）。
+    herdr-bin = {
+      url = "github:herdrdev/herdr-nix";
+      inputs.nixpkgs.follows = "nixpkgs-darwin";
+    };
+
+    # herdr 插件包 + HM 模块（只扩展官方 programs.herdr，不重新定义它）。
+    herdr-nix = {
+      url = "github:lorenzorapetti/herdr-nix";
+      inputs.nixpkgs.follows = "nixpkgs-darwin";
+      inputs.home-manager.follows = "home-manager";
+    };
+
     agent-skills.url = "github:Kyure-A/agent-skills-nix";
     mcp-servers-nix = {
       url = "github:natsukium/mcp-servers-nix";

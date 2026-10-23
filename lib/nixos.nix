@@ -41,6 +41,8 @@ nixpkgs.lib.nixosSystem {
 
           extraSpecialArgs = specialArgs;
           users."${hmUsername}".imports = home-modules ++ [
+            # herdr 插件列表/配置（扩展官方 programs.herdr；不重新定义它）。
+            inputs.herdr-nix.homeModules.default
             # what: 将 nix-index wrapper 和预生成 database 接入共享 Home Manager 主线。
             # why: 这样 Linux/Darwin 复用同一套配置，不需要在各平台重复接线。
             inputs.nix-index-database.homeModules.default

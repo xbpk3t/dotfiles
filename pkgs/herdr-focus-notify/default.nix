@@ -12,9 +12,8 @@ rustPlatform.buildRustPackage rec {
   # 运行时依赖 alerter（brew 管理，非 nix），通过 .env 的 HERDR_FOCUS_NOTIFY_NOTIFIER 注入路径。
   #
   # 使用方式（声明式接入 herdr，替代 `herdr plugin install github:...`）：
-  #   herdr plugin link ${pkg}/plugin
-  # 其中 ${pkg}/plugin 是带 herdr-plugin.toml 的插件目录（command 用 nix store 绝对路径）。
-  # 注意：plugin link 注册一次即可，状态在 ~/.local/state/herdr/plugins，不随 nix 重建。
+  #   programs.herdr.plugins = [ pkgs.herdr-focus-notify ];
+  # 包根目录就是插件根（herdr-plugin.toml 在顶层），符合 herdr-nix 模块的断言。
 
   pname = "herdr-focus-notify";
   version = "0.8.0";
@@ -35,11 +34,10 @@ rustPlatform.buildRustPackage rec {
     "--skip=notification_content_click_runs_the_focus_helper"
   ];
 
-  # 组装 herdr plugin 目录：$out/plugin/herdr-plugin.toml
+  # 组装 herdr plugin 目录：$out/herdr-plugin.toml（顶层）
   # manifest 里 command 用 $out 绝对路径（herdr 对绝对路径不做 cwd join）。
   postInstall = ''
-    mkdir -p "$out/plugin"
-    cat > "$out/plugin/herdr-plugin.toml" <<EOF
+    cat > "$out/herdr-plugin.toml" <<EOF
     id = "herdr-focus-notify"
     name = "Herdr Focus Notify"
     version = "0.8.0"
@@ -69,6 +67,10 @@ rustPlatform.buildRustPackage rec {
     command = ["$out/bin/herdr-focus-notify"]
     EOF
   '';
+
+  # herdr-nix 模块用 pluginId 做重复 id 断言；settingsFile 留空（.env 不在
+  # 模块支持的 JSON/TOML/YAML 之内）。
+  passthru.pluginId = "herdr-focus-notify";
 
   meta = with lib; {
     description = "Clickable macOS notifications for Herdr agents";

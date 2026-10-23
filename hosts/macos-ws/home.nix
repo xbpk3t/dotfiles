@@ -17,9 +17,9 @@ _: {
         };
       };
       # Agent mux (orchestration / detach / wait). Package + config.toml via herdr.nix.
-      # not `herdr integration install`. Bump llm-agents to upgrade herdr version.
+      # not `herdr integration install`. Bump herdr-bin to upgrade herdr version.
       herdr.enable = true;
-      # PR TUI（nixpkgs）+ review-first diff（llm-agents）；herdr keys: ctrl+alt+p / d
+      # PR TUI（nixpkgs）+ review-first diff（herdr-reviewr plugin）；herdr keys: ctrl+alt+p / d
       ghui.enable = true;
       hunk.enable = true;
       # fastfetch 在 Darwin 会拉入 apple-sdk-15.5（~481M 独有闭包），默认关闭；
