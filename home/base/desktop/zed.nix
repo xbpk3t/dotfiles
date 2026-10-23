@@ -542,27 +542,26 @@ let
     # https://zed.dev/docs/languages
     languages = {
       Markdown = {
-        # 使用 tree-sitter 做 outline（document_symbols: off = 默认值），
-        # 让 outline panel 正确显示 markdown heading 层级结构。
+        # outline 改用 marksman 的 textDocument/documentSymbol，
+        # 而不是 tree-sitter（document_symbols: off = 默认值）。
         #
-        # WHY NOT marksman:
-        #   之前因为没有更好的方案，切换到 marksman LSP 的
-        #   textDocument/documentSymbol 做 outline，以避开 tree-sitter
-        #   把 fenced code block 内的 # heading 识别为 atx_heading 的问题
-        #   （参见 #32755 / #15122）。
-        #   但实践发现 marksman 的 documentSymbol 响应以 SymbolKind=File 为根、
-        #   heading 为 children，Zed outline panel 只展示顶层 symbol（文件名）
-        #   而不展开 children，导致 outline 看不到 heading。
+        # WHY:
+        #   tree-sitter 会把 fenced code block 内的 # heading 也识别为
+        #   atx_heading（见 #32755 / #15122），导致 outline 出现伪条目。
+        #   PR #32987 曾用 language_at 过滤掉跨语言注入的符号，但
+        #   PR #48780（v0.225.9 起 stable）重构 outline 时删掉了这段过滤，
+        #   且同语言（```markdown）围栏内的 heading 从来就没被过滤过。
         #
-        # WHY NOW (tree-sitter):
-        #   PR #32987（v1.x 已合入）新增了跨语言 outline 过滤——来自 fenced
-        #   code block 内的非 Markdown 符号不再进入 outline panel。这意味着
-        #   最头疼的跨语言污染已解决。
-        #   对于同一语言（Markdown）内 code block 产生的 atx_heading 污染，
-        #   当前 Zed 版本的实际表现如何，需要验证。如果仍有问题，再考虑
-        #   自定义 outline.scm extension 精确过滤。
+        # WHY marksman now:
+        #   [2026-07-10] 曾因 marksman 返回 SymbolKind=File 根、heading 在
+        #   children 里不展开而回退到 tree-sitter。实测当前 marksman
+        #   （2026-02-08）已直接返回顶层 heading + 嵌套 children，且正确
+        #   忽略围栏内容；配合 Zed 的 hierarchicalDocumentSymbol 支持，
+        #   outline panel 可正常展示层级。
         #
-        # marksman 仍作为 Markdown 的主要 LSP 提供补全/跳转/诊断。
+        # 副作用：outline 现在依赖 marksman 可用（已在 lsp.nix 中安装），
+        # 若 marksman 未启动则 outline 为空。
+        document_symbols = "on";
       };
 
       Nix = {

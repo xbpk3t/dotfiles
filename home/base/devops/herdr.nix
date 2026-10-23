@@ -81,7 +81,11 @@ in
       # 插件注册由 herdr-nix 模块负责（activation 里 `herdr plugin link`）。
       # focus-notify 是 macOS-only；Linux host 上不注册。
       plugins = [
-        herdrPlugins.herdr-annotate-full
+        # [2026-10-23] 暂时停用：plannotator-tui 的测试在含非 ASCII 字符的路径下
+        # rustc 链接失败（ld: file not found: $.../ü...），导致 deploy 构建失败。
+        # upstream: https://github.com/lorenzorapetti/herdr-nix/issues/4 (plannotator-tui 构建)
+        # 修复后恢复此行，并同步恢复下方 annotate.* 键位。
+        # herdrPlugins.herdr-annotate-full
         herdrPlugins.herdr-reviewr
         herdrPlugins.herdr-web-ui
         ./herdr/herdr-plugins-palette
@@ -278,40 +282,41 @@ in
               description = "Reviewr — open code review pane (toggle)";
               command = "persiyanov.reviewr.toggle";
             }
-            # ——— Annotate（plannotator/herdr-annotate，full）————
+            # ——— Annotate（plannotator/herdr-annotate，full）———— [暂时停用]
             # 终端文本注释 + 文档/agent 回复审阅，反馈回灌给 agent。
             # 键位均为 prefix 层，与现有 prefix+comma/period/shift+1..9/p 不冲突。
             # 注释顺序即 agent 读到反馈的顺序（Annotation N + Comment on: 引用原文）。
-            {
-              key = "prefix+a";
-              type = "plugin_action";
-              description = "Annotate — comment on selected text";
-              command = "annotate.capture";
-            }
-            {
-              key = "prefix+m";
-              type = "plugin_action";
-              description = "Annotate — manage annotations (copy/send/archive)";
-              command = "annotate.manage";
-            }
-            {
-              key = "prefix+o";
-              type = "plugin_action";
-              description = "Annotate — review documents in this folder";
-              command = "annotate.open";
-            }
-            {
-              key = "prefix+shift+o";
-              type = "plugin_action";
-              description = "Annotate — review agent's last reply";
-              command = "annotate.last";
-            }
-            {
-              key = "prefix+ctrl+s";
-              type = "plugin_action";
-              description = "Annotate — send annotations to agent (next message) & archive";
-              command = "annotate.send-archive";
-            }
+            # 插件本身因 plannotator-tui 构建失败已从 plugins 移除，恢复插件后一并恢复。
+            # {
+            #   key = "prefix+a";
+            #   type = "plugin_action";
+            #   description = "Annotate — comment on selected text";
+            #   command = "annotate.capture";
+            # }
+            # {
+            #   key = "prefix+m";
+            #   type = "plugin_action";
+            #   description = "Annotate — manage annotations (copy/send/archive)";
+            #   command = "annotate.manage";
+            # }
+            # {
+            #   key = "prefix+o";
+            #   type = "plugin_action";
+            #   description = "Annotate — review documents in this folder";
+            #   command = "annotate.open";
+            # }
+            # {
+            #   key = "prefix+shift+o";
+            #   type = "plugin_action";
+            #   description = "Annotate — review agent's last reply";
+            #   command = "annotate.last";
+            # }
+            # {
+            #   key = "prefix+ctrl+s";
+            #   type = "plugin_action";
+            #   description = "Annotate — send annotations to agent (next message) & archive";
+            #   command = "annotate.send-archive";
+            # }
             # {
             #   key = "ctrl+alt+p";
             #   type = "popup";
