@@ -7,7 +7,7 @@
 # 注意：dagu 2.10 顶层 DAG 不能定义 name（name 来自文件名），name 仅 subDAG 用。
 name: wiki-digest
 description: "Digest wiki/inbox.md once it accumulates >= THRESHOLD URLs (xurls count)"
-schedule: "0 22 * * *"
+schedule: "0 22 * * 5" # 每周五晚上10点
 max_active_runs: 1
 
 env:
