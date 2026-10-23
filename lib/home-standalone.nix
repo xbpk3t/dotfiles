@@ -17,6 +17,8 @@ home-manager.lib.homeManagerConfiguration {
   inherit pkgs;
   inherit extraSpecialArgs;
   modules = home-modules ++ [
+    # herdr 插件列表/配置（扩展官方 programs.herdr；不重新定义它）。
+    inputs.herdr-nix.homeModules.default
     # 与 NixOS/Darwin 内嵌 HM 主线一致：nix-index wrapper + 预生成 database
     inputs.nix-index-database.homeModules.default
     # home/core 多处引用 config.sops.secrets.*；不挂 sops 模块则无法 eval。

@@ -20,27 +20,6 @@
         },
         "version": "v0.8.0"
     },
-    "herdr-reviewr": {
-        "cargoLock": null,
-        "date": null,
-        "extract": null,
-        "name": "herdr-reviewr",
-        "passthru": null,
-        "pinned": false,
-        "src": {
-            "deepClone": false,
-            "fetchSubmodules": false,
-            "leaveDotGit": false,
-            "name": null,
-            "owner": "persiyanov",
-            "repo": "herdr-reviewr",
-            "rev": "v0.33.0",
-            "sha256": "sha256-kS40fu57daPBUzUzEojOz2LrGzo90sYpeL3VCZK88X0=",
-            "sparseCheckout": [],
-            "type": "github"
-        },
-        "version": "v0.33.0"
-    },
     "voltagent-subagents": {
         "cargoLock": null,
         "date": null,

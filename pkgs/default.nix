@@ -7,7 +7,4 @@ in
   herdr-focus-notify = pkgs.callPackage ./herdr-focus-notify {
     inherit sources;
   };
-  herdr-reviewr = pkgs.callPackage ./herdr-reviewr {
-    inherit sources;
-  };
 }
