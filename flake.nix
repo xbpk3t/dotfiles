@@ -148,6 +148,7 @@ rec {
               # 存裸 id；claude 的 alias 再拼 CC 侧 1M context 标记 [1m]。
               models = {
                 dsf = "deepseek-v4.1-flash";
+                dsf4 = "deepseek-v4-flash";
                 gpt = "gpt-5.5";
               };
 

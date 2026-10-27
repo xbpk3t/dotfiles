@@ -57,7 +57,7 @@ in
         # --disable-slash-commands  禁用 skills/slash commands
         # --setting-sources ''  不加载任何 settings 文件，避免侧信道干扰
         # --system-prompt ''    清空系统提示词，完全由 Worktrunk 的 prompt 模板驱动
-        command = "CLAUDECODE= MAX_THINKING_TOKENS=0 claude -p --no-session-persistence --model ${globals.models.dsf} --tools '' --disable-slash-commands --setting-sources '' --system-prompt ''";
+        command = "CLAUDECODE= MAX_THINKING_TOKENS=0 claude -p --no-session-persistence --model ${globals.models.dsf4} --tools '' --disable-slash-commands --setting-sources '' --system-prompt ''";
       };
     };
 
