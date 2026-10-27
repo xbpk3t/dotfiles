@@ -1,7 +1,6 @@
 ---
 
 frontmatter:
-  name: vs
   role: composite
   desc: 同类竞品逐项 ✅❌ 对比；输出阶段串行调度 table2yml
 

@@ -1,7 +1,6 @@
 ---
 
 frontmatter:
-  name: choose
   role: atom
   desc: Grill me 对齐入口；先对齐再 PLAN/写码
 

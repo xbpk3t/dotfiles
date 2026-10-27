@@ -1,6 +1,5 @@
 ---
 frontmatter:
-  name: explore
   role: atom
   desc: 替代方案探索；seed-aware；类别路由 + 四通道并搜；peer/covers 标签 + 质量底线；batch 模式并行
 

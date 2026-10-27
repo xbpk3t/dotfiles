@@ -41,7 +41,6 @@
 #   - "只有 alive 的 URL 被系统打开命令打开;摘要计数与分组一致"
 
 frontmatter:
-  name: open-urls
   role: atom
   desc: 批量打开 URL —— 不做存活检测,直接逐个用系统打开命令交付新标签页。
 

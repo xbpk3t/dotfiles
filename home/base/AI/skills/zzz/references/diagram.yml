@@ -1,0 +1,51 @@
+---
+frontmatter:
+  name: diagram
+  role: atom
+  desc: 选 diagram 类型/工具 → 生成源码(不本地渲染 SVG,前端运行时渲染);固定命名与输出位置
+
+what:
+  is: |
+    根据需求挑选 diagram 类型与工具,在 docs-images/.diagram/ 下生成源码,遵循固定命名与输出位置纪律。
+    不做本地 SVG 渲染:站点经 /api/diagram + Kroki/CDN 运行时渲染,SVG 不纳入 Git。
+  not: |
+    不是本地渲染工具(mmd/plantuml/d2 的 SVG 产物不提交)
+    不是 tool→diagram 能力清单维护(模型自知晓)
+    不处理 intent mode / how-it-works 决策表(已移除)
+
+workflow:
+  - phase: 选型
+    steps:
+      - 解析请求 → 最具体 diagram 类型(sequence/flowchart/state/class/gantt/er/...)
+      - 按 references/diagram-defaults.yaml 选工具(默认契合则用;否则按邻近文件一致性或工具顺序)
+  - phase: 生成
+    steps:
+      - 在 docs-images/.diagram/ 生成源码,固定命名 <name>.<tool>.<diagram>.<ext>
+      - 渲染默认为不做;仅当调用方明确要求本地 SVG 时才用 references/rendering.yaml 的 fallback
+      - "生成后汇报一行: 类型 + 工具 + 为何"
+
+constraint:
+  must:
+    - 输出目录必须是 docs-images/.diagram/(repo 根)
+    - 命名必须 <name>.<tool>.<diagram>.<ext>(例 repomix-runtime.mermaid.flowchart.mmd)
+    - "复杂度上限: 约 ≤12 msg(sequence) 或 ≤12 nodes(flow/state);更大就收窄问题并注明剪掉的内容"
+    - 每个 participant/node 必须标;edge/message 带动词;禁止无标签箭头
+    - 语法最小 ASCII,不加不必要样式
+    - 渲染默认不做;仅当调用方明确要求本地 SVG 时才用 references/rendering.yaml 的 fallback
+    - 用户显式指定类型/工具时优先,除非与 references/diagram-defaults.yaml 冲突
+  must-not:
+    - 禁止本地渲染 SVG 并提交产物(SVG 不纳入 Git)
+    - 禁止维护 tool→diagram 能力清单
+    - 禁止硬编码外部 skill 名;从当前 session 的 skill 列表发现工具相关 skill
+    - 禁止在 .diagram/ 内部使用点前缀文件名
+
+output:
+  struct:
+    - key: 源码文件
+      val: docs-images/.diagram/<name>.<tool>.<diagram>.<ext>
+    - key: 汇报
+      val: 类型 + 工具 + 为何(一行)
+
+hint:
+  - if: 产出源码已完成
+    then: skx check 校验便利;如需落盘询问用户

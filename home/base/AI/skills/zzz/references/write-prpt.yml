@@ -1,7 +1,6 @@
 ---
 
 frontmatter:
-  name: write-prpt
   role: atom
   desc: 编写/重构 prompt skill；产出符合 prpt 全量 schema 的完整 YAML；先对齐信息再开工
 

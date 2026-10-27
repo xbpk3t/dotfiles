@@ -1,7 +1,6 @@
 ---
 
 frontmatter:
-  name: tools-eval
   role: atom
   desc: 工具形态决策器——判断某工具对我是否有效、该以什么形态存在，输出 keep/drop/replace + 形态归属
 

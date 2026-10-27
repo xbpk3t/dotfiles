@@ -1,5 +1,4 @@
 frontmatter:
-  name: herdr
   role: atom
   desc: 把任务 publish 给 herdr 里其他 agent（codex/claude 等）：开 pane→start→prompt 委派链；只派发不回收
 

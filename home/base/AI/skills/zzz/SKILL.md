@@ -99,10 +99,11 @@ merged:
 ## Frontmatter 约定（references 下各 prompt）
 
 ```yaml
-name: <文件名 stem>      # 必填；必须与文件名 stem 一致
 role: atom | composite   # 必填；composite 时必须有 workflow
 desc: <短说明>           # 可选；多行用 | 块
 ```
+
+路由名 = **文件名 stem**（`brk.yml` → `brk`），不在 frontmatter 声明；残留 `name` 字段会被 `skx check` 报错。
 
 composite 用 `workflow` 组织阶段；phase 的 `steps` 里可放 dispatch 步（串行起 sub-agent）：
 

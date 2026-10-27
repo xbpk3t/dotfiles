@@ -1,5 +1,4 @@
 frontmatter:
-  name: recall
   role: composite
   desc: >
     闭卷召回：出题→作答→批改→gap 收敛；类比/mapping 仅用户确认后 sub-agent。
