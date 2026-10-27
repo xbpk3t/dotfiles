@@ -1,7 +1,6 @@
 ---
 
 frontmatter:
-  name: uu
   role: atom
   desc: 挖掘 unknown unknowns；单独使用，不进默认 pipeline
 

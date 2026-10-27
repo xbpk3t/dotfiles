@@ -1,5 +1,4 @@
 frontmatter:
-  name: diagram
   role: atom
   desc: diagram 唯一入口；how-it-works 运行时图 + 固定命名/位置纪律；委托 diagram-picker；产出供 3w3h hti 合并的 artifact
 

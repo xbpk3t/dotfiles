@@ -1,6 +1,5 @@
 ---
 frontmatter:
-  name: minst-goods
   role: atom
   desc: 极简主义物品管理决策：审计（默认）+ 购物决策（候选 X）；基于 goods 数据 + OnePacker 基准
 

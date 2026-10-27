@@ -1,7 +1,6 @@
 ---
 
 frontmatter:
-  name: rss-feed-judge
   role: atom
   desc: 判定单个 RSS feed 是否符合收录标准；输出 pass/fail + 原因码 + 证据；批量筛选时循环调用；规则来源 LUC-321 / wiki/zzz/efficacy/feed管理/2026-07-31-bestblogs-rss-extraction-filtering.md
 

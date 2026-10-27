@@ -1,7 +1,6 @@
 ---
 
 frontmatter:
-  name: analogy
   role: atom
   desc: 跨域生活隐喻助记；同一 case 贯穿细节（供 recall pipeline）
 

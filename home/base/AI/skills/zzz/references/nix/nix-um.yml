@@ -2,7 +2,6 @@
 
 
 frontmatter:
-  name: nix-um
   role: atom
   desc: 定期巡检本地未纳管配置（Unified Management），产出 P0/P1 两档分级清单；可手动触发的周期任务
 

@@ -1,7 +1,6 @@
 ---
 
 frontmatter:
-  name: imp-triangle # ImpossibleTriangle
   role: atom
   desc: 快好省不可能三角（性能-质量-成本）归类引导
 

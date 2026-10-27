@@ -1,7 +1,6 @@
 ---
 
 frontmatter:
-  name: 3w3h
   role: composite
   desc: 3W3H 结构化分析；heavy 模式串行调度 brk/diagram/vs（适用性见 constraint，并入见 output）
 

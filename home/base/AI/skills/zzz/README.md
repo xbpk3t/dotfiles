@@ -8,24 +8,24 @@ alfred snippets 里的。为了在 export 的 markdown 里不出现大段重复�
 
 ## 命名与 frontmatter
 
-- `name` 必须等于 **filename stem**（路由名 = 文件名）。
+- `name` = **filename stem**（路由名 = 文件名），不在 frontmatter 声明。
 - `role`: `atom` | `composite`（先二分即可）。
 - `desc`: 短说明（多行用 `|` 块）。
 - composite 用 `workflow` 组织阶段；phase 的 `steps` 里用 `{kind: prompt, name}` 串行调度其他 prompt（sub-agent）。适用性/并入规则在 constraint 与 output。
 
 ```yaml
-# atom
+# atom（文件名 brk.yml → 路由名 brk）
 ---
-name: brk
-role: atom
-desc: …
+frontmatter:
+  role: atom
+  desc: …
 ---
 
-# composite
+# composite（文件名 3w3h.yml → 路由名 3w3h）
 ---
-name: 3w3h
-role: composite
-desc: …
+frontmatter:
+  role: composite
+  desc: …
 workflow:
   - phase: Pipeline 合并
     steps:

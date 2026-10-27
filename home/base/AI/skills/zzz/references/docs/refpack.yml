@@ -1,6 +1,5 @@
 ---
 frontmatter:
-  name: refpack
   role: atom
   desc: 主题知识参考包 —— 给定 topic，自动汇集 data / wiki / blog 三源为「参考包」注入上下文。替代手动从 docs/data/gh、docs/wiki、docs/blog 三处复制。使用姿势：先把你头脑里的问题翻译成 topic 名（可逗号组合多个），refpack 不做问题→topic 的语义映射，也不回答任何问题。
 

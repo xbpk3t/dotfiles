@@ -1,5 +1,4 @@
 frontmatter:
-  name: table2yml
   role: atom
   desc: 把 md 对比表格转扁平 YAML codeblock（用 miller，不用 AI 心算）
 

@@ -1,5 +1,4 @@
 frontmatter:
-  name: mapping-check
   role: atom
   desc: 只验收 mapping artifact 是否合规；不重写 map；标准唯一服从 mapping.yml
 

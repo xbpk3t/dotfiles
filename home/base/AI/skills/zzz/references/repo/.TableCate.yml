@@ -1,7 +1,6 @@
 ---
 
 frontmatter:
-  name: TableCate
   role: atom
   desc: 多 repo 分类、代表选型与评分（hidden，供 cross-ref）
 

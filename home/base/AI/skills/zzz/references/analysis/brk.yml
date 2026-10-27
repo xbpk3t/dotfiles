@@ -1,7 +1,6 @@
 ---
 
 frontmatter:
-  name: brk
   role: atom
   desc: 技术定义 X = A + B + C；可被 3w3h 硬引用
 
