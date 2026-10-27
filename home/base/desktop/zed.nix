@@ -37,7 +37,7 @@ let
     "cargotoml" = true;
     "catppuccin-icons" = true;
     "git-firefly" = true;
-    "marksman" = true;
+    "markdown-oxide" = true;
     "snippets" = true;
     "toml" = true;
     "typos" = true;
@@ -542,25 +542,7 @@ let
     # https://zed.dev/docs/languages
     languages = {
       Markdown = {
-        # outline 改用 marksman 的 textDocument/documentSymbol，
-        # 而不是 tree-sitter（document_symbols: off = 默认值）。
-        #
-        # WHY:
-        #   tree-sitter 会把 fenced code block 内的 # heading 也识别为
-        #   atx_heading（见 #32755 / #15122），导致 outline 出现伪条目。
-        #   PR #32987 曾用 language_at 过滤掉跨语言注入的符号，但
-        #   PR #48780（v0.225.9 起 stable）重构 outline 时删掉了这段过滤，
-        #   且同语言（```markdown）围栏内的 heading 从来就没被过滤过。
-        #
-        # WHY marksman now:
-        #   [2026-07-10] 曾因 marksman 返回 SymbolKind=File 根、heading 在
-        #   children 里不展开而回退到 tree-sitter。实测当前 marksman
-        #   （2026-02-08）已直接返回顶层 heading + 嵌套 children，且正确
-        #   忽略围栏内容；配合 Zed 的 hierarchicalDocumentSymbol 支持，
-        #   outline panel 可正常展示层级。
-        #
-        # 副作用：outline 现在依赖 marksman 可用（已在 lsp.nix 中安装），
-        # 若 marksman 未启动则 outline 为空。
+        # outline 走 LSP documentSymbol（而非 tree-sitter，避免 fenced code block 内 heading 污染 outline）。
         document_symbols = "on";
       };
 

@@ -237,7 +237,7 @@ in
         }
         {
           name = "markdown";
-          language-servers = [ "marksman" ];
+          language-servers = [ "markdown-oxide" ];
           formatter = {
             command = "hongdown";
             args = [
