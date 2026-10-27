@@ -32,8 +32,8 @@ let
     # TeX
     texlab
 
-    # Markdown
-    marksman
+
+    markdown-oxide
 
     # TOML
     taplo
