@@ -46,7 +46,6 @@ _: {
       dagu.enable = true;
 
       skills.enable = true;
-      pi-agent.enable = true;
       mcp.isDesktop = true;
     };
 
