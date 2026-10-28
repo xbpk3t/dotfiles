@@ -32,7 +32,6 @@ let
     # TeX
     texlab
 
-
     markdown-oxide
 
     # TOML

@@ -217,18 +217,13 @@ in
               # - [1m] = CC 侧 1M context 标记；gateway /v1/models 为裸 id（grok-4.5 原生 500k 故不带 [1m]）
               # - FABLE / OPUS / SONNET 均指向 deepseek-v4.1-flash[1m]（刻意重复）；HAIKU → mimo[1m]
 
-              # 注意 grok-4.5 的context只有500k，但是如果不标注[1m]，claude默认只给200k，很影响使用。有个办法是添加 CLAUDE_CODE_AUTO_COMPACT_WINDOW，但是这里无所谓了
-              # ANTHROPIC_DEFAULT_FABLE_MODEL = "grok-4.5[1m]";
-              # ANTHROPIC_DEFAULT_OPUS_MODEL = "grok-4.5[1m]";
-              # ANTHROPIC_DEFAULT_SONNET_MODEL = "mimo-v2.5-pro[1m]";
-
-              ANTHROPIC_DEFAULT_FABLE_MODEL = "${globals.models.dsf}[1m]";
-              ANTHROPIC_DEFAULT_OPUS_MODEL = "${globals.models.dsf}[1m]";
+              ANTHROPIC_DEFAULT_FABLE_MODEL = "${globals.models.dsf4}[1m]";
+              ANTHROPIC_DEFAULT_OPUS_MODEL = "${globals.models.dsf4}[1m]";
 
               # ANTHROPIC_DEFAULT_SONNET_MODEL = "hy3[1m]";
               # 默认用来做 bash分类器 的model
-              ANTHROPIC_DEFAULT_SONNET_MODEL = "${globals.models.dsf}[1m]";
-              ANTHROPIC_DEFAULT_HAIKU_MODEL = "mimo[1m]";
+              ANTHROPIC_DEFAULT_SONNET_MODEL = "${globals.models.dsf4}[1m]";
+              ANTHROPIC_DEFAULT_HAIKU_MODEL = "${globals.models.dsf4}[1m]";
 
               # 用来在 /model picker 里多塞 1 条自定义模型，不替换 opus / sonnet / haiku / fable 那些内置 alias
               # - CUSTOM 仅支持 1 条；其它可用 id 手输 /model：gpt-5.4, mimo-v2.5-tts, oc/*

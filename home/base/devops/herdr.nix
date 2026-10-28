@@ -88,7 +88,6 @@ in
         # herdrPlugins.herdr-annotate-full
         herdrPlugins.herdr-reviewr
         herdrPlugins.herdr-web-ui
-        ./herdr/herdr-plugins-palette
       ]
       ++ lib.optional pkgs.stdenv.isDarwin pkgs.herdr-focus-notify;
 
@@ -267,12 +266,6 @@ in
               height = "90%";
             }
 
-            {
-              key = "prefix+p";
-              type = "plugin_action";
-              description = "Command palette (全部插件 action, fzf)";
-              command = "jt.command-palette.open";
-            }
             {
               # reviewr 官方 README 建议 cmd+r，但 herdr 键位体系只有 ctrl/alt/prefix
               # （cmd/⌘ 不是 herdr 的 key 修饰符）→ 落地 ctrl+alt+r，保留 r=review 语义。
