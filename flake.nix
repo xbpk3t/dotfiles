@@ -149,7 +149,14 @@ rec {
               models = {
                 dsf = "deepseek-v4.1-flash";
                 dsf4 = "deepseek-v4-flash";
-                gpt = "gpt-5.5";
+
+                claude = "claude-opus-5-5";
+                gpt = "gpt-6-astra";
+                grok = "grok-4.7";
+
+                mimo = "mimo-v2.6-pro";
+                hy = "hy4";
+                glm = "glm-5.3-flash";
               };
 
               networking.nameservers = [

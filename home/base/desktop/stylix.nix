@@ -26,7 +26,6 @@ in
       autoEnable = mkDefault true;
       enableReleaseChecks = false;
       overlays.enable = false;
-      # NOTE:
       # 当 HM 使用 useGlobalPkgs=true 时，stylix overlays 会写入 nixpkgs.overlays，
       # 触发 "nixpkgs.config/overlays with useGlobalPkgs" 警告。
       # 这里显式关闭 overlays，仅保留主题渲染能力。

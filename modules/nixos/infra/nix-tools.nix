@@ -15,14 +15,12 @@ in
     enable = lib.mkEnableOption "Nix management tools (nixos-cli, cache settings, sudo env)";
   };
 
-  # NOTE: nixos-cli module import 必须在顶层，不能包在 mkIf 里（否则触发
-  # "option `imports' does not exist"——imports 只认模块顶层字段）。
+  # nixos-cli module import 必须在顶层，不能包在 mkIf 里（否则触发 "option `imports' does not exist"——imports 只认模块顶层字段）。
   imports = [ inputs.nixos-cli.nixosModules.nixos-cli ];
 
   config = lib.mkIf cfg.enable {
     # Additional Nix management tools
     environment.systemPackages = with pkgs; [
-      # NOTE: `pkgs.system` 是别名，已被上游标记弃用；改为 hostPlatform.system。
       inputs.nixos-cli.packages.${pkgs.stdenv.hostPlatform.system}.default
     ];
 
@@ -73,18 +71,16 @@ in
       channel.enable = false;
     };
 
-    # NOTE:
     # nixpkgs.config 已上移到 outputs/default.nix 的 pkgs 构造阶段，
     # 以兼容 home-manager.useGlobalPkgs + readOnlyPkgs 模式并消除评估警告。
 
     # It provides commands like: nixos build, nixos switch, nixos test, etc.
     # Configuration is done via environment variables and config files
     # NIXOS_CONFIG="$HOME/Desktop/dotfiles" nixos apply
-    # NOTE: 新版 nixos-cli 模块已从 services.* 迁移到 programs.*
-    # 保持同样语义，仅更新 option path 以消除 deprecation warning。
+    # 新版 nixos-cli 模块已从 services.* 迁移到 programs.* 保持同样语义，仅更新 option path 以消除 deprecation warning。
     programs.nixos-cli = {
       enable = true;
-      # NOTE: config 已重命名为 settings（上游兼容性调整）
+      # config 已重命名为 settings（上游兼容性调整）
       settings = {
         use_nvd = true;
         ignore_dirty_tree = true;
@@ -165,7 +161,6 @@ in
       };
 
       option-cache = {
-        # NOTE:
         # nixos-cli 当前通过 unsafeDiscardStringContext 生成 options cache，
         # 在新版本 Nix 下会触发 builtins.derivation/options.json 的 context warning。
         # 先关闭该缓存以消除 warning（不影响 nixos-cli 的核心 apply/build 能力）。

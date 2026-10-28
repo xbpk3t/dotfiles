@@ -37,6 +37,10 @@ let
     "cargotoml" = true;
     "catppuccin-icons" = true;
     "git-firefly" = true;
+    # 显式禁用 marksman：Zed 的 auto_install_extensions 只装不卸（移除 key 只是
+    # 停止未来自动装，unwrap_or(true) 默认还会装），必须显式 false 才能防误装。
+    # [2026-10-28] 已迁移到 markdown-oxide，禁用旧 LSP 避免 outline heading 重复。
+    "marksman" = false;
     "markdown-oxide" = true;
     "snippets" = true;
     "toml" = true;
@@ -899,7 +903,7 @@ let
         "--hyperlink-format=file://{path}:{line}:{column}" # 生成带行列的超链接
         "-e FIXME:"
         "-e TODO:"
-        "-e NOTE:"
+        # "-e NOTE:"
         "-e MAYBE:"
         "." # 搜索起点（当前工作区根目录）
       ];

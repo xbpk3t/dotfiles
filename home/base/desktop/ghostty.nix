@@ -113,8 +113,7 @@ let
     # resize-overlay = "never";
 
     # ── Keybind ─────────────────────────────────────────────────────
-    # NOTE: [ghostty] not using ghostty for splits or tabs so nearly
-    # all default binds conflict Hypr, nvim, or zellij.
+    # not using ghostty for splits or tabs so nearly all default binds conflict Hypr, nvim, or zellij.
     keybind = [
       # ── 调试 ──
       "ctrl+shift+d=inspector:toggle"

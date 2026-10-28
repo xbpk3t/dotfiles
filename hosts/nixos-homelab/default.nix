@@ -26,7 +26,6 @@ in
 
   services.resolved = {
     enable = true;
-    # NOTE: fallbackDns 已迁移到 settings.Resolve.FallbackDNS
     settings.Resolve.FallbackDNS = nameservers;
     # 重要：关闭本地 stub（127.0.0.53），避免集群 DNS 走到不可达的本地回环
     # settings = {
@@ -61,7 +60,6 @@ in
   };
 
   services.logind = {
-    # NOTE: 旧字段已迁移到 settings.Login.*
     settings = {
       Login = {
         HandleLidSwitch = "ignore";
