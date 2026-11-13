@@ -10,12 +10,11 @@ _: {
     };
 
     devops = {
-      herdr.enable = true;
+      herdr.enable = false;
       ghui.enable = true;
       hunk.enable = true;
     };
 
-    # herdr keys.command 依赖：claude pane + SessionStart hook（见 claude.nix）
     AI = {
       claude.enable = true;
       skills.enable = true;
