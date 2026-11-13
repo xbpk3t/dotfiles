@@ -6,7 +6,8 @@
   ...
 }:
 let
-  mcpEnabled = config.modules.AI.codex.enable || config.modules.AI.claude.enable;
+  mcpEnabled =
+    config.modules.AI.codex.enable || config.modules.AI.claude.enable || config.modules.AI.dsh.enable;
   cfg = config.modules.AI.mcp;
 in
 {
