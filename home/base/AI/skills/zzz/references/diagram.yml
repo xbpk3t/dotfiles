@@ -1,6 +1,5 @@
 ---
 frontmatter:
-  name: diagram
   role: atom
   desc: 选 diagram 类型/工具 → 生成源码(不本地渲染 SVG,前端运行时渲染);固定命名与输出位置
 
