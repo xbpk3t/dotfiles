@@ -56,6 +56,7 @@ in
       stateVersion = "24.11";
       primaryIp = "192.129.183.26";
       acmeEmail = "yyzw@live.com";
+      role = "server";
       user = commonUser;
       time = commonTime;
       editor = commonEditor;
@@ -125,6 +126,7 @@ in
       stateVersion = "24.11";
       primaryIp = "103.85.224.63";
       acmeEmail = "yyzw@live.com";
+      role = "server";
       user = commonUser;
       time = commonTime;
       editor = commonEditor;

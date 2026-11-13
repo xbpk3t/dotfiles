@@ -22,10 +22,7 @@ let
       "hosts/${name}/default.nix"
       "secrets/default.nix"
       "modules/nixos/kernel"
-      "modules/nixos/infra/nix-tools.nix"
-      "modules/nixos/infra/singbox-server.nix"
-      "modules/nixos/infra/tailscale-client.nix"
-      "modules/nixos/infra/mihomo-client.nix"
+      "modules/nixos/infra"
       "modules/nixos/ms/k3s.nix"
     ];
     home-modules = map mylib.relativeToRoot [
@@ -35,24 +32,14 @@ let
     ];
   };
 
-  # inventory（可变）：节点差异
+  # inventory（可变）：节点差异；role 由 host 层读取 hostMeta.role 处理。
   inventory = mylib.inventory."nixos-vps";
-  nodes = inventory;
-
-  # 只注入 inventory identity；role 差异由 host 层读取 hostMeta.role 处理。
-  mkNodeModule = name: node: {
-    networking.hostName = node.hostName or name;
-  };
 
   mkNodeRole =
     name: node:
     let
-      nodeModule = mkNodeModule name node;
-      modules = baseModules // {
-        nixos-modules = baseModules.nixos-modules ++ [ nodeModule ];
-      };
       systemArgs =
-        modules
+        baseModules
         // args
         // {
           specialArgs = mkSpecialArgs baseModules.system node;
@@ -71,7 +58,7 @@ let
       deploy.nodes.${name} = deployNode;
     };
 
-  nodeRoles = builtins.attrValues (builtins.mapAttrs mkNodeRole nodes);
+  nodeRoles = builtins.attrValues (builtins.mapAttrs mkNodeRole inventory);
 
   merged = {
     nixosConfigurations = lib.attrsets.mergeAttrsList (

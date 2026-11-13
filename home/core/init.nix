@@ -5,7 +5,7 @@
 #     从 c41e3f9 拆出 core / base 后，所有 host 的 home-modules 都
 #     包含 `home/core`，没有任何 host 会绕过它。
 #   - `home/base/` 的语义是「富配置（GUI / CLI 工具的可选项）」，
-#     headless 的 nixos-vps 已经显式 *不* import `home/base`，
+#     nixos-vps 的 server 角色显式 *不* import `home/base`，
 #     因此任何 home-manager 必备的 option 都不能挂在 `home/base/` 里，
 #     否则该 host 求值时会因为缺少 `home.username` / `home.homeDirectory`
 #     / `home.stateVersion` 而直接 fail（在 home-manager assertions 阶段）。

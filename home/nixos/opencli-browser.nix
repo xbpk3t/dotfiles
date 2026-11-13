@@ -7,9 +7,8 @@
 let
   cfg = config.modules.AI.opencli-browser;
   display = ":99";
-  profileDir = "${config.home.homeDirectory}/.local/share/chromium-agt";
   chromiumFlags = [
-    "--user-data-dir=${profileDir}"
+    "--user-data-dir=${config.home.homeDirectory}/.local/share/chromium-agt"
     "--load-extension=${pkgs.opencli-extension}"
     "--disable-extensions-except=${pkgs.opencli-extension}"
     "--no-first-run"
@@ -22,6 +21,19 @@ let
     "--window-position=0,0"
     "about:blank"
   ];
+
+  mkUserService = description: extra: {
+    Unit = {
+      inherit description;
+    }
+    // (extra.Unit or { });
+    Service = {
+      Restart = "on-failure";
+      RestartSec = 5;
+    }
+    // (extra.Service or { });
+    Install.WantedBy = [ "default.target" ];
+  };
 in
 {
   options.modules.AI.opencli-browser.enable = lib.mkEnableOption ''
@@ -36,55 +48,50 @@ in
     ];
 
     systemd.user.services = {
-      xvfb = {
-        Unit.Description = "Xvfb virtual display ${display}";
-        Service = {
-          ExecStart = "${pkgs.xvfb}/bin/Xvfb ${display} -screen 0 1920x1080x24 -nolisten tcp";
-          Restart = "always";
-          RestartSec = 5;
-        };
-        Install.WantedBy = [ "default.target" ];
+      xvfb = mkUserService "Xvfb virtual display ${display}" {
+        Service.ExecStart = "${pkgs.xvfb}/bin/Xvfb ${display} -screen 0 1920x1080x24 -nolisten tcp";
       };
 
-      openbox = {
-        Unit.Description = "Openbox window manager for Xvfb";
-        Unit.After = [ "xvfb.service" ];
-        Unit.Requires = [ "xvfb.service" ];
+      openbox = mkUserService "Openbox window manager for Xvfb" {
+        Unit = {
+          After = [ "xvfb.service" ];
+          Requires = [ "xvfb.service" ];
+          PartOf = [ "xvfb.service" ];
+        };
         Service = {
           ExecStart = "${pkgs.openbox}/bin/openbox";
           Environment = [ "DISPLAY=${display}" ];
-          Restart = "always";
-          RestartSec = 5;
         };
-        Install.WantedBy = [ "default.target" ];
       };
 
-      chromium-agent = {
-        Unit.Description = "Headed Chromium for opencli Browser Bridge";
-        Unit.After = [
-          "xvfb.service"
-          "openbox.service"
-        ];
-        Unit.Requires = [ "xvfb.service" ];
+      chromium-agent = mkUserService "Headed Chromium for opencli Browser Bridge" {
+        Unit = {
+          After = [
+            "xvfb.service"
+            "openbox.service"
+          ];
+          Requires = [ "xvfb.service" ];
+          PartOf = [ "xvfb.service" ];
+        };
         Service = {
           ExecStart = "${pkgs.chromium}/bin/chromium ${lib.escapeShellArgs chromiumFlags}";
           Environment = [ "DISPLAY=${display}" ];
+          # 浏览器退出（例如最后一个窗口关闭）后需要拉起来。
           Restart = "always";
           RestartSec = 10;
         };
-        Install.WantedBy = [ "default.target" ];
       };
 
-      x11vnc = {
-        Unit.Description = "x11vnc for Xvfb ${display} (localhost only)";
-        Unit.After = [ "xvfb.service" ];
-        Unit.Requires = [ "xvfb.service" ];
+      x11vnc = mkUserService "x11vnc for Xvfb ${display} (localhost only)" {
+        Unit = {
+          After = [ "xvfb.service" ];
+          Requires = [ "xvfb.service" ];
+          PartOf = [ "xvfb.service" ];
+        };
         Service = {
           ExecStart = "${pkgs.x11vnc}/bin/x11vnc -display ${display} -localhost -nopw -forever -shared -rfbport 5900";
-          Restart = "always";
           RestartSec = 10;
         };
-        Install.WantedBy = [ "default.target" ];
       };
     };
   };

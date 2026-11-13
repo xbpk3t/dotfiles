@@ -11,7 +11,6 @@
     ./dagu.nix
     ./dsh.nix
     ./skills.nix
-    ./opencli-browser.nix
   ];
   home.packages = with inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}; [
     apm
