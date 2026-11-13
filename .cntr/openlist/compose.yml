@@ -9,6 +9,8 @@ services:
     user: '0:0' # Please replace `0:0` with the actual user ID and group ID you want to use to run OpenList.
     volumes:
       - './data:/opt/openlist/data'
+      # 本地存储挂载点：OpenList 的 storage 指到这个目录，离线下载文件最终落在 VPS 本地
+      - './downloads:/downloads'
     # 对外统一走 caddy（edge 网络）反代 as.lucc.dev，不暴露端口（同 rsshub 等服务的处理）
     networks:
       - edge
@@ -20,6 +22,35 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+
+  # qbittorrent 暂缓启用（2026-11-12）：root/公网 BT/latest+watchtower/未挂 /downloads 等取舍待定。
+  # 恢复时取消下面整段注释即可。
+  # qbittorrent:
+  #   image: lscr.io/linuxserver/qbittorrent:latest
+  #   container_name: qbittorrent
+  #   environment:
+  #     - PUID=0
+  #     - PGID=0
+  #     - WEBUI_PORT=8080
+  #     - TORRENTING_PORT=6881
+  #   volumes:
+  #     - './config/qbittorrent:/config'
+  #     # OpenList 提交 BT 任务时 savepath 固定为 {temp_dir}/qBittorrent/<gid>，
+  #     # 即 openlist 容器内的 /opt/openlist/data/temp/qBittorrent。
+  #     # 所以 qbit 必须把同一个 host 目录挂到该路径，否则任务创建即失败。
+  #     - './data/temp/qBittorrent:/opt/openlist/data/temp/qBittorrent'
+  #   ports:
+  #     # WebUI 只绑 127.0.0.1：不暴露公网（避免 qbittorrent 弱口令风险）。
+  #     # OpenList 通过容器内网 http://qbittorrent:8080 访问，无需公网暴露。
+  #     - '127.0.0.1:8080:8080'
+  #     # BT 对等端口：需公网可达（对端连入），否则只能单向连、速度受限。
+  #     - '6881:6881'
+  #     - '6881:6881/udp'
+  #   restart: unless-stopped
+  #   networks:
+  #     edge:
+  #       aliases:
+  #         - qbittorrent
 
 # caddy 的 external edge 网络，openlist 加入以被 caddy 反代
 networks:
