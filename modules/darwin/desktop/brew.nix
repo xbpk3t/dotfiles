@@ -38,6 +38,8 @@ in
 
       "vjeantet/tap/alerter"
       "mq"
+
+      # "kdlbs/kandev/kandev"
     ];
 
     # 以下casks根据重要性排序
