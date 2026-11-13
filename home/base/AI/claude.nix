@@ -214,16 +214,15 @@ in
 
               # 模型映射（gateway: api.lucc.dev）
               # - settings.model = deepseek-v4.1-flash[1m]  ← session 默认（本块上方，勿与 alias 混淆）
-              # - [1m] = CC 侧 1M context 标记；gateway /v1/models 为裸 id（grok-4.5 原生 500k 故不带 [1m]）
-              # - FABLE / OPUS / SONNET 均指向 deepseek-v4.1-flash[1m]（刻意重复）；HAIKU → mimo[1m]
+              # - [1m] = CC 侧 1M context 标记；gateway /v1/models 为裸 id
+              # - FABLE / OPUS / SONNET / HAIKU 均指向 deepseek-v4.1-flash[1m]（刻意重复）
+              #   SONNET 是 bash 分类器用的模型
+              # - grok-4.7 当前不在 gateway（422 model not found），不要放进 alias
 
-              ANTHROPIC_DEFAULT_FABLE_MODEL = "${globals.models.dsf4}[1m]";
-              ANTHROPIC_DEFAULT_OPUS_MODEL = "${globals.models.dsf4}[1m]";
-
-              # ANTHROPIC_DEFAULT_SONNET_MODEL = "hy3[1m]";
-              # 默认用来做 bash分类器 的model
-              ANTHROPIC_DEFAULT_SONNET_MODEL = "${globals.models.dsf4}[1m]";
-              ANTHROPIC_DEFAULT_HAIKU_MODEL = "${globals.models.dsf4}[1m]";
+              ANTHROPIC_DEFAULT_FABLE_MODEL = "${globals.models.dsf}[1m]";
+              ANTHROPIC_DEFAULT_OPUS_MODEL = "${globals.models.dsf}[1m]";
+              ANTHROPIC_DEFAULT_SONNET_MODEL = "${globals.models.dsf}[1m]";
+              ANTHROPIC_DEFAULT_HAIKU_MODEL = "${globals.models.dsf}[1m]";
 
               # 用来在 /model picker 里多塞 1 条自定义模型，不替换 opus / sonnet / haiku / fable 那些内置 alias
               # - CUSTOM 仅支持 1 条；其它可用 id 手输 /model：gpt-5.4, mimo-v2.5-tts, oc/*
