@@ -18,6 +18,12 @@ _: {
     AI = {
       claude.enable = true;
       skills.enable = true;
+      dagu = {
+        enable = true;
+        # 避开 VPS 上 axonhub 的 8090 和给 qbittorrent 预留的 8080。
+        port = 8081;
+        schedulerPort = 8091;
+      };
     };
   };
 
