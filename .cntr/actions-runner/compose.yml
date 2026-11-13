@@ -15,7 +15,7 @@ name: actions-runner
 services:
   runner:
     # 钉版本，勿用 latest（避免与上游 self-update 不同步）
-    image: myoung34/github-runner:2.336.0
+    image: myoung34/github-runner:2.338.2
     container_name: actions-runner
     restart: unless-stopped
     environment:
