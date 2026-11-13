@@ -8,4 +8,5 @@ in
     inherit sources;
   };
   dagu = pkgs.callPackage ./dagu { };
+  opencli-extension = pkgs.callPackage ./opencli-extension { };
 }

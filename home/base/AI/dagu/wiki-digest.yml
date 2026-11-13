@@ -6,7 +6,7 @@
 # 测 corner case 时传 DRY_RUN=1：digest 步改为 echo，不会真触发 AI 任务。
 # 注意：dagu 2.10 顶层 DAG 不能定义 name（name 来自文件名），name 仅 subDAG 用。
 #
-# 目标运行主机是 nixos-vps-ws；同一时间只在一台机器跑（R2 日志是 read-merge-write）。
+# 目标运行主机是 nixos-vps-agt；同一时间只在一台机器跑（R2 日志是 read-merge-write）。
 # 路径按 ${HOME} 展开，Mac/VPS 通用。worktree 脏时 pull 会让步（不 autostash 别人的修改）。
 # 失败通知由 notify 步负责，所以显式关掉 DAG 级自动重试（base.yaml 默认 limit 3）。
 description: "Digest wiki/inbox.md once it accumulates >= THRESHOLD URLs (xurls count)"
@@ -18,7 +18,7 @@ retry_policy:
 # dagu 没有 runs-on，用 DAG-level precondition 做主机 gate（scheduled/manual 都会检查）。
 # 演练：dagu start <dag> -- DRY_RUN=1（env 变量不会进 DAG，必须走参数）。
 preconditions:
-  - condition: '[ "$DRY_RUN" = "1" ] || [ "$(hostname -s)" = "nixos-vps-ws" ]'
+  - condition: '[ "$DRY_RUN" = "1" ] || [ "$(hostname -s)" = "nixos-vps-agt" ]'
 
 env:
   WORKSPACE: ${HOME}/Desktop/docs

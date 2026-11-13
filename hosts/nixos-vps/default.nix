@@ -2,14 +2,18 @@
   config,
   lib,
   globals,
+  hostMeta,
   pkgs,
-  userMeta,
   stateVersion,
+  userMeta,
   ...
 }:
 let
   inherit (globals.networking) nameservers;
   diskDevice = lib.attrByPath [ "disko" "devices" "disk" "vda" "device" ] "/dev/vda" config;
+  isAgent = (hostMeta.role or "server") == "agent";
+  isServer = !isAgent;
+  incusOn = hostMeta.incus.enable or false;
 in
 {
   imports = [
@@ -17,137 +21,144 @@ in
     ./hardware.nix
   ];
 
-  boot.loader = {
-    systemd-boot.enable = lib.mkForce false;
-    efi.canTouchEfiVariables = lib.mkForce false;
-    efi.efiSysMountPoint = lib.mkForce "/boot/efi";
-    grub = {
-      enable = true;
-      device = diskDevice;
-      efiSupport = true;
-      efiInstallAsRemovable = true;
-    };
-  };
-
-  documentation = {
-    # server 默认关闭大部分文档产物，减少系统包体积与无关输出。
-    enable = lib.mkDefault false;
-    doc.enable = lib.mkDefault false;
-    info.enable = lib.mkDefault false;
-    man.enable = lib.mkDefault false;
-
-    # NixOS manual/options 文档在本仓库里本来就倾向关闭；这里再次作为 server profile 明确声明。
-    # 关闭 NixOS options 文档生成（options.json）。
-    # 这会规避当前 Nix 对 make-options-doc 派生出的 builtins.derivation context 警告。
-    nixos.enable = lib.mkDefault false;
-  };
-
-  programs.command-not-found.enable = lib.mkDefault false;
-
-  fonts.fontconfig.enable = lib.mkDefault false;
-
-  # VPS 使用 stable package set，但 NixOS module system 仍来自 rolling。
-  # rolling 的 all-terminfo 列表可能引用 stable 中已移除的包（例如 termite），
-  # 所以服务器只安装实际需要的常用终端 terminfo。
-  environment = {
-    enableAllTerminfo = lib.mkForce false;
-    systemPackages = [
-      pkgs.ghostty.terminfo
-      pkgs.kitty.terminfo
-      pkgs.tmux.terminfo
-      pkgs.wezterm.terminfo
-      pkgs.foot.terminfo
-    ];
-  };
-
-  xdg = {
-    # 这些 freedesktop/XDG 组件主要服务桌面环境；在 server 上默认关闭更符合角色语义。
-    autostart.enable = lib.mkDefault false;
-    icons.enable = lib.mkDefault false;
-    menus.enable = lib.mkDefault false;
-    mime.enable = lib.mkDefault false;
-    sounds.enable = lib.mkDefault false;
-  };
-
-  networking = {
-    # hostName 由 inventory 注入；这里提供默认值，避免单机调试时为空
-    hostName = lib.mkDefault "nixos-vps";
-    useDHCP = true;
-    inherit nameservers;
-    useHostResolvConf = lib.mkForce false;
-
-  };
-
-  services = {
-    resolved = {
-      enable = true;
-      # NOTE: fallbackDns 已迁移到 settings.Resolve.FallbackDNS
-      settings.Resolve.FallbackDNS = nameservers;
-    };
-
-    cron = {
-      enable = true;
-      mailto = "";
-      systemCronJobs = [
-        "0 3 * * * luck nu /home/luck/.cntr/backup-pgsql.nu axonhub"
-      ];
-    };
-  };
-
-  modules = {
-    networking = {
-      tailscale = {
-        enable = true;
-        # 多角色：既是 client + derper，又是 exit node（手机翻墙出口）。
-        # 具体 services.tailscale 配置集中在 modules/nixos/infra/tailscale-client.nix。
-        # exitNode 是裸 bool option（模块内 mkEnableOption 顶层）。
-        exitNode = true;
-        derper = {
+  config = lib.mkMerge [
+    # ── 共同 VPS 基线 ─────────────────────────────────────────────
+    {
+      boot.loader = {
+        systemd-boot.enable = lib.mkForce false;
+        efi.canTouchEfiVariables = lib.mkForce false;
+        efi.efiSysMountPoint = lib.mkForce "/boot/efi";
+        grub = {
           enable = true;
-          acmeEmail = userMeta.mail;
+          device = diskDevice;
+          efiSupport = true;
+          efiInstallAsRemovable = true;
         };
       };
-    };
 
-    systemd.manager.watchdog = {
-      # VPS 属于典型无人值守场景，默认启用 systemd Manager watchdog 兜底。
-      # 若后续某台机器的 hypervisor/watchdog 行为特殊，直接在对应 host 覆写即可。
-      enable = true;
-    };
+      networking = {
+        # hostName 由 inventory 注入；这里提供默认值，避免单机调试时为空。
+        hostName = lib.mkDefault "nixos-vps";
+        useDHCP = true;
+        inherit nameservers;
+        useHostResolvConf = lib.mkForce false;
+      };
 
-    # k3s agent：VPS 统一作为 worker 节点
-    ms.k3s = {
-      enable = false;
-      role = "agent";
-      # serverIP 由 inventory 注入，避免多处重复维护
-      serverPort = 6443;
-    };
+      services.resolved = {
+        enable = true;
+        settings.Resolve.FallbackDNS = nameservers;
+      };
 
-    infra = {
-      singbox-server.enable = true;
-    };
-  };
+      modules.systemd.manager.watchdog.enable = true;
 
-  hardware.enableRedistributableFirmware = lib.mkForce false;
+      # VPS 无固件需求；与 server 基线保持一致。
+      hardware.enableRedistributableFirmware = lib.mkForce false;
 
-  # Disable scheduled upgrades to avoid conflicts with immutable deployments.
-  system.autoUpgrade.enable = lib.mkForce false;
-  systemd.services."nixos-upgrade".enable = lib.mkForce false;
-  systemd.timers."nixos-upgrade".enable = lib.mkForce false;
+      # 不用 scheduled upgrade，避免和声明式部署冲突。
+      system.autoUpgrade.enable = lib.mkForce false;
+      systemd.services."nixos-upgrade".enable = lib.mkForce false;
+      systemd.timers."nixos-upgrade".enable = lib.mkForce false;
 
-  # Why: VPS 上的交互入口主要是 SSH。默认 Linger=no 时，第一次 SSH 登录会冷启动
-  # `systemd --user`，而 zsh 的 .zshenv 会立刻 source Home Manager 生成的
-  # hm-session-vars.sh。这个脚本里的 secret env 会执行
-  # `cat ~/.config/sops-nix/secrets/<name>`；如果它早于 user-level sops-nix.service
-  # 生成 `/run/user/<uid>/secrets.d/*`，就会偶发 `No such file or directory`。
-  #
-  # What: 启用 linger 让 luck 的 user manager 在无人登录时也保持可用，语义上接近
-  # macOS 的长期 GUI user session：Home Manager 的 sops-nix user service 可以提前生成
-  # user secrets，SSH shell 读取 hm-session-vars.sh 时不再和 secret 生成过程竞态。
-  #
-  # Scope: 只在 VPS role 上开启。workstation/macOS 不依赖 SSH 冷启动 user manager，
-  # 不需要把这个生命周期变化推广到全局 NixOS base。
-  users.users.${userMeta.username}.linger = true;
+      # dagu / Chromium / Xvfb 都是 user service；linger 让它们在无人登录时启动。
+      users.users.${userMeta.username}.linger = true;
 
-  system.stateVersion = lib.mkDefault stateVersion;
+      system.stateVersion = lib.mkDefault stateVersion;
+    }
+
+    # ── Server 角色（dev/svc）：singbox / derper / k3s / Incus ─────
+    (lib.mkIf isServer {
+      documentation = {
+        # server 默认关闭大部分文档产物，减少系统包体积与无关输出。
+        enable = lib.mkDefault false;
+        doc.enable = lib.mkDefault false;
+        info.enable = lib.mkDefault false;
+        man.enable = lib.mkDefault false;
+
+        # 关闭 NixOS options 文档生成（options.json），规避 make-options-doc
+        # 派生出的 builtins.derivation context 警告。
+        nixos.enable = lib.mkDefault false;
+      };
+
+      programs.command-not-found.enable = lib.mkDefault false;
+
+      fonts.fontconfig.enable = lib.mkDefault false;
+
+      # rolling 的 all-terminfo 列表可能引用 stable 中已移除的包（例如 termite），
+      # 所以服务器只安装实际需要的常用终端 terminfo。
+      environment = {
+        enableAllTerminfo = lib.mkForce false;
+        systemPackages = [
+          pkgs.ghostty.terminfo
+          pkgs.kitty.terminfo
+          pkgs.tmux.terminfo
+          pkgs.wezterm.terminfo
+          pkgs.foot.terminfo
+        ];
+      };
+
+      xdg = {
+        # freedesktop/XDG 组件主要服务桌面环境；server 默认关闭。
+        autostart.enable = lib.mkDefault false;
+        icons.enable = lib.mkDefault false;
+        menus.enable = lib.mkDefault false;
+        mime.enable = lib.mkDefault false;
+        sounds.enable = lib.mkDefault false;
+      };
+
+      services.cron = {
+        enable = true;
+        mailto = "";
+        systemCronJobs = [
+          "0 3 * * * luck nu /home/luck/.cntr/backup-pgsql.nu axonhub"
+        ];
+      };
+
+      modules = {
+        networking.tailscale = {
+          enable = true;
+          # 多角色：既是 client + derper，又是 exit node（手机翻墙出口）。
+          exitNode = true;
+          derper = {
+            enable = true;
+            domain = hostMeta.tailscale.derpDomain;
+            inherit (hostMeta) acmeEmail;
+          };
+        };
+
+        # k3s agent：保留原 host 默认值（role/serverPort），inventory k3s 只覆盖
+        # 节点参数；是否 enable 仍由 inventory/默认值决定。
+        ms.k3s = {
+          enable = false;
+          role = "agent";
+          serverPort = 6443;
+        }
+        // (hostMeta.k3s or { });
+
+        infra.singbox-server.enable = true;
+      };
+
+      # Incus lab：仅 inventory 显式开启的节点。
+      virtualisation.incus.enable = lib.mkIf incusOn true;
+      users.users.${userMeta.username}.extraGroups = lib.mkIf incusOn [ "incus-admin" ];
+      networking = lib.mkIf incusOn {
+        nftables.enable = true;
+        firewall.trustedInterfaces = [ "incusbr0" ];
+      };
+    })
+
+    # ── Agent 角色（agt）：dagu + headed Chromium，无 singbox/derper/k3s ──
+    (lib.mkIf isAgent {
+      modules.networking.mihomo-client.enable = true;
+
+      # Chrome 需要 fontconfig/字体；不要继承 server 的 fonts 关闭策略。
+      fonts = {
+        fontconfig.enable = true;
+        packages = with pkgs; [
+          noto-fonts
+          noto-fonts-cjk-sans
+          dejavu_fonts
+        ];
+      };
+    })
+  ];
 }

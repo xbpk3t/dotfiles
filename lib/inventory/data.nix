@@ -183,6 +183,23 @@ in
         };
       };
     };
+
+    nixos-vps-agt = rec {
+      hostName = "nixos-vps-agt";
+      stateVersion = "26.05";
+      primaryIp = "1.15.64.188";
+      # agent 角色：dagu + headed Chromium/opencli；不跑 singbox/derper/k3s。
+      role = "agent";
+      user = commonUser;
+      time = commonTime;
+      editor = commonEditor;
+      hardware = {
+        cpuCores = 4;
+        memGiB = 4;
+        bwMbps = 6;
+        rttMs = 30;
+      };
+    };
   };
   nixos-homelab = {
     nixos-homelab = rec {
