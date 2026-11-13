@@ -5,6 +5,10 @@ description: Monthly deadlink scan → AI analyze → human approve → auto del
 schedule: "0 0 1 * *"
 max_active_runs: 1
 
+# dagu 没有 runs-on，用 DAG-level precondition 做主机 gate。
+preconditions:
+  - condition: '[ "$(hostname -s)" = "macos-ws" ]'
+
 env:
   WORKSPACE: /Users/luck/Desktop/docs
   DEADLINK_DIR: /tmp/xbpk3t-docs-deadlink

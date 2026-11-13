@@ -2,25 +2,61 @@
 # wiki-digest.yml
 # 把 wiki/inbox.md 攒够的 URL 交给 docs-cli digest。
 # 计数用 xurls（只匹配 https?:// 等带 scheme 的 URL，markdown 链接正合适）。
-# 阈值：inbox 内 URL >= THRESHOLD 才跑 digest，否则整条 DAG skip。
+# 阈值：inbox 内 URL >= THRESHOLD 才跑 digest，否则只有 digest 步 skip。
 # 测 corner case 时传 DRY_RUN=1：digest 步改为 echo，不会真触发 AI 任务。
 # 注意：dagu 2.10 顶层 DAG 不能定义 name（name 来自文件名），name 仅 subDAG 用。
-name: wiki-digest
+#
+# 目标运行主机是 nixos-vps-ws；同一时间只在一台机器跑（R2 日志是 read-merge-write）。
+# 路径按 ${HOME} 展开，Mac/VPS 通用。worktree 脏时 pull 会让步（不 autostash 别人的修改）。
+# 失败通知由 notify 步负责，所以显式关掉 DAG 级自动重试（base.yaml 默认 limit 3）。
 description: "Digest wiki/inbox.md once it accumulates >= THRESHOLD URLs (xurls count)"
 schedule: "0 22 * * 5" # 每周五晚上10点
 max_active_runs: 1
+retry_policy:
+  limit: 0 # 失败由 notify 统一通知；避免整条 DAG（含 40+ 分钟 digest）重跑 3 次
+
+# dagu 没有 runs-on，用 DAG-level precondition 做主机 gate（scheduled/manual 都会检查）。
+# 演练：dagu start <dag> -- DRY_RUN=1（env 变量不会进 DAG，必须走参数）。
+preconditions:
+  - condition: '[ "$DRY_RUN" = "1" ] || [ "$(hostname -s)" = "nixos-vps-ws" ]'
 
 env:
-  WORKSPACE: /Users/luck/Desktop/docs
-  INBOX: /Users/luck/Desktop/docs/wiki/inbox.md
+  WORKSPACE: ${HOME}/Desktop/docs
+  INBOX: ${HOME}/Desktop/docs/wiki/inbox.md
   THRESHOLD: "2"
+  # 运行状态文件放在 .git/ 下，不进入工作树：
+  #   skip = 未达阈值；0 = digest 成功；其它 = 失败原因/退出码
+  STATUS_FILE: ${HOME}/Desktop/docs/.git/wiki-digest.status
   # DRY_RUN: "1"   # 取消注释即为 dry-run：digest 只打印不真正执行
 
 steps:
+  - id: pull
+    name: pull
+    description: "Step 1/5: 同步 docs repo（失败则 digest 跳过，但仍发通知）"
+    run: |
+      rm -f "$STATUS_FILE"
+      cd "$WORKSPACE" || { echo pull_failed > "$STATUS_FILE"; exit 1; }
+      # 脏树不 pull：autostash/rebase 可能把未提交修改留在冲突状态。
+      # 跳过 pull 不影响 digest（只是可能基于旧 checkout），push 阶段再处理同步失败。
+      if [ -n "$(git status --porcelain)" ]; then
+        echo "dirty working tree; skip pull"
+      elif ! git pull --rebase; then
+        echo pull_failed > "$STATUS_FILE"
+        exit 1
+      fi
+    continue_on:
+      failure: true
+
   - id: count
     name: count
-    description: "Step 1/2: 用 xurls 统计 inbox 内 URL 数量并打印"
+    description: "Step 2/5: 用 xurls 统计 inbox 内 URL 数量；未达阈值写 skip"
+    depends:
+      - pull
     run: |
+      if [ -f "$STATUS_FILE" ] && [ "$(cat "$STATUS_FILE" 2>/dev/null)" = "pull_failed" ]; then
+        echo "pull failed; skipping count"
+        exit 0
+      fi
       N=0
       if [ -f "$INBOX" ]; then
         N=$(xurls "$INBOX" 2>/dev/null | grep -c . || true)
@@ -29,20 +65,71 @@ steps:
       fi
       echo "inbox=$INBOX"
       echo "urls=$N threshold=$THRESHOLD"
+      if [ "$N" -lt "$THRESHOLD" ]; then
+        echo skip > "$STATUS_FILE"
+      fi
+    continue_on:
+      failure: true
 
   - id: digest
     name: digest
-    description: "Step 2/2: 满足阈值才跑 task wiki:digest，否则 skip"
+    description: "Step 3/5: 满足阈值才跑 task wiki:digest，退出码写入 STATUS_FILE"
     depends:
       - count
     preconditions:
       - condition: |
-          [ -f "$INBOX" ] \
+          [ ! -f "$STATUS_FILE" ] \
+          && [ -f "$INBOX" ] \
           && [ "$(xurls "$INBOX" 2>/dev/null | grep -c . || true)" -ge "$THRESHOLD" ]
     run: |
       if [ "${DRY_RUN:-0}" = "1" ]; then
         echo "[dry-run] urls >= $THRESHOLD，本应执行: task wiki:digest"
+        echo 0 > "$STATUS_FILE"
         exit 0
       fi
       cd "$WORKSPACE"
       task wiki:digest
+      code=$?
+      echo "$code" > "$STATUS_FILE"
+      exit "$code"
+    continue_on:
+      failure: true
+      skipped: true
+
+  - id: sync
+    name: sync
+    description: "Step 4/5: 提交并推送 flush 后的 inbox（digest 失败也执行）"
+    depends:
+      - digest
+    run: |
+      cd "$WORKSPACE" || { echo sync_failed > "$STATUS_FILE"; exit 1; }
+      if [ -n "$(git status --porcelain -- wiki/inbox.md)" ]; then
+        git add wiki/inbox.md || { echo sync_failed > "$STATUS_FILE"; exit 1; }
+        git commit -m "chore(wiki): flush digested inbox $(date +%F)" \
+          || { echo sync_failed > "$STATUS_FILE"; exit 1; }
+        if ! git push; then
+          # 脏树不 rebase：宁可失败通知，也不要 autostash 掉别人的修改。
+          if [ -n "$(git status --porcelain)" ]; then
+            echo sync_failed > "$STATUS_FILE"
+            exit 1
+          fi
+          git pull --rebase && git push \
+            || { echo sync_failed > "$STATUS_FILE"; exit 1; }
+        fi
+      fi
+    continue_on:
+      failure: true
+
+  - id: notify
+    name: notify
+    description: "Step 5/5: 失败时发 Resend 邮件；成功/skip 不发"
+    depends:
+      - sync
+    run: |
+      status=$(cat "$STATUS_FILE" 2>/dev/null || echo unknown)
+      case "$status" in
+        0|skip) exit 0 ;;
+      esac
+      cd "$WORKSPACE"
+      docs-cli wiki digest-notify --failed --config .github/workspace/wiki.yml
+      exit 1

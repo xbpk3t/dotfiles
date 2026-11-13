@@ -7,4 +7,5 @@ in
   herdr-focus-notify = pkgs.callPackage ./herdr-focus-notify {
     inherit sources;
   };
+  dagu = pkgs.callPackage ./dagu { };
 }

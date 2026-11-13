@@ -44,6 +44,8 @@ let
       # Claude + shared skills (herdr ctrl+alt+a / resume_agents_on_restore hook)
       "home/base/AI/claude.nix"
       "home/base/AI/skills.nix"
+      # DAG scheduler；wiki-digest 的目标主机就是 VPS（DAG 内用 hostname precondition gate）
+      "home/base/AI/dagu.nix"
     ];
   };
 
