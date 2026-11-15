@@ -43,7 +43,18 @@ in
       hostName = "macos-ws";
       stateVersion = "24.11";
       primaryIp = "127.0.0.1";
-      ssh.user = "luck";
+      ssh = {
+        # 部署入口：VPS 通过 tailnet 直连 Mac；本地部署仍可用 127.0.0.1。
+        host = "100.87.216.84";
+        # 首次连接自动记录 host key：Mac/VPS 两边发起都无需手动 ssh-keyscan。
+        # tailnet 内 TOFU 可接受；host key 真变了仍会报错。
+        opts = [
+          "-o"
+          "StrictHostKeyChecking=accept-new"
+        ];
+        user = "luck";
+      };
+
       user = commonUser;
       time = commonTime;
       editor = commonEditor;
@@ -190,16 +201,27 @@ in
       hostName = "nixos-vps-agt";
       stateVersion = "26.05";
       primaryIp = "1.15.64.188";
-      # agent 角色：dagu + headed Chromium/opencli；不跑 singbox/derper/k3s。
+      acmeEmail = "yyzw@live.com";
+      # agent 角色：dagu + headed Chromium/opencli + Tailscale DERP；不跑 singbox/k3s。
       role = "agent";
       user = commonUser;
       time = commonTime;
       editor = commonEditor;
+      networking = {
+        # 腾讯云 Lighthouse 实际默认路由网卡：ens5（2026-11-13 部署实测）。
+        externalInterface = "ens5";
+      };
       hardware = {
         cpuCores = 4;
         memGiB = 4;
         bwMbps = 6;
         rttMs = 30;
+      };
+      tailscale = {
+        # 短域名：nva = nixos-vps-agt；域名里不体现 derp。
+        derpDomain = "nva.lucc.dev";
+        # 2026-11-14 首次 join 后 `tailscale ip -4`。
+        ip = "100.66.22.92";
       };
     };
   };

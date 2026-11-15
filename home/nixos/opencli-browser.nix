@@ -15,6 +15,9 @@ let
     "--no-default-browser-check"
     # 无 keyring 的 headless VPS：登录态保存在 profile 内，不依赖 gnome-keyring。
     "--password-store=basic"
+    # Chrome 走 mihomo mixed-port；localhost/tailnet/私网绕过。
+    "--proxy-server=http://127.0.0.1:7890"
+    "--proxy-bypass-list=localhost;127.0.0.1;::1;100.64.0.0/10;10.0.0.0/8;192.168.0.0/16;198.18.0.0/16"
     "--disable-gpu"
     "--disable-dev-shm-usage"
     "--window-size=1920,1080"
@@ -36,10 +39,21 @@ let
   };
 in
 {
-  options.modules.AI.opencli-browser.enable = lib.mkEnableOption ''
-    OpenCLI headed Chromium runtime: Xvfb + openbox + Chromium + Browser Bridge
-    extension + localhost x11vnc. 用于 headless VPS 上的已登录站点自动化。
-  '';
+  options.modules.AI.opencli-browser = {
+    enable = lib.mkEnableOption ''
+      OpenCLI headed Chromium runtime: Xvfb + openbox + Chromium + Browser Bridge
+      extension + x11vnc. 用于 headless VPS 上的已登录站点自动化。
+    '';
+
+    bindAddress = lib.mkOption {
+      type = lib.types.str;
+      default = "127.0.0.1";
+      description = ''
+        x11vnc bind address. Set to the tailnet IP to connect from other
+        tailnet devices (macOS Screen Sharing: vnc://<ip>:5900).
+      '';
+    };
+  };
 
   config = lib.mkIf cfg.enable {
     home.packages = with pkgs; [
@@ -82,14 +96,14 @@ in
         };
       };
 
-      x11vnc = mkUserService "x11vnc for Xvfb ${display} (localhost only)" {
+      x11vnc = mkUserService "x11vnc for Xvfb ${display} (${cfg.bindAddress})" {
         Unit = {
           After = [ "xvfb.service" ];
           Requires = [ "xvfb.service" ];
           PartOf = [ "xvfb.service" ];
         };
         Service = {
-          ExecStart = "${pkgs.x11vnc}/bin/x11vnc -display ${display} -localhost -nopw -forever -shared -rfbport 5900";
+          ExecStart = "${pkgs.x11vnc}/bin/x11vnc -display ${display} -listen ${cfg.bindAddress} -nopw -forever -shared -rfbport 5900";
           RestartSec = 10;
         };
       };

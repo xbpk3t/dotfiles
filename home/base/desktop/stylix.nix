@@ -19,140 +19,144 @@ in
     enable = mkEnableOption "stylix theming";
   };
 
-  config = mkIf cfg.enable {
-    stylix = {
-      enable = mkDefault true;
+  config = lib.mkMerge [
+    # stylix 的 HM module 在文件顶部无条件 import。若 overlays 保持默认开启，
+    # useGlobalPkgs = true 的 host 会触发 "nixpkgs options are disabled" 断言，
+    # 即使 modules.desktop.stylix 未启用（例如 headless VPS）。
+    # 显式关闭 overlays，仅保留主题渲染能力。
+    { stylix.overlays.enable = false; }
 
-      autoEnable = mkDefault true;
-      enableReleaseChecks = false;
-      overlays.enable = false;
-      # 当 HM 使用 useGlobalPkgs=true 时，stylix overlays 会写入 nixpkgs.overlays，
-      # 触发 "nixpkgs.config/overlays with useGlobalPkgs" 警告。
-      # 这里显式关闭 overlays，仅保留主题渲染能力。
+    (mkIf cfg.enable {
+      stylix = {
+        enable = mkDefault true;
 
-      # Home Manager integration settings
-      #    homeManagerIntegration = {
-      #      autoImport = true;
-      #      followSystem = true;
-      #    };
+        autoEnable = mkDefault true;
+        enableReleaseChecks = false;
 
-      # 使用base00作为背景色（Gruvbox的深背景）
-      #    image = config.lib.stylix.pixel "base00";
-      #    image = pkgs.fetchurl {
-      #      url = "https://cdn.lucc.dev/wallpapers/a1.png";
-      #      hash = "sha256-NJy3pGK/I0bgmjT2Irxak3AX+8n4rHcFd2eNzC6RQtg=";
-      #    };
+        # Home Manager integration settings
+        #    homeManagerIntegration = {
+        #      autoImport = true;
+        #      followSystem = true;
+        #    };
 
-      # 暗色主题
-      polarity = "dark";
+        # 使用base00作为背景色（Gruvbox的深背景）
+        #    image = config.lib.stylix.pixel "base00";
+        #    image = pkgs.fetchurl {
+        #      url = "https://cdn.lucc.dev/wallpapers/a1.png";
+        #      hash = "sha256-NJy3pGK/I0bgmjT2Irxak3AX+8n4rHcFd2eNzC6RQtg=";
+        #    };
 
-      # Color scheme configuration
-      # https://nix-community.github.io/stylix/configuration.html#handmade-schemes
-      # https://github.com/tinted-theming/schemes
-      # 注意这里不接受 base24 的theme
-      # Switch to Catppuccin Mocha for a dark, pastel-friendly palette
-      # base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-hard.yaml";
-      # base16Scheme = "${pkgs.base16-schemes}/share/themes/catppuccin-latte.yaml";
-      base16Scheme = "${pkgs.base16-schemes}/share/themes/catppuccin-mocha.yaml";
+        # 暗色主题
+        polarity = "dark";
 
-      # Font configuration
-      fonts = {
-        # Monospace font for terminals and code
-        # 统一使用 JetBrainsMono Nerd Font，与 Ghostty 保持一致。
-        # 注意：这里只影响 stylix 所覆盖的 GTK/Qt 应用外观，
-        # 不涉及字体安装 —— 安装走 NixOS/darwin 的 fonts.packages。
-        monospace = {
-          package = pkgs.nerd-fonts.jetbrains-mono;
-          name = "JetBrainsMono Nerd Font Mono";
+        # Color scheme configuration
+        # https://nix-community.github.io/stylix/configuration.html#handmade-schemes
+        # https://github.com/tinted-theming/schemes
+        # 注意这里不接受 base24 的theme
+        # Switch to Catppuccin Mocha for a dark, pastel-friendly palette
+        # base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-hard.yaml";
+        # base16Scheme = "${pkgs.base16-schemes}/share/themes/catppuccin-latte.yaml";
+        base16Scheme = "${pkgs.base16-schemes}/share/themes/catppuccin-mocha.yaml";
+
+        # Font configuration
+        fonts = {
+          # Monospace font for terminals and code
+          # 统一使用 JetBrainsMono Nerd Font，与 Ghostty 保持一致。
+          # 注意：这里只影响 stylix 所覆盖的 GTK/Qt 应用外观，
+          # 不涉及字体安装 —— 安装走 NixOS/darwin 的 fonts.packages。
+          monospace = {
+            package = pkgs.nerd-fonts.jetbrains-mono;
+            name = "JetBrainsMono Nerd Font Mono";
+          };
+
+          # UI文本 - 使用支持中文的字体
+          # sansSerif = {
+          #   # 苹果苹方作为默认 UI 字体（包已移除，如需用回需重新添加 pkgs.apple-pingfang）
+          #   # package = pkgs.apple-pingfang;
+          #   # name = "PingFang SC";
+          # };
+
+          # # 正式文本（比如浏览器文本）- 使用支持中文的字体
+          # serif = {
+          #   package = pkgs.noto-fonts-cjk-serif;
+          #   # Noto Serif CJK 作为 fallback
+          #   name = "Noto Serif CJK SC";
+          # };
+
+          # # Emoji font - using noto-fonts-color-emoji for better compatibility
+          # emoji = {
+          #   package = pkgs.noto-fonts-color-emoji;
+          #   name = "Noto Color Emoji";
+          # };
+
+          sizes = {
+            # GUI 应用（Qt/GTK）+ 部分工具firefox, thunderbird, vscode, jetbrains.*, discord, slack, spotify
+            # 按照firefox设置为13(好像这里控制不了firefox的font size)
+            # zed 设置为13就太大了，所以设置为12
+            applications = 12;
+            # 所有 终端模拟器alacritty, kitty, wezterm, foot, contour
+            terminal = 11;
+            # 桌面环境 UI（面板、菜单、图标标签）plasma 面板、任务栏、菜单字体；gnome 顶部栏、概览；sway/hyprland bar
+            desktop = 12;
+            # 弹出菜单、通知、上下文菜单右键菜单、通知中心、rofi/dmenu、waybar 提示、文件管理器预览
+            popups = 12;
+          };
         };
 
-        # UI文本 - 使用支持中文的字体
-        # sansSerif = {
-        #   # 苹果苹方作为默认 UI 字体（包已移除，如需用回需重新添加 pkgs.apple-pingfang）
-        #   # package = pkgs.apple-pingfang;
-        #   # name = "PingFang SC";
-        # };
+        targets = {
+          rofi.enable = false;
+          zed.enable = false;
+          # helix本身有内置theme，比stylix提供的要好很多
+          helix.enable = false;
 
-        # # 正式文本（比如浏览器文本）- 使用支持中文的字体
-        # serif = {
-        #   package = pkgs.noto-fonts-cjk-serif;
-        #   # Noto Serif CJK 作为 fallback
-        #   name = "Noto Serif CJK SC";
-        # };
+          # autoEnable=true 时 stylix 会给「所有已实现 target」写主题文件，
+          # 不检查本机是否安装对应 app。结果是 HOME 出现从未用过的路径，例如：
+          #   blender → ~/.config/blender/{3.0–4.5}/…/Stylix.xml
+          #   vencord → ~/.config/Vencord/themes/stylix.theme.css
+          #   forge   → ~/.config/forge/stylesheet/…（GNOME 扩展，mac 无关）
+          #   gedit / gtksourceview → ~/.local/share/…/styles/stylix.xml
+          #   gtk → gtk-3/4 css、.gtkrc、~/.themes/adw-gtk3、flatpak overrides
+          #   xresources → ~/.Xresources（mac 几乎无 X11 客户端）
+          # 本机不用这些，显式关掉。常用 target（bat/btop/k9s/…）仍走 autoEnable。
+          blender.enable = false;
+          vencord.enable = false;
+          forge.enable = false;
+          gedit.enable = false;
+          gtksourceview.enable = false;
+          gtk.enable = false;
+          xresources.enable = false;
 
-        # # Emoji font - using noto-fonts-color-emoji for better compatibility
-        # emoji = {
-        #   package = pkgs.noto-fonts-color-emoji;
-        #   name = "Noto Color Emoji";
-        # };
-
-        sizes = {
-          # GUI 应用（Qt/GTK）+ 部分工具firefox, thunderbird, vscode, jetbrains.*, discord, slack, spotify
-          # 按照firefox设置为13(好像这里控制不了firefox的font size)
-          # zed 设置为13就太大了，所以设置为12
-          applications = 12;
-          # 所有 终端模拟器alacritty, kitty, wezterm, foot, contour
-          terminal = 11;
-          # 桌面环境 UI（面板、菜单、图标标签）plasma 面板、任务栏、菜单字体；gnome 顶部栏、概览；sway/hyprland bar
-          desktop = 12;
-          # 弹出菜单、通知、上下文菜单右键菜单、通知中心、rofi/dmenu、waybar 提示、文件管理器预览
-          popups = 12;
+          # 配置 Firefox profile names 以避免 stylix warning
+          firefox.profileNames = [ "default" ];
+        }
+        // optionalAttrs isLinux {
+          qt = {
+            enable = true;
+            platform = "qtct";
+          };
         };
+        # 使用默认 cursor，但是改小size
+        #    cursor = {
+        ##      package = pkgs.bibata-cursors;
+        ##      name = "Bibata-Modern-Classic";
+        ##      size = 14;
+        #
+        #      #      package = pkgs.apple-cursor;
+        #      #      name = "macOS-BigSur-White";
+        #      #      size = 14;
+        #    };
       };
 
-      targets = {
-        rofi.enable = false;
-        zed.enable = false;
-        # helix本身有内置theme，比stylix提供的要好很多
-        helix.enable = false;
+      # stylix 的 xresources target（stylix.targets.xresources.enable = false）
+      # 在此版本未完全生效，仍会设置 xresources.properties。HM 的 xresources 模块
+      # 无 enable 开关，有 properties 就会写出 .Xresources。直接覆盖为 null 阻止。
+      xresources.properties = lib.mkForce null;
 
-        # autoEnable=true 时 stylix 会给「所有已实现 target」写主题文件，
-        # 不检查本机是否安装对应 app。结果是 HOME 出现从未用过的路径，例如：
-        #   blender → ~/.config/blender/{3.0–4.5}/…/Stylix.xml
-        #   vencord → ~/.config/Vencord/themes/stylix.theme.css
-        #   forge   → ~/.config/forge/stylesheet/…（GNOME 扩展，mac 无关）
-        #   gedit / gtksourceview → ~/.local/share/…/styles/stylix.xml
-        #   gtk → gtk-3/4 css、.gtkrc、~/.themes/adw-gtk3、flatpak overrides
-        #   xresources → ~/.Xresources（mac 几乎无 X11 客户端）
-        # 本机不用这些，显式关掉。常用 target（bat/btop/k9s/…）仍走 autoEnable。
-        blender.enable = false;
-        vencord.enable = false;
-        forge.enable = false;
-        gedit.enable = false;
-        gtksourceview.enable = false;
-        gtk.enable = false;
-        xresources.enable = false;
-
-        # 配置 Firefox profile names 以避免 stylix warning
-        firefox.profileNames = [ "default" ];
-      }
-      // optionalAttrs isLinux {
-        qt = {
-          enable = true;
-          platform = "qtct";
-        };
-      };
-      # 使用默认 cursor，但是改小size
-      #    cursor = {
-      ##      package = pkgs.bibata-cursors;
-      ##      name = "Bibata-Modern-Classic";
-      ##      size = 14;
-      #
-      #      #      package = pkgs.apple-cursor;
-      #      #      name = "macOS-BigSur-White";
-      #      #      size = 14;
-      #    };
-    };
-
-    # stylix 的 xresources target（stylix.targets.xresources.enable = false）
-    # 在此版本未完全生效，仍会设置 xresources.properties。HM 的 xresources 模块
-    # 无 enable 开关，有 properties 就会写出 .Xresources。直接覆盖为 null 阻止。
-    xresources.properties = lib.mkForce null;
-
-    home.packages =
-      with pkgs;
-      optionals isLinux [
-        apple-cursor
-      ];
-  };
+      home.packages =
+        with pkgs;
+        optionals isLinux [
+          apple-cursor
+        ];
+    })
+  ];
 }

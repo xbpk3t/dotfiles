@@ -41,20 +41,55 @@ let
     ]
   );
 
-  schedulerScript = pkgs.writeShellScript "dagu-scheduler" ''
-    export PATH=${schedulerPath}
-    source ${config.home.sessionVariablesPackage}/etc/profile.d/hm-session-vars.sh
-    exec ${daguBin} scheduler --dags=${config.home.homeDirectory}/.dagu/dags
-  '';
+  daguScript =
+    name: command:
+    pkgs.writeShellScript name ''
+      export PATH=${schedulerPath}
+      source ${config.home.sessionVariablesPackage}/etc/profile.d/hm-session-vars.sh
+      exec ${daguBin} ${command} "$@"
+    '';
+
+  schedulerScript = daguScript "dagu-scheduler" "scheduler --dags=${config.home.homeDirectory}/.dagu/dags";
+  serverScript = daguScript "dagu-server" "server";
+
+  mkDaguService = description: execStart: {
+    Unit = {
+      inherit description;
+      # sops-nix 的 user service 先把 secret 文件生成到 /run/user/<uid>/secrets.d。
+      After = [ "sops-nix.service" ];
+    };
+    Service = {
+      ExecStart = execStart;
+      Restart = "always";
+      RestartSec = 10;
+      WorkingDirectory = config.home.homeDirectory;
+      Environment = [ "HOME=${config.home.homeDirectory}" ];
+    };
+    Install.WantedBy = [ "default.target" ];
+  };
 in
 {
   options.modules.AI.dagu = with lib; {
     enable = mkEnableOption "Enable Dagu";
 
+    web = {
+      enable = mkOption {
+        type = types.bool;
+        default = true;
+        description = "Enable the Dagu web UI. The scheduler can run without it.";
+      };
+    };
+
     port = mkOption {
       type = types.port;
       default = 8080;
-      description = "Dagu web UI port (bound to 127.0.0.1).";
+      description = "Dagu web UI port.";
+    };
+
+    host = mkOption {
+      type = types.str;
+      default = "127.0.0.1";
+      description = "Dagu web UI bind address (e.g. the tailnet IP on a VPS).";
     };
 
     schedulerPort = mkOption {
@@ -66,6 +101,10 @@ in
 
   config = lib.mkMerge [
     (lib.mkIf cfg.enable {
+      # CLI 也放进 HM profile，方便 `dagu validate` / `dagu start` 和 dagu runbook。
+      # Darwin 用 brew 的 dagu（daguBin），不重复装 Linux 包。
+      home.packages = lib.optionals pkgs.stdenv.hostPlatform.isLinux [ pkgs.dagu ];
+
       # DAG 定义按文件管理（不整个目录 symlink —— dagu 会在 ~/.dagu/dags 里
       # 维护运行态 .dag.index，目录 symlink 到 nix store 会变成只读导致写入失败）。
       # 每个 yaml 是到 nix store 的不可变 symlink；dagu 只读不写回，安全。
@@ -87,9 +126,8 @@ in
             # 不开则全部不加载。
             dag_discovery.symlinks = true;
 
-            # --- 服务绑定：个人本机，仅 localhost ---
-            host = "127.0.0.1";
-            inherit (cfg) port;
+            # --- 服务绑定：默认 localhost；VPS 上由 host 覆盖为 tailnet IP ---
+            inherit (cfg) host port;
             # VPS 上 8090 被 axonhub 占用，host 侧按需覆盖。
             scheduler.port = cfg.schedulerPort;
 
@@ -138,21 +176,13 @@ in
 
     # Linux：systemd user service（VPS 已开 linger，无需登录即常驻）。
     (lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
-      systemd.user.services.dagu-scheduler = lib.mkIf cfg.enable {
-        Unit = {
-          Description = "Dagu scheduler";
-          # sops-nix 的 user service 先把 secret 文件生成到 /run/user/<uid>/secrets.d。
-          After = [ "sops-nix.service" ];
-        };
-        Service = {
-          ExecStart = "${schedulerScript}";
-          Restart = "always";
-          RestartSec = 10;
-          WorkingDirectory = config.home.homeDirectory;
-          Environment = [ "HOME=${config.home.homeDirectory}" ];
-        };
-        Install.WantedBy = [ "default.target" ];
-      };
+      systemd.user.services.dagu-scheduler = lib.mkIf cfg.enable (
+        mkDaguService "Dagu scheduler" "${schedulerScript}"
+      );
+
+      systemd.user.services.dagu-web = lib.mkIf (cfg.enable && cfg.web.enable) (
+        mkDaguService "Dagu web UI" "${serverScript}"
+      );
     })
   ];
 }

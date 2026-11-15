@@ -1,6 +1,6 @@
 {
   lib,
-  stdenv,
+  stdenvNoCC,
   fetchurl,
   unzip,
 }:
@@ -9,7 +9,7 @@ let
   extensionVersion = "1.0.27";
   upstreamVersion = "2.0.3";
 in
-stdenv.mkDerivation {
+stdenvNoCC.mkDerivation {
   pname = "opencli-extension";
   version = extensionVersion;
 

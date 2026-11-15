@@ -38,6 +38,13 @@ in
           default = false;
         };
       };
+
+      agt = {
+        enable = lib.mkOption {
+          type = lib.types.bool;
+          default = false;
+        };
+      };
     };
   };
 
@@ -81,8 +88,9 @@ in
         };
       }
       // lib.optionalAttrs cfg.hosts.LA.enable {
-        # RN机器
-        "192.129.183.26" = {
+        # RN机器（LA）。实测公网直连比 tailnet 快且稳（connect ~1.7s vs ~2.2s，
+        # tailnet 也走同一公网 IP 的 WireGuard，RTT 抖动更大），只保留公网入口。
+        "nixos-vps-racknerd" = {
           hostname = "192.129.183.26";
           user = "luck";
           port = 22;
@@ -93,6 +101,14 @@ in
       // lib.optionalAttrs cfg.hosts.homelab.enable {
         "100.81.204.63" = {
           hostname = "100.81.204.63";
+          user = "luck";
+          port = 22;
+        };
+      }
+      // lib.optionalAttrs cfg.hosts.agt.enable {
+        # 开发机 nixos-vps-agt：走 tailnet；默认 id_ed25519 已在全局 authorizedKeys。
+        "nixos-vps-agt" = {
+          hostname = "100.66.22.92";
           user = "luck";
           port = 22;
         };

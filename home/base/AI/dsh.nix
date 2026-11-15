@@ -73,6 +73,13 @@ let
       // lib.optionalAttrs (timeoutSec != null) {
         startupTimeoutMs = timeoutSec * 1000;
       };
+    }
+    // lib.optionalAttrs (isHttp && bearerEnv != null) {
+      # dsh-mcp-client 静态 inject 只有 tools；带 credential 模板的 HTTP row
+      # 会在 dsh-credentials-local 提供 service 之前构造并报
+      # "MCP credential templates require a credentials provider"。
+      # 在 row 上显式加依赖，让 loader 等 credentials 就绪后再挂载。
+      inject = [ "credentials" ];
     };
 
   homePatch = [

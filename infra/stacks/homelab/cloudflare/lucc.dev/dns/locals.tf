@@ -91,6 +91,16 @@ locals {
       comment  = "Tailscale DERP (LA)"
       priority = null
     }
+    nva = {
+      id       = null
+      name     = "nva.lucc.dev"
+      type     = "A"
+      content  = "1.15.64.188"
+      ttl      = 1
+      proxied  = false
+      comment  = "Tailscale DERP (Shanghai, nixos-vps-agt)"
+      priority = null
+    }
     derp-sm-vps-tc = {
       id       = null
       name     = "derp-sm-vps-tc.lucc.dev"

@@ -7,6 +7,14 @@
 with lib;
 let
   cfg = config.modules.networking.tailscale;
+
+  # Keep derper's STUN replies out of mihomo's policy-routing table.
+  derperPolicyRoute = pkgs.writeShellScript "derper-policy-route" ''
+    op=''${1:?add|del}
+    uid="$(${pkgs.coreutils}/bin/id -u derper)"
+    ${pkgs.iproute2}/bin/ip rule "$op" uidrange "$uid-$uid" lookup main priority 100 2>/dev/null || true
+    ${pkgs.iproute2}/bin/ip -6 rule "$op" uidrange "$uid-$uid" lookup main priority 100 2>/dev/null || true
+  '';
 in
 {
   # https://nixos.wiki/wiki/Tailscale
@@ -159,38 +167,64 @@ in
 
       # Q: 本身 services.tailscale.derper 就会启动 systemd，为啥这里还要自己写一个systemd呢？
       # A: 这里覆盖 ExecStart，是为了让 derper 使用我们通过 DNS-01 拿到的证书（复制进 certDir）。原生模块使用它自己 默认证书路径，无法自动接入 DNS-01 的证书文件。
-      systemd.services.tailscale-derper.serviceConfig = {
-        DynamicUser = mkForce false;
-        User = "derper";
-        Group = "derper";
-        # 让 ExecStartPre 以 root 执行。否则以 derper 用户执行，会报没权限，导致报错
-        PermissionsStartOnly = true;
+      systemd.services = {
+        tailscale-derper.serviceConfig = {
+          DynamicUser = mkForce false;
+          User = "derper";
+          Group = "derper";
+          # 让 ExecStartPre 以 root 执行。否则以 derper 用户执行，会报没权限，导致报错
+          PermissionsStartOnly = true;
 
-        # Ensure certs exist in certDir before derper starts (ACME outputs live in /var/lib/acme).
-        ExecStartPre = [
-          "${pkgs.coreutils}/bin/install -d -m 0750 -o root -g derper ${cfg.derper.certDir}"
-          "${pkgs.coreutils}/bin/install -m 0640 -o root -g derper /var/lib/acme/${cfg.derper.domain}/fullchain.pem ${cfg.derper.certDir}/${cfg.derper.domain}.crt"
-          "${pkgs.coreutils}/bin/install -m 0640 -o root -g derper /var/lib/acme/${cfg.derper.domain}/key.pem ${cfg.derper.certDir}/${cfg.derper.domain}.key"
-        ];
+          # Ensure certs exist in certDir before derper starts (ACME outputs live in /var/lib/acme).
+          ExecStartPre = [
+            "${pkgs.coreutils}/bin/install -d -m 0750 -o root -g derper ${cfg.derper.certDir}"
+            "${pkgs.coreutils}/bin/install -m 0640 -o root -g derper /var/lib/acme/${cfg.derper.domain}/fullchain.pem ${cfg.derper.certDir}/${cfg.derper.domain}.crt"
+            "${pkgs.coreutils}/bin/install -m 0640 -o root -g derper /var/lib/acme/${cfg.derper.domain}/key.pem ${cfg.derper.certDir}/${cfg.derper.domain}.key"
+          ];
 
-        # -c 用于持久化服务密钥
-        ExecStart = mkForce ''
-          ${lib.getExe' config.services.tailscale.derper.package "derper"} \
-            -a :${toString cfg.derper.port} \
-            -c /var/lib/derper/derper.key \
-            -stun-port ${toString cfg.derper.stunPort} \
-            -hostname=${cfg.derper.domain} \
-            -certmode=manual \
-            -certdir=${cfg.derper.certDir} \
-            -verify-clients \
-            -http-port=-1
-        '';
+          # -c 用于持久化服务密钥
+          ExecStart = mkForce ''
+            ${lib.getExe' config.services.tailscale.derper.package "derper"} \
+              -a :${toString cfg.derper.port} \
+              -c /var/lib/derper/derper.key \
+              -stun-port ${toString cfg.derper.stunPort} \
+              -hostname=${cfg.derper.domain} \
+              -certmode=manual \
+              -certdir=${cfg.derper.certDir} \
+              -verify-clients \
+              -http-port=-1
+          '';
+        };
+
+        tailscale-derper = {
+          requires = [ "acme-${cfg.derper.domain}.service" ];
+          after = [
+            "acme-${cfg.derper.domain}.service"
+          ]
+          ++ lib.optional config.services.mihomo.enable "derper-policy-route.service";
+        };
+      }
+      // lib.optionalAttrs config.services.mihomo.enable {
+        # mihomo 的 policy routing（table 2022）会接管 wildcard UDP socket 的源地址选择。
+        # derper 的 STUN listener 绑定 [::]:stunPort，回包按 UID 选路由时会走 Meta，
+        # 导致客户端收不到 STUN 响应（TCP DERP 不受影响）。给 derper UID 加高优先级
+        # 规则，强制走 main 表（ens5），保留 mihomo 对其他流量的接管。
+        derper-policy-route = {
+          description = "Route derper packets outside mihomo TUN";
+          wantedBy = [ "multi-user.target" ];
+          after = [
+            "network.target"
+            "mihomo.service"
+          ];
+          serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+            ExecStart = "${derperPolicyRoute} add";
+            ExecStop = "${derperPolicyRoute} del";
+          };
+        };
       };
 
-      systemd.services.tailscale-derper = {
-        requires = [ "acme-${cfg.derper.domain}.service" ];
-        after = [ "acme-${cfg.derper.domain}.service" ];
-      };
     })
   ];
 }

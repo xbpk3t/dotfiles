@@ -1,6 +1,5 @@
 {
   config,
-  herdrPlugins,
   inputs,
   lib,
   pkgs,
@@ -78,27 +77,31 @@ in
       # 升级用 `nix flake update herdr-bin`，不要用 `herdr update`。
       package = inputs.herdr-bin.packages.${pkgs.stdenv.hostPlatform.system}.default;
 
+      # TODO: [2026-11-15] 插件与相应配置项，也都应该做开关，并保证关掉herdr插件后，相应插件配置也一同mute。暂时先都注释掉，如果之后还要用 herdr-tui，再去处理
+
       # 插件注册由 herdr-nix 模块负责（activation 里 `herdr plugin link`）。
       # focus-notify 是 macOS-only；Linux host 上不注册。
-      plugins = [
-        # [2026-10-23] 暂时停用：plannotator-tui 的测试在含非 ASCII 字符的路径下
-        # rustc 链接失败（ld: file not found: $.../ü...），导致 deploy 构建失败。
-        # upstream: https://github.com/lorenzorapetti/herdr-nix/issues/4 (plannotator-tui 构建)
-        # 修复后恢复此行，并同步恢复下方 annotate.* 键位。
-        # herdrPlugins.herdr-annotate-full
-        herdrPlugins.herdr-reviewr
-        herdrPlugins.herdr-web-ui
-      ]
-      ++ lib.optional pkgs.stdenv.isDarwin pkgs.herdr-focus-notify;
+      # plugins = [
+      #   # [2026-10-23] 暂时停用：plannotator-tui 的测试在含非 ASCII 字符的路径下
+      #   # rustc 链接失败（ld: file not found: $.../ü...），导致 deploy 构建失败。
+      #   # upstream: https://github.com/lorenzorapetti/herdr-nix/issues/4 (plannotator-tui 构建)
+      #   # 修复后恢复此行，并同步恢复下方 annotate.* 键位。
+      #   # herdrPlugins.herdr-annotate-full
+      #   # herdrPlugins.herdr-reviewr
+      #   # [2026-11-15] Mac 不再作为 web UI 宿主：远程入口保留 herdr-app + herdr-core。
+      #   # 需要浏览器/手机 web 视图的 host 再取消注释。
+      #   # herdrPlugins.herdr-web-ui
+      # ]
+      # ++ lib.optional pkgs.stdenv.isDarwin pkgs.herdr-focus-notify;
 
       # reviewr 配置写入 ~/.config/herdr/plugins/config/persiyanov.reviewr/config.toml
-      pluginSettings."persiyanov.reviewr" = {
-        # popup
-        toggle_placement = "overlay";
-        # 关掉 worktree.created 自动 open：overlay 不被 auto-open 支持（README：
-        # "New worktrees auto-open only split and tab"），且手动 toggle 才符合 popup 预期。
-        auto_open = false;
-      };
+      # pluginSettings."persiyanov.reviewr" = {
+      #   # popup
+      #   toggle_placement = "overlay";
+      #   # 关掉 worktree.created 自动 open：overlay 不被 auto-open 支持（README：
+      #   # "New worktrees auto-open only split and tab"），且手动 toggle 才符合 popup 预期。
+      #   auto_open = false;
+      # };
 
       # 配置路径: ~/.config/herdr/config.toml（官方 HM 模块生成）
       # ⚠️  Nix 注释不会带入生成的 TOML 文件。
@@ -366,30 +369,30 @@ in
       };
     };
 
-    # 迁移保护：旧配置把 ~/.config/herdr/plugins.json 管成 store symlink，
-    # 而 herdr-nix 的 activation 用 `herdr plugin link` 写真实文件。首次 rebuild 时
-    # 先移除旧 symlink，避免 link 尝试写只读 store（失败是静默的）。
-    home.activation.removeLegacyHerdrPluginsJson = lib.hm.dag.entryBefore [ "herdrPlugins" ] ''
-      if [ -L "$HOME/.config/herdr/plugins.json" ]; then
-        rm -f "$HOME/.config/herdr/plugins.json"
-      fi
-    '';
+    # # 迁移保护：旧配置把 ~/.config/herdr/plugins.json 管成 store symlink，
+    # # 而 herdr-nix 的 activation 用 `herdr plugin link` 写真实文件。首次 rebuild 时
+    # # 先移除旧 symlink，避免 link 尝试写只读 store（失败是静默的）。
+    # home.activation.removeLegacyHerdrPluginsJson = lib.hm.dag.entryBefore [ "herdrPlugins" ] ''
+    #   if [ -L "$HOME/.config/herdr/plugins.json" ]; then
+    #     rm -f "$HOME/.config/herdr/plugins.json"
+    #   fi
+    # '';
 
     # herdr-focus-notify 运行时配置：激活的终端 app + 通知器路径。
     # 路径是 herdr plugin config-dir herdr-focus-notify 的输出。
     # .env 是 KEY=value 格式 → 用 formats.keyValue 结构化生成。
     # 用 xdg.configFile 而非 home.file：herdr-nix 模块对 json/toml/yaml 之外的
     # 插件配置（如本 .env）明确文档化此逃生舱，且 $XDG_CONFIG_HOME 路径本仓统一走它。
-    xdg.configFile."herdr/plugins/config/herdr-focus-notify/.env" = lib.mkIf pkgs.stdenv.isDarwin {
-      # 注意：keyValue 不支持注释行（会当 key 解析），说明放 nix 层。
-      force = true;
-      source = (pkgs.formats.keyValue { }).generate "herdr-focus-notify.env" {
-        # 点击通知时激活的终端 app。源码里 app 名走 `open -a <name>`，全路径走 `open <path>`，
-        # 两种都支持；用名字更可移植（Ghostty 在 /Applications 或 /opt/homebrew 都能找到）。
-        HERDR_FOCUS_NOTIFY_ACTIVATE_APP = "Ghostty";
-        # 通知器：alerter 由 brew 管理（nixpkgs 无此包）。
-        HERDR_FOCUS_NOTIFY_NOTIFIER = "/opt/homebrew/bin/alerter";
-      };
-    };
+    # xdg.configFile."herdr/plugins/config/herdr-focus-notify/.env" = lib.mkIf pkgs.stdenv.isDarwin {
+    #   # 注意：keyValue 不支持注释行（会当 key 解析），说明放 nix 层。
+    #   force = true;
+    #   source = (pkgs.formats.keyValue { }).generate "herdr-focus-notify.env" {
+    #     # 点击通知时激活的终端 app。源码里 app 名走 `open -a <name>`，全路径走 `open <path>`，
+    #     # 两种都支持；用名字更可移植（Ghostty 在 /Applications 或 /opt/homebrew 都能找到）。
+    #     HERDR_FOCUS_NOTIFY_ACTIVATE_APP = "Ghostty";
+    #     # 通知器：alerter 由 brew 管理（nixpkgs 无此包）。
+    #     HERDR_FOCUS_NOTIFY_NOTIFIER = "/opt/homebrew/bin/alerter";
+    #   };
+    # };
   };
 }

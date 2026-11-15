@@ -23,7 +23,7 @@
       goimports-reviser
 
       # tags(desc): 代码质量 > 静态分析 > 空指针安全
-      nilaway
+      # nilaway
 
       # tags(desc): 代码质量 > 可读性 > 对齐格式化
       betteralign

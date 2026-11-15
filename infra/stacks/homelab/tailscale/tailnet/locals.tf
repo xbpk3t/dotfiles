@@ -46,6 +46,19 @@ locals {
           InsecureForTests = true
         }]
       }
+      "903" = {
+        RegionID   = 903
+        RegionCode = "cn-sh"
+        RegionName = "shanghai"
+        Nodes = [{
+          Name     = "903"
+          RegionID = 903
+          HostName = "nva.lucc.dev"
+          IPv4     = "1.15.64.188"
+          DERPPort = 10043
+          STUNPort = 10078
+        }]
+      }
     }
   }
 
