@@ -7,7 +7,10 @@
 }:
 let
   mcpEnabled =
-    config.modules.AI.codex.enable || config.modules.AI.claude.enable || config.modules.AI.dsh.enable;
+    config.modules.AI.codex.enable
+    || config.modules.AI.claude.enable
+    || config.modules.AI.dsh.enable
+    || config.modules.AI.opencode.enable;
   cfg = config.modules.AI.mcp;
 in
 {
@@ -27,6 +30,14 @@ in
       programs = {
         github = {
           enable = true;
+          # github-mcp-server 只认 GITHUB_PERSONAL_ACCESS_TOKEN；用 wrapper 在
+          # 启动时从 sops 读取，避免明文进 store，也让 dsh 的 stdio MCP 继承到。
+          passwordCommand = {
+            GITHUB_PERSONAL_ACCESS_TOKEN = [
+              "cat"
+              config.sops.secrets.GITHUB_TOKEN.path
+            ];
+          };
         };
 
         context7 = {
@@ -129,7 +140,7 @@ in
         #   `deja warmup` / `deja index`. Skill guidance is separate (Claude-only SKILL.md).
         # Binary: Homebrew short-term. MCP spawn often lacks interactive PATH → abs path.
         # Follow-up: package deja-vu in flake and switch command to ${pkgs...}/bin/deja.
-        deja = {
+        deja = lib.mkIf pkgs.stdenv.isDarwin {
           command = "/opt/homebrew/bin/deja";
           args = [ "mcp" ];
           type = "stdio";

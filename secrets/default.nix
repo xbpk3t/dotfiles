@@ -120,6 +120,9 @@ in
 
       RESEND_TOKEN = mkUserSecret "resend/pwd";
 
+      # Backup（restic 仓库密码；恢复到任何机器都需要它）
+      RESTIC_PASSWORD = mkUserSecret "restic/password";
+
       API_CONTEXT7 = mkUserSecret "API/context7";
       API_LINEAR = mkUserSecret "API/linear";
       GITHUB_TOKEN = mkUserSecret "API/github";

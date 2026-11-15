@@ -1,16 +1,15 @@
 ---
 # deadlink-loop.yml — DAG 名由文件名决定（dagu 2.10+ 顶层不能定义 name）
-name: deadlink
 description: Monthly deadlink scan → AI analyze → human approve → auto delete
 schedule: "0 0 1 * *"
 max_active_runs: 1
 
 # dagu 没有 runs-on，用 DAG-level precondition 做主机 gate。
 preconditions:
-  - condition: '[ "$(hostname -s)" = "macos-ws" ]'
+  - condition: '[ "$(hostname -s)" = "nixos-vps-agt" ]'
 
 env:
-  WORKSPACE: /Users/luck/Desktop/docs
+  WORKSPACE: ${HOME}/Desktop/docs
   DEADLINK_DIR: /tmp/xbpk3t-docs-deadlink
 
 steps:
@@ -23,7 +22,6 @@ steps:
         --data-dirs '["data"]' \
         --output-dir $DEADLINK_DIR \
         --skip-domains '["blog.lucc.dev","supjav.com","fandom.com","missav.ai","missav.live"]'
-    working_dir: /Users/luck/Desktop/docs
     timeout_sec: 7200
     continue_on:
       exit_code: 2
@@ -50,7 +48,6 @@ steps:
     run: |
       cd $WORKSPACE
       nu .github/taskfile/scripts/deadlink-ai-analyze.nu
-    working_dir: /Users/luck/Desktop/docs
     depends:
       - check_deadlinks
     preconditions:
@@ -64,7 +61,6 @@ steps:
     run: |
       cd $WORKSPACE
       nu .github/taskfile/scripts/deadlink-generate-script.nu
-    working_dir: /Users/luck/Desktop/docs
     depends:
       - ai_analyze
 
@@ -116,6 +112,5 @@ steps:
       else
         echo "No changes to commit"
       fi
-    working_dir: /Users/luck/Desktop/docs
     depends:
       - apply

@@ -242,7 +242,7 @@ in
               # - 如果 cc 都是从终端启动（cc alias / 手动开终端再跑）→ cc 进程会继承 shell 的 sessionVariables → 可以只写 sessionVariables 一份，settings env 那三行删掉即可。
               # - 如果 cc 有 launchd/daemon/后台任务 启动（不经过 shell）→ 只能靠 settings
               # env，必须保留两份。
-              CCX_WIKI_ROOT = "/Users/luck/Desktop/docs/wiki";
+              CCX_WIKI_ROOT = "${config.home.homeDirectory}/Desktop/docs/wiki";
               CCX_AI_MODEL = globals.models.dsf;
               CCX_AI_BASE_URL = "https://api.lucc.dev/v1";
             };

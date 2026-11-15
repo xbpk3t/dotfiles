@@ -12,7 +12,8 @@ _: {
       };
       # Agent mux (orchestration / detach / wait). Package + config.toml via herdr.nix.
       # not `herdr integration install`. Bump herdr-bin to upgrade herdr version.
-      herdr.enable = true;
+      # [2026-11-15] 转去用 herdr-app 了
+      herdr.enable = false;
       # PR TUI（nixpkgs）+ review-first diff（herdr-reviewr plugin）；herdr keys: ctrl+alt+p / d
       ghui.enable = true;
       hunk.enable = true;
@@ -28,7 +29,7 @@ _: {
       # Host plan during herdr trial: cmux remains daily Terminal/cockpit.
       # Ghostty wide window was the preferred herdr host in eval — flip when ready;
       # do not force herdr into GoLand narrow terminal.
-      ghostty.enable = true;
+      ghostty.enable = false;
 
       zed.enable = true;
     };

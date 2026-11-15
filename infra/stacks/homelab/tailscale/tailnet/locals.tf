@@ -2,7 +2,7 @@ locals {
   tailnet = "xbpk3t.github"
 
   # DERP 节点配置
-  # 2 个自定义 Region，与 admin console 的 ACL JSON 中 derpMap 一致
+  # 3 个自定义 Region，与 admin console 的 ACL JSON 中 derpMap 一致
   derp_map = {
     OmitDefaultRegions = false
     Regions = {
@@ -31,6 +31,19 @@ locals {
           DERPPort         = 10043
           STUNPort         = 10078
           InsecureForTests = true
+        }]
+      }
+      "903" = {
+        RegionID   = 903
+        RegionCode = "cn-sh"
+        RegionName = "shanghai"
+        Nodes = [{
+          Name     = "903"
+          RegionID = 903
+          HostName = "nva.lucc.dev"
+          IPv4     = "1.15.64.188"
+          DERPPort = 10043
+          STUNPort = 10078
         }]
       }
     }

@@ -50,7 +50,9 @@ let
         nixosConfiguration = nixosConfig;
         deployLib = inputs."deploy-rs".lib.${baseModules.system};
         defaultSshUser = ssh-user;
-        remoteBuild = true;
+        # 4G agent 上跑全量 nix build 容易 OOM；agent 改为本地（Mac/remote builder）
+        # 构建后 copy closure，server 节点保持 remoteBuild=true。
+        remoteBuild = (node.role or "server") != "agent";
       };
     in
     {

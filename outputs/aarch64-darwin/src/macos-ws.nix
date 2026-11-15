@@ -50,10 +50,13 @@ let
     {
       # What：部署目标地址（主机名/SSH alias）。
       # Why：保持与 inventory/主机名一致，便于统一管理。
-      hostname = node.primaryIp;
+      hostname = node.ssh.host or node.primaryIp;
       # What：SSH 用户名。
       # Why：darwin 通常使用本地用户名进行远程连接。
       inherit sshUser;
+      # What：额外 SSH 参数（由 inventory 的 ssh.opts 提供）。
+      # Why：首次从 Mac/VPS 连 tailnet IP 时需要 accept-new 记录 host key。
+      sshOpts = node.ssh.opts or [ ];
       # What：是否在远端构建。
       # Why：darwin 的 system closure 必须在 darwin 端构建/激活。
       remoteBuild = true;

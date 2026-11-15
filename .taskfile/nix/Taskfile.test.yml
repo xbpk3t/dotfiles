@@ -15,10 +15,11 @@ tasks:
     desc: "快速验证当前 host 的 Nix 配置（仅评估，不下载无关依赖）"
     summary: "task -g quick"
     vars:
+      # EVAL_CONFIG_TYPE / EVAL_HOST 用于在 Mac 上验证远端 host。
       CONFIG_TYPE:
-        sh: '[ "{{OS}}" = darwin ] && echo darwinConfigurations || echo nixosConfigurations'
+        sh: 'echo "${EVAL_CONFIG_TYPE:-$( [ "{{OS}}" = darwin ] && echo darwinConfigurations || echo nixosConfigurations )}"'
       HOST:
-        sh: '[ "{{OS}}" = darwin ] && echo macos-ws || hostname'
+        sh: 'echo "${EVAL_HOST:-$( [ "{{OS}}" = darwin ] && echo macos-ws || hostname )}"'
     cmds:
       - nix eval --impure ".#{{.CONFIG_TYPE}}.{{.HOST}}.config.system.build.toplevel.drvPath"
 

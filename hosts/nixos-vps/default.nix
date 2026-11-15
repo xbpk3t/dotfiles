@@ -3,6 +3,7 @@
   lib,
   globals,
   hostMeta,
+  mylib,
   pkgs,
   stateVersion,
   userMeta,
@@ -15,6 +16,7 @@ let
   isServer = !isAgent;
   incusOn = hostMeta.incus.enable or false;
   linuxFonts = (import ../../modules/fonts.nix { inherit pkgs; }).linux;
+  inherit (mylib) inventory;
 in
 {
   imports = [
@@ -50,7 +52,62 @@ in
         settings.Resolve.FallbackDNS = nameservers;
       };
 
-      modules.systemd.manager.watchdog.enable = true;
+      modules = {
+        systemd.manager.watchdog.enable = true;
+
+        # 所有 VPS 角色都加入 tailnet 并跑 DERP；server 角色额外声明 exit node。
+        networking.tailscale = {
+          enable = true;
+          derper = {
+            enable = true;
+            domain = hostMeta.tailscale.derpDomain;
+            inherit (hostMeta) acmeEmail;
+          };
+        };
+      };
+
+      nix = {
+
+        # 远程 builder（nixos-vps-dev）会产出无签名路径；构建机/目标机默认
+        # require-sigs=true 会让 deploy 的 home-manager-path 构建失败。
+        # 个人可信 fleet，统一关闭签名校验；比给每台机器分发 builder 签名密钥简单。
+        settings.require-sigs = false;
+
+        # 下载/构建加速：复用 Mac 上的 numtide / nix-community 缓存，并把大包
+        # offload 到 dev VPS（nixos-vps-dev）。builders 由 nix-daemon(root) 使用
+        # /root/.ssh/id_ed25519 连接；该公钥需在 dev 的 luck authorized_keys 中。
+        settings = {
+          inherit (mylib.nixCacheSettings) substituters;
+          trusted-public-keys = mylib.nixCacheSettings.trustedPublicKeys;
+          trusted-users = [ "@wheel" ];
+        };
+
+        distributedBuilds = true;
+        buildMachines = [
+          {
+            hostName = inventory."nixos-vps"."nixos-vps-dev".tailscale.ip;
+            sshUser = userMeta.username;
+            sshKey = "/root/.ssh/id_ed25519";
+            protocol = "ssh-ng";
+            system = "x86_64-linux";
+            maxJobs = 5;
+            supportedFeatures = [
+              "nixos-test"
+              "benchmark"
+              "big-parallel"
+              "kvm"
+            ];
+          }
+        ];
+
+        # 定期 GC，避免 store 撑满 66G 盘。
+        gc = {
+          automatic = true;
+          dates = "weekly";
+          options = "--delete-older-than 14d";
+        };
+
+      };
 
       # VPS 无固件需求。
       hardware.enableRedistributableFirmware = lib.mkForce false;
@@ -102,7 +159,7 @@ in
       system.stateVersion = lib.mkDefault stateVersion;
     }
 
-    # ── Server 角色（dev/svc）：singbox / derper / k3s / Incus ─────
+    # ── Server 角色（dev）：singbox / derper / Incus（k3s 已停用）─────
     (lib.mkIf isServer (
       lib.mkMerge [
         {
@@ -117,19 +174,13 @@ in
           };
 
           modules = {
-            networking.tailscale = {
-              enable = true;
-              # 多角色：既是 client + derper，又是 exit node（手机翻墙出口）。
-              exitNode = true;
-              derper = {
-                enable = true;
-                domain = hostMeta.tailscale.derpDomain;
-                inherit (hostMeta) acmeEmail;
-              };
-            };
+            # 多角色：client + derper（公共基线），并作为 exit node（手机翻墙出口）。
+            networking.tailscale.exitNode = true;
 
             # k3s agent：role 是模块必填项，其余参数由模块默认值和 inventory 覆盖。
+            # [LUC-496] 显式停用；代码保留，enable = false 时模块整体不生效。
             ms.k3s = {
+              enable = false;
               role = "agent";
             }
             // (hostMeta.k3s or { });
@@ -150,9 +201,54 @@ in
       ]
     ))
 
-    # ── Agent 角色（agt）：dagu + headed Chromium，无 singbox/derper/k3s ──
+    # ── Agent 角色（agt）：dagu + headed Chromium + Tailscale DERP，无 singbox/k3s ──
     (lib.mkIf isAgent {
-      modules.networking.mihomo-client.enable = true;
+      # 上海 VPS 上 1.1.1.1/8.8.8.8 的 DoT 不可达；改用国内 DNS + 明文 53，
+      # 让 mihomo TUN 的 dns-hijack(any:53) 接管解析。
+      services = {
+        resolved.settings.Resolve = {
+          # globals 里的 IPv6 resolver 在 Shanghai 不可达，只取 IPv4。
+          DNS = lib.mkForce (lib.filter (n: !(lib.hasInfix ":" n)) nameservers);
+          DNSOverTLS = lib.mkForce "no";
+        };
+
+        # docs-images 共享：Mac 通过 Tailscale 用 NFSv4 挂载（macOS 自带客户端 + LaunchDaemon 自动重挂）。
+        # 只允许 macos-ws 的 tailnet IP；all_squash 把 Mac 的 uid 映射到本机 luck(1000)，
+        # 这样 Finder 里保存的截图/新图在 VPS 上也归 luck 所有。
+        # macOS 的 NFS 客户端只支持 v4.0，且默认用非保留端口；所以额外开 vers4.0 和 insecure。
+        nfs.server = {
+          enable = true;
+          extraNfsdConfig = "vers4.0=y";
+          exports = ''
+            /home/${userMeta.username}/Desktop/docs-images ${
+              inventory."macos-ws"."macos-ws".ssh.host
+            }/32(rw,all_squash,anonuid=1000,anongid=100,no_subtree_check,fsid=0,insecure)
+          '';
+        };
+
+        # 手机 herdr-app 走 Tailscale SSH 直连（无需在手机放私钥）。
+        # ACL 已有 autogroup:self 的 ssh 规则；这里只是把 node 的 --ssh 打开。
+        tailscale.extraUpFlags = [ "--ssh" ];
+      };
+
+      # 官方 Node 的 V8 getter 与 nixpkgs Node 的加固编译不同；dsh 的
+      # node-addon-require-builtin 只认官方构建。nix-ld 让官方 Node 能在 NixOS 上跑。
+      programs.nix-ld = {
+        enable = true;
+        libraries = with pkgs; [
+          stdenv.cc.cc.lib
+          libgcc
+          glibc
+          zlib
+          openssl
+        ];
+      };
+
+      networking.firewall.interfaces.tailscale0.allowedTCPPorts = [ 2049 ];
+
+      modules = {
+        networking.mihomo-client.enable = true;
+      };
 
       # Chrome 需要 fontconfig/字体；不要继承 server 的 fonts 关闭策略。
       fonts = {
