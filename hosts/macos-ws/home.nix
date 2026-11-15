@@ -9,12 +9,6 @@ _: {
     devops = {
       ssh = {
         enable = true;
-        hosts = {
-          # github.enable = true;
-          hk-hdy.enable = true;
-          LA.enable = true;
-          homelab.enable = true;
-        };
       };
       # Agent mux (orchestration / detach / wait). Package + config.toml via herdr.nix.
       # not `herdr integration install`. Bump herdr-bin to upgrade herdr version.

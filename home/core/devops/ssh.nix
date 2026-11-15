@@ -1,42 +1,35 @@
 {
   config,
   lib,
+  mylib,
+  hostMeta,
   ...
 }:
 let
   cfg = config.modules.devops.ssh;
+
+  # 本机不在 tailnet 时没有可用寻址，不生成节点条目（只保留 github）。
+  selfOnTailnet = hostMeta ? tailscale && hostMeta.tailscale ? ip;
+
+  # fleet SSH 统一策略：Host 键 = inventory 节点名，地址 = 节点 tailnet IP，用户 = inventory 用户。
+  # 加机器只改 lib/inventory/data.nix（补 tailscale.ip），这里零改动。
+  tailnetNodes = lib.filterAttrs (
+    _: node: node ? tailscale && node.tailscale ? ip
+  ) mylib.inventory.nodes;
+
+  mkHost = node: {
+    hostname = node.tailscale.ip;
+    user = node.user.username;
+  };
 in
 {
   options.modules.devops.ssh = {
     enable = lib.mkEnableOption "SSH configuration module";
 
-    hosts = {
-      github = {
-        enable = lib.mkOption {
-          type = lib.types.bool;
-          default = false;
-        };
-      };
-
-      hk-hdy = {
-        enable = lib.mkOption {
-          type = lib.types.bool;
-          default = false;
-        };
-      };
-
-      LA = {
-        enable = lib.mkOption {
-          type = lib.types.bool;
-          default = false;
-        };
-      };
-
-      homelab = {
-        enable = lib.mkOption {
-          type = lib.types.bool;
-          default = false;
-        };
+    github = {
+      enable = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
       };
     };
   };
@@ -59,7 +52,7 @@ in
           forwardX11 = false;
         };
       }
-      // lib.optionalAttrs cfg.hosts.github.enable {
+      // lib.optionalAttrs cfg.github.enable {
         "github.com" = {
           hostname = "ssh.github.com";
           user = "git";
@@ -68,35 +61,9 @@ in
           identitiesOnly = true;
         };
       }
-      // lib.optionalAttrs cfg.hosts.hk-hdy.enable {
-        # HDY机器
-        # match both alias 和 裸IP 在一条 Host 规则
-        # 只有 Host hk，当你写 ssh luck@103.85.224.63，OpenSSH 先用精确 Host/IP 匹配，没有找到，再走 Host *，没用上 HK 的 key，所以被拒。
-        "103.85.224.63" = {
-          hostname = "103.85.224.63";
-          user = "luck";
-          port = 22;
-          identityFile = config.sops.secrets.SSH_HDY.path;
-          identitiesOnly = true;
-        };
-      }
-      // lib.optionalAttrs cfg.hosts.LA.enable {
-        # RN机器
-        "192.129.183.26" = {
-          hostname = "192.129.183.26";
-          user = "luck";
-          port = 22;
-          identityFile = config.sops.secrets.SSH_RACKNERD.path;
-          identitiesOnly = true;
-        };
-      }
-      // lib.optionalAttrs cfg.hosts.homelab.enable {
-        "100.81.204.63" = {
-          hostname = "100.81.204.63";
-          user = "luck";
-          port = 22;
-        };
-      };
+      // lib.optionalAttrs selfOnTailnet (
+        lib.mapAttrs' (name: node: lib.nameValuePair name (mkHost node)) tailnetNodes
+      );
     };
 
     # 覆盖 ~/.ssh/config

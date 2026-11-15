@@ -40,10 +40,7 @@ in
 
         devops.ssh = {
           enable = isAgent;
-          hosts = {
-            github.enable = true;
-            hk-hdy.enable = true;
-          };
+          github.enable = true;
         };
 
         AI = {

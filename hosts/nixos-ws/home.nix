@@ -23,10 +23,7 @@ _: {
 
     devops.ssh = {
       enable = true;
-      hosts = {
-        github.enable = true;
-        hk-hdy.enable = true;
-      };
+      github.enable = true;
     };
   };
 }

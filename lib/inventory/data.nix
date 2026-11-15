@@ -44,6 +44,8 @@ in
       stateVersion = "24.11";
       primaryIp = "127.0.0.1";
       ssh.user = "luck";
+      # fleet SSH 统一寻址：ssh.nix 只认 tailscale.ip。
+      tailscale.ip = "100.87.216.84";
       user = commonUser;
       time = commonTime;
       editor = commonEditor;
@@ -237,6 +239,8 @@ in
       stateVersion = "24.11";
       primaryIp = "100.87.217.1";
       ssh.user = "luck";
+      # fleet SSH 统一寻址：ssh.nix 只认 tailscale.ip。
+      tailscale.ip = "100.87.217.1";
       user = commonUser;
       time = commonTime;
       editor = commonEditor;

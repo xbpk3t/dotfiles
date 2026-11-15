@@ -88,8 +88,6 @@ in
 
       # SSH
       SSH_GITHUB = mkUserSecret "ssh/github";
-      SSH_HDY = mkUserSecret "ssh/hdy";
-      SSH_RACKNERD = mkUserSecret "ssh/RN";
 
       # LLM
       LLM_AxonHub = mkUserSecret "LLM/AxonHub";

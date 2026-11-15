@@ -33,6 +33,8 @@ let
 in
 {
   inherit primaryHostForNode;
+  # 扁平化所有 group 的节点（节点名全局唯一，可直接当 hostName/别名查找）。
+  nodes = lib.foldl' (acc: group: acc // group) { } (lib.attrValues inventory);
   # 分组入口（简化调用）：mylib.inventory.<group>
   "nixos-avf" = groupOrEmpty "nixos-avf";
   "nixos-vps" = groupOrEmpty "nixos-vps";
