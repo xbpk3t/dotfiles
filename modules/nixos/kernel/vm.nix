@@ -7,8 +7,12 @@
 let
   inherit (lib) mkIf mkMerge optionals;
   inherit (userMeta) username;
+  cfg = config.modules.kernel.vm;
 in
 {
+  options.modules.kernel.vm.enable =
+    lib.mkEnableOption "virtualisation baseline (docker / podman / libvirt)";
+
   ###################################################################################
   #
   #  Virtualisation - Libvirt(QEMU/KVM) / Docker / LXD / WayDroid
@@ -28,70 +32,72 @@ in
 
   # https://get.docker.com/
 
-  boot.kernelModules = [ "vfio-pci" ];
+  config = lib.mkIf cfg.enable {
+    boot.kernelModules = [ "vfio-pci" ];
 
-  # https://mynixos.com/nixpkgs/options/virtualisation
-  # https://mynixos.com/nixpkgs/options/virtualisation.docker
-  virtualisation = {
-    podman.enable = false;
-    docker = {
-      enable = true;
-      # Create a `docker` alias for podman, to use it as a drop-in replacement
-      # dockerCompat = true;
+    # https://mynixos.com/nixpkgs/options/virtualisation
+    # https://mynixos.com/nixpkgs/options/virtualisation.docker
+    virtualisation = {
+      podman.enable = false;
+      docker = {
+        enable = true;
+        # Create a `docker` alias for podman, to use it as a drop-in replacement
+        # dockerCompat = true;
 
-      #      rootless = {
-      #        enable = true;
-      #        setSocketVariable = true; # expose DOCKER_HOST/PODMAN_SOCKET for the user session
-      #      };
+        #      rootless = {
+        #        enable = true;
+        #        setSocketVariable = true; # expose DOCKER_HOST/PODMAN_SOCKET for the user session
+        #      };
 
-      daemon = {
-        settings = {
-          registry-mirrors = [
-            "https://dockerproxy.com"
-            "https://docker.m.daocloud.io"
-            "https://hub-mirror.c.163.com"
-            "https://mirror.ccs.tencentyun.com"
-          ];
+        daemon = {
+          settings = {
+            registry-mirrors = [
+              "https://dockerproxy.com"
+              "https://docker.m.daocloud.io"
+              "https://hub-mirror.c.163.com"
+              "https://mirror.ccs.tencentyun.com"
+            ];
+          };
+        };
+
+        # Required for containers under podman-compose to be able to talk to each other.
+        # defaultNetwork.settings.dns_enabled = true;
+        # Periodically prune Podman resources
+        autoPrune = {
+          enable = true;
+          dates = "weekly";
+          flags = [ "--all" ];
         };
       };
 
-      # Required for containers under podman-compose to be able to talk to each other.
-      # defaultNetwork.settings.dns_enabled = true;
-      # Periodically prune Podman resources
-      autoPrune = {
-        enable = true;
-        dates = "weekly";
-        flags = [ "--all" ];
-      };
+      # https://mynixos.com/nixpkgs/options/virtualisation.oci-containers
+      oci-containers.backend = "docker";
+
+      # Usage: https://wiki.nixos.org/wiki/Waydroid
+      # waydroid.enable = true;
+
+      # libvirtd = {
+      #   enable = true;
+      #   # hanging this option to false may cause file permission issues for existing guests.
+      #   # To fix these, manually change ownership of affected files in /var/lib/libvirt/qemu to qemu-libvirtd.
+      #   qemu.runAsRoot = true;
+      # };
+
+      # lxd.enable = true;
     };
 
-    # https://mynixos.com/nixpkgs/options/virtualisation.oci-containers
-    oci-containers.backend = "docker";
+    # Service-scoped user/group wiring
+    users.groups = mkMerge [
+      (mkIf config.virtualisation.docker.enable { docker = { }; })
+      (mkIf config.virtualisation.podman.enable { podman = { }; })
+      (mkIf config.virtualisation.libvirtd.enable { libvirtd = { }; })
+    ];
 
-    # Usage: https://wiki.nixos.org/wiki/Waydroid
-    # waydroid.enable = true;
-
-    # libvirtd = {
-    #   enable = true;
-    #   # hanging this option to false may cause file permission issues for existing guests.
-    #   # To fix these, manually change ownership of affected files in /var/lib/libvirt/qemu to qemu-libvirtd.
-    #   qemu.runAsRoot = true;
-    # };
-
-    # lxd.enable = true;
+    users.users."${username}".extraGroups =
+      optionals config.virtualisation.docker.enable [ "docker" ]
+      ++ optionals config.virtualisation.podman.enable [ "podman" ]
+      ++ optionals config.virtualisation.libvirtd.enable [ "libvirtd" ];
   };
-
-  # Service-scoped user/group wiring
-  users.groups = mkMerge [
-    (mkIf config.virtualisation.docker.enable { docker = { }; })
-    (mkIf config.virtualisation.podman.enable { podman = { }; })
-    (mkIf config.virtualisation.libvirtd.enable { libvirtd = { }; })
-  ];
-
-  users.users."${username}".extraGroups =
-    optionals config.virtualisation.docker.enable [ "docker" ]
-    ++ optionals config.virtualisation.podman.enable [ "podman" ]
-    ++ optionals config.virtualisation.libvirtd.enable [ "libvirtd" ];
 
   # 只在桌面模块中定义 containers，避免 VPS 场景占用磁盘
 

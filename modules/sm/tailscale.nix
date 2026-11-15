@@ -14,31 +14,40 @@
 # 授权侧（谁被允许走这个出口）归 TF 的 tailscale_acl 控制面管，本模块不管。
 # 已确认：infra/stacks/homelab/tailscale/tailnet/locals.tf 的 autoApprovers
 # + grants 只放行 nod-am（手机），保持现状。
-_: {
+{ lib, config, ... }:
+let
+  cfg = config.modules.sm.tailscale;
+in
+{
   _file = ./tailscale.nix;
 
-  # exit node 需要 IP 转发。boot 时由 systemd-sysctl 应用；oneshot 里再跑一次
-  # /sbin/sysctl --system 立即生效（不重启也生效）。
-  environment.etc."sysctl.d/99-sm-tailscale.conf".text = ''
-    net.ipv4.ip_forward = 1
-    net.ipv6.conf.all.forwarding = 1
-  '';
+  options.modules.sm.tailscale.enable =
+    lib.mkEnableOption "tailscale exit-node advertisement (sm track)";
 
-  systemd.services.sm-tailscale-exitnode = {
-    enable = true;
-    description = "Advertise sm-vps as Tailscale exit node (idempotent)";
-    wantedBy = [ "system-manager.target" ];
-    after = [
-      "network.target"
-      "systemd-sysctl.service"
-    ];
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-      ExecStart = [
-        "/sbin/sysctl --system"
-        "-/usr/bin/tailscale set --advertise-exit-node=true"
+  config = lib.mkIf cfg.enable {
+    # exit node 需要 IP 转发。boot 时由 systemd-sysctl 应用；oneshot 里再跑一次
+    # /sbin/sysctl --system 立即生效（不重启也生效）。
+    environment.etc."sysctl.d/99-sm-tailscale.conf".text = ''
+      net.ipv4.ip_forward = 1
+      net.ipv6.conf.all.forwarding = 1
+    '';
+
+    systemd.services.sm-tailscale-exitnode = {
+      enable = true;
+      description = "Advertise sm-vps as Tailscale exit node (idempotent)";
+      wantedBy = [ "system-manager.target" ];
+      after = [
+        "network.target"
+        "systemd-sysctl.service"
       ];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        ExecStart = [
+          "/sbin/sysctl --system"
+          "-/usr/bin/tailscale set --advertise-exit-node=true"
+        ];
+      };
     };
   };
 }

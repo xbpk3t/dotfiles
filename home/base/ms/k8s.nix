@@ -10,38 +10,28 @@ in
 {
   # K8s 工具集开关。nixos-usb（便携 USB）不需要 k8s，避免了跨 host 无差别装载
   # kubecolor 等工具；需要 K8s 的 host（vps/ws/homelab）设 modules.ms.k8s.enable = true。
-  options.modules.ms.k8s.enable = lib.mkEnableOption "Kubernetes 工具集（kubectl / k9s / flux 等）";
+  options.modules.ms.k8s = {
+    enable = lib.mkEnableOption "Kubernetes 工具集（kubectl / k9s / flux 等）";
+
+    core.enable = lib.mkEnableOption "核心 K8s CLI (kubectl / kubectx / kustomize / stern)";
+
+    cluster.enable = lib.mkEnableOption "集群构建与扩展工具 (kubebuilder / kubevirt / kompose)";
+  };
 
   config = lib.mkIf cfg.enable {
     home.packages =
       with pkgs;
-      [
+      lib.optionals cfg.core.enable [
         # 分类1：Kubernetes 核心与生态工具
-        compose2nix
-
-        # minikube
-
-        kompose
-        kube-linter
         kubectx
         kubie
         kubectl
         kubefwd
         kube-capacity
-
-        kubernetes-polaris
-        conftest
-
         kubectl-graph
-
-        cilium-cli
-
-        kubebuilder
         kubecm
-
         kubecfg
-      ]
-      ++ [
+
         # 分类2：Kubernetes 节点依赖说明与 Kustomize 工具
         #
         #
@@ -54,8 +44,25 @@ in
 
         # 命名空间切换：kubens 由 kubectx 包提供（二进制同包）
       ]
-      ++ [
+      ++ lib.optionals cfg.cluster.enable [
         # 分类3：扩展候选与补充工具
+        compose2nix
+
+        # minikube
+
+        kompose
+        kube-linter
+
+        kubernetes-polaris
+        conftest
+
+        cilium-cli
+
+        kubebuilder
+
+        kubevirt
+
+        kustomize-sops
 
         # # 监控相关
         # prometheus-cli
@@ -79,16 +86,12 @@ in
         # istioctl
         # clusterctl # for kubernetes cluster-api
 
-        kubevirt
-
         # ko
         # kor
-
-        kustomize-sops
       ];
 
     programs = {
-      k9s = {
+      k9s = lib.mkIf cfg.core.enable {
         enable = true;
         skins = {
           default = {
@@ -405,7 +408,7 @@ in
           };
         };
       };
-      kubecolor = {
+      kubecolor = lib.mkIf cfg.core.enable {
         enable = true;
         enableAlias = true;
       };

@@ -9,6 +9,17 @@ in
     mihomo-client.enable = true;
   };
 
+  modules.darwin = {
+    brew.enable = true;
+    power.enable = true;
+    sec.enable = true;
+    determinate.enable = true;
+    environment.enable = true;
+    ssh.enable = true;
+    networking.enable = true;
+    tailscale-client.enable = true;
+  };
+
   # https://mynixos.com/nix-darwin/options/launchd
   # 之所以放在这里，因为不同host的launchd本就不同
   #

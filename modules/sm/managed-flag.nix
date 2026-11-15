@@ -4,31 +4,39 @@
   pkgs,
   lib,
   hostMeta,
+  config,
   ...
 }:
+let
+  cfg = config.modules.sm.managed-flag;
+in
 {
   _file = ./managed-flag.nix;
 
-  environment.etc."sm-vps-managed" = {
-    mode = "0644";
-    text = ''
-      # Managed by system-manager (sm-vps). Do not edit by hand.
-      node=${hostMeta.hostName}
-      role=sm-vps
-      phase=4
-      marker=sm-vps-managed
-    '';
-  };
+  options.modules.sm.managed-flag.enable = lib.mkEnableOption "sm-vps managed marker";
 
-  # 可选：证明 systemd unit 收敛；oneshot + RemainAfterExit，无常驻进程。
-  systemd.services.sm-vps-managed-marker = {
-    enable = true;
-    description = "sm-vps Phase 4 managed marker (oneshot)";
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-      ExecStart = "${lib.getExe' pkgs.coreutils "true"}";
+  config = lib.mkIf cfg.enable {
+    environment.etc."sm-vps-managed" = {
+      mode = "0644";
+      text = ''
+        # Managed by system-manager (sm-vps). Do not edit by hand.
+        node=${hostMeta.hostName}
+        role=sm-vps
+        phase=4
+        marker=sm-vps-managed
+      '';
     };
-    wantedBy = [ "system-manager.target" ];
+
+    # 可选：证明 systemd unit 收敛；oneshot + RemainAfterExit，无常驻进程。
+    systemd.services.sm-vps-managed-marker = {
+      enable = true;
+      description = "sm-vps Phase 4 managed marker (oneshot)";
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        ExecStart = "${lib.getExe' pkgs.coreutils "true"}";
+      };
+      wantedBy = [ "system-manager.target" ];
+    };
   };
 }

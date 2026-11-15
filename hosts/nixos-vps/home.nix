@@ -58,9 +58,13 @@ in
           networking.enable = true;
         };
 
-        devops.ssh = {
-          enable = isAgent;
-          github.enable = true;
+        devops = {
+          helix.enable = true;
+          rclone.enable = isAgent;
+          ssh = {
+            enable = isAgent;
+            github.enable = true;
+          };
         };
 
         AI = {
@@ -81,8 +85,7 @@ in
 
     (lib.mkIf isServer {
       modules.devops = {
-        ghui.enable = true;
-        hunk.enable = true;
+        hunk.enable = false;
       };
 
       # VPS 上 Caddy 管理 edge 网络，所有服务都需要以 external 方式加入。
@@ -93,7 +96,7 @@ in
     (lib.optionalAttrs isAgent {
       modules = {
         AI = {
-          dsh.enable = true;
+          dsh.enable = false;
 
           opencli-browser = {
             enable = true;
@@ -103,7 +106,7 @@ in
 
           # opencode CLI 保留；web UI 已关闭。bind/port 保留，方便以后恢复。
           opencode = {
-            enable = true;
+            enable = false;
             web = {
               enable = false;
               bindAddress = tailnetIp;
@@ -129,6 +132,15 @@ in
           settings.restore_screen = true;
         };
 
+        infra.basePackages.enable = true;
+        xdg.enable = true;
+
+        kernel = {
+          basePackages.enable = true;
+          gpg.enable = true;
+          network.enable = true;
+          ssh.enable = true;
+        };
       };
     })
 

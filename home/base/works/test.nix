@@ -1,13 +1,26 @@
-{ pkgs, ... }:
 {
-  home.packages = with pkgs; [
-    k6
+  pkgs,
+  lib,
+  config,
+  ...
+}:
+let
+  cfg = config.modules.works.test;
+in
+{
+  options.modules.works.test.enable = lib.mkEnableOption "load-test tools (k6 / vegeta / playwright)";
 
-    vegeta
-    # speedtest-cli
+  config.home.packages = lib.optionals cfg.enable (
+    with pkgs;
+    [
+      k6
 
-    # hyperfine
+      vegeta
+      # speedtest-cli
 
-    playwright
-  ];
+      # hyperfine
+
+      playwright
+    ]
+  );
 }

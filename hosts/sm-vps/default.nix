@@ -3,7 +3,7 @@
 # 语义，这里声明 sm 轨的角色配置。
 #
 # 关键：基础能力（sops/sshd/systemd/i18n/tailscale）是 sm-vps 的必要基线，
-# 由 modules/sm 直接 enable（不配置化）。这里只声明「服务角色」：
+# 由 modules/sm 暴露 enable、在下方显式开启。服务角色：
 #   modules.networking.mihomo-client.enable — 代理客户端（可选，默认 false）
 #   modules.infra.singbox-server.enable   — 代理服务端（sm-vps 默认不做，长期机才做）
 #   modules.infra.derper.enable           — DERP 中继（SGP）
@@ -28,6 +28,18 @@
     singbox-server.enable = lib.mkIf (!isShared) true;
     derper.enable = lib.mkIf (!isShared) true;
     status-page.enable = lib.mkIf (!isShared) true;
+  };
+
+  modules.sm = {
+    fail2ban.enable = true;
+    firewall.enable = true;
+    gc.enable = true;
+    managed-flag.enable = true;
+    packages.enable = true;
+    sops.enable = true;
+    sshd.enable = true;
+    systemd.enable = true;
+    tailscale.enable = true;
   };
 
   # 共享机（shared=true）：userborn 会重写 /etc/passwd 并把 root shell 指向 store bash，

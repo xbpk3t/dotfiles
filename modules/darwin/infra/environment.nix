@@ -10,26 +10,34 @@
 #   结合与 NixOS kernel/openssh.nix 基线的对照才落下，不设空壳、不硬塞无效项。
 {
   lib,
+  config,
   ...
 }:
+let
+  cfg = config.modules.darwin.environment;
+in
 {
-  # ─── 全局 shell 环境变量 ─────────────────────────────────────────────
-  # [environment - MyNixOS](https://mynixos.com/nix-darwin/options/environment)
-  #
-  # 背景：系统 nix-darwin 默认注入 `EDITOR=nano`（interactive shell 里
-  # home-manager 设的却是 hx = 另一源）。两个来源不一致。
-  # 处理：强统一到 hx，使 GUI app / daemon / sudo 环境不再回落 nano。
-  environment.variables = {
-    # 系统级统一编辑器
-    EDITOR = lib.mkForce "hx";
-    VISUAL = lib.mkForce "hx";
-  };
+  options.modules.darwin.environment.enable = lib.mkEnableOption "Darwin system-wide environment";
 
-  # ─── terminfo：与 NixOS 基线对齐 ─────────────────────────────────────
-  # modules/nixos/kernel/openssh.nix 显式 `environment.enableAllTerminfo = true`
-  # 来保证远端/SSH 终端的 terminfo 完整（如 ghostty ssh 连入不退化 vt100）。
-  # darwin 侧此前缺这条基线 —— 这里补齐对齐。nix-darwin 默认 false。
-  environment.enableAllTerminfo = true;
+  config = lib.mkIf cfg.enable {
+    # ─── 全局 shell 环境变量 ───────────────────────────────────────────
+    # [environment - MyNixOS](https://mynixos.com/nix-darwin/options/environment)
+    #
+    # 背景：系统 nix-darwin 默认注入 `EDITOR=nano`（interactive shell 里
+    # home-manager 设的却是 hx = 另一源）。两个来源不一致。
+    # 处理：强统一到 hx，使 GUI app / daemon / sudo 环境不再回落 nano。
+    environment.variables = {
+      # 系统级统一编辑器
+      EDITOR = lib.mkForce "hx";
+      VISUAL = lib.mkForce "hx";
+    };
+
+    # ─── terminfo：与 NixOS 基线对齐 ───────────────────────────────────
+    # modules/nixos/kernel/openssh.nix 显式 `environment.enableAllTerminfo = true`
+    # 来保证远端/SSH 终端的 terminfo 完整（如 ghostty ssh 连入不退化 vt100）。
+    # darwin 侧此前缺这条基线 —— 这里补齐对齐。nix-darwin 默认 false。
+    environment.enableAllTerminfo = true;
+  };
 
   # ─── 全局登录/交互 shell init（默认留空，依赖 home-module 的 zshrc/bashrc）──
   # macOS 全局 /etc/zshenv 已由 nix-darwin 默认注入 brew shellenv。

@@ -3,12 +3,16 @@
 {
   lib,
   hostMeta,
+  config,
   ...
 }:
 let
   inherit (hostMeta) hostName;
+  cfg = config.modules.darwin.networking;
 in
 {
+  options.modules.darwin.networking.enable = lib.mkEnableOption "Darwin networking settings";
+
   # Basic networking configuration
   # Note: macOS networking is mostly managed through System Preferences
   # These are the available nix-darwin networking options
@@ -18,7 +22,7 @@ in
   # Network configuration (will be overridden by host-specific settings)
 
   # [networking - MyNixOS](https://mynixos.com/nix-darwin/options/networking)
-  networking = {
+  config.networking = lib.mkIf cfg.enable {
     # 主机名体系：三件套统一 sink 到 hostMeta.hostName（macos-ws）。
     # 显式声明，避免某 host override 时只改一处导致三者漂移。
     hostName = lib.mkDefault hostName;

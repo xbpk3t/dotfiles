@@ -5,12 +5,18 @@
   ...
 }:
 let
+  cfg = config.modules.kernel.disk;
   # 同 herdr.nix 的 tomlFormat：只绑定 format 渲染器，配置本体写在 generate 的 attrset 里。
   # BleachBit 读的是 INI（不是 TOML），故用 formats.ini，不能套 tomlFormat.generate。
   iniFormat = pkgs.formats.ini { };
 in
 {
-  home = {
+  options.modules.kernel.disk.enable = lib.mkEnableOption "disk tools (smartmontools / nvme-cli)";
+
+  options.modules.kernel.disk.bleachbit.enable =
+    lib.mkEnableOption "bleachbit (CLI/GUI cleaner + config/aliases)";
+
+  config.home = lib.mkIf cfg.enable {
     packages =
       with pkgs;
       [
@@ -20,6 +26,8 @@ in
         # 快速短测：smartctl -t short /dev/sdX && smartctl -l selftest /dev/sdX
         smartmontools
 
+      ]
+      ++ lib.optionals cfg.bleachbit.enable [
         # BleachBit：CLI/GUI 清理器（缓存、tmp、浏览器痕迹等）。
         # nixpkgs meta 含 linux + aarch64-darwin（无 x86_64-darwin）。
         # macOS 上更贴合的「应用残骸/deep clean」仍是 Mole（home/darwin/mole.nix）；
@@ -43,7 +51,7 @@ in
     #   - 路径等价于 XDG_CONFIG_HOME/bleachbit；BleachBit Constant.options_dir 也落在这里
     # ⚠️  Nix 注释不会带入生成的 INI；运行时 bleachbit -l / -p --preset 核对。
     # 自定义 CleanerML 可放 ~/.config/bleachbit/cleaners/（personal_cleaners_dir），需要时再补。
-    file.".config/bleachbit/bleachbit.ini" = {
+    file.".config/bleachbit/bleachbit.ini" = lib.mkIf cfg.bleachbit.enable {
       # 下次 switch 盖回安全 preset，防 GUI 误勾 memory/empty_space
       force = true;
 
@@ -91,7 +99,7 @@ in
     # bbcc = clean preset（真删，受上方 [tree] 白名单约束）
     # bbl  = 列出全部 cleaner.option
     # 不要做「--all-but-warning」类 alias，避免误开 system.memory / empty_space。
-    shellAliases = {
+    shellAliases = lib.mkIf cfg.bleachbit.enable {
       "bbc" = "bleachbit -p --preset";
       "bbcc" = "bleachbit -c --preset";
       "bbl" = "bleachbit -l";

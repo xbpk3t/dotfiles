@@ -1,9 +1,16 @@
 {
   inputs,
   pkgs,
+  lib,
+  config,
   ...
 }:
+let
+  cfg = config.modules.AI.basePackages;
+in
 {
+  options.modules.AI.basePackages.enable = lib.mkEnableOption "apm (llm-agents)";
+
   imports = [
     ./mcp.nix
     ./codex.nix
@@ -14,8 +21,11 @@
     ./opencode.nix
     ./skills.nix
   ];
-  home.packages = with inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}; [
-    apm
-  ];
+  config.home.packages = lib.optionals cfg.enable (
+    with inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
+    [
+      apm
+    ]
+  );
 
 }

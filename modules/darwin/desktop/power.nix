@@ -1,10 +1,16 @@
-_: {
+{ lib, config, ... }:
+let
+  cfg = config.modules.darwin.power;
+in
+{
+  options.modules.darwin.power.enable = lib.mkEnableOption "macOS power management settings";
+
   # Power management settings
   # Note: Most power settings in macOS are managed through System Preferences
   # or pmset command line tool. nix-darwin has limited power management options.
   # https://mynixos.com/nix-darwin/options/power
 
-  power = {
+  config.power = lib.mkIf cfg.enable {
     # 系统冻结后自动重启
     restartAfterFreeze = true;
     # error: restarting after power failure is not supported on your machine. Please ensure that `power.restartAfterPowerFailure` is not set.

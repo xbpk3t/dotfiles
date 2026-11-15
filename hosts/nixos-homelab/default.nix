@@ -77,9 +77,19 @@ in
       tailscale.enable = true;
     };
 
+    kernel = {
+      fhs.enable = true;
+      journald.enable = true;
+      logind.enable = true;
+      ntp.enable = true;
+      openssh.enable = true;
+      security-server.enable = true;
+      vm.enable = true;
+    };
+
     infra = {
-      avahi.enable = true;
-      guix.enable = true;
+      avahi.enable = false;
+      guix.enable = false;
       btrbk.enable = true;
       nix-tools.enable = true;
     };

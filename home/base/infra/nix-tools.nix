@@ -14,6 +14,10 @@ in
 
   options.modules.infra.nix-tools = with lib; {
     enable = mkEnableOption "Nix/NixOS dev tools (nvfecher / nixfmt / nix-unit / nix-tree 等)";
+
+    packaging.enable = mkEnableOption "Nix packaging tools (noogle-search / nvfetcher / crane / nurl / nix-init)";
+
+    analysis.enable = mkEnableOption "Nix build analysis tools (nixtract / hydra-check / nix-melt / nix-tree / nix-converter)";
   };
 
   config = lib.mkIf cfg.enable {
@@ -26,7 +30,7 @@ in
     # Nix/NixOS 开发与调试常用 CLI
     home.packages =
       with pkgs;
-      [
+      lib.optionals cfg.packaging.enable [
         # === Nix 打包工具 ===
         noogle-search
         nvfetcher
@@ -51,7 +55,7 @@ in
         # tags(说明): 测试框架 > 单元测试 > Nix表达式
         inputs.nix-unit.packages.${pkgs.stdenv.hostPlatform.system}.default
       ]
-      ++ [
+      ++ lib.optionals cfg.analysis.enable [
         # 分类3：依赖与构建分析
 
         # === 依赖/构建分析 ===
@@ -71,14 +75,12 @@ in
         nix-converter
       ];
 
-    programs.zsh.shellAliases = {
+    programs.zsh.shellAliases = lib.mkIf cfg.packaging.enable {
       # noogle-search 是 nixpkgs 中的实际可执行文件名；补一个更直观的入口。
       noogle = "noogle-search";
     };
 
     # nix-init: Nix 包起稿工具
-    programs.nix-init = {
-      enable = true;
-    };
+    programs.nix-init.enable = cfg.packaging.enable;
   };
 }

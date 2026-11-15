@@ -1,10 +1,15 @@
-{ config, ... }:
+{ config, lib, ... }:
+let
+  cfg = config.modules.kernel.journald;
+in
 {
+  options.modules.kernel.journald.enable = lib.mkEnableOption "journald log policy";
+
   # https://mynixos.com/nixpkgs/options/services.journald
   # journald / journalctl 日志策略
   # 注：nixpkgs 已把 journald 选项收敛为 settings.Journal（journald.conf 的 [Journal] 段），
   # 旧选项 storage/audit/forwardToSyslog/rateLimit* 已 rename，extraConfig/console 已移除。
-  services.journald.settings.Journal = {
+  config.services.journald.settings.Journal = lib.mkIf cfg.enable {
     # 持久化保存日志，重启后仍可查询
     Storage = "persistent";
 

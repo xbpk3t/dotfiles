@@ -1,7 +1,17 @@
-{ pkgs, ... }:
 {
+  pkgs,
+  lib,
+  config,
+  ...
+}:
+let
+  cfg = config.modules.kernel.fhs;
+in
+{
+  options.modules.kernel.fhs.enable = lib.mkEnableOption "FHS environment (appimage/flatpak support)";
+
   # FHS environment, flatpak, appImage, etc.
-  environment.systemPackages = [
+  config.environment.systemPackages = lib.optionals cfg.enable [
     # create a fhs environment by command `fhs`, so we can run non-nixos packages in nixos!
     (
       let

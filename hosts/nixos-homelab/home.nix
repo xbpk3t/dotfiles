@@ -1,8 +1,17 @@
 _: {
   modules = {
     infra = {
+      basePackages.enable = true;
       nh.enable = true;
       networking.enable = true;
+    };
+
+    kernel = {
+      basePackages.enable = true;
+      disk.enable = true;
+      gpg.enable = true;
+      network.enable = true;
+      ssh.enable = true;
     };
 
     desktop = {
@@ -17,7 +26,11 @@ _: {
     };
 
     ms = {
-      k8s.enable = true;
+      k8s = {
+        enable = true;
+        core.enable = true;
+        cluster.enable = true;
+      };
     };
 
     devops.ssh = {
@@ -27,5 +40,7 @@ _: {
     langs = {
       lsp.enable = true;
     };
+
+    xdg.enable = true;
   };
 }

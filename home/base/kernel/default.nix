@@ -1,8 +1,20 @@
-{ mylib, pkgs, ... }:
 {
+  mylib,
+  pkgs,
+  lib,
+  config,
+  ...
+}:
+let
+  cfg = config.modules.kernel.basePackages;
+in
+{
+  options.modules.kernel.basePackages.enable =
+    lib.mkEnableOption "base kernel/system CLI (compression / disk / HTTP tools)";
+
   imports = mylib.scanPaths ./.;
 
-  home.packages =
+  config.home.packages = lib.optionals cfg.enable (
     with pkgs;
     [
       # 分类3：基础系统与文本处理工具
@@ -57,5 +69,6 @@
       shellcheck
       shfmt
     ]
-    ++ [ gum ];
+    ++ [ gum ]
+  );
 }

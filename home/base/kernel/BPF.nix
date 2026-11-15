@@ -1,8 +1,18 @@
-{ pkgs, ... }:
 {
-  home.packages =
+  pkgs,
+  lib,
+  config,
+  ...
+}:
+let
+  cfg = config.modules.kernel.BPF;
+in
+{
+  options.modules.kernel.BPF.enable = lib.mkEnableOption "bpftools (Linux only)";
+
+  config.home.packages =
     with pkgs;
-    lib.optionals stdenv.isLinux [
+    lib.optionals (cfg.enable && stdenv.isLinux) [
       # bpftool 查看 BPF 程序，排查 BPF 相关问题时有用
       # sudo bpftool prog show
       # bpftool map，同上场景

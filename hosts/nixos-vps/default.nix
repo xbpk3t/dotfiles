@@ -55,6 +55,16 @@ in
       modules = {
         systemd.manager.watchdog.enable = true;
 
+        kernel = {
+          fhs.enable = true;
+          journald.enable = true;
+          logind.enable = true;
+          ntp.enable = true;
+          openssh.enable = true;
+          security-server.enable = true;
+          vm.enable = true;
+        };
+
         # 所有 VPS 角色都加入 tailnet 并跑 DERP；server 角色额外声明 exit node。
         networking.tailscale = {
           enable = true;

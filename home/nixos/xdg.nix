@@ -5,17 +5,23 @@
 {
   config,
   editorMeta,
+  lib,
   ...
 }:
+let
+  cfg = config.modules.xdg;
+in
 {
+  options.modules.xdg.enable = lib.mkEnableOption "XDG base directories / mimeapps";
+
   # home.packages = with pkgs; [
   #   # provides cli tools such as `xdg-mime` `xdg-open`
   #   xdg-utils
   #   xdg-user-dirs
   # ];
 
-  xdg.configFile."mimeapps.list".force = true;
-  xdg = {
+  config.xdg = lib.mkIf cfg.enable {
+    configFile."mimeapps.list".force = true;
     enable = true;
 
     cacheHome = "${config.home.homeDirectory}/.cache";

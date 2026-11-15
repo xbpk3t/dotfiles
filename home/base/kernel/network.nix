@@ -1,11 +1,18 @@
 {
   lib,
   pkgs,
+  config,
   ...
 }:
+let
+  cfg = config.modules.kernel.network;
+in
 {
+  options.modules.kernel.network.enable =
+    lib.mkEnableOption "network debugging tools (netshoot-style)";
+
   # https://github.com/nicolaka/netshoot 参考该repo提供的一些
-  home.packages =
+  config.home.packages = lib.optionals cfg.enable (
     with pkgs;
     [
       # 网络工具 (excluding wget/curl which are in minimal)
@@ -147,5 +154,6 @@
 
         ngrep
       ]
-    );
+    )
+  );
 }

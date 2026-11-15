@@ -1,8 +1,14 @@
-_: {
+{ lib, config, ... }:
+let
+  cfg = config.modules.kernel.logind;
+in
+{
+  options.modules.kernel.logind.enable = lib.mkEnableOption "logind settings";
+
   # https://mynixos.com/nixpkgs/options/services.logind
 
   # Keep a minimal set of local VTs ready on every NixOS machine.
-  services.logind.settings.Login = {
+  config.services.logind.settings.Login = lib.mkIf cfg.enable {
     # auto-spawn getty on tty1/tty2 only
     NAutoVTs = 2;
     # keep tty1 reserved so it's always usable

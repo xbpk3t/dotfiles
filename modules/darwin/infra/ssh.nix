@@ -1,8 +1,13 @@
-_: {
+{ lib, config, ... }:
+let
+  cfg = config.modules.darwin.ssh;
+in
+{
+  options.modules.darwin.ssh.enable = lib.mkEnableOption "macOS OpenSSH daemon";
 
   # Network services configuration
   # [services.openssh - MyNixOS](https://mynixos.com/nix-darwin/options/services.openssh)
-  services = {
+  config.services = lib.mkIf cfg.enable {
     # Note: NTP service is not configurable through nix-darwin
     # macOS handles time synchronization automatically
 

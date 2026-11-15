@@ -1,9 +1,12 @@
 {
   pkgs,
   editorMeta,
+  lib,
+  config,
   ...
 }:
 let
+  cfg = config.modules.devops.yazi;
   defaultEditor = "${pkgs.helix}/bin/${editorMeta.command}";
   yaziEditWrapper = pkgs.writeShellScriptBin "yazi-open-editor" ''
     editor="''${EDITOR:-${defaultEditor}}"
@@ -11,7 +14,9 @@ let
   '';
 in
 {
-  programs.yazi = {
+  options.modules.devops.yazi.enable = lib.mkEnableOption "Yazi file manager";
+
+  config.programs.yazi = lib.mkIf cfg.enable {
     enable = true;
     enableZshIntegration = true;
     # enableZshIntegration = true;

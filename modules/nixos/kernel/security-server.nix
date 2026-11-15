@@ -6,12 +6,16 @@
 }:
 let
   inherit (lib) mkDefault;
+  cfg = config.modules.kernel.security-server;
   # 高 ulimit 开关（放宽资源限制）
   enableHighLimits = config.modules.security.enableHighLimits;
   enableFirewall = config.modules.security.enableFirewall;
 in
 {
-  config = {
+  options.modules.kernel.security-server.enable =
+    lib.mkEnableOption "server security baseline (ulimits / fail2ban / firewall)";
+
+  config = lib.mkIf cfg.enable {
     security = {
       # 服务器角色：pam/审计等的默认偏向保守；可选启用高 ulimit 档
       pam.loginLimits =

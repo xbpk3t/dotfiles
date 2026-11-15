@@ -128,6 +128,20 @@ in
     desktop = {
       # 切换到 GNOME（Wayland 默认），避免 greetd/hyprland 冲突
       gnome.enable = true;
+      audio.enable = true;
+      openssh-desktop.enable = true;
+      power.enable = true;
+      tuptime.enable = true;
+      vm.enable = true;
+    };
+    kernel = {
+      fhs.enable = true;
+      journald.enable = true;
+      logind.enable = true;
+      ntp.enable = true;
+      openssh.enable = true;
+      security-server.enable = true;
+      vm.enable = true;
     };
     networking = {
       # Mihomo (Clash.Meta) proxy service (client)

@@ -1,6 +1,13 @@
 # Darwin security configuration
-_: {
-  security = {
+{ lib, config, ... }:
+let
+  cfg = config.modules.darwin.sec;
+in
+{
+  options.modules.darwin.sec.enable =
+    lib.mkEnableOption "macOS security baseline (PAM / sudo / CA certs)";
+
+  config.security = lib.mkIf cfg.enable {
     # PAM configuration
     pam = {
       services = {
