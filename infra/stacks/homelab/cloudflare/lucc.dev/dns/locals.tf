@@ -61,26 +61,6 @@ locals {
       comment  = "rsshub deploy by k3s"
       priority = null
     }
-    tailscale = {
-      id       = "b4a7143da983c688d9a1e3256c7fe08e"
-      name     = "ts.lucc.dev"
-      type     = "A"
-      content  = "103.85.224.63"
-      ttl      = 1
-      proxied  = true
-      comment  = "tailscale"
-      priority = null
-    }
-    derp-svc = {
-      id       = null
-      name     = "derp-nixos-vps-svc.lucc.dev"
-      type     = "A"
-      content  = "103.85.224.63"
-      ttl      = 1
-      proxied  = false
-      comment  = "Tailscale DERP (HK)"
-      priority = null
-    }
     derp-dev = {
       id       = null
       name     = "derp-nixos-vps-dev.lucc.dev"

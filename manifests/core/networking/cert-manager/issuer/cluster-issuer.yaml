@@ -13,7 +13,7 @@ metadata:
   namespace: networking
 spec:
   # What：使用 Let's Encrypt 颁发对外证书（DNS-01）。
-  # Why：memos/rsshub 需要公网域名证书；DNS-01 更稳定且不受回源限制。
+  # Why：rsshub/headlamp 等 ingress 需要公网域名证书；DNS-01 更稳定且不受回源限制。
   acme:
     # 证书申请邮箱（用于证书到期通知）
     email: "${ME_MAIL}"

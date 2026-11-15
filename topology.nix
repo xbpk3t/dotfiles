@@ -103,19 +103,11 @@ in
         };
       };
     };
-    nixos-vps-svc = {
-      interfaces = {
-        ens3 = {
-          network = "wan";
-        };
-      };
-    };
 
     # —— 互联网节点：连接所有公网出口 ——
     internet = mkInternet {
       connections = [
         (mkConnection "nixos-vps-dev" "ens3")
-        (mkConnection "nixos-vps-svc" "ens3")
         (mkConnection "sm-vps" "eth0")
       ];
     };
