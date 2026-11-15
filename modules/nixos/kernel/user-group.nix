@@ -1,4 +1,5 @@
 {
+  config,
   globals,
   pkgs,
   userMeta,
@@ -38,7 +39,7 @@ in
     users = {
       # root's ssh key are mainly used for remote deployment
       root = {
-        inherit (globals.auth) initialHashedPassword;
+        hashedPasswordFile = config.sops.secrets.ME_PASS_HASH.path;
         # 设置 root shell 为 zsh
         shell = pkgs.zsh;
         openssh.authorizedKeys.keys = globals.auth.sshPublicKeys;
@@ -46,7 +47,7 @@ in
 
       "${username}" = {
         # we have to use initialHashedPassword here when using tmpfs for /
-        inherit (globals.auth) initialHashedPassword;
+        hashedPasswordFile = config.sops.secrets.ME_PASS_HASH.path;
         home = "/home/${username}";
         isNormalUser = true;
         # 显式设置用户 shell 为 zsh

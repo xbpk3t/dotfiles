@@ -7,6 +7,8 @@
 }:
 let
   isSystemConfig = config ? system;
+  # neededForUsers 只属于 sops-nix 的 NixOS 模块；nix-darwin 不认这个选项。
+  isNixOS = isSystemConfig && pkgs.stdenv.hostPlatform.isLinux;
   inherit (userMeta) username;
   # 平台相关配置
   platform = {
@@ -66,6 +68,10 @@ in
     secrets = {
       # Me
       ME_PASS = mkUserSecret "me/pass";
+      # NixOS 用户密码 hash（root + luck），由 hashedPasswordFile 消费。
+      # neededForUsers 要求 owner=root，且必须在建用户前解密。
+      ME_PASS_HASH =
+        (mkRootSecret "me/pass_hash") // lib.optionalAttrs isNixOS { neededForUsers = true; };
       ME_PWGEN = mkUserSecret "me/pwgen";
       ME_SK = mkUserSecret "me/sk";
 
