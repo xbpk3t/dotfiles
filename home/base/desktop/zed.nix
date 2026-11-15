@@ -508,18 +508,20 @@ let
     # https://zed.dev/docs/remote-development
     ssh_connections = [
       {
-        host = "100.81.204.63";
+        host = "nixos-vps-agt";
         args = [
         ];
         projects = [
           {
             paths = [
               "/home/luck/Desktop/docs"
-              "/home/luck/Desktop/docs-alfred"
             ];
           }
+          {
+            paths = [ "/home/luck/Desktop/docs-alfred" ];
+          }
         ];
-        nickname = "homelab";
+        nickname = "agt";
       }
     ];
 

@@ -26,18 +26,6 @@ in
     };
   };
 
-  nixos-ws = {
-    nixos-ws = {
-      hostName = "nixos-ws";
-      stateVersion = "24.11";
-      primaryIp = "192.168.234.194";
-      ssh.user = "luck";
-      user = commonUser;
-      time = commonTime;
-      editor = commonEditor;
-    };
-  };
-
   macos-ws = {
     macos-ws = {
       hostName = "macos-ws";
@@ -140,32 +128,6 @@ in
       };
     };
   };
-  nixos-homelab = {
-    nixos-homelab = rec {
-      hostName = "nixos-homelab";
-      stateVersion = "24.11";
-      # What：部署/连接默认地址。
-      # Why：homelab 走 tailnet，避免依赖公网/NAT。
-      primaryIp = "100.81.204.63";
-      user = commonUser;
-      time = commonTime;
-      editor = commonEditor;
-      k3s = {
-        # What：控制面地址（server/agent 都需要）。
-        # Why：统一 tailnet，确保控制面与 flannel 通信稳定。
-        serverIP = tailscale.ip;
-        # What：节点自身 IP（k3s --node-ip）。
-        # Why：固定为 tailscale IP，确保 Pod/Service 跨节点网络走同一张网卡。
-        nodeIP = tailscale.ip;
-        # 固定 node-name，避免依赖主机 hostname
-        nodeName = hostName;
-      };
-      tailscale = {
-        ip = "100.81.204.63";
-      };
-    };
-  };
-
   # nixos-usb：便携 U 盘系统（GNOME desktop），跨机器即插即用。
   # 部署/代理都走 tailnet（primaryIp 是 tailnet IP，插到任意机器都能 SSH 到）。
   nixos-usb = {

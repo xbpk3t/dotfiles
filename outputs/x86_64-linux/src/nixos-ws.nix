@@ -7,7 +7,9 @@
 }@args:
 let
   name = "nixos-ws";
-  node = mylib.inventory."nixos-ws".${name};
+  # inventory 里没有该节点时保持惰性：hosts/ 与 outputs/ 作为模板保留，
+  # 设备到位后在 lib/inventory/data.nix 补一条（改 IP）即可自动激活。
+  node = mylib.inventory."nixos-ws".${name} or null;
 
   modules = {
     system = "x86_64-linux";
@@ -51,7 +53,7 @@ let
     remoteBuild = true;
   };
 in
-{
+lib.optionalAttrs (node != null) {
   nixosConfigurations.${name} = nixosConfig;
   deploy.nodes.${name} = deployNode;
 }
