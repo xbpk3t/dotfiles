@@ -90,7 +90,7 @@ in
     infra = {
       avahi.enable = false;
       guix.enable = false;
-      btrbk.enable = true;
+      btrbk.enable = false;
       nix-tools.enable = true;
     };
 

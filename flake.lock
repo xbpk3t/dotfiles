@@ -179,6 +179,22 @@
         "type": "github"
       }
     },
+    "cloudflare-security-audit-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1789414134,
+        "narHash": "sha256-oVVACjotkHvllQGxEP8yWaEt4c3GxT0d909TUM5P3NM=",
+        "owner": "cloudflare",
+        "repo": "security-audit-skill",
+        "rev": "c1c8a8c1471069fb0e188eeaff69b8e8db6564a8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "cloudflare",
+        "repo": "security-audit-skill",
+        "type": "github"
+      }
+    },
     "darwin": {
       "inputs": {
         "nixpkgs": [
@@ -1269,6 +1285,22 @@
         "type": "github"
       }
     },
+    "opencli-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1794073144,
+        "narHash": "sha256-Flj87d0LvguhP4/wiFfRSrSmX/wMSohhzGsSIugETEA=",
+        "owner": "jackwener",
+        "repo": "opencli",
+        "rev": "9bc5f5ca132ec4d4e48d7ee517d4303bf159e8e8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "jackwener",
+        "repo": "opencli",
+        "type": "github"
+      }
+    },
     "optnix": {
       "inputs": {
         "flake-compat": [
@@ -1322,9 +1354,26 @@
         "type": "github"
       }
     },
+    "reclaim-code-entropy-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1787293259,
+        "narHash": "sha256-5wo8GtZGeXPBXSWIY+vL1Vd23M8dTKw4KEZOVG3KykY=",
+        "owner": "Yevanchen",
+        "repo": "reclaim-code-entropy",
+        "rev": "9e6482e45814076b9710b55c8dcbb064ba4b7977",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Yevanchen",
+        "repo": "reclaim-code-entropy",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "agent-skills": "agent-skills",
+        "cloudflare-security-audit-skills": "cloudflare-security-audit-skills",
         "darwin": "darwin",
         "deploy-rs": "deploy-rs",
         "determinate": "determinate",
@@ -1346,6 +1395,8 @@
         "nixpkgs": "nixpkgs_6",
         "nixpkgs-darwin": "nixpkgs-darwin",
         "nixpkgs-stable": "nixpkgs-stable",
+        "opencli-skills": "opencli-skills",
+        "reclaim-code-entropy-skills": "reclaim-code-entropy-skills",
         "sops-nix": "sops-nix",
         "stylix": "stylix",
         "system-manager": "system-manager"

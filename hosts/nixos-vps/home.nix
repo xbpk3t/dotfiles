@@ -23,7 +23,7 @@ let
       ${config.home.homeDirectory}/.codex \
       ${config.home.homeDirectory}/.config/opencode \
       --password-file ${config.sops.secrets.RESTIC_PASSWORD.path} \
-      --exclude .git --exclude node_modules --exclude apm_modules \
+      --exclude .git --exclude node_modules \
       --exclude dist --exclude public --exclude .DS_Store --tag agt
   '';
 

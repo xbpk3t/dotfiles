@@ -79,6 +79,26 @@ rec {
     };
 
     agent-skills.url = "github:Kyure-A/agent-skills-nix";
+
+    # Global agent skill sources (ASN).
+    # flake = false: these repos are skill sources, not flakes.
+    opencli-skills = {
+      url = "github:jackwener/opencli";
+      flake = false;
+    };
+    reclaim-code-entropy-skills = {
+      url = "github:Yevanchen/reclaim-code-entropy";
+      flake = false;
+    };
+    # gstack-skills 暂时注释：plan-ceo-review 缺 gstack bin/，见 home/base/AI/skills.nix。
+    # gstack-skills = {
+    #   url = "github:garrytan/gstack";
+    #   flake = false;
+    # };
+    cloudflare-security-audit-skills = {
+      url = "github:cloudflare/security-audit-skill";
+      flake = false;
+    };
     mcp-servers-nix = {
       url = "github:natsukium/mcp-servers-nix";
       inputs.nixpkgs.follows = "nixpkgs-darwin";

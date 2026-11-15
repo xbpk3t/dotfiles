@@ -55,10 +55,6 @@ __pycache__/
 .ruff_cache/
 
 
-# APM dependencies
-apm_modules/
-apm.lock.yaml
-
 # local notes — not part of flake tree commits（仅根目录 docs/，锚定防误伤嵌套 docs）
 /docs/
 
