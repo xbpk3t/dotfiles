@@ -33,6 +33,13 @@ let
         # 默认禁止 broken packages。
         # Why: broken package 应该是显式例外，而不是整仓默认吞掉风险信号。
         allowBroken = false;
+
+        # gtk2（pname "gtk+"）已被 nixpkgs 标记 broken（计划 27.05 移除），
+        # 但 legacy NVIDIA 470 的 nvidia-settings 仍依赖它。按上游建议定点降级为
+        # warning；等 nvidia-settings 迁到 gtk3/gtk4 后删除。
+        # https://github.com/NixOS/nixpkgs/issues/410814
+        problems.handlers."gtk+".broken = "warn";
+
         enableParallelBuilding = true;
         buildManPages = false;
         buildDocs = false;

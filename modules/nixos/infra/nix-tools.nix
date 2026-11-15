@@ -64,7 +64,7 @@ in
       gc = {
         # 直接使用原生 nix.gc，避免额外依赖 nh。
         automatic = lib.mkDefault true;
-        options = "--delete-older-than 8d";
+        options = lib.mkDefault "--delete-older-than 8d";
       };
 
       # remove nix-channel related tools & configs, we use flakes instead.
