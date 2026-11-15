@@ -55,11 +55,11 @@ in
       ];
 
     # 注意 pnpm 跟 npm 的配置文件不同。而 npm本身是支持 hm配置的，所以采用这个方式配置。
-    home.file = lib.mkIf pkgs.stdenv.isDarwin {
+    home.file = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
       "Library/Preferences/pnpm/rc".source = ./pnpmrc;
     };
 
-    xdg.configFile = lib.mkIf pkgs.stdenv.isLinux {
+    xdg.configFile = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
       "pnpm/rc".source = ./pnpmrc;
     };
 

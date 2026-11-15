@@ -36,7 +36,7 @@ in
         # caido-desktop                 # tags(desc): Web代理 > 轻量级 > GUI桌面
         # whatweb
       ]
-      ++ lib.optionals pkgs.stdenv.isLinux [
+      ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
         # 分类1：Web 代理 & 模糊测试（Linux-only）
         # https://portswigger.net/burp
         # burpsuite 在 aarch64-darwin 上拉 glibc，仅 Linux 可用

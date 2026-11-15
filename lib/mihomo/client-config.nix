@@ -4,6 +4,7 @@
   lib,
   mylib,
   selfProviderTemplateName ? "mihomo-self-provider.yaml",
+  tunExcludeUids ? [ ],
   ...
 }:
 with lib;
@@ -123,6 +124,11 @@ let
       auto-route = true;
       auto-detect-interface = true;
       dns-hijack = [ "any:53" ];
+    }
+    // lib.optionalAttrs (tunExcludeUids != [ ]) {
+      # derper 等 wildcard UDP 服务的回包按 UID 选路由；排除这些 UID，
+      # 避免 STUN 回复被 mihomo 的 table 2022 接管。
+      exclude-uid = tunExcludeUids;
     };
 
     dns = {

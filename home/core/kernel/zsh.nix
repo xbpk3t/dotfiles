@@ -37,13 +37,13 @@
       LC_CTYPE = "en_US.UTF-8";
       LC_COLLATE = "C"; # Avoids locale lookup errors
     }
-    // (lib.optionalAttrs pkgs.stdenv.isLinux {
+    // (lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
       WINEPREFIX = config.xdg.dataHome + "/wine";
       LESSHISTFILE = config.xdg.cacheHome + "/less/history";
       LESSKEY = config.xdg.configHome + "/less/lesskey";
       DELTA_PAGER = "less -R";
     })
-    // (lib.optionalAttrs pkgs.stdenv.isDarwin {
+    // (lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
       # 用来抑制 macOS 终端中显示的 "The default interactive shell is now zsh"
       BASH_SILENCE_DEPRECATION_WARNING = "1";
     });
@@ -264,6 +264,8 @@
 
     nushell = {
       enable = true;
+      # 保持 legacy 行为，匹配当前 home.stateVersion；同时消除默认值变更警告。
+      loadSessionVariables = false;
 
       # 环境变量配置
       environmentVariables = {

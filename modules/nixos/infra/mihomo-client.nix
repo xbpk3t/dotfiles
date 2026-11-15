@@ -15,12 +15,19 @@ let
       lib
       pkgs
       ;
+    inherit (cfg) tunExcludeUids;
     selfProviderTemplateName = "mihomo-self-provider.yaml";
   };
 in
 {
   options.modules.networking.mihomo-client = {
     enable = mkEnableOption "mihomo proxy service";
+
+    tunExcludeUids = mkOption {
+      type = types.listOf types.ints.unsigned;
+      default = [ ];
+      description = "UIDs excluded from mihomo TUN auto-route (Linux only).";
+    };
   };
 
   config = mkIf cfg.enable {

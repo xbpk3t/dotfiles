@@ -1,4 +1,5 @@
 {
+  config,
   lib,
   globals,
   hostMeta,
@@ -33,14 +34,16 @@ in
     # 只允许 macos-ws 的 tailnet IP；all_squash 把 Mac 的 uid 映射到本机 luck(1000)，
     # 这样 Finder 里保存的截图/新图在 VPS 上也归 luck 所有。
     # macOS 的 NFS 客户端只支持 v4.0，且默认用非保留端口；所以额外开 vers4.0 和 insecure。
-    nfs.server = {
-      enable = true;
-      extraNfsdConfig = "vers4.0=y";
-      exports = ''
-        /home/${userMeta.username}/Desktop/docs-images ${
-          mylib.inventory."macos-ws"."macos-ws".ssh.host
-        }/32(rw,all_squash,anonuid=1000,anongid=100,no_subtree_check,fsid=0,insecure)
-      '';
+    nfs = {
+      server = {
+        enable = true;
+        exports = ''
+          /home/${userMeta.username}/Desktop/docs-images ${
+            mylib.inventory."macos-ws"."macos-ws".ssh.host
+          }/32(rw,all_squash,anonuid=1000,anongid=100,no_subtree_check,fsid=0,insecure)
+        '';
+      };
+      settings.nfsd."vers4.0" = "y";
     };
 
     # 手机 herdr-app 走 Tailscale SSH 直连（无需在手机放私钥）。
@@ -69,7 +72,15 @@ in
 
   networking.firewall.interfaces.tailscale0.allowedTCPPorts = [ 2049 ];
 
-  modules.networking.mihomo-client.enable = true;
+  # 固定 derper UID，供 mihomo exclude-uid 使用；当前自动分配就是 993。
+  users.users.derper.uid = 993;
+
+  modules.networking.mihomo-client = {
+    enable = true;
+    # derper 的 STUN 回包是 wildcard UDP，源地址选择会被 mihomo TUN 接管；
+    # 把 derper 的 UID 排除出 auto-route。
+    tunExcludeUids = [ config.users.users.derper.uid ];
+  };
 
   # Chrome 需要 fontconfig/字体；不要继承 server 的 fonts 关闭策略。
   fonts = {

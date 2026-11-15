@@ -16,10 +16,8 @@ in
       helix.enable = true;
       rclone.enable = false;
       hunk.enable = false;
-      ssh = {
-        enable = false;
-        github.enable = true;
-      };
+      ssh.enable = false;
+
       herdr-core = {
         enable = true;
         settings.restore_screen = true;

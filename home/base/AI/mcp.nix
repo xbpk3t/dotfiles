@@ -140,7 +140,7 @@ in
         #   `deja warmup` / `deja index`. Skill guidance is separate (Claude-only SKILL.md).
         # Binary: Homebrew short-term. MCP spawn often lacks interactive PATH → abs path.
         # Follow-up: package deja-vu in flake and switch command to ${pkgs...}/bin/deja.
-        deja = lib.mkIf pkgs.stdenv.isDarwin {
+        deja = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
           command = "/opt/homebrew/bin/deja";
           args = [ "mcp" ];
           type = "stdio";

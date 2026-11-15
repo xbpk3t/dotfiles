@@ -35,7 +35,7 @@ in
 
         chisel
       ]
-      ++ lib.optionals pkgs.stdenv.isLinux [
+      ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
         # 分类1：AD Internal Pentest（Linux-only）
         # bloodhound # tags(desc): 信息收集 > AD域 > 可视化分析
 
@@ -48,11 +48,11 @@ in
         # 分类4：专项破解（Linux-only）
         # veracrypt # tags(desc): 专项破解 > VeraCrypt > 卷密码
       ]
-      ++ lib.optionals pkgs.stdenv.isLinux [
+      ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
         # 分类2：隧道 & 后渗透（Linux-only）
         # ligolo-ng # tags(desc): 隧道代理 > 网络层 > 反向代理
       ]
-      ++ lib.optionals pkgs.stdenv.isLinux [
+      ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
         # === Blue / 蓝队防御 ===
 
         # 入侵检测
