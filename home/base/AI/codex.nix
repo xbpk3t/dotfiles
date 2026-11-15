@@ -137,7 +137,7 @@ in
         LLM_AxonHub = "$(cat ${config.sops.secrets.LLM_AxonHub.path})";
 
         # ccx session export 配置
-        CCX_WIKI_ROOT = "/Users/luck/Desktop/docs/wiki";
+        CCX_WIKI_ROOT = "${config.home.homeDirectory}/Desktop/docs/wiki";
         CCX_AI_MODEL = globals.models.dsf;
         CCX_AI_BASE_URL = "https://api.lucc.dev/v1";
       };

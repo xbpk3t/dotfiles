@@ -1,10 +1,13 @@
-{ config, ... }:
+{ config, lib, ... }:
 let
+  cfg = config.modules.devops.helix;
   lspPackages = config.modules.langs.lsp.packages;
 in
 {
+  options.modules.devops.helix.enable =
+    lib.mkEnableOption "Helix editor (default editor + LSP packages)";
 
-  programs.helix = {
+  config.programs.helix = lib.mkIf cfg.enable {
     enable = true;
     defaultEditor = true;
 

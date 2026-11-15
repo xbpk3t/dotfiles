@@ -24,6 +24,10 @@ in
   };
 
   config = mkIf cfg.enable {
+    # TUN 的返回包从 Meta 进入 INPUT；NixOS firewall 不信任该接口会 DROP SYN-ACK，
+    # 表现为 direct curl/进程超时，而 127.0.0.1:7890 代理正常。
+    networking.firewall.trustedInterfaces = [ "Meta" ];
+
     # Why 静态 mihomo user：
     # 1. services.mihomo 默认开 DynamicUser，每次重启 UID 变化；
     # 2. 我们的 self provider 走 /run/secrets/rendered/，由 sops-nix 渲染，
@@ -63,23 +67,30 @@ in
     # self provider 已在构建时转为 YAML 且使用绝对路径，无需拷贝。
     # services.mihomo 默认 WorkingDirectory 是 /var/lib/mihomo
     systemd.services.mihomo = {
-      after = [
-        "systemd-networkd.service"
+      # 只有 host 显式启用 systemd-networkd 时才绑定；否则（dhcpcd/NetworkManager）
+      # 绑定一个不存在的 unit 会让 mihomo 永远起不来。
+      after = lib.optionals config.networking.useNetworkd [ "systemd-networkd.service" ] ++ [
         "network-online.target"
       ];
       wants = [ "network-online.target" ];
-      partOf = [ "systemd-networkd.service" ];
-      bindsTo = [ "systemd-networkd.service" ];
+      partOf = lib.optionals config.networking.useNetworkd [ "systemd-networkd.service" ];
+      bindsTo = lib.optionals config.networking.useNetworkd [ "systemd-networkd.service" ];
       serviceConfig = {
         # 关掉 DynamicUser，与上面的静态 user 配套
         DynamicUser = lib.mkForce false;
         User = "mihomo";
         Group = "mihomo";
+        # nixpkgs 的 ExecStart 硬编码 -d /var/lib/private/mihomo（DynamicUser 语义）。
+        # 这里用静态 user + StateDirectory=mihomo，必须把数据目录对齐 /var/lib/mihomo，
+        # 否则 provider 的 /var/lib/mihomo/providers/*.yaml 会落在 SAFE_PATHS 之外。
+        ExecStart = lib.mkForce "${pkgs.mihomo}/bin/mihomo -d /var/lib/mihomo -f \${CREDENTIALS_DIRECTORY}/config.yaml";
         # mihomo 默认只允许 homedir 和 SAFE_PATHS 下的路径作为 external-ui /
-        # file provider 源。把 zashboard（UI）和 sops 渲染目录都加进来。
-        Environment = "SAFE_PATHS=${pkgs.zashboard}:/run/secrets/rendered";
+        # file provider 源。把 zashboard（UI）、sops 渲染目录和 state dir 都加进来。
+        Environment = "SAFE_PATHS=${pkgs.zashboard}:/run/secrets/rendered:/var/lib/mihomo";
         ExecStartPre = [
           "${pkgs.coreutils}/bin/mkdir -p /var/lib/mihomo/providers"
+          # GEOIP,CN 规则需要 Country.mmdb；避免 mihomo 启动时联网下载（VPS 还没代理）。
+          "${pkgs.coreutils}/bin/install -Dm644 ${pkgs.mihomo-geodata}/share/mihomo/Country.mmdb /var/lib/mihomo/Country.mmdb"
         ];
       };
     };

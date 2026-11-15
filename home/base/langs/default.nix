@@ -1,12 +1,20 @@
 {
   mylib,
   pkgs,
+  lib,
+  config,
   ...
 }:
+let
+  cfg = config.modules.langs.basePackages;
+in
 {
+  options.modules.langs.basePackages.enable =
+    lib.mkEnableOption "base language toolchain (gcc / cmake / lua / miller)";
+
   imports = mylib.scanPaths ./.;
 
-  home.packages =
+  config.home.packages = lib.optionals cfg.enable (
     with pkgs;
     [
       gcc
@@ -20,5 +28,6 @@
     ]
     ++ [
       miller
-    ];
+    ]
+  );
 }

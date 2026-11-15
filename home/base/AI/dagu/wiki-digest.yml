@@ -126,8 +126,9 @@ steps:
     depends:
       - sync
     run: |
-      status=$(cat "$STATUS_FILE" 2>/dev/null || echo unknown)
-      case "$status" in
+      # 注意：zsh 里 $status 是只读特殊变量（等价 $?），不能当普通变量赋值。
+      st=$(cat "$STATUS_FILE" 2>/dev/null || echo unknown)
+      case "$st" in
         0|skip) exit 0 ;;
       esac
       cd "$WORKSPACE"

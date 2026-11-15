@@ -1,6 +1,16 @@
-{ mail, ... }:
 {
-  programs.gpg = {
+  mail,
+  lib,
+  config,
+  ...
+}:
+let
+  cfg = config.modules.kernel.gpg;
+in
+{
+  options.modules.kernel.gpg.enable = lib.mkEnableOption "GnuPG config";
+
+  config.programs.gpg = lib.mkIf cfg.enable {
     enable = true;
     settings = {
       # 基本设置

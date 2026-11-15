@@ -1,24 +1,38 @@
-{ pkgs, ... }:
 {
-  home.packages = with pkgs; [
+  pkgs,
+  lib,
+  config,
+  ...
+}:
+let
+  cfg = config.modules.devops.cicd;
+in
+{
+  options.modules.devops.cicd.enable =
+    lib.mkEnableOption "CI/CD tools (fluxcd / goreleaser / actionlint)";
 
-    actionlint
+  config.home.packages = lib.optionals cfg.enable (
+    with pkgs;
+    [
 
-    # fluxcd
-    # argocd
+      actionlint
 
-    # ko # build go project to container image
-    # pkgs-stable.kubernetes-helm
-    # argocd
+      # fluxcd
+      # argocd
 
-    #
-    # For flux cli
-    fluxcd
+      # ko # build go project to container image
+      # pkgs-stable.kubernetes-helm
+      # argocd
 
-    fluxcd-operator
+      #
+      # For flux cli
+      fluxcd
 
-    # === Release 自动化 ===
-    # tags(desc): 发布交付 > Release自动化 > CI/CD
-    goreleaser
-  ];
+      fluxcd-operator
+
+      # === Release 自动化 ===
+      # tags(desc): 发布交付 > Release自动化 > CI/CD
+      goreleaser
+    ]
+  );
 }

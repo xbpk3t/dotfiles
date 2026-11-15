@@ -1,6 +1,16 @@
-{ pkgs, ... }:
 {
-  programs.distrobox = {
+  pkgs,
+  lib,
+  config,
+  ...
+}:
+let
+  cfg = config.modules.devops.distrobox;
+in
+{
+  options.modules.devops.distrobox.enable = lib.mkEnableOption "distrobox (Linux only)";
+
+  config.programs.distrobox = lib.mkIf cfg.enable {
     # Not support for Darwin
     enable = pkgs.stdenv.isLinux;
     package = pkgs.distrobox;

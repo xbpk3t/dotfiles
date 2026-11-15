@@ -1,37 +1,45 @@
 {
   pkgs,
   mylib,
+  lib,
+  config,
   ...
 }:
+let
+  cfg = config.modules.langs.treefmt;
+in
 {
-  home.packages = with pkgs; [
-    # ── Hook runner / meta formatter ─────────────────────────
-    treefmt
+  options.modules.langs.treefmt.enable = lib.mkEnableOption "treefmt + linters/formatters";
 
-    # ── Formatters (used by treefmt) ───────────────────────────
+  config = lib.mkIf cfg.enable {
+    home.packages = with pkgs; [
+      # ── Hook runner / meta formatter ─────────────────────────
+      treefmt
 
-    taplo
-    # kdlfmt 的 pre-commit 仍然需要bin才能使用
-    # tags(desc): 代码质量 > 格式化 > KDL
-    kdlfmt
+      # ── Formatters (used by treefmt) ───────────────────────────
 
-    # terraform: installed via home/base/devops/tf.nix
-    # hclfmt:    included in terraform package
+      taplo
+      # kdlfmt 的 pre-commit 仍然需要bin才能使用
+      # tags(desc): 代码质量 > 格式化 > KDL
+      kdlfmt
 
-    ruff
+      # terraform: installed via home/base/devops/tf.nix
+      # hclfmt:    included in terraform package
 
-    # tags(desc): 代码质量 > 拼写检查 > Lint
-    typos
-    # tags(desc): 代码质量 > YAML规范 > Lint
-    yamllint
-    # tags(desc): 代码质量 > Markdown规范 > Lint
+      ruff
 
-    miller
-  ];
+      # tags(desc): 代码质量 > 拼写检查 > Lint
+      typos
+      # tags(desc): 代码质量 > YAML规范 > Lint
+      yamllint
 
-  # Deploy linter configs globally from .github/linters/
-  home.file.".config/linters" = {
-    source = mylib.relativeToRoot ".github/linters";
-    recursive = true;
+      miller
+    ];
+
+    # Deploy linter configs globally from .github/linters/
+    home.file.".config/linters" = {
+      source = mylib.relativeToRoot ".github/linters";
+      recursive = true;
+    };
   };
 }

@@ -1,12 +1,19 @@
 {
   pkgs,
   globals,
+  lib,
+  config,
   ...
 }:
+let
+  cfg = config.modules.desktop.vm;
+in
 {
+  options.modules.desktop.vm.enable = lib.mkEnableOption "desktop NixOS container (nixos-minimal)";
+
   # 只在桌面下添加 nixos container. 否则在 VPS 里（即使不启用）也会占用磁盘
   # https://mynixos.com/nixpkgs/option/containers
-  containers = {
+  config.containers = lib.mkIf cfg.enable {
     nixos-minimal = {
       # 配置为不要自启，需要 sudo nixos-container start nixos-minimal 手动启动
       autoStart = false;

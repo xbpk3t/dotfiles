@@ -1,23 +1,34 @@
 {
   pkgs,
+  lib,
+  config,
   ...
 }:
+let
+  cfg = config.modules.works.recon;
+in
 {
-  home.packages = with pkgs; [
-    # 信息收集
-    nmap
+  options.modules.works.recon.enable =
+    lib.mkEnableOption "recon tools (nmap / naabu / subfinder / httpx / dnsx)";
 
-    # 端口扫描工具
-    naabu
+  config.home.packages = lib.optionals cfg.enable (
+    with pkgs;
+    [
+      # 信息收集
+      nmap
 
-    # 内网扫描工具
-    fscan
+      # 端口扫描工具
+      naabu
 
-    subfinder
+      # 内网扫描工具
+      fscan
 
-    httpx
+      subfinder
 
-    dnsx
-    gau
-  ];
+      httpx
+
+      dnsx
+      gau
+    ]
+  );
 }
