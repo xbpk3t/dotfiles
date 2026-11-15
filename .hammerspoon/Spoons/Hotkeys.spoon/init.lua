@@ -41,7 +41,7 @@ local appHotkeys = {
   { key = "1", bundleID = "com.apple.finder", label = "Finder" },
   { key = "2", bundleID = "com.google.Chrome", label = "Chrome" },
   { key = "3", bundleID = "dev.zed.Zed", label = "Zed" },
-  { key = "0", bundleID = "com.mitchellh.ghostty", label = "Ghostty" },
+  { key = "0", bundleID = "dev.herdr.app", label = "Herdr" },
 }
 
 local function launchApp(bundleID, label)
