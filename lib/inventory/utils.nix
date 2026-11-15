@@ -6,12 +6,14 @@ let
   nodesOrEmpty = inventory: if inventory == null then { } else inventory;
   inventory = nodesOrEmpty inventoryData;
   groupOrEmpty = name: inventory.${name} or { };
-  # Why：inventory 是纯数据（分组内节点结构），可能同时提供 primaryIp/ip/ips/ssh.host。
+  # Why：inventory 是纯数据（分组内节点结构），可能同时提供 tailscale.ip/primaryIp/ip/ips/ssh.host。
   # What：按优先级挑一个”主机地址”作为部署/连接默认值。
+  # tailnet 优先：sshd 统一经 tailnet 访问，公网 IP 只保留给 DNS/代理等对外服务。
   primaryHostForNode =
     name: node:
     let
       candidates = [
+        (node.tailscale.ip or null)
         (node.primaryIp or null)
         (node.ip or null)
         (if node ? ips && node.ips != [ ] then builtins.head node.ips else null)
