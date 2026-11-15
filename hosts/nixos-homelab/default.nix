@@ -77,10 +77,20 @@ in
       tailscale.enable = true;
     };
 
+    kernel = {
+      fhs.enable = true;
+      journald.enable = true;
+      logind.enable = true;
+      ntp.enable = true;
+      openssh.enable = true;
+      security-server.enable = true;
+      vm.enable = true;
+    };
+
     infra = {
-      avahi.enable = true;
-      guix.enable = true;
-      btrbk.enable = true;
+      avahi.enable = false;
+      guix.enable = false;
+      btrbk.enable = false;
       nix-tools.enable = true;
     };
 
@@ -94,9 +104,11 @@ in
     security.enableFirewall = false;
 
     ms = {
-      # k3s 控制面：只设置 enable/role，其它配置在模块内固化
+      # k3s 控制面：只设置 enable/role，其它配置在模块内固化。
+      # [LUC-496] 停用 k3s；代码保留，enable = false 会让 services.k3s 及其
+      # systemd unit / firewall 规则在下次 switch 时全部消失。
       k3s = {
-        enable = true;
+        enable = false;
         role = "server";
         # serverIP 由 inventory 注入，避免多处重复维护
         serverPort = 6443;

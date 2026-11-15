@@ -67,8 +67,6 @@ in
     displayManager.gdm.enable = true;
     desktopManager.gnome.enable = true;
     libinput.enable = true; # 触控板/触摸屏
-    pipewire.enable = true; # 音频
-    openssh.enable = true; # deploy-rs 需要
     resolved.enable = true;
   };
 
@@ -116,6 +114,20 @@ in
   modules = {
     desktop = {
       gnome.enable = true;
+      audio.enable = true;
+      openssh-desktop.enable = true;
+      power.enable = true;
+      tuptime.enable = true;
+      vm.enable = true;
+    };
+    kernel = {
+      fhs.enable = true;
+      journald.enable = true;
+      logind.enable = true;
+      ntp.enable = true;
+      openssh.enable = true;
+      security-server.enable = true;
+      vm.enable = true;
     };
     networking = {
       # 代理：mihomo-client 走 tailnet 回自己 VPS 节点
