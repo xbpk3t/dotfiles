@@ -70,7 +70,7 @@ outputs/               # flake-parts outputs 子模块
 ### 密钥管理
 
 - **sops-nix**：系统/用户级密钥（age key），配置文件在 `secrets/`
-- **SOPS**：Kubernetes secrets（`manifests/**/*.sops.yaml`），仅加密 `data`/`stringData` 保留结构可读
+- **SOPS**：`secrets/` 下的加密文件，按 key 粒度解密后由 sops-nix 注入
 - `.sops.yaml` 定义加密规则，按路径正则分流
 
 ## 代码规范与约定
@@ -130,7 +130,7 @@ outputs/               # flake-parts outputs 子模块
 
 ## 其他提醒
 
-- **SOPS 安全**：`secrets/` 和 `manifests/**/*.sops.yaml` 包含加密密钥，永远不要尝试解密后明文提交。检查 diff 时确认只有密文变更
+- **SOPS 安全**：`secrets/` 包含加密密钥，永远不要尝试解密后明文提交。检查 diff 时确认只有密文变更
 - **Impure 评估**：部署和部分 eval 命令需要 `--impure`，因为仓库中存在未 track 的源码目录会阻断 pure flake evaluation。这是有意为之，不要尝试"修复"
 - **跨平台注意**：macOS 用 `nix-darwin`，Linux 用 NixOS，WSL 用 `nixos-wsl`，AVF 用 `nixos-avf`。同一份 home-manager 配置在不同平台上可能有不同的可用包集合
 - **`hosts/<name>/` 是机器的 identity**：新增机器时在这里创建目录，包含 `default.nix`（系统级）和 `home.nix`（用户级），然后在 flake outputs 中注册
