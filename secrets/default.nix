@@ -142,8 +142,10 @@ in
       GOOGLE_CLOUD_API_KEY = mkUserSecret "google/cloud";
 
       # Atuin
+      # 登录态在 ~/.local/share/atuin/meta.db (hub_session/session)，不通过 sops 注入；
+      # 旧的 atuin/session token 已失效，各机手动 `atuin login` 一次。
+      # 详见 home/core/kernel/zsh.nix 的 NOTE(atuin)。
       AUTIN_KEY = mkUserSecret "atuin/key";
-      AUTIN_SESSION = mkUserSecret "atuin/session";
 
       # Acme
       ACME_CF_ENV = mkUserSecret "acme/cloudflare_env";

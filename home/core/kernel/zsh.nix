@@ -403,24 +403,47 @@
       ];
     };
 
+    # NOTE(atuin 2026-11-16)：登录态刻意不做声明式管理，不要再加 session_path / activation login。
+    # 背景与决策：
+    # - atuin 18.24.6 的 Settings 没有 session_path（上游 PR #3985：它从未是有效字段）；
+    #   登录 token 在 ~/.local/share/atuin/meta.db：Hub 认证用 hub_session(atapi_…)，
+    #   自建/老式服务器用 session；data_dir/session 只在首次 migration 读一次。
+    # - 三个候选模块都没有 login/session 选项：
+    #   nixpkgs services.atuin 是 sync server（atuin-server）；
+    #   nixpkgs programs.atuin 是系统级 /etc/atuin 配置，Linux only；
+    #   HM programs.atuin 只管 config + shell/daemon。上游只提供 `atuin login`（凭据/浏览器），
+    #   没有 config/env 注入 session 的通道。
+    # - 选定：HM programs.atuin + 每台机器手动 `atuin login -u <user>` 一次 + HM daemon 定时 sync。
+    #   不在 home.activation 里 oneshot login，也不注入 meta.db：登录是低频、要网络/凭据的操作，
+    #   自动化需要存密码/2FA 或碰内部 DB，收益不值风险。只有将来机器频繁重装/无人值守时，
+    #   再考虑 systemd/launchd oneshot + sops Hub token。
+    # - 若 store 混入多把 key（sync 报 WrongKey / `store verify` 失败），修复顺序：
+    #     atuin store purge → atuin history init-store → atuin store verify → atuin sync
+    #   不是 `atuin store rebuild history`：那个方向是 record store → history DB，正好相反。
+    #   `history init-store` 才会把本地 history DB 用当前 key 重新写进 record store。
     atuin = {
       enable = true;
       enableZshIntegration = true;
+      daemon.enable = true;
       settings = {
         # 多端同步是merge，而非replace
         auto_sync = true;
-        # 默认30min同步，显式声明，不修改
+        # command-triggered sync 的节流；daemon 的定时节奏看下面的 daemon.sync_frequency。
         sync_frequency = "30m";
         # 直接使用官方服务，没必要自建
         sync_address = "https://api.atuin.sh";
 
-        # https://wiki.nixos.org/wiki/Atuin
-        # 用来在不同host之间自动sync，否则 在一台机器上注册/导入/首次同步，需要执行 atuin register 以及 atuin import auto，最后 atuin sync 手动同步。就很麻烦。
-        # encryption key must be base64; session token is a UUID-like string
-        # encryption key：用于加密你的本地/同步历史，必须是随机的 256‑bit 值并以 Base64 存储。
+        # HM daemon：Linux 生成 systemd user socket/service，macOS 生成 launchd agent；
+        # 后台按这个间隔自动 sync，不依赖是否正在敲命令。
+        daemon.sync_frequency = "10m";
+
+        # 代理环境下（如 nixos-vps-agt 的 mihomo mixed-port）api.atuin.sh 经代理的
+        # 连接建立可能 >5s；atuin 默认 network_connect_timeout=5s，会误报
+        # "operation timed out"。15s 留余量，普通环境无副作用。
+        network_connect_timeout = 15;
+
+        # encryption key：用于加密本地/同步历史（base64 256-bit）。
         key_path = config.sops.secrets.AUTIN_KEY.path;
-        # session token：登录云端 API 的“会话令牌”，通常是一个带连字符的 UUID 字符串。
-        session_path = config.sops.secrets.AUTIN_SESSION.path;
 
         # 相比prefix更好用
         search_mode = "fuzzy";
