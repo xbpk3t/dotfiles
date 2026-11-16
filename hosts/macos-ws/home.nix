@@ -60,7 +60,11 @@ _: {
       # dsh 配置走 ~/.dsh/cordis.patch.yml（home 层），见 home/base/AI/dsh.nix
       dsh.enable = false;
 
-      dagu.enable = true;
+      dagu = {
+        enable = true;
+        # 单机只需要月历 DAG，不需要把健康检查端口暴露到所有接口。
+        schedulerPort = 0;
+      };
 
       skills.enable = true;
       mcp.isDesktop = true;
