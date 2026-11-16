@@ -31,16 +31,6 @@ locals {
       comment  = "OpenList (ASMR)"
     }
 
-    grafana = {
-      id       = "0a78e1bf7e0d58ac35378f3c7e117625"
-      name     = "g.lucc.dev"
-      type     = "A"
-      content  = "192.129.183.26"
-      ttl      = 1
-      proxied  = true
-      comment  = "PAG- Grafana Dashboard"
-      priority = null
-    }
     rsshub = {
       id       = "1eb043e1ffe747891513e47be11b0a6f"
       name     = "rsshub.lucc.dev"
