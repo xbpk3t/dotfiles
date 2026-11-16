@@ -41,16 +41,6 @@ locals {
       comment  = "PAG- Grafana Dashboard"
       priority = null
     }
-    k3s = {
-      id       = "c159ba2bf018bcf724084f6db32b8f41"
-      name     = "k3s.lucc.dev"
-      type     = "A"
-      content  = "192.129.183.26"
-      ttl      = 1
-      proxied  = true
-      comment  = null
-      priority = null
-    }
     rsshub = {
       id       = "1eb043e1ffe747891513e47be11b0a6f"
       name     = "rsshub.lucc.dev"
@@ -58,7 +48,7 @@ locals {
       content  = "192.129.183.26"
       ttl      = 1
       proxied  = true
-      comment  = "rsshub deploy by k3s"
+      comment  = "rsshub"
       priority = null
     }
     derp-dev = {

@@ -16,4 +16,4 @@ infra/stacks/homelab/cloudflare/dns/
 infra/stacks/vps/cloudflare/zone/
 ```
 
-现有 `infra/minio/*` 目录暂时继续作为 legacy root module 保留，不在这一步强迁。
+现有 `infra/minio/tf-s3-backend` 目录暂时继续作为 legacy root module 保留，不在这一步强迁。
