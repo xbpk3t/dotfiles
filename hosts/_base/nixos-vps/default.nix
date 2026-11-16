@@ -132,7 +132,15 @@ in
   };
 
   # dagu / Chromium / Xvfb 都是 user service；linger 让它们在无人登录时启动。
-  users.users.${userMeta.username}.linger = true;
+  # agt 的 deploy key 只下发到 VPS：它能 root 部署 dev/agt，但进不了
+  # Mac/homelab/USB。adminKeys 仍由 user-group.nix 统一管理。
+  users.users = {
+    ${userMeta.username} = {
+      linger = true;
+      openssh.authorizedKeys.keys = lib.mkAfter globals.auth.deployKeys;
+    };
+    root.openssh.authorizedKeys.keys = lib.mkAfter globals.auth.deployKeys;
+  };
 
   # 所有 VPS 角色都是 headless：关闭文档产物。
   documentation = {

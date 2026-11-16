@@ -42,7 +42,7 @@ in
         hashedPasswordFile = config.sops.secrets.ME_PASS_HASH.path;
         # 设置 root shell 为 zsh
         shell = pkgs.zsh;
-        openssh.authorizedKeys.keys = globals.auth.sshPublicKeys;
+        openssh.authorizedKeys.keys = globals.auth.adminKeys;
       };
 
       "${username}" = {
@@ -54,7 +54,7 @@ in
         shell = pkgs.zsh;
 
         # !!! 需要添加该配置，否则无法使用 ssh luck@host 登录目标host
-        openssh.authorizedKeys.keys = globals.auth.sshPublicKeys;
+        openssh.authorizedKeys.keys = globals.auth.adminKeys;
 
         extraGroups = [
           username
