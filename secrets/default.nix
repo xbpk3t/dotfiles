@@ -159,6 +159,10 @@ in
       # Both are read by systemd LoadCredential (root-only).
       NEZHA_JWT_SK = mkRootSecret "nezha/jwt_sk";
       NEZHA_AGENT_SK = mkRootSecret "nezha/agent_sk";
+
+      # Healthchecks.io dead-man switches
+      HEALTHCHECKS_VPS_DEV = mkRootSecret "healthchecks/vps_dev";
+      HEALTHCHECKS_VPS_AGT = mkRootSecret "healthchecks/vps_agt";
     };
   };
 }

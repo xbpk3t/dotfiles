@@ -19,6 +19,11 @@ in
     inherit (hostMeta) acmeEmail;
   };
 
+  modules.infra.healthchecks = {
+    enable = true;
+    urlFile = config.sops.secrets.HEALTHCHECKS_VPS_AGT.path;
+  };
+
   services = {
     # 上海 VPS 上 1.1.1.1/8.8.8.8 的 DoT 不可达；改用国内 DNS + 明文 53，
     # 让 mihomo TUN 的 dns-hijack(any:53) 接管解析。

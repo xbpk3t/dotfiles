@@ -1,4 +1,5 @@
 {
+  config,
   hostMeta,
   userMeta,
   ...
@@ -16,7 +17,13 @@
       };
     };
 
-    infra.singbox-server.enable = true;
+    infra = {
+      singbox-server.enable = true;
+      healthchecks = {
+        enable = true;
+        urlFile = config.sops.secrets.HEALTHCHECKS_VPS_DEV.path;
+      };
+    };
   };
 
   services = {
