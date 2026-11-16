@@ -231,6 +231,23 @@ locals {
     }
   }
 
+  flux_deploy_keys = {
+    main_flux_system = {
+      repository = "dotfiles"
+      id         = 141188933
+      title      = "flux-system-main-flux-system-./manifests/flux"
+      read_only  = true
+      key        = "ecdsa-sha2-nistp384 AAAAE2VjZHNhLXNoYTItbmlzdHAzODQAAAAIbmlzdHAzODQAAABhBOtgkfTqP1OD9vnggFhPlhCE9njFMGptYkj/UOlZhLaUa/6jSN4r46E7JATGQdzS2+WTHt2BRFcNvbQIdfy0FQOsmc50bItgkeQfVSHaa1Ut+yJhvKSOtF3J6oraG/wG8A=="
+    }
+    paas_flux_system = {
+      repository = "dotfiles"
+      id         = 141459881
+      title      = "flux-system-PaaS-flux-system-./manifests/flux"
+      read_only  = true
+      key        = "ecdsa-sha2-nistp384 AAAAE2VjZHNhLXNoYTItbmlzdHAzODQAAAAIbmlzdHAzODQAAABhBNLZSoe/Sl+yltlSfVly+EdE3R6EAVZyBS9MYDvOrmsJ1g3GyaCy/tBNE3fnflXbT5gA6/vw3jeyck+6HIljehroXKciV8mqEma+KV982KxiIPSe1ciAgiLEoeys+bkq9Q=="
+    }
+  }
+
   # Inventory only. Do not create github_actions_secret resources in this stack;
   # GitHub cannot read secret values back and Terraform state would become part
   # of the secret blast radius.

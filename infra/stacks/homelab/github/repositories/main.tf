@@ -59,6 +59,19 @@ resource "github_repository_environment" "environments" {
   prevent_self_review = each.value.prevent_self_review
 }
 
+resource "github_repository_deploy_key" "flux" {
+  for_each = local.flux_deploy_keys
+
+  repository = github_repository.repositories[each.value.repository].name
+  title      = each.value.title
+  key        = each.value.key
+  read_only  = each.value.read_only
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
 resource "github_branch_protection" "dotfiles_main" {
   repository_id           = github_repository.repositories["dotfiles"].node_id
   pattern                 = "main"

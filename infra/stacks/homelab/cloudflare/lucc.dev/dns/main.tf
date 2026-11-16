@@ -28,6 +28,11 @@ moved {
 }
 
 moved {
+  from = cloudflare_dns_record.k3s_lucc_dev_a_04
+  to   = cloudflare_dns_record.records["k3s"]
+}
+
+moved {
   from = cloudflare_dns_record.mm_lucc_dev_a_05
   to   = cloudflare_dns_record.records["memos"]
 }

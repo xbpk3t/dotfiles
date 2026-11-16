@@ -5,6 +5,10 @@ vars:
   # 配置：SOPS 源文件路径（可通过调用时传入 SOPS_FILE 覆盖，默认指向本项目 secrets 目录）
   SOPS_FILE: '{{.SOPS_FILE | default (printf "%s/secrets/secrets.yaml" .USER_WORKING_DIR)}}'
 
+includes:
+  # 引入 k8s 相关任务
+  k8s: ./Taskfile.sops.k8s.yml
+
 tasks:
   # 编辑 secrets 文件
   edit:

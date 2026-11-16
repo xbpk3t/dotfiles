@@ -25,3 +25,10 @@ import {
   to = github_repository_environment.environments[each.key]
   id = "${each.value.repository}:${each.value.environment}"
 }
+
+import {
+  for_each = local.flux_deploy_keys
+
+  to = github_repository_deploy_key.flux[each.key]
+  id = "${each.value.repository}:${each.value.id}"
+}

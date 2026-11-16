@@ -23,6 +23,7 @@ let
       "secrets/default.nix"
       "modules/nixos/kernel"
       "modules/nixos/infra"
+      "modules/nixos/ms/k3s.nix"
     ];
     home-modules = map mylib.relativeToRoot [
       "secrets/default.nix"

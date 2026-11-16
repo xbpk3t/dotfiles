@@ -14,7 +14,7 @@
 
 - `legacy root modules`
   - 当前已经在跑的 Terraform 目录，先保留原样
-  - 例如 `minio/tf-s3-backend`
+  - 例如 `minio/tf-s3-backend`、`minio/loki`
 - `future stacks`
   - 新增的基础设施优先放到 `stacks/` 下
   - 由 Terramate 负责做 stack 发现、批量执行、后续统一模板化
@@ -25,6 +25,7 @@
 infra/
   minio/
     tf-s3-backend/
+    loki/
   stacks/
 ```
 
@@ -45,6 +46,7 @@ infra/
 已纳入 Terramate 编目，但暂时仍按 legacy root module 运行：
 
 - `minio/tf-s3-backend`
+- `minio/loki`
 
 每个 legacy 目录都加了 `stack.tm.hcl`，目的是先把元数据和后续迁移入口固定下来，不在第一步改 state 布局。
 
@@ -107,8 +109,9 @@ infra/.inventory/2026-03-26/
 这里采用增量迁移，不做一次性翻修：
 
 1. 保留 `minio/tf-s3-backend` 作为 bootstrap stack
-2. 新增资源统一进入 `stacks/`
-3. 等某个 legacy root module 需要大改时，再迁到 `stacks/` 下
+2. 保留 `minio/loki` 作为 legacy stack
+3. 新增资源统一进入 `stacks/`
+4. 等某个 legacy root module 需要大改时，再迁到 `stacks/` 下
 
 这样做可以避免：
 
