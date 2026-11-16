@@ -28,11 +28,6 @@ moved {
 }
 
 moved {
-  from = cloudflare_dns_record.g_lucc_dev_a_03
-  to   = cloudflare_dns_record.records["grafana"]
-}
-
-moved {
   from = cloudflare_dns_record.mm_lucc_dev_a_05
   to   = cloudflare_dns_record.records["memos"]
 }
