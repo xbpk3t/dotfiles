@@ -22,6 +22,9 @@
       healthchecks = {
         enable = true;
         urlFile = config.sops.secrets.HEALTHCHECKS_VPS_DEV.path;
+        # If the dashboard is down while the host is up, ping /fail so
+        # Healthchecks alerts instead of reporting a healthy host.
+        healthUrl = "http://127.0.0.1:8008/";
       };
     };
   };

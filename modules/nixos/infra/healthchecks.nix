@@ -16,6 +16,11 @@ let
   pingScript = pkgs.writeShellScript "healthchecks-ping" ''
     set -eu
     url="$(cat "$CREDENTIALS_DIRECTORY/ping-url")"
+    ${lib.optionalString (cfg.healthUrl != null) ''
+      if ! ${pkgs.curl}/bin/curl -fsS --max-time 5 --retry 2 ${lib.escapeShellArg cfg.healthUrl} >/dev/null; then
+        exec ${pkgs.curl}/bin/curl -fsS --retry 3 --max-time 10 "$url/fail"
+      fi
+    ''}
     exec ${pkgs.curl}/bin/curl -fsS --retry 3 --max-time 10 "$url"
   '';
 in
@@ -32,6 +37,16 @@ in
       type = lib.types.str;
       default = "1min";
       description = "How often to ping Healthchecks. Keep it shorter than the check period.";
+    };
+
+    healthUrl = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = ''
+        Optional local health URL. If it does not return 2xx, ping
+        <ping-url>/fail instead of the success URL. Use this to make the
+        dead-man switch reflect a local service, not just host liveness.
+      '';
     };
   };
 
