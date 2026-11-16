@@ -323,7 +323,7 @@ let
       # PMTU 探测：0 表示启用（推荐）
       "net.ipv4.ip_no_pmtu_disc" = 0;
 
-      # 路由转发：交由各功能模块（NAT、k3s）自行管理，baseline 不做默认
+      # 路由转发：交由各功能模块（如 NAT）自行管理，baseline 不做默认
 
       # 邻居表回收策略
       "net.ipv4.neigh.default.gc_stale_time" = 120;
