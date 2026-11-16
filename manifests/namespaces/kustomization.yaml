@@ -4,18 +4,11 @@ resources:
   - resources/apps.yaml
   - resources/authentication.yaml
   - resources/backup.yaml
-  - resources/dashboard.yaml
   - resources/flux-system.yaml
   - resources/headlamp.yaml
   - resources/database.yaml
-  - resources/home-automation.yaml
-  - resources/kubevirt.yaml
-  - resources/media.yaml
-  - resources/minio-operator.yaml
   - resources/monitoring.yaml
   - resources/networking.yaml
-  - resources/notification.yaml
-  - resources/policy.yaml
   - resources/storage.yaml
   - resources/system.yaml
   # - resources/vpn-apps.yaml
