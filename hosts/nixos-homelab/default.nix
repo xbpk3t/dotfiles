@@ -18,8 +18,8 @@ in
     useNetworkd = true; # 改用 systemd-networkd，更轻量
     networkmanager.enable = false;
     useDHCP = true; # 由 hardware.nix 的接口/或 networkd profiles 提供 DHCP
-    # 重要：避免 /etc/resolv.conf 指向 127.0.0.53（stub）
-    # k3s 的 CoreDNS 默认 forward 到 /etc/resolv.conf；若是 stub 会在 Pod 内超时
+    # 避免 /etc/resolv.conf 指向 127.0.0.53（stub），显式使用 systemd-resolved
+    # 的真实上游解析结果。
     useHostResolvConf = lib.mkForce false;
     inherit nameservers;
   };
@@ -27,14 +27,9 @@ in
   services.resolved = {
     enable = true;
     settings.Resolve.FallbackDNS = nameservers;
-    # 重要：关闭本地 stub（127.0.0.53），避免集群 DNS 走到不可达的本地回环
-    # settings = {
-    #   DNSStubListener = "no";
-    # };
   };
 
-  # 重要：显式使用 systemd-resolved 的真实上游解析结果
-  # Why：避免 /etc/resolv.conf 指向 stub-resolv.conf，导致 CoreDNS 解析超时
+  # 显式使用 systemd-resolved 的真实上游解析结果，避免依赖 stub-resolv.conf。
   environment.etc."resolv.conf".source = lib.mkForce "/run/systemd/resolve/resolv.conf";
 
   # 启动与电源
@@ -102,18 +97,6 @@ in
 
     # 私网 homelab：显式关闭内置防火墙
     security.enableFirewall = false;
-
-    ms = {
-      # k3s 控制面：只设置 enable/role，其它配置在模块内固化。
-      # [LUC-496] 停用 k3s；代码保留，enable = false 会让 services.k3s 及其
-      # systemd unit / firewall 规则在下次 switch 时全部消失。
-      k3s = {
-        enable = false;
-        role = "server";
-        # serverIP 由 inventory 注入，避免多处重复维护
-        serverPort = 6443;
-      };
-    };
   };
 
   # system.stateVersion 由 inventory 注入，统一管理升级锚点

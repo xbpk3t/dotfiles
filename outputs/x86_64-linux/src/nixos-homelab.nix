@@ -24,7 +24,6 @@ let
       "modules/nixos/infra"
 
       "modules/nixos/desktop/nvidia.nix"
-      "modules/nixos/ms/k3s.nix"
     ];
     home-modules = map mylib.relativeToRoot [
       "secrets/default.nix"
@@ -35,16 +34,11 @@ let
     ];
   };
 
-  mkNodeModule =
-    name: node:
-    {
-      # What：hostName 由 inventory 注入。
-      # Why：避免单机调试时为空，同时统一节点元数据入口。
-      networking.hostName = node.hostName or name;
-    }
-    // lib.optionalAttrs (node ? k3s) {
-      modules.ms.k3s = node.k3s;
-    };
+  mkNodeModule = name: node: {
+    # What：hostName 由 inventory 注入。
+    # Why：避免单机调试时为空，同时统一节点元数据入口。
+    networking.hostName = node.hostName or name;
+  };
 
   mkNodeRole =
     name: node:

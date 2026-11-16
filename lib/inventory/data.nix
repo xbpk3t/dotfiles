@@ -72,24 +72,6 @@ in
         # LA→China 跨境链路 RTT，用于 BDP 计算 socket buffer 上限
         rttMs = 150;
       };
-      k3s = {
-        # What：控制面地址（server/agent 都需要）。
-        # Why：所有节点统一走 tailnet，避免多网段/非对称路由导致的 flannel/CNI 不稳定。
-        serverIP = "100.81.204.63";
-        # What：节点自身 IP（k3s --node-ip）。
-        # Why：固定为 tailscale IP，确保 Pod/Service 跨节点网络走同一张网卡。
-        nodeIP = tailscale.ip;
-        # What：对外可见的节点 IP（k3s --node-external-ip）。
-        # Why：VPS 具备公网能力，保留 ExternalIP 便于对外展示/诊断。
-        nodeExternalIP = primaryIp;
-        # 业务角色（用于 node-role.kubernetes.io/<role>=true）
-        roles = [ "dev" ];
-        # 拓扑标签：region=NA，zone=LA
-        region = "NA";
-        zone = "LA";
-        # 固定 node-name，避免依赖主机 hostname
-        nodeName = hostName;
-      };
       tailscale = {
         ip = "100.101.189.7";
         derpDomain = "derp-nixos-vps-dev.lucc.dev";
@@ -123,7 +105,7 @@ in
       stateVersion = "26.05";
       primaryIp = "1.15.64.188";
       acmeEmail = "yyzw@live.com";
-      # agent 角色：dagu + headed Chromium/opencli + Tailscale DERP；不跑 singbox/k3s。
+      # agent 角色：dagu + headed Chromium/opencli + Tailscale DERP；不跑 singbox。
       role = "agent";
       user = commonUser;
       time = commonTime;

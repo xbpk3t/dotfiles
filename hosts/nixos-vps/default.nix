@@ -17,12 +17,6 @@
     };
 
     infra.singbox-server.enable = true;
-
-    ms.k3s = {
-      enable = false;
-      role = "agent";
-    }
-    // (hostMeta.k3s or { });
   };
 
   services.cron = {

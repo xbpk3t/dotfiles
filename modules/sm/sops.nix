@@ -66,8 +66,6 @@ in
         SUB_DOGEGG = mkRootSecret "proxy/sub/dogegg";
         SUB_DOING = mkRootSecret "proxy/sub/doing";
         SUB_IKUUU = mkRootSecret "proxy/sub/ikuuu";
-        # k3s
-        K3S_TOKEN = mkRootSecret "k3s/token";
         # Tailscale
         TAILSCALE_AUTH_KEY = mkRootSecret "tailscale/auth_key";
         # ACME（derper 证书 DNS-01）：CF token（复用 secrets/default.nix 的 acme/cloudflare_env）。
