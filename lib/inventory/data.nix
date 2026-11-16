@@ -144,6 +144,8 @@ in
         # 2026-11-14 首次 join 后 `tailscale ip -4`。
         ip = "100.66.22.92";
       };
+      # Mac 的 ssh.nix 读取该字段；只对交互式高延迟 host opt-in。
+      ssh.multiplex = true;
     };
   };
   # nixos-usb：便携 U 盘系统（GNOME desktop），跨机器即插即用。
