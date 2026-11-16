@@ -153,6 +153,12 @@ in
       # Tailscale
       TAILSCALE_AUTH_KEY = mkRootSecret "tailscale/auth_key";
       TAILSCALE_API_KEY = mkUserSecret "tailscale/access_key";
+
+      # Nezha monitoring
+      # Dashboard JWT signing key; agent SK shared by hub and every agent.
+      # Both are read by systemd LoadCredential (root-only).
+      NEZHA_JWT_SK = mkRootSecret "nezha/jwt_sk";
+      NEZHA_AGENT_SK = mkRootSecret "nezha/agent_sk";
     };
   };
 }

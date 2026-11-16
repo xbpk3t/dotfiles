@@ -3,6 +3,7 @@
   lib,
   globals,
   hostMeta,
+  mylib,
   pkgs,
   stateVersion,
   userMeta,
@@ -74,6 +75,21 @@ in
     infra = {
       nix-tools.enable = lib.mkDefault true;
       singbox-server.enable = lib.mkDefault false;
+
+      # Nezha roles come from inventory: exactly one node declares
+      # nezha.hub = true, and every VPS runs an agent. The dashboard
+      # address is derived from that hub node, not hardcoded here.
+      nezha = {
+        hub = {
+          enable = lib.mkDefault (hostMeta.nezha.hub or false);
+          port = lib.mkDefault (hostMeta.nezha.port or 8008);
+        };
+        agent = {
+          enable = true;
+          server = mylib.inventory.nezha.server;
+          uuid = hostMeta.nezha.uuid or null;
+        };
+      };
     };
   };
 
