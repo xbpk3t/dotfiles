@@ -40,8 +40,6 @@ in
   # 分组入口（简化调用）：mylib.inventory.<group>
   "nixos-avf" = groupOrEmpty "nixos-avf";
   "nixos-vps" = groupOrEmpty "nixos-vps";
-  "nixos-homelab" = groupOrEmpty "nixos-homelab";
-  "nixos-ws" = groupOrEmpty "nixos-ws";
   "nixos-usb" = groupOrEmpty "nixos-usb";
   "macos-ws" = groupOrEmpty "macos-ws";
   "sm-vps" = groupOrEmpty "sm-vps";

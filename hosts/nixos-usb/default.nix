@@ -61,7 +61,7 @@ in
     inherit nameservers;
   };
 
-  # ── 桌面：GNOME（与 nixos-ws 一致的体验）──
+  # ── 桌面：GNOME（与工作站一致的体验）──
   services = {
     xserver.enable = true;
     displayManager.gdm.enable = true;
@@ -70,7 +70,7 @@ in
     resolved.enable = true;
   };
 
-  # ── 输入法：fcitx5（与 nixos-ws 一致）──
+  # ── 输入法：fcitx5（与工作站一致）──
   i18n.inputMethod = {
     enable = true;
     type = "fcitx5";

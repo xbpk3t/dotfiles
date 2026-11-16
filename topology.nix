@@ -72,21 +72,6 @@ in
     # —— 自动提取的 NixOS 主机：补接口定义（host 用 NetworkManager/DHCP，无静态接口）——
     # 注意：这些节点由 nixosConfigurations 自动提取，这里只补 interfaces，
     # 不会与自动字段冲突（原节点无 interfaces）。
-    # nixos-ws / nixos-homelab：设备暂缺，inventory 已移除；恢复设备时取消注释。
-    # nixos-ws = {
-    #   interfaces = {
-    #     eth0 = {
-    #       network = "lan";
-    #     };
-    #   };
-    # };
-    # nixos-homelab = {
-    #   interfaces = {
-    #     eth0 = {
-    #       network = "lan";
-    #     };
-    #   };
-    # };
     # nixos-usb：自动提取（deviceType=nixos → snowflake 图标 + card），
     # 只补 hardware.info 和 eth0 接口；NetworkManager 模式提取不到接口
     nixos-usb = {
@@ -133,9 +118,6 @@ in
 
       connections = {
         eth1 = [
-          # nixos-ws / nixos-homelab 设备暂缺，恢复时取消注释。
-          # (mkConnection "nixos-ws" "eth0")
-          # (mkConnection "nixos-homelab" "eth0")
           (mkConnection "nixos-usb" "eth0")
           (mkConnection "macos-ws" "en0")
           (mkConnection "nixos-avf" "eth0")
