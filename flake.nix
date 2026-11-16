@@ -159,23 +159,11 @@ rec {
             };
 
             config.globals = {
-              workspace = {
-                projectRoot = "/home/luck/Desktop/dotfiles";
-                projectDir = "/home/luck/Desktop/dotfiles";
-              };
-
               # Gateway 模型 id：claude/codex/worktrunk 共用，升级只改这里。
               # 存裸 id；claude 的 alias 再拼 CC 侧 1M context 标记 [1m]。
               models = {
                 dsf = "deepseek-v4.1-flash";
-
-                claude = "claude-opus-5-5";
                 gpt = "gpt-6-astra";
-                grok = "grok-4.7";
-
-                mimo = "mimo-v2.6-pro";
-                hy = "hy4";
-                glm = "glm-5.3-flash";
               };
 
               networking.nameservers = [
