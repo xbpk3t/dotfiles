@@ -7,6 +7,14 @@
 with lib;
 let
   cfg = config.modules.networking.tailscale;
+
+  # Keep derper's STUN replies out of mihomo's policy-routing table.
+  derperPolicyRoute = pkgs.writeShellScript "derper-policy-route" ''
+    op=''${1:?add|del}
+    uid="$(${pkgs.coreutils}/bin/id -u derper)"
+    ${pkgs.iproute2}/bin/ip rule "$op" uidrange "$uid-$uid" lookup main priority 100 2>/dev/null || true
+    ${pkgs.iproute2}/bin/ip -6 rule "$op" uidrange "$uid-$uid" lookup main priority 100 2>/dev/null || true
+  '';
 in
 {
   # https://nixos.wiki/wiki/Tailscale
@@ -190,7 +198,30 @@ in
 
         tailscale-derper = {
           requires = [ "acme-${cfg.derper.domain}.service" ];
-          after = [ "acme-${cfg.derper.domain}.service" ];
+          after = [
+            "acme-${cfg.derper.domain}.service"
+          ]
+          ++ lib.optional config.services.mihomo.enable "derper-policy-route.service";
+        };
+      }
+      // lib.optionalAttrs config.services.mihomo.enable {
+        # mihomo 的 policy routing（table 2022）会接管 wildcard UDP socket 的源地址选择。
+        # derper 的 STUN listener 绑定 [::]:stunPort，回包按 UID 选路由时会走 Meta，
+        # 导致客户端收不到 STUN 响应（TCP DERP 不受影响）。给 derper UID 加高优先级
+        # 规则，强制走 main 表（ens5），保留 mihomo 对其他流量的接管。
+        derper-policy-route = {
+          description = "Route derper packets outside mihomo TUN";
+          wantedBy = [ "multi-user.target" ];
+          after = [
+            "network.target"
+            "mihomo.service"
+          ];
+          serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+            ExecStart = "${derperPolicyRoute} add";
+            ExecStop = "${derperPolicyRoute} del";
+          };
         };
       };
 

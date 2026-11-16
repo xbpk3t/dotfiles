@@ -1,9 +1,27 @@
 {
+  config,
   hostMeta,
+  pkgs,
   ...
 }:
 let
   tailnetIp = hostMeta.tailscale.ip or "127.0.0.1";
+
+  proxyUrl = "http://127.0.0.1:7890";
+  noProxy = "localhost,127.0.0.1,::1,100.64.0.0/10,10.0.0.0/8,192.168.0.0/16,198.18.0.0/16";
+
+  # 备份 agt 上的项目、未提交 WIP 和 agent 状态到 R2（restic 仓库 rclone:r2:agt-backup）。
+  backupScript = pkgs.writeShellScript "restic-backup-agt" ''
+    export PATH=${config.home.profileDirectory}/bin:/run/current-system/sw/bin:/usr/bin:/bin
+    exec ${pkgs.restic}/bin/restic -r rclone:r2:agt-backup backup \
+      ${config.home.homeDirectory}/Desktop \
+      ${config.home.homeDirectory}/.claude \
+      ${config.home.homeDirectory}/.codex \
+      ${config.home.homeDirectory}/.config/opencode \
+      --password-file ${config.sops.secrets.RESTIC_PASSWORD.path} \
+      --exclude .git --exclude node_modules \
+      --exclude dist --exclude public --exclude .DS_Store --tag agt
+  '';
 in
 {
   modules = {
@@ -74,5 +92,40 @@ in
       network.enable = true;
       ssh.enable = true;
     };
+  };
+
+  # Restic 备份：Desktop + agent state → R2。
+  home.packages = [ pkgs.restic ];
+
+  systemd.user.services.restic-backup = {
+    Unit = {
+      Description = "Restic backup of Desktop + agent state to R2";
+      After = [ "sops-nix.service" ];
+    };
+    Service = {
+      Type = "oneshot";
+      ExecStart = "${backupScript}";
+    };
+  };
+
+  systemd.user.timers.restic-backup = {
+    Unit.Description = "Daily restic backup";
+    Timer = {
+      OnCalendar = "*-*-* 04:30:00";
+      Persistent = true;
+    };
+    Install.WantedBy = [ "timers.target" ];
+  };
+
+  # agt 在 Shanghai：mihomo TUN 对部分直连不可靠，显式给 DAG/CLI 设置 mixed-port 代理。
+  home.sessionVariables = {
+    HTTP_PROXY = proxyUrl;
+    HTTPS_PROXY = proxyUrl;
+    ALL_PROXY = proxyUrl;
+    NO_PROXY = noProxy;
+    http_proxy = proxyUrl;
+    https_proxy = proxyUrl;
+    all_proxy = proxyUrl;
+    no_proxy = noProxy;
   };
 }
