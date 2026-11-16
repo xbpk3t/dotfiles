@@ -7,7 +7,7 @@ let
   #  - 需要把磁盘分区、文件系统、挂载选项等纳入版本管理，确保同一配置在新盘/新实例上可一键复现。
   #- 何时“可以不用”：
   #  - 机器已手工分好区、文件系统稳定且你不打算自动重装；只想管理系统层配置。
-  #  - 桌面/工作站场景（如你的 nixos-ws）常在首次安装时手动分区，后续就靠 hardware-configuration.nix 里的fileSystems 和 swapDevices 记录即可，不需要 disko。
+  #  - 桌面/工作站场景（如工作站）常在首次安装时手动分区，后续就靠 hardware-configuration.nix 里的fileSystems 和 swapDevices 记录即可，不需要 disko。
   #- 对 VPS：
   #  - 如果你未来想“一条命令重建同规格 VPS”（含分区），保留disko.nix 很有价值，尤其云厂商重装/换实例时。
   #  - 如果该 VPS 磁盘布局简单且不打算自动化重装，完全可以移除 disko.nix，改成手动管理或只保留 fileSystems/swapDevices（用 hardware.nix 生成的传统方式）。
