@@ -51,6 +51,13 @@ locals {
 
   # ACL 规则
   acl = {
+    # Tailscale Services 要求 service host 是 tagged device。
+    # 用专用 tag 只给 nixos-vps-dev，避免影响其他设备的 owner；
+    # 单用户 tailnet 下 tag owner 直接给 tailnet owner。
+    tagOwners = {
+      "tag:svc-9router" = ["xbpk3t@github"]
+    }
+
     # 基础连通：全网全通（保持现状）
     # 注意：授予 autogroup:internet 才能用 exit node。
     # 默认不给全线的 exit 权限，仅手机单独开放 → 其他设备行为不变。
@@ -72,11 +79,18 @@ locals {
     # 用用户身份（xbpk3t）而非 tag —— 单用户 tailnet 无 churn 风险，更简单。
     # 注意：autoApprover 只在新广告时生效；已存在的广告需手动在控制台启用或重新 up。
     autoApprovers = {
+      # Service host 自动批准：只有带 tag:svc-9router 的 node 能广告 svc:9router。
+      # 这样 9router dashboard 的 service host 不需要每次手动 approve。
+      services = {
+        "svc:9router" = ["tag:svc-9router"]
+      }
       # tailnet owner 的 loginName（API 确认）：xbpk3t@github
-      exitNode = ["xbpk3t@github"]
+      # dev 打上 tag 后 owner 变成 tag，不再匹配 xbpk3t@github，所以把 tag 也加进来，
+      # 保持 exit node / 0.0.0.0/0 路由的自动批准不回归。
+      exitNode = ["xbpk3t@github", "tag:svc-9router"]
       routes = {
-        "0.0.0.0/0" = ["xbpk3t@github"]
-        "::/0"      = ["xbpk3t@github"]
+        "0.0.0.0/0" = ["xbpk3t@github", "tag:svc-9router"]
+        "::/0"      = ["xbpk3t@github", "tag:svc-9router"]
       }
     }
     ssh = [{
