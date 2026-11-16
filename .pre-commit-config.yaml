@@ -33,13 +33,6 @@ repos:
         stages: [pre-commit, pre-push, manual]
         args: ["--maxkb=1024", "--enforce-all"]
 
-      - id: check-added-large-files
-        name: check for added large files
-        entry: check-added-large-files
-        language: system
-        stages: [pre-commit, pre-push, manual]
-        args: ["--maxkb=5120", "--enforce-all"]
-
       - id: trailing-whitespace # 移除尾部空格符
         name: trim trailing whitespace
         entry: trailing-whitespace-fixer
