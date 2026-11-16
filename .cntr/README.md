@@ -43,13 +43,17 @@ CNTR_DIR=./.cntr CNTR_DRY_RUN=true task cntr:reconcile
 | Stack | 容器 | 入口 | 网络 | 持久化 | 备份 | 更新 |
 |-------|------|------|------|--------|------|------|
 | `caddy` | caddy:2 | `:80/:443`；api/rsshub/as.lucc.dev | edge | `./data`, `./config` | — | 手动（不在 watchtower） |
-| `axonhub` | axonhub:latest, postgres:15-alpine, 9router:latest, resin:latest, cpa:latest, cpamp:latest, register-lite:latest | `127.0.0.1:8090/20228/2260/8317/18317/8788` + edge | edge | named volumes + `./CPA/auth-dir`, `./resin/*` | `backup-pgsql.nu axonhub`（`axonhub-pgsql`） | watchtower: axonhub/9router/resin/cpa；其余手动 |
+| `axonhub` | axonhub:latest, postgres:15-alpine, 9router:latest, resin:latest, cpa:latest | `127.0.0.1:8090/20228/2260/8317` + edge；9router dashboard 走 tailscale serve | edge | named volumes + `./CPA/auth-dir`, `./resin/*` | `backup-pgsql.nu axonhub`（`axonhub-pgsql`） | watchtower: axonhub/9router/resin/cpa；postgres 手动 |
 | `rsshub` | rsshub:latest, browserless:1.43-chrome-stable | edge（caddy 反代） | edge | — | — | watchtower |
 | `openlist` | openlistteam/openlist:latest | edge（caddy 反代） | edge | `./data`, `./downloads` | — | watchtower |
 | `rustdesk` | rustdesk/rustdesk-server（无 tag） | `:21114-21119` | `rust_desk_net` | named volumes | — | 手动 |
 | `actions-runner` | myoung34/github-runner:2.338.2 | 无 | default | `runner_data` + `~/.opencli/xiaoyuzhou.json` | — | 手动；**必须**保持 `DISABLE_AUTO_UPDATE` |
 | `watchtower` | containrrr/watchtower:latest | 无 | default | `docker.sock` | — | 自身不纳入 allowlist |
 | `golang` | 本地 dev sandbox（profiles） | 本地端口 | `golang_backend` | named volumes | — | 不纳入 reconcile（`CNTR_INCLUDE_DEV=true` 才包含） |
+
+> 2026-11-16 移除 `cpamp`、`register-lite`（原因见 `.cntr/axonhub/compose.yml` 头部）。
+> 需要时从 git history 恢复；`cpamp_data` / `grok2api-data` 卷若仍在磁盘，需单独备份/删除，
+> `cntr:reconcile` 不会删卷。
 
 ## 边界与约定
 
@@ -60,6 +64,11 @@ CNTR_DIR=./.cntr CNTR_DRY_RUN=true task cntr:reconcile
 - **watchtower allowlist 是显式的**（`.cntr/watchtower/compose.yml`）：
   `axonhub, 9router, rsshub, resin, cpa, openlist`。新增服务不会自动更新，
   必须显式加白名单。
+- **9router Dashboard**：容器仍只绑 `127.0.0.1:20228`；在 VPS 上执行一次
+  `sudo tailscale serve --bg 20228`，浏览器打开 `https://<host>.<tailnet>.ts.net/`。
+  备选 `ssh -L 20228:localhost:20228 nixos-vps-dev`。
+  不用 `services.tailscale.serve`：它面向 Tailscale Services（`svc:` VIP），当前只出
+  HTTP 且需要在 admin console 定义服务，不如经典 `tailscale serve` 直接。
 - **版本策略**：
   - 有状态/入口/CI 关键服务保持 pin：`actions-runner 2.338.2`、`caddy:2`、
     `postgres:15-alpine`、`browserless:1.43-chrome-stable`。

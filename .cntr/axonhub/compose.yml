@@ -3,24 +3,21 @@
 #   client → api.lucc.dev → Caddy → AxonHub → 各个 upstream provider
 #
 # 同文件包含：
-#   9router — ds4f proxy pool 转发 sidecar（仅 127.0.0.1:20228，SSH tunnel 管理）
+#   9router — ds4f proxy pool 转发 sidecar（127.0.0.1:20228；推荐 tailscale serve 暴露到 tailnet）
 #   resin — 自建 proxy pool 网关，替代 Vercel/CF relay（仅 127.0.0.1:2260）
 #     9router → resin:2260（HTTP 正向代理）→ proxy node → OpenCode Zen
 #     Dashboard: ssh -L 2260:localhost:2260 nixos-vps-dev → http://localhost:2260
-#   register-lite — Grok 账号注册机（仅 127.0.0.1:8788，SSH tunnel 管理）
-#     SSH: ssh -L 8788:localhost:8788 nixos-vps-dev
-#     注册完成后在「账号池」→ 导出 CPA → cp 到 CPA/auth-dir/
-#   cpa-manager-plus — CPA Full Mode 管理/可观测/xAI 巡检（仅 127.0.0.1:18317）
-#     SSH: ssh -L 18317:localhost:18317 nixos-vps-dev
-#     浏览器: http://localhost:18317/management.html
-#     Admin Key = ${DEFAULT_SK}；首次进面板配置 CPA：
-#       URL = http://cli-proxy-api:8317
-#       Management Key = 明文 DEFAULT_SK（与 CPA remote-management 对应）
-#     xAI 巡检为 billing-first（不调推理）；已禁用 ywddd/grok-inspection 插件。
+#   cpa — CLI Proxy API（仅 127.0.0.1:8317，SSH tunnel 管理）
+#
+# 已移除（2026-11-16）：
+#   cpamp         — CPA Full Mode 管理面板（usage/xAI 巡检）；不再需要
+#   register-lite — Grok 账号注册机；不再需要新账号注册
+#   需要时从 git history 恢复（`git log -- .cntr/axonhub/compose.yml`）。
 #
 # 9router 架构：AxonHub → http://9router:20128/v1 → 9router → Resin → proxy node → OpenCode Zen
 #   分离理由：只有 ds4f 走 proxy pool，其他 model 直连不走 9router。
-#   9router/Resin 不暴露公网，Dashboard 均通过 SSH tunnel 访问。
+#   Resin 不暴露公网，Dashboard 通过 SSH tunnel 访问。
+#   9router Dashboard 推荐用 `tailscale serve`（见 9router 段），不再依赖 SSH tunnel。
 #   Resin 接入方式：
 #     HTTP 正向代理：9router pool → 通过 resin:2260（HTTP CONNECT）→ 代理节点
 #     反向代理（备选）：http://resin:2260/<token>/<Platform>/<protocol>/<target>
@@ -107,7 +104,10 @@ services:
   # 网络：只绑 127.0.0.1，Dashboard 通过 SSH tunnel 访问。
   #       9router/Resin/AxonHub 在同一 Docker internal network，直接 DNS 解析。
   #
-  # Dashboard 访问：
+  # Dashboard 访问（推荐）：
+  #   VPS 上执行一次 `sudo tailscale serve --bg 20228`
+  #   浏览器打开 https://<host>.<tailnet>.ts.net/
+  # 备选：
   #   ssh -L 20228:localhost:20228 nixos-vps-dev
   #   然后浏览器打开 http://localhost:20228
   #
@@ -240,130 +240,6 @@ services:
         max-file: "5"
 
 
-  # CPA Manager Plus Full Mode — 管理面板 + usage 持久化 + xAI 账单巡检/冷却
-  #
-  # 架构：CPAMP → http://cli-proxy-api:8317（同 compose default 网络 DNS）
-  # 网络：仅 default，不进 edge；端口只绑 127.0.0.1，经 SSH tunnel 访问。
-  #
-  # Dashboard 访问：
-  #   ssh -L 18317:localhost:18317 nixos-vps-dev
-  #   http://localhost:18317/management.html
-  #   Admin Key = ${DEFAULT_SK}
-  #
-  # 首次 Setup（UI，不写进 env）：
-  #   1. 打开 management.html，用 Admin Key 登录
-  #   2. CPA URL = http://cli-proxy-api:8317
-  #   3. CPA Management Key = 明文 DEFAULT_SK（config 里是 bcrypt 哈希）
-  #   4. 确认 Monitoring / Auth Files / xAI 巡检可用
-  #
-  # 注意：
-  #   - 持久化 /data（usage.sqlite + data.key）；丢 data.key 则已存 Management Key 不可恢复
-  #   - 巡检是 billing-first，不是对话活测（原 grok-inspection 插件已禁用）
-  #   - 官方参考：docker-compose.manager.yml / installer Full Mode
-  cpamp:
-    image: seakee/cpa-manager-plus:latest
-    container_name: cpamp
-    ports:
-      - "127.0.0.1:18317:18317"
-    volumes:
-      - cpamp_data:/data
-    environment:
-      HTTP_ADDR: "0.0.0.0:18317"
-      USAGE_DB_PATH: /data/usage.sqlite
-      CPA_MANAGER_DATA_KEY_PATH: /data/data.key
-      # 与 register-lite / 运维习惯统一；明文来自宿主机 env DEFAULT_SK
-      CPA_MANAGER_ADMIN_KEY: ${DEFAULT_SK}
-      USAGE_COLLECTOR_MODE: auto
-      USAGE_RESP_QUEUE: usage
-      USAGE_RESP_POP_SIDE: right
-      USAGE_BATCH_SIZE: "100"
-      USAGE_POLL_INTERVAL_MS: "500"
-      USAGE_QUERY_LIMIT: "50000"
-      USAGE_CORS_ORIGINS: "*"
-    # 仅 default：与 CPA 同网即可解析 cli-proxy-api，不经 edge/Caddy
-    depends_on:
-      cpa:
-        condition: service_healthy
-    restart: unless-stopped
-    # Why: 复用 AxonHub/CPA 的 OOM 教训；Full Mode 有 SQLite + usage 采集，单独封顶。
-    mem_limit: 1g
-    memswap_limit: 1g
-    healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:18317/health"]
-      interval: 10s
-      timeout: 3s
-      retries: 3
-      start_period: 40s
-    logging:
-      driver: json-file
-      options:
-        max-size: "20m"
-        max-file: "5"
-
-
-  # Grok Register Lite — Grok 账号注册机
-  #
-  # ssh -L 8788:localhost:8788 nixos-vps-dev
-  # http://localhost:8788/admin
-  register-lite:
-    image: puritan3116/groklite8:latest
-    container_name: grok-register-lite
-    ports:
-      - "127.0.0.1:8788:8788"
-    shm_size: "1gb"
-    security_opt:
-      - seccomp:unconfined
-    volumes:
-      - grok2api-data:/data
-    environment:
-      TZ: Asia/Shanghai
-
-      # Lite 模式
-      GROK_REGISTER_LITE: "1"
-      GROK_REGISTER_LITE_HOST: "0.0.0.0"
-      GROK_REGISTER_LITE_PORT: "8788"
-      GROK_REGISTER_LITE_DATA_DIR: "/data"
-      GROK_REGISTER_LITE_DB: "/data/register_lite.sqlite3"
-      GROK_REGISTER_LITE_OUTPUT_DIR: "/data/outputs"
-      GROK2API_AUTH_FILE: "/data/outputs/grok2api_auth.json"
-
-      # 管理员
-      GROK_REGISTER_ADMIN_BASE_PATH: "/admin"
-      GROK_REGISTER_ADMIN_BOOTSTRAP_PASSWORD: ${DEFAULT_SK}
-      GROK_REGISTER_ADMIN_FORCE_RESET: "1"
-
-      # 内联过盾（Camoufox + Turnstile Solver）
-      GROK_REGISTER_ALLOW_PRIVATE_URLS: "1"
-      GROK_REGISTER_ALLOW_HTTP_URLS: "1"
-      GROK2API_CAPTCHA_PROVIDER: "local"
-      CAPTCHA_PROVIDER: "local"
-      GROK2API_INLINE_SOLVER: "1"
-      GROK2API_LOCAL_SOLVER_URL: "http://127.0.0.1:5072"
-      LOCAL_SOLVER_URL: "http://127.0.0.1:5072"
-      TURNSTILE_HOST: "127.0.0.1"
-      TURNSTILE_PORT: "5072"
-      TURNSTILE_THREAD: ${TURNSTILE_THREAD:-1}
-      TURNSTILE_BROWSER_TYPE: "camoufox"
-      TURNSTILE_LAZY: "1"
-      TURNSTILE_IDLE_SEC: "180"
-      TURNSTILE_BROWSER_AUTO_FETCH: "1"
-      XDG_CACHE_HOME: "/data/cache"
-      PLAYWRIGHT_BROWSERS_PATH: "/data/cache/ms-playwright"
-
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8788/admin/api/session"]
-      interval: 30s
-      timeout: 5s
-      start_period: 90s
-      retries: 5
-    logging:
-      driver: json-file
-      options:
-        max-size: "20m"
-        max-file: "5"
-
-
 networks:
   edge:
     name: edge
@@ -376,7 +252,4 @@ volumes:
   axonhub_data:
   postgres_data:
   9router-data:
-  grok2api-data:
   cpa_plugins:
-  # Full Mode 持久化 usage.sqlite + data.key（与服务 mounts 名一致）
-  cpamp_data:
