@@ -3,7 +3,7 @@
 #   client → api.lucc.dev → Caddy → AxonHub → 各个 upstream provider
 #
 # 同文件包含：
-#   9router — ds4f proxy pool 转发 sidecar（127.0.0.1:20228；推荐 tailscale serve 暴露到 tailnet）
+#   9router — ds4f proxy pool 转发 sidecar（127.0.0.1:20228；Dashboard: http://9router.tailf19540.ts.net/）
 #   resin — 自建 proxy pool 网关，替代 Vercel/CF relay（仅 127.0.0.1:2260）
 #     9router → resin:2260（HTTP 正向代理）→ proxy node → OpenCode Zen
 #     Dashboard: ssh -L 2260:localhost:2260 nixos-vps-dev → http://localhost:2260
@@ -17,7 +17,7 @@
 # 9router 架构：AxonHub → http://9router:20128/v1 → 9router → Resin → proxy node → OpenCode Zen
 #   分离理由：只有 ds4f 走 proxy pool，其他 model 直连不走 9router。
 #   Resin 不暴露公网，Dashboard 通过 SSH tunnel 访问。
-#   9router Dashboard 推荐用 `tailscale serve`（见 9router 段），不再依赖 SSH tunnel。
+#   9router Dashboard 走 Tailscale Service `svc:9router`（见 9router 段）。
 #   Resin 接入方式：
 #     HTTP 正向代理：9router pool → 通过 resin:2260（HTTP CONNECT）→ 代理节点
 #     反向代理（备选）：http://resin:2260/<token>/<Platform>/<protocol>/<target>
@@ -101,15 +101,15 @@ services:
   # 9router sidecar — 仅为 ds4f 提供 proxy pool 转发能力
   #
   # 架构：AxonHub → http://9router:20128/v1 → 9router → Resin → proxy node → OpenCode Zen
-  # 网络：只绑 127.0.0.1，Dashboard 通过 SSH tunnel 访问。
+  # 网络：只绑 127.0.0.1；Dashboard 通过 Tailscale Service 暴露（见下），SSH tunnel 为备选。
   #       9router/Resin/AxonHub 在同一 Docker internal network，直接 DNS 解析。
   #
-  # Dashboard 访问（推荐）：
-  #   VPS 上执行一次 `sudo tailscale serve --bg 20228`
-  #   浏览器打开 https://<host>.<tailnet>.ts.net/
-  # 备选：
-  #   ssh -L 20228:localhost:20228 nixos-vps-dev
-  #   然后浏览器打开 http://localhost:20228
+  # Dashboard 访问：
+  #   http://9router.tailf19540.ts.net/
+  #   Tailscale Service svc:9router 由 infra/stacks/homelab/tailscale/tailnet
+  #   定义；host 侧 services.tailscale.serve 把 tcp:80 转到 127.0.0.1:20228。
+  #   当前是 HTTP（Tailscale Service 端点暂不支持前端 TLS termination）。
+  # 备选：ssh -L 20228:localhost:20228 nixos-vps-dev → http://localhost:20228
   #
   # 使用方法（Resin 版）：
   #   1. 浏览器连 Resin Dashboard → 订阅管理 → 添加 proxy 订阅 URL
@@ -142,8 +142,8 @@ services:
       ENABLE_REQUEST_LOGS: false
       OBSERVABILITY_ENABLED: true
 
-      BASE_URL: http://localhost:20228
-      NEXT_PUBLIC_BASE_URL: http://localhost:20228
+      BASE_URL: ${NINEROUTER_URL:-http://localhost:20228}
+      NEXT_PUBLIC_BASE_URL: ${NINEROUTER_URL:-http://localhost:20228}
     logging:
       driver: json-file
       options:

@@ -14,6 +14,7 @@
       GITHUB_TOKEN=${config.sops.placeholder.GITHUB_TOKEN}
       RESEND_TOKEN=${config.sops.placeholder.RESEND_TOKEN}
       EDGE_NETWORK_EXTERNAL=true
+      NINEROUTER_URL=http://9router.tailf19540.ts.net
     '';
   };
 

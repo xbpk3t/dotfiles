@@ -19,11 +19,25 @@
     infra.singbox-server.enable = true;
   };
 
-  services.cron = {
-    enable = true;
-    mailto = "";
-    systemCronJobs = [
-      "0 3 * * * ${userMeta.username} nu /home/${userMeta.username}/.cntr/backup-pgsql.nu axonhub"
-    ];
+  services = {
+    # 9router dashboard on the tailnet:
+    #   Tailscale Service svc:9router is defined in
+    #   infra/stacks/homelab/tailscale/tailnet (tailscale_service.ninerouter).
+    #   This host advertises tcp:80 -> http://127.0.0.1:20228, so the URL is
+    #   http://9router.tailf19540.ts.net/
+    #   Note: the current NixOS module emits HTTP (no TLS termination) for
+    #   Service endpoints (nixpkgs#530174).
+    tailscale.serve = {
+      enable = true;
+      services."9router".endpoints."tcp:80" = "http://127.0.0.1:20228";
+    };
+
+    cron = {
+      enable = true;
+      mailto = "";
+      systemCronJobs = [
+        "0 3 * * * ${userMeta.username} nu /home/${userMeta.username}/.cntr/backup-pgsql.nu axonhub"
+      ];
+    };
   };
 }

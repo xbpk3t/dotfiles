@@ -43,7 +43,7 @@ CNTR_DIR=./.cntr CNTR_DRY_RUN=true task cntr:reconcile
 | Stack | 容器 | 入口 | 网络 | 持久化 | 备份 | 更新 |
 |-------|------|------|------|--------|------|------|
 | `caddy` | caddy:2 | `:80/:443`；api/rsshub/as.lucc.dev | edge | `./data`, `./config` | — | 手动（不在 watchtower） |
-| `axonhub` | axonhub:latest, postgres:15-alpine, 9router:latest, resin:latest, cpa:latest | `127.0.0.1:8090/20228/2260/8317` + edge；9router dashboard 走 tailscale serve | edge | named volumes + `./CPA/auth-dir`, `./resin/*` | `backup-pgsql.nu axonhub`（`axonhub-pgsql`） | watchtower: axonhub/9router/resin/cpa；postgres 手动 |
+| `axonhub` | axonhub:latest, postgres:15-alpine, 9router:latest, resin:latest, cpa:latest | `127.0.0.1:8090/20228/2260/8317` + edge；9router dashboard: http://9router.tailf19540.ts.net/ | edge | named volumes + `./CPA/auth-dir`, `./resin/*` | `backup-pgsql.nu axonhub`（`axonhub-pgsql`） | watchtower: axonhub/9router/resin/cpa；postgres 手动 |
 | `rsshub` | rsshub:latest, browserless:1.43-chrome-stable | edge（caddy 反代） | edge | — | — | watchtower |
 | `openlist` | openlistteam/openlist:latest | edge（caddy 反代） | edge | `./data`, `./downloads` | — | watchtower |
 | `rustdesk` | rustdesk/rustdesk-server（无 tag） | `:21114-21119` | `rust_desk_net` | named volumes | — | 手动 |
@@ -64,11 +64,15 @@ CNTR_DIR=./.cntr CNTR_DRY_RUN=true task cntr:reconcile
 - **watchtower allowlist 是显式的**（`.cntr/watchtower/compose.yml`）：
   `axonhub, 9router, rsshub, resin, cpa, openlist`。新增服务不会自动更新，
   必须显式加白名单。
-- **9router Dashboard**：容器仍只绑 `127.0.0.1:20228`；在 VPS 上执行一次
-  `sudo tailscale serve --bg 20228`，浏览器打开 `https://<host>.<tailnet>.ts.net/`。
-  备选 `ssh -L 20228:localhost:20228 nixos-vps-dev`。
-  不用 `services.tailscale.serve`：它面向 Tailscale Services（`svc:` VIP），当前只出
-  HTTP 且需要在 admin console 定义服务，不如经典 `tailscale serve` 直接。
+- **9router Dashboard**：`http://9router.tailf19540.ts.net/`
+  - Tailnet 侧：`infra/stacks/homelab/tailscale/tailnet` 的
+    `tailscale_service.ninerouter` 定义 `svc:9router`（`tcp:80`）。
+  - Host 侧：`hosts/nixos-vps/default.nix` 的 `services.tailscale.serve` 把
+    `tcp:80` 转到 `http://127.0.0.1:20228`。
+  - 当前是 HTTP（NixOS 的 Service 端点暂不支持前端 TLS termination，
+    nixpkgs#530174）；tailnet 内由 WireGuard 加密。首次可能需要在 admin console
+    批准 `nixos-vps-dev` 作为 service host。
+  - 备选：`ssh -L 20228:localhost:20228 nixos-vps-dev` → `http://localhost:20228`。
 - **版本策略**：
   - 有状态/入口/CI 关键服务保持 pin：`actions-runner 2.338.2`、`caddy:2`、
     `postgres:15-alpine`、`browserless:1.43-chrome-stable`。
