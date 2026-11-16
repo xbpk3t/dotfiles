@@ -299,6 +299,10 @@ in
           ANTHROPIC_BASE_URL = "https://api.lucc.dev";
           ANTHROPIC_AUTH_TOKEN = "$(cat ${config.sops.secrets.LLM_AxonHub.path})";
 
+          # docs-cli / wiki digest 走 OpenAI 兼容接口时需要这两个名字。
+          OPENAI_API_KEY = "$(cat ${config.sops.secrets.LLM_AxonHub.path})";
+          LLM_AxonHub = "$(cat ${config.sops.secrets.LLM_AxonHub.path})";
+
           # AnyRouter 备用 key（cc-any alias 用）
           LLM_ANY_TOKEN = "$(cat ${config.sops.secrets.LLM_ANY_TOKEN.path})";
         };

@@ -46,7 +46,6 @@ in
 
     # 角色相关默认值：host 用普通赋值覆盖，不需要 mkForce。
     cron.enable = lib.mkDefault false;
-    nfs.server.enable = lib.mkDefault false;
   };
 
   modules = {

@@ -3,9 +3,7 @@
   lib,
   globals,
   hostMeta,
-  mylib,
   pkgs,
-  userMeta,
   ...
 }:
 let
@@ -28,22 +26,6 @@ in
       # globals 里的 IPv6 resolver 在 Shanghai 不可达，只取 IPv4。
       DNS = lib.mkForce (lib.filter (n: !(lib.hasInfix ":" n)) nameservers);
       DNSOverTLS = lib.mkForce "no";
-    };
-
-    # docs-images 共享：Mac 通过 Tailscale 用 NFSv4 挂载（macOS 自带客户端 + LaunchDaemon 自动重挂）。
-    # 只允许 macos-ws 的 tailnet IP；all_squash 把 Mac 的 uid 映射到本机 luck(1000)，
-    # 这样 Finder 里保存的截图/新图在 VPS 上也归 luck 所有。
-    # macOS 的 NFS 客户端只支持 v4.0，且默认用非保留端口；所以额外开 vers4.0 和 insecure。
-    nfs = {
-      server = {
-        enable = true;
-        exports = ''
-          /home/${userMeta.username}/Desktop/docs-images ${
-            mylib.inventory."macos-ws"."macos-ws".ssh.host
-          }/32(rw,all_squash,anonuid=1000,anongid=100,no_subtree_check,fsid=0,insecure)
-        '';
-      };
-      settings.nfsd."vers4.0" = "y";
     };
 
     # 手机 herdr-app 走 Tailscale SSH 直连（无需在手机放私钥）。
@@ -69,8 +51,6 @@ in
       openssl
     ];
   };
-
-  networking.firewall.interfaces.tailscale0.allowedTCPPorts = [ 2049 ];
 
   # 固定 derper UID，供 mihomo exclude-uid 使用；当前自动分配就是 993。
   users.users.derper.uid = 993;

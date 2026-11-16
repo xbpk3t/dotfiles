@@ -14,6 +14,7 @@ in
     };
 
     devops = {
+      cf.enable = true;
       helix.enable = true;
       rclone.enable = true;
       ssh = {

@@ -13,6 +13,11 @@ in
     CF_R2_AK = "$(cat ${config.sops.secrets.CF_R2_AK.path})";
     CF_R2_SK = "$(cat ${config.sops.secrets.CF_R2_SK.path})";
 
+    # docs-cli / wiki digest 使用的标准名字。
+    R2_AK = "$(cat ${config.sops.secrets.CF_R2_AK.path})";
+    R2_SK = "$(cat ${config.sops.secrets.CF_R2_SK.path})";
+    R2_ENDPOINT = "https://$(cat ${config.sops.secrets.CF_ACCOUNT.path}).r2.cloudflarestorage.com";
+
     # 看看能否不用这个 CLOUDFLARE_API_TOKEN 的 key? 感觉会很不清晰，容易混淆
     CLOUDFLARE_API_TOKEN = "$(cat ${config.sops.secrets.CF_TOKEN_READ_WRITE_ALL.path})";
 
