@@ -1,0 +1,141 @@
+---
+frontmatter:
+  role: atom
+  desc: 别人的 repo → 可借鉴实践候选清单（nix/absorb；只分析不改代码）；一条候选 = 证据 + 做法 + 本地落点 + 改法 + 验证 + 风险
+
+what:
+  is: |
+    给定一个外部 repo，扫描其 Nix/dotfiles 工程实践，产出可执行的「候选吸收清单」。
+    每条候选必须回答：哪来的（证据）、解决什么问题、我现在怎么做、要改成什么样、怎么验证、值不值得。
+  not: |
+    不是 repo 测评（好不好用 → repo/explore、repo/tools-eval）
+    不是逐文件通读（大 repo 先 map 后抽样）
+    不是直接改 dotfiles（落地由后续 phase 另行执行）
+
+gate:
+  - qs: 目标 repo 能实际读取吗（本地 clone 或 gh api）？
+    fail: 只有 URL 不可访问 → 降级为「仅基于入口文档 + 目录结构」模式，并在输出首行标注降级原因
+  - qs: 本地 dotfiles 现状读过了吗（flake.nix / outputs / modules / hosts / home / lib / tests / pkgs）？
+    fail: 未读 → 先读结构（结构全读，关键文件按 constraint 抽样）；flake-parts 仓库漏读 outputs/ 与 lib/ 会把已有能力误判为缺失
+
+input:
+  params:
+    - repo: owner/repo        # 必填
+    - repos: 可选，同作者多 repo 作为一组时传数组；报告按 A/B 前缀双锚定，精读上限按组均分
+    - focus: 可选，限定优先扫描的维度（如 testing / flake-ci / secrets）
+
+workflow:
+  - phase: 0 锚定
+    steps:
+      - 读目标 repo 的 flake.nix、入口文档（README.md 或 AGENTS.md / PostInstall.md 等，任一存在即可）、目录树，产出架构摘要
+      - 记录 pin 状态：有 flake.lock 且被跟踪 → 记 nixpkgs rev/tag，并核对 flake.nix 声明 ref 与 lock 的 original.ref 是否一致（不一致必须单独标注）；无 lock 或未跟踪 → 记 flake.nix 声明 ref + HEAD 日期 + 是否自我声明 rolling；跨 channel 或不同 mirror 时只给「日期差 + channel 差异 + 更新策略对比」，不直接比 rev 大小；上述情况都要在 D1 给「pin 策略」结论
+      - 读本地 dotfiles 的 flake.nix + outputs/ + modules/ + hosts/ + home/ + lib/ + tests/ + pkgs/ 结构，列出「我已有能力」清单
+      - 对比两边，给每项能力标：已有 / 没有 / 做法不同
+      - focus 参数存在时，把对应维度提到扫描顺序最前
+
+  - phase: 1 维度扫描（固定 7 维，逐维给结论；该维无内容时写「目标无此项」+ 一句判断）
+    steps:
+      - D1 flake 与质量闸门：(a) 结构：inputs 组织、outputs 拆分、overlay、pin 策略；(b) 质量闸门：flake check、CI、eval warnings、SBOM（flakebom）、策略审计（flakeaudit）、secure-build；术语不适用就写 N/A，「无 CI / 无 checks」是合法结论
+      - D2 模块系统：modules 分层、hosts/inventory、enable 开关、跨平台（nixos / darwin / home-manager）
+      - D3 home-manager：文件组织、program 模块、dotfile 处理；目标只有单平台内嵌 HM 时，只评组织与 secret 注入，不强制跨平台
+      - D4 测试：先给「目标测试成熟度：无 / 基础 / 强」；再列 nix-unit / VM tests / eval checks / CI gate；成熟度为「无」时只记录差距，不强行找候选
+      - D5 secrets：sops / agenix 用法、注入边界；必须看「每个 secret 文件的可解密主体是谁、creation_rules 是否最小权限（blast radius）」，证据指向 .sops.yaml
+      - D6 打包：pkgs / overlay / nvfetcher / 自建包维护
+      - D7 工程化：task runner、pre-commit、docs、agent 配置（AGENTS.md / CLAUDE.md）
+
+  - phase: 2 候选提炼
+    steps:
+      - 每维最多 3 条候选；无候选写「无值得吸收项」+ 一句理由
+      - 每条候选必须带 repo 内文件路径（有行号更好）或 URL 作为证据
+      - 标注与本地现状的关系：新增 / 替换 / 改进；本地已实现的进「已有跳过」节，不占候选位
+      - 每条候选给出本地落点（真实目录或明确新增路径）
+      - 每条候选给验证方式（命令 / 观察指标）；P1 及以上必填；文档/流程类候选可用「文件存在 + 链接可达 + 一次 agent 任务观察」代替命令
+
+  - phase: 3 排序与风险
+    steps:
+      - 判定 rubric：P0 = 高收益 + 低成本 + 无迁移风险；P1 = 高/中收益 + 中成本，或有明确前置；P2 = 中/低收益，或高成本/需长期观察
+      - 每条候选另标状态：ready / blocked；blocked 保留 P 级并写 blocked_by，但不进入「立刻能做」
+      - 会破坏现有 flake / hosts / secrets，或依赖不可获取/不可复现的外部工具（付费、私有、需登录）的候选，一律 blocked
+
+constraint:
+  must:
+    - "每条候选必须有证据（repo 路径 / URL / 代码片段），零证据条目直接丢弃"
+    - "每条候选必须给本地落点，精确到目录或文件（如 modules/nixos/、home/base/）"
+    - "必须区分「值得吸收」「看看就好」「已有跳过」三类，后者各自成节"
+    - "大 repo 先 map 后抽样：nix 文件数 >200 或 nix 总行数 >5000 时最多精读 30 个（多 repo 一组按组均分），其余按目录结构推断并标注为推断；全仓总文件数只用于识别资源目录，不触发抽样"
+    - "抽样顺序：flake.nix → 入口文档 → modules/common 入口 → host 配置 → pkgs/overlays → 应用模块；禁止随机抽样"
+    - "pin/兼容性判断只在有 flake.lock 时给 rev 差距；无 lock 时给 pin 策略结论，不臆造 rev"
+  must-not:
+    - "禁止凭训练记忆描述 repo 内容，必须实际读取"
+    - "禁止修改配置文件；只允许写报告到调用方指定的 .absorb/ 路径"
+    - "禁止把「它用了 X」直接等同于「我该用 X」，必须给本地收益判断"
+    - "禁止输出无落点的泛泛建议（如「模块化更好」「测试很重要」）"
+
+output:
+  format: md
+  struct:
+    - key: repo
+      val: "<owner/repo @ commit sha，扫描日期>"
+    - key: pin
+      val: "<lock rev / 声明 ref / 是否跟踪 lock / 与本地差距>"
+    - key: 架构摘要
+      val: "<一句话 + 目录树关键分支>"
+    - key: 逐维结论
+      val: "<D1–D7 每维一行：目标做法/成熟度 + 结论>"
+    - key: 已有跳过
+      val: "<做法 | 本地对应 | 结论>"
+    - key: 候选清单
+      val: "<id | 维度 | 做法 | 证据 | 关系 | 本地落点 | 改法 | 验证 | 收益 | 成本 | 优先级 | 状态>"
+    - key: 看看就好
+      val: "<做法 | 不吸收理由>"
+    - key: blocked
+      val: "<候选 | 阻塞原因 | 前置条件>"
+  template: |
+    ## 0. 锚定
+    - 目标：<owner/repo @ sha，扫描日期>（降级模式需标注；多 repo 用 A/B 分列）
+    - pin：<lock rev / 声明 ref / 是否一致 / 是否跟踪 lock / 与本地差距>
+    - 规模：<nix 文件数 / 总行数> 精读：<n>
+    - 架构摘要：<一句话 + 目录树关键分支>
+    - 本地已有能力：<清单>
+
+    ### 逐维结论
+    | 维度 | 目标做法 / 成熟度 | 结论（有候选 / 无值得吸收 / 目标无此项 / N/A） |
+    |------|-----------------|------------------------------------------|
+
+    ## 1. 已有跳过
+    | 做法 | 本地对应 | 结论 |
+    |------|---------|------|
+
+    ## 2. 候选清单
+    | id | 维度 | 做法（它怎么做的） | 证据 | 关系 | 本地落点 | 改法 | 验证 | 收益 | 成本 | 优先级 | 状态 |
+    |----|------|------------------|------|------|---------|------|------|------|------|--------|------|
+    | C1 | D1 flake | … | path/to/file.nix:12 | 新增 | flake.nix | … | `nix flake check` | 高 | 低 | P0 | ready |
+
+    ## 3. 看看就好
+    | 做法 | 不吸收理由 |
+    |------|-----------|
+
+    ## 4. blocked
+    | 候选 | 阻塞原因 | 前置条件 |
+    |------|---------|---------|
+
+    ## 5. 一句话结论
+    <这个 repo 最值得抄的 1–2 件事>
+
+self-check:
+  - 每条候选都有可定位的证据？
+  - 每条候选的落点都是本地真实存在或明确新增的路径？
+  - 已有能力是否都进了「已有跳过」而不是候选表？
+  - P1 及以上候选是否都有验证方式？
+  - blocked 是否单独标注且没混进「立刻能做」？
+  - 无 lock / 无 CI / 无测试时，是否只记录差距而没有强行编候选？
+
+hint:
+  - if: 候选集中在单一维度
+    then: 说明该 repo 价值面较窄，后续投入可降低
+  - if: blocked 涉及 flake 架构
+    then: 先做架构评估，再排期吸收
+  - if: 候选数 > 15
+    then: 只保留 P0/P1 进入落地，其余归档
+  - if: 目标测试成熟度为「无」
+    then: 把「补测试」单列成本地改进项，不算作从该 repo 吸收
