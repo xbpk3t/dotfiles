@@ -45,7 +45,6 @@ in
       -A INPUT -i lo -j ACCEPT
       -A INPUT -j YJ-FIREWALL-INPUT
       -A INPUT -i tailscale0 -j ACCEPT
-      -A INPUT -i incusbr0 -j ACCEPT
       -A INPUT -p icmp -j ACCEPT
       # fail2ban 动态 ban 链（先于放行）
       -A INPUT -j f2b-sshd

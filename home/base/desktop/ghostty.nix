@@ -172,11 +172,11 @@ in
   # ghostty 或 cmux 任一启用即可触发 Ghostty 配置部署：
   #   - macOS: brew 管理 Ghostty.app，Nix 管理配置文件（供 cmux 共享）
   #   - Linux: programs.ghostty 完整管理（包 + 配置 + shell 集成）
-  config = mkIf (cfg.enable || pkgs.stdenv.isDarwin) (mkMerge [
+  config = mkIf (cfg.enable || pkgs.stdenv.hostPlatform.isDarwin) (mkMerge [
     # ─── macOS ──────────────────────────────────────────────
     # Ghostty 配置格式为 key=value（类似 env），直接用 generators.toKeyValue 渲染。
     # cmux (libghostty) 也读取同一份配置，见 cmux.nix。
-    (mkIf pkgs.stdenv.isDarwin {
+    (mkIf pkgs.stdenv.hostPlatform.isDarwin {
       #
       # !!! macOS 上 nixpkgs 的 ghostty 包不受支持，通过 Brew Cask 安装。
       #     但配置文件通过 Nix 统一管理（ghostty 和 cmux 共享）。
@@ -191,7 +191,7 @@ in
     # ─── Linux ──────────────────────────────────────────────
     # Nixpkgs 支持 Linux 上直接管理 Ghostty 包。
     # programs.ghostty.settings 自动写入 ~/.config/ghostty/config。
-    (mkIf pkgs.stdenv.isLinux {
+    (mkIf pkgs.stdenv.hostPlatform.isLinux {
       programs.ghostty = {
         # https://github.com/NixOS/nixpkgs/issues/388984
         enable = true;

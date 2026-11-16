@@ -92,7 +92,7 @@ in
       #   # 需要浏览器/手机 web 视图的 host 再取消注释。
       #   # herdrPlugins.herdr-web-ui
       # ]
-      # ++ lib.optional pkgs.stdenv.isDarwin pkgs.herdr-focus-notify;
+      # ++ lib.optional pkgs.stdenv.hostPlatform.isDarwin pkgs.herdr-focus-notify;
 
       # reviewr 配置写入 ~/.config/herdr/plugins/config/persiyanov.reviewr/config.toml
       # pluginSettings."persiyanov.reviewr" = {
@@ -363,8 +363,8 @@ in
           # macOS 上 Claude 隐藏光标时，修复 IME 候选窗口不跟随的问题。
           # 副作用：vim 普通模式下会多一个光标。
           # Linux / remote server 无本机 IME 候选窗，关掉避免无意义副作用。
-          reveal_hidden_cursor_for_cjk_ime = pkgs.stdenv.isDarwin;
-          cjk_ime_agents = lib.optionals pkgs.stdenv.isDarwin [ "claude" ];
+          reveal_hidden_cursor_for_cjk_ime = pkgs.stdenv.hostPlatform.isDarwin;
+          cjk_ime_agents = lib.optionals pkgs.stdenv.hostPlatform.isDarwin [ "claude" ];
         };
       };
     };
@@ -383,7 +383,7 @@ in
     # .env 是 KEY=value 格式 → 用 formats.keyValue 结构化生成。
     # 用 xdg.configFile 而非 home.file：herdr-nix 模块对 json/toml/yaml 之外的
     # 插件配置（如本 .env）明确文档化此逃生舱，且 $XDG_CONFIG_HOME 路径本仓统一走它。
-    # xdg.configFile."herdr/plugins/config/herdr-focus-notify/.env" = lib.mkIf pkgs.stdenv.isDarwin {
+    # xdg.configFile."herdr/plugins/config/herdr-focus-notify/.env" = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
     #   # 注意：keyValue 不支持注释行（会当 key 解析），说明放 nix 层。
     #   force = true;
     #   source = (pkgs.formats.keyValue { }).generate "herdr-focus-notify.env" {

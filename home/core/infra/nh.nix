@@ -52,7 +52,14 @@ in
         enable = true;
         clean = {
           enable = true;
-          extraArgs = "--keep-since 7d --keep 5";
+          # 必须用 list：字符串在 Darwin 会被当成单个参数传给 launchd，
+          # 导致 `nh clean user '--keep-since 7d --keep 5'` 解析失败（exit 2）。
+          extraArgs = [
+            "--keep-since"
+            "7d"
+            "--keep"
+            "5"
+          ];
         };
         flake = "${config.home.homeDirectory}/Desktop/dotfiles";
       };

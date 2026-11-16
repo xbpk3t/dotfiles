@@ -18,7 +18,7 @@ in
     ## 2、Colima 在 colima start（默认行为）时，总是会尝试把配置写回 ~/.colima/default/colima.yaml，所以无论我们用 YAML还是nix，都需要 colima start --save-config=false 才能正常启动，否则会因为无论如何我们都用哪种方案，都会因为 colima 默认要写回配置，而 symlink 指向不可写的 nix store，导致报错
     services.colima = {
       # 只有在 mac，才有必要用 colima，在 linux下没必要，所以这么设置
-      enable = pkgs.stdenv.isDarwin;
+      enable = pkgs.stdenv.hostPlatform.isDarwin;
 
       profiles.default = {
         isActive = true;

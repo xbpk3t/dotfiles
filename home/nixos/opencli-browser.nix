@@ -58,6 +58,8 @@ in
   config = lib.mkIf cfg.enable {
     home.packages = with pkgs; [
       chromium
+      # opencli CLI 由 pnpm 安装，运行时需要 node；dagu 的 wiki-digest 也依赖它。
+      nodejs_24
       x11vnc
     ];
 

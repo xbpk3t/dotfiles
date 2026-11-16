@@ -7,12 +7,14 @@
 }:
 let
   isSystemConfig = config ? system;
+  # neededForUsers 只属于 sops-nix 的 NixOS 模块；nix-darwin 不认这个选项。
+  isNixOS = isSystemConfig && pkgs.stdenv.hostPlatform.isLinux;
   inherit (userMeta) username;
   # 平台相关配置
   platform = {
-    userGroup = if pkgs.stdenv.isDarwin then "staff" else "users";
-    rootGroup = if pkgs.stdenv.isDarwin then "wheel" else "root";
-    homePath = if pkgs.stdenv.isDarwin then "/Users" else "/home";
+    userGroup = if pkgs.stdenv.hostPlatform.isDarwin then "staff" else "users";
+    rootGroup = if pkgs.stdenv.hostPlatform.isDarwin then "wheel" else "root";
+    homePath = if pkgs.stdenv.hostPlatform.isDarwin then "/Users" else "/home";
   };
 
   # $HOME/.config/sops-nix/secrets/
@@ -45,7 +47,7 @@ in
     # darwin和linux对于sops的默认path不同
     # failed to create reader for decrypting sops data key with age: no identity matched any of the recipients. Did not find keys in locations 'SOPS_AGE_SSH_PRIVATE_KEY_FILE','/Users/luck/.ssh/id_rsa', 'SOPS_AGE_KEY','SOPS_AGE_KEY_FILE', and 'SOPS_AGE_KEY_CMD'.
     age.keyFile =
-      if pkgs.stdenv.isDarwin then
+      if pkgs.stdenv.hostPlatform.isDarwin then
         "${platform.homePath}/${username}/Library/Application Support/sops/age/keys.txt"
       else
         "${platform.homePath}/${username}/.config/sops/age/keys.txt";
@@ -66,6 +68,10 @@ in
     secrets = {
       # Me
       ME_PASS = mkUserSecret "me/pass";
+      # NixOS 用户密码 hash（root + luck），由 hashedPasswordFile 消费。
+      # neededForUsers 要求 owner=root，且必须在建用户前解密。
+      ME_PASS_HASH =
+        (mkRootSecret "me/pass_hash") // lib.optionalAttrs isNixOS { neededForUsers = true; };
       ME_PWGEN = mkUserSecret "me/pwgen";
       ME_SK = mkUserSecret "me/sk";
 

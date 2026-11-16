@@ -12,7 +12,7 @@ in
 
   config.home.packages =
     with pkgs;
-    lib.optionals (cfg.enable && stdenv.isLinux) [
+    lib.optionals (cfg.enable && stdenv.hostPlatform.isLinux) [
       # bpftool 查看 BPF 程序，排查 BPF 相关问题时有用
       # sudo bpftool prog show
       # bpftool map，同上场景

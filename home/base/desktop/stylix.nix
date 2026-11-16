@@ -7,7 +7,7 @@
 }:
 with lib;
 let
-  isLinux = pkgs.stdenv.isLinux;
+  isLinux = pkgs.stdenv.hostPlatform.isLinux;
   cfg = config.modules.desktop.stylix;
 in
 {

@@ -508,18 +508,20 @@ let
     # https://zed.dev/docs/remote-development
     ssh_connections = [
       {
-        host = "100.81.204.63";
+        host = "nixos-vps-agt";
         args = [
         ];
         projects = [
           {
             paths = [
               "/home/luck/Desktop/docs"
-              "/home/luck/Desktop/docs-alfred"
             ];
           }
+          {
+            paths = [ "/home/luck/Desktop/docs-alfred" ];
+          }
         ];
-        nickname = "homelab";
+        nickname = "agt";
       }
     ];
 
@@ -1258,8 +1260,8 @@ in
         # macOS 上 nixpkgs 的 zed 版本过于落后且与 brew cask 冲突，
         # 所以 macOS 不走 HM 管理 app bundle（仅管理配置文件，由 home.file 提供），
         # 直接使用 brew cask 安装的 /Applications/Zed.app
-        enable = pkgs.stdenv.isLinux;
-        package = lib.mkIf pkgs.stdenv.isLinux pkgs.zed-editor;
+        enable = pkgs.stdenv.hostPlatform.isLinux;
+        package = lib.mkIf pkgs.stdenv.hostPlatform.isLinux pkgs.zed-editor;
 
         extraPackages = lspPackages;
 

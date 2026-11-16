@@ -26,18 +26,6 @@ in
     };
   };
 
-  nixos-ws = {
-    nixos-ws = {
-      hostName = "nixos-ws";
-      stateVersion = "24.11";
-      primaryIp = "192.168.234.194";
-      ssh.user = "luck";
-      user = commonUser;
-      time = commonTime;
-      editor = commonEditor;
-    };
-  };
-
   macos-ws = {
     macos-ws = {
       hostName = "macos-ws";
@@ -73,10 +61,6 @@ in
       user = commonUser;
       time = commonTime;
       editor = commonEditor;
-      # sm-vps 试验床：仅本节点开 Incus（I1 + P-b）。
-      # enable 只装 daemon；首次 deploy 后在机上 `incus admin init --minimal`，
-      # 再 launch Debian 系统容器。不要写进全局 kernel/vm.nix。
-      incus.enable = true;
       networking = {
         # 目标机默认公网出口，由 `ip -o route show default` 确认为 ens3。
         externalInterface = "ens3";
@@ -160,34 +144,10 @@ in
         # 2026-11-14 首次 join 后 `tailscale ip -4`。
         ip = "100.66.22.92";
       };
+      # Mac 的 ssh.nix 读取该字段；只对交互式高延迟 host opt-in。
+      ssh.multiplex = true;
     };
   };
-  nixos-homelab = {
-    nixos-homelab = rec {
-      hostName = "nixos-homelab";
-      stateVersion = "24.11";
-      # What：部署/连接默认地址。
-      # Why：homelab 走 tailnet，避免依赖公网/NAT。
-      primaryIp = "100.81.204.63";
-      user = commonUser;
-      time = commonTime;
-      editor = commonEditor;
-      k3s = {
-        # What：控制面地址（server/agent 都需要）。
-        # Why：统一 tailnet，确保控制面与 flannel 通信稳定。
-        serverIP = tailscale.ip;
-        # What：节点自身 IP（k3s --node-ip）。
-        # Why：固定为 tailscale IP，确保 Pod/Service 跨节点网络走同一张网卡。
-        nodeIP = tailscale.ip;
-        # 固定 node-name，避免依赖主机 hostname
-        nodeName = hostName;
-      };
-      tailscale = {
-        ip = "100.81.204.63";
-      };
-    };
-  };
-
   # nixos-usb：便携 U 盘系统（GNOME desktop），跨机器即插即用。
   # 部署/代理都走 tailnet（primaryIp 是 tailnet IP，插到任意机器都能 SSH 到）。
   nixos-usb = {
@@ -206,12 +166,10 @@ in
 
   # sm-vps 平行轨（非 NixOS）：system-manager + standalone HM。
   # commit scope: sm；hosts/ 角色目录: hosts/sm-vps。
-  # 试验床：nixos-vps-dev 上 Incus 容器（实例名仍为 linux-sm-lab，可另 rename）。
   sm-vps = {
     # 真机（Phase 8）：腾讯云 Debian 13 VPS，root 密码登录起步。
     # 非 NixOS 轨的「真机验证」目标——裸 distro 上走 bootstrap → Nix → HM → sm。
     # 注意：TC 云主机无 cloud-init 可用（机器已建好），走 SSH bootstrap 路径。
-    # （原 sm-vps-lab Incus 试验床已废弃，容器已删，2026-08-13）
     sm-vps-tc = {
       hostName = "sm-vps-tc";
       stateVersion = "24.11";
@@ -226,29 +184,6 @@ in
         host = "43.156.103.43";
         user = "luck";
         opts = [
-          "-o"
-          "ServerAliveInterval=30"
-          "-o"
-          "ServerAliveCountMax=20"
-        ];
-      };
-    };
-    # 多 distro 验证（B）：nixos-vps-dev 上 Incus 的 AlmaLinux 9 容器。
-    # 实验性质：验证 sm 轨在 RHEL 系能 bootstrap + deploy（allowAnyDistro/@sudo→wheel/xz 包名）。
-    # 走 ProxyJump（容器在 nixos-vps-dev 的 incusbr0 内网）。
-    sm-vps-distro = {
-      hostName = "sm-vps-distro";
-      stateVersion = "24.11";
-      system = "x86_64-linux";
-      user = commonUser;
-      time = commonTime;
-      editor = commonEditor;
-      ssh = {
-        host = "10.87.171.201";
-        user = "luck";
-        opts = [
-          "-o"
-          "ProxyJump=luck@192.129.183.26"
           "-o"
           "ServerAliveInterval=30"
           "-o"

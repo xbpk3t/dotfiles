@@ -15,12 +15,19 @@ let
       lib
       pkgs
       ;
+    inherit (cfg) tunExcludeUids;
     selfProviderTemplateName = "mihomo-self-provider.yaml";
   };
 in
 {
   options.modules.networking.mihomo-client = {
     enable = mkEnableOption "mihomo proxy service";
+
+    tunExcludeUids = mkOption {
+      type = types.listOf types.ints.unsigned;
+      default = [ ];
+      description = "UIDs excluded from mihomo TUN auto-route (Linux only).";
+    };
   };
 
   config = mkIf cfg.enable {
@@ -89,8 +96,9 @@ in
         Environment = "SAFE_PATHS=${pkgs.zashboard}:/run/secrets/rendered:/var/lib/mihomo";
         ExecStartPre = [
           "${pkgs.coreutils}/bin/mkdir -p /var/lib/mihomo/providers"
-          # GEOIP,CN 规则需要 Country.mmdb；避免 mihomo 启动时联网下载（VPS 还没代理）。
-          "${pkgs.coreutils}/bin/install -Dm644 ${pkgs.mihomo-geodata}/share/mihomo/Country.mmdb /var/lib/mihomo/Country.mmdb"
+          # GEOIP,CN 规则需要 Country.mmdb；用 nixpkgs 的 DB-IP 数据（随 flake.lock 月度更新），
+          # 避免 mihomo 启动时联网下载（VPS 还没代理）。
+          "${pkgs.coreutils}/bin/install -Dm644 ${pkgs.dbip-country-lite.mmdb} /var/lib/mihomo/Country.mmdb"
         ];
       };
     };

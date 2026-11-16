@@ -37,7 +37,7 @@ in
         # 包：nixpkgs bleachbit（当前 6.x），无独立 HM 模块，配置见下方 home.file。
         bleachbit
       ]
-      ++ lib.optionals pkgs.stdenv.isLinux [
+      ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
         # nvme-cli：专为 NVMe，读取/操作 NVMe Log（smart-log、error-log）、固件下载、格式化等，信息比 smartctl 更全更准。
         # 三者是互补关系：smartctl/ nvme-cli 负责健康信息，badblocks 做面向介质的全盘扫描。
         # NVMe 健康：nvme smart-log /dev/nvme0

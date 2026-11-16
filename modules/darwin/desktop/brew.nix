@@ -23,7 +23,7 @@ in
     nix-homebrew = {
       enable = true;
       # Apple Silicon 常需 Rosetta 装 x86 cask
-      # enableRosetta = pkgs.stdenv.isAarch64;
+      # enableRosetta = pkgs.stdenv.hostPlatform.isAarch64;
       enableRosetta = false;
       user = username;
       autoMigrate = true;

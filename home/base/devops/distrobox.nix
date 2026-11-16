@@ -12,7 +12,7 @@ in
 
   config.programs.distrobox = lib.mkIf cfg.enable {
     # Not support for Darwin
-    enable = pkgs.stdenv.isLinux;
+    enable = pkgs.stdenv.hostPlatform.isLinux;
     package = pkgs.distrobox;
 
     # enableSystemdUnit requires at least one container to be defined

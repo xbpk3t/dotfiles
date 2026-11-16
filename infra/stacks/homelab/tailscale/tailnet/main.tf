@@ -27,7 +27,6 @@ data "tailscale_device" "servers" {
   for_each = toset([
     "nixos-vps-dev",
     "nixos-vps-agt",
-    "nixos-homelab",
   ])
   hostname = each.key
 }

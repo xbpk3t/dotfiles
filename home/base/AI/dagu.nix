@@ -103,7 +103,8 @@ in
     (lib.mkIf cfg.enable {
       # CLI 也放进 HM profile，方便 `dagu validate` / `dagu start` 和 dagu runbook。
       # Darwin 用 brew 的 dagu（daguBin），不重复装 Linux 包。
-      home.packages = lib.optionals pkgs.stdenv.hostPlatform.isLinux [ pkgs.dagu ];
+      # xurls 是 wiki-digest count 步的依赖；必须在 scheduler PATH 里。
+      home.packages = [ pkgs.xurls ] ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [ pkgs.dagu ];
 
       # DAG 定义按文件管理（不整个目录 symlink —— dagu 会在 ~/.dagu/dags 里
       # 维护运行态 .dag.index，目录 symlink 到 nix store 会变成只读导致写入失败）。

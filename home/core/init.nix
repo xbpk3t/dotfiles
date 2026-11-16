@@ -33,7 +33,7 @@ in
   home = {
     inherit username;
     homeDirectory = lib.mkForce (
-      if pkgs.stdenv.isDarwin then "/Users/${username}" else "/home/${username}"
+      if pkgs.stdenv.hostPlatform.isDarwin then "/Users/${username}" else "/home/${username}"
     );
     stateVersion = lib.mkDefault stateVersion;
   };

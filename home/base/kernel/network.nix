@@ -117,7 +117,7 @@ in
       ipcalc
     ]
     # Linux-only tools; Darwin 上直接跳过，避免 hostPlatform 不可用的求值错误
-    ++ lib.optionals stdenv.isLinux [
+    ++ lib.optionals stdenv.hostPlatform.isLinux [
       # - arping: send ARP REQUEST to a neighbour host
       # - clockdiff: measure clock difference between hosts
       # - ping: send ICMP ECHO_REQUEST to network hosts
@@ -143,7 +143,7 @@ in
 
       rustnet
     ]
-    ++ lib.optionals pkgs.stdenv.isLinux (
+    ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux (
       with pkgs;
       [
         # https://www.wireshark.org/

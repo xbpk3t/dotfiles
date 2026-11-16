@@ -9,5 +9,4 @@ in
   };
   dagu = pkgs.callPackage ./dagu { };
   opencli-extension = pkgs.callPackage ./opencli-extension { };
-  mihomo-geodata = pkgs.callPackage ./mihomo-geodata { };
 }
