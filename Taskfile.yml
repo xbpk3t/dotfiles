@@ -8,3 +8,5 @@ includes:
     taskfile: ./.taskfile/nix/Taskfile.yml
   mac:
     taskfile: ./.taskfile/mac/Taskfile.yml
+  cntr:
+    taskfile: ./.taskfile/devops/Taskfile.cntr.yml

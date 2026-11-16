@@ -1,0 +1,75 @@
+---
+version: '3'
+
+vars:
+  CNTR_SCRIPT: '{{.TASKFILE_DIR}}/scripts/cntr.nu'
+
+tasks:
+  reconcile:
+    desc: "Reconcile all .cntr compose stacks (idempotent)"
+    summary: |
+      遍历 ~/.cntr 下的所有 compose stack，执行 docker compose up -d --remove-orphans。
+      - 先幂等创建共享 edge 网络（当前仓库没有创建者）。
+      - 单个 stack 失败不会阻断其他 stack；最后汇总并返回非零。
+      - 默认跳过 golang（本地 dev sandbox）；CNTR_INCLUDE_DEV=true 可包含。
+
+      环境变量（Task 的 included vars 会遮蔽 CLI 变量，因此统一走 env）：
+      - CNTR_DIR: compose 根目录，默认 ~/.cntr；可传 ./.cntr 做本地验证。
+      - CNTR_ENV_FILE: sops 渲染的 env 文件，默认 ~/.config/cntr/env（存在才使用）。
+      - CNTR_DRY_RUN=true: 只打印将执行的命令。
+      - CNTR_INCLUDE_DEV=true: 包含 golang。
+
+      强制重跑：task -f cntr:reconcile（status 门控会跳过已收敛状态）。
+    silent: true
+    preconditions:
+      - sh: 'command -v docker >/dev/null'
+        msg: 'docker not found'
+      - sh: 'command -v nu >/dev/null'
+        msg: 'nu not found'
+      - sh: 'test -f "{{.CNTR_SCRIPT}}"'
+        msg: 'cntr.nu not found'
+    cmds:
+      - 'nu "{{.CNTR_SCRIPT}}" reconcile --cntr-dir "${CNTR_DIR:-}" --env-file "${CNTR_ENV_FILE:-}"'
+    status:
+      - 'nu "{{.CNTR_SCRIPT}}" status --cntr-dir "${CNTR_DIR:-}" --env-file "${CNTR_ENV_FILE:-}" --strict --quiet'
+
+  status:
+    desc: "Show .cntr stack/container status"
+    summary: |
+      打印每个 stack 的 service / state / health / image。
+      CNTR_STRICT=true 时，任何 missing/exited/orphan 或 unhealthy 都会返回非零。
+
+      环境变量：
+      - CNTR_DIR / CNTR_ENV_FILE / CNTR_INCLUDE_DEV: 同 cntr:reconcile。
+      - CNTR_STRICT=true: 以非零退出码表示存在漂移。
+    silent: true
+    preconditions:
+      - sh: 'command -v docker >/dev/null'
+        msg: 'docker not found'
+      - sh: 'command -v nu >/dev/null'
+        msg: 'nu not found'
+      - sh: 'test -f "{{.CNTR_SCRIPT}}"'
+        msg: 'cntr.nu not found'
+    cmds:
+      - 'nu "{{.CNTR_SCRIPT}}" status --cntr-dir "${CNTR_DIR:-}" --env-file "${CNTR_ENV_FILE:-}"'
+
+  diff:
+    desc: "Show compose config-to-running drift per stack"
+    summary: |
+      对比 docker compose config --hash 与运行容器的
+      com.docker.compose.config-hash label，输出 ok / drift / missing / orphan / unknown。
+      CNTR_STRICT=true 时，任何非 ok 都会返回非零。
+
+      环境变量：
+      - CNTR_DIR / CNTR_ENV_FILE / CNTR_INCLUDE_DEV: 同 cntr:reconcile。
+      - CNTR_STRICT=true: 以非零退出码表示存在漂移。
+    silent: true
+    preconditions:
+      - sh: 'command -v docker >/dev/null'
+        msg: 'docker not found'
+      - sh: 'command -v nu >/dev/null'
+        msg: 'nu not found'
+      - sh: 'test -f "{{.CNTR_SCRIPT}}"'
+        msg: 'cntr.nu not found'
+    cmds:
+      - 'nu "{{.CNTR_SCRIPT}}" diff --cntr-dir "${CNTR_DIR:-}" --env-file "${CNTR_ENV_FILE:-}"'
