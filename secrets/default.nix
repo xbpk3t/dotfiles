@@ -81,6 +81,7 @@ in
 
       CF_R2_AK = mkUserSecret "cf/r2/ak";
       CF_R2_SK = mkUserSecret "cf/r2/sk";
+      CF_R2_ENDPOINT = mkUserSecret "cf/r2/endpoint";
 
       # 同时具体 read all & write all 权限的token，为了方便 terraform 使用
       CF_TOKEN_READ_WRITE_ALL = mkUserSecret "cf/token/read_all";
