@@ -8,12 +8,13 @@ let
   inherit (config.lib.topology) mkInternet mkRouter mkConnection;
 
   # 自定义 OS 图标。
-  # debian/android：从 devicon（钉死 commit）拉取，彩色品牌 logo。
+  # debian：从 devicon（钉死 commit）拉取，彩色品牌 logo。
   # - devicon 是 GitHub raw，可钉死 commit，纯 <path> 结构，nix-topology 的
   #   builtins.readFile 内联渲染完全兼容。
   # apple：devicon 的 apple-original 是纯黑单 path，在深色卡片上看不清；
   #   改用 iconify API 直接返回白色版本（simple-icons 数据源 + ?color 参数），
-  #   零后处理即可见。响应内容用 hash 锁定，已实测确定性（两次抓取一致）。
+  #   零后处理即可见。响应内容用 hash 锁定。
+  #   注意：iconify 的路径语法是 "set/icon"；旧的 "set:icon" 现在会 404。
   # 为什么不用 svgrepo：/download/ 端点对数据中心 IP 返回 429 反爬（实测），
   #   /show/ 不稳定，在 VPS 上 fetchurl 会抓到反爬 HTML 而不是 SVG。
   fetchDevicon =
@@ -29,13 +30,10 @@ let
       fetchDevicon "debian" "debian/debian-original.svg"
         "sha256-CbFMmBOjIrWLEapTkPsaK06b/QKGgyFILxoZU0pm7FQ=";
     apple = pkgs.fetchurl {
-      url = "https://api.iconify.design/simple-icons:apple.svg?color=%23e3e6eb";
+      url = "https://api.iconify.design/simple-icons/apple.svg?color=%23e3e6eb";
       hash = "sha256-xysN4lI3oHPTplAq5UM7lYf8800owTUHIaTGbDL71NI=";
       name = "apple.svg";
     };
-    android =
-      fetchDevicon "android" "android/android-original.svg"
-        "sha256-1siqbCuUyQ/wLBt+ifnPhj1U21m0Wbiyh8Gb+45mTEE=";
   };
 in
 {
@@ -44,7 +42,6 @@ in
   icons.os = {
     debian.file = osIcons.debian;
     apple.file = osIcons.apple;
-    android.file = osIcons.android;
   };
 
   # 全局拓扑定义：声明网络与外部设备；
