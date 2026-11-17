@@ -12,20 +12,8 @@ with lib;
 let
   # Fleet-wide：任何在 meta 里发布 `singbox` 的节点都是 client 的 server。
   # 不再硬编码 "nixos-vps" 组；未来 homelab / 其他平台加代理节点会自动进 outbounds。
-  nodes = mylib.fleet.nodes;
-  servers = lib.lists.filter (s: s != null) (
-    lib.attrsets.mapAttrsToList (
-      name: node:
-      if node ? singbox then
-        node.singbox
-        // {
-          hostName = node.hostName or name;
-          server = node.singbox.server or (mylib.fleet.primaryHostForNode name node);
-        }
-      else
-        null
-    ) nodes
-  );
+  # 归一化逻辑（hostName/server 默认值）只保留在 fleet registry 一处。
+  servers = mylib.fleet.singboxServers;
 
   # mihomo 只接受 configFile (路径)，不支持 native Nix settings。
   # config 在 eval 阶段用 builtins.toJSON 渲染（JSON 是 YAML 1.2 子集，

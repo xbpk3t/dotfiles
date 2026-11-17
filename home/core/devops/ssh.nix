@@ -20,7 +20,7 @@ let
   # 交互式高延迟 host 的连接复用；不要加到 Host *：
   # - deploy-rs / nix ssh-ng 等自动化连接不应共享用户 master
   # - github.com 是短连接，stale master 反而会制造故障
-  # 节点通过 inventory 的 `ssh.multiplex = true` opt-in。
+  # 节点通过 meta.nix 的 `ssh.multiplex = true` opt-in。
   mux = {
     controlMaster = "auto";
     controlPath = "~/.ssh/control-%C";

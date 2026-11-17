@@ -28,7 +28,14 @@ let
     name: path:
     let
       meta = import (path + "/meta.nix");
+      forbidden = lib.filter (field: meta ? ${field}) [
+        "hostName"
+        "name"
+        "path"
+      ];
     in
+    assert lib.assertMsg (forbidden == [ ])
+      "fleet: '${name}' meta.nix must not declare ${lib.concatStringsSep ", " forbidden} (derived from the hosts path)";
     meta
     // {
       inherit name path;
@@ -38,14 +45,17 @@ let
   # 顶层目录两种形态：
   #   - 有 meta.nix       -> 单节点（目录名即节点名）
   #   - 无 meta.nix       -> group；子目录里每个 meta.nix 是一个节点
-  # `_base` / 其他 `_` 前缀目录不参与发现。
+  # `_base` / 其他 `_` 前缀目录不参与发现（顶层目录与 group 内子目录同一规则）。
   scanTop =
     topName:
     let
       topPath = hostsDir + "/${topName}";
       entries = builtins.readDir topPath;
       children = lib.filterAttrs (
-        childName: childType: isDir childType && (builtins.readDir (topPath + "/${childName}")) ? "meta.nix"
+        childName: childType:
+        isDir childType
+        && !(lib.hasPrefix "_" childName)
+        && (builtins.readDir (topPath + "/${childName}")) ? "meta.nix"
       ) entries;
       childNodes = lib.mapAttrs' (
         childName: _:
@@ -74,7 +84,18 @@ let
     lib.filter (name: isDir topEntries.${name} && !(lib.hasPrefix "_" name)) (lib.attrNames topEntries)
   );
 
-  allNodes = lib.foldl' (acc: group: acc // group) { } (lib.attrValues groups);
+  # 节点名必须全局唯一：group 子目录派生的 "<group>-<node>" 与顶层单节点目录可能撞名，
+  # foldl' 的 `//` 会静默只留一个 → 直接报错，避免 host 从 outputs 里悄无声息消失。
+  allNodes = lib.foldl' (
+    acc: group:
+    let
+      duplicates = lib.filter (nodeName: acc ? ${nodeName}) (lib.attrNames group);
+    in
+    if duplicates != [ ] then
+      throw "fleet: duplicate node name(s): ${lib.concatStringsSep ", " duplicates}"
+    else
+      acc // group
+  ) { } (lib.attrValues groups);
 
   # 按优先级挑一个“主机地址”作为部署/连接默认值。
   # tailnet 优先：sshd 统一经 tailnet 访问，公网 IP 只保留给 DNS/代理等对外服务。
@@ -129,11 +150,9 @@ let
       "${primaryHostForNode nezhaHub.hostName nezhaHub}:${toString (nezhaHub.nezha.port or 8008)}";
 
   # 不变量：值全部是布尔，nix-unit 直接消费；键以 test- 开头。
+  # 注意：hostName 由 scanNode 从路径派生（并在 meta 自带 hostName 时直接报错），
+  # 不再单列 "hostName == node key" 测试——那是构造保证的，写出来只会是永远为真的假测试。
   checks = {
-    "test-hostName-matches-node-key" = lib.all (name: (allNodes.${name}.hostName or name) == name) (
-      lib.attrNames allNodes
-    );
-
     "test-kind-present" = lib.all (node: node ? kind) (lib.attrValues allNodes);
 
     "test-system-present" = lib.all (node: node ? system) (lib.attrValues allNodes);
@@ -155,13 +174,10 @@ let
       lib.attrValues allNodes
     );
 
-    "test-uid-gid-paired" = lib.all (
-      node:
-      let
-        user = node.user or { };
-      in
-      !(user ? uid) || (user.uid > 0 && (user.gid or 0) > 0)
-    ) (lib.attrValues allNodes);
+    # 用户身份是 flake globals.identity，不允许回流到 per-node meta。
+    "test-no-per-node-identity" = lib.all (node: !(node ? user) && !(node ? time) && !(node ? editor)) (
+      lib.attrValues allNodes
+    );
   };
 
   deployRsNode =

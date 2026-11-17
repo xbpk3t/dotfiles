@@ -3,7 +3,7 @@
 # 组织：按能力分文件。
 #   - 基线能力（sops/sshd/systemd/i18n/tailscale）：模块暴露 modules.sm.*.enable，由 host 显式开启。
 #   - 服务角色（mihomo-client/singbox-server）：各模块声明 services.*.enable 开关。
-# hostPlatform / allowAnyDistro 由 outputs/.../sm-vps.nix 显式设置。
+# hostPlatform / allowAnyDistro 由 lib/mkHost.nix 显式设置。
 #
 # ⚠️ 通用坑：environment.etc 对「已存在的 unmanaged 路径」默认静默跳过
 # （激活日志 "Unmanaged path already exists"，需 replaceExisting=true 才覆盖；

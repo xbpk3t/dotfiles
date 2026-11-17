@@ -16,7 +16,7 @@ let
   # use path relative to the root of the project
   relativeToRoot = lib.path.append ../.;
   facter = import ./facter.nix {
-    inherit relativeToRoot;
+    inherit fleet relativeToRoot;
   };
   # Custom utilities
   scanPaths =

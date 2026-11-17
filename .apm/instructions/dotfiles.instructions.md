@@ -6,7 +6,7 @@ applyTo: "**"
 
 ## 项目概览
 
-NixOS/nix-darwin/home-manager 的 flake-parts 项目，管理多平台（macOS、NixOS、Android AVF、非 NixOS Debian sm 轨）的 fleet 配置。flake-parts 做模块化编排，deploy-rs 统一部署，sops-nix 管理密钥。
+NixOS/nix-darwin/home-manager 的 flake-parts 项目，管理多平台（macOS、NixOS、非 NixOS Debian sm 轨）的 fleet 配置。flake-parts 做模块化编排，deploy-rs 统一部署，sops-nix 管理密钥。
 
 ## 关键命令
 
@@ -133,6 +133,6 @@ lib/fleet/             # 扫描 hosts/**/meta.nix，派生节点名与跨机拓�
 
 - **SOPS 安全**：`secrets/` 包含加密密钥，永远不要尝试解密后明文提交。检查 diff 时确认只有密文变更
 - **Impure 评估**：部署和部分 eval 命令需要 `--impure`，因为仓库中存在未 track 的源码目录会阻断 pure flake evaluation。这是有意为之，不要尝试"修复"
-- **跨平台注意**：macOS 用 `nix-darwin`，NixOS 用 `nixosSystem`，Android AVF 用 `nixos-avf`，非 NixOS Debian 用 `system-manager`（sm 轨）。同一份 home-manager 配置在不同平台上可能有不同的可用包集合
+- **跨平台注意**：macOS 用 `nix-darwin`，NixOS 用 `nixosSystem`，非 NixOS Debian 用 `system-manager`（sm 轨）。同一份 home-manager 配置在不同平台上可能有不同的可用包集合
 - **`hosts/<group>/<node>/` 是机器的 identity**：新增机器时创建目录，包含 `meta.nix`（跨机事实）、`default.nix`（系统级）和 `home.nix`（用户级）；`lib/fleet` 自动发现并派生节点名，无需手动注册 flake outputs
 - **flake.lock 是部署的关键契约**：它锁定了所有 inputs 的版本，部署到任何机器都使用同一份 lock，保证 fleet 一致性
