@@ -153,6 +153,24 @@ rec {
                 gpt = "gpt-6-astra";
               };
 
+              # 全局身份常量：所有 host 共享。
+              # Why: user/time/editor 不是 fleet topology，不该每个节点在
+              # inventory 里复制一份；per-host 差异由 host 模块覆盖。
+              identity = {
+                user = {
+                  username = "luck";
+                  mail = "yyzw@live.com";
+                };
+                time = {
+                  timeZone = "Asia/Shanghai";
+                };
+                editor = {
+                  command = "hx";
+                  desktopEntry = "Helix.desktop";
+                  lazygitPreset = "helix";
+                };
+              };
+
               networking.nameservers = [
                 "119.29.29.29"
                 "223.5.5.5"

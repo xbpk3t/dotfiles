@@ -11,15 +11,15 @@
 #     判定方式是 `expr == expected` 的 Nix 全等。所以这里把断言写成真正的布尔值：
 #     expr 算成 true ⇔ 数据一致；false ⇔ 违约（与 expected=true 不匹配 → 报红）。
 #
-# 断言的三类契约：
+# 断言的两类契约：
 #   a) hostName 必须等于节点自身的 node name（即 group 内该节点在 inventory 里的 attr key）。
 #      这正是当年「nod 的 hostName≠nodeName」踩的坑——节点改名时 hostName 掉队了。
 #      注意：刻意不用「hostName==groupName」。像 nixos-vps / sm-vps 这种「一组多机」的 group，
 #      节点 host（nixos-vps-dev / sm-vps-hk …）天然 != group 名，那不是 bug；真正的不变量是
 #      「每个节点 hostName == 它自己的 node key」。
-#   b) user 必须继承 commonUser：username == "luck"，不允许再凭猜写死。
-#   c) stateVersion 非空；且一旦声明 user.uid 就必须同时有 gid，且两者都 >0
+#   b) stateVersion 非空；且一旦声明 user.uid 就必须同时有 gid，且两者都 >0
 #     （不允许用 0 占位：任何声明了 uid 的节点都必须给真实 uid/gid——曾经的 nod 就用 0 占位踩过坑）。
+#     用户身份已收口到 flake globals.identity，不再逐节点断言 username。
 _:
 let
   data = import ../../lib/inventory/data.nix;
@@ -54,11 +54,7 @@ in
 builtins.foldl' (acc: c: acc // c) { } (
   # a) hostName == nodeName（每个节点自己的 key）。
   (map (r: one "host-${r.g}/${r.node}: hostName == nodeName" (r.host == r.node)) nodes)
-  # b) user.username == commonUser（luck)
-  ++ (map (
-    r: one "user-${r.g}/${r.node}: username == commonUser 'luck'" (r.user.username or null == "luck")
-  ) nodes)
-  # c1）stateVersion 非空。
+  # b1）stateVersion 非空。
   ++ (map (r: one "state-${r.g}/${r.node}: stateVersion non-empty" (r.state != "")) nodes)
   # c2）有 uid 就必须有 gid 且两者都 > 0。
   ++ (builtins.concatLists (

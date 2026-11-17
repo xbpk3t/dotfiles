@@ -1,6 +1,7 @@
 {
   config,
   hostMeta,
+  mail,
   pkgs,
   userMeta,
   ...
@@ -14,7 +15,7 @@
       derper = {
         enable = true;
         domain = hostMeta.tailscale.derpDomain;
-        inherit (hostMeta) acmeEmail;
+        acmeEmail = mail;
       };
     };
 

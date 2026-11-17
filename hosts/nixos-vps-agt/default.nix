@@ -3,6 +3,7 @@
   lib,
   globals,
   hostMeta,
+  mail,
   pkgs,
   ...
 }:
@@ -18,7 +19,7 @@ in
       tailscale.derper = {
         enable = true;
         domain = hostMeta.tailscale.derpDomain;
-        inherit (hostMeta) acmeEmail;
+        acmeEmail = mail;
       };
       mihomo-client = {
         enable = true;

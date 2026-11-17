@@ -23,7 +23,7 @@ in
     home.packages = [ pkgs.ghui ];
 
     # 结构化 nix → JSON（同 pi-agent settings 思路）。
-    # editor 跟 host metadata（commonEditor.command = hx），避免 mac 写死 zed、
+    # editor 跟 flake globals.identity.editor（command = hx），避免 mac 写死 zed、
     # Linux/VPS headless 打不开 GUI。
     # 不设 repoPaths：多机/多目录（Desktop/dotfiles 等）不宜绑死 ~/Code/:repo。
     home.file.".config/ghui/config.json" = {

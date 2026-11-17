@@ -1,5 +1,6 @@
 {
   config,
+  globals,
   lib,
   mylib,
   hostMeta,
@@ -11,7 +12,8 @@ let
   # 本机不在 tailnet 时没有可用寻址，不生成节点条目（只保留 github）。
   selfOnTailnet = hostMeta ? tailscale && hostMeta.tailscale ? ip;
 
-  # fleet SSH 统一策略：Host 键 = inventory 节点名，地址 = 节点 tailnet IP，用户 = inventory 用户。
+  # fleet SSH 统一策略：Host 键 = inventory 节点名，地址 = 节点 tailnet IP。
+  # 用户名是全局身份常量，不在每个节点重复。
   # 加机器只改 lib/inventory/data.nix（补 tailscale.ip），这里零改动。
   tailnetNodes = lib.filterAttrs (
     _: node: node ? tailscale && node.tailscale ? ip
@@ -31,7 +33,7 @@ let
     node:
     {
       hostname = node.tailscale.ip;
-      user = node.user.username;
+      user = globals.identity.user.username;
     }
     // lib.optionalAttrs (lib.attrByPath [ "ssh" "multiplex" ] false node) mux;
 in

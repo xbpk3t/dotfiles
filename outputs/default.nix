@@ -85,10 +85,10 @@ let
     (genSpecialArgs system)
     // {
       inherit hostMeta;
-      userMeta = hostMeta.user;
-      mail = hostMeta.user.mail or null;
-      timeMeta = hostMeta.time;
-      editorMeta = hostMeta.editor;
+      userMeta = globals.identity.user;
+      mail = globals.identity.user.mail or null;
+      timeMeta = globals.identity.time;
+      editorMeta = globals.identity.editor;
       stateVersion = hostMeta.stateVersion or "24.11";
       pkgs = mkPkgsForHost system hostMeta;
     };

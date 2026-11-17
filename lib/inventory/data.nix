@@ -1,28 +1,16 @@
-let
-  commonUser = {
-    username = "luck";
-    mail = "yyzw@live.com";
-  };
-  commonTime = {
-    timeZone = "Asia/Shanghai";
-  };
-  commonEditor = {
-    # Why: 编辑器相关配置会被 shell、git、gh、xdg、lazygit 等多个模块共同消费。
-    # 把它放到 host metadata 源头层，可以和 user/time 一样由 specialArgs 统一透传，
-    # 避免在 outputs/default.nix 或各模块里重复写死同一组 editor 常量。
-    command = "hx";
-    desktopEntry = "Helix.desktop";
-    lazygitPreset = "helix";
-  };
-in
+# Fleet topology registry.
+#
+# 这里只放“其他机器需要知道”的事实：地址、tailnet IP、发布的 singbox
+# 能力、Nezha hub 标记、SSH 连接策略。
+#
+# 单机身份/配置（user/time/editor、stateVersion、derpDomain、acmeEmail、
+# hardware profile 等）应放在 hosts/<name>/ 或 flake globals 里，
+# 不要再回流到这个文件。
 {
   nixos-avf = {
     nixos-avf = {
       hostName = "nixos-avf";
       stateVersion = "25.11";
-      user = commonUser;
-      time = commonTime;
-      editor = commonEditor;
     };
   };
 
@@ -44,10 +32,6 @@ in
       };
       # fleet SSH 统一寻址：ssh.nix 只认 tailscale.ip。
       tailscale.ip = "100.87.216.84";
-
-      user = commonUser;
-      time = commonTime;
-      editor = commonEditor;
     };
   };
 
@@ -56,15 +40,6 @@ in
       hostName = "nixos-vps-dev";
       stateVersion = "24.11";
       primaryIp = "192.129.183.26";
-      acmeEmail = "yyzw@live.com";
-      role = "server";
-      user = commonUser;
-      time = commonTime;
-      editor = commonEditor;
-      networking = {
-        # 目标机默认公网出口，由 `ip -o route show default` 确认为 ens3。
-        externalInterface = "ens3";
-      };
       hardware = {
         cpuCores = 5;
         memGiB = 6;
@@ -111,16 +86,6 @@ in
       hostName = "nixos-vps-agt";
       stateVersion = "26.05";
       primaryIp = "1.15.64.188";
-      acmeEmail = "yyzw@live.com";
-      # agent 角色：dagu + headed Chromium/opencli + Tailscale DERP；不跑 singbox。
-      role = "agent";
-      user = commonUser;
-      time = commonTime;
-      editor = commonEditor;
-      networking = {
-        # 腾讯云 Lighthouse 实际默认路由网卡：ens5（2026-11-13 部署实测）。
-        externalInterface = "ens5";
-      };
       hardware = {
         cpuCores = 4;
         memGiB = 4;
@@ -133,7 +98,7 @@ in
         # 2026-11-14 首次 join 后 `tailscale ip -4`。
         ip = "100.66.22.92";
       };
-      # 纯 agent 节点；hub 地址由 inventory.nezha.server 从 dev 节点派生。
+      # 纯 agent 节点；hub 地址由 fleet registry 从 hub 节点派生。
       nezha.uuid = "5b8a9ab4-6ed8-4e5d-9c45-03425b6b4644";
       # Mac 的 ssh.nix 读取该字段；只对交互式高延迟 host opt-in。
       ssh.multiplex = true;
@@ -149,9 +114,6 @@ in
       ssh.user = "luck";
       # fleet SSH 统一寻址：ssh.nix 只认 tailscale.ip。
       tailscale.ip = "100.87.217.1";
-      user = commonUser;
-      time = commonTime;
-      editor = commonEditor;
     };
   };
 
@@ -165,9 +127,6 @@ in
       hostName = "sm-vps-tc";
       stateVersion = "24.11";
       system = "x86_64-linux";
-      user = commonUser;
-      time = commonTime;
-      editor = commonEditor;
       # bootstrap 后 SSH 目标：luck + 公网 IP（root 密码登录仅用于首次建用户）。
       # opts 直连（无 ProxyJump）；跨境链路（~207ms RTT）+ 真机 remote build 耗时长，
       # 加 ServerAlive 防 nix-daemon 构建期间 SSH 超时断连（Phase 8 实测坑）。
@@ -190,9 +149,6 @@ in
       hostName = "sm-vps-hk";
       stateVersion = "24.11";
       system = "x86_64-linux";
-      user = commonUser;
-      time = commonTime;
-      editor = commonEditor;
       shared = true;
       ssh = {
         host = "103.79.184.82";
@@ -210,9 +166,6 @@ in
     #   hostName = "sm-vps-<名字>";   # 与节点名一致（/etc/sm-vps-managed 的 node=）
     #   stateVersion = "24.11";
     #   system = "x86_64-linux";
-    #   user = commonUser;
-    #   time = commonTime;
-    #   editor = commonEditor;
     #   ssh = {
     #     host = "<公网IP>";
     #     user = "luck";               # bootstrap 建的用户
