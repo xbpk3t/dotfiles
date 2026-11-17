@@ -64,6 +64,13 @@ in
     cores = lib.mkForce 1;
   };
 
+  # 本地 build 的内存兜底：nix-daemon 及其 build 子进程都受这个 cgroup 限制。
+  # 超限时是 build 失败，而不是整机 OOM；eval 是客户端进程，由 user.slice 上限覆盖。
+  systemd.services.nix-daemon.serviceConfig = {
+    MemoryHigh = "1200M";
+    MemoryMax = "2000M";
+  };
+
   # 4G agent 机的用户会话硬上限：把 OOM 限制在 user.slice 内，
   # 避免 Chromium/Claude 把内核/系统服务一起拖死。dev(6G) 不继承。
   systemd.slices."user".sliceConfig = {
