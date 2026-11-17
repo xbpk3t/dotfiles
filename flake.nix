@@ -65,19 +65,6 @@ rec {
 
     llm-agents.url = "github:numtide/llm-agents.nix";
 
-    # herdr 官方预编译二进制（0.9.5；reviewr 0.47 要求 >= 0.9.3）。
-    herdr-bin = {
-      url = "github:herdrdev/herdr-nix";
-      inputs.nixpkgs.follows = "nixpkgs-darwin";
-    };
-
-    # herdr 插件包 + HM 模块（只扩展官方 programs.herdr，不重新定义它）。
-    herdr-nix = {
-      url = "github:lorenzorapetti/herdr-nix";
-      inputs.nixpkgs.follows = "nixpkgs-darwin";
-      inputs.home-manager.follows = "home-manager";
-    };
-
     agent-skills.url = "github:Kyure-A/agent-skills-nix";
 
     # Global agent skill sources (ASN).
@@ -183,11 +170,18 @@ rec {
               # Global system preferences shared across hosts.
               # 用户密码 hash 走 sops（ME_PASS_HASH），见 secrets/default.nix。
               auth = {
-                # Public keys trusted across the fleet.
-                sshPublicKeys = [
+                # Human/ops keys trusted across the fleet.
+                adminKeys = [
                   "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDth3yFJZ2p5tID2W2AHI3s6t6B8oU3nSVBIJANNxyIG nixos-cntr"
                   "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF7x+rABbX8F5M7o3JhuzC3nifn3/ePgLXp5WaW/8FiE nixos-vps"
                   "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFbnHbU+syywmhd+ywtJwsc8+IKuuph5Ol+TmxC8pZHH luck@macos-ws"
+                ];
+
+                # Dedicated deploy keys, trusted on VPS hosts only. Keeping
+                # these separate from adminKeys lets a compromised node's
+                # deploy key be rotated without touching human access.
+                deployKeys = [
+                  "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIzVmb4UevRyQgVJ649u1fc7yghYic3gdK7BF4dryEmn nixos-vps-agt-deploy"
                 ];
               };
             };

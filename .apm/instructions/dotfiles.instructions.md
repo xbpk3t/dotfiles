@@ -6,7 +6,7 @@ applyTo: "**"
 
 ## 项目概览
 
-NixOS/nix-darwin/home-manager 的 flake-parts 项目，管理多平台（macOS、NixOS、WSL、AVF/Android）的 fleet 配置。flake-parts 做模块化编排，deploy-rs 统一部署，sops-nix 管理密钥。
+NixOS/nix-darwin/home-manager 的 flake-parts 项目，管理多平台（macOS、NixOS、Android AVF、非 NixOS Debian sm 轨）的 fleet 配置。flake-parts 做模块化编排，deploy-rs 统一部署，sops-nix 管理密钥。
 
 ## 关键命令
 
@@ -25,8 +25,6 @@ task nix:test:quick        # 快速验证当前 host 配置 (targeted nix eval)
 # SOPS 密钥
 task nix:sk:edit           # 编辑加密的 secrets 文件
 task nix:sk:view           # 查看 & 验证解密后的 secrets 内容
-task nix:sk:k8s:edit       # 编辑 k8s SOPS 加密的 manifest
-task nix:sk:k8s:view       # 查看解密后的 k8s manifest
 
 # Terraform/OpenTofu
 task tf:plan               # Terraform plan
@@ -37,9 +35,9 @@ task tf:validate           # Terraform validate
 
 ## 架构与重要决策
 
-### Flake 单通道 rolling branch
+### Flake 通道策略
 
-所有 inputs 统一跟随 `nixpkgs-unstable`（或对应 master），不保留 stable/unstable 双通道。原因：dotfiles 偏向持续滚动升级，双通道是虚假抽象，统一通道降低维护成本。
+主仓默认跟随 `nixpkgs-unstable`；公网 VPS 可通过 host metadata 的 `nixpkgsChannel = "stable"` 切到 `nixpkgs-stable`。channel 选择只发生在 host 边界，不引入全局双通道抽象。
 
 ### 分层结构
 
@@ -49,10 +47,11 @@ home/base/             # 跨平台共享的用户 app 配置 (AI/desktop/langs/m
 home/core/             # 更底层/通用的用户配置 (devops/infra)
 home/darwin/           # macOS 专属 home-manager 配置
 home/nixos/            # NixOS 专属 home-manager 配置
-home/extra/            # 额外/实验性 home-manager 配置
-modules/nixos/base/    # 能力型系统模块，只定义 options 和实现
-modules/nixos/<role>/  # 角色型模块 (apps/desktop/homelab/laptop/vps/extra/hardware)
+modules/nixos/kernel/  # 内核/系统基础能力
+modules/nixos/desktop/ # 桌面能力
+modules/nixos/infra/   # 基础设施能力
 modules/darwin/        # nix-darwin 系统模块
+modules/sm/            # 非 NixOS system-manager 模块
 lib/                   # Nix helper 函数库
 pkgs/                  # 自定义 nix 包
 outputs/               # flake-parts outputs 子模块
@@ -81,7 +80,7 @@ outputs/               # flake-parts outputs 子模块
 
 ### 模块设计原则
 
-- `modules/nixos/base` 中的能力型模块只定义 options 和实现本身，不要在角色包装中加 `enable = true`
+- `modules/nixos/{kernel,desktop,infra}` 中的能力型模块只定义 options 和实现本身，不要在角色包装中加 `enable = true`
 - 角色是否启用某能力，直接在 `hosts/<name>/default.nix` 中声明；自定义参数也直接在 host 层处理
 - 遇到容易与上游 NixOS 选项混淆的模块名时，命名要体现语义边界（如区分 systemd watchdog 与 `services.watchdogd`）
 
@@ -132,6 +131,6 @@ outputs/               # flake-parts outputs 子模块
 
 - **SOPS 安全**：`secrets/` 包含加密密钥，永远不要尝试解密后明文提交。检查 diff 时确认只有密文变更
 - **Impure 评估**：部署和部分 eval 命令需要 `--impure`，因为仓库中存在未 track 的源码目录会阻断 pure flake evaluation。这是有意为之，不要尝试"修复"
-- **跨平台注意**：macOS 用 `nix-darwin`，Linux 用 NixOS，WSL 用 `nixos-wsl`，AVF 用 `nixos-avf`。同一份 home-manager 配置在不同平台上可能有不同的可用包集合
+- **跨平台注意**：macOS 用 `nix-darwin`，NixOS 用 `nixosSystem`，Android AVF 用 `nixos-avf`，非 NixOS Debian 用 `system-manager`（sm 轨）。同一份 home-manager 配置在不同平台上可能有不同的可用包集合
 - **`hosts/<name>/` 是机器的 identity**：新增机器时在这里创建目录，包含 `default.nix`（系统级）和 `home.nix`（用户级），然后在 flake outputs 中注册
 - **flake.lock 是部署的关键契约**：它锁定了所有 inputs 的版本，部署到任何机器都使用同一份 lock，保证 fleet 一致性

@@ -91,6 +91,13 @@ in
         ip = "100.101.189.7";
         derpDomain = "derp-nixos-vps-dev.lucc.dev";
       };
+      # Nezha 只允许一个 hub；agent 的 dashboard 地址和 UUID 都从这里派生。
+      # uuid 用 `uuidgen` 生成一次后固定，避免 hostname/FQDN 变化导致重复注册。
+      nezha = {
+        hub = true;
+        port = 8008;
+        uuid = "2fe2025b-cc20-4e43-b0dc-d9d24c31fbe4";
+      };
       singbox = {
         label = "LA-RN";
         server = primaryIp;
@@ -141,6 +148,8 @@ in
         # 2026-11-14 首次 join 后 `tailscale ip -4`。
         ip = "100.66.22.92";
       };
+      # 纯 agent 节点；hub 地址由 inventory.nezha.server 从 dev 节点派生。
+      nezha.uuid = "5b8a9ab4-6ed8-4e5d-9c45-03425b6b4644";
       # Mac 的 ssh.nix 读取该字段；只对交互式高延迟 host opt-in。
       ssh.multiplex = true;
     };
@@ -225,8 +234,9 @@ in
     #     opts = [ "-o" "ServerAliveInterval=30" "-o" "ServerAliveCountMax=20" ]; # 跨境 keepalive
     #   };
     # };
-    # 然后：ROOT_PASS='<初始密码>' HOST=<IP> NODE=sm-vps-<名字> \
-    #   ./hosts/sm-vps/bootstrap/phase8-real.sh
+    # 然后：ANSIBLE_PASSWORD='<初始密码>' \
+    #   ansible-playbook -i hosts/sm-vps/ansible/inventory/sm_vps.ini \
+    #     hosts/sm-vps/ansible/bootstrap.yml --ask-pass
     # 之后 deploy：task nix:deploy:sm NODE=sm-vps-<名字>，验证：task nix:deploy:smoke NODE=sm-vps-<名字>
   };
 }

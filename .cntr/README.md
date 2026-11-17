@@ -46,7 +46,6 @@ CNTR_DIR=./.cntr CNTR_DRY_RUN=true task cntr:reconcile
 | `axonhub` | axonhub:latest, postgres:15-alpine, 9router:latest, resin:latest, cpa:latest | `127.0.0.1:8090/20228/2260/8317` + edge；9router dashboard: http://9router.tailf19540.ts.net/ | edge | named volumes + `./CPA/auth-dir`, `./resin/*` | `backup-pgsql.nu axonhub`（`axonhub-pgsql`） | watchtower: axonhub/9router/resin/cpa；postgres 手动 |
 | `rsshub` | rsshub:latest, browserless:1.43-chrome-stable | edge（caddy 反代） | edge | — | — | watchtower |
 | `openlist` | openlistteam/openlist:latest | edge（caddy 反代） | edge | `./data`, `./downloads` | — | watchtower |
-| `rustdesk` | rustdesk/rustdesk-server:1.1.16 | `:21114-21119` | `rust_desk_net` | named volumes | — | 手动；1.1.16 移除了 `-m demo` |
 | `actions-runner` | myoung34/github-runner:2.338.2 | 无 | default | `runner_data` + `~/.opencli/xiaoyuzhou.json` | — | 手动；**必须**保持 `DISABLE_AUTO_UPDATE` |
 | `watchtower` | containrrr/watchtower:latest | 无 | default | `docker.sock` | — | 自身不纳入 allowlist |
 | `golang` | 本地 dev sandbox（profiles） | 本地端口 | `golang_backend` | named volumes | — | 不纳入 reconcile（`CNTR_INCLUDE_DEV=true` 才包含） |

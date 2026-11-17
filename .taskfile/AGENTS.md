@@ -62,6 +62,6 @@ reporting:
 
 ## 2) 通用规则与流程
 
-通用规则与流程已迁移到 skill：`taskfile-best-practices`（路径：`home/base/tui/ai/skills/taskfile-best-practices/SKILL.md`）。
+通用规则与流程已迁移到 skill：`taskfile-optimize`（路径：`home/base/AI/skills/taskfile-optimize/SKILL.md`）。
 
 本 AGENTS 仅保留本仓库的全局约束与接口稳定性要求。

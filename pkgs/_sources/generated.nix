@@ -6,17 +6,6 @@
   dockerTools,
 }:
 {
-  herdr-focus-notify = {
-    pname = "herdr-focus-notify";
-    version = "v0.8.0";
-    src = fetchFromGitHub {
-      owner = "yankewei";
-      repo = "herdr-focus-notify";
-      rev = "v0.8.0";
-      fetchSubmodules = false;
-      sha256 = "sha256-/x772u1kge5ZDT674Vh7HWNsz3mUroxpFJahsVTp1Hk=";
-    };
-  };
   voltagent-subagents = {
     pname = "voltagent-subagents";
     version = "5983fe3b4ea2785335ac1712c4aa1ac4e13a8fa2";

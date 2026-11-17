@@ -24,8 +24,6 @@ with pkgs;
 
         # tags(desc): 代码质量 > URL提取检查 > 文本分析
         prek
-        pre-commit
-        python3Packages.pre-commit-hooks
 
         xurls
         # tags(desc): 代码质量 > 链接校验 > 文档检查

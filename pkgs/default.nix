@@ -4,9 +4,6 @@ let
 in
 {
   voltagent-subagents = sources.voltagent-subagents.src;
-  herdr-focus-notify = pkgs.callPackage ./herdr-focus-notify {
-    inherit sources;
-  };
   dagu = pkgs.callPackage ./dagu { };
   opencli-extension = pkgs.callPackage ./opencli-extension { };
 }
