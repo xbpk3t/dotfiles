@@ -18,7 +18,6 @@
     macos-ws = {
       hostName = "macos-ws";
       stateVersion = "24.11";
-      primaryIp = "127.0.0.1";
       ssh = {
         # 部署入口：VPS 通过 tailnet 直连 Mac；本地部署仍可用 127.0.0.1。
         host = "100.87.216.84";
@@ -36,24 +35,18 @@
   };
 
   nixos-vps = {
-    nixos-vps-dev = rec {
+    nixos-vps-dev = {
       hostName = "nixos-vps-dev";
       stateVersion = "24.11";
-      primaryIp = "192.129.183.26";
-      tailscale = {
-        ip = "100.101.189.7";
-        derpDomain = "derp-nixos-vps-dev.lucc.dev";
-      };
-      # Nezha 只允许一个 hub；agent 的 dashboard 地址和 UUID 都从这里派生。
-      # uuid 用 `uuidgen` 生成一次后固定，避免 hostname/FQDN 变化导致重复注册。
+      tailscale.ip = "100.101.189.7";
+      # Nezha 只允许一个 hub；agent 的 dashboard 地址从这里派生。
       nezha = {
         hub = true;
         port = 8008;
-        uuid = "2fe2025b-cc20-4e43-b0dc-d9d24c31fbe4";
       };
       singbox = {
         label = "LA-RN";
-        server = primaryIp;
+        server = "192.129.183.26";
         vlessPort = 8443;
         hy2 = {
           domain = "hy2-nixos-vps-dev.lucc.dev";
@@ -75,29 +68,22 @@
       };
     };
 
-    nixos-vps-agt = rec {
+    nixos-vps-agt = {
       hostName = "nixos-vps-agt";
       stateVersion = "26.05";
-      primaryIp = "1.15.64.188";
-      tailscale = {
-        # 短域名：nva = nixos-vps-agt；域名里不体现 derp。
-        derpDomain = "nva.lucc.dev";
-        # 2026-11-14 首次 join 后 `tailscale ip -4`。
-        ip = "100.66.22.92";
-      };
+      # 2026-11-14 首次 join 后 `tailscale ip -4`。
+      tailscale.ip = "100.66.22.92";
       # 纯 agent 节点；hub 地址由 fleet registry 从 hub 节点派生。
-      nezha.uuid = "5b8a9ab4-6ed8-4e5d-9c45-03425b6b4644";
       # Mac 的 ssh.nix 读取该字段；只对交互式高延迟 host opt-in。
       ssh.multiplex = true;
     };
   };
   # nixos-usb：便携 U 盘系统（GNOME desktop），跨机器即插即用。
-  # 部署/代理都走 tailnet（primaryIp 是 tailnet IP，插到任意机器都能 SSH 到）。
+  # 部署/代理都走 tailnet（tailscale.ip 固定，插到任意机器都能 SSH 到）。
   nixos-usb = {
     nixos-usb = {
       hostName = "nixos-usb";
       stateVersion = "24.11";
-      primaryIp = "100.87.217.1";
       ssh.user = "luck";
       # fleet SSH 统一寻址：ssh.nix 只认 tailscale.ip。
       tailscale.ip = "100.87.217.1";

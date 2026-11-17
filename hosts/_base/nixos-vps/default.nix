@@ -95,7 +95,6 @@ in
         agent = {
           enable = true;
           server = mylib.fleet.nezha.server;
-          uuid = hostMeta.nezha.uuid or null;
         };
       };
     };

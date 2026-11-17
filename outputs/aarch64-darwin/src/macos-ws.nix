@@ -50,7 +50,7 @@ let
     {
       # What：部署目标地址（主机名/SSH alias）。
       # Why：保持与 fleet 节点名/主机名一致，便于统一管理。
-      hostname = node.ssh.host or node.primaryIp;
+      hostname = node.ssh.host or (mylib.fleet.primaryHostForNode name node);
       # What：SSH 用户名。
       # Why：darwin 通常使用本地用户名进行远程连接。
       inherit sshUser;
