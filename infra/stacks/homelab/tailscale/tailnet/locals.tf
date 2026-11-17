@@ -33,22 +33,10 @@ locals {
           InsecureForTests = true
         }]
       }
-      "903" = {
-        RegionID   = 903
-        RegionCode = "cn-sh"
-        RegionName = "shanghai"
-        Nodes = [{
-          Name     = "903"
-          RegionID = 903
-          HostName = "nva.lucc.dev"
-          # 注意：dev -> agt 的公网 TCP 10043 被 GFW 挡。尝试过把 DERP
-          # 改到 agt tailnet IP，但 Tailscale 客户端不接受，已回滚。
-          # Mac 访问 dev 上的服务用 ssh -J agt / agt 反代。
-          IPv4     = "1.15.64.188"
-          DERPPort = 10043
-          STUNPort = 10078
-        }]
-      }
+      # 903 (cn-sh, agt) 已从 DERP map 移除：
+      # dev(LA) -> agt 公网 TCP 10043 被 GFW 挡，且 Mac 会优先选 cn-sh
+      # 作为 home DERP，导致 Mac<->dev 单向。移除后 Mac 回退到 sfo/lax/la
+      # （dev 都能到）。agt 的 derper 仍保留，需要时可以重新加入。
     }
   }
 
