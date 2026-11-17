@@ -7,28 +7,19 @@
 }@args:
 let
   name = "nixos-vps-agt";
-  hostDir = "nixos-vps-agt";
+  hostDir = "nixos-vps/agt";
   node = mylib.fleet.nodes.${name} or null;
 
   modules = {
     system = "x86_64-linux";
     inherit lib;
-    nixos-modules = [
-      inputs.sops-nix.nixosModules.sops
-      inputs.disko.nixosModules.disko
-    ]
-    ++ map mylib.relativeToRoot [
+    # 平台 glue、capability 树、secrets 和 HM 组合都由 group base / node
+    # 自己 import；outputs 只负责把节点入口接进来。
+    nixos-modules = map mylib.relativeToRoot [
       "hosts/${hostDir}/default.nix"
-      "secrets/default.nix"
-      "modules/nixos/kernel"
-      "modules/nixos/infra"
     ];
     home-modules = map mylib.relativeToRoot [
-      "secrets/default.nix"
       "hosts/${hostDir}/home.nix"
-      "home/core"
-      "home/base"
-      "home/nixos"
     ];
   };
 

@@ -1,6 +1,7 @@
 {
   config,
   hostMeta,
+  mylib,
   pkgs,
   ...
 }:
@@ -21,6 +22,11 @@ let
   '';
 in
 {
+  imports = [ ../home.nix ] ++ map mylib.relativeToRoot [
+    "home/base"
+    "home/nixos"
+  ];
+
   modules = {
     infra = {
       nh.enable = true;

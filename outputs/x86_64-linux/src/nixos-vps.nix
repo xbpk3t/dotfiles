@@ -6,39 +6,21 @@
   ...
 }@args:
 let
-  # fleet 节点名 → hosts 目录名；dev 继续使用 hosts/nixos-vps。
+  # fleet 节点名 → group/node 目录。
   name = "nixos-vps-dev";
-  hostDir = "nixos-vps";
+  hostDir = "nixos-vps/dev";
   node = mylib.fleet.nodes.${name} or null;
 
   modules = {
     system = "x86_64-linux";
     inherit lib;
-    nixos-modules = [
-      inputs.sops-nix.nixosModules.sops
-      inputs.disko.nixosModules.disko
-    ]
-    ++ map mylib.relativeToRoot [
+    # 平台 glue、capability 树、secrets 和 HM 组合都由 group base / node
+    # 自己 import；outputs 只负责把节点入口接进来。
+    nixos-modules = map mylib.relativeToRoot [
       "hosts/${hostDir}/default.nix"
-      "secrets/default.nix"
-      "modules/nixos/kernel"
-      "modules/nixos/infra"
     ];
     home-modules = map mylib.relativeToRoot [
-      "secrets/default.nix"
       "hosts/${hostDir}/home.nix"
-      "home/core"
-      # server 是 curated cockpit：不整包 import home/base。
-      "home/base/devops/rclone.nix"
-      "home/base/devops/ghui.nix"
-      "home/base/devops/hunk.nix"
-      "home/base/devops/herdr-core.nix"
-      "home/base/devops/yazi.nix"
-      "home/base/langs/lsp.nix"
-      "home/base/devops/helix.nix"
-      "home/base/AI/claude.nix"
-      "home/base/AI/skills.nix"
-      "home/base/AI/dagu.nix"
     ];
   };
 

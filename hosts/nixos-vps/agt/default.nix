@@ -2,17 +2,16 @@
   config,
   lib,
   globals,
-  hostMeta,
   mail,
   pkgs,
   ...
 }:
 let
   inherit (globals.networking) nameservers;
-  linuxFonts = (import ../../modules/fonts.nix { inherit pkgs; }).linux;
+  linuxFonts = (import ../../../modules/fonts.nix { inherit pkgs; }).linux;
 in
 {
-  imports = [ ../_base/nixos-vps ];
+  imports = [ ../default.nix ];
 
   modules = {
     kernel.sysctl.hardware = {
