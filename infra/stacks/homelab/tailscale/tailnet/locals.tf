@@ -73,11 +73,21 @@ locals {
     # 注意：autoApprover 只在新广告时生效；已存在的广告需手动在控制台启用或重新 up。
     autoApprovers = {
       # tailnet owner 的 loginName（API 确认）：xbpk3t@github
-      exitNode = ["xbpk3t@github"]
+      # tag:svc-9router 也保留：nixos-vps-dev 带该 tag，承担 exit node。
+      exitNode = ["xbpk3t@github", "tag:svc-9router"]
       routes = {
-        "0.0.0.0/0" = ["xbpk3t@github"]
-        "::/0"      = ["xbpk3t@github"]
+        "0.0.0.0/0" = ["xbpk3t@github", "tag:svc-9router"]
+        "::/0"      = ["xbpk3t@github", "tag:svc-9router"]
       }
+      # svc:9router / svc:nezha 都由 nixos-vps-dev（已带 tag:svc-9router）
+      # 代理；同 tag 自动批准两个 Service host。
+      services = {
+        "svc:9router" = ["tag:svc-9router"]
+        "svc:nezha"   = ["tag:svc-9router"]
+      }
+    }
+    tagOwners = {
+      "tag:svc-9router" = ["xbpk3t@github"]
     }
     ssh = [{
       action = "check"
