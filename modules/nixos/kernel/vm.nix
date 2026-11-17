@@ -10,8 +10,18 @@ let
   cfg = config.modules.kernel.vm;
 in
 {
-  options.modules.kernel.vm.enable =
-    lib.mkEnableOption "virtualisation baseline (docker / podman / libvirt)";
+  options.modules.kernel.vm = {
+    enable = lib.mkEnableOption "virtualisation baseline (docker / podman / libvirt)";
+
+    docker.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Enable the Docker daemon. Hosts that should not run it can disable
+        this without affecting the rest of the virtualisation baseline.
+      '';
+    };
+  };
 
   ###################################################################################
   #
@@ -40,7 +50,7 @@ in
     virtualisation = {
       podman.enable = false;
       docker = {
-        enable = true;
+        enable = cfg.docker.enable;
         # Create a `docker` alias for podman, to use it as a drop-in replacement
         # dockerCompat = true;
 

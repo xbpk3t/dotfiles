@@ -40,7 +40,8 @@ in
 
       herdr-core = {
         enable = true;
-        settings.restore_screen = true;
+        # 4G 机器：不在重启后自动恢复屏幕/重任务，避免再次进入内存压力循环。
+        settings.restore_screen = false;
       };
 
       cf.enable = true;
@@ -68,6 +69,9 @@ in
 
       opencli-browser = {
         enable = true;
+        # 4G 机器：Chromium 不随 session 常驻，用 OpenCLI 前手动
+        # `systemctl --user start chromium-agent`，闲置省 ~430M。
+        autoStart = false;
         # x11vnc 绑 tailnet，Mac 可直接用 Screen Sharing 打开 vnc://<tailnet-ip>:5900。
         bindAddress = tailnetIp;
       };

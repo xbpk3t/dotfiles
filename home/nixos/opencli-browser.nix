@@ -35,7 +35,7 @@ let
       RestartSec = 5;
     }
     // (extra.Service or { });
-    Install.WantedBy = [ "default.target" ];
+    Install = { WantedBy = [ "default.target" ]; } // (extra.Install or { });
   };
 in
 {
@@ -51,6 +51,15 @@ in
       description = ''
         x11vnc bind address. Set to the tailnet IP to connect from other
         tailnet devices (macOS Screen Sharing: vnc://<ip>:5900).
+      '';
+    };
+
+    autoStart = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Start Chromium with the user session. Set false to start it on demand
+        with `systemctl --user start chromium-agent`, saving memory when idle.
       '';
     };
   };
@@ -89,6 +98,7 @@ in
           Requires = [ "xvfb.service" ];
           PartOf = [ "xvfb.service" ];
         };
+        Install.WantedBy = if cfg.autoStart then [ "default.target" ] else [ ];
         Service = {
           ExecStart = "${pkgs.chromium}/bin/chromium ${lib.escapeShellArgs chromiumFlags}";
           Environment = [ "DISPLAY=${display}" ];

@@ -21,6 +21,9 @@ in
       rttMs = 30;
     };
 
+    # 4G agent 当前没有容器；Docker 守护进程常驻约 120M，agt 上关闭。
+    kernel.vm.docker.enable = false;
+
     networking = {
       tailscale.derper = {
         enable = true;
