@@ -33,7 +33,10 @@ let
     "rst" = true;
 
     "basher" = true;
-    "biome" = true;
+    # [2026-11-17] 统一关闭 biome，改用 oxc/oxfmt。biome LSP 常驻约 72M；
+    # auto_install_extensions 只装不卸，已安装的 biome 需在 Zed 里手动卸载
+    # （agt 还要删除 ~/.local/share/zed/remote_extensions/work/biome）。
+    "biome" = false;
     "cargotoml" = true;
     "catppuccin-icons" = true;
     "git-firefly" = true;
