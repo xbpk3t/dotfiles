@@ -20,6 +20,15 @@ resource "tailscale_service" "ninerouter" {
   ports   = ["tcp:80"]
 }
 
+# Nezha dashboard: Tailscale Service -> http://nezha.tailf19540.ts.net/
+# Host side: services.tailscale.serve.services."nezha".endpoints."tcp:80"
+# = http://127.0.0.1:8008 (hosts/nixos-vps/default.nix).
+resource "tailscale_service" "nezha" {
+  name    = "svc:nezha"
+  comment = "Nezha dashboard (HTTP over tailnet)"
+  ports   = ["tcp:80"]
+}
+
 resource "tailscale_tailnet_key" "device_join" {
   reusable      = true
   ephemeral     = false

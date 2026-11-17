@@ -33,19 +33,10 @@ locals {
           InsecureForTests = true
         }]
       }
-      "903" = {
-        RegionID   = 903
-        RegionCode = "cn-sh"
-        RegionName = "shanghai"
-        Nodes = [{
-          Name     = "903"
-          RegionID = 903
-          HostName = "nva.lucc.dev"
-          IPv4     = "1.15.64.188"
-          DERPPort = 10043
-          STUNPort = 10078
-        }]
-      }
+      # 903 (cn-sh, agt) 已从 DERP map 移除：
+      # dev(LA) -> agt 公网 TCP 10043 被 GFW 挡，且 Mac 会优先选 cn-sh
+      # 作为 home DERP，导致 Mac<->dev 单向。移除后 Mac 回退到 sfo/lax/la
+      # （dev 都能到）。agt 的 derper 仍保留，需要时可以重新加入。
     }
   }
 
@@ -79,11 +70,6 @@ locals {
     # 用用户身份（xbpk3t）而非 tag —— 单用户 tailnet 无 churn 风险，更简单。
     # 注意：autoApprover 只在新广告时生效；已存在的广告需手动在控制台启用或重新 up。
     autoApprovers = {
-      # Service host 自动批准：只有带 tag:svc-9router 的 node 能广告 svc:9router。
-      # 这样 9router dashboard 的 service host 不需要每次手动 approve。
-      services = {
-        "svc:9router" = ["tag:svc-9router"]
-      }
       # tailnet owner 的 loginName（API 确认）：xbpk3t@github
       # dev 打上 tag 后 owner 变成 tag，不再匹配 xbpk3t@github，所以把 tag 也加进来，
       # 保持 exit node / 0.0.0.0/0 路由的自动批准不回归。
@@ -92,6 +78,15 @@ locals {
         "0.0.0.0/0" = ["xbpk3t@github", "tag:svc-9router"]
         "::/0"      = ["xbpk3t@github", "tag:svc-9router"]
       }
+      # svc:9router / svc:nezha 都由 nixos-vps-dev（已带 tag:svc-9router）
+      # 代理；同 tag 自动批准两个 Service host。
+      services = {
+        "svc:9router" = ["tag:svc-9router"]
+        "svc:nezha"   = ["tag:svc-9router"]
+      }
+    }
+    tagOwners = {
+      "tag:svc-9router" = ["xbpk3t@github"]
     }
     ssh = [{
       action = "check"

@@ -40,7 +40,7 @@ in
           };
         };
 
-        users.users.root.openssh.authorizedKeys.keys = globals.auth.sshPublicKeys;
+        users.users.root.openssh.authorizedKeys.keys = globals.auth.adminKeys;
 
         system.stateVersion = "24.11";
       };
