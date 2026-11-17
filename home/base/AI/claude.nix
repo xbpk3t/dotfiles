@@ -291,6 +291,47 @@ in
           # 兜底逃生开关：仅在明确需要跳过权限确认时手动使用。
           # cc-unsafe = "claude --dangerously-skip-permissions";
         };
+
+        # keybindings 只写 delta（override-only）：未声明的键沿用 Claude Code 默认。
+        # 不用 /keybindings 生成的全量模板——那会把旧版默认键位冻结进来。
+        # force = true：首次接管已存在的普通文件时跳过冲突检查。
+        file.".claude/keybindings.json" = {
+          force = true;
+          text = builtins.toJSON {
+            "$schema" = "https://www.schemastore.org/claude-code-keybindings.json";
+            "$docs" = "https://code.claude.com/docs/en/keybindings";
+            bindings = [
+              {
+                # ctrl+q：一键压缩上下文（等价 /compact）
+                context = "Chat";
+                bindings."ctrl+q" = "command:compact";
+              }
+              {
+                # h/l：vi 风格调整 effort
+                context = "ModelPicker";
+                bindings = {
+                  "h" = "modelPicker:decreaseEffort";
+                  "l" = "modelPicker:increaseEffort";
+                };
+              }
+              {
+                context = "EffortSlider";
+                bindings = {
+                  "h" = "effortSlider:decreaseEffort";
+                  "l" = "effortSlider:increaseEffort";
+                };
+              }
+              {
+                # g / shift+g：vi 风格跳到首/尾
+                context = "Select";
+                bindings = {
+                  "g" = "select:first";
+                  "shift+g" = "select:last";
+                };
+              }
+            ];
+          };
+        };
       };
 
       home.packages = with pkgs; [
