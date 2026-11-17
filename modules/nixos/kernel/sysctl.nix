@@ -10,7 +10,13 @@ let
     if cfg.hardware == null then
       mylib.vpsSysctl.mkDefaultSysctl
     else
-      mylib.vpsSysctl.mkSysctl cfg.hardware;
+      mylib.vpsSysctl.mkSysctl (
+        cfg.hardware
+        // {
+          inherit (cfg) oomKillAllocatingTask overcommitMemory;
+          zramEnabled = config.zramSwap.enable;
+        }
+      );
 in
 {
   options.modules.kernel.sysctl = {
@@ -20,6 +26,27 @@ in
       description = ''
         VPS hardware/network profile used to derive kernel sysctl.
         Set this in the host module; leave null to use the default tuning.
+        Known fields: cpuCores, memGiB, bwMbps, rttMs, mode, cc, qdisc, isSsd.
+      '';
+    };
+
+    oomKillAllocatingTask = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Whether the kernel should kill the task that triggered the OOM
+        (vm.oom_kill_allocating_task=1) instead of the highest oom_score task.
+        Defaults to false; build-heavy hosts may opt in.
+      '';
+    };
+
+    overcommitMemory = lib.mkOption {
+      type = lib.types.ints.between 0 2;
+      default = 1;
+      description = ''
+        Value for vm.overcommit_memory. 0 = heuristic, 1 = always overcommit,
+        2 = strict accounting. Kept at 1 by default because Nix builds fork
+        heavily; pair with cgroup memory limits on small hosts.
       '';
     };
   };

@@ -315,7 +315,9 @@ assert lib.assertMsg (
       nix-unit = {
         allowNetwork = true;
         inherit inputs;
-        tests = import ../tests/nix-unit/host-metadata.nix { inherit (mylib) fleet; };
+        tests =
+          (import ../tests/nix-unit/host-metadata.nix { inherit (mylib) fleet; })
+          // (import ../tests/nix-unit/memory-profile.nix { inherit (mylib) vpsSysctl; });
       };
 
       # 开发环境：CI 与本地共享同一套工具，保证 pre-commit / linter 行为一致。

@@ -58,6 +58,12 @@ let
       cc ? "bbr", # BBR, CUBIC
       qdisc ? "fq", # FQ, CAKE, FQ_PIE
       cpuCores ? null,
+      # 内存/swap 策略输入。zram 是压缩内存盘，换出代价远低于磁盘；
+      # 小内存机器应更积极地把冷 anon 页换进 zram，而不是等到 OOM。
+      zramEnabled ? false,
+      isSsd ? true,
+      oomKillAllocatingTask ? false,
+      overcommitMemory ? 1,
     }:
     let
       m = modeTable.${mode} or modeTable.balanced;
@@ -67,8 +73,17 @@ let
       ramGiB = memGiB;
       ramBytes = memGiB * 1024 * 1024 * 1024;
 
-      # 默认按 SSD/NVMe 处理（无额外入参时偏向更低 swap 与更积极的缓存策略）
-      isSsd = true;
+      # swappiness:
+      # - zram + <=8G：100，优先把冷 anon 页压缩进内存盘，避免 swap 打满后卡死/OOM
+      # - zram + >8G：60，保留内核默认换出倾向
+      # - 无 zram：SSD 60 / HDD 20（HDD 换出代价高，尽量少换）
+      swappiness =
+        if zramEnabled then
+          (if ramGiB <= 8 then 100 else 60)
+        else if isSsd then
+          60
+        else
+          20;
 
       # 使用 bwMbps 近似链路可用速率（VPS 通常无法可靠拿到真实 NIC 线速）
       nicMbps = bwMbps;
@@ -193,9 +208,8 @@ let
 
       # ################## MEMORY MANAGEMENT ############
 
-      # 默认按 SSD/NVMe 处理（减少 swap 参与，偏低延迟）
-      ## 默认情况下，Linux 内核的 swappiness 值为 60。较高的值会导致内核更积极地使用交换空间，而较低的值会减少对交换空间的使用。
-      "vm.swappiness" = if isSsd then 10 else 20;
+      # swappiness 由 swap 后端和内存规模共同决定（见上方 swappiness 定义）。
+      "vm.swappiness" = swappiness;
 
       # 脏页比例：内存越大越保守，避免大写入导致的卡顿
       "vm.dirty_ratio" = if ramGiB >= 16 then 10 else 15;
@@ -212,13 +226,17 @@ let
       # 关闭 zone reclaim：多数 VPS 上会带来额外延迟
       "vm.zone_reclaim_mode" = 0;
 
-      # overcommit：允许始终 overcommit，避免 Nix 构建 fork 时内存分配失败
-      "vm.overcommit_memory" = 1;
+      # overcommit：默认允许始终 overcommit，避免 Nix 构建 fork 时内存分配失败。
+      # 这是工作负载策略，不是硬件属性；host 可通过 modules.kernel.sysctl 覆盖。
+      "vm.overcommit_memory" = overcommitMemory;
       "vm.overcommit_ratio" = 50;
 
       "vm.max_map_count" = 1048576;
       "vm.page-cluster" = 0;
-      "vm.oom_kill_allocating_task" = 1;
+
+      # OOM 选谁：默认 0（按 oom_score 杀最大进程），避免碰巧在申请内存的
+      # sshd/小服务被杀；构建型 host 可显式设为 true。
+      "vm.oom_kill_allocating_task" = if oomKillAllocatingTask then 1 else 0;
       "vm.panic_on_oom" = 0;
 
       # 代理/VPS 场景不需要 hugepage，设为 0 避免锁内存
@@ -431,7 +449,17 @@ let
       "net.unix.max_dgram_qlen" = 256;
     };
 
-  # 默认配置（mkDefault）：用于无硬件输入时的保守基线
+  # zram 设备大小策略：小内存机器多给压缩 swap；大内存机器少给并用 memoryMax 封顶。
+  # memoryMax 单位是 bytes（对应 NixOS zramSwap.memoryMax）。
+  mkZramProfile =
+    { memGiB ? null }:
+    {
+      memoryPercent = if memGiB != null && memGiB <= 8 then 50 else 25;
+      memoryMax = 4 * 1024 * 1024 * 1024;
+    };
+
+  # 默认配置（mkDefault）：用于无硬件输入时的保守基线。
+  # 不启用 zram 推导，避免把 1GiB 占位值当成真实硬件。
   mkDefaultSysctl = mkDefaultAttrs (mkSysctl {
     bwMbps = 1000;
     rttMs = 50;
@@ -440,8 +468,12 @@ let
     mode = "balanced";
     cc = "bbr";
     qdisc = "fq";
+    zramEnabled = false;
+    isSsd = true;
+    oomKillAllocatingTask = false;
+    overcommitMemory = 1;
   });
 in
 {
-  inherit mkSysctl mkDefaultSysctl;
+  inherit mkSysctl mkDefaultSysctl mkZramProfile;
 }
