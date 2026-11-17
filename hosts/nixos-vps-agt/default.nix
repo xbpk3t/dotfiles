@@ -15,6 +15,13 @@ in
   imports = [ ../_base/nixos-vps ];
 
   modules = {
+    kernel.sysctl.hardware = {
+      cpuCores = 4;
+      memGiB = 4;
+      bwMbps = 6;
+      rttMs = 30;
+    };
+
     networking = {
       tailscale.derper = {
         enable = true;

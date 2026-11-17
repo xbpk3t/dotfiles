@@ -40,13 +40,6 @@
       hostName = "nixos-vps-dev";
       stateVersion = "24.11";
       primaryIp = "192.129.183.26";
-      hardware = {
-        cpuCores = 5;
-        memGiB = 6;
-        bwMbps = 800;
-        # LA→China 跨境链路 RTT，用于 BDP 计算 socket buffer 上限
-        rttMs = 150;
-      };
       tailscale = {
         ip = "100.101.189.7";
         derpDomain = "derp-nixos-vps-dev.lucc.dev";
@@ -86,12 +79,6 @@
       hostName = "nixos-vps-agt";
       stateVersion = "26.05";
       primaryIp = "1.15.64.188";
-      hardware = {
-        cpuCores = 4;
-        memGiB = 4;
-        bwMbps = 6;
-        rttMs = 30;
-      };
       tailscale = {
         # 短域名：nva = nixos-vps-agt；域名里不体现 derp。
         derpDomain = "nva.lucc.dev";
