@@ -61,6 +61,7 @@ in
     systemd.manager.watchdog.enable = true;
 
     kernel = {
+      earlyoom.enable = true;
       fhs.enable = true;
       journald.enable = true;
       logind.enable = true;
