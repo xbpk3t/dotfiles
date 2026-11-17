@@ -17,6 +17,7 @@ let
       lib
       pkgs
       ;
+    inherit (cfg) extraRules;
     selfProviderTemplateName = "mihomo-self-provider.yaml";
   };
   configPath = config.sops.templates."mihomo-client.yaml".path;
@@ -45,6 +46,17 @@ in
 {
   options.modules.networking.mihomo-client = {
     enable = mkEnableOption "mihomo TUN proxy daemon";
+
+    extraRules = mkOption {
+      type = types.listOf types.str;
+      default = [ ];
+      example = [ "DOMAIN-SUFFIX,zhihu.com,REJECT" ];
+      description = ''
+        Extra mihomo rules inserted before GEOIP,CN,DIRECT and MATCH,Manual.
+        Use this for per-host/per-role policy differences. The insertion point
+        matters: domain rules must match before IP-based GEOIP fallback.
+      '';
+    };
   };
 
   config = mkIf cfg.enable {

@@ -15,7 +15,7 @@ let
       lib
       pkgs
       ;
-    inherit (cfg) tunExcludeUids;
+    inherit (cfg) tunExcludeUids extraRules;
     selfProviderTemplateName = "mihomo-self-provider.yaml";
   };
 in
@@ -27,6 +27,17 @@ in
       type = types.listOf types.ints.unsigned;
       default = [ ];
       description = "UIDs excluded from mihomo TUN auto-route (Linux only).";
+    };
+
+    extraRules = mkOption {
+      type = types.listOf types.str;
+      default = [ ];
+      example = [ "DOMAIN-SUFFIX,zhihu.com,DIRECT" ];
+      description = ''
+        Extra mihomo rules inserted before GEOIP,CN,DIRECT and MATCH,Manual.
+        Use this for per-host/per-role policy differences. The insertion point
+        matters: domain rules must match before IP-based GEOIP fallback.
+      '';
     };
   };
 

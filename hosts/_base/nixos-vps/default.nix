@@ -68,7 +68,15 @@ in
         enable = lib.mkDefault true;
         exitNode = lib.mkDefault false;
       };
-      mihomo-client.enable = lib.mkDefault false;
+      mihomo-client = {
+        enable = lib.mkDefault false;
+        # VPS 可能跑 agent / 抓取任务，需要直达国内站点。
+        # 这是 role-level policy：所有 VPS 继承，个别 host 可用 mkForce/mkBefore 覆盖。
+        extraRules = [
+          "DOMAIN-SUFFIX,zhihu.com,DIRECT"
+          "DOMAIN-SUFFIX,bilibili.com,DIRECT"
+        ];
+      };
     };
 
     # 公共 Nix 管理设置；VPS 只保留签名相关差异。

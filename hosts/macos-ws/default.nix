@@ -3,10 +3,15 @@ let
   inherit (userMeta) username;
 in
 {
-  modules.networking = {
+  modules.networking.mihomo-client = {
     # Mihomo (Clash.Meta) proxy service (client)
     # wild 订阅源由 sops 自动发现（SUB_* secrets → sub.<name>），host 无需配置
-    mihomo-client.enable = true;
+    enable = true;
+    # workstation focus policy：与 VPS 的 DIRECT 策略相反，这里主动阻断。
+    extraRules = [
+      "DOMAIN-SUFFIX,zhihu.com,REJECT"
+      "DOMAIN-SUFFIX,bilibili.com,REJECT"
+    ];
   };
 
   modules.darwin = {

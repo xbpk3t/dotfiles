@@ -5,12 +5,14 @@
   mylib,
   selfProviderTemplateName ? "mihomo-self-provider.yaml",
   tunExcludeUids ? [ ],
+  extraRules ? [ ],
   ...
 }:
 with lib;
 let
-  inventory = mylib.inventory."nixos-vps";
-  nodes = inventory;
+  # Fleet-wide：任何在 meta 里发布 `singbox` 的节点都是 client 的 server。
+  # 不再硬编码 "nixos-vps" 组；未来 homelab / 其他平台加代理节点会自动进 outbounds。
+  nodes = mylib.inventory.nodes;
   servers = lib.lists.filter (s: s != null) (
     lib.attrsets.mapAttrsToList (
       name: node:
@@ -262,12 +264,11 @@ let
         "DOMAIN-SUFFIX,jd.com,DIRECT"
         "DOMAIN-SUFFIX,163.com,DIRECT"
         "DOMAIN-SUFFIX,netease.com,DIRECT"
-
-        # REJECT
-        # TODO: [2026-10-19] 之后需要针对不同hosts自定义rules，比如说 ws就REJECT zhihu 和 bz，但是用来跑agent的机器，则需要DIRECT这些DOMAIN
-        # "DOMAIN-SUFFIX,zhihu.com,REJECT"
-        # "DOMAIN-SUFFIX,bilibili.com,REJECT"
-
+      ]
+      # 主机/角色策略（host 层通过 extraRules 注入）。
+      # 必须放在 GEOIP/MATCH 之前：域名规则先匹配，否则会被 GEOIP,CN 抢先。
+      ++ extraRules
+      ++ [
         # GEOIP CN 直连
         "GEOIP,CN,DIRECT"
 
