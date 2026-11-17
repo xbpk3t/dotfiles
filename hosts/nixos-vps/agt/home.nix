@@ -55,6 +55,14 @@ in
     AI = {
       claude.enable = true;
       skills.enable = true;
+
+      # 4G agent：把三个本地 stdio MCP 换成 hosted HTTP，保留工具但省掉
+      # ~214M/会话的本地进程。默认仍是 stdio，其他 host 不受影响。
+      mcp.httpServers = [
+        "github"
+        "context7"
+        "tavily"
+      ];
       dagu = {
         enable = true;
         # 只跑 scheduler；web UI 已关闭。

@@ -12,6 +12,9 @@ let
     || config.modules.AI.dsh.enable
     || config.modules.AI.opencode.enable;
   cfg = config.modules.AI.mcp;
+  httpGithub = builtins.elem "github" cfg.httpServers;
+  httpContext7 = builtins.elem "context7" cfg.httpServers;
+  httpTavily = builtins.elem "tavily" cfg.httpServers;
 in
 {
   imports = [
@@ -20,6 +23,24 @@ in
 
   options.modules.AI.mcp = with lib; {
     isDesktop = mkEnableOption "desktop-only MCP servers (browser/GUI)";
+
+    httpServers = mkOption {
+      type = types.listOf (types.enum [
+        "github"
+        "context7"
+        "tavily"
+      ]);
+      default = [ ];
+      description = ''
+        Opt in to the hosted HTTP MCP endpoints for these servers instead of
+        spawning local stdio processes. Default keeps the existing stdio path,
+        so each host can choose independently (e.g. a 4G VPS opts in, while
+        desktops keep stdio).
+
+        Claude Code receives per-server header overrides; Codex receives
+        bearer_token_env_var. Other clients may need their own auth wiring.
+      '';
+    };
   };
 
   # https://developers.openai.com/codex/mcp
@@ -28,7 +49,7 @@ in
 
     mcp-servers = {
       programs = {
-        github = {
+        github = lib.mkIf (!httpGithub) {
           enable = true;
           # github-mcp-server 只认 GITHUB_PERSONAL_ACCESS_TOKEN；用 wrapper 在
           # 启动时从 sops 读取，避免明文进 store，也让 dsh 的 stdio MCP 继承到。
@@ -40,7 +61,7 @@ in
           };
         };
 
-        context7 = {
+        context7 = lib.mkIf (!httpContext7) {
           enable = true;
           passwordCommand = {
             CONTEXT7_API_KEY = [
@@ -54,7 +75,7 @@ in
         # 走第三方 API，不经 Anthropic 后端 → DeepSeek 网关下照常可用。
         # key 注入用 passwordCommand（进程启动时 wrap 一层注入），与 context7 同一规范，
         # 不依赖 shell 是否导出了 TAVILY_API_KEY；勿改用 env 硬编码（store 可被任意读）。
-        tavily = {
+        tavily = lib.mkIf (!httpTavily) {
           enable = true;
           passwordCommand = {
             TAVILY_API_KEY = [
@@ -84,16 +105,46 @@ in
           default_tools_approval_mode = "approve";
         };
 
-        # context7 偏库/框架文档
-        context7 = {
-          default_tools_approval_mode = "approve";
-        };
+        # Hosted GitHub MCP：host 通过 modules.AI.mcp.httpServers opt in。
+        # Claude Code 用下面的专用 headers 覆盖；Codex 用 bearer_token_env_var。
+        github = lib.mkIf httpGithub (
+          {
+            type = "http";
+            url = "https://api.githubcopilot.com/mcp/";
+            default_tools_approval_mode = "approve";
+          }
+          // lib.optionalAttrs config.modules.AI.codex.enable {
+            bearer_token_env_var = "GITHUB_TOKEN";
+          }
+        );
+
+        # context7 偏库/框架文档。默认 stdio；host opt in 后走 hosted HTTP。
+        context7 =
+          {
+            default_tools_approval_mode = "approve";
+          }
+          // lib.optionalAttrs httpContext7 {
+            type = "http";
+            url = "https://mcp.context7.com/mcp";
+          }
+          // lib.optionalAttrs (httpContext7 && config.modules.AI.codex.enable) {
+            bearer_token_env_var = "CONTEXT7_API_KEY";
+          };
 
         # Tavily 通用搜索：approve 免审批，与同文件其它 server 一致。
         # tool 属 MCP（mcp__* 前缀），不在 claude.nix 的显式 allow 列表里时靠这里放行。
-        tavily = {
-          default_tools_approval_mode = "approve";
-        };
+        # 默认 stdio；host opt in 后走 hosted HTTP。
+        tavily =
+          {
+            default_tools_approval_mode = "approve";
+          }
+          // lib.optionalAttrs httpTavily {
+            type = "http";
+            url = "https://mcp.tavily.com/mcp/";
+          }
+          // lib.optionalAttrs (httpTavily && config.modules.AI.codex.enable) {
+            bearer_token_env_var = "TAVILY_API_KEY";
+          };
 
         # https://linear.app/docs/mcp
         #   Linear MCP 是远程 HTTP MCP（`https://mcp.linear.app/mcp`），走 native HTTP transport。
@@ -173,10 +224,43 @@ in
       default_tools_approval_mode = "approve";
     };
 
+    # Hosted HTTP variants for Claude Code. CC expands ${VAR} in headers;
+    # shared settings.servers deliberately has no headers to avoid Codex's
+    # HM bridge sending duplicate Authorization headers (see linear comment).
+    programs.claude-code.mcpServers.context7 =
+      lib.mkIf (config.modules.AI.claude.enable && httpContext7)
+        {
+          type = "http";
+          url = "https://mcp.context7.com/mcp";
+          headers.CONTEXT7_API_KEY = "\${CONTEXT7_API_KEY}";
+          default_tools_approval_mode = "approve";
+        };
+
+    programs.claude-code.mcpServers.tavily =
+      lib.mkIf (config.modules.AI.claude.enable && httpTavily)
+        {
+          type = "http";
+          url = "https://mcp.tavily.com/mcp/";
+          headers.Authorization = "Bearer \${TAVILY_API_KEY}";
+          default_tools_approval_mode = "approve";
+        };
+
+    programs.claude-code.mcpServers.github =
+      lib.mkIf (config.modules.AI.claude.enable && httpGithub)
+        {
+          type = "http";
+          url = "https://api.githubcopilot.com/mcp/";
+          headers.Authorization = "Bearer \${GITHUB_TOKEN}";
+          default_tools_approval_mode = "approve";
+        };
+
     # Share API keys with MCP servers and CLI tools.
     # sessionVariables are sourced by the shell; MCP server subprocess inherits them.
+    # GITHUB_TOKEN is already exported by home/core/devops/gh.nix; keep
+    # CONTEXT7_API_KEY as mkDefault so Codex's existing definition wins.
     home.sessionVariables = {
       LINEAR_API_KEY = "$(cat ${config.sops.secrets.API_LINEAR.path})";
+      CONTEXT7_API_KEY = lib.mkDefault "$(cat ${config.sops.secrets.API_CONTEXT7.path})";
       TAVILY_API_KEY = "$(cat ${config.sops.secrets.API_TAVILY.path})";
       EXA_API_KEY = "$(cat ${config.sops.secrets.API_EXA.path})";
       KEENABLE_API_KEY = "$(cat ${config.sops.secrets.API_KEENABLE.path})";
