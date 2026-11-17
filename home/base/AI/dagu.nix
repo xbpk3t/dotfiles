@@ -60,6 +60,9 @@ let
     };
     Service = {
       ExecStart = execStart;
+      # scheduler 稳态约 127M（含 page cache），给 150M high / 300M max 兜底。
+      MemoryHigh = "150M";
+      MemoryMax = "300M";
       Restart = "always";
       RestartSec = 10;
       WorkingDirectory = config.home.homeDirectory;

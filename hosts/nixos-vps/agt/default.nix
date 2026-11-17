@@ -64,6 +64,13 @@ in
     cores = lib.mkForce 1;
   };
 
+  # 4G agent 机的用户会话硬上限：把 OOM 限制在 user.slice 内，
+  # 避免 Chromium/Claude 把内核/系统服务一起拖死。dev(6G) 不继承。
+  systemd.slices."user".sliceConfig = {
+    MemoryHigh = "2800M";
+    MemoryMax = "3200M";
+  };
+
   # 官方 Node 的 V8 getter 与 nixpkgs Node 的加固编译不同；dsh 的
   # node-addon-require-builtin 只认官方构建。nix-ld 让官方 Node 能在 NixOS 上跑。
   programs.nix-ld = {

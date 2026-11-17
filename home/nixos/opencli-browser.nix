@@ -92,6 +92,10 @@ in
         Service = {
           ExecStart = "${pkgs.chromium}/bin/chromium ${lib.escapeShellArgs chromiumFlags}";
           Environment = [ "DISPLAY=${display}" ];
+          # 先节流再硬限：避免 Chromium 把 4G 机器拖进全局 OOM，
+          # 同时保留 ~700M 工作集和 1.2G 峰值余量。
+          MemoryHigh = "700M";
+          MemoryMax = "1200M";
           # 浏览器退出（例如最后一个窗口关闭）后需要拉起来。
           Restart = "always";
           RestartSec = 10;
