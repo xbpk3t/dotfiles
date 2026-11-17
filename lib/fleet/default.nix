@@ -30,7 +30,7 @@ let
       meta = import (path + "/meta.nix");
     in
     meta // {
-      inherit name;
+      inherit name path;
       hostName = name;
     };
 
@@ -55,6 +55,7 @@ let
       ) children;
     in
     if entries ? "meta.nix" then
+      assert lib.assertMsg (children == { }) "fleet: '${topName}' has meta.nix and child node meta.nix; a directory must be either a node or a group";
       { ${topName} = { ${topName} = scanNode topName topPath; }; }
     else
       assert lib.assertMsg (children != { }) "fleet: group '${topName}' has no meta.nix and no child node meta.nix";

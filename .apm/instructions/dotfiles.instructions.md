@@ -42,7 +42,8 @@ task tf:validate           # Terraform validate
 ### 分层结构
 
 ```
-hosts/<name>/          # 每台机器的 identity：default.nix (系统) + home.nix (用户)
+hosts/<group>/<node>/  # 每台机器的 identity：meta.nix (跨机事实) + default.nix (系统) + home.nix (用户)
+hosts/<group>/         # group base：共享的 capability import / 策略；节点目录 import 它
 home/base/             # 跨平台共享的用户 app 配置 (AI/desktop/langs/ms/works 等)
 home/core/             # 更底层/通用的用户配置 (devops/infra)
 home/darwin/           # macOS 专属 home-manager 配置
@@ -54,7 +55,8 @@ modules/darwin/        # nix-darwin 系统模块
 modules/sm/            # 非 NixOS system-manager 模块
 lib/                   # Nix helper 函数库
 pkgs/                  # 自定义 nix 包
-outputs/               # flake-parts outputs 子模块
+outputs/               # flake-parts 装配；host 输出由 lib/mkHost 生成
+lib/fleet/             # 扫描 hosts/**/meta.nix，派生节点名与跨机拓扑
 ```
 
 ### home/base vs home/core 的分层原因
@@ -132,5 +134,5 @@ outputs/               # flake-parts outputs 子模块
 - **SOPS 安全**：`secrets/` 包含加密密钥，永远不要尝试解密后明文提交。检查 diff 时确认只有密文变更
 - **Impure 评估**：部署和部分 eval 命令需要 `--impure`，因为仓库中存在未 track 的源码目录会阻断 pure flake evaluation。这是有意为之，不要尝试"修复"
 - **跨平台注意**：macOS 用 `nix-darwin`，NixOS 用 `nixosSystem`，Android AVF 用 `nixos-avf`，非 NixOS Debian 用 `system-manager`（sm 轨）。同一份 home-manager 配置在不同平台上可能有不同的可用包集合
-- **`hosts/<name>/` 是机器的 identity**：新增机器时在这里创建目录，包含 `default.nix`（系统级）和 `home.nix`（用户级），然后在 flake outputs 中注册
+- **`hosts/<group>/<node>/` 是机器的 identity**：新增机器时创建目录，包含 `meta.nix`（跨机事实）、`default.nix`（系统级）和 `home.nix`（用户级）；`lib/fleet` 自动发现并派生节点名，无需手动注册 flake outputs
 - **flake.lock 是部署的关键契约**：它锁定了所有 inputs 的版本，部署到任何机器都使用同一份 lock，保证 fleet 一致性

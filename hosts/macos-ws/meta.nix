@@ -7,6 +7,14 @@
   # fleet SSH 统一寻址：ssh.nix 只认 tailscale.ip。
   tailscale.ip = "100.87.216.84";
 
+  deploy = {
+    sshUser = "luck";
+    remoteBuild = true;
+    # 本机 localhost 激活成功后 deploy-rs 的 confirmation waiter 偶发超时，
+    # 会误判失败并回滚；本机部署关闭 magic rollback。
+    magicRollback = false;
+  };
+
   ssh = {
     # 部署入口：VPS 通过 tailnet 直连 Mac；本地部署仍可用 127.0.0.1。
     host = "100.87.216.84";

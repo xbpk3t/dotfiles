@@ -56,7 +56,7 @@ tasks:
         task nix:deploy:sm                       # 默认全部 sm-vps 节点
         task nix:deploy:sm NODE=sm-vps-tc        # 指定真机
 
-      部署内容（deploy.nodes.<node>，见 outputs/x86_64-linux/src/sm-vps.nix）：
+      部署内容（deploy.nodes.<node>，见 lib/mkHost.nix + hosts/sm-vps/）：
         - profiles.system → system-manager（custom activate，root）
         - profiles.home   → standalone HM（activate.home-manager，luck）
         - profilesOrder   先 system 后 home

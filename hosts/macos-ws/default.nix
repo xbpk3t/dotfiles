@@ -1,8 +1,14 @@
-{ userMeta, ... }:
+{ inputs, mylib, userMeta, ... }:
 let
   inherit (userMeta) username;
 in
 {
+  imports = [
+    inputs.sops-nix.darwinModules.sops
+    (mylib.relativeToRoot "secrets/default.nix")
+    (mylib.relativeToRoot "modules/darwin")
+  ];
+
   modules.networking.mihomo-client = {
     # Mihomo (Clash.Meta) proxy service (client)
     # wild 订阅源由 sops 自动发现（SUB_* secrets → sub.<name>），host 无需配置

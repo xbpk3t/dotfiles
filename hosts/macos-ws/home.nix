@@ -1,4 +1,11 @@
-_: {
+{ mylib, ... }: {
+  imports = [
+    (mylib.relativeToRoot "secrets/default.nix")
+    (mylib.relativeToRoot "home/core")
+    (mylib.relativeToRoot "home/base")
+    (mylib.relativeToRoot "home/darwin")
+  ];
+
   modules = {
     infra = {
       basePackages.enable = true;

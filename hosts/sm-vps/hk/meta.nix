@@ -5,6 +5,10 @@
   system = "x86_64-linux";
   stateVersion = "24.11";
 
+  deploy = {
+    remoteBuild = true;
+  };
+
   ssh = {
     host = "103.79.184.82";
     user = "luck";

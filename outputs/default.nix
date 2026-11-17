@@ -93,31 +93,7 @@ let
       pkgs = mkPkgsForHost system hostMeta;
     };
 
-  # 传给 outputs/<system>/src/*.nix 的公共参数。
-  baseOutputArgs = {
-    inherit
-      inputs
-      lib
-      mylib
-      globals
-      genSpecialArgs
-      mkSpecialArgs
-      ;
-  };
-
-  # 加载某一架构目录下的 role outputs，并注入公共参数。
-  loadRoleOutputs =
-    dir: extraArgs:
-    let
-      outputFiles = builtins.map (name: dir + "/${name}") (
-        builtins.filter (name: name != "default.nix" && lib.strings.hasSuffix ".nix" name) (
-          builtins.attrNames (builtins.readDir dir)
-        )
-      );
-    in
-    map (path: import path (baseOutputArgs // extraArgs)) outputFiles;
-
-  # 将同一架构下多个 output 文件合并为一份标准输出结构。
+  # 将多个 host 输出合并为一份标准输出结构。
   mergeRoleOutputList = outputs: {
     apps = lib.attrsets.mergeAttrsList (map (it: it.apps or { }) outputs);
     darwinConfigurations = lib.attrsets.mergeAttrsList (
@@ -133,24 +109,32 @@ let
     packages = lib.attrsets.mergeAttrsList (map (it: it.packages or { }) outputs);
   };
 
-  # 三套架构分别收敛成统一输出。
-  architectureOutputs = {
-    aarch64-darwin = mergeRoleOutputList (
-      loadRoleOutputs ./aarch64-darwin/src {
-        system = "aarch64-darwin";
-      }
-    );
-    aarch64-linux = mergeRoleOutputList (
-      loadRoleOutputs ./aarch64-linux/src {
-        system = "aarch64-linux";
-      }
-    );
-    x86_64-linux = mergeRoleOutputList (
-      loadRoleOutputs ./x86_64-linux/src {
-        system = "x86_64-linux";
-      }
-    );
+  # 每个节点由自己的 meta + host 文件生成全部出口。
+  # 节点发现、名称派生、拓扑事实都在 mylib.fleet 内完成。
+  mkHost = import ../lib/mkHost.nix {
+    inherit
+      inputs
+      lib
+      mylib
+      genSpecialArgs
+      mkSpecialArgs
+      ;
   };
+
+  hostOutputs = lib.mapAttrs (name: node: mkHost { inherit name node; }) mylib.fleet.nodes;
+
+  # 按 node.system 分组；perSystem 的 checks/topology 仍然按系统取视图。
+  hostNamesBySystem = lib.groupBy (name: mylib.fleet.nodes.${name}.system) (
+    builtins.attrNames mylib.fleet.nodes
+  );
+
+  architectureOutputs = lib.mapAttrs (
+    system: names: mergeRoleOutputList (map (name: hostOutputs.${name}) names)
+  ) hostNamesBySystem;
+
+  unsupportedNodes = lib.filter (
+    node: !(builtins.elem node.system supportedSystems)
+  ) (builtins.attrValues mylib.fleet.nodes);
 
   architectureOutputValues = builtins.attrValues architectureOutputs;
   currentSystem = builtins.currentSystem or null;
@@ -185,6 +169,9 @@ let
     map (it: it.systemConfigs or { }) architectureOutputValues
   );
 in
+assert
+  lib.assertMsg (unsupportedNodes == [ ])
+    "fleet: nodes declare unsupported systems: ${lib.concatMapStringsSep ", " (n: n.name) unsupportedNodes}";
 {
   systems = supportedSystems;
 
@@ -193,7 +180,7 @@ in
     let
       specialArgs = genSpecialArgs system;
       inherit (specialArgs) pkgs;
-      architectureOutput = architectureOutputs.${system};
+      architectureOutput = architectureOutputs.${system} or { };
       libChecks = import ../tests {
         inherit pkgs;
         inherit (pkgs) lib;
@@ -236,7 +223,7 @@ in
       #   - nixosConfigurations / darwinConfigurations：config.system.build.toplevel.drvPath
       #   - systemConfigs（sm）：config.build.toplevel.drvPath
       #   - homeConfigurations（standalone HM）：activationPackage.drvPath
-      # 注意：host-eval 只覆盖「当前求值 system」（architectureOutput = architectureOutputs.${system}）。
+      # 注意：host-eval 只覆盖「当前求值 system」（architectureOutputs.${system} or { }）。
       #   例如 sm-vps-tc 是 x86_64-linux，它在 Darwin 上求值 flake check 时不会生成
       #   host-eval-sm-vps-tc（只有 x86_64-linux 的 check 才会）。CI 若跑在 Darwin，
       #   sm 轨的 eval 门禁不会触发——需在 x86_64-linux 的 job 上才有意义。
@@ -282,7 +269,7 @@ in
         deploy-rs = inputs."deploy-rs".apps.${system}.deploy-rs;
         default = inputs."deploy-rs".apps.${system}.default;
       }
-      // architectureOutput.apps
+      // (architectureOutput.apps or { })
       //
         lib.optionalAttrs
           (
@@ -342,7 +329,7 @@ in
         ];
       };
 
-      inherit (architectureOutput) packages;
+      packages = architectureOutput.packages or { };
     };
 
   flake = {
