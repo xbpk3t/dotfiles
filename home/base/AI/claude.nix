@@ -9,12 +9,6 @@
 let
   cfg = config.modules.AI.claude;
   subagentSrc = "${pkgs.voltagent-subagents}";
-  # Herdr Claude integration (vendored v7) — home/base/AI/hooks/herdr-agent-state.sh
-  # SessionStart reports session_id for resume_agents_on_restore; state is screen-detected.
-  # No-op outside Herdr panes (HERDR_ENV=1). Wired via HM settings, NOT `herdr integration install`.
-  herdrAgentStateHook = pkgs.writeScript "herdr-agent-state.sh" (
-    builtins.readFile ./hooks/herdr-agent-state.sh
-  );
 in
 {
   options.modules.AI.claude = with lib; {
@@ -172,12 +166,6 @@ in
               # 自动注册并后台刷新（autoUpdate=true），我们只用 ponytail 市场。
               # 不设的话它会持续联网拉目录；需要时 /plugin 可手动加回。
               CLAUDE_CODE_DISABLE_OFFICIAL_MARKETPLACE_AUTOINSTALL = "1";
-              # 临时注释（LUC-334 实测）：CLAUDE_CODE_DISABLE_TERMINAL_TITLE=1 会禁掉
-              # Claude 的 OSC 终端标题更新，而 herdr 的 osc_title_working 规则依赖它
-              # 检测 working 状态（issue #1630）。不设则 agent 状态永远 stuck 在 idle，
-              # working→idle 转换不触发 → 通知永远弹不出来。
-              # 注释后 Claude 会恢复更新 tab/window title；若实测确认状态检测恢复则保留注释。
-              # CLAUDE_CODE_DISABLE_TERMINAL_TITLE = "1";
 
               # 强制启用 auto mode 后台 agent 的 resume 能力。
               #
@@ -245,21 +233,6 @@ in
               CCX_WIKI_ROOT = "${config.home.homeDirectory}/Desktop/docs/wiki";
               CCX_AI_MODEL = globals.models.dsf;
               CCX_AI_BASE_URL = "https://api.lucc.dev/v1";
-            };
-
-            # Herdr: SessionStart → session id for native resume (state still screen-detected).
-            # Do not run `herdr integration install claude` — this replaces that install path.
-            hooks = {
-              SessionStart = [
-                {
-                  hooks = [
-                    {
-                      type = "command";
-                      command = "${herdrAgentStateHook} session";
-                    }
-                  ];
-                }
-              ];
             };
 
             # statusLine = {

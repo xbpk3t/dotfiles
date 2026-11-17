@@ -1,25 +1,4 @@
 {
-    "herdr-focus-notify": {
-        "cargoLock": null,
-        "date": null,
-        "extract": null,
-        "name": "herdr-focus-notify",
-        "passthru": null,
-        "pinned": false,
-        "src": {
-            "deepClone": false,
-            "fetchSubmodules": false,
-            "leaveDotGit": false,
-            "name": null,
-            "owner": "yankewei",
-            "repo": "herdr-focus-notify",
-            "rev": "v0.8.0",
-            "sha256": "sha256-/x772u1kge5ZDT674Vh7HWNsz3mUroxpFJahsVTp1Hk=",
-            "sparseCheckout": [],
-            "type": "github"
-        },
-        "version": "v0.8.0"
-    },
     "voltagent-subagents": {
         "cargoLock": null,
         "date": null,
