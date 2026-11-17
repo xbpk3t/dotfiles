@@ -81,7 +81,6 @@
     };
 
     # ── 5. U 盘性能/寿命优化 ──
-    fstrim.enable = true; # 支持 TRIM 的盘定期回收
 
     # 日志压缩 + 限量（U 盘空间宝贵）
     # mkForce：覆盖 kernel/journald.nix 基线的 1G/512M/14day（Compress 基线已开）
