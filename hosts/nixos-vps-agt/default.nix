@@ -13,15 +13,25 @@ in
 {
   imports = [ ../_base/nixos-vps ];
 
-  modules.networking.tailscale.derper = {
-    enable = true;
-    domain = hostMeta.tailscale.derpDomain;
-    inherit (hostMeta) acmeEmail;
-  };
+  modules = {
+    networking = {
+      tailscale.derper = {
+        enable = true;
+        domain = hostMeta.tailscale.derpDomain;
+        inherit (hostMeta) acmeEmail;
+      };
+      mihomo-client = {
+        enable = true;
+        # derper 的 STUN 回包是 wildcard UDP，源地址选择会被 mihomo TUN 接管；
+        # 把 derper 的 UID 排除出 auto-route。
+        tunExcludeUids = [ config.users.users.derper.uid ];
+      };
+    };
 
-  modules.infra.healthchecks = {
-    enable = true;
-    urlFile = config.sops.secrets.HEALTHCHECKS_VPS_AGT.path;
+    infra.healthchecks = {
+      enable = true;
+      urlFile = config.sops.secrets.HEALTHCHECKS_VPS_AGT.path;
+    };
   };
 
   services = {
@@ -59,13 +69,6 @@ in
 
   # 固定 derper UID，供 mihomo exclude-uid 使用；当前自动分配就是 993。
   users.users.derper.uid = 993;
-
-  modules.networking.mihomo-client = {
-    enable = true;
-    # derper 的 STUN 回包是 wildcard UDP，源地址选择会被 mihomo TUN 接管；
-    # 把 derper 的 UID 排除出 auto-route。
-    tunExcludeUids = [ config.users.users.derper.uid ];
-  };
 
   # Chrome 需要 fontconfig/字体；不要继承 server 的 fonts 关闭策略。
   fonts = {
