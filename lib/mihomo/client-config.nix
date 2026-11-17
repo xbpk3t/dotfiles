@@ -12,7 +12,7 @@ with lib;
 let
   # Fleet-wide：任何在 meta 里发布 `singbox` 的节点都是 client 的 server。
   # 不再硬编码 "nixos-vps" 组；未来 homelab / 其他平台加代理节点会自动进 outbounds。
-  nodes = mylib.inventory.nodes;
+  nodes = mylib.fleet.nodes;
   servers = lib.lists.filter (s: s != null) (
     lib.attrsets.mapAttrsToList (
       name: node:
@@ -20,7 +20,7 @@ let
         node.singbox
         // {
           hostName = node.hostName or name;
-          server = node.singbox.server or (mylib.inventory.primaryHostForNode name node);
+          server = node.singbox.server or (mylib.fleet.primaryHostForNode name node);
         }
       else
         null

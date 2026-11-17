@@ -7,7 +7,7 @@
 }@args:
 let
   name = "nixos-avf";
-  node = mylib.inventory."nixos-avf".${name};
+  node = mylib.fleet.nodes.${name};
 
   modules = {
     system = "aarch64-linux";

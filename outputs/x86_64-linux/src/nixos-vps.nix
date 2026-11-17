@@ -6,10 +6,10 @@
   ...
 }@args:
 let
-  # inventory 节点名 → hosts 目录名；dev 继续使用 hosts/nixos-vps。
+  # fleet 节点名 → hosts 目录名；dev 继续使用 hosts/nixos-vps。
   name = "nixos-vps-dev";
   hostDir = "nixos-vps";
-  node = mylib.inventory."nixos-vps".${name} or null;
+  node = mylib.fleet.nodes.${name} or null;
 
   modules = {
     system = "x86_64-linux";
@@ -49,7 +49,7 @@ let
       specialArgs = mkSpecialArgs modules.system node;
     };
   nixosConfig = mylib.nixosSystem systemArgs;
-  deployNode = mylib.inventory.deployRsNode {
+  deployNode = mylib.fleet.deployRsNode {
     inherit name node;
     nixosConfiguration = nixosConfig;
     deployLib = inputs."deploy-rs".lib.${modules.system};

@@ -1,13 +1,21 @@
-{
-  lib,
-  inventoryData,
-}:
+# Fleet registry: node-keyed view over lib/fleet/data.nix.
+#
+# 这里是“跨机拓扑”的唯一入口：
+#   - nodes / tailnetNodes：按节点名索引的扁平表
+#   - singboxServers：所有发布 singbox 能力的节点
+#   - nezha：唯一的 hub 及其派生地址
+#   - deployRsNode / deploySmHmNode：deploy-rs 节点构造器
+#   - checks：可在 nix-unit 里逐条断言的不变量
+#
+# 单机身份/配置不要加到这里；它们属于 hosts/<name>/。
+{ lib }:
 let
-  nodesOrEmpty = inventory: if inventory == null then { } else inventory;
-  inventory = nodesOrEmpty inventoryData;
-  groupOrEmpty = name: inventory.${name} or { };
-  # Why：inventory 是纯数据（分组内节点结构），可能同时提供 tailscale.ip/primaryIp/ip/ips/ssh.host。
-  # What：按优先级挑一个”主机地址”作为部署/连接默认值。
+  data = import ./data.nix;
+
+  groups = data;
+  allNodes = lib.foldl' (acc: group: acc // group) { } (lib.attrValues groups);
+
+  # 按优先级挑一个“主机地址”作为部署/连接默认值。
   # tailnet 优先：sshd 统一经 tailnet 访问，公网 IP 只保留给 DNS/代理等对外服务。
   primaryHostForNode =
     name: node:
@@ -22,22 +30,28 @@ let
       ];
     in
     lib.findFirst (v: v != null) null candidates;
-  normalizeSingboxNode =
-    name: node:
-    let
-      inherit (node) singbox;
-    in
-    singbox
-    // {
-      hostName = node.hostName or name;
-      server = singbox.server or primaryHostForNode name node;
-    };
 
-  allNodes = lib.foldl' (acc: group: acc // group) { } (lib.attrValues inventory);
+  tailnetNodes = lib.filterAttrs (
+    _: node: node ? tailscale && node.tailscale ? ip
+  ) allNodes;
+
+  singboxServers = lib.filter (s: s != null) (
+    lib.attrsets.mapAttrsToList (
+      name: node:
+      if node ? singbox then
+        node.singbox
+        // {
+          hostName = node.hostName or name;
+          server = node.singbox.server or (primaryHostForNode name node);
+        }
+      else
+        null
+    ) allNodes
+  );
 
   # Nezha: exactly one node may declare `nezha.hub = true`. Agents derive
-  # their dashboard address from that node, so the hub IP/port stays in
-  # inventory instead of being duplicated in host modules.
+  # their dashboard address from that node, so the hub address stays in the
+  # fleet registry instead of being duplicated in host modules.
   nezhaHub =
     let
       hubs = lib.filter (node: node.nezha.hub or false) (lib.attrValues allNodes);
@@ -45,37 +59,47 @@ let
     if hubs == [ ] then
       null
     else if lib.length hubs > 1 then
-      throw "inventory: multiple nodes declare nezha.hub = true"
+      throw "fleet: multiple nodes declare nezha.hub = true"
     else
       builtins.head hubs;
-in
-{
-  inherit primaryHostForNode;
-  # 扁平化所有 group 的节点（节点名全局唯一，可直接当 hostName/别名查找）。
-  nodes = allNodes;
 
-  nezha = {
-    hub = nezhaHub;
-    server =
-      if nezhaHub == null then
-        throw "inventory: no node declares nezha.hub = true"
-      else
-        "${primaryHostForNode nezhaHub.hostName nezhaHub}:${toString (nezhaHub.nezha.port or 8008)}";
+  nezhaServer =
+    if nezhaHub == null then
+      throw "fleet: no node declares nezha.hub = true"
+    else
+      "${primaryHostForNode nezhaHub.hostName nezhaHub}:${toString (nezhaHub.nezha.port or 8008)}";
+
+  # 不变量：值全部是布尔，nix-unit 直接消费；键以 test- 开头。
+  checks = {
+    "test-hostName-matches-node-key" = lib.all (
+      name: (allNodes.${name}.hostName or name) == name
+    ) (lib.attrNames allNodes);
+
+    "test-stateVersion-non-empty" = lib.all (
+      node: (node.stateVersion or "") != ""
+    ) (lib.attrValues allNodes);
+
+    "test-tailnet-ip-unique" =
+      let
+        ips = lib.map (node: node.tailscale.ip) (lib.attrValues tailnetNodes);
+      in
+      lib.length ips == lib.length (lib.unique ips);
+
+    "test-nezha-hub-at-most-one" =
+      lib.length (lib.filter (node: node.nezha.hub or false) (lib.attrValues allNodes)) <= 1;
+
+    "test-singbox-server-address" = lib.all (
+      node: !(node ? singbox) || node.singbox ? server
+    ) (lib.attrValues allNodes);
+
+    "test-uid-gid-paired" = lib.all (
+      node:
+      let
+        user = node.user or { };
+      in
+      !(user ? uid) || (user.uid > 0 && (user.gid or 0) > 0)
+    ) (lib.attrValues allNodes);
   };
-  # 分组入口（简化调用）：mylib.inventory.<group>
-  "nixos-avf" = groupOrEmpty "nixos-avf";
-  "nixos-vps" = groupOrEmpty "nixos-vps";
-  "nixos-usb" = groupOrEmpty "nixos-usb";
-  "macos-ws" = groupOrEmpty "macos-ws";
-  "sm-vps" = groupOrEmpty "sm-vps";
-
-  singboxForHost =
-    inventory: hostName:
-    let
-      nodes = nodesOrEmpty inventory;
-      node = nodes.${hostName};
-    in
-    normalizeSingboxNode hostName node;
 
   deployRsNode =
     {
@@ -102,7 +126,7 @@ in
     in
     {
       # What：部署目标地址（IP/域名/别名）。
-      # Why：由 inventory 的 primaryIp/ip/ips/ssh.host 统一推导，避免重复填部署字段。
+      # Why：由 fleet registry 的 ssh.host/tailscale.ip 统一推导，避免重复填部署字段。
       hostname = host;
       # What：SSH 用户名。
       # Why：默认 root，允许每个节点覆盖（node.ssh.user）。
@@ -177,7 +201,7 @@ in
     in
     {
       # What：部署目标地址（IP/域名/别名）。
-      # Why：与 deployRsNode 一致，由 inventory 的 ssh.host/primaryIp 推导。
+      # Why：与 deployRsNode 一致，由 fleet registry 的 ssh.host/tailscale.ip 推导。
       hostname = host;
       inherit sshUser sshOpts remoteBuild;
       # magic rollback：deploy-rs 0.1.0 的 canary 确认机制有确认竞态 bug——
@@ -202,4 +226,23 @@ in
       };
       inherit profilesOrder;
     };
+in
+{
+  inherit
+    groups
+    primaryHostForNode
+    tailnetNodes
+    singboxServers
+    deployRsNode
+    deploySmHmNode
+    checks
+    ;
+
+  # 扁平化所有 group 的节点（节点名全局唯一，可直接查找）。
+  nodes = allNodes;
+
+  nezha = {
+    hub = nezhaHub;
+    server = nezhaServer;
+  };
 }

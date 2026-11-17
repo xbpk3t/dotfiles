@@ -8,7 +8,7 @@
 let
   name = "nixos-vps-agt";
   hostDir = "nixos-vps-agt";
-  node = mylib.inventory."nixos-vps".${name} or null;
+  node = mylib.fleet.nodes.${name} or null;
 
   modules = {
     system = "x86_64-linux";
@@ -39,7 +39,7 @@ let
       specialArgs = mkSpecialArgs modules.system node;
     };
   nixosConfig = mylib.nixosSystem systemArgs;
-  deployNode = mylib.inventory.deployRsNode {
+  deployNode = mylib.fleet.deployRsNode {
     inherit name node;
     nixosConfiguration = nixosConfig;
     deployLib = inputs."deploy-rs".lib.${modules.system};

@@ -7,7 +7,7 @@
 }@args:
 let
   name = "nixos-usb";
-  node = mylib.inventory."nixos-usb".${name};
+  node = mylib.fleet.nodes.${name};
 
   modules = {
     system = "x86_64-linux";
@@ -45,7 +45,7 @@ let
       specialArgs = mkSpecialArgs modules.system node;
     };
   nixosConfig = mylib.nixosSystem systemArgs;
-  deployNode = mylib.inventory.deployRsNode {
+  deployNode = mylib.fleet.deployRsNode {
     inherit name node;
     nixosConfiguration = nixosConfig;
     deployLib = inputs."deploy-rs".lib."x86_64-linux";

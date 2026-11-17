@@ -8,7 +8,7 @@
 let
   group = "sm-vps";
   system = "x86_64-linux";
-  nodes = mylib.inventory.${group};
+  nodes = mylib.fleet.groups.${group};
 
   # 为组内每个节点生成一套出口：
   #   homeConfigurations.<name> — standalone HM（home/core + secrets）
@@ -93,7 +93,7 @@ let
       };
 
       # Phase 5：deploy-rs 双 profile 节点（system=sm / home=HM）。
-      deployNode = mylib.inventory.deploySmHmNode {
+      deployNode = mylib.fleet.deploySmHmNode {
         inherit name node;
         systemToplevel = systemConfig.config.build.toplevel;
         # homeConfigurations 值本身带顶层 activationPackage（deploy-rs activate.home-manager 期望）。

@@ -155,7 +155,7 @@ rec {
 
               # 全局身份常量：所有 host 共享。
               # Why: user/time/editor 不是 fleet topology，不该每个节点在
-              # inventory 里复制一份；per-host 差异由 host 模块覆盖。
+              # fleet registry 里复制一份；per-host 差异由 host 模块覆盖。
               identity = {
                 user = {
                   username = "luck";

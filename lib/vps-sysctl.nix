@@ -252,7 +252,7 @@ let
       "net.core.busy_poll" = 0;
       "net.core.busy_read" = 0;
 
-      # 队列算法：默认 fq，更稳妥；如需 cake 可在 inventory 覆盖
+      # 队列算法：默认 fq，更稳妥；如需 cake 可在 host 覆盖
       "net.core.default_qdisc" = qdisc;
 
       # ################## NETWORK - TCP ############

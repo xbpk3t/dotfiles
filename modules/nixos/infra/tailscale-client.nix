@@ -40,7 +40,7 @@ in
       # 需要
       domain = mkOption {
         type = types.str;
-        # 静态方案：默认由主机名派生域名，但最终应在 inventory/host 层显式指定
+        # 静态方案：默认由主机名派生域名，但最终应在 host 层显式指定
         default = "derp-${config.networking.hostName}.lucc.dev";
         description = "Public domain name for this DERP node.";
       };

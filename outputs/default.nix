@@ -309,7 +309,7 @@ in
       #   Why: nix-unit 会在其 builder 的沙箱里重新求值 `self#tests.systems.<system>`，
       #   未注入的 input 会被当作“需重新 fetch 的 flake”，而沙箱无网络 → 直接失败；
       #   注入整组 inputs 就保证只在本机已 resolve 的 store 里取，零网络依赖。
-      # - `tests`：纯数据驱动生成的断言 suite（读取 lib/inventory/data.nix）.
+      # - `tests`：纯数据驱动生成的断言 suite（读取 lib/fleet/data.nix）.
       # allowNetwork：仅注入顶层 inputs 还不够 —— 本仓是大 flake，含非顶层、也
       # 不 follow nixpkgs 的间接 input（如 flake-parts 的子输入 nixpkgs-lib）。
       # check 沙箱内重求值 `self` 需要它们，却无网（CI 上 `Could not resolve host: github.com`）。
@@ -318,7 +318,7 @@ in
       nix-unit = {
         allowNetwork = true;
         inherit inputs;
-        tests = import ../tests/nix-unit/host-metadata.nix { };
+        tests = import ../tests/nix-unit/host-metadata.nix { inherit lib; };
       };
 
       # 开发环境：CI 与本地共享同一套工具，保证 pre-commit / linter 行为一致。

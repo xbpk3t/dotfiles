@@ -32,7 +32,7 @@ in
   };
 
   networking = {
-    # hostName 由 inventory 注入；这里提供默认值，避免单机调试时为空。
+    # hostName 由 hostMeta 注入；这里提供默认值，避免单机调试时为空。
     hostName = lib.mkDefault (hostMeta.hostName or "nixos-vps");
     useDHCP = true;
     inherit nameservers;
@@ -84,7 +84,7 @@ in
       nix-tools.enable = lib.mkDefault true;
       singbox-server.enable = lib.mkDefault false;
 
-      # Nezha roles come from inventory: exactly one node declares
+      # Nezha roles come from the fleet registry: exactly one node declares
       # nezha.hub = true, and every VPS runs an agent. The dashboard
       # address is derived from that hub node, not hardcoded here.
       nezha = {
@@ -94,7 +94,7 @@ in
         };
         agent = {
           enable = true;
-          server = mylib.inventory.nezha.server;
+          server = mylib.fleet.nezha.server;
           uuid = hostMeta.nezha.uuid or null;
         };
       };
