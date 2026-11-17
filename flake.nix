@@ -113,6 +113,13 @@ rec {
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # NixOS as a WSL2 distribution（Windows Server 2022 PA: 0cadhjae-vmez89）。
+    # 上游 release 仍是 26.05 线；模块跟 main，switch 时随仓库 nixpkgs 走。
+    nixos-wsl = {
+      url = "github:nix-community/NixOS-WSL/main";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Nix unit testing tools
     nix-unit.url = "github:nix-community/nix-unit";
 
