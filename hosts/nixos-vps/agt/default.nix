@@ -2,23 +2,31 @@
   config,
   lib,
   globals,
-  hostMeta,
+  mail,
   pkgs,
   ...
 }:
 let
   inherit (globals.networking) nameservers;
-  linuxFonts = (import ../../modules/fonts.nix { inherit pkgs; }).linux;
+  linuxFonts = (import ../../../modules/fonts.nix { inherit pkgs; }).linux;
 in
 {
-  imports = [ ../_base/nixos-vps ];
+  imports = [ ../default.nix ];
 
   modules = {
+    kernel.sysctl.hardware = {
+      cpuCores = 4;
+      memGiB = 4;
+      bwMbps = 6;
+      rttMs = 30;
+    };
+
     networking = {
       tailscale.derper = {
         enable = true;
-        domain = hostMeta.tailscale.derpDomain;
-        inherit (hostMeta) acmeEmail;
+        # 短域名：nva = nixos-vps-agt；域名里不体现 derp。
+        domain = "nva.lucc.dev";
+        acmeEmail = mail;
       };
       mihomo-client = {
         enable = true;
@@ -32,6 +40,8 @@ in
       enable = true;
       urlFile = config.sops.secrets.HEALTHCHECKS_VPS_AGT.path;
     };
+    # 稳定 UUID：`uuidgen` 生成一次后固定，避免 hostname/FQDN 变化导致重复注册。
+    infra.nezha.agent.uuid = "5b8a9ab4-6ed8-4e5d-9c45-03425b6b4644";
   };
 
   services = {

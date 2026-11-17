@@ -1,6 +1,9 @@
 {
   globals,
+  hostMeta,
+  inputs,
   lib,
+  mylib,
   pkgs,
   stateVersion,
   ...
@@ -15,12 +18,21 @@
 #
 #############################################################
 let
-  hostName = "nixos-usb";
+  inherit (hostMeta) hostName;
   inherit (globals.networking) nameservers;
 in
 {
   imports = [
+    inputs.sops-nix.nixosModules.sops
+    inputs.disko.nixosModules.disko
     ./usb.nix
+    ./disko.nix
+    (mylib.relativeToRoot "secrets/default.nix")
+    (mylib.relativeToRoot "modules/nixos/kernel")
+    (mylib.relativeToRoot "modules/nixos/desktop")
+    (mylib.relativeToRoot "modules/nixos/infra/nix-tools.nix")
+    (mylib.relativeToRoot "modules/nixos/infra/tailscale-client.nix")
+    (mylib.relativeToRoot "modules/nixos/infra/mihomo-client.nix")
   ];
 
   # ── 引导：U 盘专属 ──

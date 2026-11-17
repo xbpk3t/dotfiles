@@ -6,10 +6,10 @@
 }:
 let
   # 当前仓库明确支持的 target systems。
-  # why: flake-parts 的 perSystem 会基于这里展开；这里是顶层支持矩阵的单一入口。
+  # why: flake-parts 的 perSystem 会基于这里展开；每个条目都会实例化一套 nixpkgs，
+  #   所以只列真正有节点的平台（aarch64-linux 随 nixos-avf 一起移除）。
   supportedSystems = [
     "aarch64-darwin"
-    "aarch64-linux"
     "x86_64-linux"
   ];
 
@@ -85,41 +85,17 @@ let
     (genSpecialArgs system)
     // {
       inherit hostMeta;
-      userMeta = hostMeta.user;
-      mail = hostMeta.user.mail or null;
-      timeMeta = hostMeta.time;
-      editorMeta = hostMeta.editor;
+      userMeta = globals.identity.user;
+      mail = globals.identity.user.mail or null;
+      timeMeta = globals.identity.time;
+      editorMeta = globals.identity.editor;
       stateVersion = hostMeta.stateVersion or "24.11";
       pkgs = mkPkgsForHost system hostMeta;
     };
 
-  # 传给 outputs/<system>/src/*.nix 的公共参数。
-  baseOutputArgs = {
-    inherit
-      inputs
-      lib
-      mylib
-      globals
-      genSpecialArgs
-      mkSpecialArgs
-      ;
-  };
-
-  # 加载某一架构目录下的 role outputs，并注入公共参数。
-  loadRoleOutputs =
-    dir: extraArgs:
-    let
-      outputFiles = builtins.map (name: dir + "/${name}") (
-        builtins.filter (name: name != "default.nix" && lib.strings.hasSuffix ".nix" name) (
-          builtins.attrNames (builtins.readDir dir)
-        )
-      );
-    in
-    map (path: import path (baseOutputArgs // extraArgs)) outputFiles;
-
-  # 将同一架构下多个 output 文件合并为一份标准输出结构。
-  mergeRoleOutputList = outputs: {
-    apps = lib.attrsets.mergeAttrsList (map (it: it.apps or { }) outputs);
+  # 将多个 host 输出合并为一份标准输出结构。
+  # host 输出只含配置/deploy 节点；apps/packages 由 flake 层自己提供。
+  mergeHostOutputs = outputs: {
     darwinConfigurations = lib.attrsets.mergeAttrsList (
       map (it: it.darwinConfigurations or { }) outputs
     );
@@ -130,27 +106,42 @@ let
     # sm-vps 平行轨
     homeConfigurations = lib.attrsets.mergeAttrsList (map (it: it.homeConfigurations or { }) outputs);
     systemConfigs = lib.attrsets.mergeAttrsList (map (it: it.systemConfigs or { }) outputs);
-    packages = lib.attrsets.mergeAttrsList (map (it: it.packages or { }) outputs);
   };
 
-  # 三套架构分别收敛成统一输出。
-  architectureOutputs = {
-    aarch64-darwin = mergeRoleOutputList (
-      loadRoleOutputs ./aarch64-darwin/src {
-        system = "aarch64-darwin";
-      }
-    );
-    aarch64-linux = mergeRoleOutputList (
-      loadRoleOutputs ./aarch64-linux/src {
-        system = "aarch64-linux";
-      }
-    );
-    x86_64-linux = mergeRoleOutputList (
-      loadRoleOutputs ./x86_64-linux/src {
-        system = "x86_64-linux";
-      }
-    );
+  # 每个节点由自己的 meta + host 文件生成全部出口。
+  # 节点发现、名称派生、拓扑事实都在 mylib.fleet 内完成。
+  mkHost = import ../lib/mkHost.nix {
+    inherit
+      inputs
+      lib
+      mylib
+      genSpecialArgs
+      mkSpecialArgs
+      ;
   };
+
+  # 按 node.system 分组；perSystem 的 checks/topology 仍然按系统取视图。
+  architectureOutputs = lib.mapAttrs (
+    _system: nodes:
+    mergeHostOutputs (
+      map (
+        node:
+        mkHost {
+          inherit (node) name;
+          node = node;
+        }
+      ) nodes
+    )
+  ) (lib.groupBy (node: node.system) (builtins.attrValues mylib.fleet.nodes));
+
+  unsupportedNodes = lib.filter (node: !(builtins.elem node.system supportedSystems)) (
+    builtins.attrValues mylib.fleet.nodes
+  );
+
+  # perSystem 会直接取 architectureOutputs.${system}；每个 supported system 必须有节点。
+  missingSystemHosts = lib.filter (
+    system: !(builtins.hasAttr system architectureOutputs)
+  ) supportedSystems;
 
   architectureOutputValues = builtins.attrValues architectureOutputs;
   currentSystem = builtins.currentSystem or null;
@@ -185,6 +176,13 @@ let
     map (it: it.systemConfigs or { }) architectureOutputValues
   );
 in
+assert lib.assertMsg (unsupportedNodes == [ ])
+  "fleet: nodes declare unsupported systems: ${
+    lib.concatMapStringsSep ", " (n: n.name) unsupportedNodes
+  }";
+assert lib.assertMsg (
+  missingSystemHosts == [ ]
+) "flake: supported systems have no host outputs: ${lib.concatStringsSep ", " missingSystemHosts}";
 {
   systems = supportedSystems;
 
@@ -236,7 +234,7 @@ in
       #   - nixosConfigurations / darwinConfigurations：config.system.build.toplevel.drvPath
       #   - systemConfigs（sm）：config.build.toplevel.drvPath
       #   - homeConfigurations（standalone HM）：activationPackage.drvPath
-      # 注意：host-eval 只覆盖「当前求值 system」（architectureOutput = architectureOutputs.${system}）。
+      # 注意：host-eval 只覆盖「当前求值 system」（architectureOutputs.${system}）。
       #   例如 sm-vps-tc 是 x86_64-linux，它在 Darwin 上求值 flake check 时不会生成
       #   host-eval-sm-vps-tc（只有 x86_64-linux 的 check 才会）。CI 若跑在 Darwin，
       #   sm 轨的 eval 门禁不会触发——需在 x86_64-linux 的 job 上才有意义。
@@ -282,7 +280,6 @@ in
         deploy-rs = inputs."deploy-rs".apps.${system}.deploy-rs;
         default = inputs."deploy-rs".apps.${system}.default;
       }
-      // architectureOutput.apps
       //
         lib.optionalAttrs
           (
@@ -309,7 +306,7 @@ in
       #   Why: nix-unit 会在其 builder 的沙箱里重新求值 `self#tests.systems.<system>`，
       #   未注入的 input 会被当作“需重新 fetch 的 flake”，而沙箱无网络 → 直接失败；
       #   注入整组 inputs 就保证只在本机已 resolve 的 store 里取，零网络依赖。
-      # - `tests`：纯数据驱动生成的断言 suite（读取 lib/inventory/data.nix）.
+      # - `tests`：纯数据驱动生成的断言 suite（读取 hosts/**/meta.nix）.
       # allowNetwork：仅注入顶层 inputs 还不够 —— 本仓是大 flake，含非顶层、也
       # 不 follow nixpkgs 的间接 input（如 flake-parts 的子输入 nixpkgs-lib）。
       # check 沙箱内重求值 `self` 需要它们，却无网（CI 上 `Could not resolve host: github.com`）。
@@ -318,7 +315,7 @@ in
       nix-unit = {
         allowNetwork = true;
         inherit inputs;
-        tests = import ../tests/nix-unit/host-metadata.nix { };
+        tests = import ../tests/nix-unit/host-metadata.nix { inherit (mylib) fleet; };
       };
 
       # 开发环境：CI 与本地共享同一套工具，保证 pre-commit / linter 行为一致。
@@ -337,12 +334,10 @@ in
           ../topology.nix
           {
             # 注入当前 system 的 nixosConfigurations，让 nix-topology 自动提取主机接口/服务。
-            nixosConfigurations = architectureOutput.nixosConfigurations or { };
+            nixosConfigurations = architectureOutput.nixosConfigurations;
           }
         ];
       };
-
-      inherit (architectureOutput) packages;
     };
 
   flake = {

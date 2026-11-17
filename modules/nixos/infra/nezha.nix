@@ -54,8 +54,8 @@ in
         type = lib.types.nullOr lib.types.str;
         default = null;
         description = ''
-          Stable agent UUID. Generate once with `uuidgen` and store it in the
-          host inventory as `nezha.uuid`; do not derive it from FQDN.
+          Stable agent UUID. Generate once with `uuidgen` and set it in the
+          host module; do not derive it from FQDN.
         '';
       };
     };
@@ -66,7 +66,7 @@ in
       assertions = [
         {
           assertion = !cfg.agent.enable || cfg.agent.uuid != null;
-          message = "modules.infra.nezha.agent.uuid must be set in inventory (nezha.uuid) when the agent is enabled.";
+          message = "modules.infra.nezha.agent.uuid must be set by the host when the agent is enabled.";
         }
       ];
     }
@@ -113,7 +113,7 @@ in
           disable_command_execute = true;
         };
 
-        # UUID comes from inventory; no FQDN dependency and no runtime
+        # UUID comes from the host config; no FQDN dependency and no runtime
         # uuidgen. Renaming a host must not create a duplicate dashboard entry.
         genUuid = false;
         clientSecretFile = config.sops.secrets.NEZHA_AGENT_SK.path;

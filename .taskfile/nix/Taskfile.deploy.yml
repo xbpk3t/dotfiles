@@ -56,7 +56,7 @@ tasks:
         task nix:deploy:sm                       # 默认全部 sm-vps 节点
         task nix:deploy:sm NODE=sm-vps-tc        # 指定真机
 
-      部署内容（deploy.nodes.<node>，见 outputs/x86_64-linux/src/sm-vps.nix）：
+      部署内容（deploy.nodes.<node>，见 lib/mkHost.nix + hosts/sm-vps/）：
         - profiles.system → system-manager（custom activate，root）
         - profiles.home   → standalone HM（activate.home-manager，luck）
         - profilesOrder   先 system 后 home
@@ -77,7 +77,7 @@ tasks:
       - |
         set -euo pipefail
         node="{{.NODE | default "sm-vps-tc"}}"
-        # host/user 从 inventory 推导（N5：不再硬编码；NODE_HOST/NODE_USER 可覆盖）
+        # host/user 从 fleet registry 推导（N5：不再硬编码；NODE_HOST/NODE_USER 可覆盖）
         host="{{.NODE_HOST | default ""}}"
         user="{{.NODE_USER | default ""}}"
         if [ -z "$host" ]; then
@@ -130,7 +130,7 @@ tasks:
       - |
         set -euo pipefail
         node="{{.NODE}}"
-        # host/user 从 inventory 推导（N5：不再硬编码；NODE_HOST/NODE_USER 可覆盖）
+        # host/user 从 fleet registry 推导（N5：不再硬编码；NODE_HOST/NODE_USER 可覆盖）
         host="{{.NODE_HOST | default ""}}"
         user="{{.NODE_USER | default ""}}"
         if [ -z "$host" ]; then

@@ -6,45 +6,30 @@
 }:
 let
   inherit (config.lib.topology) mkInternet mkRouter mkConnection;
-
-  # 自定义 OS 图标。
-  # debian/android：从 devicon（钉死 commit）拉取，彩色品牌 logo。
+in
+{
+  # 自定义 OS 图标，供 node 的 icon/deviceIcon 用 <category>.<name> 引用。
+  # nix-topology 的 icons 选项类型是 attrsOf (attrsOf { file = path; })。
+  # debian：从 devicon（钉死 commit）拉取，彩色品牌 logo。
   # - devicon 是 GitHub raw，可钉死 commit，纯 <path> 结构，nix-topology 的
   #   builtins.readFile 内联渲染完全兼容。
   # apple：devicon 的 apple-original 是纯黑单 path，在深色卡片上看不清；
   #   改用 iconify API 直接返回白色版本（simple-icons 数据源 + ?color 参数），
-  #   零后处理即可见。响应内容用 hash 锁定，已实测确定性（两次抓取一致）。
+  #   零后处理即可见。响应内容用 hash 锁定。
+  #   注意：iconify 的路径语法是 "set/icon"；旧的 "set:icon" 现在会 404。
   # 为什么不用 svgrepo：/download/ 端点对数据中心 IP 返回 429 反爬（实测），
   #   /show/ 不稳定，在 VPS 上 fetchurl 会抓到反爬 HTML 而不是 SVG。
-  fetchDevicon =
-    name: file: hash:
-    pkgs.fetchurl {
-      url = "https://raw.githubusercontent.com/devicons/devicon/7330accdbc47e2dc0c19789a48533c4a3c50fe58/icons/${file}";
-      inherit hash;
-      name = "${name}.svg";
+  icons.os = {
+    debian.file = pkgs.fetchurl {
+      url = "https://raw.githubusercontent.com/devicons/devicon/7330accdbc47e2dc0c19789a48533c4a3c50fe58/icons/debian/debian-original.svg";
+      hash = "sha256-CbFMmBOjIrWLEapTkPsaK06b/QKGgyFILxoZU0pm7FQ=";
+      name = "debian.svg";
     };
-
-  osIcons = {
-    debian =
-      fetchDevicon "debian" "debian/debian-original.svg"
-        "sha256-CbFMmBOjIrWLEapTkPsaK06b/QKGgyFILxoZU0pm7FQ=";
-    apple = pkgs.fetchurl {
-      url = "https://api.iconify.design/simple-icons:apple.svg?color=%23e3e6eb";
+    apple.file = pkgs.fetchurl {
+      url = "https://api.iconify.design/simple-icons/apple.svg?color=%23e3e6eb";
       hash = "sha256-xysN4lI3oHPTplAq5UM7lYf8800owTUHIaTGbDL71NI=";
       name = "apple.svg";
     };
-    android =
-      fetchDevicon "android" "android/android-original.svg"
-        "sha256-1siqbCuUyQ/wLBt+ifnPhj1U21m0Wbiyh8Gb+45mTEE=";
-  };
-in
-{
-  # 注册自定义图标到 icons.os 表，供 node 的 icon/deviceIcon 用 <category>.<name> 引用。
-  # nix-topology 的 icons 选项类型是 attrsOf (attrsOf { file = path; })。
-  icons.os = {
-    debian.file = osIcons.debian;
-    apple.file = osIcons.apple;
-    android.file = osIcons.android;
   };
 
   # 全局拓扑定义：声明网络与外部设备；
@@ -55,7 +40,7 @@ in
   #   mkInternet / mkRouter / mkConnection
   # 让 README 的拓扑图能看出真实链路（Internet → VPS/家庭路由 → 各设备）。
   #
-  # 注意：nixos-avf / nixos-usb / nixos-vps 等 NixOS 主机
+  # 注意：nixos-usb / nixos-vps 等 NixOS 主机
   # 由 nixosConfigurations 自动提取；这里只显式定义网络、虚拟节点，
   # 以及不在 NixOS 配置里的设备（macOS / sm-vps）。
   networks = {
@@ -120,7 +105,6 @@ in
         eth1 = [
           (mkConnection "nixos-usb" "eth0")
           (mkConnection "macos-ws" "en0")
-          (mkConnection "nixos-avf" "eth0")
         ];
         wan1 = mkConnection "internet" "*";
       };
@@ -134,18 +118,6 @@ in
       hardware.info = "MacBook M4 Pro";
       interfaces = {
         en0 = {
-          network = "lan";
-        };
-      };
-    };
-
-    # nixos-avf：Android AVF 虚拟机里的 NixOS（开发机 remote server），
-    # 自动提取（deviceType=nixos → card + Fail2Ban 服务），
-    # 只补 hardware.info 和 eth0 接口；网络由 AVF 虚拟化提供（virtio-net，走宿主手机网络）
-    nixos-avf = {
-      hardware.info = "NixOS on Android AVF";
-      interfaces = {
-        eth0 = {
           network = "lan";
         };
       };

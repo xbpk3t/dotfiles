@@ -1,7 +1,7 @@
 # nixos-wsl
 
 > 当前验证实例：厂商 PA `0cadhjae-vmez89`（Windows Server 2022）；WSL 节点
-> tailnet IP `100.95.55.36`，同时写回 `lib/inventory/data.nix`。
+> tailnet IP `100.95.55.36`，同时写回 `hosts/nixos-wsl/meta.nix`。
 
 Windows 上的 WSL2 NixOS host。目标不是把 WSL 做成生产机，而是：
 
@@ -13,7 +13,7 @@ Windows 上的 WSL2 NixOS host。目标不是把 WSL 做成生产机，而是：
 
 - `hosts/_base/nixos-wsl/`：所有 WSL host 的公共基线（common base）
 - `hosts/nixos-wsl/`：当前这台厂商 PA 的 host 差异（目前只有 import base）
-- `outputs/x86_64-linux/src/nixos-wsl.nix`：flake 输出入口
+- `hosts/nixos-wsl/{meta,default}.nix`：由 `lib/fleet` / `lib/mkHost` 自动生成 flake 输出
 
 这版只做**系统配置**，不挂 home-manager / home-core。需要 HM 时，在 output 的
 `home-modules` 里先加最小 HM，再考虑 `home/core`。
@@ -135,15 +135,13 @@ tailscale ip -4          # 记录 WSL 节点的 tailnet IP
 tailscale status
 ```
 
-把 IP 写回 `lib/inventory/data.nix`：
+把 IP 写回 `hosts/nixos-wsl/meta.nix`：
 
 ```nix
-nixos-wsl = {
-  nixos-wsl = {
-    # ...
-    tailscale.ip = "100.x.y.z";
-  };
-};
+{
+  # ...
+  tailscale.ip = "100.x.y.z";
+}
 ```
 
 然后从 tailnet 内其它机器验证：
@@ -159,7 +157,7 @@ ssh luck@<wsl-tailnet-ip>
   在 Tailscale 控制台生成新 key 并更新 sops。
 - WSL 节点和 Windows 宿主上的 Tailscale 节点是两台设备；不要给 WSL 节点开
   exit node / derper。
-- `sshd` 的 authorized keys 来自 `globals.auth.sshPublicKeys`；确认你的机器
+- `sshd` 的 authorized keys 来自 `globals.auth.adminKeys`；确认你的机器
   key 在里面。
 - 受限网络/云电脑出口可能过滤 DERP。如果 `tailscale ping` 不通，先
   `tailscale netcheck`，再 `tailscale down/up` 重建 home relay；必要时在
@@ -277,7 +275,7 @@ Tailscale 和 sshd 自动恢复。
 
 ## 明确不做
 
-- 不导入 `hosts/_base/nixos-vps`、disko、hardware、bootloader
+- 不导入 `hosts/nixos-vps`、disko、hardware、bootloader
 - 不整目录导入 `modules/nixos/kernel`（zram/sysctl/bootloader 不适用）
 - 不挂 deploy-rs；WSL 内直接 `nixos-rebuild`
 - 这版不挂 home-manager / home-core

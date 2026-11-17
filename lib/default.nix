@@ -6,8 +6,8 @@ let
   # sm-vps 平行轨：standalone Home Manager + system-manager
   homeStandalone = import ./home-standalone.nix;
   systemManager = import ./system-manager.nix;
-  # 提供统一的节点 ID / host meta 生成器
-  inventory = import ./inventory { inherit lib; };
+  # 跨机拓扑 registry（node-keyed）
+  fleet = import ./fleet { inherit lib; };
   vpsSysctl = import ./vps-sysctl.nix { inherit lib; };
   nixCacheSettings = import ./nix-cache-settings.nix;
   # pre-commit 依赖工具集（单一事实来源，devShell 与 home.packages 共用）
@@ -15,9 +15,7 @@ let
 
   # use path relative to the root of the project
   relativeToRoot = lib.path.append ../.;
-  facter = import ./facter.nix {
-    inherit relativeToRoot;
-  };
+  facter = import ./facter.nix { inherit fleet; };
   # Custom utilities
   scanPaths =
     path:
@@ -40,7 +38,7 @@ in
     nixosSystem
     homeStandalone
     systemManager
-    inventory
+    fleet
     vpsSysctl
     nixCacheSettings
     precommitTools

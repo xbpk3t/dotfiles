@@ -1,44 +1,20 @@
+# Group HM base for all nixos-vps nodes.
+#
+# Node home.nix imports this and adds its role delta:
+#   dev -> curated home/base cockpit
+#   agt -> full home/base + home/nixos agent toolchain
+{ mylib, ... }:
 {
-  hostMeta,
-  ...
-}:
-let
-  tailnetIp = hostMeta.tailscale.ip or "127.0.0.1";
-in
-{
-  modules = {
-    infra = {
-      nh.enable = true;
-      networking.enable = true;
-    };
+  imports = [
+    (mylib.relativeToRoot "home/core")
+    (mylib.relativeToRoot "secrets/default.nix")
+  ];
 
-    devops = {
-      helix.enable = true;
-      rclone.enable = false;
-      hunk.enable = false;
-      ssh.enable = false;
-
-      herdr-core = {
-        enable = true;
-        settings.restore_screen = true;
-      };
-    };
-
-    AI = {
-      claude.enable = true;
-      skills.enable = true;
-      dagu = {
-        enable = true;
-        # 只跑 scheduler；web UI 已关闭。
-        web.enable = false;
-        # 避开 VPS 上 axonhub 的 8090 和给 qbittorrent 预留的 8080。
-        host = tailnetIp;
-        port = 8081;
-        schedulerPort = 8091;
-      };
-    };
+  # 只放 group base 自己 import 的 home/core 能力。
+  # devops/AI 的 option 定义在 home/base，由节点按自己的组合 import 并声明，
+  # 否则只 import 本文件的节点会因 option 不存在而 eval 失败。
+  modules.infra = {
+    nh.enable = true;
+    networking.enable = true;
   };
-
-  # VPS 上 Caddy 管理 edge 网络，所有服务都需要以 external 方式加入。
-  home.sessionVariables.EDGE_NETWORK_EXTERNAL = "true";
 }

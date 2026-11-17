@@ -113,12 +113,6 @@ rec {
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # NixOS profile for Android Terminal / AVF
-    nixos-avf = {
-      url = "github:nix-community/nixos-avf";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     # NixOS as a WSL2 distribution（Windows Server 2022 PA: 0cadhjae-vmez89）。
     # 上游 release 仍是 26.05 线；模块跟 main，switch 时随仓库 nixpkgs 走。
     nixos-wsl = {
@@ -158,6 +152,24 @@ rec {
               models = {
                 dsf = "deepseek-v4.1-flash";
                 gpt = "gpt-6-astra";
+              };
+
+              # 全局身份常量：所有 host 共享。
+              # Why: user/time/editor 不是 fleet topology，不该每个节点在
+              # fleet registry 里复制一份；per-host 差异由 host 模块覆盖。
+              identity = {
+                user = {
+                  username = "luck";
+                  mail = "yyzw@live.com";
+                };
+                time = {
+                  timeZone = "Asia/Shanghai";
+                };
+                editor = {
+                  command = "hx";
+                  desktopEntry = "Helix.desktop";
+                  lazygitPreset = "helix";
+                };
               };
 
               networking.nameservers = [

@@ -18,7 +18,6 @@
   inputs,
   lib,
   config,
-  isShared ? false,
   ...
 }:
 let
@@ -37,12 +36,13 @@ in
   options.modules.sm.sops.enable = lib.mkEnableOption "system sops baseline (sm track)";
 
   # sops-nix 模块常驻 import：声明 sops.* options（shared 下 option 存在但无定义，
-  # 服务角色模块的 config.sops.* 引用可安全求值）。配置主体仍按 !isShared 门控。
+  # 服务角色模块的 config.sops.* 引用可安全求值）。配置主体仍按
+  # !config.modules.sm.shared 门控。
   imports = [
     inputs.sops-nix.nixosModules.sops
   ];
 
-  config = lib.mkIf (cfg.enable && !isShared) {
+  config = lib.mkIf (cfg.enable && !config.modules.sm.shared) {
     sops = {
       # 与 secrets.yaml 同一份加密文件（reuse secrets/default.nix 的 defaultSopsFile）
       defaultSopsFile = ./../../secrets/secrets.yaml;
@@ -69,7 +69,7 @@ in
         # Tailscale
         TAILSCALE_AUTH_KEY = mkRootSecret "tailscale/auth_key";
         # ACME（derper 证书 DNS-01）：CF token（复用 secrets/default.nix 的 acme/cloudflare_env）。
-        # email 用 userMeta.mail（inventory），不进 sops。
+        # email 用 userMeta.mail（flake globals.identity），不进 sops。
         ACME_CF_ENV = mkRootSecret "acme/cloudflare_env";
       };
     };
