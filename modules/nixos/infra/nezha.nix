@@ -77,6 +77,18 @@ in
         settings = {
           listenhost = cfg.hub.listenHost;
           listenport = cfg.hub.port;
+
+          # Historical metrics (1d/7d/30d) need the built-in TSDB.
+          # Keep the data under the hub's StateDirectory; metrics are
+          # intentionally not part of the R2/SQLite backup.
+          tsdb = {
+            data_path = "/var/lib/nezha/tsdb";
+            retention_days = 30;
+            min_free_disk_space_gb = 1;
+            max_memory_mb = 256;
+            write_buffer_size = 512;
+            write_buffer_flush_interval = 5;
+          };
         };
 
         # Dashboard JWT signing key and the deployment-wide agent secret.
