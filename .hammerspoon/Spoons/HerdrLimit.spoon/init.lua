@@ -1,16 +1,16 @@
 --- === HerdrLimit ===
 ---
---- 监控 herdR 中所有未关闭（存活）agent session 数量，超出限制时 compact alert（仅提醒）
---- 计数权威：herdr 原生 `agent list`（跨 workspace，可经 --remote 覆盖远端 herdr server）
---- 计数口径：`result.agents[]` 里 `agent` 为非空字符串的条数（= 已识别为 agent 的 pane）
----   → 动态：herdr 无论后来支持多少种 agent 都自动纳入；非 agent / 裸 pane 被排除
---- 无 herdr 场景下计数为 0（不弹）
+--- 监控 herdr-core 中所有未关闭（存活）agent session 数量，超出限制时 compact alert（仅提醒）
+--- 计数权威：`hc ls --json` 的 terminals[]（本机 + 已连接 machine；远程地址形如 machine/t7）
+--- 计数口径：state == "live" 且 status 非空（agent 已通过 OSC 报告状态）的条数；
+---   裸 shell / 未报告状态的普通程序不计入。
+--- 无 hc / core 未运行时计数为 0（不弹）
 
 local obj = {}
 obj.__index = obj
 
 obj.name = "HerdrLimit"
-obj.version = "1.1.0"
+obj.version = "2.0.0"
 obj.author = "luck"
 obj.license = "MIT - https://opensource.org/licenses/MIT"
 
@@ -24,87 +24,84 @@ obj.maxSessions = 25
 obj.checkInterval = 30
 --- 告警冷却（秒）：同一持续超限状态不重复弹，避免每 30s 刷屏
 obj.alertCooldown = 60
---- herdr CLI（绝对路径）
-obj.herdrBin = "/etc/profiles/per-user/luck/bin/herdr"
---- 单次 hs.execute 超时（秒）：本地/remote 都不让它无限挂住 Hammerspoon 主线程
-obj.queryTimeout = 6
---- 是否启用 remote 计数：false 时完全跳过 `--remote` 分支（连命令都不拼），不引入阻塞
-obj.enableRemote = false
---- 远端 herdr server 目标列表（`herdr --remote <t> agent list`）；仅在 enableRemote=true 时生效
-obj.remoteTargets = {}
+--- hc CLI（herdr-core）；默认自动探测，可在 config 里覆盖
+local function resolveHcBin()
+  local user = os.getenv("USER") or "luck"
+  local home = os.getenv("HOME") or ""
+  local candidates = {
+    "/etc/profiles/per-user/" .. user .. "/bin/hc",
+    "/opt/homebrew/bin/hc",
+    "/usr/local/bin/hc",
+    home .. "/.local/bin/hc",
+  }
+  for _, p in ipairs(candidates) do
+    local f = io.open(p, "r")
+    if f then
+      f:close()
+      return p
+    end
+  end
+  local out = hs.execute("command -v hc 2>/dev/null")
+  if out and out ~= "" then
+    return out:gsub("%s+$", "")
+  end
+  return "hc"
+end
+
+obj.hcBin = resolveHcBin()
+--- 单次 hs.execute 超时（秒）：hc ls 会汇总远程 machine，给它一点余量
+obj.queryTimeout = 8
 
 local notifs = dofile(hs.configdir .. "/Spoons/HerdrLimit.spoon/notifs.lua")
 
---- 对单个 herdr target（nil = 本机 server）跑 `agent list`，返回已识别为 agent 的 pane 数。
---- 计数规则：`result.agents[]` 里 `agent` 为非空字符串的条数（保留 agent 字段的 pane）。
--- 返回 nil 表示该次查询失败（server 未起 / 目标不可达 / 超时），由调用方决定累计策略。
-local function countAgentsFromHerdr(target)
-  local cmd
-  if target and target ~= "" then
-    cmd = string.format("%s --remote '%s' agent list 2>/dev/null", obj.herdrBin, target)
-  else
-    cmd = obj.herdrBin .. " agent list 2>/dev/null"
-  end
-
+--- 跑 `hc ls --json`，返回已报告状态的 live agent session 数。
+--- hc 的 terminals[] 同时包含本机与已连接 machine 的终端（machine/t7）；
+--- machine 未连接时不会出现在结果里，也不会阻塞。
+-- 返回 nil 表示查询失败（hc 未安装 / core 未起 / 超时），由调用方按 0 处理。
+local function countAgentsFromHc()
+  local cmd = obj.hcBin .. " ls --json 2>/dev/null"
   local output, ok = hs.execute(cmd, obj.queryTimeout)
   if not ok or not output or output == "" then
-    obj.logger.w("herdr agent list failed" .. (target and (" target=" .. target) or ""))
+    obj.logger:w("hc ls failed")
     return nil
   end
 
   local parseOk, data = pcall(hs.json.decode, output)
   if not parseOk or type(data) ~= "table" then
-    obj.logger.w("failed to parse herdr agent list output" .. (target and (" target=" .. target) or ""))
+    obj.logger:w("failed to parse hc ls output")
     return nil
   end
 
-  -- 契约：herdr 输出形状为 {"result":{"agents":[...]}}。不再回退 data.agents。
-  local result = data.result
-  local agents = (type(result) == "table" and result.agents) or nil
-  if type(agents) ~= "table" then
-    obj.logger.w("herdr agent list: no agents array")
+  local terminals = data.terminals
+  if type(terminals) ~= "table" then
+    obj.logger:w("hc ls: no terminals array")
     return nil
   end
 
   local count = 0
-  for _, a in ipairs(agents) do
-    -- 只计被 herdR 识别为 agent 的 pane：agent 字段为非空字符串。
-    -- 裸 pane / 非 agent 的 terminal 会被排除。
-    if type(a) == "table" and type(a.agent) == "string" and #a.agent > 0 then
+  for _, t in ipairs(terminals) do
+    -- 只计 live 且已报告 agent 状态的 terminal；裸 shell / 普通程序没有 status。
+    -- reported 是兜底：某些 agent 可能先上报过、当前 status 暂空。
+    if
+      type(t) == "table"
+      and t.state == "live"
+      and (t.status ~= nil or t.reported == true)
+    then
       count = count + 1
     end
   end
   return count
 end
 
---- 汇总：本地 + （仅当 enableRemote 时）各 remote target 的 agent session 数。
---- 本地查询失败视为 0；某 remote 失败记 log 但计入 0（不拖垮整体）。
---- enableRemote=false → 完全不碰 remote，天然规避多条 ssh 同步阻塞。
+--- 汇总当前 agent session 数；查询失败视为 0，不拖垮整体。
 local function getSessionCount()
-  local total = 0
-  local targets = obj.remoteTargets or {}
-
-  local count = countAgentsFromHerdr(nil)
-  if count ~= nil then
-    total = count
-  else
-    obj.logger:w("unable to count local herdr agents; treating as 0")
+  local count = countAgentsFromHc()
+  if count == nil then
+    obj.logger:w("unable to count hc agents; treating as 0")
+    return 0
   end
-
-  if obj.enableRemote then
-    for _, target in ipairs(targets) do
-      local rc = countAgentsFromHerdr(target)
-      if rc ~= nil then
-        total = total + rc
-      else
-        obj.logger:w("unable to count remote herdr agents target=" .. target .. "; treating as 0")
-      end
-    end
-  end
-
-  local remoteDesc = obj.enableRemote and ("(" .. #targets .. " remote)") or "(remote off)"
-  obj.logger:d("agent session total " .. remoteDesc .. "=" .. total)
-  return total
+  obj.logger:d("agent session total=" .. count)
+  return count
 end
 
 -- 上次告警时间（cooldown 去重用）
@@ -141,7 +138,7 @@ function obj:start()
     return self
   end
 
-  self.logger:i("started maxSessions=" .. self.maxSessions .. " enableRemote=" .. tostring(self.enableRemote))
+  self.logger:i("started maxSessions=" .. self.maxSessions)
   return self
 end
 
@@ -171,19 +168,12 @@ function obj:getCount()
 end
 
 function obj:getStatus()
-  local remoteInfo
-  if obj.enableRemote then
-    remoteInfo = "开（" .. table.concat(obj.remoteTargets or {}, ", ") .. "）"
-  else
-    remoteInfo = "关"
-  end
   return string.format(
-    "HerdrLimit Status:\n启用: %s\n最大未关闭 agent session: %d\n检查间隔: %d秒\nalertCooldown: %d秒\nremote: %s\n当前 agent session 数: %d",
+    "HerdrLimit Status:\n启用: %s\n最大未关闭 agent session: %d\n检查间隔: %d秒\nalertCooldown: %d秒\n计数: hc ls --json（本机 + 已连接 machine）\n当前 agent session 数: %d",
     self.enabled and "是" or "否",
     self.maxSessions,
     self.checkInterval,
     self.alertCooldown,
-    remoteInfo,
     getSessionCount()
   )
 end

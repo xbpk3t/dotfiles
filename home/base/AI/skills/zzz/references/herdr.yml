@@ -1,40 +1,54 @@
+---
 frontmatter:
   role: atom
-  desc: 把任务 publish 给 herdr 里其他 agent（codex/claude 等）：开 pane→start→prompt 委派链；只派发不回收
+  desc: 用 herdr-core 的 hc 把任务 publish 给其他 agent（claude/codex 等）；只派发不回收
 
 what:
-  is: 当本会话决定把子任务委派给 herdr 中另一个 agent 时，用 herdr CLI 完成 开 pane → 启动 agent → 派活 的委派流程，确认已发布
-  not: 不是自动化脚本/调度框架；不负责 herdr 配置；不回收/回读子 agent 的最终结果
+  is: |
+    当本会话决定把子任务委派给 herdr-core 中另一个 agent 时，用 hc 完成
+    选模板/启动 agent/确认发布 的委派流程，确认已发布。
+  not: |
+    不是旧 herdr TUI 的 pane/agent 命令（TUI 已移除）。
+    不是自动化脚本/调度框架；不负责回收/回读子 agent 的最终结果。
 
 gate:
-  - qs: 目标 pane 是否已创建并处于交互提示符（无前台命令/编辑器）？
-    fail: 先用 herdr pane split 创建 pane 并 wait-output 等 shell 落到提示符，再继续
+  - qs: 目标机器/终端是否可达？
+    fail: 先 `hc machine ls` 确认机器已添加；远程 agent 用 `--on <machine>` 启动，终端地址记为 `<machine>/<t>`。
 
 workflow:
+  - phase: 选择模板
+    steps:
+      - "先看 `hc templates`；有 reviewer/simplifier/implementer 等现成角色就优先用；没有就启动普通交互式 agent。"
   - phase: 委派（publish）
     steps:
-      - 确认子任务有明确交付物、可独立执行（有产出的活才派；否则留在本会话）
-      - "委派链：herdr pane split --current --direction right --no-focus → 取 .result.pane.pane_id → herdr pane wait-output <pid> --match '$'（等交互提示符）→ herdr agent start <kind> --pane <pid> → herdr agent prompt <name> '<任务>'（可选 --wait 确认已接收，不回收最终结果）"
-      - "句柄用 pane id：本次委派的稳定标识是返回的 pane id（name 在 agent 退出时清空），把它记进交付信息"
-      - 某步失败先 herdr agent get 查状态，不整链盲试
-
+      - 确认子任务有明确交付物、可独立执行；给每个 agent 一个唯一 `--name` 和精确 scope。
+      - "启动：`hc run --bg --name <name> --cwd <dir> [--on <machine>] <template> '<任务>'`；无模板时用 `hc run --bg --name <name> --cwd <dir> [--on <machine>] <agent> '<任务>'`。"
+      - "agent 必须用 `--bg` 启动；不要用无 `--bg` 的 `hc run`，否则整个屏幕会流进当前输出。"
+      - "确认发布：`hc get <t>` 看 `first_message.sent`；若为 false，先 `hc read <t>` 处理 trust dialog/readiness，再 `hc send <t> '<任务>'`，不要盲目重发。"
+      - "句柄用终端地址 `<t>`（远程形如 `machine/t7`）；把它记进交付信息。"
+      - "失败先 `hc get <t>` / `hc read <t>` 查状态，再定向处理，不整链盲试。"
 constraint:
+  must:
+    - "实际执行 hc CLI，不要只把委派意图 echo 出来。"
   must-not:
-    - "禁止把委派当字面转述 echo 掉——本会话有 Bash + herdr，委派意图出现就必须实际执行委派链"
+    - "不要回收/等待最终结果；需要时另行 `hc wait <t>` / `hc read <t>`。"
+    - "不要再用 `herdr pane/agent/workspace` 旧命令（TUI 已移除）。"
 
 output:
   format: md
   struct:
     - key: 委派确认
-      val: agent kind/name + 任务摘要 + pane id
+      val: agent/template + 任务摘要 + 终端地址（`t7` 或 `machine/t7`）
 
 self-check:
-  - 实际执行了 herdr CLI（非字面转述）？
-  - 委派链按序执行，pane id 正确传给 start / prompt？
-  - 没有越界去 read 回收结果？
+  - 实际执行了 hc（非字面转述）？
+  - 用了 `--bg`，并确认 `first_message.sent`？
+  - 没有越界去 read/回收最终结果？
 
 hint:
-  - if: 委派链某步失败
-    then: herdr agent get <name> 查状态后定向重试，不整链盲试
+  - if: first_message.sent=false
+    then: 先 `hc read <t>` 看屏幕；处理 readiness 后用 `hc send`，不要盲目重发。
   - if: 之后需要子 agent 的产出
-    then: 另行 read / 文件握手回收——本 prpt 只管 publish
+    then: 另行 `hc wait <t>` / `hc read <t>`；本 prpt 只管 publish。
+  - if: 需要完整命令面
+    then: 读 `hc --skill`（herdr-core 官方 manual），不要套用旧 herdr TUI 命令。
