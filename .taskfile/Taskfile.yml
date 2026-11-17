@@ -3,10 +3,6 @@ version: "3"
 
 includes:
   # devops
-  # linters: devops/Taskfile.linters.yml
-  # ansible: devops/Taskfile.ansible.yml
-  # gor: devops/Taskfile.goreleaser.yml
-  # caddy: devops/Taskfile.caddy.yml
   devops:
     taskfile: devops/Taskfile.yml
     flatten: true
