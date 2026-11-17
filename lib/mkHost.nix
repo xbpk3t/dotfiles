@@ -2,7 +2,13 @@
 #
 # 输入只依赖 node（hosts/**/meta.nix + path）和平台构造器；
 # 具体模块组合由 hosts/<group>/<node>/{default,home}.nix 自己 import。
-{ inputs, lib, mylib, mkSpecialArgs, genSpecialArgs }:
+{
+  inputs,
+  lib,
+  mylib,
+  mkSpecialArgs,
+  genSpecialArgs,
+}:
 { name, node }:
 let
   system = node.system;
@@ -15,19 +21,36 @@ let
   homeModules = lib.optional hasHome hostHome;
 
   mkNixosConfig = mylib.nixosSystem {
-    inherit inputs lib system genSpecialArgs specialArgs;
+    inherit
+      inputs
+      lib
+      system
+      genSpecialArgs
+      specialArgs
+      ;
     nixos-modules = [ hostDefault ];
     home-modules = homeModules;
   };
 
   mkDarwinConfig = mylib.macosSystem {
-    inherit inputs lib system genSpecialArgs specialArgs;
+    inherit
+      inputs
+      lib
+      system
+      genSpecialArgs
+      specialArgs
+      ;
     darwin-modules = [ hostDefault ];
     home-modules = homeModules;
   };
 
   mkSmHome = mylib.homeStandalone {
-    inherit inputs system genSpecialArgs specialArgs;
+    inherit
+      inputs
+      system
+      genSpecialArgs
+      specialArgs
+      ;
     home-modules = homeModules;
   };
 
@@ -53,12 +76,14 @@ let
     ];
   };
 
-  mkNixosDeploy = config: mylib.fleet.deployRsNode {
-    inherit name node deployLib;
-    nixosConfiguration = config;
-    defaultSshUser = node.deploy.sshUser or "root";
-    remoteBuild = node.deploy.remoteBuild or true;
-  };
+  mkNixosDeploy =
+    config:
+    mylib.fleet.deployRsNode {
+      inherit name node deployLib;
+      nixosConfiguration = config;
+      defaultSshUser = node.deploy.sshUser or "root";
+      remoteBuild = node.deploy.remoteBuild or true;
+    };
 
   mkDarwinDeploy = config: {
     hostname = node.ssh.host or (mylib.fleet.primaryHostForNode name node);
@@ -82,12 +107,16 @@ let
     };
 in
 if node.kind == "nixos" then
-  { nixosConfigurations.${name} = mkNixosConfig; }
+  {
+    nixosConfigurations.${name} = mkNixosConfig;
+  }
   // lib.optionalAttrs (node ? deploy) {
     deploy.nodes.${name} = mkNixosDeploy mkNixosConfig;
   }
 else if node.kind == "darwin" then
-  { darwinConfigurations.${name} = mkDarwinConfig; }
+  {
+    darwinConfigurations.${name} = mkDarwinConfig;
+  }
   // lib.optionalAttrs (node ? deploy) {
     deploy.nodes.${name} = mkDarwinDeploy mkDarwinConfig;
   }

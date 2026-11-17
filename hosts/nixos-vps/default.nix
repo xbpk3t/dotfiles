@@ -115,7 +115,7 @@ in
     settings.require-sigs = false;
 
     # 不配置远程 builder：deploy-rs 的 remoteBuild=true 让每个节点本地构建。
-    # agent 侧用 max-jobs=1/cores=1 控制内存（见 hosts/nixos-vps-agt）。
+    # agent 侧用 max-jobs=1/cores=1 控制内存（见 hosts/nixos-vps/agt）。
 
     # 定期 GC，避免 store 撑满 66G 盘。
     gc = {

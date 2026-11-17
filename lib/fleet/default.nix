@@ -29,7 +29,8 @@ let
     let
       meta = import (path + "/meta.nix");
     in
-    meta // {
+    meta
+    // {
       inherit name path;
       hostName = name;
     };
@@ -44,8 +45,7 @@ let
       topPath = hostsDir + "/${topName}";
       entries = builtins.readDir topPath;
       children = lib.filterAttrs (
-        childName: childType:
-        isDir childType && (builtins.readDir (topPath + "/${childName}")) ? "meta.nix"
+        childName: childType: isDir childType && (builtins.readDir (topPath + "/${childName}")) ? "meta.nix"
       ) entries;
       childNodes = lib.mapAttrs' (
         childName: _:
@@ -55,11 +55,20 @@ let
       ) children;
     in
     if entries ? "meta.nix" then
-      assert lib.assertMsg (children == { }) "fleet: '${topName}' has meta.nix and child node meta.nix; a directory must be either a node or a group";
-      { ${topName} = { ${topName} = scanNode topName topPath; }; }
+      assert lib.assertMsg (children == { })
+        "fleet: '${topName}' has meta.nix and child node meta.nix; a directory must be either a node or a group";
+      {
+        ${topName} = {
+          ${topName} = scanNode topName topPath;
+        };
+      }
     else
-      assert lib.assertMsg (children != { }) "fleet: group '${topName}' has no meta.nix and no child node meta.nix";
-      { ${topName} = childNodes; };
+      assert lib.assertMsg (
+        children != { }
+      ) "fleet: group '${topName}' has no meta.nix and no child node meta.nix";
+      {
+        ${topName} = childNodes;
+      };
 
   groups = lib.foldl' (acc: topName: acc // (scanTop topName)) { } (
     lib.filter (name: isDir topEntries.${name} && !(lib.hasPrefix "_" name)) (lib.attrNames topEntries)
@@ -83,9 +92,7 @@ let
     in
     lib.findFirst (v: v != null) null candidates;
 
-  tailnetNodes = lib.filterAttrs (
-    _: node: node ? tailscale && node.tailscale ? ip
-  ) allNodes;
+  tailnetNodes = lib.filterAttrs (_: node: node ? tailscale && node.tailscale ? ip) allNodes;
 
   singboxServers = lib.filter (s: s != null) (
     lib.attrsets.mapAttrsToList (
@@ -123,21 +130,17 @@ let
 
   # 不变量：值全部是布尔，nix-unit 直接消费；键以 test- 开头。
   checks = {
-    "test-hostName-matches-node-key" = lib.all (
-      name: (allNodes.${name}.hostName or name) == name
-    ) (lib.attrNames allNodes);
+    "test-hostName-matches-node-key" = lib.all (name: (allNodes.${name}.hostName or name) == name) (
+      lib.attrNames allNodes
+    );
 
-    "test-kind-present" = lib.all (
-      node: node ? kind
-    ) (lib.attrValues allNodes);
+    "test-kind-present" = lib.all (node: node ? kind) (lib.attrValues allNodes);
 
-    "test-system-present" = lib.all (
-      node: node ? system
-    ) (lib.attrValues allNodes);
+    "test-system-present" = lib.all (node: node ? system) (lib.attrValues allNodes);
 
-    "test-stateVersion-non-empty" = lib.all (
-      node: (node.stateVersion or "") != ""
-    ) (lib.attrValues allNodes);
+    "test-stateVersion-non-empty" = lib.all (node: (node.stateVersion or "") != "") (
+      lib.attrValues allNodes
+    );
 
     "test-tailnet-ip-unique" =
       let
@@ -148,9 +151,9 @@ let
     "test-nezha-hub-at-most-one" =
       lib.length (lib.filter (node: node.nezha.hub or false) (lib.attrValues allNodes)) <= 1;
 
-    "test-singbox-server-address" = lib.all (
-      node: !(node ? singbox) || node.singbox ? server
-    ) (lib.attrValues allNodes);
+    "test-singbox-server-address" = lib.all (node: !(node ? singbox) || node.singbox ? server) (
+      lib.attrValues allNodes
+    );
 
     "test-uid-gid-paired" = lib.all (
       node:

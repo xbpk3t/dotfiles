@@ -6,7 +6,10 @@
 #   - 不挂 sops：共享机上不放主 age key，无需 secrets 解密
 { mylib, ... }:
 {
-  imports = [ ../home.nix ] ++ map mylib.relativeToRoot [
+  imports = [
+    ../home.nix
+  ]
+  ++ map mylib.relativeToRoot [
     "home/core/init.nix"
     "home/core/infra/nh.nix"
     "home/core/infra/networking.nix"

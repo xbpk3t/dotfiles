@@ -129,12 +129,12 @@ let
   );
 
   architectureOutputs = lib.mapAttrs (
-    system: names: mergeRoleOutputList (map (name: hostOutputs.${name}) names)
+    _system: names: mergeRoleOutputList (map (name: hostOutputs.${name}) names)
   ) hostNamesBySystem;
 
-  unsupportedNodes = lib.filter (
-    node: !(builtins.elem node.system supportedSystems)
-  ) (builtins.attrValues mylib.fleet.nodes);
+  unsupportedNodes = lib.filter (node: !(builtins.elem node.system supportedSystems)) (
+    builtins.attrValues mylib.fleet.nodes
+  );
 
   architectureOutputValues = builtins.attrValues architectureOutputs;
   currentSystem = builtins.currentSystem or null;
@@ -169,9 +169,10 @@ let
     map (it: it.systemConfigs or { }) architectureOutputValues
   );
 in
-assert
-  lib.assertMsg (unsupportedNodes == [ ])
-    "fleet: nodes declare unsupported systems: ${lib.concatMapStringsSep ", " (n: n.name) unsupportedNodes}";
+assert lib.assertMsg (unsupportedNodes == [ ])
+  "fleet: nodes declare unsupported systems: ${
+    lib.concatMapStringsSep ", " (n: n.name) unsupportedNodes
+  }";
 {
   systems = supportedSystems;
 

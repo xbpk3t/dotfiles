@@ -7,7 +7,10 @@ let
   tailnetIp = hostMeta.tailscale.ip or "127.0.0.1";
 in
 {
-  imports = [ ../home.nix ] ++ map mylib.relativeToRoot [
+  imports = [
+    ../home.nix
+  ]
+  ++ map mylib.relativeToRoot [
     # server 是 curated cockpit：不整包 import home/base。
     "home/base/devops/rclone.nix"
     "home/base/devops/ghui.nix"

@@ -22,7 +22,10 @@ let
   '';
 in
 {
-  imports = [ ../home.nix ] ++ map mylib.relativeToRoot [
+  imports = [
+    ../home.nix
+  ]
+  ++ map mylib.relativeToRoot [
     "home/base"
     "home/nixos"
   ];

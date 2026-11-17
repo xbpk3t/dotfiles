@@ -1,4 +1,9 @@
-{ inputs, mylib, userMeta, ... }:
+{
+  inputs,
+  mylib,
+  userMeta,
+  ...
+}:
 let
   inherit (userMeta) username;
 in
