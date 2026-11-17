@@ -113,12 +113,6 @@ rec {
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # NixOS profile for Android Terminal / AVF
-    nixos-avf = {
-      url = "github:nix-community/nixos-avf";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     # Nix unit testing tools
     nix-unit.url = "github:nix-community/nix-unit";
 

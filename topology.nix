@@ -55,7 +55,7 @@ in
   #   mkInternet / mkRouter / mkConnection
   # 让 README 的拓扑图能看出真实链路（Internet → VPS/家庭路由 → 各设备）。
   #
-  # 注意：nixos-avf / nixos-usb / nixos-vps 等 NixOS 主机
+  # 注意：nixos-usb / nixos-vps 等 NixOS 主机
   # 由 nixosConfigurations 自动提取；这里只显式定义网络、虚拟节点，
   # 以及不在 NixOS 配置里的设备（macOS / sm-vps）。
   networks = {
@@ -120,7 +120,6 @@ in
         eth1 = [
           (mkConnection "nixos-usb" "eth0")
           (mkConnection "macos-ws" "en0")
-          (mkConnection "nixos-avf" "eth0")
         ];
         wan1 = mkConnection "internet" "*";
       };
@@ -134,18 +133,6 @@ in
       hardware.info = "MacBook M4 Pro";
       interfaces = {
         en0 = {
-          network = "lan";
-        };
-      };
-    };
-
-    # nixos-avf：Android AVF 虚拟机里的 NixOS（开发机 remote server），
-    # 自动提取（deviceType=nixos → card + Fail2Ban 服务），
-    # 只补 hardware.info 和 eth0 接口；网络由 AVF 虚拟化提供（virtio-net，走宿主手机网络）
-    nixos-avf = {
-      hardware.info = "NixOS on Android AVF";
-      interfaces = {
-        eth0 = {
           network = "lan";
         };
       };
