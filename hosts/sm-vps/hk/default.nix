@@ -6,8 +6,6 @@
 {
   imports = [ ../default.nix ];
 
+  # 共享机不管理用户（userborn 由 modules/sm 按 shared 关闭）。
   modules.sm.shared = true;
-
-  # 共享机不管理用户，避免重写 /etc/passwd 影响他人 root 登录。
-  services.userborn.enable = false;
 }

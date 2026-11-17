@@ -11,6 +11,7 @@
 # 因此：声明任何 distro 已存在的路径（/etc/timezone、/etc/localtime、/etc/shells、
 # /etc/nftables.conf、/etc/ssh/ssh_config 等）都必须显式 replaceExisting=true。
 {
+  config,
   lib,
   ...
 }:
@@ -22,8 +23,15 @@
   # 不再由 outputs 透传 specialArg；各模块读 config.modules.sm.shared。
   options.modules.sm.shared = lib.mkEnableOption ''
     shared-host mode: disable global side effects that would affect other tenants
-    (system sops, sshd hardening drop-in, userborn, service roles)
+    (system sops, sshd hardening drop-in, userborn)
   '';
+
+  # userborn 会重写 /etc/passwd 并把 root shell 指向 store bash，共享机上会
+  # 影响其他租户；由 shared 统一定义，host 不需要再记一条手写开关。
+  config = lib.mkIf config.modules.sm.shared {
+    # 普通优先级覆盖 system-manager 的 mkDefault true。
+    services.userborn.enable = false;
+  };
 
   # 全部模块常驻 import（option 声明永远存在）：
   #   - 命名统一为 modules.* 布局（对齐 darwin/nixos 轨）：

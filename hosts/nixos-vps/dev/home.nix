@@ -25,21 +25,17 @@ in
   ];
 
   modules = {
-    infra = {
-      nh.enable = true;
-      networking.enable = true;
-    };
-
     devops = {
       helix.enable = true;
-      rclone.enable = false;
-      hunk.enable = false;
-      ssh.enable = false;
 
       herdr-core = {
         enable = true;
         settings.restore_screen = true;
       };
+
+      rclone.enable = false;
+      hunk.enable = false;
+      ssh.enable = false;
     };
 
     AI = {

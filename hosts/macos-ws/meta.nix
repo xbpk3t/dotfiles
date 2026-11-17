@@ -8,7 +8,6 @@
   tailscale.ip = "100.87.216.84";
 
   deploy = {
-    sshUser = "luck";
     remoteBuild = true;
     # 本机 localhost 激活成功后 deploy-rs 的 confirmation waiter 偶发超时，
     # 会误判失败并回滚；本机部署关闭 magic rollback。
@@ -16,8 +15,8 @@
   };
 
   ssh = {
-    # 部署入口：VPS 通过 tailnet 直连 Mac；本地部署仍可用 127.0.0.1。
-    host = "100.87.216.84";
+    # 部署入口：VPS 通过 tailnet 直连 Mac。
+    # 不写 ssh.host：地址由 fleet.primaryHostForNode 取 tailscale.ip，避免两处 IP 漂移。
     # 首次连接自动记录 host key：Mac/VPS 两边发起都无需手动 ssh-keyscan。
     # tailnet 内 TOFU 可接受；host key 真变了仍会报错。
     opts = [

@@ -6,8 +6,10 @@
 }:
 let
   inherit (config.lib.topology) mkInternet mkRouter mkConnection;
-
-  # 自定义 OS 图标。
+in
+{
+  # 自定义 OS 图标，供 node 的 icon/deviceIcon 用 <category>.<name> 引用。
+  # nix-topology 的 icons 选项类型是 attrsOf (attrsOf { file = path; })。
   # debian：从 devicon（钉死 commit）拉取，彩色品牌 logo。
   # - devicon 是 GitHub raw，可钉死 commit，纯 <path> 结构，nix-topology 的
   #   builtins.readFile 内联渲染完全兼容。
@@ -17,31 +19,17 @@ let
   #   注意：iconify 的路径语法是 "set/icon"；旧的 "set:icon" 现在会 404。
   # 为什么不用 svgrepo：/download/ 端点对数据中心 IP 返回 429 反爬（实测），
   #   /show/ 不稳定，在 VPS 上 fetchurl 会抓到反爬 HTML 而不是 SVG。
-  fetchDevicon =
-    name: file: hash:
-    pkgs.fetchurl {
-      url = "https://raw.githubusercontent.com/devicons/devicon/7330accdbc47e2dc0c19789a48533c4a3c50fe58/icons/${file}";
-      inherit hash;
-      name = "${name}.svg";
+  icons.os = {
+    debian.file = pkgs.fetchurl {
+      url = "https://raw.githubusercontent.com/devicons/devicon/7330accdbc47e2dc0c19789a48533c4a3c50fe58/icons/debian/debian-original.svg";
+      hash = "sha256-CbFMmBOjIrWLEapTkPsaK06b/QKGgyFILxoZU0pm7FQ=";
+      name = "debian.svg";
     };
-
-  osIcons = {
-    debian =
-      fetchDevicon "debian" "debian/debian-original.svg"
-        "sha256-CbFMmBOjIrWLEapTkPsaK06b/QKGgyFILxoZU0pm7FQ=";
-    apple = pkgs.fetchurl {
+    apple.file = pkgs.fetchurl {
       url = "https://api.iconify.design/simple-icons/apple.svg?color=%23e3e6eb";
       hash = "sha256-xysN4lI3oHPTplAq5UM7lYf8800owTUHIaTGbDL71NI=";
       name = "apple.svg";
     };
-  };
-in
-{
-  # 注册自定义图标到 icons.os 表，供 node 的 icon/deviceIcon 用 <category>.<name> 引用。
-  # nix-topology 的 icons 选项类型是 attrsOf (attrsOf { file = path; })。
-  icons.os = {
-    debian.file = osIcons.debian;
-    apple.file = osIcons.apple;
   };
 
   # 全局拓扑定义：声明网络与外部设备；

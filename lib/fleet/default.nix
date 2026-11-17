@@ -55,7 +55,7 @@ let
         childName: childType:
         isDir childType
         && !(lib.hasPrefix "_" childName)
-        && (builtins.readDir (topPath + "/${childName}")) ? "meta.nix"
+        && builtins.pathExists (topPath + "/${childName}/meta.nix")
       ) entries;
       childNodes = lib.mapAttrs' (
         childName: _:
@@ -99,22 +99,12 @@ let
 
   # 按优先级挑一个“主机地址”作为部署/连接默认值。
   # tailnet 优先：sshd 统一经 tailnet 访问，公网 IP 只保留给 DNS/代理等对外服务。
-  primaryHostForNode =
-    name: node:
-    let
-      candidates = [
-        (node.tailscale.ip or null)
-        (node.primaryIp or null)
-        (node.ip or null)
-        (if node ? ips && node.ips != [ ] then builtins.head node.ips else null)
-        (node.ssh.host or null)
-        name
-      ];
-    in
-    lib.findFirst (v: v != null) null candidates;
+  primaryHostForNode = name: node: node.tailscale.ip or node.ssh.host or name;
 
   tailnetNodes = lib.filterAttrs (_: node: node ? tailscale && node.tailscale ? ip) allNodes;
 
+  # 发布给 client 的 singbox server 视图：补 hostName 和 server fallback，
+  # 保持 fleet API 的形状稳定；server 缺失时的最终契约仍由 checks 兜底。
   singboxServers = lib.filter (s: s != null) (
     lib.attrsets.mapAttrsToList (
       name: node:
@@ -149,17 +139,18 @@ let
     else
       "${primaryHostForNode nezhaHub.hostName nezhaHub}:${toString (nezhaHub.nezha.port or 8008)}";
 
+  nodeList = lib.attrValues allNodes;
+  every = pred: lib.all pred nodeList;
+
   # 不变量：值全部是布尔，nix-unit 直接消费；键以 test- 开头。
   # 注意：hostName 由 scanNode 从路径派生（并在 meta 自带 hostName 时直接报错），
   # 不再单列 "hostName == node key" 测试——那是构造保证的，写出来只会是永远为真的假测试。
   checks = {
-    "test-kind-present" = lib.all (node: node ? kind) (lib.attrValues allNodes);
+    "test-kind-present" = every (node: node ? kind);
 
-    "test-system-present" = lib.all (node: node ? system) (lib.attrValues allNodes);
+    "test-system-present" = every (node: node ? system);
 
-    "test-stateVersion-non-empty" = lib.all (node: (node.stateVersion or "") != "") (
-      lib.attrValues allNodes
-    );
+    "test-stateVersion-non-empty" = every (node: (node.stateVersion or "") != "");
 
     "test-tailnet-ip-unique" =
       let
@@ -168,17 +159,55 @@ let
       lib.length ips == lib.length (lib.unique ips);
 
     "test-nezha-hub-at-most-one" =
-      lib.length (lib.filter (node: node.nezha.hub or false) (lib.attrValues allNodes)) <= 1;
+      lib.length (lib.filter (node: node.nezha.hub or false) nodeList) <= 1;
 
-    "test-singbox-server-address" = lib.all (node: !(node ? singbox) || node.singbox ? server) (
-      lib.attrValues allNodes
+    "test-singbox-server-address" = every (node: !(node ? singbox) || node.singbox ? server);
+
+    # 每个节点必须有可寻址的 tailscale.ip 或 ssh.host，避免 primaryHostForNode 回退到节点名。
+    "test-node-addressable" = every (
+      node: (node.tailscale.ip or null) != null || (node.ssh.host or null) != null
     );
+
+    # SSH 登录用户只由 ssh.user 决定；deploy.sshUser 不是有效契约。
+    "test-no-deploy-ssh-user" = every (node: (node.deploy.sshUser or null) == null);
 
     # 用户身份是 flake globals.identity，不允许回流到 per-node meta。
-    "test-no-per-node-identity" = lib.all (node: !(node ? user) && !(node ? time) && !(node ? editor)) (
-      lib.attrValues allNodes
-    );
+    "test-no-per-node-identity" = every (node: !(node ? user) && !(node ? time) && !(node ? editor));
   };
+
+  # 所有 deploy-rs 节点共享的 SSH 目标解析（hostname / sshUser / sshOpts）。
+  # NixOS / darwin / sm 的差异只在 profiles 与 rollback 策略，留在各构造器里。
+  deployTarget =
+    {
+      name,
+      node,
+      defaultSshUser,
+      defaultSshPort ? null,
+      remoteBuild ? true,
+    }:
+    let
+      ssh = node.ssh or { };
+      sshPort = ssh.port or defaultSshPort;
+    in
+    {
+      # What：部署目标地址（IP/域名/别名）。
+      # Why：由 fleet registry 的 ssh.host/tailscale.ip 统一推导，避免重复填部署字段。
+      hostname = ssh.host or (primaryHostForNode name node);
+      # What：SSH 用户名。
+      # Why：默认值由平台构造器给出，允许每个节点覆盖（node.ssh.user）。
+      sshUser = ssh.user or defaultSshUser;
+      # What：额外 SSH 参数（如端口）。
+      # Why：deploy-rs 没有独立的 sshPort 字段，只能通过 sshOpts 传递。
+      sshOpts =
+        (ssh.opts or [ ])
+        ++ lib.optionals (sshPort != null) [
+          "-p"
+          (toString sshPort)
+        ];
+      # What：是否在远端构建。
+      # Why：与 Colmena 的 buildOnTarget 行为一致，避免本地负载。
+      inherit remoteBuild;
+    };
 
   deployRsNode =
     {
@@ -190,32 +219,16 @@ let
       defaultSshPort ? null,
       remoteBuild ? true,
     }:
-    let
-      ssh = node.ssh or { };
-      host = ssh.host or (primaryHostForNode name node);
-      sshUser = ssh.user or defaultSshUser;
-      sshPort = ssh.port or defaultSshPort;
-      extraOpts = ssh.opts or [ ];
-      sshOpts =
-        extraOpts
-        ++ lib.optionals (sshPort != null) [
-          "-p"
-          (toString sshPort)
-        ];
-    in
-    {
-      # What：部署目标地址（IP/域名/别名）。
-      # Why：由 fleet registry 的 ssh.host/tailscale.ip 统一推导，避免重复填部署字段。
-      hostname = host;
-      # What：SSH 用户名。
-      # Why：默认 root，允许每个节点覆盖（node.ssh.user）。
-      inherit sshUser;
-      # What：额外 SSH 参数（如端口）。
-      # Why：deploy-rs 没有独立的 sshPort 字段，只能通过 sshOpts 传递。
-      inherit sshOpts;
-      # What：是否在远端构建。
-      # Why：与 Colmena 的 buildOnTarget 行为一致，避免本地负载。
-      inherit remoteBuild;
+    deployTarget {
+      inherit
+        name
+        node
+        defaultSshUser
+        defaultSshPort
+        remoteBuild
+        ;
+    }
+    // {
       profiles.system = {
         # What：远端激活该 profile 的用户。
         # Why：NixOS 系统级激活必须以 root 执行。
@@ -257,17 +270,6 @@ let
       ],
     }:
     let
-      ssh = node.ssh or { };
-      host = ssh.host or (primaryHostForNode name node);
-      sshUser = ssh.user or defaultSshUser;
-      sshPort = ssh.port or defaultSshPort;
-      extraOpts = ssh.opts or [ ];
-      sshOpts =
-        extraOpts
-        ++ lib.optionals (sshPort != null) [
-          "-p"
-          (toString sshPort)
-        ];
       # sm 引擎激活：deploy-rs 先 nix-env --set 把 $PROFILE 指向 toplevel，
       # 再运行 activate 脚本；引擎读 $PROFILE 下的 etc/services 描述并落地。
       # 关键坑（Phase 8 实测）：
@@ -277,12 +279,19 @@ let
       #    "not in nix store: system-1-link"。必须 readlink -f 解析到真实 store 路径。
       # 引擎本身不依赖 nix 命令（activate 只跑 preActivationAssertions + 应用状态）。
       smActivate = "REAL=\$(readlink -f \$PROFILE) && \$PROFILE/bin/system-manager-engine activate --store-path \$REAL";
+
+      target = deployTarget {
+        inherit
+          name
+          node
+          defaultSshUser
+          defaultSshPort
+          remoteBuild
+          ;
+      };
     in
-    {
-      # What：部署目标地址（IP/域名/别名）。
-      # Why：与 deployRsNode 一致，由 fleet registry 的 ssh.host/tailscale.ip 推导。
-      hostname = host;
-      inherit sshUser sshOpts remoteBuild;
+    target
+    // {
       # magic rollback：deploy-rs 0.1.0 的 canary 确认机制有确认竞态 bug——
       # home-manager 激活成功（远端已删 canary）后确认命令再删一次会失败并整节点
       # 回滚（实测：Activation succeeded → rm canary No such file → 误回滚）。
@@ -299,7 +308,7 @@ let
         };
         # 用户轨：standalone HM 以 SSH 用户（luck）激活用户 profile。
         home = {
-          user = sshUser;
+          user = target.sshUser;
           path = deployLib.activate.home-manager homeActivationPackage;
         };
       };
@@ -308,7 +317,7 @@ let
 in
 {
   inherit
-    groups
+    deployTarget
     primaryHostForNode
     tailnetNodes
     singboxServers

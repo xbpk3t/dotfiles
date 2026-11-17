@@ -31,25 +31,23 @@ in
   ];
 
   modules = {
-    infra = {
-      nh.enable = true;
-      networking.enable = true;
-      basePackages.enable = true;
-    };
+    infra.basePackages.enable = true;
 
     devops = {
       basePackages.enable = true;
 
-      cf.enable = true;
       helix.enable = true;
+
+      herdr-core = {
+        enable = true;
+        settings.restore_screen = true;
+      };
+
+      cf.enable = true;
       rclone.enable = true;
       ssh = {
         enable = true;
         github.enable = true;
-      };
-      herdr-core = {
-        enable = true;
-        settings.restore_screen = true;
       };
     };
 

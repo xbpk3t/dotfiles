@@ -8,7 +8,6 @@
 
   tailscale.ip = "100.101.189.7";
   deploy = {
-    sshUser = "root";
     remoteBuild = true;
   };
 

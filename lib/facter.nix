@@ -1,6 +1,5 @@
 {
-  fleet ? null,
-  relativeToRoot,
+  fleet,
 }:
 let
   pathIfExists = path: if builtins.pathExists path then path else null;
@@ -22,12 +21,12 @@ in
   # What：约定每台主机的 report 放在该节点自身的目录（hosts/<group>/<node>/facter.json
   #   或 hosts/<node>/facter.json，以 fleet 派生出的 node.path 为准）。
   # Why：让 report 与对应 host 配置同目录收敛，维护和 review 都更直观；
-  #   不能再用 hosts/<hostName>/ 的扁平假设——group 化后节点目录在 group 之下。
+  #   路径只从 fleet 取，不再回退到 hosts/<hostName> 的旧扁平布局。
+  #   未知 host 返回 null，保持 helper 的可探测语义。
   reportPathForHost =
     hostName:
     let
-      node = if fleet == null then null else fleet.nodes.${hostName} or null;
-      hostDir = if node != null then node.path else relativeToRoot "hosts/${hostName}";
+      node = fleet.nodes.${hostName} or null;
     in
-    pathIfExists (hostDir + "/facter.json");
+    if node == null then null else pathIfExists (node.path + "/facter.json");
 }

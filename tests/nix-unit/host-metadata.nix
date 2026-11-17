@@ -9,10 +9,7 @@
 #   - `expr` / `expected` 是「在这个 Nix 语境里已经求值好的值」，不是字符串表达式；
 #     判定方式是 `expr == expected` 的 Nix 全等。所以这里把断言写成真正的布尔值：
 #     expr 算成 true ⇔ 数据一致；false ⇔ 违约（与 expected=true 不匹配 → 报红）。
-{ lib }:
-let
-  fleet = import ../../lib/fleet { inherit lib; };
-in
+{ fleet }:
 builtins.mapAttrs (_name: value: {
   expr = value;
   expected = true;

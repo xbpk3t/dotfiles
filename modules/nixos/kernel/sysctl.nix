@@ -24,6 +24,7 @@ in
     };
   };
 
+  # 模块里已有 `options`，其它配置必须放进显式 `config`。
   config = {
     # VPS 专用：根据 host module 提供的 hardware profile 动态生成 sysctl。
     # mkForce 确保覆盖 nixpkgs 默认 sysctl（如 fs.inotify.max_user_instances），

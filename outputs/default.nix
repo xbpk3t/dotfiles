@@ -6,10 +6,10 @@
 }:
 let
   # 当前仓库明确支持的 target systems。
-  # why: flake-parts 的 perSystem 会基于这里展开；这里是顶层支持矩阵的单一入口。
+  # why: flake-parts 的 perSystem 会基于这里展开；每个条目都会实例化一套 nixpkgs，
+  #   所以只列真正有节点的平台（aarch64-linux 随 nixos-avf 一起移除）。
   supportedSystems = [
     "aarch64-darwin"
-    "aarch64-linux"
     "x86_64-linux"
   ];
 
@@ -94,8 +94,8 @@ let
     };
 
   # 将多个 host 输出合并为一份标准输出结构。
-  mergeRoleOutputList = outputs: {
-    apps = lib.attrsets.mergeAttrsList (map (it: it.apps or { }) outputs);
+  # host 输出只含配置/deploy 节点；apps/packages 由 flake 层自己提供。
+  mergeHostOutputs = outputs: {
     darwinConfigurations = lib.attrsets.mergeAttrsList (
       map (it: it.darwinConfigurations or { }) outputs
     );
@@ -106,7 +106,6 @@ let
     # sm-vps 平行轨
     homeConfigurations = lib.attrsets.mergeAttrsList (map (it: it.homeConfigurations or { }) outputs);
     systemConfigs = lib.attrsets.mergeAttrsList (map (it: it.systemConfigs or { }) outputs);
-    packages = lib.attrsets.mergeAttrsList (map (it: it.packages or { }) outputs);
   };
 
   # 每个节点由自己的 meta + host 文件生成全部出口。
@@ -121,20 +120,28 @@ let
       ;
   };
 
-  hostOutputs = lib.mapAttrs (name: node: mkHost { inherit name node; }) mylib.fleet.nodes;
-
   # 按 node.system 分组；perSystem 的 checks/topology 仍然按系统取视图。
-  hostNamesBySystem = lib.groupBy (name: mylib.fleet.nodes.${name}.system) (
-    builtins.attrNames mylib.fleet.nodes
-  );
-
   architectureOutputs = lib.mapAttrs (
-    _system: names: mergeRoleOutputList (map (name: hostOutputs.${name}) names)
-  ) hostNamesBySystem;
+    _system: nodes:
+    mergeHostOutputs (
+      map (
+        node:
+        mkHost {
+          inherit (node) name;
+          node = node;
+        }
+      ) nodes
+    )
+  ) (lib.groupBy (node: node.system) (builtins.attrValues mylib.fleet.nodes));
 
   unsupportedNodes = lib.filter (node: !(builtins.elem node.system supportedSystems)) (
     builtins.attrValues mylib.fleet.nodes
   );
+
+  # perSystem 会直接取 architectureOutputs.${system}；每个 supported system 必须有节点。
+  missingSystemHosts = lib.filter (
+    system: !(builtins.hasAttr system architectureOutputs)
+  ) supportedSystems;
 
   architectureOutputValues = builtins.attrValues architectureOutputs;
   currentSystem = builtins.currentSystem or null;
@@ -173,6 +180,9 @@ assert lib.assertMsg (unsupportedNodes == [ ])
   "fleet: nodes declare unsupported systems: ${
     lib.concatMapStringsSep ", " (n: n.name) unsupportedNodes
   }";
+assert lib.assertMsg (
+  missingSystemHosts == [ ]
+) "flake: supported systems have no host outputs: ${lib.concatStringsSep ", " missingSystemHosts}";
 {
   systems = supportedSystems;
 
@@ -181,7 +191,7 @@ assert lib.assertMsg (unsupportedNodes == [ ])
     let
       specialArgs = genSpecialArgs system;
       inherit (specialArgs) pkgs;
-      architectureOutput = architectureOutputs.${system} or { };
+      architectureOutput = architectureOutputs.${system};
       libChecks = import ../tests {
         inherit pkgs;
         inherit (pkgs) lib;
@@ -224,7 +234,7 @@ assert lib.assertMsg (unsupportedNodes == [ ])
       #   - nixosConfigurations / darwinConfigurations：config.system.build.toplevel.drvPath
       #   - systemConfigs（sm）：config.build.toplevel.drvPath
       #   - homeConfigurations（standalone HM）：activationPackage.drvPath
-      # 注意：host-eval 只覆盖「当前求值 system」（architectureOutputs.${system} or { }）。
+      # 注意：host-eval 只覆盖「当前求值 system」（architectureOutputs.${system}）。
       #   例如 sm-vps-tc 是 x86_64-linux，它在 Darwin 上求值 flake check 时不会生成
       #   host-eval-sm-vps-tc（只有 x86_64-linux 的 check 才会）。CI 若跑在 Darwin，
       #   sm 轨的 eval 门禁不会触发——需在 x86_64-linux 的 job 上才有意义。
@@ -270,7 +280,6 @@ assert lib.assertMsg (unsupportedNodes == [ ])
         deploy-rs = inputs."deploy-rs".apps.${system}.deploy-rs;
         default = inputs."deploy-rs".apps.${system}.default;
       }
-      // (architectureOutput.apps or { })
       //
         lib.optionalAttrs
           (
@@ -306,7 +315,7 @@ assert lib.assertMsg (unsupportedNodes == [ ])
       nix-unit = {
         allowNetwork = true;
         inherit inputs;
-        tests = import ../tests/nix-unit/host-metadata.nix { inherit lib; };
+        tests = import ../tests/nix-unit/host-metadata.nix { inherit (mylib) fleet; };
       };
 
       # 开发环境：CI 与本地共享同一套工具，保证 pre-commit / linter 行为一致。
@@ -325,12 +334,10 @@ assert lib.assertMsg (unsupportedNodes == [ ])
           ../topology.nix
           {
             # 注入当前 system 的 nixosConfigurations，让 nix-topology 自动提取主机接口/服务。
-            nixosConfigurations = architectureOutput.nixosConfigurations or { };
+            nixosConfigurations = architectureOutput.nixosConfigurations;
           }
         ];
       };
-
-      packages = architectureOutput.packages or { };
     };
 
   flake = {

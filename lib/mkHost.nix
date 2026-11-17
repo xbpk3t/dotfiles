@@ -56,15 +56,9 @@ let
 
   mkSmSystem = mylib.systemManager {
     inherit inputs;
-    specialArgs = {
-      inherit (specialArgs)
-        inputs
-        mylib
-        hostMeta
-        userMeta
-        timeMeta
-        pkgs
-        ;
+    # 多传的 specialArgs 对未声明它们的模块是惰性的；不再手维护白名单，
+    # 避免 sm 轨新增 specialArg 时被静默漏掉。
+    specialArgs = specialArgs // {
       inherit lib;
     };
     system-modules = [
@@ -81,21 +75,23 @@ let
     mylib.fleet.deployRsNode {
       inherit name node deployLib;
       nixosConfiguration = config;
-      defaultSshUser = node.deploy.sshUser or "root";
       remoteBuild = node.deploy.remoteBuild or true;
     };
 
-  mkDarwinDeploy = config: {
-    hostname = node.ssh.host or (mylib.fleet.primaryHostForNode name node);
-    sshUser = node.ssh.user or node.deploy.sshUser or "luck";
-    sshOpts = node.ssh.opts or [ ];
-    remoteBuild = node.deploy.remoteBuild or true;
-    magicRollback = node.deploy.magicRollback or false;
-    profiles.system = {
-      user = "root";
-      path = deployLib.activate.custom config.system "./activate";
+  mkDarwinDeploy =
+    config:
+    (mylib.fleet.deployTarget {
+      inherit name node;
+      defaultSshUser = "luck";
+      remoteBuild = node.deploy.remoteBuild or true;
+    })
+    // {
+      magicRollback = node.deploy.magicRollback or false;
+      profiles.system = {
+        user = "root";
+        path = deployLib.activate.custom config.system "./activate";
+      };
     };
-  };
 
   mkSmDeploy =
     systemConfig: homeConfig:
