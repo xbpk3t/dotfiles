@@ -32,10 +32,6 @@ _: {
       ssh = {
         enable = true;
       };
-      # Agent mux (orchestration / detach / wait). Package + config.toml via herdr.nix.
-      # not `herdr integration install`. Bump herdr-bin to upgrade herdr version.
-      # [2026-11-15] 转去用 herdr-app 了
-      herdr.enable = false;
       # PR TUI（nixpkgs）+ review-first diff（herdr-reviewr plugin）；herdr keys: ctrl+alt+p / d
       hunk.enable = false;
       # fastfetch 在 Darwin 会拉入 apple-sdk-15.5（~481M 独有闭包），默认关闭；

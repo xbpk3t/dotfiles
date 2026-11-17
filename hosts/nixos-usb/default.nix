@@ -70,46 +70,6 @@ in
     resolved.enable = true;
   };
 
-  # ── 输入法：fcitx5（与工作站一致）──
-  i18n.inputMethod = {
-    enable = true;
-    type = "fcitx5";
-    fcitx5 = {
-      waylandFrontend = true;
-      addons = with pkgs; [
-        qt6Packages.fcitx5-chinese-addons
-        fcitx5-pinyin-zhwiki
-      ];
-      settings = {
-        inputMethod = {
-          GroupOrder = {
-            "0" = "Default";
-          };
-          "Groups/0" = {
-            Name = "Default";
-            "Default Layout" = "us";
-            DefaultIM = "pinyin";
-          };
-          "Groups/0/Items/0" = {
-            Name = "keyboard-us";
-            Layout = "";
-          };
-          "Groups/0/Items/1" = {
-            Name = "pinyin";
-            Layout = "";
-          };
-        };
-      };
-    };
-  };
-  environment.sessionVariables = {
-    GTK_IM_MODULE = "fcitx";
-    QT_IM_MODULE = "fcitx";
-    XMODIFIERS = "@im=fcitx";
-    INPUT_METHOD = "fcitx";
-    SDL_IM_MODULE = "fcitx";
-  };
-
   # ── 模块开关（复用仓库现有模块）──
   modules = {
     desktop = {

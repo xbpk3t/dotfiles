@@ -9,12 +9,6 @@
 let
   cfg = config.modules.AI.claude;
   subagentSrc = "${pkgs.voltagent-subagents}";
-  # Herdr Claude integration (vendored v7) — home/base/AI/hooks/herdr-agent-state.sh
-  # SessionStart reports session_id for resume_agents_on_restore; state is screen-detected.
-  # No-op outside Herdr panes (HERDR_ENV=1). Wired via HM settings, NOT `herdr integration install`.
-  herdrAgentStateHook = pkgs.writeScript "herdr-agent-state.sh" (
-    builtins.readFile ./hooks/herdr-agent-state.sh
-  );
 in
 {
   options.modules.AI.claude = with lib; {
@@ -172,12 +166,6 @@ in
               # 自动注册并后台刷新（autoUpdate=true），我们只用 ponytail 市场。
               # 不设的话它会持续联网拉目录；需要时 /plugin 可手动加回。
               CLAUDE_CODE_DISABLE_OFFICIAL_MARKETPLACE_AUTOINSTALL = "1";
-              # 临时注释（LUC-334 实测）：CLAUDE_CODE_DISABLE_TERMINAL_TITLE=1 会禁掉
-              # Claude 的 OSC 终端标题更新，而 herdr 的 osc_title_working 规则依赖它
-              # 检测 working 状态（issue #1630）。不设则 agent 状态永远 stuck 在 idle，
-              # working→idle 转换不触发 → 通知永远弹不出来。
-              # 注释后 Claude 会恢复更新 tab/window title；若实测确认状态检测恢复则保留注释。
-              # CLAUDE_CODE_DISABLE_TERMINAL_TITLE = "1";
 
               # 强制启用 auto mode 后台 agent 的 resume 能力。
               #
@@ -247,21 +235,6 @@ in
               CCX_AI_BASE_URL = "https://api.lucc.dev/v1";
             };
 
-            # Herdr: SessionStart → session id for native resume (state still screen-detected).
-            # Do not run `herdr integration install claude` — this replaces that install path.
-            hooks = {
-              SessionStart = [
-                {
-                  hooks = [
-                    {
-                      type = "command";
-                      command = "${herdrAgentStateHook} session";
-                    }
-                  ];
-                }
-              ];
-            };
-
             # statusLine = {
             #   type = "command";
             #   command = "${pkgs.nushell}/bin/nu ${./claude-hud-wrapper.nu}";
@@ -317,6 +290,47 @@ in
           # [2026-05-01] 注释掉了，默认cc直接bypassPermissions
           # 兜底逃生开关：仅在明确需要跳过权限确认时手动使用。
           # cc-unsafe = "claude --dangerously-skip-permissions";
+        };
+
+        # keybindings 只写 delta（override-only）：未声明的键沿用 Claude Code 默认。
+        # 不用 /keybindings 生成的全量模板——那会把旧版默认键位冻结进来。
+        # force = true：首次接管已存在的普通文件时跳过冲突检查。
+        file.".claude/keybindings.json" = {
+          force = true;
+          text = builtins.toJSON {
+            "$schema" = "https://www.schemastore.org/claude-code-keybindings.json";
+            "$docs" = "https://code.claude.com/docs/en/keybindings";
+            bindings = [
+              {
+                # ctrl+q：一键压缩上下文（等价 /compact）
+                context = "Chat";
+                bindings."ctrl+q" = "command:compact";
+              }
+              {
+                # h/l：vi 风格调整 effort
+                context = "ModelPicker";
+                bindings = {
+                  "h" = "modelPicker:decreaseEffort";
+                  "l" = "modelPicker:increaseEffort";
+                };
+              }
+              {
+                context = "EffortSlider";
+                bindings = {
+                  "h" = "effortSlider:decreaseEffort";
+                  "l" = "effortSlider:increaseEffort";
+                };
+              }
+              {
+                # g / shift+g：vi 风格跳到首/尾
+                context = "Select";
+                bindings = {
+                  "g" = "select:first";
+                  "shift+g" = "select:last";
+                };
+              }
+            ];
+          };
         };
       };
 

@@ -46,7 +46,6 @@ CNTR_DIR=./.cntr CNTR_DRY_RUN=true task cntr:reconcile
 | `axonhub` | axonhub:latest, postgres:15-alpine, 9router:latest, resin:latest, cpa:latest | `127.0.0.1:8090/20228/2260/8317` + edge；9router dashboard: http://9router.tailf19540.ts.net/ | edge | named volumes + `./CPA/auth-dir`, `./resin/*` | `backup-pgsql.nu axonhub`（`axonhub-pgsql`） | watchtower: axonhub/9router/resin/cpa；postgres 手动 |
 | `rsshub` | rsshub:latest, browserless:1.43-chrome-stable | edge（caddy 反代） | edge | — | — | watchtower |
 | `openlist` | openlistteam/openlist:latest | edge（caddy 反代） | edge | `./data`, `./downloads` | — | watchtower |
-| `rustdesk` | rustdesk/rustdesk-server（无 tag） | `:21114-21119` | `rust_desk_net` | named volumes | — | 手动 |
 | `actions-runner` | myoung34/github-runner:2.338.2 | 无 | default | `runner_data` + `~/.opencli/xiaoyuzhou.json` | — | 手动；**必须**保持 `DISABLE_AUTO_UPDATE` |
 | `watchtower` | containrrr/watchtower:latest | 无 | default | `docker.sock` | — | 自身不纳入 allowlist |
 | `golang` | 本地 dev sandbox（profiles） | 本地端口 | `golang_backend` | named volumes | — | 不纳入 reconcile（`CNTR_INCLUDE_DEV=true` 才包含） |
@@ -69,9 +68,13 @@ CNTR_DIR=./.cntr CNTR_DRY_RUN=true task cntr:reconcile
     `tailscale_service.ninerouter` 定义 `svc:9router`（`tcp:80`）。
   - Host 侧：`hosts/nixos-vps/default.nix` 的 `services.tailscale.serve` 把
     `tcp:80` 转到 `http://127.0.0.1:20228`。
+  - **Tag 要求**：Tailscale Services 的 service host 必须是 tagged device；
+    `nixos-vps-dev` 由 Terraform 打 `tag:svc-9router`。ACL 的
+    `autoApprovers.services` 自动批准该 host；同时把 tag 加进
+    `autoApprovers.exitNode/routes`，避免 tagging 改变 owner 后 exit node
+    自动批准回归。
   - 当前是 HTTP（NixOS 的 Service 端点暂不支持前端 TLS termination，
-    nixpkgs#530174）；tailnet 内由 WireGuard 加密。首次可能需要在 admin console
-    批准 `nixos-vps-dev` 作为 service host。
+    nixpkgs#530174）；tailnet 内由 WireGuard 加密。
   - 备选：`ssh -L 20228:localhost:20228 nixos-vps-dev` → `http://localhost:20228`。
 - **版本策略**：
   - 有状态/入口/CI 关键服务保持 pin：`actions-runner 2.338.2`、`caddy:2`、

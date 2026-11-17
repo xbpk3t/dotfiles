@@ -29,6 +29,8 @@ in
     };
 
     devops = {
+      basePackages.enable = true;
+
       cf.enable = true;
       helix.enable = true;
       rclone.enable = true;
@@ -88,6 +90,14 @@ in
       gpg.enable = true;
       network.enable = true;
       ssh.enable = true;
+    };
+
+    langs = {
+      basePackages.enable = true;
+      golang.enable = true;
+      treefmt.enable = true;
+      ts.enable = true;
+      markdown.enable = true;
     };
   };
 

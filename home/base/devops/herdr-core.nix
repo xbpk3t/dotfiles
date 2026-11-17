@@ -20,8 +20,8 @@ in
   # 不需要额外 systemd unit；VPS 用户已有 linger。
   # 可选配置: ~/.config/herdr-core/config.toml（shell / notes / draft_wait）。
   #
-  # 注意：这是 herdr-app 的 runtime，与 TUI（modules.devops.herdr）是两套系统，
-  # TUI 里跑的 agent 不会出现在 app/手机。
+  # 注意：旧 herdr TUI 已移除；herdr-core 只服务 herdr-app（桌面/手机），
+  # 旧 TUI 里的 agent 不会出现在 app/手机。
   options.modules.devops.herdr-core = with lib; {
     enable = mkEnableOption "Herdr core runtime (hc CLI; SSH-reachable by herdr-app)";
 

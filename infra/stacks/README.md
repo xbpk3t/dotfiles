@@ -1,6 +1,6 @@
 # Stacks
 
-这里放后续新增的基础设施 stack。
+这里放基础设施 stack，按 Terramate stack 编目。
 
 目录约定：
 
@@ -8,12 +8,16 @@
 infra/stacks/<scope>/<provider>/<service>/
 ```
 
-示例：
+当前 stack：
 
 ```text
-infra/stacks/homelab/minio/prometheus/
-infra/stacks/homelab/cloudflare/dns/
-infra/stacks/vps/cloudflare/zone/
+infra/stacks/homelab/cloudflare/account/{d1,kv,pages,r2}/
+infra/stacks/homelab/cloudflare/lucc.dev/{dns,email-routing}/
+infra/stacks/homelab/tailscale/tailnet/
 ```
 
-现有 `infra/minio/tf-s3-backend` 目录暂时继续作为 legacy root module 保留，不在这一步强迁。
+- `scope`：部署边界（`homelab`、`vps` 等）
+- `provider`：API 边界
+- `service`：实际 stack 单元
+
+每个 stack 是独立 root module，单独 plan/apply；不要把所有资源塞进一个 state。

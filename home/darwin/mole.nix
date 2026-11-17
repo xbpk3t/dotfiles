@@ -7,6 +7,8 @@ _: {
 
   # - 含义：只给 mo purge 用的扫描范围列表。
   # - 用途：把 purge 限定在你指定的项目根目录下跑；配置后不会再按默认目录全盘找。
+  # - 不纳管：该文件由 `mo purge --paths` 写回（自动发现项目目录），
+  #   store 软链会让该命令无法写入；要改路径直接用 `mo purge --paths` 编辑。
   #  home.file.".config/mole/purge_paths".text = ''
   #  '';
 

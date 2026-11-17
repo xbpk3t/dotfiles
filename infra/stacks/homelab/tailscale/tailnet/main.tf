@@ -51,6 +51,18 @@ data "tailscale_device" "servers" {
   hostname = each.key
 }
 
+# Tailscale Services 要求 service host 是 tagged device。
+# 只给 nixos-vps-dev 打专用 tag；tag owner / autoApprovers 见 locals.tf。
+# 注意：tagging 会把设备 owner 从 user 改为 tag，所以 ACL 里同时把
+# tag:svc-9router 加进 exitNode/routes autoApprovers，避免 exit node 回归。
+resource "tailscale_device_tags" "nixos_vps_dev" {
+  device_id = data.tailscale_device.servers["nixos-vps-dev"].id
+  tags      = ["tag:svc-9router"]
+
+  # tagOwners 必须先由 tailscale_acl 写入，设备 tag 才被接受（否则 API 400）。
+  depends_on = [tailscale_acl.main]
+}
+
 resource "tailscale_device_key" "servers" {
   for_each            = data.tailscale_device.servers
   device_id           = each.value.id

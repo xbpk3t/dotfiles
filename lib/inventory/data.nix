@@ -219,8 +219,9 @@ in
     #     opts = [ "-o" "ServerAliveInterval=30" "-o" "ServerAliveCountMax=20" ]; # 跨境 keepalive
     #   };
     # };
-    # 然后：ROOT_PASS='<初始密码>' HOST=<IP> NODE=sm-vps-<名字> \
-    #   ./hosts/sm-vps/bootstrap/phase8-real.sh
+    # 然后：ANSIBLE_PASSWORD='<初始密码>' \
+    #   ansible-playbook -i hosts/sm-vps/ansible/inventory/sm_vps.ini \
+    #     hosts/sm-vps/ansible/bootstrap.yml --ask-pass
     # 之后 deploy：task nix:deploy:sm NODE=sm-vps-<名字>，验证：task nix:deploy:smoke NODE=sm-vps-<名字>
   };
 }

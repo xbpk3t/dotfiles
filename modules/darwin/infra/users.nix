@@ -18,6 +18,9 @@ in
       home = "/Users/${username}";
       description = username;
       shell = lib.mkDefault (pkgs.zsh + "/bin/zsh");
+      # 注意：nix-darwin 不写 ~/.ssh/authorized_keys。它生成
+      # /etc/ssh/nix_authorized_keys.d/<user>，并通过 sshd 的 AuthorizedKeysCommand 读取。
+      # ~/.ssh/authorized_keys 留给临时 key，不要用 home.file 纳管（rebuild 会覆盖临时 key）。
       openssh.authorizedKeys.keys = globals.auth.adminKeys;
     };
 
