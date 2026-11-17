@@ -18,7 +18,7 @@ in
       home = "/Users/${username}";
       description = username;
       shell = lib.mkDefault (pkgs.zsh + "/bin/zsh");
-      openssh.authorizedKeys.keys = globals.auth.sshPublicKeys;
+      openssh.authorizedKeys.keys = globals.auth.adminKeys;
     };
 
     # Note: Additional users should be created manually on macOS or via host-specific configuration

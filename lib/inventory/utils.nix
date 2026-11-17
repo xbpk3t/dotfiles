@@ -32,11 +32,36 @@ let
       hostName = node.hostName or name;
       server = singbox.server or primaryHostForNode name node;
     };
+
+  allNodes = lib.foldl' (acc: group: acc // group) { } (lib.attrValues inventory);
+
+  # Nezha: exactly one node may declare `nezha.hub = true`. Agents derive
+  # their dashboard address from that node, so the hub IP/port stays in
+  # inventory instead of being duplicated in host modules.
+  nezhaHub =
+    let
+      hubs = lib.filter (node: node.nezha.hub or false) (lib.attrValues allNodes);
+    in
+    if hubs == [ ] then
+      null
+    else if lib.length hubs > 1 then
+      throw "inventory: multiple nodes declare nezha.hub = true"
+    else
+      builtins.head hubs;
 in
 {
   inherit primaryHostForNode;
   # 扁平化所有 group 的节点（节点名全局唯一，可直接当 hostName/别名查找）。
-  nodes = lib.foldl' (acc: group: acc // group) { } (lib.attrValues inventory);
+  nodes = allNodes;
+
+  nezha = {
+    hub = nezhaHub;
+    server =
+      if nezhaHub == null then
+        throw "inventory: no node declares nezha.hub = true"
+      else
+        "${primaryHostForNode nezhaHub.hostName nezhaHub}:${toString (nezhaHub.nezha.port or 8008)}";
+  };
   # 分组入口（简化调用）：mylib.inventory.<group>
   "nixos-avf" = groupOrEmpty "nixos-avf";
   "nixos-vps" = groupOrEmpty "nixos-vps";

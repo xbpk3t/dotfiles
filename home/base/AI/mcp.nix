@@ -98,17 +98,14 @@ in
         # https://linear.app/docs/mcp
         #   Linear MCP 是远程 HTTP MCP（`https://mcp.linear.app/mcp`），走 native HTTP transport。
         #
-        #   认证方式分流：
-        #   - Codex: bearer_token_env_var 让它读 env 发 Authorization header，OOTB 工作。
-        #   - CC: 走 OAuth fallback（首次弹浏览器授权，后续 token 自动续期）。
-        #     不设 headers.Authorization，让 CC 触发 OAuth 而非直接发 token。
-        #
-        #   headers.Authorization = "Bearer {env:...}" 实测对两边都是负收益：
-        #   - CC (2.1.x): 不展开 {env:...} 模板，字面量发送 → 401；且显式 header
-        #     禁用了 OAuth fallback → 彻底死锁。
-        #   - Codex: 用 bearer_token_env_var 发正确 Bearer token，headers 字段被忽略；
-        #     实测两个 Authorization 头同时发送会 400。
-        #   [2026-07-11] 所以移除 headers 行，Codex 专用 bearer_token_env_var 有条件注入。
+        #   认证方式分流（2026-11-16 重新确认）：
+        #   - Codex: 共享配置里的 bearer_token_env_var 让它读 env 发 Authorization，OOTB 工作。
+        #   - Claude Code: 用下面的 programs.claude-code.mcpServers.linear 专用覆盖，
+        #     headers.Authorization = "Bearer ${LINEAR_API_KEY}"。CC 支持 ${VAR} 展开，
+        #     Linear 官方也接受 API key 作为 Bearer；不再走 OAuth。
+        #   - 不要把 headers 加到共享 server：Codex 的 HM bridge 会把 headers 映射成
+        #     http_headers，与 bearer_token_env_var 叠加会发两个 Authorization → 400。
+        #   [2026-07-11] 之前用 Codex 的 {env:...} 模板测 CC，语法不对导致 401，已纠正。
         #   [2026-06-12] 使用 streamable HTTP（与 deepwiki 相同模式），零本地进程开销。
         "linear" = {
           type = "http";
@@ -163,6 +160,17 @@ in
         #    ];
         #  };
       };
+    };
+
+    # Claude Code 专用：CC 不读 bearer_token_env_var；共享 server 的 headers 又会被
+    # Codex 的 HM bridge 转成 http_headers（与 bearer_token_env_var 叠加 → 双 Authorization 400）。
+    # 所以这里只覆盖 Claude 这一个 client，Codex 继续用上面的共享配置。
+    # ${VAR} 由 CC 在读取 MCP 配置时展开，值来自 shell 的 LINEAR_API_KEY（见下方 sessionVariables）。
+    programs.claude-code.mcpServers.linear = lib.mkIf config.modules.AI.claude.enable {
+      type = "http";
+      url = "https://mcp.linear.app/mcp";
+      headers.Authorization = "Bearer \${LINEAR_API_KEY}";
+      default_tools_approval_mode = "approve";
     };
 
     # Share API keys with MCP servers and CLI tools.

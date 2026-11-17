@@ -7,9 +7,6 @@
 let
   tailnetIp = hostMeta.tailscale.ip or "127.0.0.1";
 
-  proxyUrl = "http://127.0.0.1:7890";
-  noProxy = "localhost,127.0.0.1,::1,100.64.0.0/10,10.0.0.0/8,192.168.0.0/16,198.18.0.0/16";
-
   # 备份 agt 上的项目、未提交 WIP 和 agent 状态到 R2（restic 仓库 rclone:r2:agt-backup）。
   backupScript = pkgs.writeShellScript "restic-backup-agt" ''
     export PATH=${config.home.profileDirectory}/bin:/run/current-system/sw/bin:/usr/bin:/bin
@@ -117,15 +114,12 @@ in
     Install.WantedBy = [ "timers.target" ];
   };
 
-  # agt 在 Shanghai：mihomo TUN 对部分直连不可靠，显式给 DAG/CLI 设置 mixed-port 代理。
-  home.sessionVariables = {
-    HTTP_PROXY = proxyUrl;
-    HTTPS_PROXY = proxyUrl;
-    ALL_PROXY = proxyUrl;
-    NO_PROXY = noProxy;
-    http_proxy = proxyUrl;
-    https_proxy = proxyUrl;
-    all_proxy = proxyUrl;
-    no_proxy = noProxy;
-  };
+  # NOTE(agt proxy 2026-11-16)：刻意不在这里全局注入 HTTP(S)_PROXY。
+  # 历史：这坨是从 main 合并进来的 workaround；现在 mihomo TUN 已在系统层接管流量，
+  # 且 mihomo-client 已把 Meta 加进 firewall.trustedInterfaces，解决了 TUN 回包被 DROP
+  # 导致的 direct 超时。全局 proxy env 反而会和 fake-IP 打架（curl 的 NO_PROXY 认
+  # 198.18.0.0/16，reqwest/atuin 不认），曾导致 atuin 5s connect timeout。
+  # 结论：默认让 TUN 透明代理；个别工具确实需要 mixed-port 时，用该工具自己的
+  # wrapper/alias 局部设置，不要污染整个 shell。容器/构建若需代理，也应在对应命令
+  # 或 daemon 配置里显式传，而不是依赖 home.sessionVariables。
 }

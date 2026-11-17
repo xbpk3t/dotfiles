@@ -81,6 +81,7 @@ in
 
       CF_R2_AK = mkUserSecret "cf/r2/ak";
       CF_R2_SK = mkUserSecret "cf/r2/sk";
+      CF_R2_ENDPOINT = mkUserSecret "cf/r2/endpoint";
 
       # 同时具体 read all & write all 权限的token，为了方便 terraform 使用
       CF_TOKEN_READ_WRITE_ALL = mkUserSecret "cf/token/read_all";
@@ -142,8 +143,10 @@ in
       GOOGLE_CLOUD_API_KEY = mkUserSecret "google/cloud";
 
       # Atuin
+      # 登录态在 ~/.local/share/atuin/meta.db (hub_session/session)，不通过 sops 注入；
+      # 旧的 atuin/session token 已失效，各机手动 `atuin login` 一次。
+      # 详见 home/core/kernel/zsh.nix 的 NOTE(atuin)。
       AUTIN_KEY = mkUserSecret "atuin/key";
-      AUTIN_SESSION = mkUserSecret "atuin/session";
 
       # Acme
       ACME_CF_ENV = mkUserSecret "acme/cloudflare_env";
@@ -151,6 +154,16 @@ in
       # Tailscale
       TAILSCALE_AUTH_KEY = mkRootSecret "tailscale/auth_key";
       TAILSCALE_API_KEY = mkUserSecret "tailscale/access_key";
+
+      # Nezha monitoring
+      # Dashboard JWT signing key; agent SK shared by hub and every agent.
+      # Both are read by systemd LoadCredential (root-only).
+      NEZHA_JWT_SK = mkRootSecret "nezha/jwt_sk";
+      NEZHA_AGENT_SK = mkRootSecret "nezha/agent_sk";
+
+      # Healthchecks.io dead-man switches
+      HEALTHCHECKS_VPS_DEV = mkRootSecret "healthchecks/vps_dev";
+      HEALTHCHECKS_VPS_AGT = mkRootSecret "healthchecks/vps_agt";
     };
   };
 }

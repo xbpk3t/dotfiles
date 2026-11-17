@@ -9,6 +9,26 @@ resource "tailscale_dns_preferences" "main" {
   magic_dns = true
 }
 
+# 9router dashboard: Tailscale Service -> http://9router.tailf19540.ts.net/
+# Host side: services.tailscale.serve.services."9router".endpoints."tcp:80"
+# = http://127.0.0.1:20228 (hosts/nixos-vps/default.nix).
+# Use tcp:80 so the URL has no explicit port; the current NixOS module cannot
+# request HTTPS termination for Service endpoints (nixpkgs#530174).
+resource "tailscale_service" "ninerouter" {
+  name    = "svc:9router"
+  comment = "9router dashboard (HTTP over tailnet)"
+  ports   = ["tcp:80"]
+}
+
+# Nezha dashboard: Tailscale Service -> http://nezha.tailf19540.ts.net/
+# Host side: services.tailscale.serve.services."nezha".endpoints."tcp:80"
+# = http://127.0.0.1:8008 (hosts/nixos-vps/default.nix).
+resource "tailscale_service" "nezha" {
+  name    = "svc:nezha"
+  comment = "Nezha dashboard (HTTP over tailnet)"
+  ports   = ["tcp:80"]
+}
+
 resource "tailscale_tailnet_key" "device_join" {
   reusable      = true
   ephemeral     = false

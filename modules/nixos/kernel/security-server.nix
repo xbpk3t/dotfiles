@@ -149,14 +149,18 @@ in
         package = pkgs.fail2ban;
         # 最大重试次数
         maxretry = 3;
-        # 封禁时长
-        bantime = "1h";
+        # 封禁时长：公网 22 爆破只做限速意义有限，1d 更符合"封禁"语义
+        bantime = "1d";
         # 白名单网段
         ignoreIP = [
           "127.0.0.1/8"
           "10.0.0.0/8"
           "172.16.0.0/12"
           "192.168.0.0/16"
+          # Tailscale CGNAT（IPv4）与 tailnet ULA（IPv6）：
+          # fleet SSH 全走 tailnet，密钥配错不应把自己 ban 掉。
+          "100.64.0.0/10"
+          "fd7a:115c:a1e0::/48"
         ];
         jails = {
           DEFAULT.settings = {
@@ -172,8 +176,8 @@ in
               port = "ssh";
               # 最大重试次数
               maxretry = 3;
-              # 封禁时长
-              bantime = "1h";
+              # 封禁时长（与全局保持一致）
+              bantime = "1d";
               # 后端
               backend = "systemd";
             };

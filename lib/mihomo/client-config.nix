@@ -26,16 +26,10 @@ let
   );
 
   # mihomo 只接受 configFile (路径)，不支持 native Nix settings。
-  # 这里在构建期就把 attrset 直接渲染成 YAML，避免运行时再 yq 转换，也避免
-  # 把 yq-go store path 写进 launchd plist 形成额外的 GC race 暴露面。
-  #
-  # 之所以用 pkgs.formats.yaml 而不是 builtins.toFile + runCommand + yq：
-  # 1) pkgs.formats.yaml.generate 是 nixpkgs 官方的 settings 渲染器，
-  #    其 passAsFile 机制天然保留 string context（不需要 unsafeDiscardStringContext）；
-  # 2) 不再有"先 toJSON、再 toFile、再 yq"三层 boilerplate；
-  # 3) 输出 derivation 的依赖关系由 nixpkgs 维护，避免我们在 lib 层自己造轮子时
-  #    把 zashboard 这类 store path 的 GC 追踪搞断。
-  yamlFmt = pkgs.formats.yaml { };
+  # config 在 eval 阶段用 builtins.toJSON 渲染（JSON 是 YAML 1.2 子集，
+  # mihomo 的 YAML parser 直接接受），避免 pkgs.formats.yaml 的 IFD——
+  # 否则从 x86_64-linux 跑 deploy-rs / nix eval 时，会去 build 一个
+  # aarch64-darwin 的 YAML derivation，直接 platform mismatch。
   secrets = {
     uuid = config.sops.placeholder.PROXY_UUID;
     publicKey = config.sops.placeholder.PROXY_PUB_KEY;
@@ -286,22 +280,12 @@ let
       ];
   };
 
-  # 这两段 readFile + yamlFmt.generate 仍然属于 IFD（import-from-derivation）：
-  # eval 阶段会触发 remarshal/python 的 build。代价是 `nix flake check --no-build`
-  # 之类的纯 eval 工作流会被打断。
-  # 这里接受 IFD 的原因：
-  # - 单 host 本地 darwin/nixos 切换场景下，eval 和 build 总是连在一起跑；
-  # - 砍掉运行时 yq 转换是 Layer 4 的核心目标；
-  # - pkgs.formats.yaml 的 build 闭包稳定（remarshal/pyyaml 都在 cache 里）。
-  # 如果未来需要恢复纯 eval 工作流，备选方案是回退到 Layer 1 风格——
-  # 把 yq 调用塞回 mihomo-tun-launcher，由 launchd 启动时再做 JSON→YAML。
-  templatesContent = builtins.readFile (yamlFmt.generate "mihomo-config.yaml" configAttrset);
+  # 纯 eval：不触发任何 derivation build。mihomo 接受 JSON 作为 YAML 配置。
+  templatesContent = builtins.toJSON configAttrset;
 
-  selfProviderContent = builtins.readFile (
-    yamlFmt.generate "mihomo-self-provider.yaml" {
-      inherit (outbounds) proxies;
-    }
-  );
+  selfProviderContent = builtins.toJSON {
+    inherit (outbounds) proxies;
+  };
 in
 {
   inherit templatesContent selfProviderContent;
