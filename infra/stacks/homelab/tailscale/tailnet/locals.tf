@@ -2,23 +2,16 @@ locals {
   tailnet = "xbpk3t.github"
 
   # DERP 节点配置
-  # 3 个自定义 Region，与 admin console 的 ACL JSON 中 derpMap 一致
+  # 自定义 Region（与 admin console 的 ACL JSON 中 derpMap 一致）
   derp_map = {
     OmitDefaultRegions = false
     Regions = {
-      "901" = {
-        RegionID   = 901
-        RegionCode = "la"
-        RegionName = "la"
-        Nodes = [{
-          Name     = "901"
-          RegionID = 901
-          HostName = "derp-nixos-vps-dev.lucc.dev"
-          IPv4     = "192.129.183.26"
-          DERPPort = 10043
-          STUNPort = 10078
-        }]
-      }
+      # 901 (la, dev) 已从 DERP map 移除：
+      # agt(上海) -> dev(LA) 公网 TCP 10043 的 TLS 握手被 GFW 重置（裸 TCP 能连上），
+      # 经 mihomo fake-IP 代理要 ~5.7s，超过 tailscaled 的 DERP 拨号超时（~2s），
+      # 导致 agt 永远连不上自己的 home DERP 'la'，peer 经 relay 发往 agt 的流量
+      # 全部丢失（Mac -> agt 表现为 tx 有、rx 0），只能靠 agt 主动打出的直连。
+      # 移除后 agt 回退到内置 lax/sfo；dev 上的 derper 仍保留，需要时可重新加入。
       "902" = {
         RegionID   = 902
         RegionCode = "hk-2"
