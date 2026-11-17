@@ -41,6 +41,9 @@ locals {
           Name     = "903"
           RegionID = 903
           HostName = "nva.lucc.dev"
+          # 注意：dev -> agt 的公网 TCP 10043 被 GFW 挡。尝试过把 DERP
+          # 改到 agt tailnet IP，但 Tailscale 客户端不接受，已回滚。
+          # Mac 访问 dev 上的服务用 ssh -J agt / agt 反代。
           IPv4     = "1.15.64.188"
           DERPPort = 10043
           STUNPort = 10078
