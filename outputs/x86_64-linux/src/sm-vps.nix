@@ -11,58 +11,33 @@ let
   nodes = mylib.fleet.groups.${group};
 
   # 为组内每个节点生成一套出口：
-  #   homeConfigurations.<name> — standalone HM（home/core + secrets）
-  #   systemConfigs.<name>      — system-manager（modules/sm 薄模块）
+  #   homeConfigurations.<name> — standalone HM（组合由 node home.nix 决定）
+  #   systemConfigs.<name>      — system-manager（node default imports group base）
   #   deploy.nodes.<name>       — deploy-rs 双 profile（system=sm / home=HM）
   # 同一文件产出全部节点，靠 outputs/default.nix 的 mergeRoleOutputList 合并。
   mkNode =
     name: node:
     let
+      # sm-vps-tc -> tc；sm-vps-hk -> hk
+      leaf = lib.removePrefix "${group}-" name;
+      hostDir = "${group}/${leaf}";
       specialArgs = mkSpecialArgs system node;
 
-      # 共享机（shared = true）：HM 裁剪集 + 系统 sops 白名单空。
-      # 与 dedicated 的差异见 hosts/sm-vps/default.nix 注释与 modules/sm/sops.nix。
-      isShared = node.shared or false;
-
-      # standalone HM：home/core 最小 + 角色 home.nix（对齐 nixos 轨 hosts/<role>/home.nix）。
-      # secrets/default.nix 提供 sops.secrets.* 定义，否则 home/core 引用 path 会失败。
-      homeModules = map mylib.relativeToRoot (
-        if isShared then
-          [
-            "hosts/${group}/home-shared.nix"
-            # 裁剪集：不 import home/core（其 scanPaths 会带进 zsh/gh/cntr → sops）
-            # 显式 import 无 sops 引用的模块
-            "home/core/init.nix"
-            "home/core/infra/nh.nix"
-            "home/core/infra/networking.nix"
-            "home/core/kernel/fzf.nix"
-            "home/core/devops/git.nix"
-            "home/core/devops/btop.nix"
-            "home/core/devops/fastfetch.nix"
-            "home/core/devops/lazygit.nix"
-            "home/core/devops/journalctl.nix"
-            "home/core/devops/taskfile.nix"
-            "home/core/db/default.nix"
-            "home/core/ms/default.nix"
-          ]
-        else
-          [
-            "hosts/${group}/home.nix"
-            "home/core"
-            "secrets/default.nix"
-          ]
-      );
-
+      # 组合由节点自己决定：
+      #   tc -> ../home.nix + home/core + secrets
+      #   hk -> ../home.nix + curated no-sops home/core subset
       homeConfig = mylib.homeStandalone (
         args
         // {
           inherit system specialArgs;
-          home-modules = homeModules;
+          home-modules = map mylib.relativeToRoot [
+            "hosts/${hostDir}/home.nix"
+          ];
         }
       );
 
-      # system-manager：platform + 极简占位；不 import modules/nixos/**
-      # 共享机额外传 isShared，供 modules/sm 按 shared 分支裁剪（见 default.nix）。
+      # system-manager：node default 自己 import group base + modules/sm；
+      # outputs 只补 platform glue。
       systemConfig = mylib.systemManager {
         inherit inputs;
         specialArgs = {
@@ -74,16 +49,10 @@ let
             timeMeta
             pkgs
             ;
-          inherit
-            lib
-            isShared
-            ;
+          inherit lib;
         };
         system-modules = [
-          # 角色装配清单（hosts/<role>/default.nix：声明服务角色，如 services.mihomo-client.enable）
-          (mylib.relativeToRoot "hosts/${group}/default.nix")
-          # sm 模块树（基线能力直接 enable；服务角色读 services.*.enable）
-          (mylib.relativeToRoot "modules/sm")
+          (mylib.relativeToRoot "hosts/${hostDir}/default.nix")
           {
             nixpkgs.hostPlatform = system;
             # 允许在 Debian 等非白名单 distro 上 eval/后续 switch（Phase 4）

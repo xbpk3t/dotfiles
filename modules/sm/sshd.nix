@@ -11,7 +11,6 @@
 {
   lib,
   config,
-  isShared ? false,
   ...
 }:
 let
@@ -27,7 +26,7 @@ in
   # 两边内容必须保持一致；改任何一侧要同步另一侧，否则 last-writer-wins 漂移。
   # 共享机（shared=true）：不写 drop-in，避免锁 root 密码登录（别人失联）。
   config.environment.etc."ssh/sshd_config.d/99-sm-hardening.conf" =
-    lib.mkIf (cfg.enable && !isShared)
+    lib.mkIf (cfg.enable && !config.modules.sm.shared)
       {
         text = ''
           PermitRootLogin no
