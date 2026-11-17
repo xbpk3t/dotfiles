@@ -66,6 +66,7 @@ in
   "nixos-avf" = groupOrEmpty "nixos-avf";
   "nixos-vps" = groupOrEmpty "nixos-vps";
   "nixos-usb" = groupOrEmpty "nixos-usb";
+  "nixos-wsl" = groupOrEmpty "nixos-wsl";
   "macos-ws" = groupOrEmpty "macos-ws";
   "sm-vps" = groupOrEmpty "sm-vps";
 
