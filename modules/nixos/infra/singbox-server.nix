@@ -1,7 +1,7 @@
 {
   config,
+  hostMeta,
   lib,
-  mylib,
   userMeta,
   ...
 }:
@@ -11,9 +11,9 @@ let
   port = singbox.vlessPort or 8443;
   # 伪装握手目标域名（随便换一个稳定的大站都行）
   handshakeServer = "www.bing.com";
-  inventory = mylib.inventory."nixos-vps";
-  nodeName = config.networking.hostName;
-  singbox = mylib.inventory.singboxForHost inventory nodeName;
+  # 本机发布的 singbox 能力；由 fleet registry 同步给所有 client。
+  # 不再按 hostname 去 inventory 里反查，host 改名不会静默失效。
+  singbox = hostMeta.singbox or { };
   hy2Enabled = singbox ? hy2;
   hy2Domain = singbox.hy2.domain;
   hy2Port = singbox.hy2.port or 8500;
@@ -40,6 +40,13 @@ in
 
   config = mkIf cfg.enable (mkMerge [
     {
+      assertions = [
+        {
+          assertion = hostMeta ? singbox;
+          message = "modules.infra.singbox-server requires hostMeta.singbox in the fleet registry.";
+        }
+      ];
+
       # 通过以下命令生成 singbox node 的相应metadata，直接放到sops里，并且分发到所有nodes里。没必要分开配置，方便client端组装。
       # sing-box generate uuid
       # sing-box generate reality-keypair
