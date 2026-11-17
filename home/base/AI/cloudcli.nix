@@ -54,6 +54,15 @@ in
       default = 3001;
       description = "Port the CloudCLI server listens on.";
     };
+
+    memoryHigh = mkOption {
+      type = types.nullOr types.str;
+      default = null;
+      description = ''
+        Optional systemd MemoryHigh for the CloudCLI server (e.g. "300M").
+        Keep null to avoid affecting first-run npm install bursts.
+      '';
+    };
   };
 
   config = lib.mkIf (cfg.enable && pkgs.stdenv.hostPlatform.isLinux) {
@@ -80,14 +89,12 @@ in
         ];
         EnvironmentFile = config.sops.templates."cloudcli-env".path;
         WorkingDirectory = config.home.homeDirectory;
-        # 稳态只有 ~66M；首次启动的 npm install 可能到 ~1.5G，
-        # 所以只设 MemoryHigh（回收/节流），不设 MemoryMax，避免升级时被杀。
-        MemoryHigh = "300M";
         Restart = "always";
         RestartSec = 5;
         # 首次启动可能触发 npm install（约 1.5G），给足时间。
         TimeoutStartSec = 900;
-      };
+      }
+      // lib.optionalAttrs (cfg.memoryHigh != null) { MemoryHigh = cfg.memoryHigh; };
 
       Install.WantedBy = [ "default.target" ];
     };

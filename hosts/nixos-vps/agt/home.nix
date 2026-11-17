@@ -63,6 +63,9 @@ in
         host = tailnetIp;
         port = 8081;
         schedulerPort = 8091;
+        # 4G 机器：scheduler 稳态约 127M（含 page cache），给 150M/300M 兜底。
+        memoryHigh = "150M";
+        memoryMax = "300M";
       };
 
       dsh.enable = false;
@@ -72,6 +75,9 @@ in
         # 4G 机器：Chromium 不随 session 常驻，用 OpenCLI 前手动
         # `systemctl --user start chromium-agent`，闲置省 ~430M。
         autoStart = false;
+        # 4G 机器：先节流再硬限，避免 Chromium 拖进全局 OOM。
+        chromiumMemoryHigh = "700M";
+        chromiumMemoryMax = "1200M";
         # x11vnc 绑 tailnet，Mac 可直接用 Screen Sharing 打开 vnc://<tailnet-ip>:5900。
         bindAddress = tailnetIp;
       };
@@ -91,6 +97,8 @@ in
         enable = true;
         bindAddress = tailnetIp;
         port = 3001;
+        # 4G 机器：稳态 ~66M；只设 MemoryHigh，首次 npm install 可突发到 ~1.5G。
+        memoryHigh = "300M";
       };
     };
 

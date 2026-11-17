@@ -60,14 +60,13 @@ let
     };
     Service = {
       ExecStart = execStart;
-      # scheduler 稳态约 127M（含 page cache），给 150M high / 300M max 兜底。
-      MemoryHigh = "150M";
-      MemoryMax = "300M";
       Restart = "always";
       RestartSec = 10;
       WorkingDirectory = config.home.homeDirectory;
       Environment = [ "HOME=${config.home.homeDirectory}" ];
-    };
+    }
+    // lib.optionalAttrs (cfg.memoryHigh != null) { MemoryHigh = cfg.memoryHigh; }
+    // lib.optionalAttrs (cfg.memoryMax != null) { MemoryMax = cfg.memoryMax; };
     Install.WantedBy = [ "default.target" ];
   };
 in
@@ -99,6 +98,18 @@ in
       type = types.port;
       default = 8090;
       description = "Dagu scheduler health-check port; 0 disables it.";
+    };
+
+    memoryHigh = mkOption {
+      type = types.nullOr types.str;
+      default = null;
+      description = "Optional systemd MemoryHigh for dagu services (e.g. \"150M\").";
+    };
+
+    memoryMax = mkOption {
+      type = types.nullOr types.str;
+      default = null;
+      description = "Optional systemd MemoryMax for dagu services (e.g. \"300M\").";
     };
   };
 
