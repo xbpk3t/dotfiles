@@ -1,6 +1,6 @@
 # nix-unit suite：fleet registry 不变量。
 #
-# 断言从 lib/fleet/data.nix 驱动生成，新增/改名节点时测试自动跟上。
+# 断言从 hosts/**/meta.nix 驱动生成，新增/改名节点时测试自动跟上。
 # 具体不变量集中在 lib/fleet/default.nix 的 checks attrset；这里只做
 # “布尔值 -> nix-unit case”的机械转换，避免测试逻辑和数据逻辑各写一份。
 #

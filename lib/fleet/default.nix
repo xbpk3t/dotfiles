@@ -1,4 +1,7 @@
-# Fleet registry: node-keyed view over lib/fleet/data.nix.
+# Fleet registry: node-keyed view over hosts/**/meta.nix.
+#
+# 节点发现规则见下方 scanTop：顶层目录有 meta.nix 是单节点，否则是 group，
+# 子目录里的 meta.nix 是节点；节点名由相对路径派生。
 #
 # 这里是“跨机拓扑”的唯一入口：
 #   - nodes / tailnetNodes：按节点名索引的扁平表
@@ -10,9 +13,57 @@
 # 单机身份/配置不要加到这里；它们属于 hosts/<name>/。
 { lib }:
 let
-  data = import ./data.nix;
+  hostsDir = ../../hosts;
 
-  groups = data;
+  isDir = type: type == "directory";
+
+  topEntries = builtins.readDir hostsDir;
+
+  # 节点名 = hosts/ 下的相对路径，把 "/" 换成 "-"：
+  #   hosts/nixos-vps/dev      -> nixos-vps-dev
+  #   hosts/macos-ws           -> macos-ws
+  #   hosts/sm-vps/tc          -> sm-vps-tc
+  # meta.nix 不再写 hostName；这里统一派生，避免第二份身份源。
+  scanNode =
+    name: path:
+    let
+      meta = import (path + "/meta.nix");
+    in
+    meta // {
+      inherit name;
+      hostName = name;
+    };
+
+  # 顶层目录两种形态：
+  #   - 有 meta.nix       -> 单节点（目录名即节点名）
+  #   - 无 meta.nix       -> group；子目录里每个 meta.nix 是一个节点
+  # `_base` / 其他 `_` 前缀目录不参与发现。
+  scanTop =
+    topName:
+    let
+      topPath = hostsDir + "/${topName}";
+      entries = builtins.readDir topPath;
+      children = lib.filterAttrs (
+        childName: childType:
+        isDir childType && (builtins.readDir (topPath + "/${childName}")) ? "meta.nix"
+      ) entries;
+      childNodes = lib.mapAttrs' (
+        childName: _:
+        lib.nameValuePair "${topName}-${childName}" (
+          scanNode "${topName}-${childName}" (topPath + "/${childName}")
+        )
+      ) children;
+    in
+    if entries ? "meta.nix" then
+      { ${topName} = { ${topName} = scanNode topName topPath; }; }
+    else
+      assert lib.assertMsg (children != { }) "fleet: group '${topName}' has no meta.nix and no child node meta.nix";
+      { ${topName} = childNodes; };
+
+  groups = lib.foldl' (acc: topName: acc // (scanTop topName)) { } (
+    lib.filter (name: isDir topEntries.${name} && !(lib.hasPrefix "_" name)) (lib.attrNames topEntries)
+  );
+
   allNodes = lib.foldl' (acc: group: acc // group) { } (lib.attrValues groups);
 
   # 按优先级挑一个“主机地址”作为部署/连接默认值。
@@ -74,6 +125,14 @@ let
     "test-hostName-matches-node-key" = lib.all (
       name: (allNodes.${name}.hostName or name) == name
     ) (lib.attrNames allNodes);
+
+    "test-kind-present" = lib.all (
+      node: node ? kind
+    ) (lib.attrValues allNodes);
+
+    "test-system-present" = lib.all (
+      node: node ? system
+    ) (lib.attrValues allNodes);
 
     "test-stateVersion-non-empty" = lib.all (
       node: (node.stateVersion or "") != ""

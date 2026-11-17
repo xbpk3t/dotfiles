@@ -14,7 +14,7 @@ let
 
   # fleet SSH 统一策略：Host 键 = 节点名，地址 = 节点 tailnet IP。
   # 用户名是全局身份常量，不在每个节点重复。
-  # 加机器只改 lib/fleet/data.nix（补 tailscale.ip），这里零改动。
+  # 加机器只在 hosts/<group>/<node>/meta.nix 补 tailscale.ip，这里零改动。
   tailnetNodes = mylib.fleet.tailnetNodes;
 
   # 交互式高延迟 host 的连接复用；不要加到 Host *：
