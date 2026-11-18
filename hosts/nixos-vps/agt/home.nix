@@ -31,10 +31,20 @@ in
   ];
 
   modules = {
-    infra.basePackages.enable = true;
+    infra = {
+      basePackages.enable = true;
+      android.enable = true;
+    };
 
     devops = {
       basePackages.enable = true;
+      cicd.enable = true;
+      distrobox.enable = true;
+      yazi.enable = true;
+      fetch = {
+        enable = true;
+        driver = "microfetch";
+      };
 
       helix.enable = true;
 
@@ -46,6 +56,13 @@ in
 
       cf.enable = true;
       rclone.enable = true;
+      tf = {
+        enable = true;
+        opentofu.enable = true;
+        terramate.enable = true;
+        lint.enable = true;
+        ansible.enable = true;
+      };
       ssh = {
         enable = true;
         github.enable = true;
@@ -125,6 +142,8 @@ in
 
     kernel = {
       basePackages.enable = true;
+      disk.enable = true;
+      BPF.enable = true;
       gpg.enable = true;
       network.enable = true;
       ssh.enable = true;
@@ -132,11 +151,34 @@ in
 
     langs = {
       basePackages.enable = true;
-      golang.enable = true;
+      golang = {
+        enable = true;
+        gotools.enable = true;
+      };
+      python.enable = true;
+      rust.enable = true;
       treefmt.enable = true;
       ts.enable = true;
       markdown.enable = true;
     };
+
+    ms = {
+      gateway = {
+        enable = true;
+        grpc.enable = true;
+      };
+      helm.enable = true;
+    };
+
+    sys.basePackages.enable = true;
+
+    works = {
+      crawler.enable = true;
+      recon.enable = true;
+      test.enable = true;
+    };
+
+    zzz.enable = true;
   };
 
   # Restic 备份：Desktop + agent state → R2。
