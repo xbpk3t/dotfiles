@@ -124,5 +124,11 @@ else if node.kind == "sm" then
   // lib.optionalAttrs (node ? deploy) {
     deploy.nodes.${name} = mkSmDeploy mkSmSystem mkSmHome;
   }
+else if node.kind == "home" then
+  # Home-only node: standalone Home Manager, no NixOS/system-manager outputs.
+  # For platform-managed containers where the OS is not ours to manage.
+  {
+    homeConfigurations.${name} = mkSmHome;
+  }
 else
   throw "mkHost: unsupported kind '${node.kind}' for node '${name}'"
