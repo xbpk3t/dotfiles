@@ -30,5 +30,9 @@ terraform {
     skip_requesting_account_id  = true
     skip_s3_checksum            = true
     use_path_style              = true
+
+    # R2 支持 S3 条件写；用原生 lockfile 替代 DynamoDB 锁表。
+    # 注意：老版本 OpenTofu 不认这个字段，升级前不要加。
+    use_lockfile = true
   }
 }

@@ -97,6 +97,42 @@ Cloudflare inventory：
 task tf:inventory
 ```
 
+## GitOps / CI
+
+`.github/workflows/infra.yml` 是 infra 的 CI 控制面：
+
+- **PR**：对 `terramate list --tags layer-infra` 选出的全部 stack 逐个跑
+  `tofu plan`（只读）。fork PR 拿不到 secrets，会跳过；同仓分支 PR 正常跑。
+- **main**：merge 后**默认不自动 apply**。确认仓库里的 drift 可接受后，可在
+  仓库变量里设置 `INFRA_AUTO_APPLY=true` 打开自动 apply；或者手动触发
+  `workflow_dispatch` 并选择 `mode=apply`。apply job 绑定 `environment: infra`，
+  建议在 GitHub 仓库设置里给该 environment 配 required reviewers，形成人工批准闸门。
+- **schedule**：每天 03:17 UTC 跑 `tofu plan -detailed-exitcode`；exit 2 表示
+  云端有 drift，job 失败并触发通知。
+- **workflow_dispatch**：手动选择 `plan` / `apply` / `drift`，`stack` 填单个
+  stack 路径或 `all`。
+
+需要的 repository secrets：
+
+| Secret | 用途 |
+| --- | --- |
+| `CF_R2_AK` / `CF_R2_SK` | R2 S3-compatible backend 凭据 |
+| `CLOUDFLARE_API_TOKEN` | Cloudflare provider token |
+| `TAILSCALE_API_KEY` | Tailscale provider token |
+
+所有 stack 的 backend 已启用 `use_lockfile = true`，用 R2 的条件写做 state
+locking（OpenTofu 1.13.9 实测可用），不再需要 DynamoDB 锁表。workflow 另外用
+`concurrency` 按 stack 串行化 apply。
+
+本地复现（与 CI 使用同一套工具）：
+
+```bash
+nix develop .#infra
+cd infra/stacks/homelab/cloudflare/lucc.dev/dns
+tofu init -reconfigure -input=false
+tofu plan -input=false
+```
+
 ## 下一步
 
 - 按需补充 `infra/.inventory/<date>/` 盘点清单

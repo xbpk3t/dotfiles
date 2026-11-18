@@ -329,6 +329,21 @@ assert lib.assertMsg (
         packages = mylib.precommitTools { inherit pkgs; };
       };
 
+      # infra 工具链：本地与 GitHub Actions 共用，避免 CI runner 上 ad-hoc 安装。
+      # 版本跟随 flake.lock 的 nixpkgs，与 home/base/devops/tf.nix 同源。
+      # 用法：`nix develop .#infra -c tofu version`。
+      devShells.infra = pkgs.mkShell {
+        name = "dotfiles-infra";
+        packages = with pkgs; [
+          opentofu
+          terramate
+          terranix
+          tflint
+          terraform-docs
+          jq
+        ];
+      };
+
       # 舰队拓扑图（README 用）：nix-topology 自动从 nixosConfigurations 提取节点，
       # 配合 topology.nix 手写的网络/外部设备，渲染成 SVG。
       topology = {
