@@ -5,9 +5,9 @@
   ...
 }:
 let
-  # attrByPath 让 zram 模块可以单独导入（例如 WSL）而不依赖 sysctl 模块存在。
-  hw = lib.attrByPath [ "modules" "kernel" "sysctl" "hardware" ] null config;
-  memGiB = if hw == null then null else hw.memGiB or null;
+  # attrByPath 让 zram 模块可以单独导入而不依赖 sysctl 模块存在；
+  # hardware 缺失或为 null 时回落为 null（保守的 25%）。
+  memGiB = lib.attrByPath [ "modules" "kernel" "sysctl" "hardware" "memGiB" ] null config;
   zramProfile = mylib.vpsSysctl.mkZramProfile { inherit memGiB; };
 in
 {

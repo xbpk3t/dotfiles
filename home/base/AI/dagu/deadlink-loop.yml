@@ -11,6 +11,7 @@ preconditions:
 env:
   WORKSPACE: ${HOME}/Desktop/docs
   DEADLINK_DIR: /tmp/xbpk3t-docs-deadlink
+  BROWSER_MARKER: /tmp/xbpk3t-docs-deadlink-browser-started
 
 steps:
   - id: start_browser
@@ -18,22 +19,30 @@ steps:
     description: "Step 1/9: Ensure the on-demand Chromium is running for OpenCLI"
     run: |
       export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
-      marker=/tmp/xbpk3t-docs-deadlink-browser-started
       if systemctl --user is-active --quiet chromium-agent; then
         echo "chromium-agent already active; will leave it running"
-        rm -f "$marker"
+        rm -f "$BROWSER_MARKER"
       else
-        systemctl --user start chromium-agent
-        echo started > "$marker"
+        systemctl --user start chromium-agent || {
+          echo "failed to start chromium-agent" >&2
+          exit 1
+        }
+        echo started > "$BROWSER_MARKER"
       fi
-      for i in $(seq 1 30); do
+      # 轻量有界等待：Chromium/Browser Bridge 启动不是瞬时完成；最多 10s。
+      # lychee 前半段不需要浏览器，但后续 OpenCLI 验证前 bridge 必须 ready。
+      for i in $(seq 1 10); do
         if opencli doctor >/dev/null 2>&1; then
           echo "OpenCLI browser ready"
           exit 0
         fi
-        sleep 2
+        sleep 1
       done
-      echo "OpenCLI browser not ready after 60s" >&2
+      echo "OpenCLI browser not ready after 10s" >&2
+      if [ -f "$BROWSER_MARKER" ]; then
+        systemctl --user stop chromium-agent || true
+        rm -f "$BROWSER_MARKER"
+      fi
       exit 1
 
   - id: scan
@@ -57,10 +66,9 @@ steps:
     description: "Step 3/9: Stop Chromium if this DAG started it"
     run: |
       export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
-      marker=/tmp/xbpk3t-docs-deadlink-browser-started
-      if [ -f "$marker" ]; then
+      if [ -f "$BROWSER_MARKER" ]; then
         systemctl --user stop chromium-agent
-        rm -f "$marker"
+        rm -f "$BROWSER_MARKER"
         echo "stopped chromium-agent (started by DAG)"
       else
         echo "chromium-agent was already running; leaving it alone"

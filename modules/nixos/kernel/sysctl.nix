@@ -7,22 +7,17 @@
 let
   cfg = config.modules.kernel.sysctl;
   sysctl =
-    if cfg.hardware == null then
-      mylib.vpsSysctl.mkDefaultSysctl
-      # mkDefaultSysctl 只是无硬件输入时的基线；显式策略选项必须仍然生效，
-      # 否则没有 hardware profile 的 host（例如 nixos-usb）设了这些选项会被静默忽略。
-      // {
-        "vm.oom_kill_allocating_task" = if cfg.oomKillAllocatingTask then 1 else 0;
-        "vm.overcommit_memory" = cfg.overcommitMemory;
-      }
-    else
-      mylib.vpsSysctl.mkSysctl (
-        cfg.hardware
-        // {
-          inherit (cfg) oomKillAllocatingTask overcommitMemory;
-          zramEnabled = config.zramSwap.enable;
-        }
-      );
+    (
+      if cfg.hardware == null then
+        # 无 hardware profile 时的保守基线；显式策略选项在下面统一叠加，
+        # 否则没有 profile 的 host（例如 nixos-usb）设了策略会被静默忽略。
+        mylib.vpsSysctl.mkDefaultSysctl
+      else
+        mylib.vpsSysctl.mkSysctl (cfg.hardware // { zramEnabled = config.zramSwap.enable; })
+    )
+    // mylib.vpsSysctl.mkMemoryPolicy {
+      inherit (cfg) oomKillAllocatingTask overcommitMemory;
+    };
 in
 {
   options.modules.kernel.sysctl = {

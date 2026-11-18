@@ -10,21 +10,8 @@ in
   options.modules.kernel.earlyoom = {
     enable = lib.mkEnableOption "earlyoom userspace OOM killer";
 
-    freeMemThreshold = lib.mkOption {
-      type = lib.types.ints.between 1 100;
-      default = 10;
-      description = ''
-        Minimum available memory (percent) before earlyoom starts killing.
-      '';
-    };
-
-    freeSwapThreshold = lib.mkOption {
-      type = lib.types.ints.between 1 100;
-      default = 10;
-      description = ''
-        Minimum free swap (percent) before earlyoom starts killing.
-      '';
-    };
+    # freeMemThreshold / freeSwapThreshold 直接用 nixpkgs services.earlyoom
+    # 的选项（默认同为 10），不再另设一层同名包装。
 
     prefer = lib.mkOption {
       type = lib.types.listOf lib.types.str;
@@ -71,13 +58,13 @@ in
 
     services.earlyoom = {
       enable = true;
-      inherit (cfg) freeMemThreshold freeSwapThreshold;
       reportInterval = 0;
+      # earlyoom 只匹配 /proc/<pid>/comm，不含路径，锚定首尾即可。
       extraArgs = [
         "--prefer"
-        "(^|/)(${lib.concatStringsSep "|" cfg.prefer})$"
+        "^(${lib.concatStringsSep "|" cfg.prefer})$"
         "--avoid"
-        "(^|/)(${lib.concatStringsSep "|" cfg.avoid})$"
+        "^(${lib.concatStringsSep "|" cfg.avoid})$"
       ];
     };
   };

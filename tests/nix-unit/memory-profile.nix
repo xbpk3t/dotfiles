@@ -54,28 +54,26 @@ in
   };
 
   testMemoryOomKillAllocatingTaskDefault = {
-    expr = (sysctl { memGiB = 4; })."vm.oom_kill_allocating_task";
+    expr = (vpsSysctl.mkMemoryPolicy { })."vm.oom_kill_allocating_task";
     expected = 0;
   };
 
   testMemoryOomKillAllocatingTaskOptIn = {
     expr =
-      (sysctl {
-        memGiB = 4;
+      (vpsSysctl.mkMemoryPolicy {
         oomKillAllocatingTask = true;
       })."vm.oom_kill_allocating_task";
     expected = 1;
   };
 
   testMemoryOvercommitDefault = {
-    expr = (sysctl { memGiB = 4; })."vm.overcommit_memory";
+    expr = (vpsSysctl.mkMemoryPolicy { })."vm.overcommit_memory";
     expected = 1;
   };
 
   testMemoryOvercommitOverride = {
     expr =
-      (sysctl {
-        memGiB = 4;
+      (vpsSysctl.mkMemoryPolicy {
         overcommitMemory = 0;
       })."vm.overcommit_memory";
     expected = 0;

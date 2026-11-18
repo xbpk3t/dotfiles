@@ -19,6 +19,9 @@ let
   roundUp = x: align: ((x + align - 1) / align) * align;
   bdpBytes = bwMbps: rttMs: bwMbps * rttMs * 125;
 
+  # 小内存机器的分界点；swappiness 与 zram 容量共用，避免两处阈值漂移。
+  smallMemGiB = 8;
+
   modeTable = {
     steady = {
       factorNum = 1;
@@ -58,12 +61,10 @@ let
       cc ? "bbr", # BBR, CUBIC
       qdisc ? "fq", # FQ, CAKE, FQ_PIE
       cpuCores ? null,
-      # 内存/swap 策略输入。zram 是压缩内存盘，换出代价远低于磁盘；
+      # 内存/swap 事实输入。zram 是压缩内存盘，换出代价远低于磁盘；
       # 小内存机器应更积极地把冷 anon 页换进 zram，而不是等到 OOM。
       zramEnabled ? false,
       isSsd ? true,
-      oomKillAllocatingTask ? false,
-      overcommitMemory ? 1,
     }:
     let
       m = modeTable.${mode} or modeTable.balanced;
@@ -79,7 +80,7 @@ let
       # - 无 zram：SSD 60 / HDD 20（HDD 换出代价高，尽量少换）
       swappiness =
         if zramEnabled then
-          (if ramGiB <= 8 then 100 else 60)
+          (if ramGiB <= smallMemGiB then 100 else 60)
         else if isSsd then
           60
         else
@@ -226,17 +227,13 @@ let
       # 关闭 zone reclaim：多数 VPS 上会带来额外延迟
       "vm.zone_reclaim_mode" = 0;
 
-      # overcommit：默认允许始终 overcommit，避免 Nix 构建 fork 时内存分配失败。
-      # 这是工作负载策略，不是硬件属性；host 可通过 modules.kernel.sysctl 覆盖。
-      "vm.overcommit_memory" = overcommitMemory;
+      # overcommit/OOM 选谁属于工作负载策略，不是硬件属性；由
+      # mkMemoryPolicy 在模块层叠加，见 modules/nixos/kernel/sysctl.nix。
       "vm.overcommit_ratio" = 50;
 
       "vm.max_map_count" = 1048576;
       "vm.page-cluster" = 0;
 
-      # OOM 选谁：默认 0（按 oom_score 杀最大进程），避免碰巧在申请内存的
-      # sshd/小服务被杀；构建型 host 可显式设为 true。
-      "vm.oom_kill_allocating_task" = if oomKillAllocatingTask then 1 else 0;
       "vm.panic_on_oom" = 0;
 
       # 代理/VPS 场景不需要 hugepage，设为 0 避免锁内存
@@ -449,6 +446,21 @@ let
       "net.unix.max_dgram_qlen" = 256;
     };
 
+  # OOM/overcommit 策略：模块层一次性叠加到硬件推导之上。
+  mkMemoryPolicy =
+    {
+      oomKillAllocatingTask ? false,
+      overcommitMemory ? 1,
+    }:
+    {
+      # overcommit：默认允许始终 overcommit，避免 Nix 构建 fork 时内存分配失败。
+      "vm.overcommit_memory" = overcommitMemory;
+
+      # OOM 选谁：默认 0（按 oom_score 杀最大进程），避免碰巧在申请内存的
+      # sshd/小服务被杀；构建型 host 可显式设为 true。
+      "vm.oom_kill_allocating_task" = if oomKillAllocatingTask then 1 else 0;
+    };
+
   # zram 设备大小策略：小内存机器多给压缩 swap；大内存机器少给并用 memoryMax 封顶。
   # memoryMax 单位是 bytes（对应 NixOS zramSwap.memoryMax）。
   mkZramProfile =
@@ -456,7 +468,7 @@ let
       memGiB ? null,
     }:
     {
-      memoryPercent = if memGiB != null && memGiB <= 8 then 50 else 25;
+      memoryPercent = if memGiB != null && memGiB <= smallMemGiB then 50 else 25;
       memoryMax = 4 * 1024 * 1024 * 1024;
     };
 
@@ -470,12 +482,15 @@ let
     mode = "balanced";
     cc = "bbr";
     qdisc = "fq";
-    zramEnabled = false;
-    isSsd = true;
-    oomKillAllocatingTask = false;
-    overcommitMemory = 1;
   });
 in
 {
-  inherit mkSysctl mkDefaultSysctl mkZramProfile;
+  # mkSysctl / mkDefaultSysctl 只返回硬件推导部分；OOM/overcommit 策略
+  # 由 mkMemoryPolicy 叠加（见 modules/nixos/kernel/sysctl.nix）。
+  inherit
+    mkSysctl
+    mkDefaultSysctl
+    mkZramProfile
+    mkMemoryPolicy
+    ;
 }

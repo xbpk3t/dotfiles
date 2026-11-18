@@ -131,9 +131,6 @@ in
         OPENAI_BASE_URL = "https://api.lucc.dev/v1";
         OPENAI_MODEL = "";
 
-        # For Context7 MCP
-        CONTEXT7_API_KEY = "$(cat ${config.sops.secrets.API_CONTEXT7.path})";
-
         LLM_AxonHub = "$(cat ${config.sops.secrets.LLM_AxonHub.path})";
 
         # ccx session export 配置

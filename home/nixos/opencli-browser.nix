@@ -117,7 +117,7 @@ in
           StartLimitIntervalSec = 300;
           StartLimitBurst = 3;
         };
-        Install.WantedBy = if cfg.autoStart then [ "default.target" ] else [ ];
+        Install.WantedBy = lib.optionals cfg.autoStart [ "default.target" ];
         Service = {
           ExecStart = "${pkgs.chromium}/bin/chromium ${lib.escapeShellArgs chromiumFlags}";
           Environment = [ "DISPLAY=${display}" ];
