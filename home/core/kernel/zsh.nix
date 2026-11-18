@@ -200,7 +200,6 @@
         # TUI tool aliases
         t = "btop";
         yz = "yazi";
-        ff = "fastfetch";
         lg = "lazygit";
         v = "${editorMeta.command} .";
       };

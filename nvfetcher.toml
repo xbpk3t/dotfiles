@@ -10,3 +10,34 @@
 # 后续上游打 tag 后可切回 src.github_tag。
 src.manual = "5983fe3b4ea2785335ac1712c4aa1ac4e13a8fa2"
 fetch.github = "VoltAgent/awesome-claude-code-subagents"
+
+# apm: 官方 standalone release（PyInstaller bundle）。
+# 为什么不用 llm-agents 的 Python build：closure ~1G+；官方 bundle 33MB（Linux unpacked）。
+# 为什么不用 nixpkgs apm-cli：463.5MiB，且 pythonRemoveDeps 掉了 llm-github-models。
+# 四个平台分开建 nvfetcher entry，由 pkgs/apm-bin 按 hostPlatform 选。
+# TODO(llm-agents#12494): upstream 若接受 apm-bin package，切回 llm-agents 并删掉本地 pkgs/apm-bin。
+#   PR: https://github.com/numtide/llm-agents.nix/pull/12494
+#   merge 后只需改 home/base/AI/apm.nix 的 package 来源。
+[apm-bin-x86_64-linux]
+src.github = "microsoft/apm"
+src.from_pattern = "^v"
+src.to_pattern = ""
+fetch.url = "https://github.com/microsoft/apm/releases/download/v$ver/apm-linux-x86_64.tar.gz"
+
+[apm-bin-aarch64-linux]
+src.github = "microsoft/apm"
+src.from_pattern = "^v"
+src.to_pattern = ""
+fetch.url = "https://github.com/microsoft/apm/releases/download/v$ver/apm-linux-arm64.tar.gz"
+
+[apm-bin-aarch64-darwin]
+src.github = "microsoft/apm"
+src.from_pattern = "^v"
+src.to_pattern = ""
+fetch.url = "https://github.com/microsoft/apm/releases/download/v$ver/apm-darwin-arm64.tar.gz"
+
+[apm-bin-x86_64-darwin]
+src.github = "microsoft/apm"
+src.from_pattern = "^v"
+src.to_pattern = ""
+fetch.url = "https://github.com/microsoft/apm/releases/download/v$ver/apm-darwin-x86_64.tar.gz"

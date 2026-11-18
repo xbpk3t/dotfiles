@@ -9,7 +9,11 @@
     infra = {
       basePackages.enable = true;
       android.enable = false;
-      nix-tools.enable = true;
+      nix-tools = {
+        enable = true;
+        packaging.enable = true;
+        analysis.enable = true;
+      };
       nh.enable = true;
       networking.enable = true;
     };
@@ -24,6 +28,7 @@
 
     devops = {
       basePackages.enable = true;
+      cicd.enable = true;
       cf.enable = true;
       helix.enable = true;
       rclone.enable = true;
@@ -40,9 +45,10 @@
       };
       # PR TUI（nixpkgs）+ review-first diff（herdr-reviewr plugin）；herdr keys: ctrl+alt+p / d
       hunk.enable = false;
-      # fastfetch 在 Darwin 会拉入 apple-sdk-15.5（~481M 独有闭包），默认关闭；
-      # 需要 fetcher 时打开。
-      fastfetch.enable = false;
+      fetch = {
+        enable = true;
+        driver = "macchina";
+      };
     };
 
     desktop = {
@@ -57,6 +63,7 @@
     };
 
     AI = {
+      apm.enable = true;
       codex.enable = false;
       claude.enable = true;
       # dsh 配置走 ~/.dsh/cordis.patch.yml（home 层），见 home/base/AI/dsh.nix
@@ -74,8 +81,12 @@
 
     langs = {
       basePackages.enable = true;
-      golang.enable = true;
+      golang = {
+        enable = true;
+        gotools.enable = true;
+      };
       markdown.enable = true;
+      pandoc.enable = true;
       python.enable = true;
       rust.enable = true;
       treefmt.enable = true;
@@ -89,8 +100,17 @@
         caddy.enable = true;
         grpc.enable = true;
       };
+      helm.enable = true;
       docker-cli.enable = true;
       colima.enable = true;
+    };
+
+    sys.basePackages.enable = true;
+
+    works = {
+      crawler.enable = true;
+      recon.enable = true;
+      test.enable = true;
     };
 
     zzz.enable = true;

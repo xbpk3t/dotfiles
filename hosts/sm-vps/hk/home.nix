@@ -16,7 +16,6 @@
     "home/core/kernel/fzf.nix"
     "home/core/devops/git.nix"
     "home/core/devops/btop.nix"
-    "home/core/devops/fastfetch.nix"
     "home/core/devops/lazygit.nix"
     "home/core/devops/journalctl.nix"
     "home/core/devops/taskfile.nix"

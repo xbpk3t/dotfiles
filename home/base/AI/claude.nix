@@ -430,11 +430,28 @@ in
 
     # 模式：yolo — 无值守 daemon 模式（容器 agent）
     (lib.mkIf (cfg.enable && cfg.permissionMode == "yolo") {
-      programs.claude-code.settings.permissions = {
-        defaultMode = "bypassPermissions";
-        # bypassPermissions is the permission profile; avoid carrying the
-        # workstation allow/ask lists into container agents.
-        deny = [ ];
+      programs.claude-code.settings = {
+        # [2026-11-18] 跳过启动时 "WARNING: Claude Code running in Bypass
+        # Permissions mode" 的 Yes, I accept / No, exit 确认弹窗。
+        #
+        # 弹窗条件（cc 2.1.325 bundle）：
+        #   if (p !== "bypassPermissions" && !u || Ree()) return null;
+        # 即 bypassPermissions 模式且 Ree() === false 才弹；而 Ree() 检查
+        # userSettings / localSettings / flagSettings / policySettings 里的
+        # skipDangerousModePermissionPrompt。
+        #
+        # 手动点 "Yes, I accept" 本身也是写 userSettings 的这个 key，但
+        # ~/.claude/settings.json 由 home-manager 生成（mutableSettings 默认
+        # false → store 只读链接），写入失败且没有报错 → 弹窗每次启动复现。
+        # 无人值守场景没人按按钮，所以必须在声明式配置里写死。
+        skipDangerousModePermissionPrompt = true;
+
+        permissions = {
+          defaultMode = "bypassPermissions";
+          # bypassPermissions is the permission profile; avoid carrying the
+          # workstation allow/ask lists into container agents.
+          deny = [ ];
+        };
       };
     })
   ];
