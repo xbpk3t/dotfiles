@@ -11,7 +11,7 @@
 }:
 { name, node }:
 let
-  system = node.system;
+  inherit (node) system;
   specialArgs = mkSpecialArgs system node;
   deployLib = inputs."deploy-rs".lib.${system};
 
