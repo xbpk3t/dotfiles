@@ -76,3 +76,13 @@ tasks:
     cmds:
       - mkdir -p infra/generated
       - nix eval --json .#infraFacts | jq -S . > infra/generated/facts.json
+
+  terranix:
+    desc: "生成 DNS stack 的 Terraform JSON（terranix 试点）"
+    summary: |
+      task tf:terranix
+    dir: "{{.TASKFILE_DIR}}/.."
+    cmds:
+      - >-
+        nix develop .#infra --command bash -c
+        'terranix --with-nulls infra/stacks/homelab/cloudflare/lucc.dev/dns/terranix.nix | jq -S . > infra/stacks/homelab/cloudflare/lucc.dev/dns/generated.tf.json'

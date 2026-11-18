@@ -145,6 +145,17 @@ tofu plan -input=false
 stack 用 `jsondecode(file(...))` 消费。改 `hosts/*/meta.nix` 或
 `infra/facts.nix` 后必须重新生成并提交，CI 会做 freshness 检查。
 
+## terranix 试点
+
+`infra/stacks/homelab/cloudflare/lucc.dev/dns` 已切换为 terranix：
+
+- 源文件：`terranix.nix`（共享 facts + 手写记录 + provider/backend/moved/import）
+- 生成物：`generated.tf.json`，由 `task tf:terranix` 写入，不要手改
+- 回退：`git revert` 对应 commit 即可恢复被删除的 HCL 文件（git 历史保留）
+- 该 stack 不再适用 `terraform fmt` / `tflint` / `terraform-ls` 的 HCL 能力；
+  `tofu validate` / `tofu plan` 仍是有效闸门
+- 其他 stack 暂时保持 HCL；是否扩大试点看这一个 stack 的 DX 体验
+
 ## 下一步
 
 - 按需补充 `infra/.inventory/<date>/` 盘点清单

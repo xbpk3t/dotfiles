@@ -72,6 +72,15 @@ jobs:
           nix develop .#infra --command jq -S . /tmp/infra-facts.raw.json > /tmp/infra-facts.json
           diff -u infra/generated/facts.json /tmp/infra-facts.json
 
+      - name: Check generated DNS terranix
+        run: |
+          set -euo pipefail
+          nix develop .#infra --command bash -c '
+            terranix --with-nulls infra/stacks/homelab/cloudflare/lucc.dev/dns/terranix.nix \
+              | jq -S . > /tmp/dns.tf.json
+          '
+          diff -u infra/stacks/homelab/cloudflare/lucc.dev/dns/generated.tf.json /tmp/dns.tf.json
+
       - name: List Terramate stacks
         id: list
         env:
