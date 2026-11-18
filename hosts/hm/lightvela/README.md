@@ -51,6 +51,16 @@ Mac/phone.
   `loginctl enable-linger`, and `user@0.service`. `hc server status` reports
   `keeps_running_after_logout: true`, `logout_linger_user: root`, with a live
   terminal.
+- **Full HM profile is active** (`/nix/store/1dmrz...-home-manager-generation`):
+  zsh 5.9.2 + starship + atuin daemon, gh (token from sops), helix, btop,
+  lazygit, worktrunk, jq, ssh tailnet config; root shell is zsh. The HM profile
+  intentionally does **not** own `hc`/herdr-core; the sh/closure wrappers stay
+  in `/root/.local/bin` + `/usr/local/bin`.
+- **Nezha agent is active** (`nezha-agent.service`) and connected to the hub
+  `100.101.189.7:8008` (ESTAB on tailnet). It reads the sops-rendered
+  `/root/.config/nezha/config.json`.
+- `.bashrc`/`.profile` were moved to `*.pre-hm-20261118` before the first HM
+  activation; HM now owns them.
 - herdr-app now lists the machine as:
 
   ```text
@@ -69,6 +79,80 @@ Mac/phone.
   `255.4-1ubuntu8.18`. A platform image reset can remove the package/unit;
   re-run `hosts/_base/hm/bootstrap.sh --user-manager` after a reset.
   `libpam-systemd` is available from the Tencent Ubuntu mirror.
+
+## Full HM profile (S-Full-PA + Nezha N1)
+
+The PA profile is curated from `home/core`, not the whole directory:
+
+- `home/core/kernel`（zsh 全量 + starship + atuin + fzf）
+- `home/core/langs`（jq）
+- `home/core/devops/{btop,fastfetch,git,gh,journalctl,lazygit,ssh,worktrunk}.nix`
+- `ssh` only enables tailnet hosts (`github.enable = false`)
+- `fastfetch` imported but its option stays off
+- no `db` / `lazydocker`（无 enable 开关，import 即安装）
+- no `cntr` / `taskfile` / `init` / `infra`
+- `herdr-core` stays sh/closure-managed; HM does not touch
+  `~/.local/bin/{hc,herdr-core}` or `/usr/local/bin` wrappers
+
+### Sops (full copy, PA-only key)
+
+- `secrets/hm-lightvela.yaml` is a **full copy** of `secrets/secrets.yaml`,
+  encrypted to the PA-only age key. It is not encrypted to the fleet master key.
+- PA private key: `/root/.config/sops/age/keys.txt`.
+- `.sops.yaml` has a dedicated rule for `secrets/hm-lightvela.yaml`.
+- `secrets/hm-lightvela.nix` imports `secrets/default.nix` and overrides
+  `sops.defaultSopsFile` + `sops.age.keyFile`; no per-secret selection.
+- The fleet master age key is **not** on the PA. The PA can decrypt its full
+  copy, but a PA compromise can be contained by revoking/rotating its key.
+
+### HM activation
+
+Build the activation package on a Linux builder, export the closure, import it
+on the PA, then run the activation:
+
+```bash
+# build host
+nix build .#homeConfigurations.hm-lightvela.activationPackage
+nix-store --export $(nix-store -qR result) | gzip -9 \
+  > /tmp/hm-lightvela-closure.nar.gz
+
+# PA
+gunzip -c /root/hm-lightvela-closure.nar.gz | \
+  nix-portable nix-store --import
+
+# nix-portable does not put nix-env on PATH; the HM activate script needs it.
+for c in nix nix-env nix-store nix-build; do
+  printf '#!/usr/bin/env bash\nexec /root/.local/bin/nix-portable %s "$@"\n' "$c" \
+    > "/root/.local/bin/$c"
+  chmod 0755 "/root/.local/bin/$c"
+done
+
+HOME=/root USER=root XDG_RUNTIME_DIR=/run/user/0 PATH=/root/.local/bin:$PATH \
+  /nix/store/<hash>-home-manager-generation/activate
+
+usermod -s /root/.nix-profile/bin/zsh root
+```
+
+`PATH=/root/.local/bin:$PATH` lets the activate script find the `nix-env`
+wrapper. The wrapper enters nix-portable, which sees `/root` and the store.
+
+### Nezha agent (N1)
+
+The HM profile includes `pkgs.nezha-agent` and renders
+`/root/.config/nezha/config.json` (the agent v1 expects JSON) from the sops
+template. Install the system
+unit once:
+
+```bash
+install -m 644 hosts/_base/hm/nezha-agent.service \
+  /etc/systemd/system/nezha-agent.service
+systemctl daemon-reload
+systemctl enable --now nezha-agent.service
+systemctl status nezha-agent.service
+```
+
+The unit waits for the sops-rendered config, then connects to the hub
+`100.101.189.7:8008` (nixos-vps-dev) over tailnet.
 
 ## herdr-app cannot add the machine
 
