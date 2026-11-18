@@ -40,6 +40,11 @@ in
         };
       };
 
+      # 2026-10 eMudhra / Comodo AAA Services root 私钥泄露事件。
+      # nixpkgs cacert 移除该根证书后删除本条目。
+      # https://emudhra.we-have-a-problem.com/
+      pki.caCertificateBlacklist = [ "Comodo AAA Services root" ];
+
       # sudo 留痕（追加到已存在的 extraConfig）
       sudo.extraConfig = lib.mkAfter ''
         Defaults logfile="/var/log/sudo.log"
