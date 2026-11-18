@@ -1,4 +1,4 @@
-{ mylib, ... }: {
+{ config, mylib, ... }: {
   imports = [
     (mylib.relativeToRoot "secrets/default.nix")
     (mylib.relativeToRoot "home/core")
@@ -96,5 +96,13 @@
     zzz.enable = true;
     darwin.basePackages.enable = true;
     darwin.default-apps.enable = true;
+  };
+
+  # docs 只在本机 opt-in；core 只保留 services.git-sync.enable 开关。
+  # launchd 默认 StartInterval + WatchPaths；interval 是周期兜底。
+  services.git-sync.repositories.docs = {
+    path = "${config.home.homeDirectory}/Desktop/docs";
+    uri = "https://github.com/xbpk3t/docs.git";
+    interval = 24 * 60 * 60;
   };
 }

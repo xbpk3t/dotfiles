@@ -516,11 +516,7 @@ let
         args = [
         ];
         projects = [
-          {
-            paths = [
-              "/home/luck/Desktop/docs"
-            ];
-          }
+          # docs 已改为 Mac 本地项目；远程只保留仍留在 agt 的 docs-alfred。
           {
             paths = [ "/home/luck/Desktop/docs-alfred" ];
           }
