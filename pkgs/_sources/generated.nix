@@ -6,6 +6,38 @@
   dockerTools,
 }:
 {
+  apm-bin-aarch64-darwin = {
+    pname = "apm-bin-aarch64-darwin";
+    version = "0.36.1";
+    src = fetchurl {
+      url = "https://github.com/microsoft/apm/releases/download/v0.36.1/apm-darwin-arm64.tar.gz";
+      sha256 = "sha256-STNM/2OKErjPSYdODKaBol9kHsdgKBlQcBjoQuM4Uvs=";
+    };
+  };
+  apm-bin-aarch64-linux = {
+    pname = "apm-bin-aarch64-linux";
+    version = "0.36.1";
+    src = fetchurl {
+      url = "https://github.com/microsoft/apm/releases/download/v0.36.1/apm-linux-arm64.tar.gz";
+      sha256 = "sha256-Nu89U3aAq0mdFxhELy5P8wHj1MBwflEYTMQjAj/lCFY=";
+    };
+  };
+  apm-bin-x86_64-darwin = {
+    pname = "apm-bin-x86_64-darwin";
+    version = "0.36.1";
+    src = fetchurl {
+      url = "https://github.com/microsoft/apm/releases/download/v0.36.1/apm-darwin-x86_64.tar.gz";
+      sha256 = "sha256-efMrYERE3XZx/OiQXaAHhX0cnUmwrrKk4E+GrljLnmk=";
+    };
+  };
+  apm-bin-x86_64-linux = {
+    pname = "apm-bin-x86_64-linux";
+    version = "0.36.1";
+    src = fetchurl {
+      url = "https://github.com/microsoft/apm/releases/download/v0.36.1/apm-linux-x86_64.tar.gz";
+      sha256 = "sha256-3TuEsKAnm3CoDAwcFV00iy8RLe4Ko6leCuIlgvwNlu4=";
+    };
+  };
   voltagent-subagents = {
     pname = "voltagent-subagents";
     version = "5983fe3b4ea2785335ac1712c4aa1ac4e13a8fa2";

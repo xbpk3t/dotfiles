@@ -63,6 +63,7 @@
     };
 
     AI = {
+      apm.enable = true;
       codex.enable = false;
       claude.enable = true;
       # dsh 配置走 ~/.dsh/cordis.patch.yml（home 层），见 home/base/AI/dsh.nix

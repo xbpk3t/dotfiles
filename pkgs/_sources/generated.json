@@ -1,4 +1,64 @@
 {
+    "apm-bin-aarch64-darwin": {
+        "cargoLock": null,
+        "date": null,
+        "extract": null,
+        "name": "apm-bin-aarch64-darwin",
+        "passthru": null,
+        "pinned": false,
+        "src": {
+            "name": null,
+            "sha256": "sha256-STNM/2OKErjPSYdODKaBol9kHsdgKBlQcBjoQuM4Uvs=",
+            "type": "url",
+            "url": "https://github.com/microsoft/apm/releases/download/v0.36.1/apm-darwin-arm64.tar.gz"
+        },
+        "version": "0.36.1"
+    },
+    "apm-bin-aarch64-linux": {
+        "cargoLock": null,
+        "date": null,
+        "extract": null,
+        "name": "apm-bin-aarch64-linux",
+        "passthru": null,
+        "pinned": false,
+        "src": {
+            "name": null,
+            "sha256": "sha256-Nu89U3aAq0mdFxhELy5P8wHj1MBwflEYTMQjAj/lCFY=",
+            "type": "url",
+            "url": "https://github.com/microsoft/apm/releases/download/v0.36.1/apm-linux-arm64.tar.gz"
+        },
+        "version": "0.36.1"
+    },
+    "apm-bin-x86_64-darwin": {
+        "cargoLock": null,
+        "date": null,
+        "extract": null,
+        "name": "apm-bin-x86_64-darwin",
+        "passthru": null,
+        "pinned": false,
+        "src": {
+            "name": null,
+            "sha256": "sha256-efMrYERE3XZx/OiQXaAHhX0cnUmwrrKk4E+GrljLnmk=",
+            "type": "url",
+            "url": "https://github.com/microsoft/apm/releases/download/v0.36.1/apm-darwin-x86_64.tar.gz"
+        },
+        "version": "0.36.1"
+    },
+    "apm-bin-x86_64-linux": {
+        "cargoLock": null,
+        "date": null,
+        "extract": null,
+        "name": "apm-bin-x86_64-linux",
+        "passthru": null,
+        "pinned": false,
+        "src": {
+            "name": null,
+            "sha256": "sha256-3TuEsKAnm3CoDAwcFV00iy8RLe4Ko6leCuIlgvwNlu4=",
+            "type": "url",
+            "url": "https://github.com/microsoft/apm/releases/download/v0.36.1/apm-linux-x86_64.tar.gz"
+        },
+        "version": "0.36.1"
+    },
     "voltagent-subagents": {
         "cargoLock": null,
         "date": null,

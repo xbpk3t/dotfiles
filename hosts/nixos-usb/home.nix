@@ -64,6 +64,8 @@
       helm.enable = true;
     };
 
+    AI.apm.enable = true;
+
     sys.basePackages.enable = true;
 
     works = {

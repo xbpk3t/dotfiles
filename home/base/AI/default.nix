@@ -1,5 +1,6 @@
 _: {
   imports = [
+    ./apm.nix
     ./mcp.nix
     ./codex.nix
     ./claude.nix
