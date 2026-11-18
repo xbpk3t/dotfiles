@@ -128,7 +128,7 @@ let
         node:
         mkHost {
           inherit (node) name;
-          node = node;
+          inherit node;
         }
       ) nodes
     )
@@ -336,7 +336,7 @@ assert lib.assertMsg (
           ../topology.nix
           {
             # 注入当前 system 的 nixosConfigurations，让 nix-topology 自动提取主机接口/服务。
-            nixosConfigurations = architectureOutput.nixosConfigurations;
+            inherit (architectureOutput) nixosConfigurations;
           }
         ];
       };

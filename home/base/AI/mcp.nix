@@ -60,7 +60,46 @@ in
 
   # https://developers.openai.com/codex/mcp
   config = lib.mkIf mcpEnabled {
-    programs.mcp.enable = true;
+    programs = {
+      mcp.enable = true;
+
+      # Claude Code 专用：CC 不读 bearer_token_env_var；共享 server 的 headers 又会被
+      # Codex 的 HM bridge 转成 http_headers（与 bearer_token_env_var 叠加 → 双 Authorization 400）。
+      # 所以这里只覆盖 Claude 这一个 client，Codex 继续用上面的共享配置。
+      # ${VAR} 由 CC 在读取 MCP 配置时展开，值来自 shell 的 LINEAR_API_KEY（见下方 sessionVariables）。
+      claude-code.mcpServers = {
+        linear = lib.mkIf config.modules.AI.claude.enable {
+          type = "http";
+          url = "https://mcp.linear.app/mcp";
+          headers.Authorization = "Bearer \${LINEAR_API_KEY}";
+          default_tools_approval_mode = "approve";
+        };
+
+        # Hosted HTTP variants for Claude Code. CC expands ${VAR} in headers;
+        # shared settings.servers deliberately has no headers to avoid Codex's
+        # HM bridge sending duplicate Authorization headers (see linear comment).
+        context7 = lib.mkIf (config.modules.AI.claude.enable && isHttp "context7") {
+          type = "http";
+          inherit (hostedServers.context7) url;
+          headers = hostedServers.context7.claudeHeaders;
+          default_tools_approval_mode = "approve";
+        };
+
+        tavily = lib.mkIf (config.modules.AI.claude.enable && isHttp "tavily") {
+          type = "http";
+          inherit (hostedServers.tavily) url;
+          headers = hostedServers.tavily.claudeHeaders;
+          default_tools_approval_mode = "approve";
+        };
+
+        github = lib.mkIf (config.modules.AI.claude.enable && isHttp "github") {
+          type = "http";
+          inherit (hostedServers.github) url;
+          headers = hostedServers.github.claudeHeaders;
+          default_tools_approval_mode = "approve";
+        };
+      };
+    };
 
     mcp-servers = {
       programs = {
@@ -218,47 +257,6 @@ in
         #  };
       };
     };
-
-    # Claude Code 专用：CC 不读 bearer_token_env_var；共享 server 的 headers 又会被
-    # Codex 的 HM bridge 转成 http_headers（与 bearer_token_env_var 叠加 → 双 Authorization 400）。
-    # 所以这里只覆盖 Claude 这一个 client，Codex 继续用上面的共享配置。
-    # ${VAR} 由 CC 在读取 MCP 配置时展开，值来自 shell 的 LINEAR_API_KEY（见下方 sessionVariables）。
-    programs.claude-code.mcpServers.linear = lib.mkIf config.modules.AI.claude.enable {
-      type = "http";
-      url = "https://mcp.linear.app/mcp";
-      headers.Authorization = "Bearer \${LINEAR_API_KEY}";
-      default_tools_approval_mode = "approve";
-    };
-
-    # Hosted HTTP variants for Claude Code. CC expands ${VAR} in headers;
-    # shared settings.servers deliberately has no headers to avoid Codex's
-    # HM bridge sending duplicate Authorization headers (see linear comment).
-    programs.claude-code.mcpServers.context7 =
-      lib.mkIf (config.modules.AI.claude.enable && isHttp "context7")
-        {
-          type = "http";
-          inherit (hostedServers.context7) url;
-          headers = hostedServers.context7.claudeHeaders;
-          default_tools_approval_mode = "approve";
-        };
-
-    programs.claude-code.mcpServers.tavily =
-      lib.mkIf (config.modules.AI.claude.enable && isHttp "tavily")
-        {
-          type = "http";
-          inherit (hostedServers.tavily) url;
-          headers = hostedServers.tavily.claudeHeaders;
-          default_tools_approval_mode = "approve";
-        };
-
-    programs.claude-code.mcpServers.github =
-      lib.mkIf (config.modules.AI.claude.enable && isHttp "github")
-        {
-          type = "http";
-          inherit (hostedServers.github) url;
-          headers = hostedServers.github.claudeHeaders;
-          default_tools_approval_mode = "approve";
-        };
 
     # Share API keys with MCP servers and CLI tools.
     # sessionVariables are sourced by the shell; MCP server subprocess inherits them.

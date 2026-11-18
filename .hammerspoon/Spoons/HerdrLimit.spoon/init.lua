@@ -82,11 +82,7 @@ local function countAgentsFromHc()
   for _, t in ipairs(terminals) do
     -- 只计 live 且已报告 agent 状态的 terminal；裸 shell / 普通程序没有 status。
     -- reported 是兜底：某些 agent 可能先上报过、当前 status 暂空。
-    if
-      type(t) == "table"
-      and t.state == "live"
-      and (t.status ~= nil or t.reported == true)
-    then
+    if type(t) == "table" and t.state == "live" and (t.status ~= nil or t.reported == true) then
       count = count + 1
     end
   end

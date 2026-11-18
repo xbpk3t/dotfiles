@@ -53,7 +53,12 @@ in
     };
 
     AI = {
-      claude.enable = true;
+      # agt 是无人值守 agent 机：开 bypassPermissions，不再逐条确认。
+      # 风险边界：sudo 仍需密码（无法提权），restic 每日备份 Desktop + agent state。
+      claude = {
+        enable = true;
+        permissionMode = "yolo";
+      };
       skills.enable = true;
 
       # 4G agent：把三个本地 stdio MCP 换成 hosted HTTP，保留工具但省掉
