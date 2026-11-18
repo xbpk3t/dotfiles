@@ -65,6 +65,13 @@ jobs:
       - name: Enable Nix cache
         uses: DeterminateSystems/magic-nix-cache-action@v13
 
+      - name: Check generated infra facts
+        run: |
+          set -euo pipefail
+          nix eval --json .#infraFacts > /tmp/infra-facts.raw.json
+          nix develop .#infra --command jq -S . /tmp/infra-facts.raw.json > /tmp/infra-facts.json
+          diff -u infra/generated/facts.json /tmp/infra-facts.json
+
       - name: List Terramate stacks
         id: list
         env:

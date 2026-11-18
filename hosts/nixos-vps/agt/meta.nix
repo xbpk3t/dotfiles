@@ -6,6 +6,10 @@
   stateVersion = "26.05";
 
   tailscale.ip = "100.66.22.92";
+
+  # 公网入口 IP：nva.lucc.dev / Tailscale DERP (Shanghai)。
+  public.ipv4 = "1.15.64.188";
+
   deploy = {
     remoteBuild = true;
   };

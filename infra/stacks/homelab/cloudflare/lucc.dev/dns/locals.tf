@@ -1,77 +1,19 @@
 locals {
+  # Nix 生成的共享 infra facts：account/zone id 与由 host meta 派生的 DNS 记录。
+  # 源文件 infra/facts.nix；重新生成用 `task tf:facts`。
+  facts = jsondecode(file("${path.module}/../../../../../generated/facts.json"))
+
   # 当前这个 stack 只管理 lucc.dev 这个 zone 的 DNS。
   # 后续如果有第二个 zone，应该新建独立 stack，而不是混进同一个 state。
-  zone_id   = "1c07a1b84d8273f4dfa6c3adce513f94"
-  zone_name = "lucc.dev"
+  zone_id   = local.facts.cloudflare.zone_id
+  zone_name = local.facts.cloudflare.zone_name
 
-  # 这里开始使用 human-facing records model。
-  # 日常维护时优先改这个数据结构，而不是继续手写一堆 resource blocks。
-  dns_records_managed = {
-    api = {
-      id      = null
-      name    = "api.lucc.dev"
-      type    = "A"
-      content = "192.129.183.26"
-      ttl     = 1
-      # 开启cf橙云代理
-      proxied  = true
-      priority = null
-      comment  = "AxonHub"
-    }
+  # Nix facts 派生记录（api/as/rsshub/derp-dev/nva/derp-sm-vps-tc）。
+  dns_records_from_nix = local.facts.dns.shared_records
 
-    as = {
-      id      = null
-      name    = "as.lucc.dev"
-      type    = "A"
-      content = "192.129.183.26"
-      ttl     = 1
-      # 开启cf橙云代理
-      proxied  = true
-      priority = null
-      comment  = "OpenList (ASMR)"
-    }
-
-    rsshub = {
-      id       = "1eb043e1ffe747891513e47be11b0a6f"
-      name     = "rsshub.lucc.dev"
-      type     = "A"
-      content  = "192.129.183.26"
-      ttl      = 1
-      proxied  = true
-      comment  = "rsshub"
-      priority = null
-    }
-    derp-dev = {
-      id       = null
-      name     = "derp-nixos-vps-dev.lucc.dev"
-      type     = "A"
-      content  = "192.129.183.26"
-      ttl      = 1
-      proxied  = false
-      comment  = "Tailscale DERP (LA)"
-      priority = null
-    }
-    nva = {
-      id       = null
-      name     = "nva.lucc.dev"
-      type     = "A"
-      content  = "1.15.64.188"
-      ttl      = 1
-      proxied  = false
-      comment  = "Tailscale DERP (Shanghai, nixos-vps-agt)"
-      priority = null
-    }
-    derp-sm-vps-tc = {
-      id       = null
-      name     = "derp-sm-vps-tc.lucc.dev"
-      type     = "A"
-      content  = "43.156.103.43"
-      ttl      = 1
-      proxied  = false
-      comment  = "Tailscale DERP (SGP)"
-      priority = null
-    }
-
+  # 手写记录：外部服务 / Pages / Email Routing 等 provider 细节较多，
+  # 暂不进入 Nix facts。
+  dns_records_manual = {
     blog = {
       id       = "db66877fcacde96aa9844c8a91ec3a16"
       name     = "blog.lucc.dev"
@@ -203,5 +145,9 @@ locals {
   dns_records_pending_delete = {}
 
   # google 这条记录已经不在 live 里了，所以继续排除，不放进 pending_delete。
-  dns_records = merge(local.dns_records_managed, local.dns_records_pending_delete)
+  dns_records = merge(
+    local.dns_records_from_nix,
+    local.dns_records_manual,
+    local.dns_records_pending_delete
+  )
 }

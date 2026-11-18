@@ -1,5 +1,8 @@
 locals {
-  account_id = "96540bd100b82adba941163704660c31"
+  # Nix 生成的共享 infra facts；源文件 infra/facts.nix。
+  facts = jsondecode(file("${path.module}/../../../../../generated/facts.json"))
+
+  account_id = local.facts.cloudflare.account_id
 
   # Pages 里的 D1 binding 先直接引用 live database id，避免现在就引入跨 state output 依赖。
   # 等后续整个 Cloudflare 栈稳定以后，再考虑通过 remote state / globals 做统一编排。

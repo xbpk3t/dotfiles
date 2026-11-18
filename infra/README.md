@@ -133,6 +133,18 @@ tofu init -reconfigure -input=false
 tofu plan -input=false
 ```
 
+## 共享 infra facts
+
+`infra/facts.nix` 是 Nix 与 Terraform 共享的事实源：
+
+- Cloudflare account / zone id
+- `hosts/*/meta.nix` 里的公网 IP、Tailscale IP
+- 由 host meta 派生的 DNS 记录（api / as / rsshub / derp / nva）
+
+生成物是 `infra/generated/facts.json`，由 `task tf:facts` 写入；Cloudflare
+stack 用 `jsondecode(file(...))` 消费。改 `hosts/*/meta.nix` 或
+`infra/facts.nix` 后必须重新生成并提交，CI 会做 freshness 检查。
+
 ## 下一步
 
 - 按需补充 `infra/.inventory/<date>/` 盘点清单

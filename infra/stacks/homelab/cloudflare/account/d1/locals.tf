@@ -1,7 +1,10 @@
 locals {
+  # Nix 生成的共享 infra facts；源文件 infra/facts.nix。
+  facts = jsondecode(file("${path.module}/../../../../../generated/facts.json"))
+
   # D1 是 account-scope 资源，不属于某一个 zone。
   # 所以这里单独拆成 account 级别 state，避免和 DNS / Pages 混在一起。
-  account_id = "96540bd100b82adba941163704660c31"
+  account_id = local.facts.cloudflare.account_id
 
   d1_databases_managed = {
     docs = {

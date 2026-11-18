@@ -1,0 +1,85 @@
+# 跨 Nix / Terraform 共享的 infra facts。
+#
+# 设计原则：
+# - 能从 hosts/*/meta.nix 派生的事实，不在 Terraform locals 里重复写。
+# - 只放 NixOS 与云资源都需要的事实；纯 Terraform provider 细节不要进来。
+# - 生成物 infra/generated/facts.json 由本文件求值得出，不要手改。
+#
+# 重新生成：
+#   task tf:facts
+# 等价命令（仓库根目录）：
+#   nix eval --json .#infraFacts | jq -S . > infra/generated/facts.json
+let
+  dev = import ../hosts/nixos-vps/dev/meta.nix;
+  agt = import ../hosts/nixos-vps/agt/meta.nix;
+  tc = import ../hosts/sm-vps/tc/meta.nix;
+  hk = import ../hosts/sm-vps/hk/meta.nix;
+
+  zone_name = "lucc.dev";
+  dev_ip = dev.singbox.server;
+  agt_ip = agt.public.ipv4;
+  tc_ip = tc.ssh.host;
+  hk_ip = hk.ssh.host;
+
+  aRecord = name: content: proxied: comment: {
+    id = null;
+    inherit
+      name
+      content
+      proxied
+      comment
+      ;
+    type = "A";
+    ttl = 1;
+    priority = null;
+  };
+in
+{
+  cloudflare = {
+    account_id = "96540bd100b82adba941163704660c31";
+    zone_id = "1c07a1b84d8273f4dfa6c3adce513f94";
+    inherit zone_name;
+    r2_endpoint = "https://96540bd100b82adba941163704660c31.r2.cloudflarestorage.com";
+  };
+
+  hosts = {
+    nixos-vps-dev = {
+      public_ipv4 = dev_ip;
+      tailscale_ipv4 = dev.tailscale.ip;
+      domains = {
+        derp = "derp-nixos-vps-dev.${zone_name}";
+        hy2 = dev.singbox.hy2.domain;
+        vmess = dev.singbox.vmessWs.domain;
+        tuic = dev.singbox.tuic.domain;
+        anytls = dev.singbox.anytls.domain;
+      };
+    };
+    nixos-vps-agt = {
+      public_ipv4 = agt_ip;
+      tailscale_ipv4 = agt.tailscale.ip;
+      domains.nva = "nva.${zone_name}";
+    };
+    sm-vps-tc = {
+      public_ipv4 = tc_ip;
+      domains.derp = "derp-sm-vps-tc.${zone_name}";
+    };
+    sm-vps-hk = {
+      public_ipv4 = hk_ip;
+    };
+  };
+
+  dns = {
+    # 这些记录的内容来自 hosts/*/meta.nix；手写记录（MX/DKIM/Pages CNAME 等）
+    # 仍留在 Terraform locals 里。
+    shared_records = {
+      api = aRecord "api.${zone_name}" dev_ip true "AxonHub";
+      as = aRecord "as.${zone_name}" dev_ip true "OpenList (ASMR)";
+      rsshub = (aRecord "rsshub.${zone_name}" dev_ip true "rsshub") // {
+        id = "1eb043e1ffe747891513e47be11b0a6f";
+      };
+      derp-dev = aRecord "derp-nixos-vps-dev.${zone_name}" dev_ip false "Tailscale DERP (LA)";
+      nva = aRecord "nva.${zone_name}" agt_ip false "Tailscale DERP (Shanghai, nixos-vps-agt)";
+      derp-sm-vps-tc = aRecord "derp-sm-vps-tc.${zone_name}" tc_ip false "Tailscale DERP (SGP)";
+    };
+  };
+}

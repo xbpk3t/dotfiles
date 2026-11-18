@@ -358,6 +358,10 @@ assert lib.assertMsg (
     };
 
   flake = {
+    # 跨 Nix / Terraform 共享的 infra facts，供 `nix eval --json .#infraFacts`
+    # 生成 infra/generated/facts.json，见 infra/facts.nix。
+    infraFacts = import ../infra/facts.nix;
+
     darwinConfigurations = mergedDarwinConfigurations;
     deploy = {
       nodes = mergedDeployNodes;

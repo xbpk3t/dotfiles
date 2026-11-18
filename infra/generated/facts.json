@@ -1,0 +1,101 @@
+{
+  "cloudflare": {
+    "account_id": "96540bd100b82adba941163704660c31",
+    "r2_endpoint": "https://96540bd100b82adba941163704660c31.r2.cloudflarestorage.com",
+    "zone_id": "1c07a1b84d8273f4dfa6c3adce513f94",
+    "zone_name": "lucc.dev"
+  },
+  "dns": {
+    "shared_records": {
+      "api": {
+        "comment": "AxonHub",
+        "content": "192.129.183.26",
+        "id": null,
+        "name": "api.lucc.dev",
+        "priority": null,
+        "proxied": true,
+        "ttl": 1,
+        "type": "A"
+      },
+      "as": {
+        "comment": "OpenList (ASMR)",
+        "content": "192.129.183.26",
+        "id": null,
+        "name": "as.lucc.dev",
+        "priority": null,
+        "proxied": true,
+        "ttl": 1,
+        "type": "A"
+      },
+      "derp-dev": {
+        "comment": "Tailscale DERP (LA)",
+        "content": "192.129.183.26",
+        "id": null,
+        "name": "derp-nixos-vps-dev.lucc.dev",
+        "priority": null,
+        "proxied": false,
+        "ttl": 1,
+        "type": "A"
+      },
+      "derp-sm-vps-tc": {
+        "comment": "Tailscale DERP (SGP)",
+        "content": "43.156.103.43",
+        "id": null,
+        "name": "derp-sm-vps-tc.lucc.dev",
+        "priority": null,
+        "proxied": false,
+        "ttl": 1,
+        "type": "A"
+      },
+      "nva": {
+        "comment": "Tailscale DERP (Shanghai, nixos-vps-agt)",
+        "content": "1.15.64.188",
+        "id": null,
+        "name": "nva.lucc.dev",
+        "priority": null,
+        "proxied": false,
+        "ttl": 1,
+        "type": "A"
+      },
+      "rsshub": {
+        "comment": "rsshub",
+        "content": "192.129.183.26",
+        "id": "1eb043e1ffe747891513e47be11b0a6f",
+        "name": "rsshub.lucc.dev",
+        "priority": null,
+        "proxied": true,
+        "ttl": 1,
+        "type": "A"
+      }
+    }
+  },
+  "hosts": {
+    "nixos-vps-agt": {
+      "domains": {
+        "nva": "nva.lucc.dev"
+      },
+      "public_ipv4": "1.15.64.188",
+      "tailscale_ipv4": "100.66.22.92"
+    },
+    "nixos-vps-dev": {
+      "domains": {
+        "anytls": "anytls-nixos-vps-dev.lucc.dev",
+        "derp": "derp-nixos-vps-dev.lucc.dev",
+        "hy2": "hy2-nixos-vps-dev.lucc.dev",
+        "tuic": "tuic-nixos-vps-dev.lucc.dev",
+        "vmess": "vmess-nixos-vps-dev.lucc.dev"
+      },
+      "public_ipv4": "192.129.183.26",
+      "tailscale_ipv4": "100.101.189.7"
+    },
+    "sm-vps-hk": {
+      "public_ipv4": "103.79.184.82"
+    },
+    "sm-vps-tc": {
+      "domains": {
+        "derp": "derp-sm-vps-tc.lucc.dev"
+      },
+      "public_ipv4": "43.156.103.43"
+    }
+  }
+}

@@ -67,3 +67,12 @@ tasks:
       - task: cf:inventory
         vars:
           DATE: "{{.DATE}}"
+
+  facts:
+    desc: "从 Nix 生成共享 infra facts"
+    summary: |
+      task tf:facts
+    dir: "{{.TASKFILE_DIR}}/.."
+    cmds:
+      - mkdir -p infra/generated
+      - nix eval --json .#infraFacts | jq -S . > infra/generated/facts.json
