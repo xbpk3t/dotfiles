@@ -27,7 +27,7 @@ let
 
   mkUserService = description: extra: {
     Unit = {
-      inherit description;
+      Description = description;
     }
     // (extra.Unit or { });
     Service = {
@@ -35,7 +35,10 @@ let
       RestartSec = 5;
     }
     // (extra.Service or { });
-    Install = { WantedBy = [ "default.target" ]; } // (extra.Install or { });
+    Install = {
+      WantedBy = [ "default.target" ];
+    }
+    // (extra.Install or { });
   };
 in
 {
@@ -109,6 +112,10 @@ in
           ];
           Requires = [ "xvfb.service" ];
           PartOf = [ "xvfb.service" ];
+          # 10s 重启间隔正好落在 systemd 默认 10s start-limit 窗口外；
+          # 显式放宽窗口，避免 MemoryMax 触发后无限 kill/restart。
+          StartLimitIntervalSec = 300;
+          StartLimitBurst = 3;
         };
         Install.WantedBy = if cfg.autoStart then [ "default.target" ] else [ ];
         Service = {

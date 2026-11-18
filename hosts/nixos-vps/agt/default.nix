@@ -72,6 +72,8 @@ in
   systemd.services.nix-daemon.serviceConfig = {
     MemoryHigh = "1200M";
     MemoryMax = "2000M";
+    # 构建的 swap 也要有边界；超限时是 build 失败，而不是拖垮整机。
+    MemorySwapMax = "1G";
   };
 
   # 4G agent 机的用户会话硬上限：把 OOM 限制在 user.slice 内，
@@ -79,6 +81,9 @@ in
   systemd.slices."user".sliceConfig = {
     MemoryHigh = "2800M";
     MemoryMax = "3200M";
+    # 只限 RAM 不够：cgroup 默认可以无限用 swap，溢出会进 zram/磁盘。
+    # 2G 让 user.slice 在 swap 侧也有硬边界，earlyoom 仍负责提前 kill。
+    MemorySwapMax = "2G";
   };
 
   # 官方 Node 的 V8 getter 与 nixpkgs Node 的加固编译不同；dsh 的

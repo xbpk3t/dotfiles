@@ -16,22 +16,40 @@ let
 in
 {
   testMemorySwappinessZramSmall = {
-    expr = (sysctl { memGiB = 4; zramEnabled = true; })."vm.swappiness";
+    expr =
+      (sysctl {
+        memGiB = 4;
+        zramEnabled = true;
+      })."vm.swappiness";
     expected = 100;
   };
 
   testMemorySwappinessZramLarge = {
-    expr = (sysctl { memGiB = 16; zramEnabled = true; })."vm.swappiness";
+    expr =
+      (sysctl {
+        memGiB = 16;
+        zramEnabled = true;
+      })."vm.swappiness";
     expected = 60;
   };
 
   testMemorySwappinessDiskSsd = {
-    expr = (sysctl { memGiB = 4; zramEnabled = false; isSsd = true; })."vm.swappiness";
+    expr =
+      (sysctl {
+        memGiB = 4;
+        zramEnabled = false;
+        isSsd = true;
+      })."vm.swappiness";
     expected = 60;
   };
 
   testMemorySwappinessDiskHdd = {
-    expr = (sysctl { memGiB = 4; zramEnabled = false; isSsd = false; })."vm.swappiness";
+    expr =
+      (sysctl {
+        memGiB = 4;
+        zramEnabled = false;
+        isSsd = false;
+      })."vm.swappiness";
     expected = 20;
   };
 
@@ -41,7 +59,11 @@ in
   };
 
   testMemoryOomKillAllocatingTaskOptIn = {
-    expr = (sysctl { memGiB = 4; oomKillAllocatingTask = true; })."vm.oom_kill_allocating_task";
+    expr =
+      (sysctl {
+        memGiB = 4;
+        oomKillAllocatingTask = true;
+      })."vm.oom_kill_allocating_task";
     expected = 1;
   };
 
@@ -51,7 +73,11 @@ in
   };
 
   testMemoryOvercommitOverride = {
-    expr = (sysctl { memGiB = 4; overcommitMemory = 0; })."vm.overcommit_memory";
+    expr =
+      (sysctl {
+        memGiB = 4;
+        overcommitMemory = 0;
+      })."vm.overcommit_memory";
     expected = 0;
   };
 

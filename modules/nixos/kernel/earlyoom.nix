@@ -33,12 +33,19 @@ in
         "chrome"
         "claude"
         "node"
-        "nix"
-        "\\.claude-wrapped"
+        "MainThread"
+        "nix.*"
+        "[.]claude-wrapped"
       ];
       description = ''
         Process-name regexes to prefer killing when memory is tight.
-        Matched against /proc/<pid>/comm and cmdline by earlyoom.
+        earlyoom matches these against /proc/<pid>/comm only (first 15
+        bytes); it does not look at the command line.
+
+        Avoid backslash escapes: nixpkgs passes these through the
+        EARLYOOM_ARGS environment string, and systemd's $EARLYOOM_ARGS
+        expansion consumes them before earlyoom sees the regex. Use
+        character classes (e.g. [.]foo) instead.
       '';
     };
 
@@ -67,8 +74,10 @@ in
       inherit (cfg) freeMemThreshold freeSwapThreshold;
       reportInterval = 0;
       extraArgs = [
-        "--prefer" "(^|/)(${lib.concatStringsSep "|" cfg.prefer})$"
-        "--avoid" "(^|/)(${lib.concatStringsSep "|" cfg.avoid})$"
+        "--prefer"
+        "(^|/)(${lib.concatStringsSep "|" cfg.prefer})$"
+        "--avoid"
+        "(^|/)(${lib.concatStringsSep "|" cfg.avoid})$"
       ];
     };
   };

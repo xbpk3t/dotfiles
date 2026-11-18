@@ -54,7 +54,7 @@ let
 
   mkDaguService = description: execStart: {
     Unit = {
-      inherit description;
+      Description = description;
       # sops-nix 的 user service 先把 secret 文件生成到 /run/user/<uid>/secrets.d。
       After = [ "sops-nix.service" ];
     };

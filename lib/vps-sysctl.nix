@@ -452,7 +452,9 @@ let
   # zram 设备大小策略：小内存机器多给压缩 swap；大内存机器少给并用 memoryMax 封顶。
   # memoryMax 单位是 bytes（对应 NixOS zramSwap.memoryMax）。
   mkZramProfile =
-    { memGiB ? null }:
+    {
+      memGiB ? null,
+    }:
     {
       memoryPercent = if memGiB != null && memGiB <= 8 then 50 else 25;
       memoryMax = 4 * 1024 * 1024 * 1024;

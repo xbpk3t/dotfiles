@@ -9,6 +9,12 @@ let
   sysctl =
     if cfg.hardware == null then
       mylib.vpsSysctl.mkDefaultSysctl
+      # mkDefaultSysctl 只是无硬件输入时的基线；显式策略选项必须仍然生效，
+      # 否则没有 hardware profile 的 host（例如 nixos-usb）设了这些选项会被静默忽略。
+      // {
+        "vm.oom_kill_allocating_task" = if cfg.oomKillAllocatingTask then 1 else 0;
+        "vm.overcommit_memory" = cfg.overcommitMemory;
+      }
     else
       mylib.vpsSysctl.mkSysctl (
         cfg.hardware

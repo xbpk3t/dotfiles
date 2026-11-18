@@ -25,11 +25,13 @@ in
     isDesktop = mkEnableOption "desktop-only MCP servers (browser/GUI)";
 
     httpServers = mkOption {
-      type = types.listOf (types.enum [
-        "github"
-        "context7"
-        "tavily"
-      ]);
+      type = types.listOf (
+        types.enum [
+          "github"
+          "context7"
+          "tavily"
+        ]
+      );
       default = [ ];
       description = ''
         Opt in to the hosted HTTP MCP endpoints for these servers instead of
@@ -119,32 +121,30 @@ in
         );
 
         # context7 偏库/框架文档。默认 stdio；host opt in 后走 hosted HTTP。
-        context7 =
-          {
-            default_tools_approval_mode = "approve";
-          }
-          // lib.optionalAttrs httpContext7 {
-            type = "http";
-            url = "https://mcp.context7.com/mcp";
-          }
-          // lib.optionalAttrs (httpContext7 && config.modules.AI.codex.enable) {
-            bearer_token_env_var = "CONTEXT7_API_KEY";
-          };
+        context7 = {
+          default_tools_approval_mode = "approve";
+        }
+        // lib.optionalAttrs httpContext7 {
+          type = "http";
+          url = "https://mcp.context7.com/mcp";
+        }
+        // lib.optionalAttrs (httpContext7 && config.modules.AI.codex.enable) {
+          bearer_token_env_var = "CONTEXT7_API_KEY";
+        };
 
         # Tavily 通用搜索：approve 免审批，与同文件其它 server 一致。
         # tool 属 MCP（mcp__* 前缀），不在 claude.nix 的显式 allow 列表里时靠这里放行。
         # 默认 stdio；host opt in 后走 hosted HTTP。
-        tavily =
-          {
-            default_tools_approval_mode = "approve";
-          }
-          // lib.optionalAttrs httpTavily {
-            type = "http";
-            url = "https://mcp.tavily.com/mcp/";
-          }
-          // lib.optionalAttrs (httpTavily && config.modules.AI.codex.enable) {
-            bearer_token_env_var = "TAVILY_API_KEY";
-          };
+        tavily = {
+          default_tools_approval_mode = "approve";
+        }
+        // lib.optionalAttrs httpTavily {
+          type = "http";
+          url = "https://mcp.tavily.com/mcp/";
+        }
+        // lib.optionalAttrs (httpTavily && config.modules.AI.codex.enable) {
+          bearer_token_env_var = "TAVILY_API_KEY";
+        };
 
         # https://linear.app/docs/mcp
         #   Linear MCP 是远程 HTTP MCP（`https://mcp.linear.app/mcp`），走 native HTTP transport。
@@ -236,23 +236,19 @@ in
           default_tools_approval_mode = "approve";
         };
 
-    programs.claude-code.mcpServers.tavily =
-      lib.mkIf (config.modules.AI.claude.enable && httpTavily)
-        {
-          type = "http";
-          url = "https://mcp.tavily.com/mcp/";
-          headers.Authorization = "Bearer \${TAVILY_API_KEY}";
-          default_tools_approval_mode = "approve";
-        };
+    programs.claude-code.mcpServers.tavily = lib.mkIf (config.modules.AI.claude.enable && httpTavily) {
+      type = "http";
+      url = "https://mcp.tavily.com/mcp/";
+      headers.Authorization = "Bearer \${TAVILY_API_KEY}";
+      default_tools_approval_mode = "approve";
+    };
 
-    programs.claude-code.mcpServers.github =
-      lib.mkIf (config.modules.AI.claude.enable && httpGithub)
-        {
-          type = "http";
-          url = "https://api.githubcopilot.com/mcp/";
-          headers.Authorization = "Bearer \${GITHUB_TOKEN}";
-          default_tools_approval_mode = "approve";
-        };
+    programs.claude-code.mcpServers.github = lib.mkIf (config.modules.AI.claude.enable && httpGithub) {
+      type = "http";
+      url = "https://api.githubcopilot.com/mcp/";
+      headers.Authorization = "Bearer \${GITHUB_TOKEN}";
+      default_tools_approval_mode = "approve";
+    };
 
     # Share API keys with MCP servers and CLI tools.
     # sessionVariables are sourced by the shell; MCP server subprocess inherits them.
