@@ -98,11 +98,15 @@
     darwin.default-apps.enable = true;
   };
 
-  # docs 只在本机 opt-in；core 只保留 services.git-sync.enable 开关。
-  # launchd 默认 StartInterval + WatchPaths；interval 是周期兜底。
-  services.git-sync.repositories.docs = {
-    path = "${config.home.homeDirectory}/Desktop/docs";
-    uri = "https://github.com/xbpk3t/docs.git";
-    interval = 24 * 60 * 60;
+  # docs: Mutagen 只同步工作区，.git 由 --ignore-vcs 排除；
+  # 其余 ignore 直接读 docs repo 里 tracked 的 .gitignore（含 docs/、wiki/ 下的嵌套文件）。
+  # Mac 是唯一 git owner；agt 只接收文件，不跑 git。
+  modules.devops.mutagen = {
+    enable = true;
+    syncs.docs = {
+      alpha = "${config.home.homeDirectory}/Desktop/docs";
+      beta = "nixos-vps-agt:/home/luck/Desktop/docs";
+      gitignore = true;
+    };
   };
 }

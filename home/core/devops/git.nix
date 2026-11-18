@@ -130,17 +130,6 @@ in
       git-quick-stats
     ];
 
-  services.git-sync = {
-    enable = true;
-    #    repositories = {
-    #        notes = {
-    #          path = "/home/user/notes";
-    #          uri = "git@github.com:username/notes.git";
-    #          interval = 300; # 每5分钟同步一次
-    #        };
-    #      };
-  };
-
   programs.diff-so-fancy = {
     enable = true;
     enableGitIntegration = true;

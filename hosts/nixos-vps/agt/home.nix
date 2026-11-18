@@ -142,14 +142,6 @@ in
   # Restic 备份：Desktop + agent state → R2。
   home.packages = [ pkgs.restic ];
 
-  # docs 只在本机 opt-in；core 只保留 services.git-sync.enable 开关。
-  # interval 是 inotify 的空闲兜底，文件变化仍会触发同步。
-  services.git-sync.repositories.docs = {
-    path = "${config.home.homeDirectory}/Desktop/docs";
-    uri = "https://github.com/xbpk3t/docs.git";
-    interval = 24 * 60 * 60;
-  };
-
   systemd.user.services.restic-backup = {
     Unit = {
       Description = "Restic backup of Desktop + agent state to R2";
