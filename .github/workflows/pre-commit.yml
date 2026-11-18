@@ -18,6 +18,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          # Full-history gitleaks scan below needs all commits, not a shallow clone.
+          fetch-depth: 0
 
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@v19
@@ -31,3 +34,7 @@ jobs:
         # 注意：CI 默认只跑 `pre-commit` stage 的 hooks；commit-msg / pre-push
         # stage（commitizen 等）不属于文件级 lint，需要时另行显式触发。
         run: nix develop -c pre-commit run --all-files --show-diff-on-failure
+
+      - name: Scan full git history for secrets
+        # The pre-commit gitleaks hook is staged-only; keep history scanning in CI.
+        run: nix develop -c gitleaks git --redact --no-banner --log-level warn .
