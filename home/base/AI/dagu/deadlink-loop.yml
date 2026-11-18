@@ -11,25 +11,76 @@ preconditions:
 env:
   WORKSPACE: ${HOME}/Desktop/docs
   DEADLINK_DIR: /tmp/xbpk3t-docs-deadlink
+  BROWSER_MARKER: /tmp/xbpk3t-docs-deadlink-browser-started
 
 steps:
+  - id: start_browser
+    name: start_browser
+    description: "Step 1/9: Ensure the on-demand Chromium is running for OpenCLI"
+    run: |
+      export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+      if systemctl --user is-active --quiet chromium-agent; then
+        echo "chromium-agent already active; will leave it running"
+        rm -f "$BROWSER_MARKER"
+      else
+        systemctl --user start chromium-agent || {
+          echo "failed to start chromium-agent" >&2
+          exit 1
+        }
+        echo started > "$BROWSER_MARKER"
+      fi
+      # 轻量有界等待：Chromium/Browser Bridge 启动不是瞬时完成；最多 10s。
+      # lychee 前半段不需要浏览器，但后续 OpenCLI 验证前 bridge 必须 ready。
+      for i in $(seq 1 10); do
+        if opencli doctor >/dev/null 2>&1; then
+          echo "OpenCLI browser ready"
+          exit 0
+        fi
+        sleep 1
+      done
+      echo "OpenCLI browser not ready after 10s" >&2
+      if [ -f "$BROWSER_MARKER" ]; then
+        systemctl --user stop chromium-agent || true
+        rm -f "$BROWSER_MARKER"
+      fi
+      exit 1
+
   - id: scan
     name: scan
-    description: "Step 1/7: Run lychee + OpenCLI to find verified dead links"
+    description: "Step 2/9: Run lychee + OpenCLI to find verified dead links"
     run: |
       cd $WORKSPACE
       nu .github/taskfile/scripts/deadlink.nu \
         --data-dirs '["data"]' \
         --output-dir $DEADLINK_DIR \
         --skip-domains '["blog.lucc.dev","supjav.com","fandom.com","missav.ai","missav.live"]'
+    depends:
+      - start_browser
     timeout_sec: 7200
     continue_on:
       exit_code: 2
       mark_success: true
 
+  - id: stop_browser
+    name: stop_browser
+    description: "Step 3/9: Stop Chromium if this DAG started it"
+    run: |
+      export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+      if [ -f "$BROWSER_MARKER" ]; then
+        systemctl --user stop chromium-agent
+        rm -f "$BROWSER_MARKER"
+        echo "stopped chromium-agent (started by DAG)"
+      else
+        echo "chromium-agent was already running; leaving it alone"
+      fi
+    depends:
+      - scan
+    continue_on:
+      failure: true
+
   - id: check_deadlinks
     name: check_deadlinks
-    description: "Step 2/7: Check if deadlinks were found; skip downstream if none"
+    description: "Step 4/9: Check if deadlinks were found; skip downstream if none"
     run: |
       REPORT="$DEADLINK_DIR/deadlink-report.json"
       if [ -f "$REPORT" ] && jq -e '.summary.verified_dead > 0' "$REPORT" > /dev/null 2>&1; then
@@ -44,7 +95,7 @@ steps:
 
   - id: ai_analyze
     name: ai_analyze
-    description: "Step 3/7: AI reads deadlink report and produces deletion proposal"
+    description: "Step 5/9: AI reads deadlink report and produces deletion proposal"
     run: |
       cd $WORKSPACE
       nu .github/taskfile/scripts/deadlink-ai-analyze.nu
@@ -57,7 +108,7 @@ steps:
 
   - id: generate_script
     name: generate_script
-    description: "Step 4/7: Generate verified sed script from AI proposal"
+    description: "Step 6/9: Generate verified sed script from AI proposal"
     run: |
       cd $WORKSPACE
       nu .github/taskfile/scripts/deadlink-generate-script.nu
@@ -66,7 +117,7 @@ steps:
 
   - id: human_gate
     name: human_gate
-    description: "Step 5/7: Review deadlink proposal and approve or reject"
+    description: "Step 7/9: Review deadlink proposal and approve or reject"
     action: noop
     depends:
       - generate_script
@@ -87,7 +138,7 @@ steps:
 
   - id: apply
     name: apply
-    description: "Step 6/7: Execute verified deletion script"
+    description: "Step 8/9: Execute verified deletion script"
     run: |
       SCRIPT="$DEADLINK_DIR/verified-deletion-script.sh"
       if [ -f "$SCRIPT" ] && [ -s "$SCRIPT" ]; then
@@ -101,7 +152,7 @@ steps:
 
   - id: recheck_commit
     name: recheck_commit
-    description: "Step 7/7: Recheck and commit changes"
+    description: "Step 9/9: Recheck and commit changes"
     run: |
       cd $WORKSPACE
       lychee --cache --max-cache-age 0h data/**/*.yml --format summary 2>&1 | tail -5

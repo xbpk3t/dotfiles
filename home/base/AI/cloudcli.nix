@@ -54,6 +54,15 @@ in
       default = 3001;
       description = "Port the CloudCLI server listens on.";
     };
+
+    memoryHigh = mkOption {
+      type = types.nullOr types.str;
+      default = null;
+      description = ''
+        Optional systemd MemoryHigh for the CloudCLI server (e.g. "300M").
+        Keep null to avoid affecting first-run npm install bursts.
+      '';
+    };
   };
 
   config = lib.mkIf (cfg.enable && pkgs.stdenv.hostPlatform.isLinux) {
@@ -84,7 +93,8 @@ in
         RestartSec = 5;
         # 首次启动可能触发 npm install（约 1.5G），给足时间。
         TimeoutStartSec = 900;
-      };
+      }
+      // lib.optionalAttrs (cfg.memoryHigh != null) { MemoryHigh = cfg.memoryHigh; };
 
       Install.WantedBy = [ "default.target" ];
     };
@@ -97,11 +107,18 @@ in
     #   （该版本只认固定 env 列表，不解析 opencode config；实际请求仍走 axonhub）
     #   故意放占位符而不是真 token：避免 OpenCode/Codex 选中 openai provider 时
     #   把 AxonHub key 发到第三方端点。
+    # Hosted MCP servers（modules.AI.mcp.httpServers）的 Claude Code 覆盖靠
+    # CONTEXT7_API_KEY / TAVILY_API_KEY / GITHUB_TOKEN 做 header 展开；这些值
+    # 只在 hm-session-vars 里，而 CloudCLI 拉起的 claude 进程不经过 shell。
+    # CloudCLI 会把自身 env 传给子进程，所以在这里显式注入。
     sops.templates."cloudcli-env".content = ''
       ANTHROPIC_BASE_URL=https://api.lucc.dev
       ANTHROPIC_AUTH_TOKEN=${config.sops.placeholder.LLM_AxonHub}
       AXONHUB_API_KEY=${config.sops.placeholder.LLM_AxonHub}
       OPENAI_API_KEY=cloudcli-status-only
+      GITHUB_TOKEN=${config.sops.placeholder.GITHUB_TOKEN}
+      CONTEXT7_API_KEY=${config.sops.placeholder.API_CONTEXT7}
+      TAVILY_API_KEY=${config.sops.placeholder.API_TAVILY}
     '';
   };
 }

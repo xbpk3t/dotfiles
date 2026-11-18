@@ -33,7 +33,11 @@ let
     "rst" = true;
 
     "basher" = true;
-    "biome" = true;
+    # [2026-11-17] 统一关闭 biome，改用 oxc/oxfmt。biome LSP 常驻约 72M。
+    # 注意：auto_install_extensions 只防未来安装、不卸载已安装；而且 agt 的
+    # Zed 是 remote，扩展由 macOS 客户端推送，服务端这份配置管不到。
+    # 要真正关掉 agt 上的 biome，需在 macOS Zed 客户端 Uninstall。
+    "biome" = false;
     "cargotoml" = true;
     "catppuccin-icons" = true;
     "git-firefly" = true;

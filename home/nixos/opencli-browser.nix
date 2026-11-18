@@ -27,7 +27,7 @@ let
 
   mkUserService = description: extra: {
     Unit = {
-      inherit description;
+      Description = description;
     }
     // (extra.Unit or { });
     Service = {
@@ -35,7 +35,10 @@ let
       RestartSec = 5;
     }
     // (extra.Service or { });
-    Install.WantedBy = [ "default.target" ];
+    Install = {
+      WantedBy = [ "default.target" ];
+    }
+    // (extra.Install or { });
   };
 in
 {
@@ -52,6 +55,27 @@ in
         x11vnc bind address. Set to the tailnet IP to connect from other
         tailnet devices (macOS Screen Sharing: vnc://<ip>:5900).
       '';
+    };
+
+    autoStart = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Start Chromium with the user session. Set false to start it on demand
+        with `systemctl --user start chromium-agent`, saving memory when idle.
+      '';
+    };
+
+    chromiumMemoryHigh = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = "Optional systemd MemoryHigh for chromium-agent (e.g. \"700M\").";
+    };
+
+    chromiumMemoryMax = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = "Optional systemd MemoryMax for chromium-agent (e.g. \"1200M\").";
     };
   };
 
@@ -88,13 +112,24 @@ in
           ];
           Requires = [ "xvfb.service" ];
           PartOf = [ "xvfb.service" ];
+          # 10s 重启间隔正好落在 systemd 默认 10s start-limit 窗口外；
+          # 显式放宽窗口，避免 MemoryMax 触发后无限 kill/restart。
+          StartLimitIntervalSec = 300;
+          StartLimitBurst = 3;
         };
+        Install.WantedBy = lib.optionals cfg.autoStart [ "default.target" ];
         Service = {
           ExecStart = "${pkgs.chromium}/bin/chromium ${lib.escapeShellArgs chromiumFlags}";
           Environment = [ "DISPLAY=${display}" ];
           # 浏览器退出（例如最后一个窗口关闭）后需要拉起来。
           Restart = "always";
           RestartSec = 10;
+        }
+        // lib.optionalAttrs (cfg.chromiumMemoryHigh != null) {
+          MemoryHigh = cfg.chromiumMemoryHigh;
+        }
+        // lib.optionalAttrs (cfg.chromiumMemoryMax != null) {
+          MemoryMax = cfg.chromiumMemoryMax;
         };
       };
 

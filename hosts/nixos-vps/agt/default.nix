@@ -21,6 +21,9 @@ in
       rttMs = 30;
     };
 
+    # 4G agent 当前没有容器；Docker 守护进程常驻约 120M，agt 上关闭。
+    kernel.vm.docker.enable = false;
+
     networking = {
       tailscale.derper = {
         enable = true;
@@ -62,6 +65,25 @@ in
   nix.settings = {
     max-jobs = lib.mkForce 1;
     cores = lib.mkForce 1;
+  };
+
+  # 本地 build 的内存兜底：nix-daemon 及其 build 子进程都受这个 cgroup 限制。
+  # 超限时是 build 失败，而不是整机 OOM；eval 是客户端进程，由 user.slice 上限覆盖。
+  systemd.services.nix-daemon.serviceConfig = {
+    MemoryHigh = "1200M";
+    MemoryMax = "2000M";
+    # 构建的 swap 也要有边界；超限时是 build 失败，而不是拖垮整机。
+    MemorySwapMax = "1G";
+  };
+
+  # 4G agent 机的用户会话硬上限：把 OOM 限制在 user.slice 内，
+  # 避免 Chromium/Claude 把内核/系统服务一起拖死。dev(6G) 不继承。
+  systemd.slices."user".sliceConfig = {
+    MemoryHigh = "2800M";
+    MemoryMax = "3200M";
+    # 只限 RAM 不够：cgroup 默认可以无限用 swap，溢出会进 zram/磁盘。
+    # 2G 让 user.slice 在 swap 侧也有硬边界，earlyoom 仍负责提前 kill。
+    MemorySwapMax = "2G";
   };
 
   # 官方 Node 的 V8 getter 与 nixpkgs Node 的加固编译不同；dsh 的

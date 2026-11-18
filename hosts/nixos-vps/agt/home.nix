@@ -40,7 +40,8 @@ in
 
       herdr-core = {
         enable = true;
-        settings.restore_screen = true;
+        # 4G 机器：不在重启后自动恢复屏幕/重任务，避免再次进入内存压力循环。
+        settings.restore_screen = false;
       };
 
       cf.enable = true;
@@ -54,6 +55,14 @@ in
     AI = {
       claude.enable = true;
       skills.enable = true;
+
+      # 4G agent：把三个本地 stdio MCP 换成 hosted HTTP，保留工具但省掉
+      # ~214M/会话的本地进程。默认仍是 stdio，其他 host 不受影响。
+      mcp.httpServers = [
+        "github"
+        "context7"
+        "tavily"
+      ];
       dagu = {
         enable = true;
         # 只跑 scheduler；web UI 已关闭。
@@ -62,12 +71,25 @@ in
         host = tailnetIp;
         port = 8081;
         schedulerPort = 8091;
+        # 4G 机器：DAG 步骤是 scheduler 的子进程，同样受这个 service cgroup
+        # 限制；scheduler 自身稳态约 127M，但 claude -p / wiki:digest 等步骤
+        # 可达数百 MB。上限按步骤峰值给，而不是只按 scheduler 稳态。
+        memoryHigh = "1000M";
+        memoryMax = "1500M";
       };
 
       dsh.enable = false;
 
       opencli-browser = {
         enable = true;
+        # 4G 机器：Chromium 不随 session 常驻，用 OpenCLI 前手动
+        # `systemctl --user start chromium-agent`，闲置省 ~430M。
+        # deadlink-loop DAG 的 scan 步走 `opencli browser`；DAG 现在会在 scan
+        # 前按需 start、结束后 stop（见 deadlink-loop.yml），不依赖常驻。
+        autoStart = false;
+        # 4G 机器：先节流再硬限，避免 Chromium 拖进全局 OOM。
+        chromiumMemoryHigh = "700M";
+        chromiumMemoryMax = "1200M";
         # x11vnc 绑 tailnet，Mac 可直接用 Screen Sharing 打开 vnc://<tailnet-ip>:5900。
         bindAddress = tailnetIp;
       };
@@ -87,6 +109,10 @@ in
         enable = true;
         bindAddress = tailnetIp;
         port = 3001;
+        # 4G 机器：server 稳态 ~66M，但它拉起的 Claude Code 会话和首次
+        # npm install（~1.5G）都是子进程，同样受这个 cgroup 限制。
+        # MemoryHigh 是软限，给到 burst 量级；硬保护交给 user.slice 上限。
+        memoryHigh = "1500M";
       };
     };
 
