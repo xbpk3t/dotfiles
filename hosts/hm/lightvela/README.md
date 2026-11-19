@@ -51,7 +51,7 @@ Mac/phone.
   `loginctl enable-linger`, and `user@0.service`. `hc server status` reports
   `keeps_running_after_logout: true`, `logout_linger_user: root`, with a live
   terminal.
-- **Full HM profile is active** (`/nix/store/1dmrz...-home-manager-generation`):
+- **Full HM profile is active** (`/nix/store/5dhbal...-home-manager-generation`):
   zsh 5.9.2 + starship + atuin daemon, gh (token from sops), helix, btop,
   lazygit, worktrunk, jq, ssh tailnet config; root shell is zsh. The HM profile
   intentionally does **not** own `hc`/herdr-core; the sh/closure wrappers stay
@@ -86,9 +86,9 @@ The PA profile is curated from `home/core`, not the whole directory:
 
 - `home/core/kernel`（zsh 全量 + starship + atuin + fzf）
 - `home/core/langs`（jq）
-- `home/core/devops/{btop,fastfetch,git,gh,journalctl,lazygit,ssh,worktrunk}.nix`
+- `home/core/devops/{btop,fetch,git,gh,journalctl,lazygit,ssh,worktrunk}.nix`
 - `ssh` only enables tailnet hosts (`github.enable = false`)
-- `fastfetch` imported but its option stays off
+- `fetch` imported but its option stays off
 - no `db` / `lazydocker`（无 enable 开关，import 即安装）
 - no `cntr` / `taskfile` / `init` / `infra`
 - `herdr-core` stays sh/closure-managed; HM does not touch
@@ -154,6 +154,28 @@ systemctl status nezha-agent.service
 The unit waits for the sops-rendered config, then connects to the hub
 `100.101.189.7:8008` (nixos-vps-dev) over tailnet.
 
+## Restore after reboot / platform reset
+
+**Important:** a `reboot` inside the systemd-nspawn container stops the vendor
+workbench; in the 2026-11-19 test it did **not** auto-start. Start it from the
+Vela/Hermes platform console first, then run the restore script if any
+overlay-level state (`/nix`, `/usr/local/bin`, user@0, Nezha unit, root shell)
+is missing.
+
+Copy these two files to the PA and run the restore script as root:
+
+```bash
+scp hosts/_base/hm/restore.sh hosts/_base/hm/nezha-agent.service \
+  root@100.72.194.36:/root/hm-bootstrap/
+ssh root@100.72.194.36 '/root/hm-bootstrap/restore.sh'
+```
+
+It recreates `/nix`, the nix-portable command wrappers, `/usr/local/bin`
+links, the user manager (`libpam-systemd` + `user@0` + linger), runs the HM
+generation from `/root/.hm-generation`, sets root's shell to zsh, and installs
+the Nezha system unit. The nix-portable store, HM generation, sops key, and
+`hc` wrappers under `/root` are persistent and are not re-downloaded.
+
 ## herdr-app cannot add the machine
 
 If the app says "it needs you to answer something (a password, a new host key,
@@ -165,7 +187,8 @@ or installing herdr-core there)", the usual cause is the remote binary name:
   is not enough.
 - Confirm:
   `ssh root@100.72.194.36 'command -v herdr-core; herdr-core --version'`.
-- Create both names:
+- Create both names (set `H` to the herdr-core store path first, as in Path 0:
+  `H=/nix/store/<hash>-herdr-core-<version>`):
   `ln -sfn "$H/bin/hc" /root/.local/bin/hc`,
   `ln -sfn "$H/bin/herdr-core" /root/.local/bin/herdr-core`,
   `ln -sfn /root/.local/bin/hc /usr/local/bin/hc`,
@@ -296,8 +319,11 @@ present locally or referenced remotely):
 home-manager switch --flake .#hm-lightvela
 ```
 
-The shared profile lives in `home/hm/default.nix`; it is identity-agnostic
-and does not import the sops-heavy `home/core` or GUI-heavy `home/base`.
+The shared profile lives in `home/hm/default.nix`; it is identity-agnostic and
+imports a curated subset of `home/core` (kernel, langs, selected devops). It
+still reads a few `sops.secrets.*` (`AUTIN_KEY`, `GITHUB_TOKEN`,
+`RESEND_TOKEN`), so the host must import `secrets/hm-<node>.nix`; the
+GUI-heavy `home/base` is not imported.
 This path is not applied yet on this PA; the sh/closure path is the current
 installation.
 

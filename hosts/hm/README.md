@@ -30,7 +30,8 @@ hosts/hm/
     README.md     # machine-specific constraints
 
 home/hm/
-  default.nix     # shared, identity-agnostic, sops-free HM profile
+  default.nix     # shared, identity-agnostic HM profile (consumes a few
+                  # sops secrets; host imports secrets/hm-<node>.nix)
 
 hosts/_base/hm/
   bootstrap.sh    # user-level Nix/herdr-core installer (not a system bootstrap)

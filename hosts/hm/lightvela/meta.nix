@@ -14,4 +14,8 @@
 
   # fleet 可寻址事实；只用于 tailnet/checks，不参与 deploy。
   tailscale.ip = "100.72.194.36";
+
+  # 平台只授权 root（hermes-workbench-client），不是 fleet 全局身份 luck。
+  # ssh.nix 生成 fleet SSH config 时按这个字段选登录用户。
+  ssh.user = "root";
 }

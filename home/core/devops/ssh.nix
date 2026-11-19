@@ -31,7 +31,8 @@ let
     node:
     {
       hostname = node.tailscale.ip;
-      user = globals.identity.user.username;
+      # meta.nix 的 ssh.user 优先；平台托管的 hm 节点登录用户不是全局 luck。
+      user = node.ssh.user or globals.identity.user.username;
     }
     // lib.optionalAttrs (lib.attrByPath [ "ssh" "multiplex" ] false node) mux;
 in

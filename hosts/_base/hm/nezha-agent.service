@@ -7,6 +7,9 @@ Wants=network-online.target
 Type=simple
 # The HM sops template renders /root/.config/nezha/config.json after the
 # user manager + sops-nix user service are up. Wait for it before starting.
+# The loop waits up to 240s, so raise the start timeout above the default 90s;
+# otherwise systemd kills the ExecStartPre before it runs out.
+TimeoutStartSec=300
 ExecStartPre=/bin/sh -c 'for i in $(seq 1 120); do [ -s /root/.config/nezha/config.json ] && exit 0; sleep 2; done; exit 1'
 ExecStart=/root/.nix-profile/bin/nezha-agent --config /root/.config/nezha/config.json
 Restart=always

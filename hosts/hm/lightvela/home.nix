@@ -30,8 +30,11 @@
 
   # Nezha agent config (N1). The agent v1 reads JSON, not YAML. The secret is
   # rendered by sops-nix; the system service waits for this file before starting.
+  #
+  # server 从 fleet registry 派生（hub 节点的 tailscale.ip:port），与 NixOS 侧
+  # modules/infra/nezha.nix 共用同一事实源；hub 换 IP/端口时这里不用手改。
   sops.templates."nezha-config".content = builtins.toJSON {
-    server = "100.101.189.7:8008";
+    server = mylib.fleet.nezha.server;
     client_secret = config.sops.placeholder.NEZHA_AGENT_SK;
     uuid = "42ff60cb-0845-4a85-bb67-509475d7e05f";
     tls = false;

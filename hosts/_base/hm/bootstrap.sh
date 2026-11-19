@@ -150,7 +150,10 @@ resolve_nix() {
 }
 
 herdr_installed() {
-  "${NIX[@]}" profile list 2>/dev/null | grep -q 'herdr-core'
+  # NIX_FLAGS matters here: without experimental features enabled in nix.conf
+  # (the default for a plain system Nix install), `nix profile list` errors out
+  # and this function would always report "not installed".
+  "${NIX[@]}" "${NIX_FLAGS[@]}" profile list 2>/dev/null | grep -q 'herdr-core'
 }
 
 install_herdr() {
@@ -205,6 +208,14 @@ write_config() {
 
 ensure_path_block() {
   local file="$1"
+  # After `home-manager switch`, ~/.profile / ~/.bashrc / ~/.zshrc are symlinks
+  # into the Nix store. Appending to them either corrupts an immutable store
+  # path (root) or aborts the script under `set -e` (non-root), and the block is
+  # discarded on the next activation anyway. Let HM own those files.
+  if [[ -L $file ]]; then
+    warn "$file is a symlink (Home Manager-managed?); not appending the PATH block"
+    return 0
+  fi
   mkdir -p "$(dirname -- "$file")"
   if grep -q 'hm-lightvela PATH' "$file" 2>/dev/null; then
     return 0
@@ -229,7 +240,10 @@ add_ssh_key() {
   [[ -f $keyfile ]] || die "SSH public key not found: $keyfile"
   local key
   key="$(tr -d '\r' <"$keyfile" | head -n 1)"
-  [[ $key == ssh-* ]] || die "not an SSH public key: $keyfile"
+  case "$key" in
+  ssh-* | ecdsa-* | sk-*) ;;
+  *) die "not an SSH public key: $keyfile" ;;
+  esac
   mkdir -p "$TARGET_HOME/.ssh"
   chmod 700 "$TARGET_HOME/.ssh"
   touch "$TARGET_HOME/.ssh/authorized_keys"
@@ -329,8 +343,23 @@ HC_BIN="$(readlink -f "$HC_BIN" 2>/dev/null || printf '%s' "$HC_BIN")"
 # nix-portable keeps its store under $HOME; the ELF interpreter and RPATH still
 # use /nix/store. Make that visible to the outer namespace so `hc` can execute
 # without `nix-portable nix shell` (which re-substitutes the bad cache).
-if [[ $NIX_SOURCE == "nix-portable" ]]; then
-  if [[ "$(id -u)" -eq 0 && ! -e /nix ]]; then
+#
+# Decide by the presence of the nix-portable store, not only by NIX_SOURCE: on
+# a PA where ~/.local/bin/nix is a shim to nix-portable (see
+# hosts/hm/lightvela/README.md), `have nix` succeeds and NIX_SOURCE is
+# misdetected as "system". Relying on NIX_SOURCE alone would skip this after a
+# platform reset and leave `hc` unable to exec.
+if [[ $NIX_SOURCE == "nix-portable" || -d "$TARGET_HOME/.nix-portable/nix" ]]; then
+  if [[ -L /nix && ! -e /nix ]]; then
+    if [[ "$(id -u)" -eq 0 ]]; then
+      warn "/nix is a dangling symlink; replacing it"
+      rm -f /nix
+      ln -s "$TARGET_HOME/.nix-portable/nix" /nix
+      log "recreated /nix -> $TARGET_HOME/.nix-portable/nix"
+    else
+      warn "/nix is a dangling symlink; as root run: rm -f /nix && ln -s $TARGET_HOME/.nix-portable/nix /nix"
+    fi
+  elif [[ "$(id -u)" -eq 0 && ! -e /nix ]]; then
     ln -s "$TARGET_HOME/.nix-portable/nix" /nix
     log "created /nix -> $TARGET_HOME/.nix-portable/nix"
   elif [[ ! -e /nix ]]; then
