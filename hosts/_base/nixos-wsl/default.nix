@@ -57,7 +57,7 @@ in
     };
 
     networking = {
-      hostName = lib.mkDefault (hostMeta.hostName or "nixos-wsl");
+      hostName = lib.mkDefault hostMeta.hostName;
       # WSL 自己生成 /etc/resolv.conf；NixOS-WSL 的 generateResolvConf
       # 已经关闭 NixOS 侧 resolvconf，不需要 useHostResolvConf。
     };

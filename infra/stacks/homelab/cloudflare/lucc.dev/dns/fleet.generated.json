@@ -1,0 +1,22 @@
+{
+  "derpNodes": {
+    "nixos-vps-agt": {
+      "dnsComment": "Tailscale DERP (Shanghai, nixos-vps-agt)",
+      "dnsKey": "nva",
+      "domain": "nva.lucc.dev",
+      "publicIpv4": "1.15.64.188"
+    },
+    "nixos-vps-dev": {
+      "dnsComment": "Tailscale DERP (LA)",
+      "dnsKey": "derp-dev",
+      "domain": "derp-nixos-vps-dev.lucc.dev",
+      "publicIpv4": "192.129.183.26"
+    },
+    "sm-vps-tc": {
+      "dnsComment": "Tailscale DERP (SGP)",
+      "dnsKey": "derp-sm-vps-tc",
+      "domain": "derp-sm-vps-tc.lucc.dev",
+      "publicIpv4": "43.156.103.43"
+    }
+  }
+}

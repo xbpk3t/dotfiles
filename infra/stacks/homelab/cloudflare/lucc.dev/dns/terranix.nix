@@ -13,6 +13,23 @@
 let
   facts = import ../../../../../facts.nix;
 
+  # DERP A 记录由 main 的 fleet metadata 生成（task tf:dns:generate）。
+  # 这里直接消费生成物，避免 facts 再维护一份 DERP 域名/IP。
+  fleet = builtins.fromJSON (builtins.readFile ./fleet.generated.json);
+  derpRecords = lib.mapAttrs' (
+    _name: node:
+    lib.nameValuePair node.dnsKey {
+      id = null;
+      name = node.domain;
+      type = "A";
+      content = node.publicIpv4;
+      ttl = 1;
+      proxied = false;
+      comment = if node.dnsComment != null then node.dnsComment else "Tailscale DERP (${_name})";
+      priority = null;
+    }
+  ) fleet.derpNodes;
+
   # 这些记录含外部服务 / Pages / Email Routing 的 provider 细节，
   # 暂不进入共享 facts；terranix 试点就地把它们搬成 Nix 数据。
   manualRecords = {
@@ -118,7 +135,7 @@ let
     };
   };
 
-  records = facts.dns.shared_records // manualRecords;
+  records = facts.dns.shared_records // derpRecords // manualRecords;
   importable = lib.filterAttrs (_: record: record.id != null) records;
 in
 {

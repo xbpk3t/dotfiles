@@ -58,7 +58,7 @@ let
     system: hostMeta:
     let
       channel = hostMeta.nixpkgsChannel or "rolling";
-      hostName = hostMeta.hostName or "unknown";
+      inherit (hostMeta) hostName;
       inputsByChannel = {
         rolling = inputs.nixpkgs;
         stable = inputs.nixpkgs-stable;
@@ -350,7 +350,8 @@ assert lib.assertMsg (
       # 配合 topology.nix 手写的网络/外部设备，渲染成 SVG。
       topology = {
         modules = [
-          ../topology.nix
+          # fleet registry 从 flake 层注入，避免 topology.nix 再扫描一次 hosts/**/meta.nix。
+          (import ../topology.nix { inherit (mylib) fleet; })
           {
             # 注入当前 system 的 nixosConfigurations，让 nix-topology 自动提取主机接口/服务。
             inherit (architectureOutput) nixosConfigurations;
@@ -372,5 +373,17 @@ assert lib.assertMsg (
     # sm-vps 平行轨出口
     homeConfigurations = mergedHomeConfigurations;
     systemConfigs = mergedSystemConfigs;
+
+    # 跨层生成的机读 fleet 清单；目前供 Terraform DERP DNS records 使用。
+    # 只导出消费端需要的 DERP 事实，避免 ssh/tailscale 等 meta 变更造成生成物 churn。
+    # 生成：task tf:dns:generate；校验：task tf:dns:check。
+    fleetMetadata = {
+      derpNodes = lib.mapAttrs (_name: node: {
+        publicIpv4 = node.publicIpv4 or null;
+        domain = node.derper.domain;
+        dnsKey = node.derper.dnsKey or null;
+        dnsComment = node.derper.dnsComment or null;
+      }) mylib.fleet.derperNodes;
+    };
   };
 }

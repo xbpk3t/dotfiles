@@ -7,8 +7,15 @@
 
   tailscale.ip = "100.66.22.92";
 
-  # 公网入口 IP：nva.lucc.dev / Tailscale DERP (Shanghai)。
-  public.ipv4 = "1.15.64.188";
+  # 公网 IPv4：TF DNS / DERP A 记录从这里生成。
+  publicIpv4 = "1.15.64.188";
+
+  # 短域名：nva = nixos-vps-agt；域名里不体现 derp。
+  derper = {
+    domain = "nva.lucc.dev";
+    dnsKey = "nva";
+    dnsComment = "Tailscale DERP (Shanghai, nixos-vps-agt)";
+  };
 
   deploy = {
     remoteBuild = true;

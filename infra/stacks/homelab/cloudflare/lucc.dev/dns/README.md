@@ -4,14 +4,25 @@
 records，不是从零创建。Email Routing 用到的 MX / SPF / DKIM records 也统一放在
 这里，避免 DNS ownership 被拆散。每次改动后的目标仍是 no-op plan。
 
-这是 `infra/` 里唯一一个用 terranix 生成 Terraform JSON 的 stack。
+这个 stack 由 terranix 生成 Terraform JSON。
 
 ## 文件
 
 - `terranix.nix`：唯一手写源文件（provider / backend / records / moved / import）
 - `generated.tf.json`：terranix 生成物，**不要手改**
+- `fleet.generated.json`：DERP DNS 事实，由 fleet metadata 生成，**不要手改**
 - `stack.tm.hcl`：Terramate 元数据
 - `.terraform.lock.hcl`：provider 版本锁
+
+## DERP records
+
+`derp-dev` / `nva` / `derp-sm-vps-tc` 不手写：
+
+- 事实来源：`hosts/**/meta.nix` 的 `derper.*` 与 `publicIpv4`
+- 生成：`task tf:dns:generate`
+- 校验：`task tf:dns:check`（CI 也会跑）
+- 生成物：`fleet.generated.json`
+- terranix 读取 `fleet.generated.json` 生成 `derpRecords`
 
 ## 使用方式
 
@@ -30,6 +41,7 @@ export CF_R2_SK="..."
 生成与校验：
 
 ```bash
+task tf:dns:generate
 task tf:terranix
 cd infra/stacks/homelab/cloudflare/lucc.dev/dns
 tofu init -reconfigure -input=false
@@ -37,8 +49,8 @@ tofu validate
 tofu plan -input=false
 ```
 
-CI 会重新生成并检查 `generated.tf.json` 无 diff；`tofu validate` / `plan`
-仍然是最终闸门。
+CI 会检查 `fleet.generated.json` / `generated.tf.json` 无 diff；
+`tofu validate` / `plan` 仍然是最终闸门。
 
 ## 回退
 
@@ -55,7 +67,7 @@ HCL 原文件仍在 git 历史里，state 地址未改变（`cloudflare_dns_reco
 ## DX 备注
 
 - 日常维护优先改 `terranix.nix` 里的 records 数据模型，不要新增独立 resource block。
-- 共享记录来自 `infra/facts.nix`；改 host meta 后先 `task tf:facts`，
-  再 `task tf:terranix`。
+- 共享记录来自 `infra/facts.nix`；DERP 记录来自 `fleet.generated.json`。
+- 改 host meta 后先 `task tf:dns:generate` / `task tf:facts`，再 `task tf:terranix`。
 - `terraform fmt` / `tflint` / `terraform-ls` 对该 stack 不再适用；
   改记录时靠 `tofu validate` / `plan` 反馈。

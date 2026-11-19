@@ -68,6 +68,20 @@ tasks:
         vars:
           DATE: "{{.DATE}}"
 
+  dns:generate:
+    desc: "从 fleet metadata 生成 DERP DNS records 文件"
+    summary: |
+      task tf:dns:generate
+    cmds:
+      - task: cf:dns:generate
+
+  dns:check:
+    desc: "检查 DERP DNS records 文件是否与 fleet metadata 同步"
+    summary: |
+      task tf:dns:check
+    cmds:
+      - task: cf:dns:check
+
   facts:
     desc: "从 Nix 生成共享 infra facts"
     summary: |
@@ -98,12 +112,13 @@ tasks:
         'terranix --with-nulls infra/stacks/homelab/tailscale/tailnet/terranix.nix | jq -S . > infra/stacks/homelab/tailscale/tailnet/generated.tf.json'
 
   check:
-    desc: "本地校验 infra（facts/terranix freshness + actionlint + fmt/validate）"
+    desc: "本地校验 infra（dns/facts/terranix freshness + actionlint + fmt/validate）"
     summary: |
       nix develop .#infra
       task tf:check
     dir: "{{.TASKFILE_DIR}}/.."
     cmds:
+      - task: cf:dns:check
       - |
         set -euo pipefail
         nix eval --json .#infraFacts | jq -S . | diff -u infra/generated/facts.json -

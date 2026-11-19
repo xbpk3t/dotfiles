@@ -16,9 +16,9 @@ let
   hk = import ../hosts/sm-vps/hk/meta.nix;
 
   zone_name = "lucc.dev";
-  dev_ip = dev.singbox.server;
-  agt_ip = agt.public.ipv4;
-  tc_ip = tc.ssh.host;
+  dev_ip = dev.publicIpv4;
+  agt_ip = agt.publicIpv4;
+  tc_ip = tc.publicIpv4;
   hk_ip = hk.ssh.host;
 
   aRecord = name: content: proxied: comment: {
@@ -67,7 +67,7 @@ in
       public_ipv4 = dev_ip;
       tailscale_ipv4 = dev.tailscale.ip;
       domains = {
-        derp = "derp-nixos-vps-dev.${zone_name}";
+        derp = dev.derper.domain;
         hy2 = dev.singbox.hy2.domain;
         vmess = dev.singbox.vmessWs.domain;
         tuic = dev.singbox.tuic.domain;
@@ -77,11 +77,11 @@ in
     nixos-vps-agt = {
       public_ipv4 = agt_ip;
       tailscale_ipv4 = agt.tailscale.ip;
-      domains.nva = "nva.${zone_name}";
+      domains.nva = agt.derper.domain;
     };
     sm-vps-tc = {
       public_ipv4 = tc_ip;
-      domains.derp = "derp-sm-vps-tc.${zone_name}";
+      domains.derp = tc.derper.domain;
     };
     sm-vps-hk = {
       public_ipv4 = hk_ip;
@@ -97,9 +97,6 @@ in
       rsshub = (aRecord "rsshub.${zone_name}" dev_ip true "rsshub") // {
         id = "1eb043e1ffe747891513e47be11b0a6f";
       };
-      derp-dev = aRecord "derp-nixos-vps-dev.${zone_name}" dev_ip false "Tailscale DERP (LA)";
-      nva = aRecord "nva.${zone_name}" agt_ip false "Tailscale DERP (Shanghai, nixos-vps-agt)";
-      derp-sm-vps-tc = aRecord "derp-sm-vps-tc.${zone_name}" tc_ip false "Tailscale DERP (SGP)";
     };
   };
 }

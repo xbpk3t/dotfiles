@@ -29,6 +29,9 @@
 result
 result-*
 
+# Generated topology diagram (published via jsDelivr from the topology branch)
+/topology.svg
+
 # For Taskfile checksum etc...
 # 使用 **/ 而非 / 前缀，因为 Taskfile 会在任意子目录（如 .taskfile/nix/、infra/ 等）
 # 运行时生成 .task/ 目录（存放 checksum、任务缓存等运行时产物），

@@ -43,36 +43,6 @@
         "ttl": 1,
         "type": "A"
       },
-      "derp-dev": {
-        "comment": "Tailscale DERP (LA)",
-        "content": "192.129.183.26",
-        "id": null,
-        "name": "derp-nixos-vps-dev.lucc.dev",
-        "priority": null,
-        "proxied": false,
-        "ttl": 1,
-        "type": "A"
-      },
-      "derp-sm-vps-tc": {
-        "comment": "Tailscale DERP (SGP)",
-        "content": "43.156.103.43",
-        "id": null,
-        "name": "derp-sm-vps-tc.lucc.dev",
-        "priority": null,
-        "proxied": false,
-        "ttl": 1,
-        "type": "A"
-      },
-      "nva": {
-        "comment": "Tailscale DERP (Shanghai, nixos-vps-agt)",
-        "content": "1.15.64.188",
-        "id": null,
-        "name": "nva.lucc.dev",
-        "priority": null,
-        "proxied": false,
-        "ttl": 1,
-        "type": "A"
-      },
       "rsshub": {
         "comment": "rsshub",
         "content": "192.129.183.26",

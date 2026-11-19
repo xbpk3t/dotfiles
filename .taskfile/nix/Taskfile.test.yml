@@ -19,7 +19,7 @@ tasks:
       CONFIG_TYPE:
         sh: 'echo "${EVAL_CONFIG_TYPE:-$( [ "{{OS}}" = darwin ] && echo darwinConfigurations || echo nixosConfigurations )}"'
       HOST:
-        sh: 'echo "${EVAL_HOST:-$( [ "{{OS}}" = darwin ] && echo macos-ws || hostname )}"'
+        sh: 'echo "${EVAL_HOST:-$( [ "{{OS}}" = darwin ] && echo macos-ws || hostname -s )}"'
     cmds:
       - nix eval --impure ".#{{.CONFIG_TYPE}}.{{.HOST}}.config.system.build.toplevel.drvPath"
 

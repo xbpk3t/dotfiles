@@ -27,8 +27,7 @@ in
     networking = {
       tailscale.derper = {
         enable = true;
-        # 短域名：nva = nixos-vps-agt；域名里不体现 derp。
-        domain = "nva.lucc.dev";
+        # 短域名 nva = nixos-vps-agt；域名事实在 hosts/nixos-vps/agt/meta.nix。
         acmeEmail = mail;
       };
       mihomo-client = {

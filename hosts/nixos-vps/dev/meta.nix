@@ -7,15 +7,23 @@
   stateVersion = "24.11";
 
   tailscale.ip = "100.101.189.7";
+
+  # 公网 IPv4：TF DNS / DERP A 记录从这里生成。
+  publicIpv4 = "192.129.183.26";
+
+  # DERP 域名 + Cloudflare records key/comment：跨层生成用。
+  derper = {
+    domain = "derp-nixos-vps-dev.lucc.dev";
+    dnsKey = "derp-dev";
+    dnsComment = "Tailscale DERP (LA)";
+  };
+
   deploy = {
     remoteBuild = true;
   };
 
   # Nezha 只允许一个 hub；agent 的 dashboard 地址从这里派生。
-  nezha = {
-    hub = true;
-    port = 8008;
-  };
+  nezha.hub = true;
 
   singbox = {
     label = "LA-RN";
