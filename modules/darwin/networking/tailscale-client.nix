@@ -21,6 +21,14 @@ in
       # overrideLocalDns = true;
     };
 
+    # 个人设备只解密 tag:ws 的加入 key；VPS key 不在 Darwin 上出现。
+    sops.secrets.TAILSCALE_AUTH_KEY_WS = {
+      key = "tailscale/auth_key_ws";
+      mode = "0400";
+      owner = "root";
+      group = "wheel";
+    };
+
     # 与 nixos 版 tailscale-client 一致：tailscale 启用时提供 tss 快捷 alias。
     environment.shellAliases = {
       tss = "tailscale";
@@ -34,7 +42,7 @@ in
         echo "tailscale: already connected, skipping pre-auth"
       else
         echo "tailscale: attempting pre-auth with auth key..."
-        ${pkgs.tailscale}/bin/tailscale up --authkey="$(cat ${config.sops.secrets.TAILSCALE_AUTH_KEY.path})"
+        ${pkgs.tailscale}/bin/tailscale up --authkey="$(cat ${config.sops.secrets.TAILSCALE_AUTH_KEY_WS.path})"
       fi
 
       # 设备名钉死到 fleet metadata 的 hostName（幂等）；未连接时跳过。

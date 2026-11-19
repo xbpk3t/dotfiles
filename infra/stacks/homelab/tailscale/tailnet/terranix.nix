@@ -26,12 +26,262 @@ let
 
   owner = "xbpk3t@github";
 
+  # ── 角色 / 能力模型 ─────────────────────────────────────────────
+  # 暴露面 role：vps（公网/低信任）、ws（个人设备/高信任）。
+  # 能力 tag：svc（Tailscale Services host）、exit（exit node）、ssh（SSH 目标）。
+  # tag 是扁平的；一台设备可以叠加多个（dev = vps + svc + exit）。
+  tagOwners = {
+    "tag:vps" = [ owner ];
+    "tag:ws" = [ owner ];
+    "tag:svc" = [ owner ];
+    "tag:exit" = [ owner ];
+    # Tailscale SSH 的 dst 只接受 tag/autogroup，不能写 host alias/IP。
+    "tag:ssh" = [ owner ];
+  };
+
+  # 一次性/非 fleet 管理设备的 host alias。
+  # 注意：ACL 里直接写 hostname 会被控制面拒绝（invalid address）；
+  # 在 hosts 里定义别名，再用别名写 grants/tests。
+  # （SSH 规则的 src/dst 不接受 host alias/IP，只能用 user/group/tag/autogroup。）
+  hosts = {
+    "macos-ws" = macosIp;
+    "hermes-wb" = hmPaIp;
+    "agt" = agtIp;
+    "nod-am" = phoneIp;
+  };
+
+  grants = [
+    # 个人设备 → VPS/hermes：只开 SSH（部署/开发）。
+    {
+      src = [ "tag:ws" ];
+      dst = [ "tag:vps" ];
+      ip = [ "22" ];
+    }
+    # 个人设备之间：只开 SSH；其他端口用 SSH 隧道或按需加。
+    {
+      src = [ "tag:ws" ];
+      dst = [ "tag:ws" ];
+      ip = [ "22" ];
+    }
+    # VPS/hermes 之间：只开 SSH；Nezha 走单独的 8008。
+    {
+      src = [ "tag:vps" ];
+      dst = [ "tag:vps" ];
+      ip = [ "22" ];
+    }
+    # Nezha agent → hub（dev 带 tag:svc）。
+    {
+      src = [ "tag:vps" ];
+      dst = [ "tag:svc" ];
+      ip = [ "8008" ];
+    }
+    # 个人设备 → Tailscale Services VIPs。
+    {
+      src = [ "tag:ws" ];
+      dst = [
+        "svc:9router"
+        "svc:nezha"
+      ];
+      ip = [ "80" ];
+    }
+    # 手机 → Services VIPs（手机不打 tag:ws，保持 user-owned）。
+    {
+      src = [ "nod-am" ];
+      dst = [
+        "svc:9router"
+        "svc:nezha"
+      ];
+      ip = [ "80" ];
+    }
+    # 手机 Tailscale SSH → agt：网络层先放行 22。
+    # 手机是唯一未打 tag 的用户设备；xbpk3t@github 只匹配 user-owned devices。
+    {
+      src = [ owner ];
+      dst = [ "tag:ssh" ];
+      ip = [ "22" ];
+    }
+    # 手机 exit node：只允许走 tag:exit（dev）。
+    {
+      src = [ "nod-am" ];
+      dst = [ "autogroup:internet" ];
+      ip = [ "*" ];
+      via = [ "tag:exit" ];
+    }
+    # hm PA local-build exit node：PA 只在构建 HM generation 时用 dev，
+    # 构建完成后会清掉 exit node。只允许走 tag:exit。
+    {
+      src = [ "hermes-wb" ];
+      dst = [ "autogroup:internet" ];
+      ip = [ "*" ];
+      via = [ "tag:exit" ];
+    }
+    # peer relay：只允许 Mac/hermes 用 agt 做 UDP 中继。
+    # 两端都在 NAT 后，Mac 侧对称 NAT；peer relay 只在直连失败时启用，
+    # 不改 home DERP，所以不会影响 Mac↔dev（见 LUC-555）。
+    {
+      src = [
+        "macos-ws"
+        "hermes-wb"
+      ];
+      dst = [ "agt" ];
+      app = {
+        "tailscale.com/cap/relay" = [ ];
+      };
+    }
+    # NOTE(2026-11-21): 维护通道，不是最终信任模型。
+    # agt 是公网 VPS；这里只允许 agt → macos-ws:22，用于从 agt 部署/维护 Mac。
+    # 等有固定的、可信的开发机后删除这条 grant，恢复 vps↛ws。
+    {
+      src = [ "agt" ];
+      dst = [ "macos-ws" ];
+      ip = [ "22" ];
+    }
+  ];
+
+  # ── DERP map（方案 B：只把 agt 加进来）──────────────────────────
+  # agt（上海）作为低延迟 DERP fallback；保留默认 region。
+  # dev(LA) / tc(SGP) 不加入：dev→agt TCP 10043 被 GFW 挡，
+  # 加入后会重演 cn-sh 的 Mac↔dev 单向回归；tc 机器已不在线。
+  derpMap = {
+    OmitDefaultRegions = false;
+    Regions = {
+      "900" = {
+        RegionID = 900;
+        RegionCode = "agt";
+        RegionName = "agt-sh";
+        Nodes = [
+          {
+            Name = "900a";
+            RegionID = 900;
+            HostName = "nva.lucc.dev";
+            IPv4 = "1.15.64.188";
+            DERPPort = 10043;
+            STUNPort = 10078;
+          }
+        ];
+      };
+    };
+  };
+
+  aclBase = {
+    inherit
+      tagOwners
+      hosts
+      grants
+      derpMap
+      ;
+
+    autoApprovers = {
+      # 只允许带 tag:exit 的设备自动批准 exit node（当前只有 dev）。
+      # 不再用用户身份或 service tag 自动批准；routes 已删（没有 subnet router）。
+      exitNode = [ "tag:exit" ];
+      services = {
+        "svc:9router" = [ "tag:svc" ];
+        "svc:nezha" = [ "tag:svc" ];
+      };
+    };
+
+    ssh = [
+      # agt 开启 --ssh 后，所有到 agt tailnet 22 的连接都由 Tailscale SSH
+      # 裁决；grants 只负责网络层放行。tagged 设备不属于 autogroup:self；
+      # check 不支持 tag src，所以可信 workstation 用 accept。
+      {
+        action = "accept";
+        src = [ "tag:ws" ];
+        dst = [ "tag:ssh" ];
+        users = [ "luck" ];
+      }
+      # 非 tagged 用户设备（手机）保留 check（周期重新认证）。
+      {
+        action = "check";
+        src = [ owner ];
+        dst = [ "tag:ssh" ];
+        users = [ "luck" ];
+      }
+    ];
+  };
+
+  aclFinal = aclBase // {
+    # 防止以后改 ACL 时回归。tests 在 policy 变更时由控制面执行，
+    # 失败会拒绝整份 policy。
+    tests = [
+      {
+        src = "tag:ws";
+        accept = [
+          "tag:vps:22"
+          "tag:ws:22"
+          "svc:9router:80"
+          "svc:nezha:80"
+        ];
+        deny = [
+          "tag:vps:80"
+          "198.51.100.8:22"
+        ];
+      }
+      {
+        src = "tag:vps";
+        accept = [
+          "tag:vps:22"
+          "tag:svc:8008"
+        ];
+        deny = [ "tag:ws:22" ];
+      }
+      {
+        src = "nod-am";
+        accept = [
+          "svc:9router:80"
+          "svc:nezha:80"
+        ];
+      }
+    ];
+
+    sshTests = [
+      {
+        src = owner;
+        dst = [ "tag:ssh" ];
+        check = [ "luck" ];
+        deny = [ "root" ];
+      }
+      {
+        src = "tag:ws";
+        dst = [ "tag:ssh" ];
+        accept = [ "luck" ];
+        deny = [ "root" ];
+      }
+      {
+        src = "tag:vps";
+        dst = [ "tag:ssh" ];
+        deny = [
+          "luck"
+          "root"
+        ];
+      }
+    ];
+  };
+
+  # Phase 1：给设备打 tag / 重新认证期间保留 *→*，避免默认拒绝把自己锁死。
+  # Phase 2（默认）：上面的最小权限 ACL。
+  aclTagging = aclBase // {
+    grants = [
+      {
+        src = [ "*" ];
+        dst = [ "*" ];
+        ip = [ "*" ];
+      }
+    ]
+    ++ grants;
+    tests = [ ];
+    sshTests = [ ];
+  };
+
+  aclFinalJson = builtins.toJSON aclFinal;
+  aclTaggingJson = builtins.toJSON aclTagging;
+
   # 每台设备的 tag；key 是 fleet 节点名。
   deviceTags = {
     nixos-vps-dev = [
       "tag:exit"
       "tag:svc"
-      "tag:svc-9router"
       "tag:vps"
     ];
     hm-lightvela = [ "tag:vps" ];
@@ -54,121 +304,6 @@ let
     in
     lib.nameValuePair (node.tailscale.hostname or name) { inherit tags; }
   ) deviceTags;
-
-  # 自定义 DERP region 全部下线（保留默认 region 即可）：
-  #   901 (la) / 903 (cn-sh) 因 dev(LA) → agt(SH) 公网 TCP 被 GFW 挡、而 Mac 会优先
-  #   选 cn-sh 作为 home DERP，导致 Mac↔dev 单向，已移除（见 f68eb73d）。
-  #   902 (hk-2, 47.79.17.202) 已不可达：hermes `tailscale debug derp hk-2` TCP 超时，
-  #   Mac/hermes netcheck 里也没有该 region 的延迟。
-  # Mac（对称 NAT）↔ hermes 打洞失败改用 peer relay（agt UDP 40000），
-  # 不再依赖自定义 DERP region。
-
-  acl = {
-    # Tailscale Services 要求 service host 是 tagged device。
-    tagOwners = {
-      # Tailscale 不允许通过 API 给 tagged node 摘 tag（需要 reauth），
-      # 所以迁移保留设备上的旧 tag；grant 已改为 IP 规则，不依赖它们。
-      "tag:exit" = [ owner ];
-      "tag:ssh" = [ owner ];
-      "tag:svc" = [ owner ];
-      "tag:svc-9router" = [ owner ];
-      "tag:vps" = [ owner ];
-      "tag:ws" = [ owner ];
-    };
-
-    grants = [
-      {
-        src = [ "*" ];
-        dst = [ "*" ];
-        ip = [ "*" ];
-      }
-      # 手机 exit node：xbpk3t@nod-am 是早已不存在的用户（tailnet 现在只有
-      # xbpk3t@github），旧规则匹配不到任何设备。改用手机 tailnet IP。
-      {
-        src = [ phoneIp ]; # Redmi Note 13 Pro
-        dst = [ "autogroup:internet" ];
-        ip = [ "*" ];
-      }
-      # hm PA local-build exit node: the PA uses nixos-vps-dev only while
-      # building the HM generation (GitHub flake inputs). It clears the exit
-      # node afterwards. autoApprovers already approves the dev exit node; this
-      # grant is the missing client-side permission. src 必须是身份或 IP：
-      # user@hostname 不是合法选择器（只有 hosts 别名可用于 dst）。
-      {
-        src = [ hmPaIp ]; # hermes-wb (hm PA)
-        dst = [ "autogroup:internet" ];
-        ip = [ "*" ];
-      }
-      # peer relay：只允许 macos-ws 和 hermes-wb 用 nixos-vps-agt 做 UDP 中继。
-      # 两者都在 NAT 后，Mac 侧还是对称 NAT，直连打洞失败；DERP 又会绕美国。
-      # grant 的 src 是"需要通过 relay 访问的设备"，两端都列入，保证两个方向
-      # 都能命中。能力本身不需要参数。
-      # 注意：src 用 Tailscale IP；直接写 hostname 会被控制面拒绝
-      # （invalid address），除非在 ACL 的 hosts 里额外定义别名。
-      {
-        src = [
-          macosIp # macos-ws
-          hmPaIp # hermes-wb
-        ];
-        dst = [ agtIp ]; # nixos-vps-agt
-        app = {
-          "tailscale.com/cap/relay" = [ ];
-        };
-      }
-    ];
-
-    autoApprovers = {
-      exitNode = [
-        owner
-        "tag:svc-9router"
-      ];
-      routes = {
-        "0.0.0.0/0" = [
-          owner
-          "tag:svc-9router"
-        ];
-        "::/0" = [
-          owner
-          "tag:svc-9router"
-        ];
-      };
-      services = {
-        "svc:9router" = [ "tag:svc-9router" ];
-        "svc:nezha" = [ "tag:svc-9router" ];
-      };
-    };
-
-    ssh = [
-      # 内层 workstation（tag:ws，含 Mac）→ 外层 VPS（tag:ssh）：Tailscale
-      # SSH 由 ssh 段裁决，不走 grants。tagged 设备不属于 autogroup:self，
-      # 必须显式列出 tag:ws / tag:vps；但 check 不支持 tag src，只能用 accept。
-      {
-        action = "accept";
-        src = [
-          "tag:ws"
-          "tag:vps"
-        ];
-        dst = [ "tag:ssh" ];
-        users = [ "luck" ];
-      }
-      # 非 tagged 用户设备的入口保留 check（周期重新认证）。
-      {
-        action = "check";
-        src = [ owner ];
-        dst = [ "tag:ssh" ];
-        users = [ "luck" ];
-      }
-      {
-        action = "check";
-        src = [ "autogroup:member" ];
-        dst = [ "autogroup:self" ];
-        users = [
-          "autogroup:nonroot"
-          "root"
-        ];
-      }
-    ];
-  };
 in
 {
   terraform = {
@@ -196,14 +331,24 @@ in
     };
   };
 
+  # Phase 1 rollout 开关：
+  #   tofu apply -var tailscale_acl_allow_all=true   # 打 tag / re-auth
+  #   tofu apply                                      # 默认 false，切最小权限
+  variable.tailscale_acl_allow_all = {
+    type = "bool";
+    default = false;
+    description = "Keep the legacy *→* grant while devices are tagged and re-authenticated. Default false = least-privilege ACL.";
+  };
+
   provider.tailscale = {
     tailnet = facts.tailscale.tailnet;
   };
 
   resource = {
     tailscale_acl.main = {
-      # ACL 是静态数据，直接在 Nix 侧编码；不使用自定义 derpMap（默认 region 即可）。
-      acl = builtins.toJSON acl;
+      # ACL 是静态数据，在 Nix 侧编码；用 Terraform 变量在
+      # “打 tag 阶段（保留 *→*）”和“最终阶段（默认拒绝）”之间切换。
+      acl = lib.tf.ref "var.tailscale_acl_allow_all ? ${builtins.toJSON aclTaggingJson} : ${builtins.toJSON aclFinalJson}";
     };
 
     tailscale_dns_preferences.main = {
@@ -224,14 +369,29 @@ in
       };
     };
 
-    tailscale_tailnet_key.device_join = {
+    # 两个 auth key：VPS 自动带 tag:vps，个人设备自动带 tag:ws。
+    # 90 天 reusable；泄露一个只影响一类角色；Tailnet Lock 是最终兜底。
+    # 必须先有 ACL 的 tagOwners，才能创建带 tag 的 key。
+    tailscale_tailnet_key.vps_join = {
       reusable = true;
       ephemeral = false;
       preauthorized = false;
       expiry = 7776000;
+      tags = [ "tag:vps" ];
+      depends_on = [ "tailscale_acl.main" ];
     };
 
-    # 旧 tag 不能通过 API 摘除（需要 reauth）；nixos-vps-dev 保留旧 tag 并补上服务 tag。
+    tailscale_tailnet_key.ws_join = {
+      reusable = true;
+      ephemeral = false;
+      preauthorized = false;
+      expiry = 7776000;
+      tags = [ "tag:ws" ];
+      depends_on = [ "tailscale_acl.main" ];
+    };
+
+    # 旧 tag 不能通过 API 摘除（需要 reauth）；deviceTags 已去掉 legacy，
+    # 这里按 hostname 维护每台设备的完整 tag 集合。
     tailscale_device_tags = lib.mapAttrs' (
       device: cfg:
       lib.nameValuePair (tfName device) {
@@ -269,4 +429,17 @@ in
       to = "tailscale_device_tags.${tfName device}";
     }
   ]) (lib.attrNames devices);
+
+  # 方便把新 key 写入 sops（sensitive output）。
+  #   tofu output -raw vps_join_key
+  #   tofu output -raw ws_join_key
+  output.vps_join_key = {
+    value = lib.tf.ref "tailscale_tailnet_key.vps_join.key";
+    sensitive = true;
+  };
+
+  output.ws_join_key = {
+    value = lib.tf.ref "tailscale_tailnet_key.ws_join.key";
+    sensitive = true;
+  };
 }

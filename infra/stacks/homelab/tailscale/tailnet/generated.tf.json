@@ -55,6 +55,16 @@
       "to": "tailscale_device_tags.nixos_wsl"
     }
   ],
+  "output": {
+    "vps_join_key": {
+      "sensitive": true,
+      "value": "${tailscale_tailnet_key.vps_join.key}"
+    },
+    "ws_join_key": {
+      "sensitive": true,
+      "value": "${tailscale_tailnet_key.ws_join.key}"
+    }
+  },
   "provider": {
     "tailscale": {
       "tailnet": "xbpk3t.github"
@@ -63,7 +73,7 @@
   "resource": {
     "tailscale_acl": {
       "main": {
-        "acl": "{\"autoApprovers\":{\"exitNode\":[\"xbpk3t@github\",\"tag:svc-9router\"],\"routes\":{\"0.0.0.0/0\":[\"xbpk3t@github\",\"tag:svc-9router\"],\"::/0\":[\"xbpk3t@github\",\"tag:svc-9router\"]},\"services\":{\"svc:9router\":[\"tag:svc-9router\"],\"svc:nezha\":[\"tag:svc-9router\"]}},\"grants\":[{\"dst\":[\"*\"],\"ip\":[\"*\"],\"src\":[\"*\"]},{\"dst\":[\"autogroup:internet\"],\"ip\":[\"*\"],\"src\":[\"100.123.207.1\"]},{\"dst\":[\"autogroup:internet\"],\"ip\":[\"*\"],\"src\":[\"100.72.194.36\"]},{\"app\":{\"tailscale.com/cap/relay\":[]},\"dst\":[\"100.66.22.92\"],\"src\":[\"100.87.216.84\",\"100.72.194.36\"]}],\"ssh\":[{\"action\":\"accept\",\"dst\":[\"tag:ssh\"],\"src\":[\"tag:ws\",\"tag:vps\"],\"users\":[\"luck\"]},{\"action\":\"check\",\"dst\":[\"tag:ssh\"],\"src\":[\"xbpk3t@github\"],\"users\":[\"luck\"]},{\"action\":\"check\",\"dst\":[\"autogroup:self\"],\"src\":[\"autogroup:member\"],\"users\":[\"autogroup:nonroot\",\"root\"]}],\"tagOwners\":{\"tag:exit\":[\"xbpk3t@github\"],\"tag:ssh\":[\"xbpk3t@github\"],\"tag:svc\":[\"xbpk3t@github\"],\"tag:svc-9router\":[\"xbpk3t@github\"],\"tag:vps\":[\"xbpk3t@github\"],\"tag:ws\":[\"xbpk3t@github\"]}}"
+        "acl": "${var.tailscale_acl_allow_all ? \"{\\\"autoApprovers\\\":{\\\"exitNode\\\":[\\\"tag:exit\\\"],\\\"services\\\":{\\\"svc:9router\\\":[\\\"tag:svc\\\"],\\\"svc:nezha\\\":[\\\"tag:svc\\\"]}},\\\"derpMap\\\":{\\\"OmitDefaultRegions\\\":false,\\\"Regions\\\":{\\\"900\\\":{\\\"Nodes\\\":[{\\\"DERPPort\\\":10043,\\\"HostName\\\":\\\"nva.lucc.dev\\\",\\\"IPv4\\\":\\\"1.15.64.188\\\",\\\"Name\\\":\\\"900a\\\",\\\"RegionID\\\":900,\\\"STUNPort\\\":10078}],\\\"RegionCode\\\":\\\"agt\\\",\\\"RegionID\\\":900,\\\"RegionName\\\":\\\"agt-sh\\\"}}},\\\"grants\\\":[{\\\"dst\\\":[\\\"*\\\"],\\\"ip\\\":[\\\"*\\\"],\\\"src\\\":[\\\"*\\\"]},{\\\"dst\\\":[\\\"tag:vps\\\"],\\\"ip\\\":[\\\"22\\\"],\\\"src\\\":[\\\"tag:ws\\\"]},{\\\"dst\\\":[\\\"tag:ws\\\"],\\\"ip\\\":[\\\"22\\\"],\\\"src\\\":[\\\"tag:ws\\\"]},{\\\"dst\\\":[\\\"tag:vps\\\"],\\\"ip\\\":[\\\"22\\\"],\\\"src\\\":[\\\"tag:vps\\\"]},{\\\"dst\\\":[\\\"tag:svc\\\"],\\\"ip\\\":[\\\"8008\\\"],\\\"src\\\":[\\\"tag:vps\\\"]},{\\\"dst\\\":[\\\"svc:9router\\\",\\\"svc:nezha\\\"],\\\"ip\\\":[\\\"80\\\"],\\\"src\\\":[\\\"tag:ws\\\"]},{\\\"dst\\\":[\\\"svc:9router\\\",\\\"svc:nezha\\\"],\\\"ip\\\":[\\\"80\\\"],\\\"src\\\":[\\\"nod-am\\\"]},{\\\"dst\\\":[\\\"tag:ssh\\\"],\\\"ip\\\":[\\\"22\\\"],\\\"src\\\":[\\\"xbpk3t@github\\\"]},{\\\"dst\\\":[\\\"autogroup:internet\\\"],\\\"ip\\\":[\\\"*\\\"],\\\"src\\\":[\\\"nod-am\\\"],\\\"via\\\":[\\\"tag:exit\\\"]},{\\\"dst\\\":[\\\"autogroup:internet\\\"],\\\"ip\\\":[\\\"*\\\"],\\\"src\\\":[\\\"hermes-wb\\\"],\\\"via\\\":[\\\"tag:exit\\\"]},{\\\"app\\\":{\\\"tailscale.com/cap/relay\\\":[]},\\\"dst\\\":[\\\"agt\\\"],\\\"src\\\":[\\\"macos-ws\\\",\\\"hermes-wb\\\"]},{\\\"dst\\\":[\\\"macos-ws\\\"],\\\"ip\\\":[\\\"22\\\"],\\\"src\\\":[\\\"agt\\\"]}],\\\"hosts\\\":{\\\"agt\\\":\\\"100.66.22.92\\\",\\\"hermes-wb\\\":\\\"100.72.194.36\\\",\\\"macos-ws\\\":\\\"100.87.216.84\\\",\\\"nod-am\\\":\\\"100.123.207.1\\\"},\\\"ssh\\\":[{\\\"action\\\":\\\"accept\\\",\\\"dst\\\":[\\\"tag:ssh\\\"],\\\"src\\\":[\\\"tag:ws\\\"],\\\"users\\\":[\\\"luck\\\"]},{\\\"action\\\":\\\"check\\\",\\\"dst\\\":[\\\"tag:ssh\\\"],\\\"src\\\":[\\\"xbpk3t@github\\\"],\\\"users\\\":[\\\"luck\\\"]}],\\\"sshTests\\\":[],\\\"tagOwners\\\":{\\\"tag:exit\\\":[\\\"xbpk3t@github\\\"],\\\"tag:ssh\\\":[\\\"xbpk3t@github\\\"],\\\"tag:svc\\\":[\\\"xbpk3t@github\\\"],\\\"tag:vps\\\":[\\\"xbpk3t@github\\\"],\\\"tag:ws\\\":[\\\"xbpk3t@github\\\"]},\\\"tests\\\":[]}\" : \"{\\\"autoApprovers\\\":{\\\"exitNode\\\":[\\\"tag:exit\\\"],\\\"services\\\":{\\\"svc:9router\\\":[\\\"tag:svc\\\"],\\\"svc:nezha\\\":[\\\"tag:svc\\\"]}},\\\"derpMap\\\":{\\\"OmitDefaultRegions\\\":false,\\\"Regions\\\":{\\\"900\\\":{\\\"Nodes\\\":[{\\\"DERPPort\\\":10043,\\\"HostName\\\":\\\"nva.lucc.dev\\\",\\\"IPv4\\\":\\\"1.15.64.188\\\",\\\"Name\\\":\\\"900a\\\",\\\"RegionID\\\":900,\\\"STUNPort\\\":10078}],\\\"RegionCode\\\":\\\"agt\\\",\\\"RegionID\\\":900,\\\"RegionName\\\":\\\"agt-sh\\\"}}},\\\"grants\\\":[{\\\"dst\\\":[\\\"tag:vps\\\"],\\\"ip\\\":[\\\"22\\\"],\\\"src\\\":[\\\"tag:ws\\\"]},{\\\"dst\\\":[\\\"tag:ws\\\"],\\\"ip\\\":[\\\"22\\\"],\\\"src\\\":[\\\"tag:ws\\\"]},{\\\"dst\\\":[\\\"tag:vps\\\"],\\\"ip\\\":[\\\"22\\\"],\\\"src\\\":[\\\"tag:vps\\\"]},{\\\"dst\\\":[\\\"tag:svc\\\"],\\\"ip\\\":[\\\"8008\\\"],\\\"src\\\":[\\\"tag:vps\\\"]},{\\\"dst\\\":[\\\"svc:9router\\\",\\\"svc:nezha\\\"],\\\"ip\\\":[\\\"80\\\"],\\\"src\\\":[\\\"tag:ws\\\"]},{\\\"dst\\\":[\\\"svc:9router\\\",\\\"svc:nezha\\\"],\\\"ip\\\":[\\\"80\\\"],\\\"src\\\":[\\\"nod-am\\\"]},{\\\"dst\\\":[\\\"tag:ssh\\\"],\\\"ip\\\":[\\\"22\\\"],\\\"src\\\":[\\\"xbpk3t@github\\\"]},{\\\"dst\\\":[\\\"autogroup:internet\\\"],\\\"ip\\\":[\\\"*\\\"],\\\"src\\\":[\\\"nod-am\\\"],\\\"via\\\":[\\\"tag:exit\\\"]},{\\\"dst\\\":[\\\"autogroup:internet\\\"],\\\"ip\\\":[\\\"*\\\"],\\\"src\\\":[\\\"hermes-wb\\\"],\\\"via\\\":[\\\"tag:exit\\\"]},{\\\"app\\\":{\\\"tailscale.com/cap/relay\\\":[]},\\\"dst\\\":[\\\"agt\\\"],\\\"src\\\":[\\\"macos-ws\\\",\\\"hermes-wb\\\"]},{\\\"dst\\\":[\\\"macos-ws\\\"],\\\"ip\\\":[\\\"22\\\"],\\\"src\\\":[\\\"agt\\\"]}],\\\"hosts\\\":{\\\"agt\\\":\\\"100.66.22.92\\\",\\\"hermes-wb\\\":\\\"100.72.194.36\\\",\\\"macos-ws\\\":\\\"100.87.216.84\\\",\\\"nod-am\\\":\\\"100.123.207.1\\\"},\\\"ssh\\\":[{\\\"action\\\":\\\"accept\\\",\\\"dst\\\":[\\\"tag:ssh\\\"],\\\"src\\\":[\\\"tag:ws\\\"],\\\"users\\\":[\\\"luck\\\"]},{\\\"action\\\":\\\"check\\\",\\\"dst\\\":[\\\"tag:ssh\\\"],\\\"src\\\":[\\\"xbpk3t@github\\\"],\\\"users\\\":[\\\"luck\\\"]}],\\\"sshTests\\\":[{\\\"check\\\":[\\\"luck\\\"],\\\"deny\\\":[\\\"root\\\"],\\\"dst\\\":[\\\"tag:ssh\\\"],\\\"src\\\":\\\"xbpk3t@github\\\"},{\\\"accept\\\":[\\\"luck\\\"],\\\"deny\\\":[\\\"root\\\"],\\\"dst\\\":[\\\"tag:ssh\\\"],\\\"src\\\":\\\"tag:ws\\\"},{\\\"deny\\\":[\\\"luck\\\",\\\"root\\\"],\\\"dst\\\":[\\\"tag:ssh\\\"],\\\"src\\\":\\\"tag:vps\\\"}],\\\"tagOwners\\\":{\\\"tag:exit\\\":[\\\"xbpk3t@github\\\"],\\\"tag:ssh\\\":[\\\"xbpk3t@github\\\"],\\\"tag:svc\\\":[\\\"xbpk3t@github\\\"],\\\"tag:vps\\\":[\\\"xbpk3t@github\\\"],\\\"tag:ws\\\":[\\\"xbpk3t@github\\\"]},\\\"tests\\\":[{\\\"accept\\\":[\\\"tag:vps:22\\\",\\\"tag:ws:22\\\",\\\"svc:9router:80\\\",\\\"svc:nezha:80\\\"],\\\"deny\\\":[\\\"tag:vps:80\\\",\\\"198.51.100.8:22\\\"],\\\"src\\\":\\\"tag:ws\\\"},{\\\"accept\\\":[\\\"tag:vps:22\\\",\\\"tag:svc:8008\\\"],\\\"deny\\\":[\\\"tag:ws:22\\\"],\\\"src\\\":\\\"tag:vps\\\"},{\\\"accept\\\":[\\\"svc:9router:80\\\",\\\"svc:nezha:80\\\"],\\\"src\\\":\\\"nod-am\\\"}]}\"}"
       }
     },
     "tailscale_device_key": {
@@ -110,7 +120,6 @@
         "tags": [
           "tag:exit",
           "tag:svc",
-          "tag:svc-9router",
           "tag:vps"
         ]
       },
@@ -146,11 +155,29 @@
       }
     },
     "tailscale_tailnet_key": {
-      "device_join": {
+      "vps_join": {
+        "depends_on": [
+          "tailscale_acl.main"
+        ],
         "ephemeral": false,
         "expiry": 7776000,
         "preauthorized": false,
-        "reusable": true
+        "reusable": true,
+        "tags": [
+          "tag:vps"
+        ]
+      },
+      "ws_join": {
+        "depends_on": [
+          "tailscale_acl.main"
+        ],
+        "ephemeral": false,
+        "expiry": 7776000,
+        "preauthorized": false,
+        "reusable": true,
+        "tags": [
+          "tag:ws"
+        ]
       }
     }
   },
@@ -179,5 +206,12 @@
       }
     },
     "required_version": ">= 1.10.0"
+  },
+  "variable": {
+    "tailscale_acl_allow_all": {
+      "default": false,
+      "description": "Keep the legacy *→* grant while devices are tagged and re-authenticated. Default false = least-privilege ACL.",
+      "type": "bool"
+    }
   }
 }

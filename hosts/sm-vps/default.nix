@@ -1,7 +1,7 @@
 # sm-vps group base：非 NixOS 系统态声明的共享基线。
 #
 # Node dirs import this and add role deltas:
-#   tc -> dedicated VPS: sops + singbox/derper/status-page
+#   tc -> dedicated VPS: sops + singbox/status-page（DERP 只保留 agt）
 #   hk -> shared VPS: modules.sm.shared = true, no global side effects
 #
 # 这里只放两个节点都需要的基线能力；服务角色和 shared 策略由节点自己声明。

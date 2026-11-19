@@ -5,7 +5,10 @@
   stateVersion = "24.11";
 
   # fleet SSH 统一寻址：ssh.nix 只认 tailscale.ip。
-  tailscale.ip = "100.87.216.84";
+  tailscale = {
+    ip = "100.87.216.84";
+    role = "ws";
+  };
 
   deploy = {
     remoteBuild = true;

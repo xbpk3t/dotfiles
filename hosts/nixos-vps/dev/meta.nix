@@ -6,17 +6,14 @@
   system = "x86_64-linux";
   stateVersion = "24.11";
 
-  tailscale.ip = "100.101.189.7";
-
-  # 公网 IPv4：TF DNS / DERP A 记录从这里生成。
-  publicIpv4 = "192.129.183.26";
-
-  # DERP 域名 + Cloudflare records key/comment：跨层生成用。
-  derper = {
-    domain = "derp-nixos-vps-dev.lucc.dev";
-    dnsKey = "derp-dev";
-    dnsComment = "Tailscale DERP (LA)";
+  tailscale = {
+    ip = "100.101.189.7";
+    role = "vps";
   };
+
+  # 公网 IPv4：TF DNS / sing-box 记录从这里生成。
+  # dev 不再跑 derper（DERP 只保留 agt，见 terranix.nix 的 derpMap）。
+  publicIpv4 = "192.129.183.26";
 
   deploy = {
     remoteBuild = true;

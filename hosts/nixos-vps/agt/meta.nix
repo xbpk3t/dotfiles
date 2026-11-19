@@ -5,7 +5,10 @@
   system = "x86_64-linux";
   stateVersion = "26.05";
 
-  tailscale.ip = "100.66.22.92";
+  tailscale = {
+    ip = "100.66.22.92";
+    role = "vps";
+  };
 
   # 公网 IPv4：TF DNS / DERP A 记录从这里生成。
   publicIpv4 = "1.15.64.188";

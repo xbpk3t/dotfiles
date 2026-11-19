@@ -66,8 +66,8 @@ in
         SUB_DOGEGG = mkRootSecret "proxy/sub/dogegg";
         SUB_DOING = mkRootSecret "proxy/sub/doing";
         SUB_IKUUU = mkRootSecret "proxy/sub/ikuuu";
-        # Tailscale
-        TAILSCALE_AUTH_KEY = mkRootSecret "tailscale/auth_key";
+        # Tailscale（sm 主机都是 VPS 角色）
+        TAILSCALE_AUTH_KEY_VPS = mkRootSecret "tailscale/auth_key_vps";
         # ACME（derper 证书 DNS-01）：CF token（复用 secrets/default.nix 的 acme/cloudflare_env）。
         # email 用 userMeta.mail（flake globals.identity），不进 sops。
         ACME_CF_ENV = mkRootSecret "acme/cloudflare_env";

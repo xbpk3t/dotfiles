@@ -5,15 +5,13 @@
   system = "x86_64-linux";
   stateVersion = "24.11";
 
-  # 公网 IPv4：TF DNS / DERP A 记录从这里生成。
+  # sm-vps 都是 VPS 角色；用于未来切回 tailnet 时选择 VPS auth key。
+  tailscale.role = "vps";
+
+  # 公网 IPv4：TF DNS 记录从这里生成。
   publicIpv4 = "43.156.103.43";
 
-  # DERP 域名 + Cloudflare records key/comment：跨层生成用。
-  derper = {
-    domain = "derp-sm-vps-tc.lucc.dev";
-    dnsKey = "derp-sm-vps-tc";
-    dnsComment = "Tailscale DERP (SGP)";
-  };
+  # tc 不再跑 derper（DERP 只保留 agt，见 terranix.nix 的 derpMap）。
 
   deploy = {
     remoteBuild = true;

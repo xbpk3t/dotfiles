@@ -8,6 +8,7 @@
 with lib;
 let
   cfg = config.modules.networking.tailscale;
+  role = hostMeta.tailscale.role or "vps";
 
   # 设备名钉死到 fleet metadata 的 hostName，不跟随 OS hostname 漂移。
   hostnameFlag = "--hostname=${hostMeta.hostName}";
@@ -37,6 +38,21 @@ in
     # 开启后：useRoutingFeatures=server + --advertise-exit-node。
     # 批准由控制面（autoApprovers）+ 使用侧 grants 管理，模块不关心。
     exitNode = mkEnableOption "Advertise this host as a Tailscale exit node";
+
+    # 角色对应的加入 key：VPS 用 tag:vps，个人设备用 tag:ws。
+    # 默认从 meta 的 tailscale.role 派生；缺失时按 vps 处理。
+    authKeyFile = mkOption {
+      type = types.path;
+      default =
+        if role == "ws" then
+          config.sops.secrets.TAILSCALE_AUTH_KEY_WS.path
+        else
+          config.sops.secrets.TAILSCALE_AUTH_KEY_VPS.path;
+      description = ''
+        Path to the Tailscale auth key used to join the tailnet.
+        The key is tagged by role: VPS -> tag:vps, personal -> tag:ws.
+      '';
+    };
 
     # 多角色：本机作为 peer relay（节点间 UDP 中继，替代远端 DERP）。
     # 典型场景：两端都在 NAT 后且打洞失败（如 Mac 对称 NAT ↔ hermes），
@@ -119,7 +135,7 @@ in
         enable = true;
         package = pkgs.tailscale;
         openFirewall = true;
-        authKeyFile = config.sops.secrets.TAILSCALE_AUTH_KEY.path;
+        authKeyFile = cfg.authKeyFile;
         # 多角色：基础 client；exitNode 开启时提升为 "server"（开 ip_forward，exit node 必备）。
         # 纯 if（求值期）而非 mkIf（合并期）：mkIf false 会 fallback 到 NixOS 默认 "none"，
         # 丢掉 client 语义（rp_filter strict）——nixos-usb 等只开 enable 的 host 会回归。
@@ -153,6 +169,29 @@ in
       environment.shellAliases = {
         tss = "tailscale";
       };
+    })
+
+    # 只解密本角色需要的加入 key：VPS -> tag:vps，个人设备 -> tag:ws。
+    (mkIf (cfg.enable && config ? sops) {
+      sops.secrets =
+        if role == "ws" then
+          {
+            TAILSCALE_AUTH_KEY_WS = {
+              key = "tailscale/auth_key_ws";
+              mode = "0400";
+              owner = "root";
+              group = "root";
+            };
+          }
+        else
+          {
+            TAILSCALE_AUTH_KEY_VPS = {
+              key = "tailscale/auth_key_vps";
+              mode = "0400";
+              owner = "root";
+              group = "root";
+            };
+          };
     })
 
     (mkIf cfg.derper.enable {

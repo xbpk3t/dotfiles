@@ -80,8 +80,9 @@ in
     };
 
     # 手机 herdr-app 走 Tailscale SSH 直连（无需在手机放私钥）。
-    # ACL 已有 autogroup:self 的 ssh 规则；这里只是把 node 的 --ssh 打开。
-    tailscale.extraUpFlags = [ "--ssh" ];
+    # --ssh 放 extraSetFlags：已登录节点也会被 tailscaled-set 幂等设置；
+    # 只放 extraUpFlags 时，已认证节点不会重新 up，RunSSH 会一直是 false。
+    tailscale.extraSetFlags = [ "--ssh" ];
   };
 
   # 本地构建：4G agent 上限制并发，避免 OOM（nix-tools 默认 max-jobs=5）。
