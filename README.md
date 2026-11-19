@@ -9,7 +9,7 @@
 ---
 
 
-![topology](./topology.svg)
+![topology](https://cdn.jsdelivr.net/gh/xbpk3t/dotfiles@topology/topology/latest.svg)
 
 ## Stack
 
