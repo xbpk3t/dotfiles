@@ -7,7 +7,7 @@ locals {
   # Pages 里的 D1 binding 先直接引用 live database id，避免现在就引入跨 state output 依赖。
   # 等后续整个 Cloudflare 栈稳定以后，再考虑通过 remote state / globals 做统一编排。
   d1_database_ids = {
-    vscs = "6f4f878f-4845-4801-9386-458c612f0a72"
+    vscs = local.facts.cloudflare.d1.vscs.id
   }
 
   # pages_projects_managed 只保留仍在用的 music。

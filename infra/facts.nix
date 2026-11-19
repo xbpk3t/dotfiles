@@ -40,6 +40,26 @@ in
     zone_id = "1c07a1b84d8273f4dfa6c3adce513f94";
     inherit zone_name;
     r2_endpoint = "https://96540bd100b82adba941163704660c31.r2.cloudflarestorage.com";
+
+    d1 = {
+      docs = {
+        id = "96375ee2-188f-44d4-ab16-eaa06828a4ac";
+        name = "docs";
+      };
+      vscs = {
+        id = "6f4f878f-4845-4801-9386-458c612f0a72";
+        name = "vscs";
+      };
+    };
+
+    r2.buckets = {
+      docs = "docs";
+      docs-wiki = "docs-wiki";
+    };
+  };
+
+  tailscale = {
+    tailnet = "xbpk3t.github";
   };
 
   hosts = {

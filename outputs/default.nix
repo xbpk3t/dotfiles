@@ -341,6 +341,8 @@ assert lib.assertMsg (
           tflint
           terraform-docs
           jq
+          actionlint
+          go-task
         ];
       };
 

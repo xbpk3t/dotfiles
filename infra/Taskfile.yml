@@ -86,3 +86,25 @@ tasks:
       - >-
         nix develop .#infra --command bash -c
         'terranix --with-nulls infra/stacks/homelab/cloudflare/lucc.dev/dns/terranix.nix | jq -S . > infra/stacks/homelab/cloudflare/lucc.dev/dns/generated.tf.json'
+
+  check:
+    desc: "本地校验 infra（facts/terranix freshness + actionlint + fmt/validate）"
+    summary: |
+      nix develop .#infra
+      task tf:check
+    dir: "{{.TASKFILE_DIR}}/.."
+    cmds:
+      - |
+        set -euo pipefail
+        nix eval --json .#infraFacts | jq -S . | diff -u infra/generated/facts.json -
+      - |
+        set -euo pipefail
+        terranix --with-nulls infra/stacks/homelab/cloudflare/lucc.dev/dns/terranix.nix \
+          | jq -S . | diff -u infra/stacks/homelab/cloudflare/lucc.dev/dns/generated.tf.json -
+      - actionlint .github/workflows/infra.yml
+      - |
+        set -euo pipefail
+        for d in $(terramate list --tags layer-infra); do
+          echo "==> $d"
+          (cd "$d" && tofu init -backend=false -input=false -no-color >/dev/null && tofu fmt -check && tofu validate -no-color)
+        done

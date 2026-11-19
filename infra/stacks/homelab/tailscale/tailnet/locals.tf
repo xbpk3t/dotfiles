@@ -1,5 +1,8 @@
 locals {
-  tailnet = "xbpk3t.github"
+  # Nix 生成的共享 infra facts；源文件 infra/facts.nix。
+  facts = jsondecode(file("${path.module}/../../../../generated/facts.json"))
+
+  tailnet = local.facts.tailscale.tailnet
 
   # DERP 节点配置
   # 自定义 Region（与 admin console 的 ACL JSON 中 derpMap 一致）

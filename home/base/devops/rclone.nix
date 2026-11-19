@@ -6,6 +6,8 @@
 }:
 let
   cfg = config.modules.devops.rclone;
+  # R2 endpoint 与 Terraform 共用同一份 facts，避免两处漂移。
+  infraFacts = import ../../../infra/facts.nix;
   # rclone.conf 是 INI。用 sops.templates 渲染含 AK/SK 的完整配置，
   # 不走 programs.rclone.remotes（Darwin 上 launchd 弱收敛），
   # 也不走 env_auth + sessionVariables（HM guard 导致子 shell 丢失 env）。
@@ -41,7 +43,7 @@ in
         access_key_id = ${config.sops.placeholder.CF_R2_AK}
         secret_access_key = ${config.sops.placeholder.CF_R2_SK}
         region = auto
-        endpoint = https://96540bd100b82adba941163704660c31.r2.cloudflarestorage.com
+        endpoint = ${infraFacts.cloudflare.r2_endpoint}
         acl = private
       '';
     };

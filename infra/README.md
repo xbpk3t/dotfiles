@@ -97,12 +97,22 @@ Cloudflare inventory：
 task tf:inventory
 ```
 
+本地完整校验（与 CI `validate` job 一致）：
+
+```bash
+nix develop .#infra
+task tf:check
+```
+
 ## GitOps / CI
 
 `.github/workflows/infra.yml` 是 infra 的 CI 控制面：
 
 - **PR**：对 `terramate list --tags layer-infra` 选出的全部 stack 逐个跑
   `tofu plan`（只读）。fork PR 拿不到 secrets，会跳过；同仓分支 PR 正常跑。
+- **所有 PR / push**：`validate` job 不依赖 secrets，跑 `task tf:check`
+  （facts / terranix freshness、actionlint、`tofu fmt -check`、全 stack
+  `tofu validate`）。fork PR 也能拿到这层检查。
 - **main**：merge 后**默认不自动 apply**。确认仓库里的 drift 可接受后，可在
   仓库变量里设置 `INFRA_AUTO_APPLY=true` 打开自动 apply；或者手动触发
   `workflow_dispatch` 并选择 `mode=apply`。apply job 绑定 `environment: infra`，
@@ -137,8 +147,10 @@ tofu plan -input=false
 
 `infra/facts.nix` 是 Nix 与 Terraform 共享的事实源：
 
-- Cloudflare account / zone id
+- Cloudflare account / zone id、R2 endpoint / bucket 名称
+- D1 database id（docs / vscs）
 - `hosts/*/meta.nix` 里的公网 IP、Tailscale IP
+- Tailscale tailnet 名称
 - 由 host meta 派生的 DNS 记录（api / as / rsshub / derp / nva）
 
 生成物是 `infra/generated/facts.json`，由 `task tf:facts` 写入；Cloudflare

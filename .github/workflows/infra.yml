@@ -99,9 +99,30 @@ jobs:
           echo "stacks=$json" >> "$GITHUB_OUTPUT"
           printf 'selected stacks: %s\n' "$json"
 
+  validate:
+    name: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v19
+
+      - name: Enable Nix cache
+        uses: DeterminateSystems/magic-nix-cache-action@v13
+
+      - name: Run infra checks
+        run: |
+          set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          nix develop .#infra --command task tf:check
+
   plan:
     name: plan ${{ matrix.stack }}
-    needs: list
+    needs: [list, validate]
     # fork PR 没有 secrets，直接跳过；同仓分支 PR 和手动 plan 正常跑。
     if: >-
       (github.event_name == 'pull_request' &&
@@ -143,7 +164,7 @@ jobs:
 
   apply:
     name: apply ${{ matrix.stack }}
-    needs: list
+    needs: [list, validate]
     # 默认不自动 apply：避免仓库里已有的 drift 在 merge 后被直接落云。
     # 审核完 drift 后，可在仓库变量里设置 INFRA_AUTO_APPLY=true 打开自动 apply；
     # 或者手动 workflow_dispatch mode=apply（建议配合 infra environment 的
@@ -190,7 +211,7 @@ jobs:
 
   drift:
     name: drift ${{ matrix.stack }}
-    needs: list
+    needs: [list, validate]
     if: >-
       github.event_name == 'schedule' ||
       (github.event_name == 'workflow_dispatch' && inputs.mode == 'drift')
