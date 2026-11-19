@@ -138,6 +138,31 @@ task tf:check
 locking（OpenTofu 1.13.9 实测可用），不再需要 DynamoDB 锁表。workflow 另外用
 `concurrency` 按 stack 串行化 apply。
 
+### Token 权限
+
+- **plan / drift**：Cloudflare Pages / Email Routing / DNS / Workers 的 Read
+  权限即可；R2 state backend 需要 `CF_R2_AK` / `CF_R2_SK` 的读写。
+- **apply**：上述资源需要 Edit 权限；`CLOUDFLARE_API_TOKEN` 在 GitHub 里必须
+  使用 write token。
+- 本地 / CI 的 `CLOUDFLARE_API_TOKEN` 来自 SOPS `cf/token/read_all`
+  （历史命名，实际保存 read + write all token）。rotate 时用：
+
+```bash
+printf '%s' '"cfat_..."' | sops set --value-stdin secrets/secrets.yaml \
+  '["cf"]["token"]["read_all"]'
+```
+
+不要把 token 贴到聊天/commit 里；rotate 后同步更新 GitHub secret。
+
+### Apply 运营清单
+
+- [ ] GitHub secret `CLOUDFLARE_API_TOKEN` 使用有 Edit 权限的 token
+- [ ] `infra` environment 配置 required reviewers
+- [ ] 需要 main 自动 apply 时设置仓库变量 `INFRA_AUTO_APPLY=true`
+- [ ] 每次 drift 变红时先确认是否预期，再手动 `workflow_dispatch mode=apply`
+- [ ] 回退：`git revert` + 对应 stack apply；Pages/Workers 域名 ownership
+      的变更要先确认 custom domain/DNS 顺序
+
 本地复现（与 CI 使用同一套工具）：
 
 ```bash
