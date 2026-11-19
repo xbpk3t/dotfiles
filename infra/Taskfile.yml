@@ -87,6 +87,16 @@ tasks:
         nix develop .#infra --command bash -c
         'terranix --with-nulls infra/stacks/homelab/cloudflare/lucc.dev/dns/terranix.nix | jq -S . > infra/stacks/homelab/cloudflare/lucc.dev/dns/generated.tf.json'
 
+  terranix-tailscale:
+    desc: "生成 Tailscale stack 的 Terraform JSON（terranix 第二个试点）"
+    summary: |
+      task tf:terranix-tailscale
+    dir: "{{.TASKFILE_DIR}}/.."
+    cmds:
+      - >-
+        nix develop .#infra --command bash -c
+        'terranix --with-nulls infra/stacks/homelab/tailscale/tailnet/terranix.nix | jq -S . > infra/stacks/homelab/tailscale/tailnet/generated.tf.json'
+
   check:
     desc: "本地校验 infra（facts/terranix freshness + actionlint + fmt/validate）"
     summary: |
@@ -101,6 +111,10 @@ tasks:
         set -euo pipefail
         terranix --with-nulls infra/stacks/homelab/cloudflare/lucc.dev/dns/terranix.nix \
           | jq -S . | diff -u infra/stacks/homelab/cloudflare/lucc.dev/dns/generated.tf.json -
+      - |
+        set -euo pipefail
+        terranix --with-nulls infra/stacks/homelab/tailscale/tailnet/terranix.nix \
+          | jq -S . | diff -u infra/stacks/homelab/tailscale/tailnet/generated.tf.json -
       - actionlint .github/workflows/infra.yml
       - |
         set -euo pipefail
