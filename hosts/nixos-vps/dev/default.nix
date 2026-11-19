@@ -21,7 +21,7 @@
       exitNode = true;
       derper = {
         enable = true;
-        domain = "derp-nixos-vps-dev.lucc.dev";
+        # 域名来自 hosts/nixos-vps/dev/meta.nix（derper.domain）。
         acmeEmail = mail;
       };
     };
@@ -33,7 +33,7 @@
         urlFile = config.sops.secrets.HEALTHCHECKS_VPS_DEV.path;
         # If the dashboard is down while the host is up, ping /fail so
         # Healthchecks alerts instead of reporting a healthy host.
-        healthUrl = "http://127.0.0.1:8008/";
+        healthUrl = "http://127.0.0.1:${toString config.modules.infra.nezha.hub.port}/";
       };
       # 稳定 UUID：`uuidgen` 生成一次后固定，避免 hostname/FQDN 变化导致重复注册。
       nezha.agent.uuid = "2fe2025b-cc20-4e43-b0dc-d9d24c31fbe4";
@@ -103,7 +103,7 @@
         # Tailscale Service svc:nezha is defined in
         # infra/stacks/homelab/tailscale/tailnet (tailscale_service.nezha).
         # URL: http://nezha.tailf19540.ts.net/
-        "nezha".endpoints."tcp:80" = "http://127.0.0.1:8008";
+        "nezha".endpoints."tcp:80" = "http://127.0.0.1:${toString config.modules.infra.nezha.hub.port}";
       };
     };
 

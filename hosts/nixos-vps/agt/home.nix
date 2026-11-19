@@ -6,7 +6,7 @@
   ...
 }:
 let
-  tailnetIp = hostMeta.tailscale.ip or "127.0.0.1";
+  tailnetIp = hostMeta.tailscale.ip;
 
   # 备份 agt 上的项目、未提交 WIP 和 agent 状态到 R2（restic 仓库 rclone:r2:agt-backup）。
   backupScript = pkgs.writeShellScript "restic-backup-agt" ''

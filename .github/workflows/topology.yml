@@ -1,0 +1,70 @@
+name: topology
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - topology.nix
+      - hosts/**
+      - modules/nixos/**
+      - lib/fleet/**
+      - outputs/default.nix
+      - flake.lock
+      - .github/workflows/topology.yml
+  workflow_dispatch:
+
+concurrency:
+  group: topology-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v19
+
+      - name: Enable Nix cache
+        uses: DeterminateSystems/magic-nix-cache-action@v13
+
+      - name: Build topology
+        id: build
+        run: |
+          set -euo pipefail
+          out="$(nix build --accept-flake-config --impure --no-link --print-out-paths '.#topology.x86_64-linux.config.output')"
+          test -f "$out/main.svg"
+          echo "out=$out" >> "$GITHUB_OUTPUT"
+
+      - name: Publish to topology branch
+        env:
+          OUT: ${{ steps.build.outputs.out }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # 单 commit 的 orphan 分支：每次 force-push，避免 SVG 历史在 git 里累积。
+          git checkout --orphan topology-publish
+          git rm -rf --cached . >/dev/null
+
+          mkdir -p topology
+          cp "$OUT/main.svg" topology/latest.svg
+          cp "$OUT/main.svg" "topology/${GITHUB_SHA::7}.svg"
+
+          git add topology
+          git commit -m "chore(topology): publish ${GITHUB_SHA::7}"
+          git push --force origin HEAD:topology
+
+      - name: Purge jsDelivr cache
+        run: |
+          # jsDelivr 会缓存 branch 版本；purge 失败不影响构建。
+          curl -fsS "https://purge.jsdelivr.net/gh/xbpk3t/dotfiles@topology/topology/latest.svg" || true

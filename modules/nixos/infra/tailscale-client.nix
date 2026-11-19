@@ -1,5 +1,6 @@
 {
   config,
+  hostMeta,
   lib,
   pkgs,
   ...
@@ -37,12 +38,12 @@ in
     derper = {
       enable = mkEnableOption "Tailscale DERP server on this host";
 
-      # 需要
+      # 域名只来自 hostMeta.derper.domain（不按 hostName 派生）；
+      # TF DNS 由同一份 fleet metadata 生成，见 dns/README.md。
       domain = mkOption {
         type = types.str;
-        # 静态方案：默认由主机名派生域名，但最终应在 host 层显式指定
-        default = "derp-${config.networking.hostName}.lucc.dev";
-        description = "Public domain name for this DERP node.";
+        default = hostMeta.derper.domain or "";
+        description = "Public domain name for this DERP node (from hostMeta.derper.domain).";
       };
 
       port = mkOption {
@@ -115,8 +116,10 @@ in
           message = "modules.networking.tailscale.derper.acmeEmail must be set when derper is enabled.";
         }
         {
-          assertion = cfg.derper.domain != "";
-          message = "modules.networking.tailscale.derper.domain must be set when derper is enabled.";
+          # domain 必须与 meta 一致：只检查 meta 存在还不够，
+          # 否则 host 覆盖 option 时 ACME/derper 会用一个没有 DNS 记录的名字。
+          assertion = cfg.derper.domain != "" && cfg.derper.domain == (hostMeta.derper.domain or "");
+          message = "modules.networking.tailscale.derper.domain must be non-empty and match hostMeta.derper.domain.";
         }
       ];
 

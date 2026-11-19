@@ -32,8 +32,6 @@ repos:
         language: system
         stages: [pre-commit, pre-push, manual]
         args: ["--maxkb=1024", "--enforce-all"]
-        # topology.svg 是 nix-topology 生成的产物，体积随舰队增长，单独放行。
-        exclude: ^topology\.svg$
 
       - id: trailing-whitespace # 移除尾部空格符
         name: trim trailing whitespace

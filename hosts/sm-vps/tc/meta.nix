@@ -5,6 +5,16 @@
   system = "x86_64-linux";
   stateVersion = "24.11";
 
+  # 公网 IPv4：TF DNS / DERP A 记录从这里生成。
+  publicIpv4 = "43.156.103.43";
+
+  # DERP 域名 + Cloudflare records key/comment：跨层生成用。
+  derper = {
+    domain = "derp-sm-vps-tc.lucc.dev";
+    dnsKey = "derp-sm-vps-tc";
+    dnsComment = "Tailscale DERP (SGP)";
+  };
+
   deploy = {
     remoteBuild = true;
   };

@@ -40,8 +40,8 @@ in
   };
 
   networking = {
-    # hostName 由 hostMeta 注入；这里提供默认值，避免单机调试时为空。
-    hostName = lib.mkDefault (hostMeta.hostName or "nixos-vps");
+    # hostName 由 hostMeta 注入；缺失时直接报错，不再回退到第二份名字。
+    hostName = lib.mkDefault hostMeta.hostName;
     useDHCP = true;
     inherit nameservers;
     useHostResolvConf = lib.mkForce false;
@@ -99,7 +99,6 @@ in
       nezha = {
         hub = {
           enable = lib.mkDefault (hostMeta.nezha.hub or false);
-          port = lib.mkDefault (hostMeta.nezha.port or 8008);
         };
         agent = {
           enable = true;

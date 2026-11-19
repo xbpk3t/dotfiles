@@ -67,3 +67,17 @@ tasks:
       - task: cf:inventory
         vars:
           DATE: "{{.DATE}}"
+
+  dns:generate:
+    desc: "从 fleet metadata 生成 DERP DNS records 文件"
+    summary: |
+      task tf:dns:generate
+    cmds:
+      - task: cf:dns:generate
+
+  dns:check:
+    desc: "检查 DERP DNS records 文件是否与 fleet metadata 同步"
+    summary: |
+      task tf:dns:check
+    cmds:
+      - task: cf:dns:check

@@ -4,6 +4,23 @@ locals {
   zone_id   = "1c07a1b84d8273f4dfa6c3adce513f94"
   zone_name = "lucc.dev"
 
+  # DERP DNS records 由 hosts/**/meta.nix 生成，避免和 host 配置漂移。
+  # 生成：task tf:dns:generate；校验：task tf:dns:check。
+  fleet = jsondecode(file("${path.module}/fleet.generated.json"))
+
+  derp_records = {
+    for name, node in local.fleet.derpNodes : node.dnsKey => {
+      id       = null
+      name     = node.domain
+      type     = "A"
+      content  = node.publicIpv4
+      ttl      = 1
+      proxied  = false
+      comment  = node.dnsComment != null ? node.dnsComment : "Tailscale DERP (${name})"
+      priority = null
+    }
+  }
+
   # 这里开始使用 human-facing records model。
   # 日常维护时优先改这个数据结构，而不是继续手写一堆 resource blocks。
   dns_records_managed = {
@@ -41,37 +58,6 @@ locals {
       comment  = "rsshub"
       priority = null
     }
-    derp-dev = {
-      id       = null
-      name     = "derp-nixos-vps-dev.lucc.dev"
-      type     = "A"
-      content  = "192.129.183.26"
-      ttl      = 1
-      proxied  = false
-      comment  = "Tailscale DERP (LA)"
-      priority = null
-    }
-    nva = {
-      id       = null
-      name     = "nva.lucc.dev"
-      type     = "A"
-      content  = "1.15.64.188"
-      ttl      = 1
-      proxied  = false
-      comment  = "Tailscale DERP (Shanghai, nixos-vps-agt)"
-      priority = null
-    }
-    derp-sm-vps-tc = {
-      id       = null
-      name     = "derp-sm-vps-tc.lucc.dev"
-      type     = "A"
-      content  = "43.156.103.43"
-      ttl      = 1
-      proxied  = false
-      comment  = "Tailscale DERP (SGP)"
-      priority = null
-    }
-
     blog = {
       id       = "db66877fcacde96aa9844c8a91ec3a16"
       name     = "blog.lucc.dev"
@@ -203,5 +189,5 @@ locals {
   dns_records_pending_delete = {}
 
   # google 这条记录已经不在 live 里了，所以继续排除，不放进 pending_delete。
-  dns_records = merge(local.dns_records_managed, local.dns_records_pending_delete)
+  dns_records = merge(local.dns_records_managed, local.derp_records, local.dns_records_pending_delete)
 }

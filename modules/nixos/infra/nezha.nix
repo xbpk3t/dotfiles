@@ -11,7 +11,9 @@
 # and are configured once via the dashboard (see the deployment notes).
 {
   config,
+  hostMeta,
   lib,
+  mylib,
   ...
 }:
 let
@@ -24,8 +26,8 @@ in
 
       port = lib.mkOption {
         type = lib.types.port;
-        default = 8008;
-        description = "Nezha dashboard and agent gRPC port.";
+        default = lib.attrByPath [ "nezha" "port" ] mylib.fleet.nezha.defaultPort hostMeta;
+        description = "Nezha dashboard and agent gRPC port (hostMeta.nezha.port or the fleet default).";
       };
 
       listenHost = lib.mkOption {
@@ -67,6 +69,14 @@ in
         {
           assertion = !cfg.agent.enable || cfg.agent.uuid != null;
           message = "modules.infra.nezha.agent.uuid must be set by the host when the agent is enabled.";
+        }
+        {
+          # hub 的监听端口和 agent 使用的 fleet.nezha.server 必须一致。
+          # fleet 只读 meta，所以 host 层覆盖 hub.port 时 meta 必须同步。
+          assertion =
+            !cfg.hub.enable
+            || cfg.hub.port == lib.attrByPath [ "nezha" "port" ] mylib.fleet.nezha.defaultPort hostMeta;
+          message = "modules.infra.nezha.hub.port must match hostMeta.nezha.port (or the fleet default) so agents can dial the hub.";
         }
       ];
     }

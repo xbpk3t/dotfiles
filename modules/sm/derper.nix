@@ -3,7 +3,7 @@
 # 声明式能力表达 NixOS services.tailscale.derper（对齐 modules/nixos/infra/tailscale-client.nix）：
 #   - systemd.services.tailscale-derper → 声明式 unit（-a/-c /-stun-port/-hostname/-certmode=manual）
 #   - 证书：lego DNS-01（CF token 走 sm sops）生成 ACME 证书 → /var/lib/derper/certs
-#   - DNS 记录：TF 控制面（infra/stacks/.../tailscale/），声明式
+#   - DNS 记录：TF（infra/stacks/.../cloudflare/lucc.dev/dns），由 fleet metadata 生成
 #   - 防火墙：sm-firewall 已放行（10043/10078 需加入）
 #
 # 这是「服务角色」，走 modules.infra.derper.enable 开关（对齐 nixos 轨命名），由 hosts/sm-vps 启用。
@@ -11,13 +11,14 @@
   config,
   lib,
   pkgs,
+  hostMeta,
   userMeta,
   ...
 }:
 with lib;
 let
   cfg = config.modules.infra.derper;
-  domain = "derp-sm-vps-tc.lucc.dev";
+  inherit (cfg) domain;
   port = 10043;
   stunPort = 10078;
   certDir = "/var/lib/derper/certs";
@@ -27,9 +28,25 @@ in
 
   options.modules.infra.derper = {
     enable = mkEnableOption "Tailscale DERP relay server on this host";
+
+    # 域名只来自 hostMeta.derper.domain（不按 hostName 派生）；
+    # TF DNS 由同一份 fleet metadata 生成，见 dns/README.md。
+    domain = mkOption {
+      type = types.str;
+      default = hostMeta.derper.domain or "";
+      description = "Public domain name for this DERP node (from hostMeta.derper.domain).";
+    };
   };
 
   config = mkIf cfg.enable {
+    assertions = [
+      {
+        # domain 必须与 meta 一致，避免 host 覆盖出一个没有 DNS 记录的名字。
+        assertion = cfg.domain != "" && cfg.domain == (hostMeta.derper.domain or "");
+        message = "modules.infra.derper.domain must be non-empty and match hostMeta.derper.domain.";
+      }
+    ];
+
     environment.systemPackages = [ pkgs.tailscale ];
 
     # ── ACME 证书（lego DNS-01，CF token 走 sops）──
