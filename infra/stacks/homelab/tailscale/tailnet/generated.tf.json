@@ -18,7 +18,7 @@
   "resource": {
     "tailscale_acl": {
       "main": {
-        "acl": "{\"autoApprovers\":{\"exitNode\":[\"xbpk3t@github\",\"tag:svc-9router\"],\"routes\":{\"0.0.0.0/0\":[\"xbpk3t@github\",\"tag:svc-9router\"],\"::/0\":[\"xbpk3t@github\",\"tag:svc-9router\"]},\"services\":{\"svc:9router\":[\"tag:svc-9router\"],\"svc:nezha\":[\"tag:svc-9router\"]}},\"derpMap\":{\"OmitDefaultRegions\":false,\"Regions\":{\"902\":{\"Nodes\":[{\"DERPPort\":10043,\"HostName\":\"47.79.17.202\",\"IPv4\":\"47.79.17.202\",\"InsecureForTests\":true,\"Name\":\"902\",\"RegionID\":902,\"STUNPort\":10078}],\"RegionCode\":\"hk-2\",\"RegionID\":902,\"RegionName\":\"hk-2\"}}},\"grants\":[{\"dst\":[\"*\"],\"ip\":[\"*\"],\"src\":[\"*\"]},{\"dst\":[\"autogroup:internet\"],\"ip\":[\"*\"],\"src\":[\"xbpk3t@nod-am\"]}],\"ssh\":[{\"action\":\"check\",\"dst\":[\"autogroup:self\"],\"src\":[\"autogroup:member\"],\"users\":[\"autogroup:nonroot\",\"root\"]}],\"tagOwners\":{\"tag:svc-9router\":[\"xbpk3t@github\"]}}"
+        "acl": "{\"autoApprovers\":{\"exitNode\":[\"xbpk3t@github\",\"tag:svc-9router\"],\"routes\":{\"0.0.0.0/0\":[\"xbpk3t@github\",\"tag:svc-9router\"],\"::/0\":[\"xbpk3t@github\",\"tag:svc-9router\"]},\"services\":{\"svc:9router\":[\"tag:svc-9router\"],\"svc:nezha\":[\"tag:svc-9router\"]}},\"grants\":[{\"dst\":[\"*\"],\"ip\":[\"*\"],\"src\":[\"*\"]},{\"dst\":[\"autogroup:internet\"],\"ip\":[\"*\"],\"src\":[\"xbpk3t@nod-am\"]},{\"app\":{\"tailscale.com/cap/relay\":[]},\"dst\":[\"100.66.22.92\"],\"src\":[\"100.87.216.84\",\"100.72.194.36\"]}],\"ssh\":[{\"action\":\"check\",\"dst\":[\"autogroup:self\"],\"src\":[\"autogroup:member\"],\"users\":[\"autogroup:nonroot\",\"root\"]}],\"tagOwners\":{\"tag:svc-9router\":[\"xbpk3t@github\"]}}"
       }
     },
     "tailscale_device_key": {

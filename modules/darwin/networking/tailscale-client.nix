@@ -2,6 +2,7 @@
   config,
   pkgs,
   lib,
+  hostMeta,
   ...
 }:
 let
@@ -34,6 +35,11 @@ in
       else
         echo "tailscale: attempting pre-auth with auth key..."
         ${pkgs.tailscale}/bin/tailscale up --authkey="$(cat ${config.sops.secrets.TAILSCALE_AUTH_KEY.path})"
+      fi
+
+      # 设备名钉死到 fleet metadata 的 hostName（幂等）；未连接时跳过。
+      if ${pkgs.tailscale}/bin/tailscale status >/dev/null 2>&1; then
+        ${pkgs.tailscale}/bin/tailscale set --hostname=${lib.escapeShellArg hostMeta.hostName}
       fi
     '';
   };
