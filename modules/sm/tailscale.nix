@@ -12,7 +12,7 @@
 # 激活（用 systemd `-` 前缀忽略退出码），避免触发 magicRollback 误伤。
 #
 # 授权侧（谁被允许走这个出口）归 TF 的 tailscale_acl 控制面管，本模块不管。
-# 已确认：infra/stacks/homelab/tailscale/tailnet/locals.tf 的 autoApprovers
+# 已确认：infra/stacks/homelab/tailscale/tailnet/terranix.nix 的 autoApprovers
 # + grants 只放行 nod-am（手机），保持现状。
 { lib, config, ... }:
 let

@@ -55,35 +55,6 @@
       }
     }
   },
-  "hosts": {
-    "nixos-vps-agt": {
-      "domains": {
-        "nva": "nva.lucc.dev"
-      },
-      "public_ipv4": "1.15.64.188",
-      "tailscale_ipv4": "100.66.22.92"
-    },
-    "nixos-vps-dev": {
-      "domains": {
-        "anytls": "anytls-nixos-vps-dev.lucc.dev",
-        "derp": "derp-nixos-vps-dev.lucc.dev",
-        "hy2": "hy2-nixos-vps-dev.lucc.dev",
-        "tuic": "tuic-nixos-vps-dev.lucc.dev",
-        "vmess": "vmess-nixos-vps-dev.lucc.dev"
-      },
-      "public_ipv4": "192.129.183.26",
-      "tailscale_ipv4": "100.101.189.7"
-    },
-    "sm-vps-hk": {
-      "public_ipv4": "103.79.184.82"
-    },
-    "sm-vps-tc": {
-      "domains": {
-        "derp": "derp-sm-vps-tc.lucc.dev"
-      },
-      "public_ipv4": "43.156.103.43"
-    }
-  },
   "tailscale": {
     "tailnet": "xbpk3t.github"
   }

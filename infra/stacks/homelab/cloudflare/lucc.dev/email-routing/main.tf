@@ -34,3 +34,6 @@ resource "cloudflare_email_routing_rule" "forward_me" {
 #
 # live 配置已固定为 disabled + drop；需要修改时走 Dashboard 或 API。如果
 # provider 后续修复，可以重新加回 resource + import。
+#
+# state 处理：catch-all 已通过 `tofu state rm` 从 remote state 移除，
+# 当前 plan 不再包含它；live 保持 disabled + drop，不执行 destroy。

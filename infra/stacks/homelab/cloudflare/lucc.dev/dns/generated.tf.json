@@ -47,36 +47,8 @@
   ],
   "moved": [
     {
-      "from": "cloudflare_dns_record.atuin_lucc_dev_a_01",
-      "to": "cloudflare_dns_record.records[\"atuin\"]"
-    },
-    {
-      "from": "cloudflare_dns_record.beszel_lucc_dev_a_02",
-      "to": "cloudflare_dns_record.records[\"beszel\"]"
-    },
-    {
-      "from": "cloudflare_dns_record.mm_lucc_dev_a_05",
-      "to": "cloudflare_dns_record.records[\"memos\"]"
-    },
-    {
-      "from": "cloudflare_dns_record.n8n_lucc_dev_a_06",
-      "to": "cloudflare_dns_record.records[\"n8n\"]"
-    },
-    {
-      "from": "cloudflare_dns_record.pan_lucc_dev_a_07",
-      "to": "cloudflare_dns_record.records[\"openlist\"]"
-    },
-    {
-      "from": "cloudflare_dns_record.pt_lucc_dev_a_08",
-      "to": "cloudflare_dns_record.records[\"pt\"]"
-    },
-    {
       "from": "cloudflare_dns_record.rsshub_lucc_dev_a_09",
       "to": "cloudflare_dns_record.records[\"rsshub\"]"
-    },
-    {
-      "from": "cloudflare_dns_record.ts_lucc_dev_a_10",
-      "to": "cloudflare_dns_record.records[\"tailscale\"]"
     },
     {
       "from": "cloudflare_dns_record.blog_lucc_dev_cname_12",
@@ -89,10 +61,6 @@
     {
       "from": "cloudflare_dns_record.docs_lucc_dev_cname_14",
       "to": "cloudflare_dns_record.records[\"docs\"]"
-    },
-    {
-      "from": "cloudflare_dns_record.dokploy_lucc_dev_cname_15",
-      "to": "cloudflare_dns_record.records[\"dokploy\"]"
     },
     {
       "from": "cloudflare_dns_record.lucc_dev_cname_16",
@@ -121,10 +89,6 @@
     {
       "from": "cloudflare_dns_record.dp_lucc_dev_aaaa_24",
       "to": "cloudflare_dns_record.records[\"dp\"]"
-    },
-    {
-      "from": "cloudflare_dns_record.google_lucc_dev_aaaa_25",
-      "to": "cloudflare_dns_record.records[\"google\"]"
     }
   ],
   "provider": {
@@ -330,6 +294,6 @@
         "version": "~> 5.0"
       }
     },
-    "required_version": ">= 1.8.0"
+    "required_version": ">= 1.10.0"
   }
 }

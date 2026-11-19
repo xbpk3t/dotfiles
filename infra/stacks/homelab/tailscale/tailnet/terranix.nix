@@ -92,7 +92,7 @@ let
 in
 {
   terraform = {
-    required_version = ">= 1.8.0";
+    required_version = ">= 1.10.0";
 
     required_providers.tailscale = {
       source = "tailscale/tailscale";
@@ -104,7 +104,7 @@ in
       key = "homelab/tailscale/tailnet/terraform.tfstate";
       region = "auto";
 
-      endpoints.s3 = "https://96540bd100b82adba941163704660c31.r2.cloudflarestorage.com";
+      endpoints.s3 = facts.cloudflare.r2_endpoint;
 
       skip_credentials_validation = true;
       skip_metadata_api_check = true;

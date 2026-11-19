@@ -178,13 +178,16 @@ tofu plan -input=false
 
 - Cloudflare account / zone id、R2 endpoint / bucket 名称
 - D1 database id（docs / vscs）
-- `hosts/*/meta.nix` 里的公网 IP、Tailscale IP
+- `nixos-vps-dev` 的公网 IP（api / as / rsshub 共用）
 - Tailscale tailnet 名称
-- 由 host meta 派生的 DNS 记录（api / as / rsshub / derp / nva）
+- 由 host meta 派生的共享 DNS 记录（api / as / rsshub）；DERP 记录
+  （derp / nva）走 `task tf:dns:generate` 写入 `dns/fleet.generated.json`
 
 生成物是 `infra/generated/facts.json`，由 `task tf:facts` 写入；Cloudflare
-stack 用 `jsondecode(file(...))` 消费。改 `hosts/*/meta.nix` 或
-`infra/facts.nix` 后必须重新生成并提交，CI 会做 freshness 检查。
+stack 用 `jsondecode(file(...))` 消费。改 `hosts/*/meta.nix` 时要同时重跑
+`task tf:dns:generate`（DERP）和 `task tf:facts`（facts），再跑
+`task tf:terranix`；改 `infra/facts.nix` 后只需 `task tf:facts`。
+CI 会做 freshness 检查。
 
 ## terranix 试点
 

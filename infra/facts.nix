@@ -10,16 +10,13 @@
 # 等价命令（仓库根目录）：
 #   nix eval --json .#infraFacts | jq -S . > infra/generated/facts.json
 let
+  # facts 只消费 nixos-vps-dev 的公网 IP（api/as/rsshub 共用）。
+  # 其他 host 的 DERP 事实由 lib/fleet 的 fleetMetadata 负责，不在这里重复。
   dev = import ../hosts/nixos-vps/dev/meta.nix;
-  agt = import ../hosts/nixos-vps/agt/meta.nix;
-  tc = import ../hosts/sm-vps/tc/meta.nix;
-  hk = import ../hosts/sm-vps/hk/meta.nix;
 
+  account_id = "96540bd100b82adba941163704660c31";
   zone_name = "lucc.dev";
   dev_ip = dev.publicIpv4;
-  agt_ip = agt.publicIpv4;
-  tc_ip = tc.publicIpv4;
-  hk_ip = hk.ssh.host;
 
   aRecord = name: content: proxied: comment: {
     id = null;
@@ -36,10 +33,10 @@ let
 in
 {
   cloudflare = {
-    account_id = "96540bd100b82adba941163704660c31";
+    inherit account_id;
     zone_id = "1c07a1b84d8273f4dfa6c3adce513f94";
     inherit zone_name;
-    r2_endpoint = "https://96540bd100b82adba941163704660c31.r2.cloudflarestorage.com";
+    r2_endpoint = "https://${account_id}.r2.cloudflarestorage.com";
 
     d1 = {
       docs = {
@@ -62,35 +59,9 @@ in
     tailnet = "xbpk3t.github";
   };
 
-  hosts = {
-    nixos-vps-dev = {
-      public_ipv4 = dev_ip;
-      tailscale_ipv4 = dev.tailscale.ip;
-      domains = {
-        derp = dev.derper.domain;
-        hy2 = dev.singbox.hy2.domain;
-        vmess = dev.singbox.vmessWs.domain;
-        tuic = dev.singbox.tuic.domain;
-        anytls = dev.singbox.anytls.domain;
-      };
-    };
-    nixos-vps-agt = {
-      public_ipv4 = agt_ip;
-      tailscale_ipv4 = agt.tailscale.ip;
-      domains.nva = agt.derper.domain;
-    };
-    sm-vps-tc = {
-      public_ipv4 = tc_ip;
-      domains.derp = tc.derper.domain;
-    };
-    sm-vps-hk = {
-      public_ipv4 = hk_ip;
-    };
-  };
-
   dns = {
     # 这些记录的内容来自 hosts/*/meta.nix；手写记录（MX/DKIM/Pages CNAME 等）
-    # 仍留在 Terraform locals 里。
+    # 留在 dns/terranix.nix 的 manualRecords 里。
     shared_records = {
       api = aRecord "api.${zone_name}" dev_ip true "AxonHub";
       as = aRecord "as.${zone_name}" dev_ip true "OpenList (ASMR)";

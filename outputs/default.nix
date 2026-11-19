@@ -344,6 +344,12 @@ assert lib.assertMsg (
           actionlint
           go-task
         ];
+        # terranix 在运行期 `import <nixpkgs> {}`；默认 NIX_PATH 是 flake
+        # registry 的 `flake:nixpkgs`（不随 flake.lock 固定）。这里指向本 flake
+        # 的 nixpkgs，保证 task tf:terranix 与 CI freshness 检查用同一份 lib。
+        shellHook = ''
+          export NIX_PATH="nixpkgs=${pkgs.path}"
+        '';
       };
 
       # 舰队拓扑图（README 用）：nix-topology 自动从 nixosConfigurations 提取节点，

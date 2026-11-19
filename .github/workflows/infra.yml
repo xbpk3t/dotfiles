@@ -1,7 +1,7 @@
 name: infra
 
 # GitOps 控制面：
-# - PR：对受影响的 stack 跑 tofu plan（只读，不 apply）
+# - PR：对 `terramate list --tags layer-infra` 选出的 stack 跑 tofu plan（只读，不 apply）
 # - main：merge 后 apply（environment=infra，可在 GitHub 上配置 required reviewers）
 # - schedule：每日 plan -detailed-exitcode，exit 2 视为 drift 并失败
 #
@@ -19,12 +19,24 @@ on:
   pull_request:
     paths:
       - "infra/**"
+      - "hosts/**/meta.nix"
+      - "outputs/default.nix"
+      - "lib/fleet/**"
+      - "flake.nix"
+      - "flake.lock"
       - ".github/workflows/infra.yml"
   push:
     branches:
       - main
     paths:
       - "infra/**"
+      # facts.json / fleet.generated.json 由 hosts meta 派生；这些文件变化也要
+      # 触发 validate（freshness）与 apply（DNS 记录随 host IP/域名更新）。
+      - "hosts/**/meta.nix"
+      - "outputs/default.nix"
+      - "lib/fleet/**"
+      - "flake.nix"
+      - "flake.lock"
       - ".github/workflows/infra.yml"
   schedule:
     # 每天 03:17 UTC 做 drift 检测，避开整点。
@@ -65,22 +77,8 @@ jobs:
       - name: Enable Nix cache
         uses: DeterminateSystems/magic-nix-cache-action@v13
 
-      - name: Check generated infra facts
-        run: |
-          set -euo pipefail
-          nix eval --json .#infraFacts > /tmp/infra-facts.raw.json
-          nix develop .#infra --command jq -S . /tmp/infra-facts.raw.json > /tmp/infra-facts.json
-          diff -u infra/generated/facts.json /tmp/infra-facts.json
-
-      - name: Check generated DNS terranix
-        run: |
-          set -euo pipefail
-          nix develop .#infra --command bash -c '
-            terranix --with-nulls infra/stacks/homelab/cloudflare/lucc.dev/dns/terranix.nix \
-              | jq -S . > /tmp/dns.tf.json
-          '
-          diff -u infra/stacks/homelab/cloudflare/lucc.dev/dns/generated.tf.json /tmp/dns.tf.json
-
+      # facts / terranix freshness 由 validate job 的 `task tf:check` 统一负责
+      # （plan/apply/drift 都以 validate 为 needs），这里只负责选出 stack 列表。
       - name: List Terramate stacks
         id: list
         env:
@@ -92,7 +90,16 @@ jobs:
           stacks="$(nix develop .#infra --command terramate list --tags layer-infra)"
 
           if [ -n "${INPUT_STACK:-}" ] && [ "$INPUT_STACK" != "all" ]; then
-            stacks="$(printf '%s\n' "$stacks" | grep -Fx "$INPUT_STACK")"
+            stacks="$(printf '%s\n' "$stacks" | grep -Fx "$INPUT_STACK" || true)"
+            if [ -z "$stacks" ]; then
+              echo "::error title=Unknown stack::'$INPUT_STACK' is not in 'terramate list --tags layer-infra'"
+              exit 1
+            fi
+          fi
+
+          if [ -z "$stacks" ]; then
+            echo "::error title=No stacks::'terramate list --tags layer-infra' returned no stacks"
+            exit 1
           fi
 
           json="$(printf '%s\n' "$stacks" | jq -R -s -c 'split("\n") | map(select(length > 0))')"
@@ -115,8 +122,13 @@ jobs:
         uses: DeterminateSystems/magic-nix-cache-action@v13
 
       - name: Run infra checks
+        # tf:check 会对每个 stack 各 init 一次；共享 plugin cache 后
+        # 同一个 provider 只下载一次。
+        env:
+          TF_PLUGIN_CACHE_DIR: ${{ runner.temp }}/opentofu-plugin-cache
         run: |
           set -euo pipefail
+          mkdir -p "$TF_PLUGIN_CACHE_DIR"
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           nix develop .#infra --command task tf:check
 
@@ -159,8 +171,11 @@ jobs:
         run: |
           set -euo pipefail
           cd "${{ matrix.stack }}"
-          nix develop "$GITHUB_WORKSPACE#infra" --command tofu init -reconfigure -input=false -no-color
-          nix develop "$GITHUB_WORKSPACE#infra" --command tofu plan -input=false -no-color -lock-timeout=5m
+          nix develop "$GITHUB_WORKSPACE#infra" --command bash -c '
+            set -euo pipefail
+            tofu init -reconfigure -input=false -no-color
+            tofu plan -input=false -no-color -lock-timeout=5m
+          '
 
   apply:
     name: apply ${{ matrix.stack }}
@@ -169,10 +184,12 @@ jobs:
     # 审核完 drift 后，可在仓库变量里设置 INFRA_AUTO_APPLY=true 打开自动 apply；
     # 或者手动 workflow_dispatch mode=apply（建议配合 infra environment 的
     # required reviewers）。
+    # workflow_dispatch 也必须限定在 main：GitHub 的 Run workflow 分支选择器
+    # 允许从任意分支触发，若不加 ref guard 会把未合并的 .tf 直接 apply 到生产。
     if: >-
-      (github.event_name == 'push' && github.ref == 'refs/heads/main' &&
-       vars.INFRA_AUTO_APPLY == 'true') ||
-      (github.event_name == 'workflow_dispatch' && inputs.mode == 'apply')
+      github.ref == 'refs/heads/main' &&
+      ((github.event_name == 'push' && vars.INFRA_AUTO_APPLY == 'true') ||
+       (github.event_name == 'workflow_dispatch' && inputs.mode == 'apply'))
     runs-on: ubuntu-latest
     # 建议在 GitHub 仓库设置里给 infra environment 配 required reviewers。
     environment: infra
@@ -206,15 +223,20 @@ jobs:
         run: |
           set -euo pipefail
           cd "${{ matrix.stack }}"
-          nix develop "$GITHUB_WORKSPACE#infra" --command tofu init -reconfigure -input=false -no-color
-          nix develop "$GITHUB_WORKSPACE#infra" --command tofu apply -auto-approve -input=false -no-color -lock-timeout=10m
+          nix develop "$GITHUB_WORKSPACE#infra" --command bash -c '
+            set -euo pipefail
+            tofu init -reconfigure -input=false -no-color
+            tofu apply -auto-approve -input=false -no-color -lock-timeout=10m
+          '
 
   drift:
     name: drift ${{ matrix.stack }}
     needs: [list, validate]
+    # drift 只对 main 有意义；workflow_dispatch 允许选分支，必须显式限制。
     if: >-
-      github.event_name == 'schedule' ||
-      (github.event_name == 'workflow_dispatch' && inputs.mode == 'drift')
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'schedule' ||
+       (github.event_name == 'workflow_dispatch' && inputs.mode == 'drift'))
     runs-on: ubuntu-latest
     concurrency:
       group: infra-drift-${{ matrix.stack }}
@@ -246,10 +268,15 @@ jobs:
         run: |
           set -euo pipefail
           cd "${{ matrix.stack }}"
-          nix develop "$GITHUB_WORKSPACE#infra" --command tofu init -reconfigure -input=false -no-color
 
+          # init 与 plan 在同一个 dev shell 里执行；plan 的 exit code
+          # （0=no drift, 2=drift）由 bash 透传出来。
           set +e
-          nix develop "$GITHUB_WORKSPACE#infra" --command tofu plan -detailed-exitcode -input=false -no-color -lock-timeout=5m
+          nix develop "$GITHUB_WORKSPACE#infra" --command bash -c '
+            set -euo pipefail
+            tofu init -reconfigure -input=false -no-color
+            tofu plan -detailed-exitcode -input=false -no-color -lock-timeout=5m
+          '
           code=$?
           set -e
 

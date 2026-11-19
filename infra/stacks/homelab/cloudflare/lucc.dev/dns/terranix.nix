@@ -63,6 +63,8 @@ let
       comment = null;
       priority = null;
     };
+    # 这个 CNAME 指向已删除的 Pages 项目；apex 实际由 Worker route
+    # `lucc.dev/* -> me` 拦截。若移除该 route，需要同步改这条记录。
     root = {
       id = "a80a731e11c54cc0a9707b454b0dea63";
       name = "lucc.dev";
@@ -137,10 +139,18 @@ let
 
   records = facts.dns.shared_records // derpRecords // manualRecords;
   importable = lib.filterAttrs (_: record: record.id != null) records;
+
+  # derp key 与手写记录撞名时 `//` 会静默覆盖其中一条，Terraform 随后会删除/
+  # 覆盖 live record。生成期直接报错，别让生成物悄悄丢记录。
+  derpKeyCollisions = lib.intersectLists (builtins.attrNames derpRecords) (
+    builtins.attrNames (facts.dns.shared_records // manualRecords)
+  );
 in
+assert lib.assertMsg (derpKeyCollisions == [ ])
+  "dns terranix: derp dnsKey collides with manual records: ${lib.concatStringsSep ", " derpKeyCollisions}";
 {
   terraform = {
-    required_version = ">= 1.8.0";
+    required_version = ">= 1.10.0";
 
     required_providers.cloudflare = {
       source = "cloudflare/cloudflare";
@@ -186,39 +196,11 @@ in
     id = "${facts.cloudflare.zone_id}/${importable.${key}.id}";
   }) (builtins.attrNames importable);
 
-  # 旧地址 -> for_each 地址的平滑迁移；与迁移前 HCL 完全一致。
+  # 旧地址 -> for_each 地址的平滑迁移；只保留仍由本 stack 管理的 record。
   moved = [
-    {
-      from = "cloudflare_dns_record.atuin_lucc_dev_a_01";
-      to = "cloudflare_dns_record.records[\"atuin\"]";
-    }
-    {
-      from = "cloudflare_dns_record.beszel_lucc_dev_a_02";
-      to = "cloudflare_dns_record.records[\"beszel\"]";
-    }
-    {
-      from = "cloudflare_dns_record.mm_lucc_dev_a_05";
-      to = "cloudflare_dns_record.records[\"memos\"]";
-    }
-    {
-      from = "cloudflare_dns_record.n8n_lucc_dev_a_06";
-      to = "cloudflare_dns_record.records[\"n8n\"]";
-    }
-    {
-      from = "cloudflare_dns_record.pan_lucc_dev_a_07";
-      to = "cloudflare_dns_record.records[\"openlist\"]";
-    }
-    {
-      from = "cloudflare_dns_record.pt_lucc_dev_a_08";
-      to = "cloudflare_dns_record.records[\"pt\"]";
-    }
     {
       from = "cloudflare_dns_record.rsshub_lucc_dev_a_09";
       to = "cloudflare_dns_record.records[\"rsshub\"]";
-    }
-    {
-      from = "cloudflare_dns_record.ts_lucc_dev_a_10";
-      to = "cloudflare_dns_record.records[\"tailscale\"]";
     }
     {
       from = "cloudflare_dns_record.blog_lucc_dev_cname_12";
@@ -231,10 +213,6 @@ in
     {
       from = "cloudflare_dns_record.docs_lucc_dev_cname_14";
       to = "cloudflare_dns_record.records[\"docs\"]";
-    }
-    {
-      from = "cloudflare_dns_record.dokploy_lucc_dev_cname_15";
-      to = "cloudflare_dns_record.records[\"dokploy\"]";
     }
     {
       from = "cloudflare_dns_record.lucc_dev_cname_16";
@@ -263,10 +241,6 @@ in
     {
       from = "cloudflare_dns_record.dp_lucc_dev_aaaa_24";
       to = "cloudflare_dns_record.records[\"dp\"]";
-    }
-    {
-      from = "cloudflare_dns_record.google_lucc_dev_aaaa_25";
-      to = "cloudflare_dns_record.records[\"google\"]";
     }
   ];
 }

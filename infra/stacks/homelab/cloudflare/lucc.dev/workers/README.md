@@ -19,13 +19,15 @@
 5. 验证 `https://music.lucc.dev` 200
 6. 删除 Pages project `music`
 
-## 回退
+## 回退（Pages project 已删除）
 
-在 Pages project 删除前：
-
-- 重新把 `music.lucc.dev` 加回 Pages custom domain
-- DNS stack `git revert` 恢复旧 CNAME 并 apply
+- 在 Cloudflare 重新创建 Pages project `music`（或把 zzz 的部署切回 Pages）
+- 重新绑定 `music.lucc.dev` custom domain
+- 在 DNS stack 新增 `music` CNAME，`id = null`（不要复用已删除记录的 id）
 - 删除本 stack 的 custom domain
+
+注意：直接 `git revert` 会带回旧 DNS record 的 import id；旧记录已经删除，
+import 会失败。回退时把 `id` 改成 `null`，或 import 新建出来的 record。
 
 ## 注意
 

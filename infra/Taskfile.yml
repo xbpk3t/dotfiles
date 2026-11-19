@@ -88,8 +88,14 @@ tasks:
       task tf:facts
     dir: "{{.TASKFILE_DIR}}/.."
     cmds:
-      - mkdir -p infra/generated
-      - nix eval --json .#infraFacts | jq -S . > infra/generated/facts.json
+      # 先写临时文件再 mv：nix eval / terranix 失败时不要把已提交的生成物截断。
+      - |
+        set -euo pipefail
+        mkdir -p infra/generated
+        tmp="$(mktemp infra/generated/.facts.json.XXXXXX)"
+        trap 'rm -f "$tmp"' EXIT
+        nix eval --json .#infraFacts | jq -S . > "$tmp"
+        mv "$tmp" infra/generated/facts.json
 
   terranix:
     desc: "生成 DNS stack 的 Terraform JSON（terranix 试点）"
@@ -97,9 +103,13 @@ tasks:
       task tf:terranix
     dir: "{{.TASKFILE_DIR}}/.."
     cmds:
-      - >-
-        nix develop .#infra --command bash -c
-        'terranix --with-nulls infra/stacks/homelab/cloudflare/lucc.dev/dns/terranix.nix | jq -S . > infra/stacks/homelab/cloudflare/lucc.dev/dns/generated.tf.json'
+      - |
+        set -euo pipefail
+        out=infra/stacks/homelab/cloudflare/lucc.dev/dns/generated.tf.json
+        tmp="$(mktemp "${out}.XXXXXX")"
+        trap 'rm -f "$tmp"' EXIT
+        nix develop .#infra --command bash -c 'set -o pipefail; terranix --with-nulls infra/stacks/homelab/cloudflare/lucc.dev/dns/terranix.nix | jq -S .' > "$tmp"
+        mv "$tmp" "$out"
 
   terranix-tailscale:
     desc: "生成 Tailscale stack 的 Terraform JSON（terranix 第二个试点）"
@@ -107,9 +117,13 @@ tasks:
       task tf:terranix-tailscale
     dir: "{{.TASKFILE_DIR}}/.."
     cmds:
-      - >-
-        nix develop .#infra --command bash -c
-        'terranix --with-nulls infra/stacks/homelab/tailscale/tailnet/terranix.nix | jq -S . > infra/stacks/homelab/tailscale/tailnet/generated.tf.json'
+      - |
+        set -euo pipefail
+        out=infra/stacks/homelab/tailscale/tailnet/generated.tf.json
+        tmp="$(mktemp "${out}.XXXXXX")"
+        trap 'rm -f "$tmp"' EXIT
+        nix develop .#infra --command bash -c 'set -o pipefail; terranix --with-nulls infra/stacks/homelab/tailscale/tailnet/terranix.nix | jq -S .' > "$tmp"
+        mv "$tmp" "$out"
 
   check:
     desc: "本地校验 infra（dns/facts/terranix freshness + actionlint + fmt/validate）"
