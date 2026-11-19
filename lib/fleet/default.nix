@@ -103,6 +103,23 @@ let
 
   tailnetNodes = lib.filterAttrs (_: node: node ? tailscale && node.tailscale ? ip) allNodes;
 
+  # DERP 节点必须声明非空 domain/dnsKey 和 publicIpv4；否则 ACME/DNS 会漂移。
+  derperNodeComplete =
+    node:
+    (node.derper.domain or "") != ""
+    && (node.derper.dnsKey or "") != ""
+    && (node.publicIpv4 or null) != null;
+
+  # 发布给 TF DNS 的 DERP 节点视图。这里不静默过滤不完整节点：
+  # 生成物漏掉一条记录会让 Terraform 删除已有 DNS record；直接 throw 更安全。
+  derperNodes = lib.mapAttrs (
+    name: node:
+    if derperNodeComplete node then
+      node
+    else
+      throw "fleet: incomplete derper meta for '${name}' (need derper.domain, derper.dnsKey, publicIpv4)"
+  ) (lib.filterAttrs (_: node: node ? derper) allNodes);
+
   # 发布给 client 的 singbox server 视图：补 hostName 和 server fallback，
   # 保持 fleet API 的形状稳定；server 缺失时的最终契约仍由 checks 兜底。
   singboxServers = lib.filter (s: s != null) (
@@ -133,11 +150,16 @@ let
     else
       builtins.head hubs;
 
+  # Hub 端口的默认值只在这里维护；host 模块和 Nezha 模块都从这里取。
+  nezhaDefaultPort = 8008;
+
   nezhaServer =
     if nezhaHub == null then
       throw "fleet: no node declares nezha.hub = true"
     else
-      "${primaryHostForNode nezhaHub.hostName nezhaHub}:${toString (nezhaHub.nezha.port or 8008)}";
+      "${primaryHostForNode nezhaHub.hostName nezhaHub}:${
+        toString (nezhaHub.nezha.port or nezhaDefaultPort)
+      }";
 
   nodeList = lib.attrValues allNodes;
   every = pred: lib.all pred nodeList;
@@ -157,6 +179,27 @@ let
         ips = lib.map (node: node.tailscale.ip) (lib.attrValues tailnetNodes);
       in
       lib.length ips == lib.length (lib.unique ips);
+
+    # DERP 节点必须声明非空 domain/dnsKey 和 publicIpv4；
+    # 否则 derperNodes 会直接 throw，这个 check 让 nix-unit 也能提前报红。
+    "test-derper-node-complete" = every (node: !(node ? derper) || derperNodeComplete node);
+
+    "test-derper-domain-unique" =
+      let
+        domains = map (node: node.derper.domain) (
+          lib.filter (node: node ? derper && node.derper ? domain) nodeList
+        );
+      in
+      lib.length domains == lib.length (lib.unique domains);
+
+    # dnsKey 是 Terraform records 的 for_each key；重复会静默覆盖其中一条。
+    "test-derper-dns-key-unique" =
+      let
+        keys = map (node: node.derper.dnsKey) (
+          lib.filter (node: node ? derper && node.derper ? dnsKey) nodeList
+        );
+      in
+      lib.length keys == lib.length (lib.unique keys);
 
     "test-nezha-hub-at-most-one" =
       lib.length (lib.filter (node: node.nezha.hub or false) nodeList) <= 1;
@@ -320,6 +363,7 @@ in
     deployTarget
     primaryHostForNode
     tailnetNodes
+    derperNodes
     singboxServers
     deployRsNode
     deploySmHmNode
@@ -332,5 +376,6 @@ in
   nezha = {
     hub = nezhaHub;
     server = nezhaServer;
+    defaultPort = nezhaDefaultPort;
   };
 }

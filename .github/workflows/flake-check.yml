@@ -33,6 +33,18 @@ jobs:
         # builder 的环境限制，非仓库问题。故恢复标准 `nix flake check`。
         run: nix flake check --accept-flake-config
 
+      - name: Evaluate fleet topology
+        # topology.nix 的断言只在求值 topology output 时运行；nix flake check 不会碰它。
+        # 只 eval 节点集合（不渲染 SVG），让节点覆盖/连接目标断言在 CI 生效。
+        run: nix eval --accept-flake-config --impure --json '.#topology.x86_64-linux.config.nodes' --apply builtins.attrNames >/dev/null
+
+      - name: Check generated fleet metadata
+        # infra/stacks/.../dns/fleet.generated.json 由 hosts/**/meta.nix 生成；
+        # 这里确保 meta 改动时没有忘记重新生成。
+        run: |
+          nix eval --accept-flake-config --impure --json '.#fleetMetadata' | jq . > /tmp/fleet.generated.json
+          diff -u infra/stacks/homelab/cloudflare/lucc.dev/dns/fleet.generated.json /tmp/fleet.generated.json
+
       - name: Check flake.lock health
         # flake-checker：只读检查三个 nixpkgs 输入的锁文件健康（非阻断，默认 exit 0）。
         # condition 覆盖 check-* 三项：

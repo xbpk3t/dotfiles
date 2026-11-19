@@ -4,7 +4,7 @@
   ...
 }:
 let
-  tailnetIp = hostMeta.tailscale.ip or "127.0.0.1";
+  tailnetIp = hostMeta.tailscale.ip;
 in
 {
   imports = [

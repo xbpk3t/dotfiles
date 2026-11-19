@@ -23,4 +23,9 @@ export CF_R2_SK="..."
 - `imports.tf` 会把 live DNS records 导入 state。
 - 第一次目标应该是 `no-op plan`。
 - Email Routing 用到的 MX / SPF / DKIM records 也统一放在这个 DNS stack，避免 DNS ownership 被拆散。
-- 日常维护时优先修改 `locals.tf` 里的 `dns_records` 数据模型，而不是继续新增独立 resource block。
+- 日常维护时优先修改 `locals.tf` 里的 `dns_records_managed`，而不是继续新增独立 resource block。
+- DERP records（`derp-dev` / `nva` / `derp-sm-vps-tc`）不手改 `locals.tf`：
+  - 事实来源：`hosts/**/meta.nix` 的 `derper.*` 与 `publicIpv4`
+  - 生成：`task tf:dns:generate`
+  - 校验：`task tf:dns:check`（CI 也会跑）
+  - 生成物：`fleet.generated.json`（需要提交）
