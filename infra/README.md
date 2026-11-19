@@ -144,12 +144,12 @@ locking（OpenTofu 1.13.9 实测可用），不再需要 DynamoDB 锁表。workf
   权限即可；R2 state backend 需要 `CF_R2_AK` / `CF_R2_SK` 的读写。
 - **apply**：上述资源需要 Edit 权限；`CLOUDFLARE_API_TOKEN` 在 GitHub 里必须
   使用 write token。
-- 本地 / CI 的 `CLOUDFLARE_API_TOKEN` 来自 SOPS `cf/token/read_all`
-  （历史命名，实际保存 read + write all token）。rotate 时用：
+- 本地 / CI 的 `CLOUDFLARE_API_TOKEN` 来自 SOPS `cf/token/all`
+  （全能 read/write token）。rotate 时用：
 
 ```bash
 printf '%s' '"cfat_..."' | sops set --value-stdin secrets/secrets.yaml \
-  '["cf"]["token"]["read_all"]'
+  '["cf"]["token"]["all"]'
 ```
 
 不要把 token 贴到聊天/commit 里；rotate 后同步更新 GitHub secret。
