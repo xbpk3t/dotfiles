@@ -120,32 +120,48 @@ in
     tailnet = facts.tailscale.tailnet;
   };
 
-  resource.tailscale_acl.main = {
-    # ACL 是静态数据，直接在 Nix 侧编码；derpMap 与 ACL 合并后交给 provider。
-    acl = builtins.toJSON (acl // { derpMap = derp_map; });
-  };
+  resource = {
+    tailscale_acl.main = {
+      # ACL 是静态数据，直接在 Nix 侧编码；derpMap 与 ACL 合并后交给 provider。
+      acl = builtins.toJSON (acl // { derpMap = derp_map; });
+    };
 
-  resource.tailscale_dns_preferences.main = {
-    magic_dns = true;
-  };
+    tailscale_dns_preferences.main = {
+      magic_dns = true;
+    };
 
-  resource.tailscale_service.ninerouter = {
-    name = "svc:9router";
-    comment = "9router dashboard (HTTP over tailnet)";
-    ports = [ "tcp:80" ];
-  };
+    tailscale_service = {
+      ninerouter = {
+        name = "svc:9router";
+        comment = "9router dashboard (HTTP over tailnet)";
+        ports = [ "tcp:80" ];
+      };
 
-  resource.tailscale_service.nezha = {
-    name = "svc:nezha";
-    comment = "Nezha dashboard (HTTP over tailnet)";
-    ports = [ "tcp:80" ];
-  };
+      nezha = {
+        name = "svc:nezha";
+        comment = "Nezha dashboard (HTTP over tailnet)";
+        ports = [ "tcp:80" ];
+      };
+    };
 
-  resource.tailscale_tailnet_key.device_join = {
-    reusable = true;
-    ephemeral = false;
-    preauthorized = false;
-    expiry = 7776000;
+    tailscale_tailnet_key.device_join = {
+      reusable = true;
+      ephemeral = false;
+      preauthorized = false;
+      expiry = 7776000;
+    };
+
+    tailscale_device_tags.nixos_vps_dev = {
+      device_id = lib.tf.ref "data.tailscale_device.servers[\"nixos-vps-dev\"].id";
+      tags = [ "tag:svc-9router" ];
+      depends_on = [ "tailscale_acl.main" ];
+    };
+
+    tailscale_device_key.servers = {
+      for_each = lib.tf.ref "data.tailscale_device.servers";
+      device_id = lib.tf.ref "each.value.id";
+      key_expiry_disabled = true;
+    };
   };
 
   data.tailscale_device.servers = {
@@ -154,17 +170,5 @@ in
       "nixos-vps-agt" = true;
     };
     hostname = lib.tf.ref "each.key";
-  };
-
-  resource.tailscale_device_tags.nixos_vps_dev = {
-    device_id = lib.tf.ref "data.tailscale_device.servers[\"nixos-vps-dev\"].id";
-    tags = [ "tag:svc-9router" ];
-    depends_on = [ "tailscale_acl.main" ];
-  };
-
-  resource.tailscale_device_key.servers = {
-    for_each = lib.tf.ref "data.tailscale_device.servers";
-    device_id = lib.tf.ref "each.value.id";
-    key_expiry_disabled = true;
   };
 }

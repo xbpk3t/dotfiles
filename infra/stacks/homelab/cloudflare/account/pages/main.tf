@@ -13,4 +13,3 @@ resource "cloudflare_pages_project" "projects" {
   production_branch  = each.value.production_branch
   source             = each.value.source
 }
-
