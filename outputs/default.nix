@@ -330,20 +330,11 @@ assert lib.assertMsg (
       };
 
       # infra 工具链：本地与 GitHub Actions 共用，避免 CI runner 上 ad-hoc 安装。
-      # 版本跟随 flake.lock 的 nixpkgs，与 home/base/devops/tf.nix 同源。
+      # 包清单唯一来源是 lib/infra-tools.nix（与 home/base/devops/tf.nix 共用）。
       # 用法：`nix develop .#infra -c tofu version`。
       devShells.infra = pkgs.mkShell {
         name = "dotfiles-infra";
-        packages = with pkgs; [
-          opentofu
-          terramate
-          terranix
-          tflint
-          terraform-docs
-          jq
-          actionlint
-          go-task
-        ];
+        packages = lib.concatLists (lib.attrValues (mylib.infraTools { inherit pkgs; }));
         # terranix 在运行期 `import <nixpkgs> {}`；默认 NIX_PATH 是 flake
         # registry 的 `flake:nixpkgs`（不随 flake.lock 固定）。这里指向本 flake
         # 的 nixpkgs，保证 task tf:terranix 与 CI freshness 检查用同一份 lib。

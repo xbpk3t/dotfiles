@@ -8,9 +8,5 @@ locals {
   # - blog / docs / me 早已迁到 Workers
   # - music 已迁到 Workers（infra/stacks/homelab/cloudflare/lucc.dev/workers）
   # 这里保留空 stack 作为历史锚点；确认不再需要 Pages 后可以整体删除。
-  pages_projects_managed = {}
-
-  pages_projects_pending_delete = {}
-
-  pages_projects = merge(local.pages_projects_managed, local.pages_projects_pending_delete)
+  pages_projects = {}
 }

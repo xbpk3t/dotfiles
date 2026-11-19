@@ -13,127 +13,117 @@
 let
   facts = import ../../../../../facts.nix;
 
+  # 所有 DNS record 共用的字段形状；记录本身只写各自不同的字段。
+  mkRecord =
+    {
+      id ? null,
+      name,
+      type,
+      content,
+      ttl ? 1,
+      proxied ? true,
+      comment ? null,
+      priority ? null,
+    }:
+    {
+      inherit
+        id
+        name
+        type
+        content
+        ttl
+        proxied
+        comment
+        priority
+        ;
+    };
+
   # DERP A 记录由 main 的 fleet metadata 生成（task tf:dns:generate）。
   # 这里直接消费生成物，避免 facts 再维护一份 DERP 域名/IP。
   fleet = builtins.fromJSON (builtins.readFile ./fleet.generated.json);
   derpRecords = lib.mapAttrs' (
     _name: node:
-    lib.nameValuePair node.dnsKey {
-      id = null;
+    lib.nameValuePair node.dnsKey (mkRecord {
       name = node.domain;
       type = "A";
       content = node.publicIpv4;
-      ttl = 1;
       proxied = false;
       comment = if node.dnsComment != null then node.dnsComment else "Tailscale DERP (${_name})";
-      priority = null;
-    }
+    })
   ) fleet.derpNodes;
 
   # 这些记录含外部服务 / Pages / Email Routing 的 provider 细节，
   # 暂不进入共享 facts；terranix 试点就地把它们搬成 Nix 数据。
   manualRecords = {
-    blog = {
+    blog = mkRecord {
       id = "db66877fcacde96aa9844c8a91ec3a16";
       name = "blog.lucc.dev";
       type = "AAAA";
       content = "100::";
-      ttl = 1;
-      proxied = true;
-      comment = null;
-      priority = null;
     };
-    cdn = {
+    cdn = mkRecord {
       id = "68bf0f40f96ff96acbd75a119e988750";
       name = "cdn.lucc.dev";
       type = "CNAME";
       content = "public.r2.dev";
-      ttl = 1;
-      proxied = true;
-      comment = null;
-      priority = null;
     };
-    docs = {
+    docs = mkRecord {
       id = "056c4cc7e02dfac9d69c9ff02d522314";
       name = "docs.lucc.dev";
       type = "AAAA";
       content = "100::";
-      ttl = 1;
-      proxied = true;
-      comment = null;
-      priority = null;
     };
     # 这个 CNAME 指向已删除的 Pages 项目；apex 实际由 Worker route
     # `lucc.dev/* -> me` 拦截。若移除该 route，需要同步改这条记录。
-    root = {
+    root = mkRecord {
       id = "a80a731e11c54cc0a9707b454b0dea63";
       name = "lucc.dev";
       type = "CNAME";
       content = "me-4b9.pages.dev";
-      ttl = 1;
-      proxied = true;
-      comment = null;
-      priority = null;
     };
-    mx_route3 = {
+    mx_route3 = mkRecord {
       id = "3bfffe44f3323a9fdbbb8b455622f113";
       name = "lucc.dev";
       type = "MX";
       content = "route3.mx.cloudflare.net";
-      ttl = 1;
       proxied = false;
-      comment = null;
       priority = 51;
     };
-    mx_route2 = {
+    mx_route2 = mkRecord {
       id = "3cbcaf3176b7ea868a57dd13f47512c7";
       name = "lucc.dev";
       type = "MX";
       content = "route2.mx.cloudflare.net";
-      ttl = 1;
       proxied = false;
-      comment = null;
       priority = 38;
     };
-    mx_route1 = {
+    mx_route1 = mkRecord {
       id = "e16cff5af9f8ec1e705fff3020a654f5";
       name = "lucc.dev";
       type = "MX";
       content = "route1.mx.cloudflare.net";
-      ttl = 1;
       proxied = false;
-      comment = null;
       priority = 67;
     };
-    dkim = {
+    dkim = mkRecord {
       id = "650591690a857966f1ca8242f4108ab3";
       name = "cf2024-1._domainkey.lucc.dev";
       type = "TXT";
       content = "\"v=DKIM1; h=sha256; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAiweykoi+o48IOGuP7GR3X0MOExCUDY/BCRHoWBnh3rChl7WhdyCxW3jgq1daEjPPqoi7sJvdg5hEQVsgVRQP4DcnQDVjGMbASQtrY4WmB1VebF+RPJB2ECPsEDTpeiI5ZyUAwJaVX7r6bznU67g7LvFq35yIo4sdlmtZGV+i0H4cpYH9+3JJ78k\" \"m4KXwaf9xUJCWF6nxeD+qG6Fyruw1Qlbds2r85U9dkNDVAS3gioCvELryh1TxKGiVTkg4wqHTyHfWsp7KD3WQHYJn0RyfJJu6YEmL77zonn7p2SRMvTMP3ZEXibnC9gz3nnhR6wcYL8Q7zXypKTMD58bTixDSJwIDAQAB\"";
-      ttl = 1;
       proxied = false;
-      comment = null;
-      priority = null;
     };
-    spf = {
+    spf = mkRecord {
       id = "8eadaa51a16abe012878207f99ae5d33";
       name = "lucc.dev";
       type = "TXT";
       content = "\"v=spf1 include:_spf.mx.cloudflare.net ~all\"";
-      ttl = 1;
       proxied = false;
-      comment = null;
-      priority = null;
     };
-    dp = {
+    dp = mkRecord {
       id = "6bc3b7e5f9391562ac7df710c3578362";
       name = "dp.lucc.dev";
       type = "AAAA";
       content = "100::";
-      ttl = 1;
-      proxied = true;
-      comment = null;
-      priority = null;
     };
   };
 

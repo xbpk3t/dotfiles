@@ -1,11 +1,13 @@
 {
   pkgs,
   lib,
+  mylib,
   config,
   ...
 }:
 let
   cfg = config.modules.devops.tf;
+  tools = mylib.infraTools { inherit pkgs; };
 in
 {
   options.modules.devops.tf = {
@@ -27,41 +29,20 @@ in
       modules.langs.lsp.packages = lib.optionals cfg.enable [ pkgs.terraform-ls ];
     }
     (lib.mkIf cfg.enable {
+      # 包清单见 lib/infra-tools.nix（与 devShells.infra 同源）；这里只决定
+      # 哪些能力装进 home profile。
       home.packages =
-        with pkgs;
-        lib.optionals cfg.opentofu.enable [
-          opentofu
-
-          # ==================== 新增：带 Cloudflare provider 的 OpenTofu ====================
-          #    (opentofu.withPlugins (p: [
-          #      p.cloudflare_cloudflare # terraform-providers.cloudflare 已重命名为 cloudflare_cloudflare
-
-          #      # 如果以后还想加其他 provider，就继续往这里加，例如：
-          #      # p.aws
-          #      # p.null
-          #      # p.random
-          #    ]))
-
-          terranix
-        ]
-        ++ lib.optionals cfg.terramate.enable [
-          terramate
-
-          # [2026-03-27] conflict with terramate
-          # > `/nix/store/irwfbfmq4696wvf3h3w6pnjsf77hw8ds-tenv-4.9.3/bin/terramate' and
-          # > `/nix/store/prgxvl5sw4sn44i9sinv82asj1fihhcc-terramate-0.16.0/bin/terramate'
-          # tenv
-        ]
-        ++ lib.optionals cfg.lint.enable [
-          # === Terraform 代码质量 ===
-          tflint
-          terraform-docs
-        ]
-        ++ lib.optionals cfg.ansible.enable [
-          # CICD
-          ansible
-          ansible-lint
-        ];
+        lib.optionals cfg.opentofu.enable tools.opentofu
+        ++ lib.optionals cfg.terramate.enable tools.terramate
+        ++ lib.optionals cfg.lint.enable tools.lint
+        ++ lib.optionals cfg.ansible.enable (
+          with pkgs;
+          [
+            # CICD
+            ansible
+            ansible-lint
+          ]
+        );
     })
   ];
 }

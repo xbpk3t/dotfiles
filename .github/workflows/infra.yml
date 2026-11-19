@@ -17,27 +17,22 @@ name: infra
 
 on:
   pull_request:
-    paths:
+    # facts.json / fleet.generated.json 由 hosts meta 派生；这些文件变化也要
+    # 触发 validate（freshness）与 apply（DNS 记录随 host IP/域名更新）。
+    paths: &infra-paths
       - "infra/**"
       - "hosts/**/meta.nix"
       - "outputs/default.nix"
       - "lib/fleet/**"
+      - "lib/default.nix"
+      - "lib/infra-tools.nix"
       - "flake.nix"
       - "flake.lock"
       - ".github/workflows/infra.yml"
   push:
     branches:
       - main
-    paths:
-      - "infra/**"
-      # facts.json / fleet.generated.json 由 hosts meta 派生；这些文件变化也要
-      # 触发 validate（freshness）与 apply（DNS 记录随 host IP/域名更新）。
-      - "hosts/**/meta.nix"
-      - "outputs/default.nix"
-      - "lib/fleet/**"
-      - "flake.nix"
-      - "flake.lock"
-      - ".github/workflows/infra.yml"
+    paths: *infra-paths
   schedule:
     # 每天 03:17 UTC 做 drift 检测，避开整点。
     - cron: "17 3 * * *"
@@ -148,7 +143,7 @@ jobs:
       fail-fast: false
       matrix:
         stack: ${{ fromJSON(needs.list.outputs.stacks) }}
-    env:
+    env: &tofu-env
       AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_AK }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SK }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -200,13 +195,7 @@ jobs:
       fail-fast: false
       matrix:
         stack: ${{ fromJSON(needs.list.outputs.stacks) }}
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_AK }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SK }}
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      TAILSCALE_API_KEY: ${{ secrets.TAILSCALE_API_KEY }}
-      TF_IN_AUTOMATION: "1"
-      TF_INPUT: "0"
+    env: *tofu-env
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -245,13 +234,7 @@ jobs:
       fail-fast: false
       matrix:
         stack: ${{ fromJSON(needs.list.outputs.stacks) }}
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_AK }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SK }}
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      TAILSCALE_API_KEY: ${{ secrets.TAILSCALE_API_KEY }}
-      TF_IN_AUTOMATION: "1"
-      TF_INPUT: "0"
+    env: *tofu-env
     steps:
       - name: Checkout
         uses: actions/checkout@v4
