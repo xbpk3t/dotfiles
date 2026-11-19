@@ -66,16 +66,6 @@ let
       comment = null;
       priority = null;
     };
-    slides = {
-      id = "21078041f801e1c49d6171d0226760eb";
-      name = "s.lucc.dev";
-      type = "CNAME";
-      content = "slides-6fn.pages.dev";
-      ttl = 1;
-      proxied = true;
-      comment = null;
-      priority = null;
-    };
     mx_route3 = {
       id = "3bfffe44f3323a9fdbbb8b455622f113";
       name = "lucc.dev";
@@ -246,10 +236,6 @@ in
     {
       from = "cloudflare_dns_record.music_lucc_dev_cname_17";
       to = "cloudflare_dns_record.records[\"music\"]";
-    }
-    {
-      from = "cloudflare_dns_record.s_lucc_dev_cname_18";
-      to = "cloudflare_dns_record.records[\"slides\"]";
     }
     {
       from = "cloudflare_dns_record.lucc_dev_mx_19";

@@ -45,10 +45,6 @@
       "to": "cloudflare_dns_record.records[\"rsshub\"]"
     },
     {
-      "id": "1c07a1b84d8273f4dfa6c3adce513f94/21078041f801e1c49d6171d0226760eb",
-      "to": "cloudflare_dns_record.records[\"slides\"]"
-    },
-    {
       "id": "1c07a1b84d8273f4dfa6c3adce513f94/8eadaa51a16abe012878207f99ae5d33",
       "to": "cloudflare_dns_record.records[\"spf\"]"
     }
@@ -109,10 +105,6 @@
     {
       "from": "cloudflare_dns_record.music_lucc_dev_cname_17",
       "to": "cloudflare_dns_record.records[\"music\"]"
-    },
-    {
-      "from": "cloudflare_dns_record.s_lucc_dev_cname_18",
-      "to": "cloudflare_dns_record.records[\"slides\"]"
     },
     {
       "from": "cloudflare_dns_record.lucc_dev_mx_19",
@@ -311,16 +303,6 @@
             "proxied": true,
             "ttl": 1,
             "type": "A"
-          },
-          "slides": {
-            "comment": null,
-            "content": "slides-6fn.pages.dev",
-            "id": "21078041f801e1c49d6171d0226760eb",
-            "name": "s.lucc.dev",
-            "priority": null,
-            "proxied": true,
-            "ttl": 1,
-            "type": "CNAME"
           },
           "spf": {
             "comment": null,

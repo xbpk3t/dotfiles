@@ -1,6 +1,14 @@
 # Cloudflare Pages Stack
 
-这个 stack 负责当前 Cloudflare account 下已经存在的 Pages projects。
+这个 stack 目前只负责 `music` 一个 Pages project。
+
+## 当前范围
+
+- `music`：长三角青少年小提琴艺术展演活动站点，live 绑定 D1 `vscs`。
+- 旧项目 `blog` / `docs` / `me` 已经迁到 Workers routes；`slides` 已删除；
+  `nextflux` 已从 state 移除。
+- `music` 计划后续迁到 Workers Static Assets；迁移完成前保留在 Pages，
+  避免站点中断。
 
 ## 使用方式
 
@@ -9,22 +17,17 @@ export CLOUDFLARE_API_TOKEN="..."
 export CF_R2_AK="..."
 export CF_R2_SK="..."
 
-# docs 项目的 runtime/build secret 不直接写入仓库
-export TF_VAR_pages_docs_cfp_pwd="..."
-```
-
-然后执行：
-
-```bash
-tofu init
-tofu plan
+tofu init -reconfigure -input=false
+tofu plan -input=false
 ```
 
 ## 注意
 
-- 这个 stack 当前是 `adopt existing projects` 的基线，不是最终的人类友好抽象。
-- OpenTofu 的 `s3` backend 底层仍然读取 `AWS_*` 变量名，但仓库 task 已经帮你把 `CF_R2_AK` / `CF_R2_SK` 映射过去了，日常不需要再手写 `AWS_*`。
-- `docs` 的 `CFP_PASSWORD` 是 live secret，必须通过 `TF_VAR_pages_docs_cfp_pwd` 注入，否则 plan 会看到 drift。
-- `music` 当前已经绑定了一个 D1 database，所以这里直接按 live binding 声明。
-- `web_analytics_token` 也是 sensitive，当前故意不落仓库。
-- 日常维护时优先修改 `locals.tf` 里的 `pages_projects` 数据模型，而不是继续复制完整 project resource。
+- 这个 stack 是 `adopt existing projects` 的基线，不是最终的人类友好抽象。
+- OpenTofu 的 `s3` backend 底层仍然读取 `AWS_*` 变量名，但仓库 task 已经帮你把
+  `CF_R2_AK` / `CF_R2_SK` 映射过去了，日常不需要再手写 `AWS_*`。
+- 不要显式写 `path_excludes` / `preview_branch_excludes = []`：provider v5 会把
+  空列表读回 null，apply 后报 `inconsistent result after apply`。
+- `web_analytics_token` 是 sensitive，当前故意不落仓库。
+- 日常维护时优先修改 `locals.tf` 里的 `pages_projects` 数据模型，而不是继续复制
+  完整 project resource。
