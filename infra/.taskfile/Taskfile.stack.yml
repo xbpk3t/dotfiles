@@ -29,7 +29,8 @@ tasks:
       - sh: test -d "{{.USER_WORKING_DIR}}/{{.STACK}}"
         msg: "STACK 必须是相对仓库根目录的有效路径，例如 infra/stacks/homelab/cloudflare/lucc.dev/dns"
     cmds:
-      - rm -rf .terraform .terraform.lock.hcl
+      # 只清理本地 provider 缓存，保留受版本控制的 .terraform.lock.hcl。
+      - rm -rf .terraform
       - tofu init -backend=false -input=false
       - tofu validate
 

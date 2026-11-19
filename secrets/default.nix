@@ -83,15 +83,8 @@ in
       CF_R2_SK = mkUserSecret "cf/r2/sk";
       CF_R2_ENDPOINT = mkUserSecret "cf/r2/endpoint";
 
-      # 同时具体 read all & write all 权限的token，为了方便 terraform 使用
-      CF_TOKEN_READ_WRITE_ALL = mkUserSecret "cf/token/read_all";
-      # CF_TOKEN_DNS = mkUserSecret "cf/token/DNS";
-
-      # Cloudflare Tunnel 管理 token（Cloudflare Tunnel:Edit 权限，账户级）。
-      # 用于 herdr-mobile-relay 的命名隧道（cc.lucc.dev）创建 + DNS 路由。
-      CF_TUNNEL_TOKEN = mkUserSecret "cf/token/tunnel";
-
-      CF_WORKERS_CFP = mkUserSecret "cf/workers/cfp";
+      # 全能 Cloudflare token（read/write），供 Terraform / 日常 API 使用。
+      CLOUDFLARE_API_TOKEN = mkUserSecret "cf/token/all";
 
       # SSH
       SSH_GITHUB = mkUserSecret "ssh/github";

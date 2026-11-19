@@ -1,5 +1,8 @@
 locals {
-  account_id = "96540bd100b82adba941163704660c31"
+  # Nix 生成的共享 infra facts；源文件 infra/facts.nix。
+  facts = jsondecode(file("${path.module}/../../../../../generated/facts.json"))
+
+  account_id = local.facts.cloudflare.account_id
 
   kv_namespaces_managed = {}
 

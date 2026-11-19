@@ -1,0 +1,98 @@
+{
+  "data": {
+    "tailscale_device": {
+      "servers": {
+        "for_each": {
+          "nixos-vps-agt": true,
+          "nixos-vps-dev": true
+        },
+        "hostname": "${each.key}"
+      }
+    }
+  },
+  "provider": {
+    "tailscale": {
+      "tailnet": "xbpk3t.github"
+    }
+  },
+  "resource": {
+    "tailscale_acl": {
+      "main": {
+        "acl": "{\"autoApprovers\":{\"exitNode\":[\"xbpk3t@github\",\"tag:svc-9router\"],\"routes\":{\"0.0.0.0/0\":[\"xbpk3t@github\",\"tag:svc-9router\"],\"::/0\":[\"xbpk3t@github\",\"tag:svc-9router\"]},\"services\":{\"svc:9router\":[\"tag:svc-9router\"],\"svc:nezha\":[\"tag:svc-9router\"]}},\"derpMap\":{\"OmitDefaultRegions\":false,\"Regions\":{\"902\":{\"Nodes\":[{\"DERPPort\":10043,\"HostName\":\"47.79.17.202\",\"IPv4\":\"47.79.17.202\",\"InsecureForTests\":true,\"Name\":\"902\",\"RegionID\":902,\"STUNPort\":10078}],\"RegionCode\":\"hk-2\",\"RegionID\":902,\"RegionName\":\"hk-2\"}}},\"grants\":[{\"dst\":[\"*\"],\"ip\":[\"*\"],\"src\":[\"*\"]},{\"dst\":[\"autogroup:internet\"],\"ip\":[\"*\"],\"src\":[\"xbpk3t@nod-am\"]}],\"ssh\":[{\"action\":\"check\",\"dst\":[\"autogroup:self\"],\"src\":[\"autogroup:member\"],\"users\":[\"autogroup:nonroot\",\"root\"]}],\"tagOwners\":{\"tag:svc-9router\":[\"xbpk3t@github\"]}}"
+      }
+    },
+    "tailscale_device_key": {
+      "servers": {
+        "device_id": "${each.value.id}",
+        "for_each": "${data.tailscale_device.servers}",
+        "key_expiry_disabled": true
+      }
+    },
+    "tailscale_device_tags": {
+      "nixos_vps_dev": {
+        "depends_on": [
+          "tailscale_acl.main"
+        ],
+        "device_id": "${data.tailscale_device.servers[\"nixos-vps-dev\"].id}",
+        "tags": [
+          "tag:svc-9router"
+        ]
+      }
+    },
+    "tailscale_dns_preferences": {
+      "main": {
+        "magic_dns": true
+      }
+    },
+    "tailscale_service": {
+      "nezha": {
+        "comment": "Nezha dashboard (HTTP over tailnet)",
+        "name": "svc:nezha",
+        "ports": [
+          "tcp:80"
+        ]
+      },
+      "ninerouter": {
+        "comment": "9router dashboard (HTTP over tailnet)",
+        "name": "svc:9router",
+        "ports": [
+          "tcp:80"
+        ]
+      }
+    },
+    "tailscale_tailnet_key": {
+      "device_join": {
+        "ephemeral": false,
+        "expiry": 7776000,
+        "preauthorized": false,
+        "reusable": true
+      }
+    }
+  },
+  "terraform": {
+    "backend": {
+      "s3": {
+        "bucket": "luck-dotfiles-opentofu-state",
+        "endpoints": {
+          "s3": "https://96540bd100b82adba941163704660c31.r2.cloudflarestorage.com"
+        },
+        "key": "homelab/tailscale/tailnet/terraform.tfstate",
+        "region": "auto",
+        "skip_credentials_validation": true,
+        "skip_metadata_api_check": true,
+        "skip_region_validation": true,
+        "skip_requesting_account_id": true,
+        "skip_s3_checksum": true,
+        "use_lockfile": true,
+        "use_path_style": true
+      }
+    },
+    "required_providers": {
+      "tailscale": {
+        "source": "tailscale/tailscale",
+        "version": "~> 0.18"
+      }
+    },
+    "required_version": ">= 1.10.0"
+  }
+}

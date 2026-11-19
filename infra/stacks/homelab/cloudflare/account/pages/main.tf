@@ -13,28 +13,3 @@ resource "cloudflare_pages_project" "projects" {
   production_branch  = each.value.production_branch
   source             = each.value.source
 }
-
-moved {
-  from = cloudflare_pages_project.blog
-  to   = cloudflare_pages_project.projects["blog"]
-}
-
-moved {
-  from = cloudflare_pages_project.docs
-  to   = cloudflare_pages_project.projects["docs"]
-}
-
-moved {
-  from = cloudflare_pages_project.me
-  to   = cloudflare_pages_project.projects["me"]
-}
-
-moved {
-  from = cloudflare_pages_project.music
-  to   = cloudflare_pages_project.projects["music"]
-}
-
-moved {
-  from = cloudflare_pages_project.slides
-  to   = cloudflare_pages_project.projects["slides"]
-}

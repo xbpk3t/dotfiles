@@ -1,0 +1,299 @@
+{
+  "import": [
+    {
+      "id": "1c07a1b84d8273f4dfa6c3adce513f94/db66877fcacde96aa9844c8a91ec3a16",
+      "to": "cloudflare_dns_record.records[\"blog\"]"
+    },
+    {
+      "id": "1c07a1b84d8273f4dfa6c3adce513f94/68bf0f40f96ff96acbd75a119e988750",
+      "to": "cloudflare_dns_record.records[\"cdn\"]"
+    },
+    {
+      "id": "1c07a1b84d8273f4dfa6c3adce513f94/650591690a857966f1ca8242f4108ab3",
+      "to": "cloudflare_dns_record.records[\"dkim\"]"
+    },
+    {
+      "id": "1c07a1b84d8273f4dfa6c3adce513f94/056c4cc7e02dfac9d69c9ff02d522314",
+      "to": "cloudflare_dns_record.records[\"docs\"]"
+    },
+    {
+      "id": "1c07a1b84d8273f4dfa6c3adce513f94/6bc3b7e5f9391562ac7df710c3578362",
+      "to": "cloudflare_dns_record.records[\"dp\"]"
+    },
+    {
+      "id": "1c07a1b84d8273f4dfa6c3adce513f94/e16cff5af9f8ec1e705fff3020a654f5",
+      "to": "cloudflare_dns_record.records[\"mx_route1\"]"
+    },
+    {
+      "id": "1c07a1b84d8273f4dfa6c3adce513f94/3cbcaf3176b7ea868a57dd13f47512c7",
+      "to": "cloudflare_dns_record.records[\"mx_route2\"]"
+    },
+    {
+      "id": "1c07a1b84d8273f4dfa6c3adce513f94/3bfffe44f3323a9fdbbb8b455622f113",
+      "to": "cloudflare_dns_record.records[\"mx_route3\"]"
+    },
+    {
+      "id": "1c07a1b84d8273f4dfa6c3adce513f94/a80a731e11c54cc0a9707b454b0dea63",
+      "to": "cloudflare_dns_record.records[\"root\"]"
+    },
+    {
+      "id": "1c07a1b84d8273f4dfa6c3adce513f94/1eb043e1ffe747891513e47be11b0a6f",
+      "to": "cloudflare_dns_record.records[\"rsshub\"]"
+    },
+    {
+      "id": "1c07a1b84d8273f4dfa6c3adce513f94/8eadaa51a16abe012878207f99ae5d33",
+      "to": "cloudflare_dns_record.records[\"spf\"]"
+    }
+  ],
+  "moved": [
+    {
+      "from": "cloudflare_dns_record.rsshub_lucc_dev_a_09",
+      "to": "cloudflare_dns_record.records[\"rsshub\"]"
+    },
+    {
+      "from": "cloudflare_dns_record.blog_lucc_dev_cname_12",
+      "to": "cloudflare_dns_record.records[\"blog\"]"
+    },
+    {
+      "from": "cloudflare_dns_record.cdn_lucc_dev_cname_13",
+      "to": "cloudflare_dns_record.records[\"cdn\"]"
+    },
+    {
+      "from": "cloudflare_dns_record.docs_lucc_dev_cname_14",
+      "to": "cloudflare_dns_record.records[\"docs\"]"
+    },
+    {
+      "from": "cloudflare_dns_record.lucc_dev_cname_16",
+      "to": "cloudflare_dns_record.records[\"root\"]"
+    },
+    {
+      "from": "cloudflare_dns_record.lucc_dev_mx_19",
+      "to": "cloudflare_dns_record.records[\"mx_route3\"]"
+    },
+    {
+      "from": "cloudflare_dns_record.lucc_dev_mx_20",
+      "to": "cloudflare_dns_record.records[\"mx_route2\"]"
+    },
+    {
+      "from": "cloudflare_dns_record.lucc_dev_mx_21",
+      "to": "cloudflare_dns_record.records[\"mx_route1\"]"
+    },
+    {
+      "from": "cloudflare_dns_record.cf2024_1_domainkey_lucc_dev_txt_22",
+      "to": "cloudflare_dns_record.records[\"dkim\"]"
+    },
+    {
+      "from": "cloudflare_dns_record.lucc_dev_txt_23",
+      "to": "cloudflare_dns_record.records[\"spf\"]"
+    },
+    {
+      "from": "cloudflare_dns_record.dp_lucc_dev_aaaa_24",
+      "to": "cloudflare_dns_record.records[\"dp\"]"
+    }
+  ],
+  "provider": {
+    "cloudflare": {}
+  },
+  "resource": {
+    "cloudflare_dns_record": {
+      "records": {
+        "comment": "${each.value.comment}",
+        "content": "${each.value.content}",
+        "for_each": {
+          "api": {
+            "comment": "AxonHub",
+            "content": "192.129.183.26",
+            "id": null,
+            "name": "api.lucc.dev",
+            "priority": null,
+            "proxied": true,
+            "ttl": 1,
+            "type": "A"
+          },
+          "as": {
+            "comment": "OpenList (ASMR)",
+            "content": "192.129.183.26",
+            "id": null,
+            "name": "as.lucc.dev",
+            "priority": null,
+            "proxied": true,
+            "ttl": 1,
+            "type": "A"
+          },
+          "blog": {
+            "comment": null,
+            "content": "100::",
+            "id": "db66877fcacde96aa9844c8a91ec3a16",
+            "name": "blog.lucc.dev",
+            "priority": null,
+            "proxied": true,
+            "ttl": 1,
+            "type": "AAAA"
+          },
+          "cdn": {
+            "comment": null,
+            "content": "public.r2.dev",
+            "id": "68bf0f40f96ff96acbd75a119e988750",
+            "name": "cdn.lucc.dev",
+            "priority": null,
+            "proxied": true,
+            "ttl": 1,
+            "type": "CNAME"
+          },
+          "derp-dev": {
+            "comment": "Tailscale DERP (LA)",
+            "content": "192.129.183.26",
+            "id": null,
+            "name": "derp-nixos-vps-dev.lucc.dev",
+            "priority": null,
+            "proxied": false,
+            "ttl": 1,
+            "type": "A"
+          },
+          "derp-sm-vps-tc": {
+            "comment": "Tailscale DERP (SGP)",
+            "content": "43.156.103.43",
+            "id": null,
+            "name": "derp-sm-vps-tc.lucc.dev",
+            "priority": null,
+            "proxied": false,
+            "ttl": 1,
+            "type": "A"
+          },
+          "dkim": {
+            "comment": null,
+            "content": "\"v=DKIM1; h=sha256; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAiweykoi+o48IOGuP7GR3X0MOExCUDY/BCRHoWBnh3rChl7WhdyCxW3jgq1daEjPPqoi7sJvdg5hEQVsgVRQP4DcnQDVjGMbASQtrY4WmB1VebF+RPJB2ECPsEDTpeiI5ZyUAwJaVX7r6bznU67g7LvFq35yIo4sdlmtZGV+i0H4cpYH9+3JJ78k\" \"m4KXwaf9xUJCWF6nxeD+qG6Fyruw1Qlbds2r85U9dkNDVAS3gioCvELryh1TxKGiVTkg4wqHTyHfWsp7KD3WQHYJn0RyfJJu6YEmL77zonn7p2SRMvTMP3ZEXibnC9gz3nnhR6wcYL8Q7zXypKTMD58bTixDSJwIDAQAB\"",
+            "id": "650591690a857966f1ca8242f4108ab3",
+            "name": "cf2024-1._domainkey.lucc.dev",
+            "priority": null,
+            "proxied": false,
+            "ttl": 1,
+            "type": "TXT"
+          },
+          "docs": {
+            "comment": null,
+            "content": "100::",
+            "id": "056c4cc7e02dfac9d69c9ff02d522314",
+            "name": "docs.lucc.dev",
+            "priority": null,
+            "proxied": true,
+            "ttl": 1,
+            "type": "AAAA"
+          },
+          "dp": {
+            "comment": null,
+            "content": "100::",
+            "id": "6bc3b7e5f9391562ac7df710c3578362",
+            "name": "dp.lucc.dev",
+            "priority": null,
+            "proxied": true,
+            "ttl": 1,
+            "type": "AAAA"
+          },
+          "mx_route1": {
+            "comment": null,
+            "content": "route1.mx.cloudflare.net",
+            "id": "e16cff5af9f8ec1e705fff3020a654f5",
+            "name": "lucc.dev",
+            "priority": 67,
+            "proxied": false,
+            "ttl": 1,
+            "type": "MX"
+          },
+          "mx_route2": {
+            "comment": null,
+            "content": "route2.mx.cloudflare.net",
+            "id": "3cbcaf3176b7ea868a57dd13f47512c7",
+            "name": "lucc.dev",
+            "priority": 38,
+            "proxied": false,
+            "ttl": 1,
+            "type": "MX"
+          },
+          "mx_route3": {
+            "comment": null,
+            "content": "route3.mx.cloudflare.net",
+            "id": "3bfffe44f3323a9fdbbb8b455622f113",
+            "name": "lucc.dev",
+            "priority": 51,
+            "proxied": false,
+            "ttl": 1,
+            "type": "MX"
+          },
+          "nva": {
+            "comment": "Tailscale DERP (Shanghai, nixos-vps-agt)",
+            "content": "1.15.64.188",
+            "id": null,
+            "name": "nva.lucc.dev",
+            "priority": null,
+            "proxied": false,
+            "ttl": 1,
+            "type": "A"
+          },
+          "root": {
+            "comment": null,
+            "content": "me-4b9.pages.dev",
+            "id": "a80a731e11c54cc0a9707b454b0dea63",
+            "name": "lucc.dev",
+            "priority": null,
+            "proxied": true,
+            "ttl": 1,
+            "type": "CNAME"
+          },
+          "rsshub": {
+            "comment": "rsshub",
+            "content": "192.129.183.26",
+            "id": "1eb043e1ffe747891513e47be11b0a6f",
+            "name": "rsshub.lucc.dev",
+            "priority": null,
+            "proxied": true,
+            "ttl": 1,
+            "type": "A"
+          },
+          "spf": {
+            "comment": null,
+            "content": "\"v=spf1 include:_spf.mx.cloudflare.net ~all\"",
+            "id": "8eadaa51a16abe012878207f99ae5d33",
+            "name": "lucc.dev",
+            "priority": null,
+            "proxied": false,
+            "ttl": 1,
+            "type": "TXT"
+          }
+        },
+        "name": "${each.value.name}",
+        "priority": "${each.value.priority}",
+        "proxied": "${each.value.proxied}",
+        "ttl": "${each.value.ttl}",
+        "type": "${each.value.type}",
+        "zone_id": "1c07a1b84d8273f4dfa6c3adce513f94"
+      }
+    }
+  },
+  "terraform": {
+    "backend": {
+      "s3": {
+        "bucket": "luck-dotfiles-opentofu-state",
+        "endpoints": {
+          "s3": "https://96540bd100b82adba941163704660c31.r2.cloudflarestorage.com"
+        },
+        "key": "homelab/cloudflare/lucc.dev/dns/terraform.tfstate",
+        "region": "auto",
+        "skip_credentials_validation": true,
+        "skip_metadata_api_check": true,
+        "skip_region_validation": true,
+        "skip_requesting_account_id": true,
+        "skip_s3_checksum": true,
+        "use_lockfile": true,
+        "use_path_style": true
+      }
+    },
+    "required_providers": {
+      "cloudflare": {
+        "source": "cloudflare/cloudflare",
+        "version": "~> 5.0"
+      }
+    },
+    "required_version": ">= 1.10.0"
+  }
+}

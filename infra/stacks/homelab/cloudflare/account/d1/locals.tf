@@ -1,12 +1,15 @@
 locals {
+  # Nix 生成的共享 infra facts；源文件 infra/facts.nix。
+  facts = jsondecode(file("${path.module}/../../../../../generated/facts.json"))
+
   # D1 是 account-scope 资源，不属于某一个 zone。
   # 所以这里单独拆成 account 级别 state，避免和 DNS / Pages 混在一起。
-  account_id = "96540bd100b82adba941163704660c31"
+  account_id = local.facts.cloudflare.account_id
 
   d1_databases_managed = {
     docs = {
-      uuid                  = "96375ee2-188f-44d4-ab16-eaa06828a4ac"
-      name                  = "docs"
+      uuid                  = local.facts.cloudflare.d1.docs.id
+      name                  = local.facts.cloudflare.d1.docs.name
       jurisdiction          = null
       primary_location_hint = null
       read_replication_mode = "disabled"
@@ -14,8 +17,8 @@ locals {
 
     # https://github.com/xbpk3t/zzz
     vscs = {
-      uuid                  = "6f4f878f-4845-4801-9386-458c612f0a72"
-      name                  = "vscs"
+      uuid                  = local.facts.cloudflare.d1.vscs.id
+      name                  = local.facts.cloudflare.d1.vscs.name
       jurisdiction          = null
       primary_location_hint = null
       read_replication_mode = "disabled"

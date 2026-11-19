@@ -1,5 +1,8 @@
 locals {
-  account_id = "96540bd100b82adba941163704660c31"
+  # Nix 生成的共享 infra facts；源文件 infra/facts.nix。
+  facts = jsondecode(file("${path.module}/../../../../../generated/facts.json"))
+
+  account_id = local.facts.cloudflare.account_id
 
   # 1. resource-facing 字段
   #    name, title, uuid, read_replication_mode 这种 provider 真正会用到的
@@ -17,7 +20,7 @@ locals {
   r2_buckets_managed = {
 
     docs = {
-      name = "docs"
+      name = local.facts.cloudflare.r2.buckets.docs
       notes = {
         crit  = "high"
         owner = "docs"
@@ -28,7 +31,7 @@ locals {
     # [2026-10-19] 由 docs-alfred 经 S3 API 先行创建（R2 access key 建桶），
     # 待下次 apply 经 import 块收编；公开域名为 dw.lucc.dev（R2 侧绑定）。
     docs-wiki = {
-      name = "docs-wiki"
+      name = local.facts.cloudflare.r2.buckets["docs-wiki"]
       notes = {
         crit  = "medium"
         owner = "xbpk3t/docs-alfred"

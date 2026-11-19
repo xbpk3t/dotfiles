@@ -18,10 +18,6 @@ in
     R2_SK = "$(cat ${config.sops.secrets.CF_R2_SK.path})";
     R2_ENDPOINT = "https://$(cat ${config.sops.secrets.CF_ACCOUNT.path}).r2.cloudflarestorage.com";
 
-    # 看看能否不用这个 CLOUDFLARE_API_TOKEN 的 key? 感觉会很不清晰，容易混淆
-    CLOUDFLARE_API_TOKEN = "$(cat ${config.sops.secrets.CF_TOKEN_READ_WRITE_ALL.path})";
-
-    # 我在 cloudflare-pages-auth 里设置的pwd
-    TF_VAR_pages_docs_cfp_pwd = "$(cat ${config.sops.secrets.CF_WORKERS_CFP.path})";
+    CLOUDFLARE_API_TOKEN = "$(cat ${config.sops.secrets.CLOUDFLARE_API_TOKEN.path})";
   };
 }

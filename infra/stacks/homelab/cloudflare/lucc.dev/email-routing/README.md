@@ -4,11 +4,15 @@
 
 ## 当前范围
 
-- 一个定向转发规则：`me@lucc.dev -> jeffcottlu@gmail.com`
-- 一个 catch-all 规则：默认 `drop`
+- 一个定向转发规则：`me@lucc.dev -> jeffcottlu@gmail.com`（Terraform 管理）
+- catch-all 规则：live 为 `disabled + drop`，**不由 Terraform 管理**
+  - provider v5 的 `cloudflare_email_routing_catch_all.tag` 是 computed-only，
+    每次 plan 都会出现永久 diff；详见 `main.tf` 的说明
+  - 需要修改时走 Cloudflare Dashboard 或 API
 
 ## 有意不放进这个 stack 的内容
 
+- catch-all 规则（原因见 `main.tf`）
 - MX / SPF / DKIM records
 
 这些记录虽然服务于 Email Routing，但它们本质上仍然是 DNS ownership，已经放在：

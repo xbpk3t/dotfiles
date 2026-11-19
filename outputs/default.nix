@@ -329,6 +329,20 @@ assert lib.assertMsg (
         packages = mylib.precommitTools { inherit pkgs; };
       };
 
+      # infra 工具链：本地与 GitHub Actions 共用，避免 CI runner 上 ad-hoc 安装。
+      # 包清单唯一来源是 lib/infra-tools.nix（与 home/base/devops/tf.nix 共用）。
+      # 用法：`nix develop .#infra -c tofu version`。
+      devShells.infra = pkgs.mkShell {
+        name = "dotfiles-infra";
+        packages = lib.concatLists (lib.attrValues (mylib.infraTools { inherit pkgs; }));
+        # terranix 在运行期 `import <nixpkgs> {}`；默认 NIX_PATH 是 flake
+        # registry 的 `flake:nixpkgs`（不随 flake.lock 固定）。这里指向本 flake
+        # 的 nixpkgs，保证 task tf:terranix 与 CI freshness 检查用同一份 lib。
+        shellHook = ''
+          export NIX_PATH="nixpkgs=${pkgs.path}"
+        '';
+      };
+
       # 舰队拓扑图（README 用）：nix-topology 自动从 nixosConfigurations 提取节点，
       # 配合 topology.nix 手写的网络/外部设备，渲染成 SVG。
       topology = {
@@ -344,6 +358,10 @@ assert lib.assertMsg (
     };
 
   flake = {
+    # 跨 Nix / Terraform 共享的 infra facts，供 `nix eval --json .#infraFacts`
+    # 生成 infra/generated/facts.json，见 infra/facts.nix。
+    infraFacts = import ../infra/facts.nix;
+
     darwinConfigurations = mergedDarwinConfigurations;
     deploy = {
       nodes = mergedDeployNodes;

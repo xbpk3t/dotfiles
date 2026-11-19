@@ -1,16 +1,16 @@
 terraform {
-  required_version = ">= 1.8.0"
+  required_version = ">= 1.10.0"
 
   required_providers {
-    tailscale = {
-      source  = "tailscale/tailscale"
-      version = "~> 0.18"
+    cloudflare = {
+      source  = "cloudflare/cloudflare"
+      version = "~> 5.0"
     }
   }
 
   backend "s3" {
     bucket = "luck-dotfiles-opentofu-state"
-    key    = "homelab/tailscale/tailnet/terraform.tfstate"
+    key    = "homelab/cloudflare/lucc.dev/workers/terraform.tfstate"
     region = "auto"
 
     endpoints = {
@@ -23,5 +23,6 @@ terraform {
     skip_requesting_account_id  = true
     skip_s3_checksum            = true
     use_path_style              = true
+    use_lockfile                = true
   }
 }

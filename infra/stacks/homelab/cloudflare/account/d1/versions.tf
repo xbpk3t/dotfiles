@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.8.0"
+  required_version = ">= 1.10.0"
 
   required_providers {
     cloudflare = {
@@ -27,5 +27,8 @@ terraform {
     skip_requesting_account_id  = true
     skip_s3_checksum            = true
     use_path_style              = true
+
+    # R2 支持 S3 条件写；用原生 lockfile 替代 DynamoDB 锁表。
+    use_lockfile = true
   }
 }

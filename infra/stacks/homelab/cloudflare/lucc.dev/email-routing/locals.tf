@@ -1,4 +1,7 @@
 locals {
-  zone_id   = "1c07a1b84d8273f4dfa6c3adce513f94"
-  zone_name = "lucc.dev"
+  # Nix 生成的共享 infra facts；源文件 infra/facts.nix。
+  facts = jsondecode(file("${path.module}/../../../../../generated/facts.json"))
+
+  zone_id   = local.facts.cloudflare.zone_id
+  zone_name = local.facts.cloudflare.zone_name
 }

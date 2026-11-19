@@ -7,6 +7,11 @@ includes:
   cf:
     taskfile: ./.taskfile/Taskfile.cf.yml
 
+vars:
+  # terranix 试点 stack；生成与 freshness 校验共用，避免路径在多处重复。
+  DNS_STACK: infra/stacks/homelab/cloudflare/lucc.dev/dns
+  TAILSCALE_STACK: infra/stacks/homelab/tailscale/tailnet
+
 tasks:
   default:
     desc: "列出 infra stacks"
@@ -81,3 +86,92 @@ tasks:
       task tf:dns:check
     cmds:
       - task: cf:dns:check
+
+  facts:
+    desc: "从 Nix 生成共享 infra facts"
+    summary: |
+      task tf:facts
+    dir: "{{.TASKFILE_DIR}}/.."
+    cmds:
+      # 先写临时文件再 mv：nix eval / terranix 失败时不要把已提交的生成物截断。
+      - |
+        set -euo pipefail
+        mkdir -p infra/generated
+        tmp="$(mktemp infra/generated/.facts.json.XXXXXX)"
+        trap 'rm -f "$tmp"' EXIT
+        nix eval --json .#infraFacts | jq -S . > "$tmp"
+        mv "$tmp" infra/generated/facts.json
+
+  terranix-gen:
+    internal: true
+    dir: "{{.TASKFILE_DIR}}/.."
+    requires:
+      vars:
+        - SRC
+        - OUT
+    cmds:
+      - |
+        set -euo pipefail
+        tmp="$(mktemp "{{.OUT}}.XXXXXX")"
+        trap 'rm -f "$tmp"' EXIT
+        nix develop .#infra --command bash -c 'set -o pipefail; terranix --with-nulls {{.SRC}} | jq -S .' > "$tmp"
+        mv "$tmp" "{{.OUT}}"
+
+  terranix-diff:
+    internal: true
+    dir: "{{.TASKFILE_DIR}}/.."
+    requires:
+      vars:
+        - SRC
+        - OUT
+    cmds:
+      - |
+        set -euo pipefail
+        terranix --with-nulls {{.SRC}} | jq -S . | diff -u "{{.OUT}}" -
+
+  terranix:
+    desc: "生成 DNS stack 的 Terraform JSON（terranix 试点）"
+    summary: |
+      task tf:terranix
+    cmds:
+      - task: terranix-gen
+        vars:
+          SRC: "{{.DNS_STACK}}/terranix.nix"
+          OUT: "{{.DNS_STACK}}/generated.tf.json"
+
+  terranix-tailscale:
+    desc: "生成 Tailscale stack 的 Terraform JSON（terranix 第二个试点）"
+    summary: |
+      task tf:terranix-tailscale
+    cmds:
+      - task: terranix-gen
+        vars:
+          SRC: "{{.TAILSCALE_STACK}}/terranix.nix"
+          OUT: "{{.TAILSCALE_STACK}}/generated.tf.json"
+
+  check:
+    desc: "本地校验 infra（dns/facts/terranix freshness + actionlint + fmt/validate）"
+    summary: |
+      nix develop .#infra
+      task tf:check
+    dir: "{{.TASKFILE_DIR}}/.."
+    cmds:
+      - task: cf:dns:check
+      - |
+        set -euo pipefail
+        nix eval --json .#infraFacts | jq -S . | diff -u infra/generated/facts.json -
+      - task: terranix-diff
+        vars:
+          SRC: "{{.DNS_STACK}}/terranix.nix"
+          OUT: "{{.DNS_STACK}}/generated.tf.json"
+      - task: terranix-diff
+        vars:
+          SRC: "{{.TAILSCALE_STACK}}/terranix.nix"
+          OUT: "{{.TAILSCALE_STACK}}/generated.tf.json"
+      - actionlint .github/workflows/infra.yml
+      - |
+        set -euo pipefail
+        for d in $(terramate list --tags layer-infra); do
+          echo "==> $d"
+          (cd "$d" && tofu init -backend=false -input=false -no-color >/dev/null && tofu fmt -check && tofu validate -no-color)
+        done

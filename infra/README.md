@@ -31,6 +31,10 @@ infra/
 
 - `stacks/homelab/cloudflare/lucc.dev/dns`
 - `stacks/homelab/cloudflare/lucc.dev/email-routing`
+- `stacks/homelab/cloudflare/lucc.dev/workers`（`music.lucc.dev` -> Worker `music`）
+
+> Pages stack 现在为空：`blog` / `docs` / `me` / `music` 已迁到 Workers，
+> `slides` / `nextflux` 已删除。保留空 stack 作为历史锚点。
 - `stacks/homelab/cloudflare/account/d1`
 - `stacks/homelab/cloudflare/account/kv`
 - `stacks/homelab/cloudflare/account/pages`
@@ -96,6 +100,112 @@ Cloudflare inventory：
 ```bash
 task tf:inventory
 ```
+
+本地完整校验（与 CI `validate` job 一致）：
+
+```bash
+nix develop .#infra
+task tf:check
+```
+
+## GitOps / CI
+
+`.github/workflows/infra.yml` 是 infra 的 CI 控制面：
+
+- **PR**：对 `terramate list --tags layer-infra` 选出的全部 stack 逐个跑
+  `tofu plan`（只读）。fork PR 拿不到 secrets，会跳过；同仓分支 PR 正常跑。
+- **所有 PR / push**：`validate` job 不依赖 secrets，跑 `task tf:check`
+  （facts / terranix freshness、actionlint、`tofu fmt -check`、全 stack
+  `tofu validate`）。fork PR 也能拿到这层检查。
+- **main**：merge 后**默认不自动 apply**。确认仓库里的 drift 可接受后，可在
+  仓库变量里设置 `INFRA_AUTO_APPLY=true` 打开自动 apply；或者手动触发
+  `workflow_dispatch` 并选择 `mode=apply`。apply job 绑定 `environment: infra`，
+  建议在 GitHub 仓库设置里给该 environment 配 required reviewers，形成人工批准闸门。
+- **schedule**：每天 03:17 UTC 跑 `tofu plan -detailed-exitcode`；exit 2 表示
+  云端有 drift，job 失败并触发通知。
+- **workflow_dispatch**：手动选择 `plan` / `apply` / `drift`，`stack` 填单个
+  stack 路径或 `all`。
+
+需要的 repository secrets：
+
+| Secret | 用途 |
+| --- | --- |
+| `CF_R2_AK` / `CF_R2_SK` | R2 S3-compatible backend 凭据 |
+| `CLOUDFLARE_API_TOKEN` | Cloudflare provider token |
+| `TAILSCALE_API_KEY` | Tailscale provider token |
+
+所有 stack 的 backend 已启用 `use_lockfile = true`，用 R2 的条件写做 state
+locking（OpenTofu 1.13.9 实测可用），不再需要 DynamoDB 锁表。workflow 另外用
+`concurrency` 按 stack 串行化 apply。
+
+### Token 权限
+
+- **plan / drift**：Cloudflare Pages / Email Routing / DNS / Workers 的 Read
+  权限即可；R2 state backend 需要 `CF_R2_AK` / `CF_R2_SK` 的读写。
+- **apply**：上述资源需要 Edit 权限；`CLOUDFLARE_API_TOKEN` 在 GitHub 里必须
+  使用 write token。
+- 本地 / CI 的 `CLOUDFLARE_API_TOKEN` 来自 SOPS `cf/token/all`
+  （全能 read/write token）。rotate 时用：
+
+```bash
+printf '%s' '"cfat_..."' | sops set --value-stdin secrets/secrets.yaml \
+  '["cf"]["token"]["all"]'
+```
+
+不要把 token 贴到聊天/commit 里；rotate 后同步更新 GitHub secret。
+
+### Apply 运营清单
+
+- [ ] GitHub secret `CLOUDFLARE_API_TOKEN` 使用有 Edit 权限的 token
+- [ ] `infra` environment 配置 required reviewers
+- [ ] 需要 main 自动 apply 时设置仓库变量 `INFRA_AUTO_APPLY=true`
+- [ ] 每次 drift 变红时先确认是否预期，再手动 `workflow_dispatch mode=apply`
+- [ ] 回退：`git revert` + 对应 stack apply；Pages/Workers 域名 ownership
+      的变更要先确认 custom domain/DNS 顺序
+
+本地复现（与 CI 使用同一套工具）：
+
+```bash
+nix develop .#infra
+cd infra/stacks/homelab/cloudflare/lucc.dev/dns
+tofu init -reconfigure -input=false
+tofu plan -input=false
+```
+
+## 共享 infra facts
+
+`infra/facts.nix` 是 Nix 与 Terraform 共享的事实源：
+
+- Cloudflare account / zone id、R2 endpoint / bucket 名称
+- D1 database id（docs / vscs）
+- `nixos-vps-dev` 的公网 IP（api / as / rsshub 共用）
+- Tailscale tailnet 名称
+- 由 host meta 派生的共享 DNS 记录（api / as / rsshub）；DERP 记录
+  （derp / nva）走 `task tf:dns:generate` 写入 `dns/fleet.generated.json`
+
+生成物是 `infra/generated/facts.json`，由 `task tf:facts` 写入；Cloudflare
+stack 用 `jsondecode(file(...))` 消费。改 `hosts/*/meta.nix` 时要同时重跑
+`task tf:dns:generate`（DERP）和 `task tf:facts`（facts），再跑
+`task tf:terranix`；改 `infra/facts.nix` 后只需 `task tf:facts`。
+CI 会做 freshness 检查。
+
+## terranix 试点
+
+目前两个 stack 使用 terranix：
+
+- `infra/stacks/homelab/cloudflare/lucc.dev/dns`
+  - 源文件：`terranix.nix`（共享 facts + 手写记录 + provider/backend/moved/import）
+  - 生成物：`generated.tf.json`，由 `task tf:terranix` 写入，不要手改
+- `infra/stacks/homelab/tailscale/tailnet`
+  - 源文件：`terranix.nix`（ACL / DERP / provider / resources）
+  - 生成物：`generated.tf.json`，由 `task tf:terranix-tailscale` 写入，不要手改
+
+共同约定：
+
+- 回退：`git revert` 对应 commit 即可恢复被删除的 HCL 文件（git 历史保留）
+- 这些 stack 不再适用 `terraform fmt` / `tflint` / `terraform-ls` 的 HCL 能力；
+  `tofu validate` / `tofu plan` 仍是有效闸门
+- 其他 stack 暂时保持 HCL，不做全量迁移
 
 ## 下一步
 
