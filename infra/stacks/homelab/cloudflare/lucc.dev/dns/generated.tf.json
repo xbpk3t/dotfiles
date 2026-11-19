@@ -21,10 +21,6 @@
       "to": "cloudflare_dns_record.records[\"dp\"]"
     },
     {
-      "id": "1c07a1b84d8273f4dfa6c3adce513f94/165e4b06ec8c27ac99f5167106a2fa38",
-      "to": "cloudflare_dns_record.records[\"music\"]"
-    },
-    {
       "id": "1c07a1b84d8273f4dfa6c3adce513f94/e16cff5af9f8ec1e705fff3020a654f5",
       "to": "cloudflare_dns_record.records[\"mx_route1\"]"
     },
@@ -101,10 +97,6 @@
     {
       "from": "cloudflare_dns_record.lucc_dev_cname_16",
       "to": "cloudflare_dns_record.records[\"root\"]"
-    },
-    {
-      "from": "cloudflare_dns_record.music_lucc_dev_cname_17",
-      "to": "cloudflare_dns_record.records[\"music\"]"
     },
     {
       "from": "cloudflare_dns_record.lucc_dev_mx_19",
@@ -233,16 +225,6 @@
             "proxied": true,
             "ttl": 1,
             "type": "AAAA"
-          },
-          "music": {
-            "comment": null,
-            "content": "music-6gm.pages.dev",
-            "id": "165e4b06ec8c27ac99f5167106a2fa38",
-            "name": "music.lucc.dev",
-            "priority": null,
-            "proxied": true,
-            "ttl": 1,
-            "type": "CNAME"
           },
           "mx_route1": {
             "comment": null,

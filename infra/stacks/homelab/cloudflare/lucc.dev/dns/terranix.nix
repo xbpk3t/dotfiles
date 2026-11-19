@@ -56,16 +56,6 @@ let
       comment = null;
       priority = null;
     };
-    music = {
-      id = "165e4b06ec8c27ac99f5167106a2fa38";
-      name = "music.lucc.dev";
-      type = "CNAME";
-      content = "music-6gm.pages.dev";
-      ttl = 1;
-      proxied = true;
-      comment = null;
-      priority = null;
-    };
     mx_route3 = {
       id = "3bfffe44f3323a9fdbbb8b455622f113";
       name = "lucc.dev";
@@ -232,10 +222,6 @@ in
     {
       from = "cloudflare_dns_record.lucc_dev_cname_16";
       to = "cloudflare_dns_record.records[\"root\"]";
-    }
-    {
-      from = "cloudflare_dns_record.music_lucc_dev_cname_17";
-      to = "cloudflare_dns_record.records[\"music\"]";
     }
     {
       from = "cloudflare_dns_record.lucc_dev_mx_19";

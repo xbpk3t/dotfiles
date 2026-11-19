@@ -14,7 +14,3 @@ resource "cloudflare_pages_project" "projects" {
   source             = each.value.source
 }
 
-moved {
-  from = cloudflare_pages_project.music
-  to   = cloudflare_pages_project.projects["music"]
-}

@@ -31,6 +31,10 @@ infra/
 
 - `stacks/homelab/cloudflare/lucc.dev/dns`
 - `stacks/homelab/cloudflare/lucc.dev/email-routing`
+- `stacks/homelab/cloudflare/lucc.dev/workers`（`music.lucc.dev` -> Worker `music`）
+
+> Pages stack 现在为空：`blog` / `docs` / `me` / `music` 已迁到 Workers，
+> `slides` / `nextflux` 已删除。保留空 stack 作为历史锚点。
 - `stacks/homelab/cloudflare/account/d1`
 - `stacks/homelab/cloudflare/account/kv`
 - `stacks/homelab/cloudflare/account/pages`
