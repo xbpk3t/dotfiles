@@ -13,29 +13,13 @@
 let
   facts = import ../../../../facts.nix;
 
-  derp_map = {
-    OmitDefaultRegions = false;
-    Regions = {
-      # 902 (hk-2) 是当前保留的自定义 DERP region。
-      # 901 (la) / 903 (cn-sh) 已移除，原因见 git 历史与 HCL 版本注释。
-      "902" = {
-        RegionID = 902;
-        RegionCode = "hk-2";
-        RegionName = "hk-2";
-        Nodes = [
-          {
-            Name = "902";
-            RegionID = 902;
-            HostName = "47.79.17.202";
-            IPv4 = "47.79.17.202";
-            DERPPort = 10043;
-            STUNPort = 10078;
-            InsecureForTests = true;
-          }
-        ];
-      };
-    };
-  };
+  # 自定义 DERP region 全部下线（保留默认 region 即可）：
+  #   901 (la) / 903 (cn-sh) 因 dev(LA) → agt(SH) 公网 TCP 被 GFW 挡、而 Mac 会优先
+  #   选 cn-sh 作为 home DERP，导致 Mac↔dev 单向，已移除（见 f68eb73d）。
+  #   902 (hk-2, 47.79.17.202) 已不可达：hermes `tailscale debug derp hk-2` TCP 超时，
+  #   Mac/hermes netcheck 里也没有该 region 的延迟。
+  # Mac（对称 NAT）↔ hermes 打洞失败改用 peer relay（agt UDP 40000），
+  # 不再依赖自定义 DERP region。
 
   acl = {
     # Tailscale Services 要求 service host 是 tagged device。
@@ -53,6 +37,22 @@ let
         src = [ "xbpk3t@nod-am" ];
         dst = [ "autogroup:internet" ];
         ip = [ "*" ];
+      }
+      # peer relay：只允许 Mac(100.87.216.84) 和 hermes(100.72.194.36) 用 agt
+      # (100.66.22.92) 做 UDP 中继。两者都在 NAT 后，Mac 侧还是对称 NAT，直连打洞
+      # 失败；DERP 又会绕美国。grant 的 src 是"需要通过 relay 访问的设备"，
+      # 两端都列入，保证两个方向都能命中。能力本身不需要参数。
+      # 注意：src 用 Tailscale IP；直接写 hostname 会被控制面拒绝
+      # （invalid address），除非在 ACL 的 hosts 里额外定义别名。
+      {
+        src = [
+          "100.87.216.84" # macos-ws
+          "100.72.194.36" # hermes-wb
+        ];
+        dst = [ "100.66.22.92" ]; # nixos-vps-agt
+        app = {
+          "tailscale.com/cap/relay" = [ ];
+        };
       }
     ];
 
@@ -122,8 +122,8 @@ in
 
   resource = {
     tailscale_acl.main = {
-      # ACL 是静态数据，直接在 Nix 侧编码；derpMap 与 ACL 合并后交给 provider。
-      acl = builtins.toJSON (acl // { derpMap = derp_map; });
+      # ACL 是静态数据，直接在 Nix 侧编码；不使用自定义 derpMap（默认 region 即可）。
+      acl = builtins.toJSON acl;
     };
 
     tailscale_dns_preferences.main = {

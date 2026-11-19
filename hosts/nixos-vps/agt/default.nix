@@ -25,10 +25,19 @@ in
     kernel.vm.docker.enable = false;
 
     networking = {
-      tailscale.derper = {
-        enable = true;
-        # 短域名 nva = nixos-vps-agt；域名事实在 hosts/nixos-vps/agt/meta.nix。
-        acmeEmail = mail;
+      tailscale = {
+        derper = {
+          enable = true;
+          # 短域名 nva = nixos-vps-agt；域名事实在 hosts/nixos-vps/agt/meta.nix。
+          acmeEmail = mail;
+        };
+        # Mac（对称 NAT）↔ hermes 打洞失败后，用 agt（上海）做低延迟 peer relay，
+        # 避免回退到绕美国的 DERP(lax/sfo)。使用侧授权见
+        # infra/stacks/homelab/tailscale/tailnet/terranix.nix 的 grants（tailscale.com/cap/relay）。
+        peerRelay = {
+          enable = true;
+          port = 40000;
+        };
       };
       mihomo-client = {
         enable = true;
