@@ -100,8 +100,14 @@ in
         # 丢掉 client 语义（rp_filter strict）——nixos-usb 等只开 enable 的 host 会回归。
         # 用 if 显式二选一：exitNode → server，否则 client。
         useRoutingFeatures = if cfg.exitNode then "server" else "client";
-        # exitNode 时广播自己是出口。
-        extraUpFlags = lib.mkIf cfg.exitNode [ "--advertise-exit-node" ];
+        # 设备名钉死到 fleet metadata 的 hostName，不跟随 OS hostname 漂移。
+        # extraUpFlags 覆盖首次 join / auth key 过期后的重新认证；
+        # extraSetFlags 由 tailscaled-set oneshot 在 autoconnect 之后执行，幂等。
+        extraUpFlags = [
+          "--hostname=${hostMeta.hostName}"
+        ]
+        ++ lib.optional cfg.exitNode "--advertise-exit-node";
+        extraSetFlags = [ "--hostname=${hostMeta.hostName}" ];
       };
 
       environment.shellAliases = {
