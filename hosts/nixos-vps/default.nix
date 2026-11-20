@@ -90,7 +90,20 @@ in
 
     # 公共 Nix 管理设置；VPS 只保留签名相关差异。
     infra = {
-      nix-tools.enable = lib.mkDefault true;
+      nix-tools = {
+        enable = lib.mkDefault true;
+
+        # 3 代 + 7 天：日常回滚够用；更久的历史用 git revert + redeploy。
+        gc = {
+          keepGenerations = 3;
+          maxAge = "7d";
+          dates = "*-*-* 04:00:00";
+          minFree = 2000000000;
+          maxFree = 8000000000;
+          optimise = true;
+        };
+      };
+
       singbox-server.enable = lib.mkDefault false;
 
       # Nezha roles come from the fleet registry: exactly one node declares
@@ -116,13 +129,6 @@ in
 
     # 不配置远程 builder：deploy-rs 的 remoteBuild=true 让每个节点本地构建。
     # agent 侧用 max-jobs=1/cores=1 控制内存（见 hosts/nixos-vps/agt）。
-
-    # 定期 GC，避免 store 撑满 66G 盘。
-    gc = {
-      automatic = true;
-      dates = "weekly";
-      options = "--delete-older-than 14d";
-    };
   };
 
   fonts.fontconfig.enable = lib.mkDefault false;

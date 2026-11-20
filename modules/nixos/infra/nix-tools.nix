@@ -13,6 +13,62 @@ in
 {
   options.modules.infra.nix-tools = {
     enable = lib.mkEnableOption "Nix management tools (nixos-cli, cache settings, sudo env)";
+
+    gc = {
+      automatic = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = "Enable the periodic Nix garbage collector.";
+      };
+
+      dates = lib.mkOption {
+        type = lib.types.either lib.types.str (lib.types.listOf lib.types.str);
+        default = "weekly";
+        description = "systemd calendar expression(s) for the Nix GC timer.";
+      };
+
+      keepGenerations = lib.mkOption {
+        type = lib.types.nullOr lib.types.ints.positive;
+        default = null;
+        description = ''
+          Keep only the last N system generations before each GC run.
+
+          nix-collect-garbage has no count-based option (only
+          --delete-old/--delete-older-than), so this is implemented with
+          `nix-env -p /nix/var/nix/profiles/system --delete-generations +N`
+          in the nix-gc service's preStart. `null` disables count-based
+          pruning.
+        '';
+      };
+
+      maxAge = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        default = "8d";
+        description = ''
+          Pass `--delete-older-than <maxAge>` to nix-collect-garbage
+          (for example "7d"). Applies to every profile found under
+          /nix/var/nix/profiles. `null` disables the age-based safety net.
+        '';
+      };
+
+      optimise = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Enable periodic `nix store optimise` (retroactive hardlink dedup).";
+      };
+
+      minFree = lib.mkOption {
+        type = lib.types.ints.positive;
+        default = 128000000;
+        description = "Free disk space (bytes) that triggers GC during builds.";
+      };
+
+      maxFree = lib.mkOption {
+        type = lib.types.ints.positive;
+        default = 1000000000;
+        description = "Free disk space (bytes) that an automatic GC aims for.";
+      };
+    };
   };
 
   # nixos-cli module import 必须在顶层，不能包在 mkIf 里（否则触发 "option `imports' does not exist"——imports 只认模块顶层字段）。
@@ -33,8 +89,8 @@ in
         log-lines = 25;
 
         # 构建过程中磁盘空间低于阈值时，临时触发 GC，直到回到 max-free
-        min-free = 128000000;
-        max-free = 1000000000;
+        min-free = lib.mkDefault cfg.gc.minFree;
+        max-free = lib.mkDefault cfg.gc.maxFree;
         trusted-users = [ "@wheel" ];
         inherit (cacheSettings) substituters;
         trusted-public-keys = cacheSettings.trustedPublicKeys;
@@ -60,16 +116,31 @@ in
         # To avoid API rate limits, export the sops-managed GITHUB_TOKEN in the shell.
       '';
 
-      # 定时GC
+      # 定时 GC。数量裁剪由 nix-env 完成（见下面 nix-gc.preStart），
+      # nix-collect-garbage 本身只支持按时间 --delete-older-than。
       gc = {
-        # 直接使用原生 nix.gc，避免额外依赖 nh。
-        automatic = lib.mkDefault true;
-        options = lib.mkDefault "--delete-older-than 8d";
+        automatic = lib.mkDefault cfg.gc.automatic;
+        dates = lib.mkDefault cfg.gc.dates;
+        options = lib.mkDefault (
+          lib.optionalString (cfg.gc.maxAge != null) "--delete-older-than ${cfg.gc.maxAge}"
+        );
       };
+
+      # 对已有路径做 retroactive hardlink 去重。
+      optimise.automatic = lib.mkDefault cfg.gc.optimise;
 
       # remove nix-channel related tools & configs, we use flakes instead.
       channel.enable = false;
     };
+
+    # nix-collect-garbage 没有 --delete-generations；按数量保留由 nix-env 完成。
+    # 用 config.nix.gc.automatic 而不是 cfg.gc.automatic：host 层可能直接覆盖
+    # nix.gc.automatic = false，此时不能凭空生成一个只有 preStart 的 nix-gc unit。
+    systemd.services.nix-gc.preStart =
+      lib.mkIf (config.nix.gc.automatic && cfg.gc.keepGenerations != null)
+        ''
+          ${config.nix.package}/bin/nix-env -p /nix/var/nix/profiles/system --delete-generations +${toString cfg.gc.keepGenerations}
+        '';
 
     # nixpkgs.config 已上移到 outputs/default.nix 的 pkgs 构造阶段，
     # 以兼容 home-manager.useGlobalPkgs + readOnlyPkgs 模式并消除评估警告。
