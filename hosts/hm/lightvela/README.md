@@ -107,8 +107,32 @@ The PA profile is curated from `home/core`, not the whole directory:
 
 ### HM activation
 
-Build the activation package on a Linux builder, export the closure, import it
-on the PA, then run the activation:
+Default: PA-local build + activate via Ansible:
+
+```bash
+task nix:hm:apply
+```
+
+`hosts/_base/hm/ansible/bootstrap.yml` tars the dotfiles tree, copies it to
+`/root/hm-build` on the PA, and builds
+`homeConfigurations.hm-lightvela.activationPackage` with the PA's
+nix-portable. Default network: GitHub via the agt mihomo proxy, all Nix nars
+from the USTC mirror / `cache.nixos.org` direct (`NO_PROXY`), measured at
+~18MB/s from the PA.
+
+Fallback: `-e hm_build_network=exitnode` uses a temporary `nixos-vps-dev`
+exit node around `nix build` (all external traffic, including
+`cache.nixos.org`, then goes through the exit node). It requires the tailnet
+ACL grant for the PA's IP `100.72.194.36` `autogroup:internet`; with the
+nftables firewall backend it also needs a forward rule for `tailscale0` on
+the exit-node host, otherwise forwarded traffic is dropped by `nixos-fw`
+(the iptables backend forwards by default). Tailnet SSH is unaffected by
+either path.
+
+herdr-core is intentionally not rebuilt here; it stays on the existing good
+closure/wrapper path.
+
+Fallback: prebuilt closure on a Linux builder, export, import, activate:
 
 ```bash
 # build host

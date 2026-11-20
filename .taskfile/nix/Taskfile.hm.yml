@@ -1,0 +1,25 @@
+---
+version: "3"
+
+# hm-only PAs: build the HM generation on the PA itself, then activate.
+# Default network: GitHub via the agt mihomo proxy, Nix nars from the USTC
+# mirror direct. `-e hm_build_network=exitnode` switches to a temporary
+# nixos-vps-dev exit node; `-e hm_build_network=proxy` is the default.
+
+vars:
+  ANSIBLE_DIR: "{{.TASKFILE_DIR}}/../../hosts/_base/hm/ansible"
+  INVENTORY: "{{.ANSIBLE_DIR}}/inventory/hm.ini"
+  PLAYBOOK: "{{.ANSIBLE_DIR}}/bootstrap.yml"
+
+tasks:
+  apply:
+    desc: "hm PA 本地 build + activate（Ansible target-only；agt proxy + USTC mirror）"
+    summary: "task nix:hm:apply"
+    cmds:
+      - ansible-playbook -i "{{.INVENTORY}}" "{{.PLAYBOOK}}" {{.CLI_ARGS}}
+
+  restore:
+    desc: "hm PA 平台 reset 后恢复（restore.sh）"
+    summary: "task nix:hm:restore"
+    cmds:
+      - ansible-playbook -i "{{.INVENTORY}}" "{{.PLAYBOOK}}" --tags restore {{.CLI_ARGS}}

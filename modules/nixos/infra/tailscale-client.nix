@@ -140,6 +140,17 @@ in
         relayServerPort = mkIf cfg.peerRelay.enable cfg.peerRelay.port;
       };
 
+      # exit node 转发：只有 nftables 后端的 firewall 会过滤 FORWARD
+      # （filterForward + forward-allow，policy drop），需要显式放行
+      # tailscale0；iptables 后端默认 FORWARD ACCEPT，不需要额外规则。
+      # nixpkgs 的 useRoutingFeatures="server" 只打开 ip_forward，两种情况
+      # 都不会自动加防火墙规则。
+      networking.firewall.extraForwardRules =
+        lib.mkIf (cfg.exitNode && config.networking.firewall.backend == "nftables")
+          ''
+            iifname "tailscale0" accept
+          '';
+
       environment.shellAliases = {
         tss = "tailscale";
       };

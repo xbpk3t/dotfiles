@@ -3,13 +3,58 @@
     "tailscale_device": {
       "servers": {
         "for_each": {
+          "hermes-wb": true,
+          "macos-ws": true,
           "nixos-vps-agt": true,
-          "nixos-vps-dev": true
+          "nixos-vps-dev": true,
+          "nixos-wsl": true
         },
         "hostname": "${each.key}"
       }
     }
   },
+  "moved": [
+    {
+      "from": "tailscale_device_key.devices[\"hermes-wb\"]",
+      "to": "tailscale_device_key.servers[\"hermes-wb\"]"
+    },
+    {
+      "from": "tailscale_device_key.devices[\"macos-ws\"]",
+      "to": "tailscale_device_key.servers[\"macos-ws\"]"
+    },
+    {
+      "from": "tailscale_device_key.devices[\"nixos-vps-agt\"]",
+      "to": "tailscale_device_key.servers[\"nixos-vps-agt\"]"
+    },
+    {
+      "from": "tailscale_device_key.devices[\"nixos-vps-dev\"]",
+      "to": "tailscale_device_key.servers[\"nixos-vps-dev\"]"
+    },
+    {
+      "from": "tailscale_device_key.devices[\"nixos-wsl\"]",
+      "to": "tailscale_device_key.servers[\"nixos-wsl\"]"
+    },
+    {
+      "from": "tailscale_device_tags.devices[\"nixos-vps-dev\"]",
+      "to": "tailscale_device_tags.nixos_vps_dev"
+    },
+    {
+      "from": "tailscale_device_tags.devices[\"hermes-wb\"]",
+      "to": "tailscale_device_tags.hermes_wb"
+    },
+    {
+      "from": "tailscale_device_tags.devices[\"macos-ws\"]",
+      "to": "tailscale_device_tags.macos_ws"
+    },
+    {
+      "from": "tailscale_device_tags.devices[\"nixos-vps-agt\"]",
+      "to": "tailscale_device_tags.nixos_vps_agt"
+    },
+    {
+      "from": "tailscale_device_tags.devices[\"nixos-wsl\"]",
+      "to": "tailscale_device_tags.nixos_wsl"
+    }
+  ],
   "provider": {
     "tailscale": {
       "tailnet": "xbpk3t.github"
@@ -18,7 +63,7 @@
   "resource": {
     "tailscale_acl": {
       "main": {
-        "acl": "{\"autoApprovers\":{\"exitNode\":[\"xbpk3t@github\",\"tag:svc-9router\"],\"routes\":{\"0.0.0.0/0\":[\"xbpk3t@github\",\"tag:svc-9router\"],\"::/0\":[\"xbpk3t@github\",\"tag:svc-9router\"]},\"services\":{\"svc:9router\":[\"tag:svc-9router\"],\"svc:nezha\":[\"tag:svc-9router\"]}},\"grants\":[{\"dst\":[\"*\"],\"ip\":[\"*\"],\"src\":[\"*\"]},{\"dst\":[\"autogroup:internet\"],\"ip\":[\"*\"],\"src\":[\"xbpk3t@nod-am\"]},{\"app\":{\"tailscale.com/cap/relay\":[]},\"dst\":[\"100.66.22.92\"],\"src\":[\"100.87.216.84\",\"100.72.194.36\"]}],\"ssh\":[{\"action\":\"check\",\"dst\":[\"autogroup:self\"],\"src\":[\"autogroup:member\"],\"users\":[\"autogroup:nonroot\",\"root\"]}],\"tagOwners\":{\"tag:svc-9router\":[\"xbpk3t@github\"]}}"
+        "acl": "{\"autoApprovers\":{\"exitNode\":[\"xbpk3t@github\",\"tag:svc-9router\"],\"routes\":{\"0.0.0.0/0\":[\"xbpk3t@github\",\"tag:svc-9router\"],\"::/0\":[\"xbpk3t@github\",\"tag:svc-9router\"]},\"services\":{\"svc:9router\":[\"tag:svc-9router\"],\"svc:nezha\":[\"tag:svc-9router\"]}},\"grants\":[{\"dst\":[\"*\"],\"ip\":[\"*\"],\"src\":[\"*\"]},{\"dst\":[\"autogroup:internet\"],\"ip\":[\"*\"],\"src\":[\"100.123.207.1\"]},{\"dst\":[\"autogroup:internet\"],\"ip\":[\"*\"],\"src\":[\"100.72.194.36\"]},{\"app\":{\"tailscale.com/cap/relay\":[]},\"dst\":[\"100.66.22.92\"],\"src\":[\"100.87.216.84\",\"100.72.194.36\"]}],\"ssh\":[{\"action\":\"check\",\"dst\":[\"autogroup:self\"],\"src\":[\"autogroup:member\"],\"users\":[\"autogroup:nonroot\",\"root\"]}],\"tagOwners\":{\"tag:exit\":[\"xbpk3t@github\"],\"tag:ssh\":[\"xbpk3t@github\"],\"tag:svc\":[\"xbpk3t@github\"],\"tag:svc-9router\":[\"xbpk3t@github\"],\"tag:vps\":[\"xbpk3t@github\"],\"tag:ws\":[\"xbpk3t@github\"]}}"
       }
     },
     "tailscale_device_key": {
@@ -29,13 +74,53 @@
       }
     },
     "tailscale_device_tags": {
+      "hermes_wb": {
+        "depends_on": [
+          "tailscale_acl.main"
+        ],
+        "device_id": "${data.tailscale_device.servers[\"hermes-wb\"].id}",
+        "tags": [
+          "tag:vps"
+        ]
+      },
+      "macos_ws": {
+        "depends_on": [
+          "tailscale_acl.main"
+        ],
+        "device_id": "${data.tailscale_device.servers[\"macos-ws\"].id}",
+        "tags": [
+          "tag:ws"
+        ]
+      },
+      "nixos_vps_agt": {
+        "depends_on": [
+          "tailscale_acl.main"
+        ],
+        "device_id": "${data.tailscale_device.servers[\"nixos-vps-agt\"].id}",
+        "tags": [
+          "tag:ssh",
+          "tag:vps"
+        ]
+      },
       "nixos_vps_dev": {
         "depends_on": [
           "tailscale_acl.main"
         ],
         "device_id": "${data.tailscale_device.servers[\"nixos-vps-dev\"].id}",
         "tags": [
-          "tag:svc-9router"
+          "tag:exit",
+          "tag:svc",
+          "tag:svc-9router",
+          "tag:vps"
+        ]
+      },
+      "nixos_wsl": {
+        "depends_on": [
+          "tailscale_acl.main"
+        ],
+        "device_id": "${data.tailscale_device.servers[\"nixos-wsl\"].id}",
+        "tags": [
+          "tag:ws"
         ]
       }
     },

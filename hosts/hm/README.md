@@ -53,6 +53,26 @@ in `hosts/hm/lightvela/README.md` (Path 0).
 (vendor PAs); do not apply it to NixOS or sm-vps hosts. It is a system-level
 change and can be removed by a platform image reset; re-run it after a reset.
 
+## Build / apply (hm-only)
+
+The default is a PA-local build via Ansible:
+
+```bash
+task nix:hm:apply
+```
+
+It builds `homeConfigurations.<node>` on the PA with nix-portable, then
+activates. Default network: GitHub via the agt mihomo proxy, Nix nars from
+the USTC mirror direct; no dev-built 778MB closure transfer. The
+`exitnode` fallback sets a temporary `nixos-vps-dev` exit node only around
+`nix build` and clears it in an `always` block; it requires the tailnet ACL
+grant for the PA's IP `100.72.194.36` `autogroup:internet` and, when the
+firewall backend is nftables, a forward rule for `tailscale0` on the
+exit-node host (handled by `modules/nixos/infra/tailscale-client.nix`; the
+iptables backend forwards by default).
+`herdr-core` remains on its separate good-closure path.
+`task nix:hm:restore` is the platform-reset recovery.
+
 ## Why not `hosts/sm-vps/ansible`?
 
 `hosts/sm-vps/ansible` is a **system bootstrap** for a real Debian/Ubuntu VM

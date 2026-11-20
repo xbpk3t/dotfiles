@@ -24,7 +24,14 @@ let
   acl = {
     # Tailscale Services 要求 service host 是 tagged device。
     tagOwners = {
+      # Tailscale 不允许通过 API 给 tagged node 摘 tag（需要 reauth），
+      # 所以迁移保留设备上的旧 tag；grant 已改为 IP 规则，不依赖它们。
+      "tag:exit" = [ "xbpk3t@github" ];
+      "tag:ssh" = [ "xbpk3t@github" ];
+      "tag:svc" = [ "xbpk3t@github" ];
       "tag:svc-9router" = [ "xbpk3t@github" ];
+      "tag:vps" = [ "xbpk3t@github" ];
+      "tag:ws" = [ "xbpk3t@github" ];
     };
 
     grants = [
@@ -33,8 +40,20 @@ let
         dst = [ "*" ];
         ip = [ "*" ];
       }
+      # 手机 exit node：xbpk3t@nod-am 是早已不存在的用户（tailnet 现在只有
+      # xbpk3t@github），旧规则匹配不到任何设备。改用手机 tailnet IP。
       {
-        src = [ "xbpk3t@nod-am" ];
+        src = [ "100.123.207.1" ]; # Redmi Note 13 Pro
+        dst = [ "autogroup:internet" ];
+        ip = [ "*" ];
+      }
+      # hm PA local-build exit node: the PA uses nixos-vps-dev only while
+      # building the HM generation (GitHub flake inputs). It clears the exit
+      # node afterwards. autoApprovers already approves the dev exit node; this
+      # grant is the missing client-side permission. src 必须是身份或 IP：
+      # user@hostname 不是合法选择器（只有 hosts 别名可用于 dst）。
+      {
+        src = [ "100.72.194.36" ]; # hermes-wb (hm PA)
         dst = [ "autogroup:internet" ];
         ip = [ "*" ];
       }
@@ -151,10 +170,45 @@ in
       expiry = 7776000;
     };
 
-    tailscale_device_tags.nixos_vps_dev = {
-      device_id = lib.tf.ref "data.tailscale_device.servers[\"nixos-vps-dev\"].id";
-      tags = [ "tag:svc-9router" ];
-      depends_on = [ "tailscale_acl.main" ];
+    tailscale_device_tags = {
+      nixos_vps_dev = {
+        device_id = lib.tf.ref "data.tailscale_device.servers[\"nixos-vps-dev\"].id";
+        # 旧 tag 不能通过 API 摘除（需要 reauth）；保留并补上服务 tag。
+        tags = [
+          "tag:exit"
+          "tag:svc"
+          "tag:svc-9router"
+          "tag:vps"
+        ];
+        depends_on = [ "tailscale_acl.main" ];
+      };
+
+      hermes_wb = {
+        device_id = lib.tf.ref "data.tailscale_device.servers[\"hermes-wb\"].id";
+        tags = [ "tag:vps" ];
+        depends_on = [ "tailscale_acl.main" ];
+      };
+
+      macos_ws = {
+        device_id = lib.tf.ref "data.tailscale_device.servers[\"macos-ws\"].id";
+        tags = [ "tag:ws" ];
+        depends_on = [ "tailscale_acl.main" ];
+      };
+
+      nixos_vps_agt = {
+        device_id = lib.tf.ref "data.tailscale_device.servers[\"nixos-vps-agt\"].id";
+        tags = [
+          "tag:ssh"
+          "tag:vps"
+        ];
+        depends_on = [ "tailscale_acl.main" ];
+      };
+
+      nixos_wsl = {
+        device_id = lib.tf.ref "data.tailscale_device.servers[\"nixos-wsl\"].id";
+        tags = [ "tag:ws" ];
+        depends_on = [ "tailscale_acl.main" ];
+      };
     };
 
     tailscale_device_key.servers = {
@@ -168,7 +222,59 @@ in
     for_each = {
       "nixos-vps-dev" = true;
       "nixos-vps-agt" = true;
+      # 旧 HCL 对所有设备关闭了 key 过期。terranix 迁移后只保留 dev/agt，
+      # 若直接 destroy 旧的 device_key 会在 provider Delete 时重新启用过期
+      # （macos-ws 2026-11-25 到期）。把 client 也纳入管理，保持不过期。
+      "macos-ws" = true;
+      "nixos-wsl" = true;
+      "hermes-wb" = true;
     };
     hostname = lib.tf.ref "each.key";
   };
+
+  # 迁移旧 HCL 的 per-device 地址，避免 destroy→create：
+  # - device_key 的 Delete 会 SetKey(key_expiry_disabled=false)，重新启用过期；
+  # - device_tags 的 Delete 会清空设备 tag，dev 的 svc 服务会出现空 tag 窗口。
+  moved = [
+    {
+      from = "tailscale_device_key.devices[\"hermes-wb\"]";
+      to = "tailscale_device_key.servers[\"hermes-wb\"]";
+    }
+    {
+      from = "tailscale_device_key.devices[\"macos-ws\"]";
+      to = "tailscale_device_key.servers[\"macos-ws\"]";
+    }
+    {
+      from = "tailscale_device_key.devices[\"nixos-vps-agt\"]";
+      to = "tailscale_device_key.servers[\"nixos-vps-agt\"]";
+    }
+    {
+      from = "tailscale_device_key.devices[\"nixos-vps-dev\"]";
+      to = "tailscale_device_key.servers[\"nixos-vps-dev\"]";
+    }
+    {
+      from = "tailscale_device_key.devices[\"nixos-wsl\"]";
+      to = "tailscale_device_key.servers[\"nixos-wsl\"]";
+    }
+    {
+      from = "tailscale_device_tags.devices[\"nixos-vps-dev\"]";
+      to = "tailscale_device_tags.nixos_vps_dev";
+    }
+    {
+      from = "tailscale_device_tags.devices[\"hermes-wb\"]";
+      to = "tailscale_device_tags.hermes_wb";
+    }
+    {
+      from = "tailscale_device_tags.devices[\"macos-ws\"]";
+      to = "tailscale_device_tags.macos_ws";
+    }
+    {
+      from = "tailscale_device_tags.devices[\"nixos-vps-agt\"]";
+      to = "tailscale_device_tags.nixos_vps_agt";
+    }
+    {
+      from = "tailscale_device_tags.devices[\"nixos-wsl\"]";
+      to = "tailscale_device_tags.nixos_wsl";
+    }
+  ];
 }
