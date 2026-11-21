@@ -22,7 +22,9 @@ let
 
   hmPaIp = fleet.nodes."hm-lightvela".tailscale.ip;
   macosIp = fleet.nodes."macos-ws".tailscale.ip;
-  agtIp = fleet.nodes."nixos-vps-agt".tailscale.ip;
+  # agt 的 DERP 事实（域名/公网 IP）与 DNS/ACME 同源，见 hosts/nixos-vps/agt/meta.nix。
+  agtNode = fleet.nodes."nixos-vps-agt";
+  agtIp = agtNode.tailscale.ip;
 
   owner = "xbpk3t@github";
 
@@ -35,8 +37,6 @@ let
     "tag:ws" = [ owner ];
     "tag:svc" = [ owner ];
     "tag:exit" = [ owner ];
-    # Tailscale SSH 的 dst 只接受 tag/autogroup，不能写 host alias/IP。
-    "tag:ssh" = [ owner ];
   };
 
   # 一次性/非 fleet 管理设备的 host alias。
@@ -113,6 +113,23 @@ let
         "tailscale.com/cap/relay" = [ ];
       };
     }
+    # hm PA 本地 build（hm_build_network=proxy）经 agt mihomo 代理拉 GitHub。
+    # agt 主机防火墙只对 hmPaIp 放行 7890；这里用 host alias 保持同一最小权限。
+    {
+      src = [ "hermes-wb" ];
+      dst = [ "agt" ];
+      ip = [ "7890" ];
+    }
+    # agt 上只绑 tailnet IP 的个人服务：CloudCLI UI（3001）+ x11vnc（5900）。
+    # 旧 *→* 允许 Mac/手机直接访问；最小权限下只开 ws → agt 的这两个端口。
+    {
+      src = [ "tag:ws" ];
+      dst = [ "agt" ];
+      ip = [
+        "3001"
+        "5900"
+      ];
+    }
     # NOTE(2026-11-21): 维护通道，不是最终信任模型。
     # agt 是公网 VPS；这里只允许 agt → macos-ws:22，用于从 agt 部署/维护 Mac。
     # 等有固定的、可信的开发机后删除这条 grant，恢复 vps↛ws。
@@ -138,8 +155,8 @@ let
           {
             Name = "900a";
             RegionID = 900;
-            HostName = "nva.lucc.dev";
-            IPv4 = "1.15.64.188";
+            HostName = agtNode.derper.domain;
+            IPv4 = agtNode.publicIpv4;
             DERPPort = 10043;
             STUNPort = 10078;
           }
@@ -165,18 +182,6 @@ let
         "svc:nezha" = [ "tag:svc" ];
       };
     };
-
-    ssh = [
-      # agt 开启 --ssh 后，所有到 agt tailnet 22 的连接都由 Tailscale SSH
-      # 裁决；grants 只负责网络层放行。tagged 设备不属于 autogroup:self；
-      # check 不支持 tag src，所以可信 workstation/手机（均 tag:ws）用 accept。
-      {
-        action = "accept";
-        src = [ "tag:ws" ];
-        dst = [ "tag:ssh" ];
-        users = [ "luck" ];
-      }
-    ];
   };
 
   aclFinal = aclBase // {
@@ -211,27 +216,25 @@ let
           "svc:nezha:80"
         ];
       }
-    ];
-
-    sshTests = [
       {
-        src = "tag:ws";
-        dst = [ "tag:ssh" ];
-        accept = [ "luck" ];
-        deny = [ "root" ];
+        # 回归：hm PA 的默认 build 路径依赖 agt mihomo 代理（7890）。
+        src = "hermes-wb";
+        accept = [ "agt:7890" ];
       }
       {
-        src = "tag:vps";
-        dst = [ "tag:ssh" ];
-        deny = [
-          "luck"
-          "root"
+        # 回归：agt 上只绑 tailnet IP 的个人服务（CloudCLI / x11vnc）。
+        src = "tag:ws";
+        accept = [
+          "agt:3001"
+          "agt:5900"
         ];
       }
     ];
   };
 
   # Phase 1：给设备打 tag / 重新认证期间保留 *→*，避免默认拒绝把自己锁死。
+  # 注意 `dst = "*"` 只覆盖 tailnet/子网 IP，不包含 autogroup:internet（exit node）
+  # 和 app capability（peer relay），所以必须继续叠加最小权限 grants。
   # Phase 2（默认）：上面的最小权限 ACL。
   aclTagging = aclBase // {
     grants = [
@@ -243,7 +246,6 @@ let
     ]
     ++ grants;
     tests = [ ];
-    sshTests = [ ];
   };
 
   aclFinalJson = builtins.toJSON aclFinal;
@@ -258,10 +260,7 @@ let
     ];
     hm-lightvela = [ "tag:vps" ];
     macos-ws = [ "tag:ws" ];
-    nixos-vps-agt = [
-      "tag:ssh"
-      "tag:vps"
-    ];
+    nixos-vps-agt = [ "tag:vps" ];
     nixos-wsl = [ "tag:ws" ];
   };
 
@@ -342,7 +341,8 @@ in
     };
 
     # 两个 auth key：VPS 自动带 tag:vps，个人设备自动带 tag:ws。
-    # 90 天 reusable；泄露一个只影响一类角色；Tailnet Lock 是最终兜底。
+    # 90 天 reusable；泄露一个只影响一类角色；到期/泄露后 revoke 并轮换该角色 key。
+    # 注意：Tailnet Lock 已在 LUC-556 关闭，控制面只依赖 ACL + tagged key。
     # 必须先有 ACL 的 tagOwners，才能创建带 tag 的 key。
     tailscale_tailnet_key.vps_join = {
       reusable = true;
@@ -362,8 +362,8 @@ in
       depends_on = [ "tailscale_acl.main" ];
     };
 
-    # 旧 tag 不能通过 API 摘除（需要 reauth）；deviceTags 已去掉 legacy，
-    # 这里按 hostname 维护每台设备的完整 tag 集合。
+    # 部分 tag 更新可以直接通过 API 完成；只有移除全部 tag 才需要 reauth。
+    # deviceTags 按 hostname 维护每台设备的完整 tag 集合（已去掉 legacy）。
     tailscale_device_tags = lib.mapAttrs' (
       device: cfg:
       lib.nameValuePair (tfName device) {

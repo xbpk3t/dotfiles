@@ -56,8 +56,10 @@ import；只 `git revert` 会让旧地址计划为 create。
 
 ## DX 备注
 
-- ACL 是静态数据，在 Nix 里用 `builtins.toJSON` 生成后作为字符串交给 provider；
-  生成结果与 HCL `jsonencode` 字节级一致，plan 保持 no-op。
+- ACL 由 Nix 生成后经 `lib.tf.ref` 以 HCL 表达式交给 provider：
+  `var.tailscale_acl_allow_all` 选择 Phase 1（`*→*`）或 Phase 2（最小权限）。
+  默认 false；Phase 2 生效后 `plan` 保持 no-op。若用 `-var` 打开过 Phase 1，
+  记得用默认值再 apply 一次恢复最小权限。
 - `terraform fmt` / `tflint` / `terraform-ls` 对该 stack 不再适用；
   `tofu validate` / `plan` 是最终闸门。
 
@@ -67,17 +69,15 @@ import；只 `git revert` 会让旧地址计划为 create。
 - `tag:ws`：个人设备（macos-ws、nixos-wsl、nixos-usb，以及手动打 tag 的手机 Redmi Note 13 Pro）
 - `tag:svc`：Tailscale Services host（dev）
 - `tag:exit`：exit node（dev）
-- `tag:ssh`：Tailscale SSH 目标（agt）。SSH 规则的 dst 只接受 tag/autogroup，
-  不能写 host alias/IP，所以单独用这个 tag。
 - tag 是扁平的；一台设备可叠加多个：dev = `tag:vps` + `tag:svc` + `tag:exit`，
-  agt = `tag:vps` + `tag:ssh`。
+  agt = `tag:vps`。
 - ACL 默认拒绝；一次性/非 fleet 设备在 `hosts` 里定义 alias。
   直接写 hostname 会被控制面拒绝（`invalid address`）。
-- Tailscale SSH：`tag:ws`（Mac + 手动打 tag 的手机）→ `tag:ssh`（agt）
-  用 `accept`。agt 开启 `--ssh` 后，所有到 agt tailnet 22 的连接都由
-  Tailscale SSH 裁决；`grants` 只负责网络层放行。tagged 设备不匹配
-  `autogroup:self`，且 `check` 不支持 tag src，所以用 `accept`。
-  不开 `tag:vps` → `tag:ssh`：VPS/hermes 不用 Tailscale SSH 连 agt。
+- Tailscale SSH 已关闭（2026-11-21，LUC-556 D 方案）：agt 显式
+  `--ssh=false`。所有 SSH 统一走 OpenSSH over tailnet，由
+  `tag:ws → tag:vps:22` 的 grant 放行；deploy-rs 的 root 连接恢复正常。
+  手机 herdr-app 改为自带 SSH key（`tag:ws` 仍适用），不再依赖 Tailscale SSH。
+  不再有 `tag:ssh`、`ssh` ACL 规则和 sshTests。
 - 手机（`nod-am`）已打 `tag:ws`，与 Mac 共享 `tag:ws` 的 grants/services/SSH；
   唯一区别是手机保留 exit node（`nod-am → autogroup:internet via tag:exit`），
   Mac 不走 exit。手机不在 fleet `deviceTags` 里，tag 是手动/API 打的。
@@ -100,8 +100,16 @@ tofu apply -var tailscale_acl_allow_all=true
 
 ```bash
 tailscale status --json | jq '.Self.Tags'
-# 需要时：tailscale up --force-reauth
+# 需要时用该角色的 tagged key 重新认证（key 从 Phase 1 的 tofu output 取，见下方
+# Auth keys）。不要用不带 key 的 `tailscale up --force-reauth`——那会以用户身份
+# 重新登录并清掉 tag：
+tailscale up --force-reauth --authkey=<vps_join_key 或 ws_join_key>
 ```
+
+注意：auth key 只带角色 tag（`tag:vps` / `tag:ws`）。重新认证会把设备 tag
+重置为该 key 的 tag 集合；dev 的 `tag:svc`/`tag:exit` 等 per-device 能力 tag
+由 `tailscale_device_tags` 管理，re-auth 后需要再跑一次 `tofu apply` 恢复
+（否则服务/exit node 会短暂失效）。
 
 Phase 2：默认最小权限（`tailscale_acl_allow_all=false`）：
 
