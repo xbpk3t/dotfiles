@@ -8,10 +8,18 @@ keys:
 
 # Default creation rules
 creation_rules:
+  # PA-only full copy: encrypted to the PA age key, not the fleet master key.
+  - path_regex: ^secrets/hm-lightvela\.yaml$
+    key_groups:
+      - age:
+          - age18dsw945cyp5mzcsxp5pjgalhx8m8c7srqfffynkh3ghdczw65fsqzd7ctf
+    # Keys ending in `_unencrypted` are stored in plaintext.
+    unencrypted_suffix: _unencrypted
+
   # Rule for secrets in the secrets directory
   - path_regex: ^secrets/.*\.yaml$
     key_groups:
       - age:
           - *age_key
-    # Don't encrypt the entire file, only specific keys
+    # Keys ending in `_unencrypted` are stored in plaintext.
     unencrypted_suffix: _unencrypted

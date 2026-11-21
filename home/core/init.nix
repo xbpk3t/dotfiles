@@ -11,29 +11,33 @@
 #     / `home.stateVersion` 而直接 fail（在 home-manager assertions 阶段）。
 #
 # 它设置的四件事都属于「不设置就无法生成 generation」的硬性要求：
-#   1. `home.username` —— home-manager 用它定位用户目录与 activation target
-#   2. `home.homeDirectory` —— `mkForce` 是为了覆盖 home-manager 基于
-#      `getEnv "HOME"` 的默认推断，在 cross-system / pure eval 场景下后者
-#      可能为空或指向 builder 临时目录，必须显式钉死
+#   1. `home.username` —— home-manager 用它定位用户目录与 activation target；
+#      默认取 fleet 全局身份，平台托管节点（如 hm PA 的 root）可覆盖
+#   2. `home.homeDirectory` —— 由 username 派生；`mkForce` 是为了覆盖
+#      home-manager 基于 `getEnv "HOME"` 的默认推断，在 cross-system /
+#      pure eval 场景下后者可能为空或指向 builder 临时目录，必须显式钉死
 #   3. `home.stateVersion` —— state migration 锚点，`mkDefault` 允许 host
-#      在升级时按需 override；这里固定 24.11 是首次落地版本
+#      在升级时按需 override；默认取 host metadata 的 `stateVersion`
 #   4. `programs.home-manager.enable` —— 让 home-manager 自管自身，否则
 #      `home-manager switch` 这类 CLI 在用户 profile 里就拿不到
 {
+  config,
   pkgs,
   lib,
   userMeta,
   stateVersion,
   ...
 }:
-let
-  inherit (userMeta) username;
-in
 {
   home = {
-    inherit username;
+    username = lib.mkDefault userMeta.username;
     homeDirectory = lib.mkForce (
-      if pkgs.stdenv.hostPlatform.isDarwin then "/Users/${username}" else "/home/${username}"
+      if config.home.username == "root" then
+        "/root"
+      else if pkgs.stdenv.hostPlatform.isDarwin then
+        "/Users/${config.home.username}"
+      else
+        "/home/${config.home.username}"
     );
     stateVersion = lib.mkDefault stateVersion;
   };

@@ -9,6 +9,9 @@ with lib;
 let
   cfg = config.modules.networking.tailscale;
 
+  # 设备名钉死到 fleet metadata 的 hostName，不跟随 OS hostname 漂移。
+  hostnameFlag = "--hostname=${hostMeta.hostName}";
+
   # Keep derper's STUN replies out of mihomo's policy-routing table.
   derperPolicyRoute = pkgs.writeShellScript "derper-policy-route" ''
     op=''${1:?add|del}
@@ -34,6 +37,28 @@ in
     # 开启后：useRoutingFeatures=server + --advertise-exit-node。
     # 批准由控制面（autoApprovers）+ 使用侧 grants 管理，模块不关心。
     exitNode = mkEnableOption "Advertise this host as a Tailscale exit node";
+
+    # 多角色：本机作为 peer relay（节点间 UDP 中继，替代远端 DERP）。
+    # 典型场景：两端都在 NAT 后且打洞失败（如 Mac 对称 NAT ↔ hermes），
+    # 用一个低延迟公网节点做 underlay 中继。使用侧授权在 TF 的 tailscale_acl
+    # grants（app: tailscale.com/cap/relay），模块不关心。
+    peerRelay = {
+      enable = mkEnableOption "Tailscale peer relay server (UDP)";
+
+      port = mkOption {
+        type = types.port;
+        default = 40000;
+        description = "UDP port for peer relay traffic (must be reachable from tailnet peers).";
+      };
+
+      staticEndpoints = mkOption {
+        type = types.listOf types.str;
+        default = lib.optional (
+          hostMeta ? publicIpv4
+        ) "${hostMeta.publicIpv4}:${toString cfg.peerRelay.port}";
+        description = "Static ip:port endpoints advertised for the peer relay. Needed behind EIP/NAT where auto-discovery only sees private addresses.";
+      };
+    };
 
     derper = {
       enable = mkEnableOption "Tailscale DERP server on this host";
@@ -100,9 +125,30 @@ in
         # 丢掉 client 语义（rp_filter strict）——nixos-usb 等只开 enable 的 host 会回归。
         # 用 if 显式二选一：exitNode → server，否则 client。
         useRoutingFeatures = if cfg.exitNode then "server" else "client";
-        # exitNode 时广播自己是出口。
-        extraUpFlags = lib.mkIf cfg.exitNode [ "--advertise-exit-node" ];
+        # extraUpFlags 覆盖首次 join / auth key 过期后的重新认证；
+        # extraSetFlags 由 tailscaled-set oneshot 在 autoconnect 之后执行，幂等。
+        extraUpFlags = [ hostnameFlag ] ++ lib.optional cfg.exitNode "--advertise-exit-node";
+        extraSetFlags = [
+          hostnameFlag
+        ]
+        ++ lib.optionals (cfg.peerRelay.enable && cfg.peerRelay.staticEndpoints != [ ]) [
+          "--relay-server-static-endpoints=${lib.concatStringsSep "," cfg.peerRelay.staticEndpoints}"
+        ];
+        # peer relay：nixpkgs 通过 tailscaled-set oneshot 执行
+        # `tailscale set --relay-server-port`；openFirewall=true 时自动放行该 UDP 端口。
+        relayServerPort = mkIf cfg.peerRelay.enable cfg.peerRelay.port;
       };
+
+      # exit node 转发：只有 nftables 后端的 firewall 会过滤 FORWARD
+      # （filterForward + forward-allow，policy drop），需要显式放行
+      # tailscale0；iptables 后端默认 FORWARD ACCEPT，不需要额外规则。
+      # nixpkgs 的 useRoutingFeatures="server" 只打开 ip_forward，两种情况
+      # 都不会自动加防火墙规则。
+      networking.firewall.extraForwardRules =
+        lib.mkIf (cfg.exitNode && config.networking.firewall.backend == "nftables")
+          ''
+            iifname "tailscale0" accept
+          '';
 
       environment.shellAliases = {
         tss = "tailscale";

@@ -41,6 +41,19 @@ let
       };
     };
 
+    # hm-lightvela：厂商托管的 Vela PA 工作台（kind = "home"，非 NixOS）。
+    # nix-topology 不会从 nixosConfigurations 提取它；manualNodes 必须覆盖。
+    hm-lightvela = {
+      deviceType = "cloud-server";
+      deviceIcon = "os.debian";
+      hardware.info = "Vela PA workbench";
+      interfaces = {
+        host0 = {
+          network = "wan";
+        };
+      };
+    };
+
     # —— 家庭设备（host 名作节点名；注释里写明角色说明）——
     # macos-ws：macOS 工作站（MacBook M4 Pro）
     macos-ws = {
@@ -90,6 +103,7 @@ let
         (mkConnection "nixos-vps-dev" "ens3")
         (mkConnection "sm-vps-hk" "eth0")
         (mkConnection "sm-vps-tc" "eth0")
+        (mkConnection "hm-lightvela" "host0")
       ];
     };
 

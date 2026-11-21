@@ -5,6 +5,7 @@ includes:
   deploy: ./Taskfile.deploy.yml
   flake: ./Taskfile.flake.yml
   gc: ./Taskfile.gc.yml
+  hm: ./Taskfile.hm.yml
   nixos-anywhere: ./Taskfile.nixos-anywhere.yml
   nixos-container: ./Taskfile.nixos-container.yml
   rollback: ./Taskfile.rollback.yml

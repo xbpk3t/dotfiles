@@ -1,0 +1,341 @@
+---
+# hm-only PA: build the HM generation on the PA itself, then activate it.
+#
+# Why not deploy-rs: the PA is a systemd-nspawn container; deploy-rs would still
+# need a Nix daemon/store and an SSH activation path. The PA already has a
+# persistent nix-portable store, so a local `nix build` + `activate` is simpler
+# and matches the target-builds-itself model used by the fleet.
+#
+# The temporary exit node is only for GitHub access during the build. It is
+# cleared in `always`; tailnet SSH is unaffected because Tailscale routes
+# 100.64.0.0/10 more specifically than the exit-node default route.
+- name: hm PA local build + activate
+  hosts: hm
+  gather_facts: true
+  become: false
+  tags: [build, activate, nezha, verify]
+
+  tasks:
+    - name: "Preflight: systemd + nix-portable + root"
+      ansible.builtin.assert:
+        that:
+          - ansible_facts.system == "Linux"
+          - ansible_facts.service_mgr == "systemd"
+          - ansible_facts.user_id == "root"
+        fail_msg: "hm target must be Linux/systemd/root (systemd-nspawn expected)"
+        success_msg: "hm target preflight OK ({{ ansible_facts.virtualization_type | default('unknown') }})"
+
+    - name: Check nix-portable store
+      ansible.builtin.stat:
+        path: /root/.nix-portable/nix
+      register: hm_nix_portable
+
+    - name: Require nix-portable store
+      ansible.builtin.assert:
+        that:
+          - hm_nix_portable.stat.isdir
+        fail_msg: "/root/.nix-portable/nix missing; run restore.sh/bootstrap first"
+
+    # The build below uses /root/.local/bin/nix. bootstrap.sh only writes
+    # nix-portable + hc/herdr-core wrappers; restore.sh (and the manual Path 0
+    # flow) write the four nix command wrappers. Make this playbook self-contained
+    # for a PA bootstrapped with bootstrap.sh.
+    - name: Check nix-portable binary
+      ansible.builtin.stat:
+        path: /root/.local/bin/nix-portable
+      register: hm_nix_portable_bin
+
+    - name: Require nix-portable binary
+      ansible.builtin.assert:
+        that:
+          - hm_nix_portable_bin.stat.exists
+          - hm_nix_portable_bin.stat.executable
+        fail_msg: "/root/.local/bin/nix-portable missing/not executable; run bootstrap.sh or restore.sh first"
+
+    - name: Ensure /root/.local/bin
+      ansible.builtin.file:
+        path: /root/.local/bin
+        state: directory
+        mode: "0755"
+
+    - name: Ensure nix-portable command wrappers
+      ansible.builtin.copy:
+        dest: "/root/.local/bin/{{ item }}"
+        mode: "0755"
+        content: |
+          #!/usr/bin/env bash
+          exec /root/.local/bin/nix-portable {{ item }} "$@"
+      loop:
+        - nix
+        - nix-env
+        - nix-store
+        - nix-build
+
+    - name: Validate build network mode
+      ansible.builtin.assert:
+        that:
+          - hm_build_network in ['proxy', 'exitnode']
+        fail_msg: "hm_build_network must be proxy or exitnode"
+
+    - name: Create source tarball on the control node
+      ansible.builtin.command:
+        cmd: >-
+          tar -C {{ hm_source | quote }} -czf {{ hm_tar | quote }}
+          --exclude=.git --exclude=.worktrees --exclude=.claude --exclude=.direnv
+          --exclude=.terraform --exclude=node_modules --exclude=result --exclude=result-* .
+      delegate_to: localhost
+      changed_when: false
+
+    - name: Replace /root/hm-build
+      ansible.builtin.file:
+        path: "{{ hm_remote_src }}"
+        state: absent
+
+    - name: Recreate /root/hm-build
+      ansible.builtin.file:
+        path: "{{ hm_remote_src }}"
+        state: directory
+        mode: "0755"
+
+    - name: Unpack source
+      ansible.builtin.unarchive:
+        src: "{{ hm_tar }}"
+        dest: "{{ hm_remote_src }}"
+
+    - name: Check libpam-systemd
+      ansible.builtin.find:
+        paths: /usr/lib
+        patterns: pam_systemd.so
+        recurse: true
+      register: hm_pam
+
+    - name: Install libpam-systemd (hm-only system-level change)
+      ansible.builtin.apt:
+        name: libpam-systemd
+        state: present
+        update_cache: true
+      when: hm_pam.matched == 0
+
+    - name: Ensure /run/user/0
+      ansible.builtin.file:
+        path: /run/user/0
+        state: directory
+        mode: "0700"
+
+    - name: Enable linger for root
+      ansible.builtin.command:
+        cmd: loginctl enable-linger root
+      changed_when: false
+
+    - name: Start user@0.service
+      ansible.builtin.systemd:
+        name: user@0.service
+        state: started
+
+    - name: Build HM via the dev exit node (fallback)
+      when: hm_build_network == "exitnode"
+      block:
+        - name: Set temporary exit node
+          ansible.builtin.command:
+            cmd: tailscale set --exit-node={{ hm_exit_node }}
+          changed_when: false
+
+        - name: Read tailscale prefs
+          ansible.builtin.command:
+            cmd: tailscale debug prefs
+          register: hm_prefs
+          changed_when: false
+
+        # RouteAll is the --accept-routes pref, NOT exit-node state. A working
+        # exit node sets ExitNodeID (the IP normally collapses into the ID).
+        - name: Require an active exit node
+          ansible.builtin.assert:
+            that:
+              - >-
+                ((hm_prefs.stdout | from_json).ExitNodeID | default('') | length > 0)
+                or ((hm_prefs.stdout | from_json).ExitNodeIP | default('') | length > 0)
+            fail_msg: >-
+              exit node is not active (ExitNodeID/ExitNodeIP empty). Apply the
+              Tailscale ACL grant for 100.72.194.36, or run with
+              -e hm_build_network=proxy.
+
+        # Linux tailscaled routes the exit node through table 52's default
+        # route, not the 0.0.0.0/1 pair used by some other clients.
+        - name: Check exit-node route
+          ansible.builtin.command:
+            cmd: ip route get 1.1.1.1
+          register: hm_routes
+          changed_when: false
+
+        - name: Require the exit-node default route
+          ansible.builtin.assert:
+            that:
+              - "'dev tailscale0' in hm_routes.stdout"
+            fail_msg: "1.1.1.1 is not routed via tailscale0 (exit node inactive)"
+
+        - name: Check GitHub via exit node
+          ansible.builtin.command:
+            cmd: curl -4 -fsI --max-time 20 https://github.com
+          changed_when: false
+
+        - name: Check cache.nixos.org through the exit node
+          ansible.builtin.command:
+            cmd: curl -fsI --max-time 10 https://cache.nixos.org
+          changed_when: false
+
+        - name: Build homeConfigurations.{{ inventory_hostname }} locally
+          ansible.builtin.command:
+            cmd: >-
+              /root/.local/bin/nix build --impure --no-link --print-out-paths
+              'path:{{ hm_remote_src }}#homeConfigurations.{{ inventory_hostname }}.activationPackage'
+          environment:
+            HOME: /root
+            PATH: "/root/.local/bin:{{ ansible_env.PATH }}"
+          register: hm_build
+      always:
+        - name: Clear temporary exit node
+          ansible.builtin.command:
+            cmd: tailscale set --exit-node=
+          changed_when: false
+          failed_when: false
+
+    - name: Build HM via the agt mihomo HTTP proxy (default)
+      when: hm_build_network == "proxy"
+      block:
+        - name: Check GitHub via the agt proxy
+          ansible.builtin.command:
+            cmd: curl -x {{ hm_proxy }} -4 -fsI --max-time 20 https://github.com
+          changed_when: false
+
+        - name: Check cache.nixos.org direct
+          ansible.builtin.command:
+            cmd: curl -fsI --max-time 10 https://cache.nixos.org
+          changed_when: false
+
+        - name: Check the USTC Nix mirror direct
+          ansible.builtin.command:
+            cmd: curl -fsI --max-time 10 https://mirrors.ustc.edu.cn/nix-channels/store/nix-cache-info
+          changed_when: false
+
+        - name: Build homeConfigurations.{{ inventory_hostname }} locally
+          ansible.builtin.command:
+            cmd: >-
+              /root/.local/bin/nix build --impure --no-link --print-out-paths
+              --option substituters {{ hm_substituters | quote }}
+              'path:{{ hm_remote_src }}#homeConfigurations.{{ inventory_hostname }}.activationPackage'
+          environment:
+            HOME: /root
+            PATH: "/root/.local/bin:{{ ansible_env.PATH }}"
+            HTTP_PROXY: "{{ hm_proxy }}"
+            HTTPS_PROXY: "{{ hm_proxy }}"
+            ALL_PROXY: "{{ hm_proxy }}"
+            http_proxy: "{{ hm_proxy }}"
+            https_proxy: "{{ hm_proxy }}"
+            all_proxy: "{{ hm_proxy }}"
+            NO_PROXY: "localhost,127.0.0.1,100.64.0.0/10,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,cache.nixos.org,mirrors.ustc.edu.cn"
+            no_proxy: "localhost,127.0.0.1,100.64.0.0/10,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,cache.nixos.org,mirrors.ustc.edu.cn"
+          register: hm_build
+
+    - name: Record the HM generation
+      ansible.builtin.copy:
+        content: "{{ hm_build.stdout_lines | last }}\n"
+        dest: "{{ hm_generation_file }}"
+        mode: "0644"
+
+    - name: Activate HM generation
+      ansible.builtin.command:
+        cmd: "{{ hm_build.stdout_lines | last }}/activate"
+        chdir: /root
+      environment:
+        HOME: /root
+        USER: root
+        XDG_RUNTIME_DIR: /run/user/0
+        PATH: "/root/.local/bin:{{ ansible_env.PATH }}"
+
+    - name: Set root shell to zsh
+      ansible.builtin.user:
+        name: root
+        shell: /root/.nix-profile/bin/zsh
+
+    - name: Install Nezha system unit
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/../nezha-agent.service"
+        dest: /etc/systemd/system/nezha-agent.service
+        mode: "0644"
+
+    - name: Enable Nezha agent
+      ansible.builtin.systemd:
+        name: nezha-agent.service
+        daemon_reload: true
+        enabled: true
+        state: started
+
+    - name: Verify hc
+      ansible.builtin.command:
+        cmd: hc --version
+      register: hm_hc
+      changed_when: false
+
+    - name: Verify herdr-core
+      ansible.builtin.command:
+        cmd: herdr-core --version
+      register: hm_herdr
+      changed_when: false
+
+    - name: Verify user manager
+      ansible.builtin.command:
+        cmd: systemctl is-active user@0.service
+      register: hm_user_manager
+      changed_when: false
+
+    - name: Verify Nezha unit
+      ansible.builtin.command:
+        cmd: systemctl is-active nezha-agent.service
+      register: hm_nezha
+      changed_when: false
+
+    - name: Verify Nezha client secret is rendered
+      ansible.builtin.command:
+        cmd: /root/.nix-profile/bin/jq -e '.client_secret | length > 0' /root/.config/nezha/config.json
+      changed_when: false
+
+    - name: Show verification
+      ansible.builtin.debug:
+        msg:
+          - "hc: {{ hm_hc.stdout }}"
+          - "herdr-core: {{ hm_herdr.stdout }}"
+          - "user@0: {{ hm_user_manager.stdout }}"
+          - "nezha-agent: {{ hm_nezha.stdout }}"
+          - "generation: {{ hm_build.stdout_lines | last }}"
+
+# Recovery play: run when the platform started a reset container and overlay
+# state is missing. `ansible-playbook ... --tags restore`.
+- name: hm PA restore (platform reset)
+  hosts: hm
+  gather_facts: false
+  become: false
+  # `never` keeps this out of a plain apply; run with `--tags restore`.
+  tags: [never, restore]
+
+  tasks:
+    - name: Ensure /root/hm-bootstrap
+      ansible.builtin.file:
+        path: /root/hm-bootstrap
+        state: directory
+        mode: "0755"
+
+    - name: Copy restore script
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/../restore.sh"
+        dest: /root/hm-bootstrap/restore.sh
+        mode: "0755"
+
+    - name: Copy Nezha unit
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/../nezha-agent.service"
+        dest: /root/hm-bootstrap/nezha-agent.service
+        mode: "0644"
+
+    - name: Run restore
+      ansible.builtin.command:
+        cmd: /root/hm-bootstrap/restore.sh

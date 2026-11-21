@@ -23,6 +23,14 @@ tasks:
     cmds:
       - nix eval --impure ".#{{.CONFIG_TYPE}}.{{.HOST}}.config.system.build.toplevel.drvPath"
 
+  hm:
+    desc: "快速验证 hm-only host 的 Home Manager 配置（仅评估，不 build）"
+    summary: "task -g hm HOST=hm-lightvela"
+    vars:
+      HOST: '{{.HOST | default "hm-lightvela"}}'
+    cmds:
+      - nix eval --impure ".#homeConfigurations.{{.HOST}}.activationPackage.drvPath"
+
 
   # 从 Justfile 移植的通用 Nix 任务
 #  test:

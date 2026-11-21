@@ -1,0 +1,3 @@
+# herdr-core user config. Copied by bootstrap.sh to
+# ~/.config/herdr-core/config.toml
+restore_screen = true

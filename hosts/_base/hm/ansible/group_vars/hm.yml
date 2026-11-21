@@ -1,0 +1,26 @@
+# hm-only build/activate settings.
+#
+# The source is the dotfiles tree; the playbook is under hosts/_base/hm/ansible,
+# so ../../../.. is the repo root. `hm_source` can be overridden from the CLI
+# (e.g. a clean `git archive` checkout).
+hm_source: "{{ playbook_dir }}/../../../.."
+hm_tar: /tmp/hm-build-source.tar.gz
+hm_remote_src: /root/hm-build
+hm_generation_file: /root/.hm-generation
+
+# Default: GitHub via the agt mihomo proxy, everything else from the USTC
+# mirror direct. Measured on the PA: exit node ~15-22KB/s (lossy ~164ms
+# tunnel), cache.nixos.org direct also poor, USTC mirror ~18MB/s.
+hm_build_network: proxy
+hm_proxy: "http://100.66.22.92:7890"
+
+# Fallback: temporary nixos-vps-dev exit node. Requires the tailnet ACL grant
+# for the PA's tailnet IP 100.72.194.36 autogroup:internet (terranix stack)
+# and a forward allow rule for tailscale0 on the exit-node host. The playbook
+# clears the exit node in an always block.
+hm_exit_node: "100.101.189.7"
+
+# Nars are signed by cache.nixos.org, so the USTC mirror needs no extra
+# trusted keys; cache.nixos.org stays as a fallback for paths the mirror has
+# not synced yet.
+hm_substituters: "https://mirrors.ustc.edu.cn/nix-channels/store https://cache.nixos.org"

@@ -1,6 +1,6 @@
 stack {
   name        = "tailscale-tailnet"
-  description = "Tailscale tailnet ACL, DERP map, DNS preferences, and auth keys."
+  description = "Tailscale tailnet ACL, DNS preferences, services, and auth keys."
   tags = [
     "layer-infra",
     "env-homelab",
