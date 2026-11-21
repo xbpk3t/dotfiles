@@ -168,7 +168,7 @@
 
         # 文件操作
         # 覆盖 eza enableZshIntegration 的 mkDefault ll='eza -l'（要 -la）
-        ls = "/bin/ls";
+        # ls 交给 eza 集成；不再用 /bin/ls（NixOS 没有该路径）。
         ll = "eza -la";
 
         "md" = "mkdir -p";
