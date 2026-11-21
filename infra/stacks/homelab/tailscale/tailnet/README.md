@@ -80,12 +80,13 @@ import；只 `git revert` 会让旧地址计划为 create。
   不再有 `tag:ssh`、`ssh` ACL 规则和 sshTests。
 - 手机（`nod-am`）已打 `tag:ws`，与 Mac 共享 `tag:ws` 的 grants/services/SSH；
   唯一区别是手机保留 exit node（`nod-am → autogroup:internet via tag:exit`），
-  Mac 不走 exit。手机不在 fleet `deviceTags` 里，tag 是手动/API 打的。
+  Mac 不走 exit。手机不在 `deviceCapabilityTags` 的设备表里，tag 是手动/API 打的。
 - 维护通道：`agt → macos-ws:22` 允许从 agt 部署/维护 Mac，不是最终信任
   模型；有固定的可信开发机后删除。
-- `deviceTags` 只列当前实际在 tailnet 的设备；离线/未加入的设备不要加，
-  用 tagged auth key 加入时会自动带 tag。加错设备会让 `tofu plan` 的
-  data source 查不到 hostname。
+- `deviceCapabilityTags` 只列当前实际在 tailnet 的设备（角色 tag 由 fleet
+  meta 的 `tailscale.role` 派生）；离线/未加入的设备不要加，用 tagged auth
+  key 加入时会自动带角色 tag。加错设备会让 `tofu plan` 的 data source
+  查不到 hostname。
 
 ## 两阶段 rollout（必须先 tag 再 deny）
 
@@ -130,7 +131,8 @@ task nix:sk:edit
 # 写入：tailscale/auth_key_vps、tailscale/auth_key_ws
 ```
 
-然后部署 Nix 侧。旧的 `tailscale/auth_key` 在所有设备迁移完后 revoke/删除。
+然后部署 Nix 侧。旧的 `tailscale/auth_key` 已 revoke；`secrets.yaml` 里的旧
+条目可在所有设备迁移完成后删除。
 
 ## Tailnet Lock
 

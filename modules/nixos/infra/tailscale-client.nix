@@ -8,21 +8,15 @@
 with lib;
 let
   cfg = config.modules.networking.tailscale;
-  role = hostMeta.tailscale.role or "vps";
+  tailscaleRoles = import ../../../lib/tailscale.nix { inherit lib; };
 
-  # 角色 -> 加入 key（sops secret 名 + sops key 路径）的唯一映射。
-  # authKeyFile 默认值与下面的 sops.secrets 声明都从这里派生，避免两处漂移。
-  joinKey =
-    if role == "ws" then
-      {
-        name = "TAILSCALE_AUTH_KEY_WS";
-        path = "tailscale/auth_key_ws";
-      }
-    else
-      {
-        name = "TAILSCALE_AUTH_KEY_VPS";
-        path = "tailscale/auth_key_vps";
-      };
+  # 角色是必需事实：缺失/未知直接报错，不静默落到 vps（会拿错角色的加入 key）。
+  role =
+    hostMeta.tailscale.role
+      or (throw "modules.networking.tailscale: hostMeta.tailscale.role (ws|vps) is required on '${hostMeta.hostName}'");
+
+  # 角色 -> 加入 key（sops secret 名 + sops key 路径），映射在 lib/tailscale.nix。
+  joinKey = tailscaleRoles.roleInfo role;
 
   # 设备名钉死到 fleet metadata 的 hostName，不跟随 OS hostname 漂移。
   hostnameFlag = "--hostname=${hostMeta.hostName}";
@@ -52,18 +46,6 @@ in
     # 开启后：useRoutingFeatures=server + --advertise-exit-node。
     # 批准由控制面（autoApprovers）+ 使用侧 grants 管理，模块不关心。
     exitNode = mkEnableOption "Advertise this host as a Tailscale exit node";
-
-    # 角色对应的加入 key：VPS 用 tag:vps，个人设备用 tag:ws。
-    # 默认从 meta 的 tailscale.role 派生；缺失时按 vps 处理。
-    authKeyFile = mkOption {
-      type = types.nullOr types.path;
-      default = if config ? sops then config.sops.secrets.${joinKey.name}.path else null;
-      description = ''
-        Path to the Tailscale auth key used to join the tailnet.
-        The key is tagged by role: VPS -> tag:vps, personal -> tag:ws.
-        null when sops-nix is not imported; set explicitly if the key is provisioned elsewhere.
-      '';
-    };
 
     # 多角色：本机作为 peer relay（节点间 UDP 中继，替代远端 DERP）。
     # 典型场景：两端都在 NAT 后且打洞失败（如 Mac 对称 NAT ↔ hermes），
@@ -146,7 +128,10 @@ in
         enable = true;
         package = pkgs.tailscale;
         openFirewall = true;
-        authKeyFile = cfg.authKeyFile;
+        # 按角色解密并注入加入 key；host 可直接覆盖 services.tailscale.authKeyFile。
+        authKeyFile = mkDefault (
+          if config ? sops then config.sops.secrets.${joinKey.secretName}.path else null
+        );
         # 多角色：基础 client；exitNode 开启时提升为 "server"（开 ip_forward，exit node 必备）。
         # 纯 if（求值期）而非 mkIf（合并期）：mkIf false 会 fallback 到 NixOS 默认 "none"，
         # 丢掉 client 语义（rp_filter strict）——nixos-usb 等只开 enable 的 host 会回归。
@@ -184,8 +169,8 @@ in
 
     # 只解密本角色需要的加入 key：VPS -> tag:vps，个人设备 -> tag:ws。
     (mkIf (cfg.enable && config ? sops) {
-      sops.secrets.${joinKey.name} = {
-        key = joinKey.path;
+      sops.secrets.${joinKey.secretName} = {
+        key = joinKey.secretPath;
         mode = "0400";
         owner = "root";
         group = "root";

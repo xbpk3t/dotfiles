@@ -16,6 +16,7 @@ let
   # fleet 是 hosts/**/meta.nix 的派生视图；tailnet IP/设备名从 meta.nix 取，
   # 不在 Terraform 里再写一份。
   fleet = import ../../../../../lib/fleet { inherit lib; };
+  tailscaleRoles = import ../../../../../lib/tailscale.nix { inherit lib; };
 
   # 手机不是 fleet 节点，是唯一留在本地的地址事实。
   phoneIp = "100.123.207.1";
@@ -28,9 +29,31 @@ let
 
   owner = "xbpk3t@github";
 
+  # Tailscale Services 的唯一定义：ACL 的 autoApprovers/grants/tests 与
+  # terraform resource 都从这里派生，避免服务名多处漂移。
+  # 列表顺序决定 ACL 里的服务顺序（保持生成物稳定）。
+  serviceDefs = [
+    {
+      key = "ninerouter";
+      name = "svc:9router";
+      comment = "9router dashboard (HTTP over tailnet)";
+      ports = [ "tcp:80" ];
+    }
+    {
+      key = "nezha";
+      name = "svc:nezha";
+      comment = "Nezha dashboard (HTTP over tailnet)";
+      ports = [ "tcp:80" ];
+    }
+  ];
+  serviceNames = map (svc: svc.name) serviceDefs;
+  serviceResources = lib.listToAttrs (
+    map (svc: lib.nameValuePair svc.key (removeAttrs svc [ "key" ])) serviceDefs
+  );
+
   # ── 角色 / 能力模型 ─────────────────────────────────────────────
   # 暴露面 role：vps（公网/低信任）、ws（个人设备/高信任）。
-  # 能力 tag：svc（Tailscale Services host）、exit（exit node）、ssh（SSH 目标）。
+  # 能力 tag：svc（Tailscale Services host）、exit（exit node）。
   # tag 是扁平的；一台设备可以叠加多个（dev = vps + svc + exit）。
   tagOwners = {
     "tag:vps" = [ owner ];
@@ -42,7 +65,6 @@ let
   # 一次性/非 fleet 管理设备的 host alias。
   # 注意：ACL 里直接写 hostname 会被控制面拒绝（invalid address）；
   # 在 hosts 里定义别名，再用别名写 grants/tests。
-  # （SSH 规则的 src/dst 不接受 host alias/IP，只能用 user/group/tag/autogroup。）
   hosts = {
     "macos-ws" = macosIp;
     "hermes-wb" = hmPaIp;
@@ -78,10 +100,7 @@ let
     # 个人设备 → Tailscale Services VIPs。
     {
       src = [ "tag:ws" ];
-      dst = [
-        "svc:9router"
-        "svc:nezha"
-      ];
+      dst = serviceNames;
       ip = [ "80" ];
     }
     # 手机 exit node：只给 nod-am（IP 别名），Mac 不配 exit；只允许走 tag:exit（dev）。
@@ -165,7 +184,7 @@ let
     };
   };
 
-  aclBase = {
+  aclFinal = {
     inherit
       tagOwners
       hosts
@@ -177,14 +196,9 @@ let
       # 只允许带 tag:exit 的设备自动批准 exit node（当前只有 dev）。
       # 不再用用户身份或 service tag 自动批准；routes 已删（没有 subnet router）。
       exitNode = [ "tag:exit" ];
-      services = {
-        "svc:9router" = [ "tag:svc" ];
-        "svc:nezha" = [ "tag:svc" ];
-      };
+      services = lib.genAttrs serviceNames (_: [ "tag:svc" ]);
     };
-  };
 
-  aclFinal = aclBase // {
     # 防止以后改 ACL 时回归。tests 在 policy 变更时由控制面执行，
     # 失败会拒绝整份 policy。
     tests = [
@@ -193,9 +207,8 @@ let
         accept = [
           "tag:vps:22"
           "tag:ws:22"
-          "svc:9router:80"
-          "svc:nezha:80"
-        ];
+        ]
+        ++ map (name: "${name}:80") serviceNames;
         deny = [
           "tag:vps:80"
           "198.51.100.8:22"
@@ -211,10 +224,7 @@ let
       }
       {
         src = "nod-am";
-        accept = [
-          "svc:9router:80"
-          "svc:nezha:80"
-        ];
+        accept = map (name: "${name}:80") serviceNames;
       }
       {
         # 回归：hm PA 的默认 build 路径依赖 agt mihomo 代理（7890）。
@@ -236,7 +246,7 @@ let
   # 注意 `dst = "*"` 只覆盖 tailnet/子网 IP，不包含 autogroup:internet（exit node）
   # 和 app capability（peer relay），所以必须继续叠加最小权限 grants。
   # Phase 2（默认）：上面的最小权限 ACL。
-  aclTagging = aclBase // {
+  aclTagging = aclFinal // {
     grants = [
       {
         src = [ "*" ];
@@ -244,24 +254,35 @@ let
         ip = [ "*" ];
       }
     ]
-    ++ grants;
+    ++ aclFinal.grants;
     tests = [ ];
   };
 
-  aclFinalJson = builtins.toJSON aclFinal;
-  aclTaggingJson = builtins.toJSON aclTagging;
+  # lib.tf.ref 接收 HCL 表达式；ACL 作为字符串交给 provider，所以需要两层
+  # toJSON（对象 -> JSON 文本 -> 带引号/转义的 HCL 字符串字面量）。
+  asHclString = acl: builtins.toJSON (builtins.toJSON acl);
 
-  # 每台设备的 tag；key 是 fleet 节点名。
-  deviceTags = {
+  # 两个角色 key 的公共策略；只有 tags 不同。
+  joinKeyPolicy = {
+    reusable = true;
+    ephemeral = false;
+    preauthorized = false;
+    expiry = 7776000;
+    depends_on = [ "tailscale_acl.main" ];
+  };
+
+  # 每台设备的能力 tag；角色 tag（tag:ws / tag:vps）从 fleet meta 的
+  # tailscale.role 派生，避免与 auth key 的 tag 两处漂移。
+  # key 是 fleet 节点名；只列当前实际在 tailnet 的设备。
+  deviceCapabilityTags = {
     nixos-vps-dev = [
       "tag:exit"
       "tag:svc"
-      "tag:vps"
     ];
-    hm-lightvela = [ "tag:vps" ];
-    macos-ws = [ "tag:ws" ];
-    nixos-vps-agt = [ "tag:vps" ];
-    nixos-wsl = [ "tag:ws" ];
+    hm-lightvela = [ ];
+    macos-ws = [ ];
+    nixos-vps-agt = [ ];
+    nixos-wsl = [ ];
   };
 
   tfName = lib.replaceStrings [ "-" ] [ "_" ];
@@ -269,12 +290,15 @@ let
   # Terraform 按 tailnet device name 索引；meta.nix 可用 tailscale.hostname
   # 覆盖派生的节点名（hm PA 的 tailnet 设备名是 hermes-wb）。
   devices = lib.mapAttrs' (
-    name: tags:
+    name: capabilityTags:
     let
       node = fleet.nodes.${name};
+      role = tailscaleRoles.roleInfo node.tailscale.role;
     in
-    lib.nameValuePair (node.tailscale.hostname or name) { inherit tags; }
-  ) deviceTags;
+    lib.nameValuePair (node.tailscale.hostname or name) {
+      tags = capabilityTags ++ [ role.tag ];
+    }
+  ) deviceCapabilityTags;
 in
 {
   terraform = {
@@ -319,51 +343,30 @@ in
     tailscale_acl.main = {
       # ACL 是静态数据，在 Nix 侧编码；用 Terraform 变量在
       # “打 tag 阶段（保留 *→*）”和“最终阶段（默认拒绝）”之间切换。
-      acl = lib.tf.ref "var.tailscale_acl_allow_all ? ${builtins.toJSON aclTaggingJson} : ${builtins.toJSON aclFinalJson}";
+      acl = lib.tf.ref "var.tailscale_acl_allow_all ? ${asHclString aclTagging} : ${asHclString aclFinal}";
     };
 
     tailscale_dns_preferences.main = {
       magic_dns = true;
     };
 
-    tailscale_service = {
-      ninerouter = {
-        name = "svc:9router";
-        comment = "9router dashboard (HTTP over tailnet)";
-        ports = [ "tcp:80" ];
-      };
-
-      nezha = {
-        name = "svc:nezha";
-        comment = "Nezha dashboard (HTTP over tailnet)";
-        ports = [ "tcp:80" ];
-      };
-    };
+    tailscale_service = serviceResources;
 
     # 两个 auth key：VPS 自动带 tag:vps，个人设备自动带 tag:ws。
     # 90 天 reusable；泄露一个只影响一类角色；到期/泄露后 revoke 并轮换该角色 key。
     # 注意：Tailnet Lock 已在 LUC-556 关闭，控制面只依赖 ACL + tagged key。
     # 必须先有 ACL 的 tagOwners，才能创建带 tag 的 key。
-    tailscale_tailnet_key.vps_join = {
-      reusable = true;
-      ephemeral = false;
-      preauthorized = false;
-      expiry = 7776000;
-      tags = [ "tag:vps" ];
-      depends_on = [ "tailscale_acl.main" ];
-    };
-
-    tailscale_tailnet_key.ws_join = {
-      reusable = true;
-      ephemeral = false;
-      preauthorized = false;
-      expiry = 7776000;
-      tags = [ "tag:ws" ];
-      depends_on = [ "tailscale_acl.main" ];
+    tailscale_tailnet_key = {
+      vps_join = joinKeyPolicy // {
+        tags = [ tailscaleRoles.roles.vps.tag ];
+      };
+      ws_join = joinKeyPolicy // {
+        tags = [ tailscaleRoles.roles.ws.tag ];
+      };
     };
 
     # 部分 tag 更新可以直接通过 API 完成；只有移除全部 tag 才需要 reauth。
-    # deviceTags 按 hostname 维护每台设备的完整 tag 集合（已去掉 legacy）。
+    # deviceCapabilityTags 只列当前在 tailnet 的设备；角色 tag 从 fleet meta 派生。
     tailscale_device_tags = lib.mapAttrs' (
       device: cfg:
       lib.nameValuePair (tfName device) {

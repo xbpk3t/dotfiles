@@ -11,7 +11,7 @@
     role = "vps";
   };
 
-  # 公网 IPv4：TF DNS / sing-box 记录从这里生成。
+  # 公网 IPv4：TF DNS 记录（api/as/rsshub）从这里生成。
   # dev 不再跑 derper（DERP 只保留 agt，见 terranix.nix 的 derpMap）。
   publicIpv4 = "192.129.183.26";
 

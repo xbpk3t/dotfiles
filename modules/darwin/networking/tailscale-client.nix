@@ -7,6 +7,9 @@
 }:
 let
   cfg = config.modules.darwin.tailscale-client;
+  tailscaleRoles = import ../../../lib/tailscale.nix { inherit lib; };
+  # macOS 设备都是个人设备，固定用 ws 角色的加入 key。
+  joinKey = tailscaleRoles.roleInfo "ws";
 in
 {
   options.modules.darwin.tailscale-client.enable = lib.mkEnableOption "Tailscale client (macOS)";
@@ -22,8 +25,8 @@ in
     };
 
     # 个人设备只解密 tag:ws 的加入 key；VPS key 不在 Darwin 上出现。
-    sops.secrets.TAILSCALE_AUTH_KEY_WS = {
-      key = "tailscale/auth_key_ws";
+    sops.secrets.${joinKey.secretName} = {
+      key = joinKey.secretPath;
       mode = "0400";
       owner = "root";
       group = "wheel";
@@ -42,7 +45,9 @@ in
         echo "tailscale: already connected, skipping pre-auth"
       else
         echo "tailscale: attempting pre-auth with auth key..."
-        ${pkgs.tailscale}/bin/tailscale up --authkey="$(cat ${config.sops.secrets.TAILSCALE_AUTH_KEY_WS.path})"
+        ${pkgs.tailscale}/bin/tailscale up --authkey="$(cat ${
+          config.sops.secrets.${joinKey.secretName}.path
+        })"
       fi
 
       # 设备名钉死到 fleet metadata 的 hostName（幂等）；未连接时跳过。

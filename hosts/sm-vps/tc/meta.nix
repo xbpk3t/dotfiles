@@ -5,13 +5,13 @@
   system = "x86_64-linux";
   stateVersion = "24.11";
 
-  # sm-vps 都是 VPS 角色；用于未来切回 tailnet 时选择 VPS auth key。
-  tailscale.role = "vps";
+  # sm-vps 都是 VPS 角色（fleet 角色事实；sm 的 join 由 ansible bootstrap 完成）。
+  tailscale = {
+    role = "vps";
+  };
 
   # 公网 IPv4：tc 目前不跑 derper，没有 DERP/DNS 消费者；保留供未来服务记录使用。
   publicIpv4 = "43.156.103.43";
-
-  # tc 不再跑 derper（DERP 只保留 agt，见 terranix.nix 的 derpMap）。
 
   deploy = {
     remoteBuild = true;
