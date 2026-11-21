@@ -16,6 +16,18 @@ let
   pingScript = pkgs.writeShellScript "healthchecks-ping" ''
     set -eu
     url="$(cat "$CREDENTIALS_DIRECTORY/ping-url")"
+    ${lib.optionalString cfg.disk.enable ''
+      disk_usage="$(${pkgs.coreutils}/bin/df --output=pcent ${lib.escapeShellArg cfg.disk.path} | ${pkgs.coreutils}/bin/tail -n 1 | ${pkgs.coreutils}/bin/tr -dc '0-9')"
+      if [ "$disk_usage" -ge ${toString cfg.disk.maxUsagePercent} ]; then
+        exec ${pkgs.curl}/bin/curl -fsS --retry 3 --max-time 10 "$url/fail"
+      fi
+    ''}
+    ${lib.optionalString cfg.rebootPending.enable ''
+      current_kernel="$(${pkgs.findutils}/bin/find /run/current-system/kernel-modules/lib/modules -mindepth 1 -maxdepth 1 -printf '%f\\n' | ${pkgs.coreutils}/bin/head -n 1)"
+      if [ "$(${pkgs.coreutils}/bin/uname -r)" != "$current_kernel" ]; then
+        exec ${pkgs.curl}/bin/curl -fsS --retry 3 --max-time 10 "$url/fail"
+      fi
+    ''}
     ${lib.optionalString (cfg.healthUrl != null) ''
       if ! ${pkgs.curl}/bin/curl -fsS --max-time 5 --retry 2 ${lib.escapeShellArg cfg.healthUrl} >/dev/null; then
         exec ${pkgs.curl}/bin/curl -fsS --retry 3 --max-time 10 "$url/fail"
@@ -47,6 +59,33 @@ in
         <ping-url>/fail instead of the success URL. Use this to make the
         dead-man switch reflect a local service, not just host liveness.
       '';
+    };
+
+    disk = {
+      enable = lib.mkEnableOption "disk usage check";
+
+      path = lib.mkOption {
+        type = lib.types.str;
+        default = "/";
+        description = "Filesystem path whose usage is checked.";
+      };
+
+      maxUsagePercent = lib.mkOption {
+        type = lib.types.addCheck lib.types.ints.positive (n: n <= 100);
+        default = 85;
+        description = ''
+          Fail the Healthchecks ping when this path's usage is at or above
+          this percentage.
+        '';
+      };
+    };
+
+    rebootPending = {
+      enable = lib.mkEnableOption "reboot-pending check";
+
+      # 运行时内核和当前 generation 的内核不一致时 ping /fail。比比较
+      # /run/booted-system 与 /run/current-system 的 store path 更准确：
+      # 同一 nixpkgs 的两次 activation 也可能产生不同 store path。
     };
   };
 

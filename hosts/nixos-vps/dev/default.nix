@@ -34,6 +34,8 @@
         # If the dashboard is down while the host is up, ping /fail so
         # Healthchecks alerts instead of reporting a healthy host.
         healthUrl = "http://127.0.0.1:${toString config.modules.infra.nezha.hub.port}/";
+        disk.enable = true;
+        rebootPending.enable = true;
       };
       # 稳定 UUID：`uuidgen` 生成一次后固定，避免 hostname/FQDN 变化导致重复注册。
       nezha.agent.uuid = "2fe2025b-cc20-4e43-b0dc-d9d24c31fbe4";
