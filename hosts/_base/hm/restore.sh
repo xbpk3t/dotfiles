@@ -65,7 +65,8 @@ done
 
 # Standard user manager (hm-only). Installing libpam-systemd upgrades systemd;
 # this is the same trade-off as `bootstrap.sh --user-manager`.
-if ! find /usr/lib -name pam_systemd.so -print -quit 2>/dev/null | grep -q .; then
+if ! compgen -G '/usr/lib/*/security/pam_systemd.so' >/dev/null &&
+  [[ ! -e /usr/lib/security/pam_systemd.so ]]; then
   log "installing libpam-systemd (hm-only system-level change)"
   apt-get update -qq || warn "apt-get update failed; trying install anyway"
   DEBIAN_FRONTEND=noninteractive apt-get install -y libpam-systemd

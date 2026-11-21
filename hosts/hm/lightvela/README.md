@@ -77,20 +77,20 @@ Mac/phone.
 - **Persistence:** `user@0.service` is active and `Linger=yes`, so it should
   start automatically at boot. The apt install upgraded systemd to
   `255.4-1ubuntu8.18`. A platform image reset can remove the package/unit;
-  re-run `hosts/_base/hm/bootstrap.sh --user-manager` after a reset.
+  run `task nix:hm:restore` after a reset.
   `libpam-systemd` is available from the Tencent Ubuntu mirror.
 
 ## Full HM profile (S-Full-PA + Nezha N1)
 
 The PA profile is curated from `home/core`, not the whole directory:
 
+- `home/core/init.nix`（username / homeDirectory / stateVersion / home-manager）
 - `home/core/kernel`（zsh 全量 + starship + atuin + fzf）
 - `home/core/langs`（jq）
-- `home/core/devops/{btop,fetch,git,gh,journalctl,lazygit,ssh,worktrunk}.nix`
+- `home/core/devops/{btop,git,gh,journalctl,lazygit,ssh,worktrunk}.nix`
 - `ssh` only enables tailnet hosts (`github.enable = false`)
-- `fetch` imported but its option stays off
 - no `db` / `lazydocker`（无 enable 开关，import 即安装）
-- no `cntr` / `taskfile` / `init` / `infra`
+- no `cntr` / `taskfile` / `infra`
 - `herdr-core` stays sh/closure-managed; HM does not touch
   `~/.local/bin/{hc,herdr-core}` or `/usr/local/bin` wrappers
 
@@ -348,9 +348,10 @@ home-manager switch --flake .#hm-lightvela
 ```
 
 The shared profile lives in `home/hm/default.nix`; it is identity-agnostic and
-imports a curated subset of `home/core` (kernel, langs, selected devops). It
+imports a curated subset of `home/core` (init, kernel, langs, selected devops). It
 still reads a few `sops.secrets.*` (`AUTIN_KEY`, `GITHUB_TOKEN`,
-`RESEND_TOKEN`), so the host must import `secrets/hm-<node>.nix`; the
+`RESEND_TOKEN`), and the host-specific Nezha template uses
+`NEZHA_AGENT_SK`; the host must import `secrets/hm-<node>.nix`; the
 GUI-heavy `home/base` is not imported.
 This path is not applied yet on this PA; the sh/closure path is the current
 installation.
@@ -368,18 +369,12 @@ systemctl --user status
 loginctl show-user root -p Linger
 ```
 
-On the Mac, add the machine with the local `herdr-core` CLI (the installed
-binary is `herdr-core`; `hc` is not necessarily on PATH):
+On the Mac, add/verify the machine with the local `herdr-core` CLI as described
+in [herdr-app cannot add the machine](#herdr-app-cannot-add-the-machine).
 
-```bash
-/Users/luck/.local/bin/herdr-core machine add root@100.72.194.36
-/Users/luck/.local/bin/herdr-core machine ls
-```
-
-`hc server status` prints
-`no systemd user manager here: the core ends with whatever started it`.
-`hc exec`/`hc run` work; `keeps_running_after_logout` is null, so do not rely
-on a core surviving logout until user systemd is available.
+`hc server status` should report `keeps_running_after_logout: true` with
+`logout_linger_user: root` (see Status); `hc exec`/`hc run` use the
+user-manager core.
 
 ## Persistence
 

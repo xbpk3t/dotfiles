@@ -7,6 +7,9 @@ version: "3"
 # nixos-vps-dev exit node; `-e hm_build_network=proxy` is the default.
 
 vars:
+  # TASKFILE_DIR 是这个 include 的 taskfile 所在目录（.taskfile/nix），
+  # ../../ 稳定指向仓库根，不依赖调用 task 时的 cwd。`task -g` 不会加载
+  # 这个 repo Taskfile，所以不要用 USER_WORKING_DIR 做 repo resolution。
   ANSIBLE_DIR: "{{.TASKFILE_DIR}}/../../hosts/_base/hm/ansible"
   INVENTORY: "{{.ANSIBLE_DIR}}/inventory/hm.ini"
   PLAYBOOK: "{{.ANSIBLE_DIR}}/bootstrap.yml"

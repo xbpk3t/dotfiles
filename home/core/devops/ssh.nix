@@ -13,7 +13,7 @@ let
   selfOnTailnet = hostMeta ? tailscale && hostMeta.tailscale ? ip;
 
   # fleet SSH 统一策略：Host 键 = 节点名，地址 = 节点 tailnet IP。
-  # 用户名是全局身份常量，不在每个节点重复。
+  # 登录用户默认取全局身份；平台托管节点可用 meta.nix 的 ssh.user 覆盖。
   # 加机器只在 hosts/<group>/<node>/meta.nix 补 tailscale.ip，这里零改动。
   tailnetNodes = mylib.fleet.tailnetNodes;
 

@@ -7,7 +7,6 @@ hm_source: "{{ playbook_dir }}/../../../.."
 hm_tar: /tmp/hm-build-source.tar.gz
 hm_remote_src: /root/hm-build
 hm_generation_file: /root/.hm-generation
-hm_host_name: hm-lightvela
 
 # Default: GitHub via the agt mihomo proxy, everything else from the USTC
 # mirror direct. Measured on the PA: exit node ~15-22KB/s (lossy ~164ms
@@ -21,9 +20,7 @@ hm_proxy: "http://100.66.22.92:7890"
 # clears the exit node in an always block.
 hm_exit_node: "100.101.189.7"
 
-# The PA's direct international path is slow (~15KB/s through a lossy exit-node
-# tunnel, and cache.nixos.org direct is also poor). The USTC Nix mirror is
-# reachable directly from the PA at ~10MB/s. Nars are signed by
-# cache.nixos.org, so the mirror needs no extra trusted keys; cache.nixos.org
-# stays as a fallback for paths the mirror has not synced yet.
+# Nars are signed by cache.nixos.org, so the USTC mirror needs no extra
+# trusted keys; cache.nixos.org stays as a fallback for paths the mirror has
+# not synced yet.
 hm_substituters: "https://mirrors.ustc.edu.cn/nix-channels/store https://cache.nixos.org"

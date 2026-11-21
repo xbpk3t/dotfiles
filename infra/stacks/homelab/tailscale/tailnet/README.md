@@ -1,11 +1,12 @@
 # Tailscale Tailnet (terranix)
 
-这个 stack 管理 Tailscale tailnet 的 ACL、DERP map、DNS preferences、
-Services 和 device/auth keys。现在由 terranix 生成 Terraform JSON。
+这个 stack 管理 Tailscale tailnet 的 ACL、DNS preferences、Services 和
+device/auth keys（不使用自定义 DERP map，保留默认 region）。现在由
+terranix 生成 Terraform JSON。
 
 ## 文件
 
-- `terranix.nix`：唯一手写源文件（ACL / DERP / provider / resources）
+- `terranix.nix`：唯一手写源文件（ACL / provider / resources）
 - `generated.tf.json`：terranix 生成物，**不要手改**
 - `stack.tm.hcl`：Terramate 元数据
 - `.terraform.lock.hcl`：provider 版本锁

@@ -13,6 +13,48 @@
 let
   facts = import ../../../../facts.nix;
 
+  # fleet 是 hosts/**/meta.nix 的派生视图；tailnet IP/设备名从 meta.nix 取，
+  # 不在 Terraform 里再写一份。
+  fleet = import ../../../../../lib/fleet { inherit lib; };
+
+  # 手机不是 fleet 节点，是唯一留在本地的地址事实。
+  phoneIp = "100.123.207.1";
+
+  hmPaIp = fleet.nodes."hm-lightvela".tailscale.ip;
+  macosIp = fleet.nodes."macos-ws".tailscale.ip;
+  agtIp = fleet.nodes."nixos-vps-agt".tailscale.ip;
+
+  owner = "xbpk3t@github";
+
+  # 每台设备的 tag；key 是 fleet 节点名。
+  deviceTags = {
+    nixos-vps-dev = [
+      "tag:exit"
+      "tag:svc"
+      "tag:svc-9router"
+      "tag:vps"
+    ];
+    hm-lightvela = [ "tag:vps" ];
+    macos-ws = [ "tag:ws" ];
+    nixos-vps-agt = [
+      "tag:ssh"
+      "tag:vps"
+    ];
+    nixos-wsl = [ "tag:ws" ];
+  };
+
+  tfName = lib.replaceStrings [ "-" ] [ "_" ];
+
+  # Terraform 按 tailnet device name 索引；meta.nix 可用 tailscale.hostname
+  # 覆盖派生的节点名（hm PA 的 tailnet 设备名是 hermes-wb）。
+  devices = lib.mapAttrs' (
+    name: tags:
+    let
+      node = fleet.nodes.${name};
+    in
+    lib.nameValuePair (node.tailscale.hostname or name) { inherit tags; }
+  ) deviceTags;
+
   # 自定义 DERP region 全部下线（保留默认 region 即可）：
   #   901 (la) / 903 (cn-sh) 因 dev(LA) → agt(SH) 公网 TCP 被 GFW 挡、而 Mac 会优先
   #   选 cn-sh 作为 home DERP，导致 Mac↔dev 单向，已移除（见 f68eb73d）。
@@ -26,12 +68,12 @@ let
     tagOwners = {
       # Tailscale 不允许通过 API 给 tagged node 摘 tag（需要 reauth），
       # 所以迁移保留设备上的旧 tag；grant 已改为 IP 规则，不依赖它们。
-      "tag:exit" = [ "xbpk3t@github" ];
-      "tag:ssh" = [ "xbpk3t@github" ];
-      "tag:svc" = [ "xbpk3t@github" ];
-      "tag:svc-9router" = [ "xbpk3t@github" ];
-      "tag:vps" = [ "xbpk3t@github" ];
-      "tag:ws" = [ "xbpk3t@github" ];
+      "tag:exit" = [ owner ];
+      "tag:ssh" = [ owner ];
+      "tag:svc" = [ owner ];
+      "tag:svc-9router" = [ owner ];
+      "tag:vps" = [ owner ];
+      "tag:ws" = [ owner ];
     };
 
     grants = [
@@ -43,7 +85,7 @@ let
       # 手机 exit node：xbpk3t@nod-am 是早已不存在的用户（tailnet 现在只有
       # xbpk3t@github），旧规则匹配不到任何设备。改用手机 tailnet IP。
       {
-        src = [ "100.123.207.1" ]; # Redmi Note 13 Pro
+        src = [ phoneIp ]; # Redmi Note 13 Pro
         dst = [ "autogroup:internet" ];
         ip = [ "*" ];
       }
@@ -53,22 +95,22 @@ let
       # grant is the missing client-side permission. src 必须是身份或 IP：
       # user@hostname 不是合法选择器（只有 hosts 别名可用于 dst）。
       {
-        src = [ "100.72.194.36" ]; # hermes-wb (hm PA)
+        src = [ hmPaIp ]; # hermes-wb (hm PA)
         dst = [ "autogroup:internet" ];
         ip = [ "*" ];
       }
-      # peer relay：只允许 Mac(100.87.216.84) 和 hermes(100.72.194.36) 用 agt
-      # (100.66.22.92) 做 UDP 中继。两者都在 NAT 后，Mac 侧还是对称 NAT，直连打洞
-      # 失败；DERP 又会绕美国。grant 的 src 是"需要通过 relay 访问的设备"，
-      # 两端都列入，保证两个方向都能命中。能力本身不需要参数。
+      # peer relay：只允许 macos-ws 和 hermes-wb 用 nixos-vps-agt 做 UDP 中继。
+      # 两者都在 NAT 后，Mac 侧还是对称 NAT，直连打洞失败；DERP 又会绕美国。
+      # grant 的 src 是"需要通过 relay 访问的设备"，两端都列入，保证两个方向
+      # 都能命中。能力本身不需要参数。
       # 注意：src 用 Tailscale IP；直接写 hostname 会被控制面拒绝
       # （invalid address），除非在 ACL 的 hosts 里额外定义别名。
       {
         src = [
-          "100.87.216.84" # macos-ws
-          "100.72.194.36" # hermes-wb
+          macosIp # macos-ws
+          hmPaIp # hermes-wb
         ];
-        dst = [ "100.66.22.92" ]; # nixos-vps-agt
+        dst = [ agtIp ]; # nixos-vps-agt
         app = {
           "tailscale.com/cap/relay" = [ ];
         };
@@ -77,16 +119,16 @@ let
 
     autoApprovers = {
       exitNode = [
-        "xbpk3t@github"
+        owner
         "tag:svc-9router"
       ];
       routes = {
         "0.0.0.0/0" = [
-          "xbpk3t@github"
+          owner
           "tag:svc-9router"
         ];
         "::/0" = [
-          "xbpk3t@github"
+          owner
           "tag:svc-9router"
         ];
       };
@@ -112,7 +154,7 @@ let
       # 非 tagged 用户设备的入口保留 check（周期重新认证）。
       {
         action = "check";
-        src = [ "xbpk3t@github" ];
+        src = [ owner ];
         dst = [ "tag:ssh" ];
         users = [ "luck" ];
       }
@@ -189,46 +231,15 @@ in
       expiry = 7776000;
     };
 
-    tailscale_device_tags = {
-      nixos_vps_dev = {
-        device_id = lib.tf.ref "data.tailscale_device.servers[\"nixos-vps-dev\"].id";
-        # 旧 tag 不能通过 API 摘除（需要 reauth）；保留并补上服务 tag。
-        tags = [
-          "tag:exit"
-          "tag:svc"
-          "tag:svc-9router"
-          "tag:vps"
-        ];
+    # 旧 tag 不能通过 API 摘除（需要 reauth）；nixos-vps-dev 保留旧 tag 并补上服务 tag。
+    tailscale_device_tags = lib.mapAttrs' (
+      device: cfg:
+      lib.nameValuePair (tfName device) {
+        device_id = lib.tf.ref "data.tailscale_device.servers[\"${device}\"].id";
+        inherit (cfg) tags;
         depends_on = [ "tailscale_acl.main" ];
-      };
-
-      hermes_wb = {
-        device_id = lib.tf.ref "data.tailscale_device.servers[\"hermes-wb\"].id";
-        tags = [ "tag:vps" ];
-        depends_on = [ "tailscale_acl.main" ];
-      };
-
-      macos_ws = {
-        device_id = lib.tf.ref "data.tailscale_device.servers[\"macos-ws\"].id";
-        tags = [ "tag:ws" ];
-        depends_on = [ "tailscale_acl.main" ];
-      };
-
-      nixos_vps_agt = {
-        device_id = lib.tf.ref "data.tailscale_device.servers[\"nixos-vps-agt\"].id";
-        tags = [
-          "tag:ssh"
-          "tag:vps"
-        ];
-        depends_on = [ "tailscale_acl.main" ];
-      };
-
-      nixos_wsl = {
-        device_id = lib.tf.ref "data.tailscale_device.servers[\"nixos-wsl\"].id";
-        tags = [ "tag:ws" ];
-        depends_on = [ "tailscale_acl.main" ];
-      };
-    };
+      }
+    ) devices;
 
     tailscale_device_key.servers = {
       for_each = lib.tf.ref "data.tailscale_device.servers";
@@ -238,62 +249,24 @@ in
   };
 
   data.tailscale_device.servers = {
-    for_each = {
-      "nixos-vps-dev" = true;
-      "nixos-vps-agt" = true;
-      # 旧 HCL 对所有设备关闭了 key 过期。terranix 迁移后只保留 dev/agt，
-      # 若直接 destroy 旧的 device_key 会在 provider Delete 时重新启用过期
-      # （macos-ws 2026-11-25 到期）。把 client 也纳入管理，保持不过期。
-      "macos-ws" = true;
-      "nixos-wsl" = true;
-      "hermes-wb" = true;
-    };
+    # 旧 HCL 对所有设备关闭了 key 过期。terranix 迁移后只保留 dev/agt，
+    # 若直接 destroy 旧的 device_key 会在 provider Delete 时重新启用过期
+    # （macos-ws 2026-11-25 到期）。把 client 也纳入管理，保持不过期。
+    for_each = lib.genAttrs (lib.attrNames devices) (_: true);
     hostname = lib.tf.ref "each.key";
   };
 
   # 迁移旧 HCL 的 per-device 地址，避免 destroy→create：
   # - device_key 的 Delete 会 SetKey(key_expiry_disabled=false)，重新启用过期；
   # - device_tags 的 Delete 会清空设备 tag，dev 的 svc 服务会出现空 tag 窗口。
-  moved = [
+  moved = lib.concatMap (device: [
     {
-      from = "tailscale_device_key.devices[\"hermes-wb\"]";
-      to = "tailscale_device_key.servers[\"hermes-wb\"]";
+      from = "tailscale_device_key.devices[\"${device}\"]";
+      to = "tailscale_device_key.servers[\"${device}\"]";
     }
     {
-      from = "tailscale_device_key.devices[\"macos-ws\"]";
-      to = "tailscale_device_key.servers[\"macos-ws\"]";
+      from = "tailscale_device_tags.devices[\"${device}\"]";
+      to = "tailscale_device_tags.${tfName device}";
     }
-    {
-      from = "tailscale_device_key.devices[\"nixos-vps-agt\"]";
-      to = "tailscale_device_key.servers[\"nixos-vps-agt\"]";
-    }
-    {
-      from = "tailscale_device_key.devices[\"nixos-vps-dev\"]";
-      to = "tailscale_device_key.servers[\"nixos-vps-dev\"]";
-    }
-    {
-      from = "tailscale_device_key.devices[\"nixos-wsl\"]";
-      to = "tailscale_device_key.servers[\"nixos-wsl\"]";
-    }
-    {
-      from = "tailscale_device_tags.devices[\"nixos-vps-dev\"]";
-      to = "tailscale_device_tags.nixos_vps_dev";
-    }
-    {
-      from = "tailscale_device_tags.devices[\"hermes-wb\"]";
-      to = "tailscale_device_tags.hermes_wb";
-    }
-    {
-      from = "tailscale_device_tags.devices[\"macos-ws\"]";
-      to = "tailscale_device_tags.macos_ws";
-    }
-    {
-      from = "tailscale_device_tags.devices[\"nixos-vps-agt\"]";
-      to = "tailscale_device_tags.nixos_vps_agt";
-    }
-    {
-      from = "tailscale_device_tags.devices[\"nixos-wsl\"]";
-      to = "tailscale_device_tags.nixos_wsl";
-    }
-  ];
+  ]) (lib.attrNames devices);
 }

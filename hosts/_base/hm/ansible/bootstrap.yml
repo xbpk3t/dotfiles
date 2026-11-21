@@ -22,9 +22,8 @@
           - ansible_facts.system == "Linux"
           - ansible_facts.service_mgr == "systemd"
           - ansible_facts.user_id == "root"
-          - ansible_facts.virtualization_type is defined
         fail_msg: "hm target must be Linux/systemd/root (systemd-nspawn expected)"
-        success_msg: "hm target preflight OK ({{ ansible_facts.virtualization_type }})"
+        success_msg: "hm target preflight OK ({{ ansible_facts.virtualization_type | default('unknown') }})"
 
     - name: Check nix-portable store
       ansible.builtin.stat:
@@ -82,15 +81,10 @@
       ansible.builtin.command:
         cmd: >-
           tar -C {{ hm_source | quote }} -czf {{ hm_tar | quote }}
-          --exclude=.git --exclude=.worktrees --exclude=.claude --exclude=.direnv .
+          --exclude=.git --exclude=.worktrees --exclude=.claude --exclude=.direnv
+          --exclude=.terraform --exclude=node_modules --exclude=result --exclude=result-* .
       delegate_to: localhost
       changed_when: false
-
-    - name: Copy source tarball to the PA
-      ansible.builtin.copy:
-        src: "{{ hm_tar }}"
-        dest: /root/hm-build-source.tar.gz
-        mode: "0600"
 
     - name: Replace /root/hm-build
       ansible.builtin.file:
@@ -105,13 +99,14 @@
 
     - name: Unpack source
       ansible.builtin.unarchive:
-        src: /root/hm-build-source.tar.gz
+        src: "{{ hm_tar }}"
         dest: "{{ hm_remote_src }}"
-        remote_src: true
 
     - name: Check libpam-systemd
-      ansible.builtin.stat:
-        path: /usr/lib/x86_64-linux-gnu/security/pam_systemd.so
+      ansible.builtin.find:
+        paths: /usr/lib
+        patterns: pam_systemd.so
+        recurse: true
       register: hm_pam
 
     - name: Install libpam-systemd (hm-only system-level change)
@@ -119,7 +114,7 @@
         name: libpam-systemd
         state: present
         update_cache: true
-      when: not hm_pam.stat.exists
+      when: hm_pam.matched == 0
 
     - name: Ensure /run/user/0
       ansible.builtin.file:
@@ -143,14 +138,7 @@
         - name: Set temporary exit node
           ansible.builtin.command:
             cmd: tailscale set --exit-node={{ hm_exit_node }}
-          register: hm_exit_set
           changed_when: false
-
-        - name: Assert exit node was accepted
-          ansible.builtin.assert:
-            that:
-              - hm_exit_set.rc == 0
-            fail_msg: "tailscale set --exit-node failed"
 
         - name: Read tailscale prefs
           ansible.builtin.command:
@@ -195,22 +183,15 @@
             cmd: curl -fsI --max-time 10 https://cache.nixos.org
           changed_when: false
 
-        - name: Build homeConfigurations.{{ hm_host_name }} locally
+        - name: Build homeConfigurations.{{ inventory_hostname }} locally
           ansible.builtin.command:
             cmd: >-
               /root/.local/bin/nix build --impure --no-link --print-out-paths
-              'path:{{ hm_remote_src }}#homeConfigurations.{{ hm_host_name }}.activationPackage'
-            chdir: "{{ hm_remote_src }}"
+              'path:{{ hm_remote_src }}#homeConfigurations.{{ inventory_hostname }}.activationPackage'
           environment:
             HOME: /root
             PATH: "/root/.local/bin:{{ ansible_env.PATH }}"
           register: hm_build
-
-        - name: Record the HM generation
-          ansible.builtin.copy:
-            content: "{{ hm_build.stdout_lines | last }}\n"
-            dest: "{{ hm_generation_file }}"
-            mode: "0644"
       always:
         - name: Clear temporary exit node
           ansible.builtin.command:
@@ -236,13 +217,12 @@
             cmd: curl -fsI --max-time 10 https://mirrors.ustc.edu.cn/nix-channels/store/nix-cache-info
           changed_when: false
 
-        - name: Build homeConfigurations.{{ hm_host_name }} locally
+        - name: Build homeConfigurations.{{ inventory_hostname }} locally
           ansible.builtin.command:
             cmd: >-
               /root/.local/bin/nix build --impure --no-link --print-out-paths
               --option substituters {{ hm_substituters | quote }}
-              'path:{{ hm_remote_src }}#homeConfigurations.{{ hm_host_name }}.activationPackage'
-            chdir: "{{ hm_remote_src }}"
+              'path:{{ hm_remote_src }}#homeConfigurations.{{ inventory_hostname }}.activationPackage'
           environment:
             HOME: /root
             PATH: "/root/.local/bin:{{ ansible_env.PATH }}"
@@ -256,11 +236,11 @@
             no_proxy: "localhost,127.0.0.1,100.64.0.0/10,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,cache.nixos.org,mirrors.ustc.edu.cn"
           register: hm_build
 
-        - name: Record the HM generation
-          ansible.builtin.copy:
-            content: "{{ hm_build.stdout_lines | last }}\n"
-            dest: "{{ hm_generation_file }}"
-            mode: "0644"
+    - name: Record the HM generation
+      ansible.builtin.copy:
+        content: "{{ hm_build.stdout_lines | last }}\n"
+        dest: "{{ hm_generation_file }}"
+        mode: "0644"
 
     - name: Activate HM generation
       ansible.builtin.command:

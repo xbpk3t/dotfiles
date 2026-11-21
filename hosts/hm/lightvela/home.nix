@@ -11,12 +11,10 @@
   ];
 
   # 厂商 PA 当前授权的是 root（hermes-workbench-client）；不建 luck。
-  # 如果改用 desk 登录，改成：
-  #   username = "desk"; homeDirectory = "/home/desk";
+  # homeDirectory/stateVersion 由 home/core/init.nix 从 username / meta 派生。
+  # 如果改用 desk 登录，把 username 改成 "desk"。
   home = {
     username = "root";
-    homeDirectory = "/root";
-    stateVersion = "26.05";
 
     # git/gh 的 editorMeta.command 是 hx；补上 helix。
     # nezha-agent 供 systemd system service 使用。
@@ -25,8 +23,6 @@
       nezha-agent
     ];
   };
-
-  programs.home-manager.enable = true;
 
   # Nezha agent config (N1). The agent v1 reads JSON, not YAML. The secret is
   # rendered by sops-nix; the system service waits for this file before starting.

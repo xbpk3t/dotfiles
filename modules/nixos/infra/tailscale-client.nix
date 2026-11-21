@@ -9,6 +9,9 @@ with lib;
 let
   cfg = config.modules.networking.tailscale;
 
+  # 设备名钉死到 fleet metadata 的 hostName，不跟随 OS hostname 漂移。
+  hostnameFlag = "--hostname=${hostMeta.hostName}";
+
   # Keep derper's STUN replies out of mihomo's policy-routing table.
   derperPolicyRoute = pkgs.writeShellScript "derper-policy-route" ''
     op=''${1:?add|del}
@@ -122,15 +125,11 @@ in
         # 丢掉 client 语义（rp_filter strict）——nixos-usb 等只开 enable 的 host 会回归。
         # 用 if 显式二选一：exitNode → server，否则 client。
         useRoutingFeatures = if cfg.exitNode then "server" else "client";
-        # 设备名钉死到 fleet metadata 的 hostName，不跟随 OS hostname 漂移。
         # extraUpFlags 覆盖首次 join / auth key 过期后的重新认证；
         # extraSetFlags 由 tailscaled-set oneshot 在 autoconnect 之后执行，幂等。
-        extraUpFlags = [
-          "--hostname=${hostMeta.hostName}"
-        ]
-        ++ lib.optional cfg.exitNode "--advertise-exit-node";
+        extraUpFlags = [ hostnameFlag ] ++ lib.optional cfg.exitNode "--advertise-exit-node";
         extraSetFlags = [
-          "--hostname=${hostMeta.hostName}"
+          hostnameFlag
         ]
         ++ lib.optionals (cfg.peerRelay.enable && cfg.peerRelay.staticEndpoints != [ ]) [
           "--relay-server-static-endpoints=${lib.concatStringsSep "," cfg.peerRelay.staticEndpoints}"

@@ -13,7 +13,12 @@
   stateVersion = "26.05";
 
   # fleet 可寻址事实；只用于 tailnet/checks，不参与 deploy。
-  tailscale.ip = "100.72.194.36";
+  tailscale = {
+    ip = "100.72.194.36";
+    # 平台预注册的 tailnet 设备名，与 fleet 路径派生的 hm-lightvela 不同。
+    # terranix/ACL 按这个名字索引设备。
+    hostname = "hermes-wb";
+  };
 
   # 平台只授权 root（hermes-workbench-client），不是 fleet 全局身份 luck。
   # ssh.nix 生成 fleet SSH config 时按这个字段选登录用户。

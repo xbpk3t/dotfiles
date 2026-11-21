@@ -110,6 +110,11 @@ prepend_path() {
 
 have() { command -v "$1" >/dev/null 2>&1; }
 
+has_pam_systemd() {
+  compgen -G '/usr/lib/*/security/pam_systemd.so' >/dev/null ||
+    [[ -e /usr/lib/security/pam_systemd.so ]]
+}
+
 fetch() {
   local url="$1" out="$2"
   if have curl; then
@@ -137,7 +142,7 @@ resolve_nix() {
   if [[ $NO_NIX_PORTABLE -eq 1 ]]; then
     die "nix not found and --no-nix-portable was given"
   fi
-  if [[ ! -x $NIX_PORTABLE_BIN || $FORCE -eq 1 ]]; then
+  if [[ ! -x $NIX_PORTABLE_BIN ]]; then
     log "downloading nix-portable to $NIX_PORTABLE_BIN"
     mkdir -p "$BIN_DIR"
     fetch "$NIX_PORTABLE_URL" "$NIX_PORTABLE_BIN.tmp"
@@ -157,11 +162,16 @@ herdr_installed() {
 }
 
 install_herdr() {
-  if [[ $FORCE -eq 1 ]] && herdr_installed; then
+  local installed=0
+  if herdr_installed; then
+    installed=1
+  fi
+  if [[ $FORCE -eq 1 && $installed -eq 1 ]]; then
     log "removing existing herdr-core profile entry"
     "${NIX[@]}" "${NIX_FLAGS[@]}" profile remove herdr-core >/dev/null 2>&1 || true
+    installed=0
   fi
-  if herdr_installed; then
+  if [[ $installed -eq 1 ]]; then
     log "herdr-core already installed in $PROFILE"
     return 0
   fi
@@ -172,23 +182,18 @@ install_herdr() {
 
 find_hc() {
   local candidate
+  # Store globs are bounded; do not `find -L` the whole nix-portable store
+  # (it is the full HM/nixpkgs closure).
   for candidate in \
     "$TARGET_HOME/.nix-profile/bin/hc" \
-    "$TARGET_HOME/.local/state/nix/profiles/profile/bin/hc"; do
+    "$TARGET_HOME/.local/state/nix/profiles/profile/bin/hc" \
+    $(compgen -G "/nix/store/*-herdr-core-*/bin/hc" 2>/dev/null) \
+    $(compgen -G "$TARGET_HOME/.nix-portable/nix/store/*-herdr-core-*/bin/hc" 2>/dev/null); do
     if [[ -x $candidate ]]; then
       printf '%s\n' "$candidate"
       return 0
     fi
   done
-  candidate="$(
-    find -L "$TARGET_HOME/.nix-profile" "$TARGET_HOME/.nix-portable" \
-      "$TARGET_HOME/.local/state/nix/profiles" \
-      -type f -name hc -perm -u+x 2>/dev/null | head -n 1 || true
-  )"
-  if [[ -n $candidate ]]; then
-    printf '%s\n' "$candidate"
-    return 0
-  fi
   return 1
 }
 
@@ -264,7 +269,7 @@ setup_user_manager() {
   uid="$(id -u)"
   runtime="/run/user/$uid"
 
-  if ! find /usr/lib -name pam_systemd.so -print -quit 2>/dev/null | grep -q .; then
+  if ! has_pam_systemd; then
     have apt-get || die "pam_systemd.so missing and apt-get is unavailable"
     log "installing libpam-systemd (hm-only system-level change)"
     apt-get update -qq || warn "apt-get update failed; trying install anyway"

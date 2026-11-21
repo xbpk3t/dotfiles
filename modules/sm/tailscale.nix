@@ -13,9 +13,6 @@
 # 激活（用 systemd `-` 前缀忽略退出码），避免触发 magicRollback 误伤。
 #
 # 授权侧（谁被允许走这个出口）归 TF 的 tailscale_acl 控制面管，本模块不管。
-# 当前 terranix.nix 的 grants 放行手机与 hm PA（100.123.207.1 /
-# 100.72.194.36）使用 exit node；autoApprovers 由 tag:svc-9router 等批准
-# exit-node 广告。注意 grants 第一条仍是 `*→*` 过渡规则，最小权限尚未生效。
 # sm 模块本身只负责广告和设备名。
 {
   lib,

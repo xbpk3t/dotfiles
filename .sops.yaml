@@ -13,7 +13,7 @@ creation_rules:
     key_groups:
       - age:
           - age18dsw945cyp5mzcsxp5pjgalhx8m8c7srqfffynkh3ghdczw65fsqzd7ctf
-    # Don't encrypt the entire file, only specific keys
+    # Keys ending in `_unencrypted` are stored in plaintext.
     unencrypted_suffix: _unencrypted
 
   # Rule for secrets in the secrets directory
@@ -21,5 +21,5 @@ creation_rules:
     key_groups:
       - age:
           - *age_key
-    # Don't encrypt the entire file, only specific keys
+    # Keys ending in `_unencrypted` are stored in plaintext.
     unencrypted_suffix: _unencrypted

@@ -19,36 +19,36 @@
       "to": "tailscale_device_key.servers[\"hermes-wb\"]"
     },
     {
-      "from": "tailscale_device_key.devices[\"macos-ws\"]",
-      "to": "tailscale_device_key.servers[\"macos-ws\"]"
-    },
-    {
-      "from": "tailscale_device_key.devices[\"nixos-vps-agt\"]",
-      "to": "tailscale_device_key.servers[\"nixos-vps-agt\"]"
-    },
-    {
-      "from": "tailscale_device_key.devices[\"nixos-vps-dev\"]",
-      "to": "tailscale_device_key.servers[\"nixos-vps-dev\"]"
-    },
-    {
-      "from": "tailscale_device_key.devices[\"nixos-wsl\"]",
-      "to": "tailscale_device_key.servers[\"nixos-wsl\"]"
-    },
-    {
-      "from": "tailscale_device_tags.devices[\"nixos-vps-dev\"]",
-      "to": "tailscale_device_tags.nixos_vps_dev"
-    },
-    {
       "from": "tailscale_device_tags.devices[\"hermes-wb\"]",
       "to": "tailscale_device_tags.hermes_wb"
+    },
+    {
+      "from": "tailscale_device_key.devices[\"macos-ws\"]",
+      "to": "tailscale_device_key.servers[\"macos-ws\"]"
     },
     {
       "from": "tailscale_device_tags.devices[\"macos-ws\"]",
       "to": "tailscale_device_tags.macos_ws"
     },
     {
+      "from": "tailscale_device_key.devices[\"nixos-vps-agt\"]",
+      "to": "tailscale_device_key.servers[\"nixos-vps-agt\"]"
+    },
+    {
       "from": "tailscale_device_tags.devices[\"nixos-vps-agt\"]",
       "to": "tailscale_device_tags.nixos_vps_agt"
+    },
+    {
+      "from": "tailscale_device_key.devices[\"nixos-vps-dev\"]",
+      "to": "tailscale_device_key.servers[\"nixos-vps-dev\"]"
+    },
+    {
+      "from": "tailscale_device_tags.devices[\"nixos-vps-dev\"]",
+      "to": "tailscale_device_tags.nixos_vps_dev"
+    },
+    {
+      "from": "tailscale_device_key.devices[\"nixos-wsl\"]",
+      "to": "tailscale_device_key.servers[\"nixos-wsl\"]"
     },
     {
       "from": "tailscale_device_tags.devices[\"nixos-wsl\"]",
