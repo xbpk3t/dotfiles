@@ -7,6 +7,9 @@
 }:
 let
   cfg = config.modules.darwin.tailscale-client;
+  tailscaleRoles = import ../../../lib/tailscale.nix { inherit lib; };
+  # macOS 设备都是个人设备，固定用 ws 角色的加入 key。
+  joinKey = tailscaleRoles.roleInfo "ws";
 in
 {
   options.modules.darwin.tailscale-client.enable = lib.mkEnableOption "Tailscale client (macOS)";
@@ -19,6 +22,14 @@ in
       # 启用后，设备会忽略本地 DNS 设置，改为始终使用 tailnet 里定义的全局 nameserver。这个机制适合几种场景：你要稳定解析私有 DNS 记录、你不想信任当前 Wi-Fi/局域网给你的 DNS、或者你希望所有 DNS 都强制走 NextDNS / Control D / 自建解析器。
       # 但它也有明显副作用：因为它把 100.100.100.100 设成 sole DNS，所以如果你没有在 Tailscale 后台配好至少一个可用的 DNS server，或者控制面板里没把对应开关开对，非 MagicDNS 查询会直接失败。所以如果你只是普通用 Tailscale 联网，不依赖 MagicDNS / 全局 nameserver / 分流 DNS，这个选项通常没必要开。
       # overrideLocalDns = true;
+    };
+
+    # 个人设备只解密 tag:ws 的加入 key；VPS key 不在 Darwin 上出现。
+    sops.secrets.${joinKey.secretName} = {
+      key = joinKey.secretPath;
+      mode = "0400";
+      owner = "root";
+      group = "wheel";
     };
 
     # 与 nixos 版 tailscale-client 一致：tailscale 启用时提供 tss 快捷 alias。
@@ -34,7 +45,9 @@ in
         echo "tailscale: already connected, skipping pre-auth"
       else
         echo "tailscale: attempting pre-auth with auth key..."
-        ${pkgs.tailscale}/bin/tailscale up --authkey="$(cat ${config.sops.secrets.TAILSCALE_AUTH_KEY.path})"
+        ${pkgs.tailscale}/bin/tailscale up --authkey="$(cat ${
+          config.sops.secrets.${joinKey.secretName}.path
+        })"
       fi
 
       # 设备名钉死到 fleet metadata 的 hostName（幂等）；未连接时跳过。

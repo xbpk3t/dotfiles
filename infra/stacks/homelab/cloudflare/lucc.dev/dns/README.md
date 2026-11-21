@@ -16,7 +16,7 @@ records，不是从零创建。Email Routing 用到的 MX / SPF / DKIM records �
 
 ## DERP records
 
-`derp-dev` / `nva` / `derp-sm-vps-tc` 不手写：
+`nva` 不手写：
 
 - 事实来源：`hosts/**/meta.nix` 的 `derper.*` 与 `publicIpv4`
 - 生成：`task tf:dns:generate`

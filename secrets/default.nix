@@ -144,8 +144,10 @@ in
       # Acme
       ACME_CF_ENV = mkUserSecret "acme/cloudflare_env";
 
-      # Tailscale
-      TAILSCALE_AUTH_KEY = mkRootSecret "tailscale/auth_key";
+      # Tailscale auth key 按角色声明，避免每台机器都解密两条：
+      # - NixOS：modules/nixos/infra/tailscale-client.nix
+      # - Darwin：modules/darwin/networking/tailscale-client.nix
+      # - sm：modules/sm/sops.nix
       TAILSCALE_API_KEY = mkUserSecret "tailscale/access_key";
 
       # Nezha monitoring

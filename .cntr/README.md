@@ -69,10 +69,9 @@ CNTR_DIR=./.cntr CNTR_DRY_RUN=true task cntr:reconcile
   - Host 侧：`hosts/nixos-vps/default.nix` 的 `services.tailscale.serve` 把
     `tcp:80` 转到 `http://127.0.0.1:20228`。
   - **Tag 要求**：Tailscale Services 的 service host 必须是 tagged device；
-    `nixos-vps-dev` 由 Terraform 打 `tag:svc-9router`。ACL 的
-    `autoApprovers.services` 自动批准该 host；同时把 tag 加进
-    `autoApprovers.exitNode/routes`，避免 tagging 改变 owner 后 exit node
-    自动批准回归。
+    `nixos-vps-dev` 由 Terraform 打 `tag:svc`。ACL 的
+    `autoApprovers.services` 自动批准该 host；exit node 由单独的
+    `tag:exit` 自动批准（不再复用 service tag，routes 也不再配置）。
   - 当前是 HTTP（NixOS 的 Service 端点暂不支持前端 TLS termination，
     nixpkgs#530174）；tailnet 内由 WireGuard 加密。
   - 备选：`ssh -L 20228:localhost:20228 nixos-vps-dev` → `http://localhost:20228`。

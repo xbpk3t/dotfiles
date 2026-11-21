@@ -5,15 +5,13 @@
   system = "x86_64-linux";
   stateVersion = "24.11";
 
-  # 公网 IPv4：TF DNS / DERP A 记录从这里生成。
-  publicIpv4 = "43.156.103.43";
-
-  # DERP 域名 + Cloudflare records key/comment：跨层生成用。
-  derper = {
-    domain = "derp-sm-vps-tc.lucc.dev";
-    dnsKey = "derp-sm-vps-tc";
-    dnsComment = "Tailscale DERP (SGP)";
+  # sm-vps 都是 VPS 角色（fleet 角色事实；sm 的 join 由 ansible bootstrap 完成）。
+  tailscale = {
+    role = "vps";
   };
+
+  # 公网 IPv4：tc 目前不跑 derper，没有 DERP/DNS 消费者；保留供未来服务记录使用。
+  publicIpv4 = "43.156.103.43";
 
   deploy = {
     remoteBuild = true;

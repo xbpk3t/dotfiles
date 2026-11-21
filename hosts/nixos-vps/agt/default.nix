@@ -81,9 +81,10 @@ in
       DNSOverTLS = lib.mkForce "no";
     };
 
-    # 手机 herdr-app 走 Tailscale SSH 直连（无需在手机放私钥）。
-    # ACL 已有 autogroup:self 的 ssh 规则；这里只是把 node 的 --ssh 打开。
-    tailscale.extraUpFlags = [ "--ssh" ];
+    # Tailscale SSH 已关闭（LUC-556 D 方案）：显式 --ssh=false，因为仅移除
+    # flag 不会改 daemon 的持久偏好。所有 SSH 走 OpenSSH over tailnet；
+    # deploy-rs 的 root 连接恢复正常，手机改用 SSH key（tag:ws + 22 grant）。
+    tailscale.extraSetFlags = [ "--ssh=false" ];
   };
 
   # 本地构建：4G agent 上限制并发，避免 OOM（nix-tools 默认 max-jobs=5）。

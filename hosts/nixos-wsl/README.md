@@ -82,7 +82,8 @@ chown -R 1001:100 /home/luck
 chmod 400 /home/luck/.config/sops/age/keys.txt
 ```
 
-`secrets/default.nix` 用这个 key 解密 `ME_PASS_HASH`、`TAILSCALE_AUTH_KEY` 等。
+`secrets/default.nix` 用这个 key 解密 `ME_PASS_HASH` 等；`TAILSCALE_AUTH_KEY_WS`
+由 `modules/nixos/infra/tailscale-client.nix` 按 `tailscale.role` 声明（同一份 sops key 解密）。
 没有 key 时第一次 boot 会在 users/sops activation 阶段失败。
 
 ## 放入 dotfiles 并首次 boot
@@ -128,7 +129,7 @@ modules.networking.tailscale = {
 };
 ```
 
-使用 sops 里的 `TAILSCALE_AUTH_KEY` 自动 join。join 后：
+使用 sops 里的 `TAILSCALE_AUTH_KEY_WS` 自动 join（key 自带 `tag:ws`）。join 后：
 
 ```sh
 tailscale ip -4          # 记录 WSL 节点的 tailnet IP
@@ -140,7 +141,10 @@ tailscale status
 ```nix
 {
   # ...
-  tailscale.ip = "100.x.y.z";
+  tailscale = {
+    ip = "100.x.y.z";
+    role = "ws";
+  };
 }
 ```
 
@@ -153,8 +157,8 @@ ssh luck@<wsl-tailnet-ip>
 
 注意：
 
-- 如果 `TAILSCALE_AUTH_KEY` 是单次 key，第二个 WSL 节点会 join 失败；需要
-  在 Tailscale 控制台生成新 key 并更新 sops。
+- `TAILSCALE_AUTH_KEY_WS` 是 90 天 reusable key；如果换成单次 key，第二个 WSL
+  节点会 join 失败，需要在 Tailscale 控制台生成新 key 并更新 sops。
 - WSL 节点和 Windows 宿主上的 Tailscale 节点是两台设备；不要给 WSL 节点开
   exit node / derper。
 - `sshd` 的 authorized keys 来自 `globals.auth.adminKeys`；确认你的机器

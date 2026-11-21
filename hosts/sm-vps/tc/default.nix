@@ -11,7 +11,7 @@
 
     infra = {
       singbox-server.enable = true;
-      derper.enable = true;
+      # DERP 只保留 agt；tc 回来时不再跑 derper。
       status-page.enable = true;
     };
   };

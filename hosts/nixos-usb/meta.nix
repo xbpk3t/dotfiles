@@ -5,7 +5,10 @@
   system = "x86_64-linux";
   stateVersion = "24.11";
 
-  tailscale.ip = "100.87.217.1";
+  tailscale = {
+    ip = "100.87.217.1";
+    role = "ws";
+  };
   ssh.user = "luck";
 
   deploy = {

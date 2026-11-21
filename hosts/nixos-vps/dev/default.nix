@@ -1,6 +1,5 @@
 {
   config,
-  mail,
   pkgs,
   userMeta,
   ...
@@ -18,12 +17,8 @@
     };
 
     networking.tailscale = {
+      # dev 是唯一 exit node；DERP 只保留 agt（见 terranix.nix 的 derpMap）。
       exitNode = true;
-      derper = {
-        enable = true;
-        # 域名来自 hosts/nixos-vps/dev/meta.nix（derper.domain）。
-        acmeEmail = mail;
-      };
     };
 
     infra = {
