@@ -84,23 +84,8 @@ let
       ];
       ip = [ "80" ];
     }
-    # 手机 → Services VIPs（手机不打 tag:ws，保持 user-owned）。
-    {
-      src = [ "nod-am" ];
-      dst = [
-        "svc:9router"
-        "svc:nezha"
-      ];
-      ip = [ "80" ];
-    }
-    # 手机 Tailscale SSH → agt：网络层先放行 22。
-    # 手机是唯一未打 tag 的用户设备；xbpk3t@github 只匹配 user-owned devices。
-    {
-      src = [ owner ];
-      dst = [ "tag:ssh" ];
-      ip = [ "22" ];
-    }
-    # 手机 exit node：只允许走 tag:exit（dev）。
+    # 手机 exit node：只给 nod-am（IP 别名），Mac 不配 exit；只允许走 tag:exit（dev）。
+    # 手机已打 tag:ws：服务/SSH 网络权限由 tag:ws 规则覆盖，这里只保留手机专属的 exit。
     {
       src = [ "nod-am" ];
       dst = [ "autogroup:internet" ];
@@ -184,17 +169,10 @@ let
     ssh = [
       # agt 开启 --ssh 后，所有到 agt tailnet 22 的连接都由 Tailscale SSH
       # 裁决；grants 只负责网络层放行。tagged 设备不属于 autogroup:self；
-      # check 不支持 tag src，所以可信 workstation 用 accept。
+      # check 不支持 tag src，所以可信 workstation/手机（均 tag:ws）用 accept。
       {
         action = "accept";
         src = [ "tag:ws" ];
-        dst = [ "tag:ssh" ];
-        users = [ "luck" ];
-      }
-      # 非 tagged 用户设备（手机）保留 check（周期重新认证）。
-      {
-        action = "check";
-        src = [ owner ];
         dst = [ "tag:ssh" ];
         users = [ "luck" ];
       }
@@ -236,12 +214,6 @@ let
     ];
 
     sshTests = [
-      {
-        src = owner;
-        dst = [ "tag:ssh" ];
-        check = [ "luck" ];
-        deny = [ "root" ];
-      }
       {
         src = "tag:ws";
         dst = [ "tag:ssh" ];

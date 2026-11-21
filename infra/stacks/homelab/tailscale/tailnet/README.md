@@ -64,7 +64,7 @@ import；只 `git revert` 会让旧地址计划为 create。
 ## 安全模型（2026-11）
 
 - `tag:vps`：公网/低信任设备（dev、agt、hermes；tc/hk 回来时）
-- `tag:ws`：个人设备（macos-ws、nixos-wsl、nixos-usb）
+- `tag:ws`：个人设备（macos-ws、nixos-wsl、nixos-usb，以及手动打 tag 的手机 Redmi Note 13 Pro）
 - `tag:svc`：Tailscale Services host（dev）
 - `tag:exit`：exit node（dev）
 - `tag:ssh`：Tailscale SSH 目标（agt）。SSH 规则的 dst 只接受 tag/autogroup，
@@ -73,14 +73,14 @@ import；只 `git revert` 会让旧地址计划为 create。
   agt = `tag:vps` + `tag:ssh`。
 - ACL 默认拒绝；一次性/非 fleet 设备在 `hosts` 里定义 alias。
   直接写 hostname 会被控制面拒绝（`invalid address`）。
-- Tailscale SSH：
-  - `tag:ws`（可信 workstation，含 Mac）→ `tag:ssh`（agt）用 `accept`；
-  - 手机（user-owned）→ `tag:ssh` 用 `check`（`users = ["luck"]`）。
-  - agt 开启 `--ssh` 后，所有到 agt tailnet 22 的连接都由 Tailscale SSH
-    裁决；`grants` 只负责网络层放行。tagged 设备不匹配 `autogroup:self`，
-    且 `check` 不支持 tag src，所以 tagged ws 只能用 `accept`。
-  - 不开 `tag:vps` → `tag:ssh`：VPS/hermes 不用 Tailscale SSH 连 agt。
-  - herdr-app 如果无法处理 check，再考虑改成 `accept`（风险更高）。
+- Tailscale SSH：`tag:ws`（Mac + 手动打 tag 的手机）→ `tag:ssh`（agt）
+  用 `accept`。agt 开启 `--ssh` 后，所有到 agt tailnet 22 的连接都由
+  Tailscale SSH 裁决；`grants` 只负责网络层放行。tagged 设备不匹配
+  `autogroup:self`，且 `check` 不支持 tag src，所以用 `accept`。
+  不开 `tag:vps` → `tag:ssh`：VPS/hermes 不用 Tailscale SSH 连 agt。
+- 手机（`nod-am`）已打 `tag:ws`，与 Mac 共享 `tag:ws` 的 grants/services/SSH；
+  唯一区别是手机保留 exit node（`nod-am → autogroup:internet via tag:exit`），
+  Mac 不走 exit。手机不在 fleet `deviceTags` 里，tag 是手动/API 打的。
 - 维护通道：`agt → macos-ws:22` 允许从 agt 部署/维护 Mac，不是最终信任
   模型；有固定的可信开发机后删除。
 - `deviceTags` 只列当前实际在 tailnet 的设备；离线/未加入的设备不要加，
@@ -124,23 +124,12 @@ task nix:sk:edit
 
 然后部署 Nix 侧。旧的 `tailscale/auth_key` 在所有设备迁移完后 revoke/删除。
 
-## Tailnet Lock（手动）
+## Tailnet Lock
 
-Tailnet Lock 没有 Terraform resource，需在 macos-ws 上执行：
-
-```bash
-tailscale lock status           # 记录 macos-ws 的 tlpub:
-tailscale lock init --gen-disablements 2 --gen-disablement-for-support \
-  --confirm tlpub:<macos-ws-tlpub>
-tailscale lock status           # 确认 ENABLED
-```
-
-- disablement secrets 只显示一次，存密码管理器/离线；不要放服务器。
-- 新设备/重装/自动 auth key 加入的节点会 locked out；在 macos-ws 上：
-  `tailscale lock sign nodekey:<new-node-key>`
-- 不要用 `tailscale lock sign <auth-key>` 包装共享 auth key（官方不推荐）。
-- Tailnet Lock 与 device approval 二选一。
-- 只有一个签名节点（macos-ws）；丢失 Mac 时用 disablement secret 关闭 Lock。
+2026-11-21 已关闭并移除（LUC-556）。启用后新设备/重装/重新认证都需要在
+macos-ws 上 `tailscale lock sign`，对当前单人 fleet 的操作成本高于收益。
+当前控制面依赖 ACL + tagged auth key；如果将来重新启用，需要重新
+`tailscale lock init` 并生成新的 disablement secrets。
 
 ## DERP
 
