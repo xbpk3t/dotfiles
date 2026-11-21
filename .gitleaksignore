@@ -1,0 +1,3 @@
+# Gitleaks ignore list.
+# Format: <commit>:<path>:<rule-id>:<line>
+# Add reviewed false positives here with a short reason; full history is scanned in CI.

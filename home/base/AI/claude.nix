@@ -144,6 +144,10 @@ in
             };
 
             env = {
+              # Agent shell: use the HM-managed bash, not the interactive zsh
+              # with its aliases/plugins. No bash integrations are enabled.
+              CLAUDE_CODE_SHELL = "${pkgs.bash}/bin/bash";
+
               # 降低运行噪音，避免额外 telemetry / survey 干扰
               # 它等价于同时设置 DISABLE_AUTOUPDATER、DISABLE_FEEDBACK_COMMAND、DISABLE_ERROR_REPORTING、DISABLE_TELEMETRY。而且 survey 在 DISABLE_TELEMETRY 或 CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC 设置后也会被禁用。
               # 但这里仍显式列出关键开关，方便阅读和后续单独调整

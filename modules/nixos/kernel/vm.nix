@@ -21,6 +21,21 @@ in
         this without affecting the rest of the virtualisation baseline.
       '';
     };
+
+    forwardFilter = {
+      enable = lib.mkEnableOption "forward filtering for container/VM traffic";
+
+      extraAllowedDestinations = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = [ ];
+        example = [ "100.66.22.92/32" ];
+        description = ''
+          Destinations explicitly allowed through the forwarding filter.
+          Use this only for service IPs that containers/VMs must reach;
+          RFC1918, tailnet and link-local destinations are denied by default.
+        '';
+      };
+    };
   };
 
   ###################################################################################
@@ -44,6 +59,39 @@ in
 
   config = lib.mkIf cfg.enable {
     boot.kernelModules = [ "vfio-pci" ];
+
+    # 容器/VM forwarding 硬化（opt-in per host）。
+    # 默认拒绝转发到 RFC1918 / tailnet / link-local；只放行容器出公网、
+    # 容器互通和 host 显式登记的 service IP。需要 nftables backend，
+    # 因为 networking.firewall.filterForward 只在该 backend 下生效。
+    networking = lib.mkIf cfg.forwardFilter.enable {
+      nftables.enable = true;
+      firewall = {
+        filterForward = true;
+        extraForwardRules = ''
+          # 容器/VM 互通（docker/podman/libvirt bridge、Docker 自定义 br-*、NixOS container ve-*）
+          iifname { "docker0", "podman0", "virbr0" } oifname { "docker0", "podman0", "virbr0" } accept
+          iifname "br-*" oifname "br-*" accept
+          iifname "ve-*" oifname "ve-*" accept
+
+          # 容器/VM 出公网：只放行目的地不在 RFC1918/tailnet/link-local 的流量
+          iifname { "docker0", "podman0", "virbr0" } ip daddr != { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 100.64.0.0/10, 169.254.0.0/16 } accept
+          iifname { "docker0", "podman0", "virbr0" } ip6 daddr != { fc00::/7, fe80::/10, fd7a:115c:a1e0::/48 } accept
+          iifname "br-*" ip daddr != { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 100.64.0.0/10, 169.254.0.0/16 } accept
+          iifname "br-*" ip6 daddr != { fc00::/7, fe80::/10, fd7a:115c:a1e0::/48 } accept
+          iifname "ve-*" ip daddr != { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 100.64.0.0/10, 169.254.0.0/16 } accept
+          iifname "ve-*" ip6 daddr != { fc00::/7, fe80::/10, fd7a:115c:a1e0::/48 } accept
+
+          # host 级显式 service IP 例外（覆盖所有容器/VM bridge）
+          ${lib.concatMapStringsSep "\n" (
+            cidr:
+            "iifname { \"docker0\", \"podman0\", \"virbr0\" } ip daddr ${cidr} accept\n"
+            + "iifname \"br-*\" ip daddr ${cidr} accept\n"
+            + "iifname \"ve-*\" ip daddr ${cidr} accept"
+          ) cfg.forwardFilter.extraAllowedDestinations}
+        '';
+      };
+    };
 
     # https://mynixos.com/nixpkgs/options/virtualisation
     # https://mynixos.com/nixpkgs/options/virtualisation.docker

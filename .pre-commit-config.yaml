@@ -152,7 +152,8 @@ repos:
     hooks:
       - id: gitleaks
         name: Scan Secrets
-        entry: gitleaks detect --source . -v
+        # Local commit only scans staged changes; full history runs in CI.
+        entry: gitleaks git --staged --redact --no-banner --log-level warn .
         language: system
         pass_filenames: false
         stages: [pre-commit]

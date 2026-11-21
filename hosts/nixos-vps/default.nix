@@ -68,7 +68,10 @@ in
       ntp.enable = true;
       openssh.enable = true;
       security-server.enable = true;
-      vm.enable = true;
+      vm = {
+        enable = true;
+        forwardFilter.enable = true;
+      };
     };
 
     # 所有 VPS 角色都加入 tailnet；DERP / exitNode 由各自 host 显式开启。
