@@ -68,8 +68,11 @@ in
         SUB_IKUUU = mkRootSecret "proxy/sub/ikuuu";
         # Tailscale（sm 主机都是 VPS 角色）
         TAILSCALE_AUTH_KEY_VPS = mkRootSecret "tailscale/auth_key_vps";
+      }
+      // lib.optionalAttrs config.modules.infra.derper.enable {
         # ACME（derper 证书 DNS-01）：CF token（复用 secrets/default.nix 的 acme/cloudflare_env）。
         # email 用 userMeta.mail（flake globals.identity），不进 sops。
+        # 只有启用 derper 的 sm 主机才解密这个 root secret。
         ACME_CF_ENV = mkRootSecret "acme/cloudflare_env";
       };
     };

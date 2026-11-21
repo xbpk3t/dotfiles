@@ -82,7 +82,8 @@ chown -R 1001:100 /home/luck
 chmod 400 /home/luck/.config/sops/age/keys.txt
 ```
 
-`secrets/default.nix` 用这个 key 解密 `ME_PASS_HASH`、`TAILSCALE_AUTH_KEY_WS` 等。
+`secrets/default.nix` 用这个 key 解密 `ME_PASS_HASH` 等；`TAILSCALE_AUTH_KEY_WS`
+由 `modules/nixos/infra/tailscale-client.nix` 按 `tailscale.role` 声明（同一份 sops key 解密）。
 没有 key 时第一次 boot 会在 users/sops activation 阶段失败。
 
 ## 放入 dotfiles 并首次 boot
