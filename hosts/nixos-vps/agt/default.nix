@@ -55,6 +55,21 @@ in
     infra.nezha.agent.uuid = "5b8a9ab4-6ed8-4e5d-9c45-03425b6b4644";
   };
 
+  # hm PA 的本地 build 默认经 agt mihomo 代理拉 GitHub
+  # （hosts/_base/hm/ansible/group_vars/hm.yml 的 hm_build_network=proxy）。
+  # mihomo 已 allow-lan + bind "*"，但防火墙只信任 Meta/lo；不放行
+  # tailscale0 会让 PA → agt:7890 的 SYN 被丢弃。
+  #
+  # 只放行 PA（hermes-wb, 100.72.194.36）。不要用
+  # interfaces.tailscale0.allowedTCPPorts：它会把 7890 开给整个 tailnet，
+  # 而这个代理没有认证。以后 Mac/手机也要用的话，在这里追加源地址。
+  networking.firewall.extraCommands = lib.mkIf (config.networking.firewall.backend == "iptables") ''
+    iptables -w -A nixos-fw -i tailscale0 -s 100.72.194.36 -p tcp --dport 7890 -j nixos-fw-accept
+  '';
+  networking.firewall.extraInputRules = lib.mkIf (config.networking.firewall.backend == "nftables") ''
+    iifname "tailscale0" ip saddr 100.72.194.36 tcp dport 7890 accept
+  '';
+
   services = {
     # 上海 VPS 上 1.1.1.1/8.8.8.8 的 DoT 不可达；改用国内 DNS + 明文 53，
     # 让 mihomo TUN 的 dns-hijack(any:53) 接管解析。

@@ -97,6 +97,25 @@ let
     };
 
     ssh = [
+      # 内层 workstation（tag:ws，含 Mac）→ 外层 VPS（tag:ssh）：Tailscale
+      # SSH 由 ssh 段裁决，不走 grants。tagged 设备不属于 autogroup:self，
+      # 必须显式列出 tag:ws / tag:vps；但 check 不支持 tag src，只能用 accept。
+      {
+        action = "accept";
+        src = [
+          "tag:ws"
+          "tag:vps"
+        ];
+        dst = [ "tag:ssh" ];
+        users = [ "luck" ];
+      }
+      # 非 tagged 用户设备的入口保留 check（周期重新认证）。
+      {
+        action = "check";
+        src = [ "xbpk3t@github" ];
+        dst = [ "tag:ssh" ];
+        users = [ "luck" ];
+      }
       {
         action = "check";
         src = [ "autogroup:member" ];

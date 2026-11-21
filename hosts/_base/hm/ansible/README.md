@@ -3,7 +3,10 @@
 Target-only Ansible for vendor-managed `kind = "home"` PAs.
 
 The PA builds its own HM generation with `nix-portable`; Ansible does not build
-on dev/agt and does not transfer a 778MB closure.
+on dev/agt and does not transfer a 778MB closure. The playbook requires
+`/root/.local/bin/nix-portable` and creates the four `nix*` command wrappers
+itself, so a PA bootstrapped with `bootstrap.sh` does not need the manual Path 0
+wrapper step. It does not support a system-Nix-only PA.
 
 Network (default, `hm_build_network=proxy`): GitHub goes through the agt
 mihomo proxy (`http://100.66.22.92:7890`); all Nix nars come from the USTC

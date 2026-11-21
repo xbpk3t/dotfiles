@@ -37,6 +37,47 @@
           - hm_nix_portable.stat.isdir
         fail_msg: "/root/.nix-portable/nix missing; run restore.sh/bootstrap first"
 
+    # The build below uses /root/.local/bin/nix. bootstrap.sh only writes
+    # nix-portable + hc/herdr-core wrappers; restore.sh (and the manual Path 0
+    # flow) write the four nix command wrappers. Make this playbook self-contained
+    # for a PA bootstrapped with bootstrap.sh.
+    - name: Check nix-portable binary
+      ansible.builtin.stat:
+        path: /root/.local/bin/nix-portable
+      register: hm_nix_portable_bin
+
+    - name: Require nix-portable binary
+      ansible.builtin.assert:
+        that:
+          - hm_nix_portable_bin.stat.exists
+          - hm_nix_portable_bin.stat.executable
+        fail_msg: "/root/.local/bin/nix-portable missing/not executable; run bootstrap.sh or restore.sh first"
+
+    - name: Ensure /root/.local/bin
+      ansible.builtin.file:
+        path: /root/.local/bin
+        state: directory
+        mode: "0755"
+
+    - name: Ensure nix-portable command wrappers
+      ansible.builtin.copy:
+        dest: "/root/.local/bin/{{ item }}"
+        mode: "0755"
+        content: |
+          #!/usr/bin/env bash
+          exec /root/.local/bin/nix-portable {{ item }} "$@"
+      loop:
+        - nix
+        - nix-env
+        - nix-store
+        - nix-build
+
+    - name: Validate build network mode
+      ansible.builtin.assert:
+        that:
+          - hm_build_network in ['proxy', 'exitnode']
+        fail_msg: "hm_build_network must be proxy or exitnode"
+
     - name: Create source tarball on the control node
       ansible.builtin.command:
         cmd: >-
@@ -96,7 +137,7 @@
         name: user@0.service
         state: started
 
-    - name: Build HM via the dev exit node (default)
+    - name: Build HM via the dev exit node (fallback)
       when: hm_build_network == "exitnode"
       block:
         - name: Set temporary exit node
@@ -177,7 +218,7 @@
           changed_when: false
           failed_when: false
 
-    - name: Build HM via the agt mihomo HTTP proxy (fallback)
+    - name: Build HM via the agt mihomo HTTP proxy (default)
       when: hm_build_network == "proxy"
       block:
         - name: Check GitHub via the agt proxy

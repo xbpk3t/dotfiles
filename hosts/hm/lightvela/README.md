@@ -94,16 +94,20 @@ The PA profile is curated from `home/core`, not the whole directory:
 - `herdr-core` stays sh/closure-managed; HM does not touch
   `~/.local/bin/{hc,herdr-core}` or `/usr/local/bin` wrappers
 
-### Sops (full copy, PA-only key)
+### Sops (PA-only subset)
 
-- `secrets/hm-lightvela.yaml` is a **full copy** of `secrets/secrets.yaml`,
-  encrypted to the PA-only age key. It is not encrypted to the fleet master key.
+- `secrets/hm-lightvela.yaml` contains only the secrets the PA actually uses:
+  `API/github`, `resend/pwd`, `atuin/key`, `nezha/agent_sk`. It is encrypted to
+  the PA-only age key, not the fleet master key.
 - PA private key: `/root/.config/sops/age/keys.txt`.
 - `.sops.yaml` has a dedicated rule for `secrets/hm-lightvela.yaml`.
-- `secrets/hm-lightvela.nix` imports `secrets/default.nix` and overrides
-  `sops.defaultSopsFile` + `sops.age.keyFile`; no per-secret selection.
-- The fleet master age key is **not** on the PA. The PA can decrypt its full
-  copy, but a PA compromise can be contained by revoking/rotating its key.
+- `secrets/hm-lightvela.nix` declares only those four `sops.secrets` and
+  overrides `sops.defaultSopsFile` + `sops.age.keyFile`. It deliberately does
+  **not** import `secrets/default.nix`; that would make sops-nix decrypt every
+  fleet secret on the vendor-managed PA.
+- The fleet master age key is **not** on the PA. If the PA is compromised, only
+  those four secrets are exposed; rotate them and the PA age key. The other
+  fleet secrets are not present in this file.
 
 ### HM activation
 
