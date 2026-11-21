@@ -64,6 +64,9 @@ in
 
         daemon = {
           settings = {
+            # 明确写死 journald，和当前实际行为一致；容器日志受 journald
+            # SystemMaxUse=1G 约束，不依赖 Docker 自己的 json-file 轮转。
+            log-driver = "journald";
             registry-mirrors = [
               "https://dockerproxy.com"
               "https://docker.m.daocloud.io"

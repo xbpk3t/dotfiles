@@ -1,0 +1,21 @@
+---
+
+description: "Docker 月度报表（dev）：卷/容器/镜像现状，只读不删"
+schedule: "40 4 1 * *" # 每月 1 号 04:40，避开 04:00 GC 和 04:30 清理
+max_active_runs: 1
+
+preconditions:
+  - condition: '[ "$(hostname -s)" = "nixos-vps-dev" ]'
+
+steps:
+  - id: system_df
+    run: docker system df -v
+
+  - id: dangling_volumes
+    run: docker volume ls -f dangling=true
+
+  - id: containers
+    run: docker ps -a --format "table {{.Names}}\t{{.Status}}\t{{.Image}}"
+
+  - id: images
+    run: docker image ls --format "table {{.Repository}}:{{.Tag}}\t{{.Size}}\t{{.CreatedSince}}"

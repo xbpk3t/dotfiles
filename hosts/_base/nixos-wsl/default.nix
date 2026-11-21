@@ -79,7 +79,14 @@ in
         journald.enable = true;
         openssh.enable = true;
       };
-      infra.nix-tools.enable = true;
+      infra.nix-tools = {
+        enable = true;
+        gc = {
+          keepGenerations = 3;
+          maxAge = "7d";
+          dates = "daily";
+        };
+      };
       # 所有 WSL host 默认作为 tailnet client；不需要的 host 可显式关掉。
       networking.tailscale.enable = lib.mkDefault true;
     };

@@ -1,6 +1,7 @@
 {
   inputs,
   mylib,
+  pkgs,
   userMeta,
   ...
 }:
@@ -48,18 +49,22 @@ in
       # TODO: [2026-09-03] 等 Determinate-Nix 原生支持GC + prune system generations 之后，可以把这个launchd踢掉
       #
       # Determinate Nixd 的 automatic GC 负责 store 级回收，不会自动裁剪旧 system generations。
-      # 这里在 Darwin host 层补一条最小化 retention policy；由于 system daemon 本身以 root 运行，
-      # 直接执行 nix-collect-garbage 即等价于手动执行 `sudo nix-collect-garbage --delete-older-than 7d`。
+      # 这里在 Darwin host 层补一条最小化 retention policy：保留最近 3 代 + 7 天。
+      # 由于 system daemon 本身以 root 运行，脚本即等价于手动
+      # `sudo nix-env ... +3 && sudo nix-collect-garbage --delete-older-than 7d`。
       nix-prune-generations = {
         serviceConfig = {
           Label = "local.nix.prune.generations";
-          # 注意：nix-collect-garbage 不在 /run/current-system/sw/bin/（system profile），
-          # 而在 /nix/var/nix/profiles/default/bin/（nix-daemon default profile）。
-          # 用 nix-profile 路径而非 store 路径，避免 GC 后二进制消失。
+          # 注意：nix-env / nix-collect-garbage 不在 /run/current-system/sw/bin/
+          # （system profile），而在 /nix/var/nix/profiles/default/bin/
+          # （nix-daemon default profile）。用 nix-profile 路径而非 store 路径，
+          # 避免 GC 后二进制消失。
           ProgramArguments = [
-            "/nix/var/nix/profiles/default/bin/nix-collect-garbage"
-            "--delete-older-than"
-            "7d"
+            "${pkgs.writeShellScript "nix-prune-generations" ''
+              set -eu
+              /nix/var/nix/profiles/default/bin/nix-env -p /nix/var/nix/profiles/system --delete-generations +3 || true
+              /nix/var/nix/profiles/default/bin/nix-collect-garbage --delete-older-than 7d
+            ''}"
           ];
           StartCalendarInterval = [
             {
