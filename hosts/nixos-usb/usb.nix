@@ -1,5 +1,6 @@
 {
   lib,
+  pkgs,
   userMeta,
   ...
 }:
@@ -66,12 +67,17 @@
     ];
   };
 
-  # ── 3. 定时 GC（U 盘空间宝贵，保留 7 天回滚）──
+  # ── 3. 定时 GC（U 盘空间宝贵：保留最近 3 代 + 7 天）──
   nix.gc = {
     automatic = true;
-    # mkForce：覆盖 nix-tools.nix 基线的 8d，U 盘用更激进的 7d
-    options = lib.mkForce "--delete-older-than 7d";
+    dates = "daily";
+    options = "--delete-older-than 7d";
   };
+
+  # nix-collect-garbage 只按时间裁剪；数量保留由 nix-env 完成。
+  systemd.services.nix-gc.preStart = ''
+    ${pkgs.nix}/bin/nix-env -p /nix/var/nix/profiles/system --delete-generations +3
+  '';
 
   services = {
     # ── 4. GDM 自动登录（即插即用）──

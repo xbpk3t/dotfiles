@@ -50,6 +50,8 @@ in
     infra.healthchecks = {
       enable = true;
       urlFile = config.sops.secrets.HEALTHCHECKS_VPS_AGT.path;
+      disk.enable = true;
+      rebootPending.enable = true;
     };
     # 稳定 UUID：`uuidgen` 生成一次后固定，避免 hostname/FQDN 变化导致重复注册。
     infra.nezha.agent.uuid = "5b8a9ab4-6ed8-4e5d-9c45-03425b6b4644";

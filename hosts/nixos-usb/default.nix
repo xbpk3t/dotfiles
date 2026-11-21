@@ -99,7 +99,10 @@ in
       ntp.enable = true;
       openssh.enable = true;
       security-server.enable = true;
-      vm.enable = true;
+      vm = {
+        enable = true;
+        forwardFilter.enable = true;
+      };
     };
     networking = {
       # 代理：mihomo-client 走 tailnet 回自己 VPS 节点
