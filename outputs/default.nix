@@ -371,9 +371,8 @@ assert lib.assertMsg (
     homeConfigurations = mergedHomeConfigurations;
     systemConfigs = mergedSystemConfigs;
 
-    # 跨层生成的机读 fleet 清单；目前供 Terraform DERP DNS records 使用。
-    # 只导出消费端需要的 DERP 事实，避免 ssh/tailscale 等 meta 变更造成生成物 churn。
-    # 生成：task tf:dns:generate；校验：task tf:dns:check。
+    # 机读 fleet 清单（调试/外部消费）。
+    # infra 的 DNS/Tailscale terranix 直接 import lib/fleet，不依赖这个输出。
     fleetMetadata = {
       derpNodes = lib.mapAttrs (_name: node: {
         publicIpv4 = node.publicIpv4 or null;

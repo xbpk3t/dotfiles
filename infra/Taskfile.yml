@@ -68,20 +68,6 @@ tasks:
         vars:
           DATE: "{{.DATE}}"
 
-  dns:generate:
-    desc: "从 fleet metadata 生成 DERP DNS records 文件"
-    summary: |
-      task tf:dns:generate
-    cmds:
-      - task: cf:dns:generate
-
-  dns:check:
-    desc: "检查 DERP DNS records 文件是否与 fleet metadata 同步"
-    summary: |
-      task tf:dns:check
-    cmds:
-      - task: cf:dns:check
-
   terranix:
     desc: "生成所有 terranix stack 的 Terraform JSON"
     summary: |
@@ -104,13 +90,12 @@ tasks:
         '
 
   check:
-    desc: "本地校验 infra（dns/terranix freshness + actionlint + fmt/validate）"
+    desc: "本地校验 infra（terranix freshness + actionlint + fmt/validate）"
     summary: |
       nix develop .#infra
       task tf:check
     dir: "{{.TASKFILE_DIR}}/.."
     cmds:
-      - task: cf:dns:check
       - |
         set -euo pipefail
         nix develop .#infra --command bash -c '

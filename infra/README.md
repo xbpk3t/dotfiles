@@ -15,15 +15,16 @@ infra/
   stacks/
     homelab/
       cloudflare/
-        account/{d1,r2}/
+        account/{d1,kv,r2}/
         lucc.dev/{dns,email-routing}/
       tailscale/tailnet/
   .taskfile/              # OpenTofu/Cloudflare inventory 任务
-  cloud-init/             # 手工 bootstrap 产物
   cloudflare/             # Cloudflare 纳管策略与 inventory 说明
 ```
 
 > 注：inventory 为本地盘点产物，不入仓库（见 `infra/AGENTS.md`）。
+> 历史 `infra/cloud-init/aliyun-vps.yaml` 已删除：模板没有被任何链路引用，
+> 当前 VPS 走 NixOS + Ansible，不再维护 Ubuntu/Debian cloud-init 模板。
 
 ## 当前 stack
 
@@ -33,10 +34,12 @@ infra/
 - `stacks/homelab/cloudflare/lucc.dev/email-routing`
 - `stacks/homelab/cloudflare/lucc.dev/workers`（`music.lucc.dev` -> Worker `music`）
 
-> Pages / KV stack 已移除：Pages 没有 live project；KV 的 live namespaces 由
-> Worker 部署链路创建，未纳入 Terraform，删除空 stack 不会影响它们。
+> Pages stack 已移除：live 已无 Pages project。KV stack 只纳管 `docs-session`；
+> `__me-workers_sites_assets` 是 Workers Sites 自动创建的 assets namespace，
+> 仍有数据，刻意不纳管。
 
 - `stacks/homelab/cloudflare/account/d1`
+- `stacks/homelab/cloudflare/account/kv`
 - `stacks/homelab/cloudflare/account/r2`
 - `stacks/homelab/tailscale/tailnet`
 
@@ -114,7 +117,7 @@ task tf:check
 - **PR**：对 `terramate list --tags layer-infra` 选出的全部 stack 逐个跑
   `tofu plan`（只读）。fork PR 拿不到 secrets，会跳过；同仓分支 PR 正常跑。
 - **所有 PR / push**：`validate` job 不依赖 secrets，跑 `task tf:check`
-  （facts / terranix freshness、actionlint、`tofu fmt -check`、全 stack
+  （terranix freshness、actionlint、`tofu fmt -check`、全 stack
   `tofu validate`）。fork PR 也能拿到这层检查。
 - **main**：merge 后**默认不自动 apply**。确认仓库里的 drift 可接受后，可在
   仓库变量里设置 `INFRA_AUTO_APPLY=true` 打开自动 apply；或者手动触发
@@ -180,11 +183,10 @@ tofu plan -input=false
 - `nixos-vps-dev` 的公网 IP（api / as / rsshub 共用）
 - Tailscale tailnet 名称
 - 由 host meta 派生的共享 DNS 记录（api / as / rsshub）；DERP 记录
-  （derp / nva）走 `task tf:dns:generate` 写入 `dns/fleet.generated.json`
+  （derp / nva）由 DNS terranix 直接 import `lib/fleet` 派生
 
-`infra/facts.nix` 是唯一事实源；所有 terranix stack 直接 `import` 它，
-不再生成中间 JSON。改 `hosts/*/meta.nix` 时要重跑 `task tf:dns:generate`
-（DERP）和 `task tf:terranix`；只改 `infra/facts.nix` 时重跑
+`infra/facts.nix` 是共享事实源；所有 terranix stack 直接 `import` 它，
+不再生成中间 JSON。改 `hosts/*/meta.nix` 或 `infra/facts.nix` 后重跑
 `task tf:terranix` 即可。CI 会做 terranix freshness 检查。
 
 ## terranix stacks
@@ -195,6 +197,7 @@ tofu plan -input=false
 - `infra/stacks/homelab/cloudflare/lucc.dev/email-routing`
 - `infra/stacks/homelab/cloudflare/lucc.dev/workers`
 - `infra/stacks/homelab/cloudflare/account/d1`
+- `infra/stacks/homelab/cloudflare/account/kv`
 - `infra/stacks/homelab/cloudflare/account/r2`
 - `infra/stacks/homelab/tailscale/tailnet`
 
