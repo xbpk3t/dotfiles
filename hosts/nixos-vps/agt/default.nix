@@ -12,6 +12,10 @@ let
   linuxFonts = (import ../../../modules/fonts.nix { inherit pkgs; }).linux;
   # PA 的 tailnet IP 来自 fleet registry（hosts/hm/lightvela/meta.nix）。
   hmPaIp = mylib.fleet.nodes."hm-lightvela".tailscale.ip;
+  # TODO(volces): devIp 及下面两条 7890 放行只为 AxonHub 的 volces 渠道；
+  # 停用 volces 后，连同 tailnet ACL 里 dev → agt:7890 的 grant 一起删除。
+  # dev 上的 AxonHub 需要访问只有国内可达的 volces ark 端点，复用 agt mihomo。
+  devIp = mylib.fleet.nodes."nixos-vps-dev".tailscale.ip;
 in
 {
   imports = [ ../default.nix ];
@@ -62,14 +66,17 @@ in
   # mihomo 已 allow-lan + bind "*"，但防火墙只信任 Meta/lo；不放行
   # tailscale0 会让 PA → agt:7890 的 SYN 被丢弃。
   #
-  # 只放行 PA（hermes-wb，fleet 节点 hm-lightvela）。不要用
-  # interfaces.tailscale0.allowedTCPPorts：它会把 7890 开给整个 tailnet，
-  # 而这个代理没有认证。以后 Mac/手机也要用的话，在这里追加源地址。
+  # 只放行 PA（hermes-wb，fleet 节点 hm-lightvela）和 dev（AxonHub 的
+  # volces 渠道）。不要用 interfaces.tailscale0.allowedTCPPorts：它会把
+  # 7890 开给整个 tailnet，而这个代理没有认证。以后 Mac/手机也要用的话，
+  # 在这里追加源地址。
   networking.firewall.extraCommands = lib.mkIf (config.networking.firewall.backend == "iptables") ''
     iptables -w -A nixos-fw -i tailscale0 -s ${hmPaIp} -p tcp --dport 7890 -j nixos-fw-accept
+    iptables -w -A nixos-fw -i tailscale0 -s ${devIp} -p tcp --dport 7890 -j nixos-fw-accept
   '';
   networking.firewall.extraInputRules = lib.mkIf (config.networking.firewall.backend == "nftables") ''
     iifname "tailscale0" ip saddr ${hmPaIp} tcp dport 7890 accept
+    iifname "tailscale0" ip saddr ${devIp} tcp dport 7890 accept
   '';
 
   services = {
