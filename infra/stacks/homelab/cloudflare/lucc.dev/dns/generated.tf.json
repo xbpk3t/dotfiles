@@ -33,7 +33,7 @@
       "to": "cloudflare_dns_record.records[\"mx_route3\"]"
     },
     {
-      "id": "1c07a1b84d8273f4dfa6c3adce513f94/a80a731e11c54cc0a9707b454b0dea63",
+      "id": "1c07a1b84d8273f4dfa6c3adce513f94/01663f7a1946bf5b32ab169b39fc2940",
       "to": "cloudflare_dns_record.records[\"root\"]"
     },
     {
@@ -211,14 +211,14 @@
             "type": "A"
           },
           "root": {
-            "comment": null,
-            "content": "me-4b9.pages.dev",
-            "id": "a80a731e11c54cc0a9707b454b0dea63",
+            "comment": "Worker route lucc.dev/* -> me (apex placeholder)",
+            "content": "100::",
+            "id": "01663f7a1946bf5b32ab169b39fc2940",
             "name": "lucc.dev",
             "priority": null,
             "proxied": true,
             "ttl": 1,
-            "type": "CNAME"
+            "type": "AAAA"
           },
           "rsshub": {
             "comment": "rsshub",
