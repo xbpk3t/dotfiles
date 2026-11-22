@@ -53,7 +53,6 @@
 ```text
 infra/stacks/homelab/cloudflare/<zone>/dns/
 infra/stacks/homelab/cloudflare/<zone>/email-routing/
-infra/stacks/homelab/cloudflare/account/pages/
 infra/stacks/homelab/cloudflare/account/d1/
 infra/stacks/homelab/cloudflare/account/kv/
 infra/stacks/homelab/cloudflare/account/r2/
@@ -114,9 +113,15 @@ Terraform/OpenTofu 不是双向同步工具。
 - `infra/stacks/homelab/cloudflare/lucc.dev/dns/`
 - `infra/stacks/homelab/cloudflare/lucc.dev/email-routing/`
 - `infra/stacks/homelab/cloudflare/account/d1/`
-- `infra/stacks/homelab/cloudflare/account/kv/`
+- `infra/stacks/homelab/cloudflare/account/kv/`（只纳管 `docs-session`）
 - `infra/stacks/homelab/cloudflare/account/r2/`
-- `infra/stacks/homelab/cloudflare/account/pages/`
+
+已移除：
+
+- `account/pages/`：所有 Pages project 已迁到 Workers，live 已无 Pages project
+
+KV 例外：`__me-workers_sites_assets` 是 Workers Sites 自动创建的 assets
+namespace，仍有数据，刻意不纳管。
 
 当前有意暂缓：
 

@@ -12,6 +12,7 @@
 { lib, ... }:
 let
   facts = import ../../../../../facts.nix;
+  infraLib = import ../../../../../terranix-lib.nix;
 
   # 所有 DNS record 共用的字段形状；记录本身只写各自不同的字段。
   mkRecord =
@@ -38,22 +39,23 @@ let
         ;
     };
 
-  # DERP A 记录由 main 的 fleet metadata 生成（task tf:dns:generate）。
-  # 这里直接消费生成物，避免 facts 再维护一份 DERP 域名/IP。
-  fleet = builtins.fromJSON (builtins.readFile ./fleet.generated.json);
+  # DERP A 记录直接从 lib/fleet 派生，和 Tailscale stack 同源；
+  # 不再维护 fleet.generated.json。
+  fleet = import ../../../../../../lib/fleet { inherit lib; };
   derpRecords = lib.mapAttrs' (
     _name: node:
-    lib.nameValuePair node.dnsKey (mkRecord {
-      name = node.domain;
+    lib.nameValuePair node.derper.dnsKey (mkRecord {
+      name = node.derper.domain;
       type = "A";
       content = node.publicIpv4;
       proxied = false;
-      comment = if node.dnsComment != null then node.dnsComment else "Tailscale DERP (${_name})";
+      comment =
+        if node.derper.dnsComment != null then node.derper.dnsComment else "Tailscale DERP (${_name})";
     })
-  ) fleet.derpNodes;
+  ) fleet.derperNodes;
 
-  # 这些记录含外部服务 / Pages / Email Routing 的 provider 细节，
-  # 暂不进入共享 facts；terranix 试点就地把它们搬成 Nix 数据。
+  # 这些记录含外部服务 / apex 占位 / Email Routing 的 provider 细节，
+  # 暂不进入共享 facts；在 terranix stack 里就地维护。
   manualRecords = {
     blog = mkRecord {
       id = "db66877fcacde96aa9844c8a91ec3a16";
@@ -73,13 +75,15 @@ let
       type = "AAAA";
       content = "100::";
     };
-    # 这个 CNAME 指向已删除的 Pages 项目；apex 实际由 Worker route
-    # `lucc.dev/* -> me` 拦截。若移除该 route，需要同步改这条记录。
+    # apex 由 Worker route `lucc.dev/* -> me` 拦截；这里用一个不指向任何源的
+    # proxied AAAA 占位，避免继续引用已删除的 Pages 项目。
+    # 若移除该 route，需要同步改这条记录。
     root = mkRecord {
-      id = "a80a731e11c54cc0a9707b454b0dea63";
+      id = "01663f7a1946bf5b32ab169b39fc2940";
       name = "lucc.dev";
-      type = "CNAME";
-      content = "me-4b9.pages.dev";
+      type = "AAAA";
+      content = "100::";
+      comment = "Worker route lucc.dev/* -> me (apex placeholder)";
     };
     mx_route3 = mkRecord {
       id = "3bfffe44f3323a9fdbbb8b455622f113";
@@ -139,28 +143,12 @@ in
 assert lib.assertMsg (derpKeyCollisions == [ ])
   "dns terranix: derp dnsKey collides with manual records: ${lib.concatStringsSep ", " derpKeyCollisions}";
 {
-  terraform = {
-    required_version = ">= 1.10.0";
-
-    required_providers.cloudflare = {
+  terraform = infraLib.mkTerraform {
+    stateKey = "homelab/cloudflare/lucc.dev/dns/terraform.tfstate";
+    r2Endpoint = facts.cloudflare.r2_endpoint;
+    providers.cloudflare = {
       source = "cloudflare/cloudflare";
       version = "~> 5.0";
-    };
-
-    backend.s3 = {
-      bucket = "luck-dotfiles-opentofu-state";
-      key = "homelab/cloudflare/lucc.dev/dns/terraform.tfstate";
-      region = "auto";
-
-      endpoints.s3 = facts.cloudflare.r2_endpoint;
-
-      skip_credentials_validation = true;
-      skip_metadata_api_check = true;
-      skip_region_validation = true;
-      skip_requesting_account_id = true;
-      skip_s3_checksum = true;
-      use_path_style = true;
-      use_lockfile = true;
     };
   };
 

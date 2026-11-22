@@ -8,6 +8,7 @@
 #   - singboxServers：所有发布 singbox 能力的节点
 #   - nezha：唯一的 hub 及其派生地址
 #   - deployRsNode / deploySmHmNode：deploy-rs 节点构造器
+#   - deployRoutes：按 deploy driver（deploy-rs / ansible-hm）路由的部署目标
 #   - checks：可在 nix-unit 里逐条断言的不变量
 #
 # 单机身份/配置不要加到这里；它们属于 hosts/<name>/。
@@ -32,14 +33,44 @@ let
         "hostName"
         "name"
         "path"
+        "deployDriver"
       ];
+
+      # 部署驱动是节点身份的一部分，但由 kind/deploy 结构派生，避免每台机器重复声明。
+      #   - 显式 deploy.driver 优先（未来新 driver 的扩展点）
+      #   - kind = "home"（厂商托管 PA）→ ansible-hm
+      #   - 其他带 deploy 块的节点 → deploy-rs
+      #   - 没有 deploy 块且不是 home → 不可远程部署（如 nixos-wsl 首装）
+      deployDriver =
+        if meta ? deploy && meta.deploy ? driver then
+          meta.deploy.driver
+        else if meta.kind == "home" then
+          "ansible-hm"
+        else if meta ? deploy then
+          "deploy-rs"
+        else
+          null;
+
+      driverKnown =
+        deployDriver == null
+        || builtins.elem deployDriver [
+          "deploy-rs"
+          "ansible-hm"
+        ];
+
+      homeDriverValid = !(meta.kind == "home" && deployDriver == "deploy-rs");
     in
     assert lib.assertMsg (forbidden == [ ])
       "fleet: '${name}' meta.nix must not declare ${lib.concatStringsSep ", " forbidden} (derived from the hosts path)";
+    assert lib.assertMsg driverKnown
+      "fleet: '${name}' has unknown deploy.driver '${toString deployDriver}' (expected deploy-rs or ansible-hm)";
+    assert lib.assertMsg homeDriverValid
+      "fleet: '${name}' is kind=home but deploy.driver=deploy-rs; use ansible-hm (default) or omit deploy.driver";
     meta
     // {
       inherit name path;
       hostName = name;
+      inherit deployDriver;
     };
 
   # 顶层目录两种形态：
@@ -100,6 +131,22 @@ let
   # 按优先级挑一个“主机地址”作为部署/连接默认值。
   # tailnet 优先：sshd 统一经 tailnet 访问，公网 IP 只保留给 DNS/代理等对外服务。
   primaryHostForNode = name: node: node.tailscale.ip or node.ssh.host or name;
+
+  # 可远程部署的节点：driver 由 scanNode 派生。这里只发布部署路由消费的最小事实，
+  # Taskfile（nix:deploy / nix:deploy:sm / nix:deploy:hm）按 driver/kind 分发；
+  # 不把部署逻辑写进 Nix。
+  deployableNodes = lib.filterAttrs (_: node: node.deployDriver != null) allNodes;
+
+  defaultDeploySshUser = node: if node.kind == "darwin" || node.kind == "sm" then "luck" else "root";
+
+  deployRoutes = lib.mapAttrs (name: node: {
+    driver = node.deployDriver;
+    inherit (node) kind;
+    host = node.ssh.host or (primaryHostForNode name node);
+    sshUser = node.ssh.user or (defaultDeploySshUser node);
+    port = node.ssh.port or null;
+    inherit (node) system;
+  }) deployableNodes;
 
   tailnetNodes = lib.filterAttrs (_: node: node ? tailscale && node.tailscale ? ip) allNodes;
 
@@ -210,6 +257,25 @@ let
     "test-node-addressable" = every (
       node: (node.tailscale.ip or null) != null || (node.ssh.host or null) != null
     );
+
+    # 部署路由：driver 必须是 Taskfile 能分发的已知值；home 节点不能走 deploy-rs。
+    "test-deploy-driver-known" = every (
+      node:
+      let
+        driver = node.deployDriver;
+      in
+      driver == null
+      || builtins.elem driver [
+        "deploy-rs"
+        "ansible-hm"
+      ]
+    );
+
+    "test-home-not-deploy-rs" = every (
+      node: !(node.kind == "home" && node.deployDriver == "deploy-rs")
+    );
+
+    "test-deploy-route-host" = lib.all (route: route.host != "") (lib.attrValues deployRoutes);
 
     # SSH 登录用户只由 ssh.user 决定；deploy.sshUser 不是有效契约。
     "test-no-deploy-ssh-user" = every (node: (node.deploy.sshUser or null) == null);
@@ -367,6 +433,7 @@ in
     singboxServers
     deployRsNode
     deploySmHmNode
+    deployRoutes
     checks
     ;
 

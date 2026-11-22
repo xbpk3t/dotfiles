@@ -12,7 +12,12 @@
   system = "x86_64-linux";
   stateVersion = "26.05";
 
-  # fleet 可寻址事实；只用于 tailnet/checks，不参与 deploy。
+  # 部署驱动：kind=home 默认派生为 ansible-hm，这里显式写出便于阅读。
+  # task nix:deploy:hm 会把它列入多选，并路由到 hosts/_base/hm/ansible
+  # （PA 本地 nix-portable build + activate）；不会生成 deploy.nodes。
+  deploy.driver = "ansible-hm";
+
+  # fleet 可寻址事实；用于 tailnet/checks 和 deployRoutes 的 ansible inventory。
   tailscale = {
     ip = "100.72.194.36";
     role = "vps";

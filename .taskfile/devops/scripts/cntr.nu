@@ -113,9 +113,22 @@ def parse-json-lines [raw: string]: nothing -> list<record> {
     if ($text | is-empty) {
         []
     } else if ($text | str starts-with '[') {
-        $text | from json
+        try {
+            $text | from json
+        } catch {|err|
+            error make {msg: $'invalid docker compose JSON: ($err.msg)'}
+        }
     } else {
-        $text | lines | where {|line| ($line | str trim) != '' } | each {|line| $line | from json }
+        $text
+        | lines
+        | where {|line| ($line | str trim) != '' }
+        | each {|line|
+            try {
+                $line | from json
+            } catch {|err|
+                error make {msg: $'invalid docker compose JSON line: ($err.msg)'}
+            }
+        }
     }
 }
 

@@ -358,11 +358,13 @@ assert lib.assertMsg (
     };
 
   flake = {
-    # 跨 Nix / Terraform 共享的 infra facts，供 `nix eval --json .#infraFacts`
-    # 生成 infra/generated/facts.json，见 infra/facts.nix。
+    # 跨 Nix / Terraform 共享的 infra facts，见 infra/facts.nix。
+    # terranix stack 直接 import 该文件；这个 flake 输出只用于调试/查看。
     infraFacts = import ../infra/facts.nix;
 
     darwinConfigurations = mergedDarwinConfigurations;
+    # 部署路由事实：deploy-rs / sm / ansible-hm 三条 track 的节点列表来源。
+    deployRoutes = mylib.fleet.deployRoutes;
     deploy = {
       nodes = mergedDeployNodes;
     };
@@ -371,9 +373,8 @@ assert lib.assertMsg (
     homeConfigurations = mergedHomeConfigurations;
     systemConfigs = mergedSystemConfigs;
 
-    # 跨层生成的机读 fleet 清单；目前供 Terraform DERP DNS records 使用。
-    # 只导出消费端需要的 DERP 事实，避免 ssh/tailscale 等 meta 变更造成生成物 churn。
-    # 生成：task tf:dns:generate；校验：task tf:dns:check。
+    # 机读 fleet 清单（调试/外部消费）。
+    # infra 的 DNS/Tailscale terranix 直接 import lib/fleet，不依赖这个输出。
     fleetMetadata = {
       derpNodes = lib.mapAttrs (_name: node: {
         publicIpv4 = node.publicIpv4 or null;

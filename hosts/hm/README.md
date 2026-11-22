@@ -13,6 +13,11 @@ A node here:
 - is activated with `home-manager switch --flake .#<node>` (or the shared
   `hosts/_base/hm/bootstrap.sh` for a minimal `nix profile` flow).
 
+It is still a first-class `task nix:deploy:hm` target: the fleet registry
+derives `deploy.driver = "ansible-hm"` for every `kind = "home"` node, and
+the hm track routes it to the Ansible playbook below. `deploy.nodes` is
+not generated because the PA has no remote Nix daemon/store for deploy-rs.
+
 Node naming follows the fleet path convention:
 
 ```text
@@ -38,6 +43,19 @@ hosts/_base/hm/
   herdr-core.toml
 ```
 
+## Adding a new hm node
+
+Create `hosts/hm/<name>/{meta.nix,home.nix,README.md}` with `kind = "home"`,
+`system`, `stateVersion`, `tailscale.ip`, and `ssh.user`. No Taskfile or
+Ansible inventory edit is needed:
+
+- `lib/fleet` derives `deployDriver = "ansible-hm"` from `kind = "home"`;
+- the node appears in `task nix:deploy:hm` via `.#deployRoutes`;
+- the Ansible inventory is generated from the same route facts.
+
+If the node needs a different mechanism, set `deploy.driver` explicitly in
+`meta.nix`; the current Taskfile handles `deploy-rs` and `ansible-hm`.
+
 ## Prebuilt closures
 
 For a PA that cannot reach GitHub or receives a corrupt cache output, build the
@@ -60,6 +78,13 @@ The default is a PA-local build via Ansible:
 ```bash
 task nix:hm:apply
 ```
+
+`task nix:deploy:hm` is the hm track entry: it lists every
+`ansible-hm` node in `.#deployRoutes`, supports multi-select, and calls
+`task nix:hm:apply NODES=...`. Both commands generate the Ansible inventory
+from `deployRoutes` (`host`/`sshUser` from `meta.nix`); the static
+`hosts/_base/hm/ansible/inventory/hm.ini` is only an optional manual
+override (`INVENTORY=...`).
 
 It builds `homeConfigurations.<node>` on the PA with nix-portable, then
 activates. Default network: GitHub via the agt mihomo proxy, Nix nars from

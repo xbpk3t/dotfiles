@@ -1,0 +1,70 @@
+{
+  "import": [
+    {
+      "id": "96540bd100b82adba941163704660c31/96375ee2-188f-44d4-ab16-eaa06828a4ac",
+      "to": "cloudflare_d1_database.databases[\"docs\"]"
+    },
+    {
+      "id": "96540bd100b82adba941163704660c31/6f4f878f-4845-4801-9386-458c612f0a72",
+      "to": "cloudflare_d1_database.databases[\"vscs\"]"
+    }
+  ],
+  "provider": {
+    "cloudflare": {}
+  },
+  "resource": {
+    "cloudflare_d1_database": {
+      "databases": {
+        "account_id": "96540bd100b82adba941163704660c31",
+        "for_each": {
+          "docs": {
+            "jurisdiction": null,
+            "name": "docs",
+            "primary_location_hint": null,
+            "read_replication_mode": "disabled",
+            "uuid": "96375ee2-188f-44d4-ab16-eaa06828a4ac"
+          },
+          "vscs": {
+            "jurisdiction": null,
+            "name": "vscs",
+            "primary_location_hint": null,
+            "read_replication_mode": "disabled",
+            "uuid": "6f4f878f-4845-4801-9386-458c612f0a72"
+          }
+        },
+        "jurisdiction": "${each.value.jurisdiction}",
+        "name": "${each.value.name}",
+        "primary_location_hint": "${each.value.primary_location_hint}",
+        "read_replication": {
+          "mode": "${each.value.read_replication_mode}"
+        }
+      }
+    }
+  },
+  "terraform": {
+    "backend": {
+      "s3": {
+        "bucket": "luck-dotfiles-opentofu-state",
+        "endpoints": {
+          "s3": "https://96540bd100b82adba941163704660c31.r2.cloudflarestorage.com"
+        },
+        "key": "homelab/cloudflare/account/d1/terraform.tfstate",
+        "region": "auto",
+        "skip_credentials_validation": true,
+        "skip_metadata_api_check": true,
+        "skip_region_validation": true,
+        "skip_requesting_account_id": true,
+        "skip_s3_checksum": true,
+        "use_lockfile": true,
+        "use_path_style": true
+      }
+    },
+    "required_providers": {
+      "cloudflare": {
+        "source": "cloudflare/cloudflare",
+        "version": "~> 5.0"
+      }
+    },
+    "required_version": ">= 1.10.0"
+  }
+}

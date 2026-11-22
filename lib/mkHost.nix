@@ -15,6 +15,10 @@ let
   specialArgs = mkSpecialArgs system node;
   deployLib = inputs."deploy-rs".lib.${system};
 
+  # deploy-rs 只在 driver=deploy-rs 的节点生成；hm-only PA 走 ansible-hm（Taskfile 路由），
+  # 不产出 deploy.nodes。fallback 保持对直接构造 node 的兼容。
+  deployDriver = node.deployDriver or (if node ? deploy then "deploy-rs" else null);
+
   hostDefault = node.path + "/default.nix";
   hostHome = node.path + "/home.nix";
   hasHome = builtins.pathExists hostHome;
@@ -106,14 +110,14 @@ if node.kind == "nixos" then
   {
     nixosConfigurations.${name} = mkNixosConfig;
   }
-  // lib.optionalAttrs (node ? deploy) {
+  // lib.optionalAttrs (deployDriver == "deploy-rs") {
     deploy.nodes.${name} = mkNixosDeploy mkNixosConfig;
   }
 else if node.kind == "darwin" then
   {
     darwinConfigurations.${name} = mkDarwinConfig;
   }
-  // lib.optionalAttrs (node ? deploy) {
+  // lib.optionalAttrs (deployDriver == "deploy-rs") {
     deploy.nodes.${name} = mkDarwinDeploy mkDarwinConfig;
   }
 else if node.kind == "sm" then
@@ -121,12 +125,14 @@ else if node.kind == "sm" then
     homeConfigurations.${name} = mkSmHome;
     systemConfigs.${name} = mkSmSystem;
   }
-  // lib.optionalAttrs (node ? deploy) {
+  // lib.optionalAttrs (deployDriver == "deploy-rs") {
     deploy.nodes.${name} = mkSmDeploy mkSmSystem mkSmHome;
   }
 else if node.kind == "home" then
   # Home-only node: standalone Home Manager, no NixOS/system-manager outputs.
   # For platform-managed containers where the OS is not ours to manage.
+  assert lib.assertMsg (deployDriver != "deploy-rs")
+    "mkHost: kind='home' node '${name}' cannot use deploy-rs; use ansible-hm (default) or omit deploy.driver";
   {
     homeConfigurations.${name} = mkSmHome;
   }

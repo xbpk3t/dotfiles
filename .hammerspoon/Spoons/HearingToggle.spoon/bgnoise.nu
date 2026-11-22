@@ -21,28 +21,28 @@ const SOUNDS = [  { name: "rain",   id: "84f9ff9b144a40671c1e273848b1ffc7600e467
   { name: "brown",  id: "9f784c5cc6ab6eaacd3c6411df95889c52b1ad6d" },
 ]
 
-def normalize-sound [s: string] {
-  match ($s | str downcase) {
+def normalize-sound [s: string]: nothing -> string {
+  match ($s | str lowercase) {
     "bright" => "white"
     "balanced" => "pink"
     "dark" => "brown"
     "water" => "stream"
-    _ => ($s | str downcase)
+    _ => ($s | str lowercase)
   }
 }
 
-def asset-files [s: string] {
+def asset-files [s: string]: nothing -> list<string> {
   let name = (normalize-sound $s)
   let found = ($SOUNDS | where name == $name)
   if (($found | length) == 0) {
     error make { msg: $"unknown sound: ($s). use: rain, stream, ocean, white, pink, brown" }
   }
-  let rec = $found.0
+  let rec = ($found | first)
   let dir = [$ROOT $"($rec.id).asset" "AssetData"] | path join
   glob $"($dir)/*" | sort
 }
 
-def loop-noise [s: string] {
+def loop-noise [s: string]: nothing -> nothing {
   let sound = (normalize-sound $s)
   let volume = ($env.BGNOISE_VOLUME? | default "0.45")
   let files = (asset-files $sound)
@@ -63,14 +63,13 @@ def loop-noise [s: string] {
   }
 }
 
-def main [cmd: string, sound: string = "rain"] {
-  match $cmd {
-    "loop" => { loop-noise $sound }
-    _ => {
-      print "usage: bgnoise.nu loop <sound>"
-      print "  HearingToggle.spoon/init.lua drives start/stop/cycling; this script"
-      print "  only implements the persistent 'loop' worker."
-      exit 2
-    }
-  }
+def "main loop" [sound: string = "rain"]: nothing -> nothing {
+  loop-noise $sound
+}
+
+def main []: nothing -> nothing {
+  print -e "usage: bgnoise.nu loop <sound>"
+  print -e "  HearingToggle.spoon/init.lua drives start/stop/cycling; this script"
+  print -e "  only implements the persistent 'loop' worker."
+  exit 2
 }

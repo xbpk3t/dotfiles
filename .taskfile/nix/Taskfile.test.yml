@@ -31,6 +31,17 @@ tasks:
     cmds:
       - nix eval --impure ".#homeConfigurations.{{.HOST}}.activationPackage.drvPath"
 
+  nu-lint:
+    desc: "用 nu-lint 检查仓库内所有 Nushell 脚本"
+    summary: |
+      task nix:test:nu-lint
+
+      通过 nix-shell 引入 nu-lint；配置文件为仓库根目录的 nu-lint.toml。
+    dir: '{{.TASKFILE_DIR}}/../..'
+    cmds:
+      - |
+        nix-shell -p nu-lint --run 'nu-lint check --format compact -c nu-lint.toml $(find . -name "*.nu" -not -path "./.git/*" -not -path "./.claude/*" -not -path "./.worktrees/*")'
+
 
   # 从 Justfile 移植的通用 Nix 任务
 #  test:

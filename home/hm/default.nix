@@ -15,6 +15,7 @@
     (mylib.relativeToRoot "home/core/kernel")
     (mylib.relativeToRoot "home/core/langs")
     (mylib.relativeToRoot "home/core/devops/btop.nix")
+    (mylib.relativeToRoot "home/core/devops/fetch.nix")
     (mylib.relativeToRoot "home/core/devops/git.nix")
     (mylib.relativeToRoot "home/core/devops/gh.nix")
     (mylib.relativeToRoot "home/core/devops/journalctl.nix")
