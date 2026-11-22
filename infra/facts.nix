@@ -3,12 +3,7 @@
 # 设计原则：
 # - 能从 hosts/*/meta.nix 派生的事实，不在 Terraform locals 里重复写。
 # - 只放 NixOS 与云资源都需要的事实；纯 Terraform provider 细节不要进来。
-# - 生成物 infra/generated/facts.json 由本文件求值得出，不要手改。
-#
-# 重新生成：
-#   task tf:facts
-# 等价命令（仓库根目录）：
-#   nix eval --json .#infraFacts | jq -S . > infra/generated/facts.json
+# - terranix stack 直接 import 本文件；不再生成中间 JSON。
 let
   # facts 只消费 nixos-vps-dev 的公网 IP（api/as/rsshub 共用）。
   # 其他 host 的 DERP 事实由 lib/fleet 的 fleetMetadata 负责，不在这里重复。

@@ -182,29 +182,31 @@ tofu plan -input=false
 - 由 host meta 派生的共享 DNS 记录（api / as / rsshub）；DERP 记录
   （derp / nva）走 `task tf:dns:generate` 写入 `dns/fleet.generated.json`
 
-生成物是 `infra/generated/facts.json`，由 `task tf:facts` 写入；Cloudflare
-stack 用 `jsondecode(file(...))` 消费。改 `hosts/*/meta.nix` 时要同时重跑
-`task tf:dns:generate`（DERP）和 `task tf:facts`（facts），再跑
-`task tf:terranix`；改 `infra/facts.nix` 后只需 `task tf:facts`。
-CI 会做 freshness 检查。
+`infra/facts.nix` 是唯一事实源；所有 terranix stack 直接 `import` 它，
+不再生成中间 JSON。改 `hosts/*/meta.nix` 时要重跑 `task tf:dns:generate`
+（DERP）和 `task tf:terranix`；只改 `infra/facts.nix` 时重跑
+`task tf:terranix` 即可。CI 会做 terranix freshness 检查。
 
-## terranix 试点
+## terranix stacks
 
-目前两个 stack 使用 terranix：
+目前所有 stack 都使用 terranix：
 
 - `infra/stacks/homelab/cloudflare/lucc.dev/dns`
-  - 源文件：`terranix.nix`（共享 facts + 手写记录 + provider/backend/moved/import）
-  - 生成物：`generated.tf.json`，由 `task tf:terranix` 写入，不要手改
+- `infra/stacks/homelab/cloudflare/lucc.dev/email-routing`
+- `infra/stacks/homelab/cloudflare/lucc.dev/workers`
+- `infra/stacks/homelab/cloudflare/account/d1`
+- `infra/stacks/homelab/cloudflare/account/r2`
 - `infra/stacks/homelab/tailscale/tailnet`
-  - 源文件：`terranix.nix`（ACL / DERP / provider / resources）
-  - 生成物：`generated.tf.json`，由 `task tf:terranix-tailscale` 写入，不要手改
+
+每个 stack 的源文件是 `terranix.nix`，生成物是同目录的
+`generated.tf.json`，由 `task tf:terranix` 统一写入，不要手改。
 
 共同约定：
 
 - 回退：`git revert` 对应 commit 即可恢复被删除的 HCL 文件（git 历史保留）
 - 这些 stack 不再适用 `terraform fmt` / `tflint` / `terraform-ls` 的 HCL 能力；
   `tofu validate` / `tofu plan` 仍是有效闸门
-- 其他 stack 暂时保持 HCL，不做全量迁移
+- 新增 stack 时优先用 terranix；默认不引入新 HCL
 
 ## 下一步
 

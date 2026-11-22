@@ -358,8 +358,8 @@ assert lib.assertMsg (
     };
 
   flake = {
-    # 跨 Nix / Terraform 共享的 infra facts，供 `nix eval --json .#infraFacts`
-    # 生成 infra/generated/facts.json，见 infra/facts.nix。
+    # 跨 Nix / Terraform 共享的 infra facts，见 infra/facts.nix。
+    # terranix stack 直接 import 该文件；这个 flake 输出只用于调试/查看。
     infraFacts = import ../infra/facts.nix;
 
     darwinConfigurations = mergedDarwinConfigurations;

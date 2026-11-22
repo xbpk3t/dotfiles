@@ -1,7 +1,7 @@
 # terranix 第二个试点：把 tailscale/tailnet 从 HCL 迁到 Nix。
 #
 # 生成：
-#   task tf:terranix-tailscale
+#   task tf:terranix
 # 等价命令（仓库根目录）：
 #   nix develop .#infra --command bash -c \
 #     'terranix --with-nulls infra/stacks/homelab/tailscale/tailnet/terranix.nix \
