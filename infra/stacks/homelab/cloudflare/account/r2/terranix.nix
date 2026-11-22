@@ -9,6 +9,7 @@
 { lib, ... }:
 let
   facts = import ../../../../../facts.nix;
+  infraLib = import ../../../../../terranix-lib.nix;
 
   accountId = facts.cloudflare.account_id;
 
@@ -17,28 +18,12 @@ let
   buckets = facts.cloudflare.r2.buckets;
 in
 {
-  terraform = {
-    required_version = ">= 1.10.0";
-
-    required_providers.cloudflare = {
+  terraform = infraLib.mkTerraform {
+    stateKey = "homelab/cloudflare/account/r2/terraform.tfstate";
+    r2Endpoint = facts.cloudflare.r2_endpoint;
+    providers.cloudflare = {
       source = "cloudflare/cloudflare";
       version = "~> 5.0";
-    };
-
-    backend.s3 = {
-      bucket = "luck-dotfiles-opentofu-state";
-      key = "homelab/cloudflare/account/r2/terraform.tfstate";
-      region = "auto";
-
-      endpoints.s3 = facts.cloudflare.r2_endpoint;
-
-      skip_credentials_validation = true;
-      skip_metadata_api_check = true;
-      skip_region_validation = true;
-      skip_requesting_account_id = true;
-      skip_s3_checksum = true;
-      use_path_style = true;
-      use_lockfile = true;
     };
   };
 

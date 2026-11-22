@@ -200,6 +200,8 @@ tofu plan -input=false
 
 每个 stack 的源文件是 `terranix.nix`，生成物是同目录的
 `generated.tf.json`，由 `task tf:terranix` 统一写入，不要手改。
+共享的 `required_version` / provider / R2 backend 骨架在
+`infra/terranix-lib.nix`；资源、import、moved 等语义仍留在各 stack。
 
 共同约定：
 

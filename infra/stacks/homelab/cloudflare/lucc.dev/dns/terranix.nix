@@ -12,6 +12,7 @@
 { lib, ... }:
 let
   facts = import ../../../../../facts.nix;
+  infraLib = import ../../../../../terranix-lib.nix;
 
   # 所有 DNS record 共用的字段形状；记录本身只写各自不同的字段。
   mkRecord =
@@ -139,28 +140,12 @@ in
 assert lib.assertMsg (derpKeyCollisions == [ ])
   "dns terranix: derp dnsKey collides with manual records: ${lib.concatStringsSep ", " derpKeyCollisions}";
 {
-  terraform = {
-    required_version = ">= 1.10.0";
-
-    required_providers.cloudflare = {
+  terraform = infraLib.mkTerraform {
+    stateKey = "homelab/cloudflare/lucc.dev/dns/terraform.tfstate";
+    r2Endpoint = facts.cloudflare.r2_endpoint;
+    providers.cloudflare = {
       source = "cloudflare/cloudflare";
       version = "~> 5.0";
-    };
-
-    backend.s3 = {
-      bucket = "luck-dotfiles-opentofu-state";
-      key = "homelab/cloudflare/lucc.dev/dns/terraform.tfstate";
-      region = "auto";
-
-      endpoints.s3 = facts.cloudflare.r2_endpoint;
-
-      skip_credentials_validation = true;
-      skip_metadata_api_check = true;
-      skip_region_validation = true;
-      skip_requesting_account_id = true;
-      skip_s3_checksum = true;
-      use_path_style = true;
-      use_lockfile = true;
     };
   };
 
