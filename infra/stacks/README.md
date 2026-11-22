@@ -11,7 +11,7 @@ infra/stacks/<scope>/<provider>/<service>/
 当前 stack：
 
 ```text
-infra/stacks/homelab/cloudflare/account/{d1,kv,pages,r2}/
+infra/stacks/homelab/cloudflare/account/{d1,r2}/
 infra/stacks/homelab/cloudflare/lucc.dev/{dns,email-routing}/
 infra/stacks/homelab/tailscale/tailnet/
 ```

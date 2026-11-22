@@ -15,7 +15,7 @@ infra/
   stacks/
     homelab/
       cloudflare/
-        account/{d1,kv,pages,r2}/
+        account/{d1,r2}/
         lucc.dev/{dns,email-routing}/
       tailscale/tailnet/
   .taskfile/              # OpenTofu/Cloudflare inventory 任务
@@ -33,11 +33,10 @@ infra/
 - `stacks/homelab/cloudflare/lucc.dev/email-routing`
 - `stacks/homelab/cloudflare/lucc.dev/workers`（`music.lucc.dev` -> Worker `music`）
 
-> Pages stack 现在为空：`blog` / `docs` / `me` / `music` 已迁到 Workers，
-> `slides` / `nextflux` 已删除。保留空 stack 作为历史锚点。
+> Pages / KV stack 已移除：Pages 没有 live project；KV 的 live namespaces 由
+> Worker 部署链路创建，未纳入 Terraform，删除空 stack 不会影响它们。
+
 - `stacks/homelab/cloudflare/account/d1`
-- `stacks/homelab/cloudflare/account/kv`
-- `stacks/homelab/cloudflare/account/pages`
 - `stacks/homelab/cloudflare/account/r2`
 - `stacks/homelab/tailscale/tailnet`
 
@@ -62,7 +61,7 @@ infra/stacks/<scope>/<provider>/<service>/
 
 ```text
 infra/stacks/homelab/cloudflare/lucc.dev/dns/
-infra/stacks/homelab/cloudflare/account/pages/
+infra/stacks/homelab/cloudflare/account/d1/
 infra/stacks/homelab/tailscale/tailnet/
 ```
 
@@ -88,8 +87,8 @@ cd /path/to/dotfiles
 
 task tf                    # 列出 stacks
 task tf:validate STACK=infra/stacks/homelab/cloudflare/lucc.dev/dns
-task tf:plan STACK=infra/stacks/homelab/cloudflare/account/pages
-task tf:apply STACK=infra/stacks/homelab/cloudflare/account/pages
+task tf:plan STACK=infra/stacks/homelab/cloudflare/account/d1
+task tf:apply STACK=infra/stacks/homelab/cloudflare/account/d1
 
 terramate list --tags layer-infra
 terramate run --tags layer-infra -- tofu plan
@@ -140,7 +139,7 @@ locking（OpenTofu 1.13.9 实测可用），不再需要 DynamoDB 锁表。workf
 
 ### Token 权限
 
-- **plan / drift**：Cloudflare Pages / Email Routing / DNS / Workers 的 Read
+- **plan / drift**：Cloudflare Email Routing / DNS / Workers 的 Read
   权限即可；R2 state backend 需要 `CF_R2_AK` / `CF_R2_SK` 的读写。
 - **apply**：上述资源需要 Edit 权限；`CLOUDFLARE_API_TOKEN` 在 GitHub 里必须
   使用 write token。
@@ -160,7 +159,7 @@ printf '%s' '"cfat_..."' | sops set --value-stdin secrets/secrets.yaml \
 - [ ] `infra` environment 配置 required reviewers
 - [ ] 需要 main 自动 apply 时设置仓库变量 `INFRA_AUTO_APPLY=true`
 - [ ] 每次 drift 变红时先确认是否预期，再手动 `workflow_dispatch mode=apply`
-- [ ] 回退：`git revert` + 对应 stack apply；Pages/Workers 域名 ownership
+- [ ] 回退：`git revert` + 对应 stack apply；Workers 域名 ownership
       的变更要先确认 custom domain/DNS 顺序
 
 本地复现（与 CI 使用同一套工具）：

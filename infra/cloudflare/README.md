@@ -26,7 +26,7 @@ Cloudflare 先走 `inventory -> ownership -> import/adopt -> managed stacks` 的
   - 用于对齐当前真实状态
 - `infra/stacks/homelab/cloudflare/`
   - 已经收编进 OpenTofu/Terramate 的正式 stack
-  - 当前已覆盖 DNS、Email Routing、Pages、D1、KV、R2
+  - 当前已覆盖 DNS、Email Routing、D1、R2、Workers 域名
 
 ## Secret 约定
 

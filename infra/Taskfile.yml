@@ -27,7 +27,7 @@ tasks:
     desc: "对单个 infra stack 做本地校验"
     summary: |
       task tf:validate STACK=infra/stacks/homelab/cloudflare/lucc.dev/dns
-      task tf:validate STACK=infra/stacks/homelab/cloudflare/account/pages
+      task tf:validate STACK=infra/stacks/homelab/cloudflare/account/d1
     cmds:
       - task: stack:validate
         vars:
@@ -36,7 +36,7 @@ tasks:
   plan:
     desc: "对单个 stack 或一组 tagged stacks 做计划预览"
     summary: |
-      task tf:plan STACK=infra/stacks/homelab/cloudflare/account/pages
+      task tf:plan STACK=infra/stacks/homelab/cloudflare/account/d1
       task tf:plan TAG=cloudflare
     cmds:
       - task: stack:plan
@@ -47,7 +47,7 @@ tasks:
   apply:
     desc: "对单个 infra stack 执行 apply"
     summary: |
-      task tf:apply STACK=infra/stacks/homelab/cloudflare/account/pages
+      task tf:apply STACK=infra/stacks/homelab/cloudflare/account/d1
     cmds:
       - task: stack:apply
         vars:

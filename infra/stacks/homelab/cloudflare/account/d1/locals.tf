@@ -26,7 +26,7 @@ locals {
       notes = {
         owner = "xbpk3t/zzz"
         crit  = "high"
-        des   = "搭配 pages/music 项目"
+        des   = "搭配 Workers music 项目"
       }
     }
   }
