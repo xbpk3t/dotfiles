@@ -1,15 +1,26 @@
 ---
+# 部署入口按平台轨道分为三条，互不混用：
+#
+#   task nix:deploy       nixos + darwin           deploy-rs（deploy.nodes）
+#   task nix:deploy:sm    sm-vps                   deploy-rs + sm 专属后处理
+#   task nix:deploy:hm    ansible-hm (hm-only PA)  Ansible 本地 build + activate
+#
+# 节点事实来自 flake .#deployRoutes（lib/fleet 派生 driver/kind）；新增同类节点
+# 会自动出现在对应轨道，不要在 Taskfile 里手写节点名单。
+# sm 节点不在 nix:deploy 里：sm 需要额外的 zsh/drop-in 后处理，必须走 nix:deploy:sm。
+#
 # [2026-01-25] 从colmena -> deploy-rs 之后，就不需要把 darwin 和 nixos 拆分到不同taskfile了（因为colmena不支持 multi-profile，所以darwin可能使用 darwin-rebuild 命令或者 nh这种第三方工具来部署，NixOS可能使用 nixos-cli 或者 colmena来部署，并不统一。但是切换到 deploy-rs 之后就不需要考虑这些问题了，统一使用 deploy-rs 进行部署即可）
 
 
 version: '3'
 
 vars:
-  # 统一获取 deploy-rs 节点列表，使用换行分隔，供交互选择/批量执行复用
+  # 部署脚本统一收口在 .taskfile/nix/scripts，Taskfile 只做薄封装。
+  SCRIPTS_DIR: "{{.TASKFILE_DIR}}/scripts"
+  # nix:deploy：nixos + darwin（driver=deploy-rs，排除 sm 轨）。
   # Why：deploy 依赖当前工作树里的本地 flake；仓库里存在未 track 的源码目录时，
-  #      pure flake 评估会直接失败。
-  # What：这里显式加 `--impure`，让 deploy 入口按 working tree 评估。
-  NODES_CMD: "nix eval --impure --raw .#deploy.nodes --apply 'x: builtins.concatStringsSep \"\\n\" (builtins.attrNames x)'"
+  #      pure flake 评估会直接失败。What：脚本内部用 `--impure` 评估。
+  NODES_CMD: 'nu "{{.SCRIPTS_DIR}}/deploy.nu" routes --track nixos-darwin'
   # Why：deploy-rs 自带的 pre-build checks 会再次以 pure flake 方式检查目标，
   #      在存在未 track 源码目录时会提前失败。
   # What：这里统一跳过它的内建 checks，并把 `--impure` 继续透传给后续 Nix
@@ -22,15 +33,21 @@ vars:
 
 tasks:
   default:
-    desc: "deploy-rs 部署（支持多选）"
-    summary: "task -g default"
+    desc: "部署 nixos/darwin（deploy-rs，支持多选）"
+    summary: |
+      task nix:deploy
+
+      只列 nixos + darwin 的 deploy-rs 节点。
+        - sm-vps：task nix:deploy:sm（带 sm 后处理）
+        - hm-only PA：task nix:deploy:hm（ansible-hm）
     dir: '{{.USER_WORKING_DIR}}'
     vars:
       HOSTS:
-        sh: '{{.NODES_CMD}} | gum choose --no-limit --header "选择节点（可多选）"'
+        sh: '{{.NODES_CMD}} | gum choose --no-limit --header "选择节点（可多选：nixos/darwin）"'
+    set: [errexit, nounset, pipefail]
     cmds:
       - |
-        if [[ -z "{{.HOSTS}}" ]]; then
+        if [ -z "{{.HOSTS}}" ]; then
           echo "No node selected"
           exit 1
         fi
@@ -41,26 +58,28 @@ tasks:
 
 # [2026-04-27] 其实没啥用，注释掉
 #  list:
-#    desc: "列出 deploy-rs 节点"
+#    desc: "列出 deploy-rs nixos/darwin 节点"
 #    summary: "task -g list"
 #    dir: '{{.USER_WORKING_DIR}}'
 #    cmds:
 #      - '{{.NODES_CMD}}'
 
   sm:
-    desc: "deploy-rs 部署 sm-vps 平行轨（sm + standalone HM 双 profile）"
+    desc: "部署 sm-vps 轨（deploy-rs + sm 后处理，支持多选）"
     summary: |
-      从 Mac 用 deploy-rs 部署到非 NixOS 目标（真机 sm-vps-tc）。
-
-      用法（在 Mac、dotfiles 仓库根目录）：
-        task nix:deploy:sm                       # 默认全部 sm-vps 节点
-        task nix:deploy:sm NODE=sm-vps-tc        # 指定真机
+      task nix:deploy:sm                        # 交互多选
+      task nix:deploy:sm NODE=sm-vps-tc         # 单节点（兼容旧用法）
+      task nix:deploy:sm NODES=sm-vps-tc,sm-vps-hk
 
       部署内容（deploy.nodes.<node>，见 lib/mkHost.nix + hosts/sm-vps/）：
         - profiles.system → system-manager（custom activate，root）
         - profiles.home   → standalone HM（activate.home-manager，luck）
         - profilesOrder   先 system 后 home
         - remoteBuild=true（目标机构建，Mac 零闭包下载）
+
+      后处理（sm 专属，deploy-rs 之后逐个节点执行）：
+        - 登录 shell 切到 zsh
+        - reload/restart sshd/journald/logind，让 drop-in 生效
 
       前置（bootstrap，一次性，不入库）：
         1. 目标机能 SSH：Mac pubkey 已进目标机 luck 的 authorized_keys
@@ -70,43 +89,29 @@ tasks:
     dir: '{{.USER_WORKING_DIR}}'
     cmds:
       - |
-        set -euo pipefail
-        node="{{.NODE | default "sm-vps-tc"}}"
-        echo "==> deploy-rs .#${node} (sm + HM)"
-        {{.DEPLOY_RS_CMD}} ".#${node}" -- --impure
+        nu "{{.SCRIPTS_DIR}}/deploy.nu" sm \
+          --node "{{.NODE | default ""}}" \
+          --nodes "{{.NODES | default ""}}" \
+          --node-host "{{.NODE_HOST | default ""}}" \
+          --node-user "{{.NODE_USER | default ""}}" {{if .DRY_RUN}}--dry-run{{end}}
+
+  hm:
+    desc: "部署 ansible-hm 轨（hm-only PA，支持多选）"
+    summary: |
+      task nix:deploy:hm                        # 交互多选
+      task nix:deploy:hm NODES=hm-lightvela     # 指定节点
+      task nix:deploy:hm NODES=a,b
+
+      只列 .#deployRoutes 中 driver=ansible-hm 的节点。
+      部署走 hosts/_base/hm/ansible：PA 本地 nix-portable build + activate。
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
       - |
-        set -euo pipefail
-        node="{{.NODE | default "sm-vps-tc"}}"
-        # host/user 从 fleet registry 推导（N5：不再硬编码；NODE_HOST/NODE_USER 可覆盖）
-        host="{{.NODE_HOST | default ""}}"
-        user="{{.NODE_USER | default ""}}"
-        if [ -z "$host" ]; then
-          host="$(nix eval --impure --raw ".#deploy.nodes.${node}.hostname")"
-        fi
-        if [ -z "$user" ]; then
-          user="$(nix eval --impure --raw ".#deploy.nodes.${node}.sshUser")"
-        fi
-        # 切登录 shell 到 zsh（HM 激活后 zsh 可用；bootstrap 建用户时用 bash）
-        # 幂等：已是 zsh 则跳过。见 modules/sm/shells.nix 关于声明化登录 shell 的说明。
-        shell_path="/home/${user}/.nix-profile/bin/zsh"
-        ssh -o BatchMode=yes -o ConnectTimeout=15 "${user}@${host}" \
-          "current=\$(getent passwd ${user} | cut -d: -f7); if [ \"\$current\" != \"${shell_path}\" ]; then sudo -n usermod -s ${shell_path} ${user}; echo \"shell -> zsh\"; else echo \"shell already zsh\"; fi"
-      - |
-        set -euo pipefail
-        node="{{.NODE | default "sm-vps-tc"}}"
-        host="{{.NODE_HOST | default ""}}"
-        user="{{.NODE_USER | default ""}}"
-        if [ -z "$host" ]; then
-          host="$(nix eval --impure --raw ".#deploy.nodes.${node}.hostname")"
-        fi
-        if [ -z "$user" ]; then
-          user="$(nix eval --impure --raw ".#deploy.nodes.${node}.sshUser")"
-        fi
-        # N6：sm 只落地 drop-in（journald/logind/sshd 的 /etc/systemd/*.conf.d、
-        # sshd_config.d），运行中的服务不会自动重读——reload/restart 让 drop-in 生效。
-        # sshd 用 reload（不中断会话）；journald/logind 用 restart（drop-in 需重启才读）。
-        ssh -o BatchMode=yes -o ConnectTimeout=15 "${user}@${host}" \
-          'sudo -n systemctl reload ssh 2>/dev/null || sudo -n systemctl reload sshd 2>/dev/null || true; sudo -n systemctl restart systemd-journald; sudo -n systemctl restart systemd-logind; echo "drop-ins reloaded"'
+        nu "{{.SCRIPTS_DIR}}/deploy.nu" hm \
+          --nodes "{{.NODES | default ""}}" \
+          --inventory "{{.INVENTORY | default ""}}" \
+          --interactive {{if .DRY_RUN}}--dry-run{{end}} \
+          --extra-args "{{.CLI_ARGS}}"
 
   smoke:
     desc: "sm-vps 部署后 smoke check（验证 etc/unit/secret/tailnet/SSH）"

@@ -36,7 +36,7 @@ def validate-quality [quality: int]: nothing -> int {
 
 # 收集文件列表。
 # 重要：patterns 显式区分大小写，避免把平台大小写行为隐式交给底层 filesystem。
-def collect-files [root_abs: string, patterns: list<string>]: nothing -> list<string> {
+def collect-files [root_abs: string, ...patterns: string]: nothing -> list<string> {
     $patterns
     | each {|pattern|
         glob $'($root_abs)/**/($pattern)' --no-dir
@@ -54,30 +54,31 @@ def build-output-path [file_path: string, target_ext: string]: nothing -> string
 }
 
 def run-command [cmd: string, ...args: string]: nothing -> nothing {
-    let result = (^$cmd ...$args | complete)
+    let result = (run-external $cmd ...$args | complete)
 
     if $result.exit_code != 0 {
-        let stderr_text = ($result.stderr | str trim)
-        let stdout_text = ($result.stdout | str trim)
-
-        if $stderr_text != '' {
-            print -e $stderr_text
+        let detail = (
+            [($result.stderr | str trim) ($result.stdout | str trim)]
+            | where {|text| $text | is-not-empty}
+            | str join (char newline)
+        )
+        let message = if ($detail | is-empty) {
+            $'Command failed: ($cmd) ($args | str join " ")'
+        } else {
+            $'Command failed: ($cmd) ($args | str join " ")\n($detail)'
         }
-
-        if $stdout_text != '' {
-            print $stdout_text
-        }
-
-        error make {
-            msg: $'Command failed: ($cmd) ($args | str join " ")'
-        }
+        error make {msg: $message}
     }
 }
 
 # 仅在目标文件存在时删除 source，避免 external command 成功返回但未产出文件时误删原文件。
-def remove-source-if-needed [source_path: string, output_path: string, keep_source: bool]: nothing -> nothing {
+def remove-source-if-needed [source_path: path, output_path: path, --keep-source]: nothing -> nothing {
     if (not $keep_source) and ($output_path | path exists) {
-        rm $source_path
+        try {
+            rm $source_path
+        } catch {|err|
+            error make {msg: $'failed to remove source ($source_path): ($err.msg)'}
+        }
     }
 }
 
@@ -88,19 +89,21 @@ def convert-jpg-to-png-file [file_path: string, keep_source: bool]: nothing -> n
         print $'skip: ($output_path)'
     } else {
         run-command 'magick' $file_path $output_path
-        remove-source-if-needed $file_path $output_path $keep_source
+        remove-source-if-needed $file_path $output_path --keep-source=$keep_source
         print $'ok: ($file_path) -> ($output_path)'
     }
 }
 
-def convert-to-webp-file [file_path: string, quality: int, keep_source: bool]: nothing -> nothing {
+def convert-to-webp-file [
+    file_path: string
+    --quality (-q): int = $default_webp_quality
+    --keep-source (-k)
+]: nothing -> nothing {
     let output_path = (build-output-path $file_path 'webp')
 
     if ($output_path | path exists) {
         print $'skip: ($output_path)'
     } else {
-        let ext = (($file_path | path parse | get extension) | str lowercase)
-
         # 重要：png / jpg(jpeg) 统一走 lossy quality 模式。
         # JPG 原是有损格式，PNG 转 lossy webp 也能获得极大压缩比且肉眼几乎无差。
         # 如需 lossless 转换，调用 cwebp -lossless 自行处理。
@@ -113,7 +116,7 @@ def convert-to-webp-file [file_path: string, quality: int, keep_source: bool]: n
         ]
 
         run-command 'cwebp' ...$cwebp_args
-        remove-source-if-needed $file_path $output_path $keep_source
+        remove-source-if-needed $file_path $output_path --keep-source=$keep_source
         print $'ok: ($file_path) -> ($output_path)'
     }
 }
@@ -122,9 +125,9 @@ def convert-to-webp-file [file_path: string, quality: int, keep_source: bool]: n
 def "main jpg2png" [
     --root (-r): string = '.'
     --keep-source (-k)
-] {
+]: nothing -> nothing {
     let root_abs = (normalize-root $root)
-    let files = (collect-files $root_abs ['*.jpg' '*.JPG' '*.jpeg' '*.JPEG'])
+    let files = (collect-files $root_abs '*.jpg' '*.JPG' '*.jpeg' '*.JPEG')
 
     if ($files | is-empty) {
         print $'No jpg/jpeg files found under ($root_abs)'
@@ -141,29 +144,22 @@ def "main webp" [
     --root (-r): string = '.'
     --quality (-q): int = $default_webp_quality
     --keep-source (-k)
-] {
+]: nothing -> nothing {
     let root_abs = (normalize-root $root)
     let checked_quality = (validate-quality $quality)
     let files = (
-        collect-files $root_abs [
-            '*.jpg'
-            '*.JPG'
-            '*.jpeg'
-            '*.JPEG'
-            '*.png'
-            '*.PNG'
-        ]
+        collect-files $root_abs '*.jpg' '*.JPG' '*.jpeg' '*.JPEG' '*.png' '*.PNG'
     )
 
     if ($files | is-empty) {
         print $'No jpg/jpeg/png files found under ($root_abs)'
     } else {
         $files | each {|file_path|
-            convert-to-webp-file $file_path $checked_quality $keep_source
+            convert-to-webp-file $file_path --quality=$checked_quality --keep-source=$keep_source
         } | ignore
     }
 }
 
-def main [] {
+def main []: nothing -> nothing {
     print 'Usage: img.nu <jpg2png|webp> [flags]'
 }

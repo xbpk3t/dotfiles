@@ -363,6 +363,8 @@ assert lib.assertMsg (
     infraFacts = import ../infra/facts.nix;
 
     darwinConfigurations = mergedDarwinConfigurations;
+    # 部署路由事实：deploy-rs / sm / ansible-hm 三条 track 的节点列表来源。
+    deployRoutes = mylib.fleet.deployRoutes;
     deploy = {
       nodes = mergedDeployNodes;
     };

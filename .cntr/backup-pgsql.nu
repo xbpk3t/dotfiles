@@ -27,8 +27,15 @@
 # Find a running postgres container matching the project name.
 # Requires the container name to start with the project name followed by "postgres".
 def find-pg-container [project: string]: nothing -> string {
+  let ps = (^docker ps --format '{{.Names}}' | complete)
+  if $ps.exit_code != 0 {
+    error make {
+      msg: $'docker ps failed: ($ps.stderr | str trim)'
+    }
+  }
+
   let result = (
-    ^docker ps --format '{{.Names}}'
+    $ps.stdout
     | lines
     | str trim
     | where {|c| $c =~ $'^($project).*postgres'}
@@ -161,37 +168,28 @@ def run-backup [
 
   let pg_dump_args = if $verbose { ['--verbose'] } else { [] }
 
-  let result = if $compress == 'zstd' {
-    ^docker exec -e $'PGPASSWORD=($password)' $cfg.container pg_dump ...$pg_dump_args -U $cfg.db_user $cfg.db_name
-    | ^zstd
-    | ^rclone rcat $'($cfg.bucket)($filename)'
-    | complete
-  } else if $compress == 'none' {
-    ^docker exec -e $'PGPASSWORD=($password)' $cfg.container pg_dump ...$pg_dump_args -U $cfg.db_user $cfg.db_name
-    | ^rclone rcat $'($cfg.bucket)($filename)'
-    | complete
-  } else {
-    ^docker exec -e $'PGPASSWORD=($password)' $cfg.container pg_dump ...$pg_dump_args -U $cfg.db_user $cfg.db_name
-    | ^gzip
-    | ^rclone rcat $'($cfg.bucket)($filename)'
-    | complete
-  }
-
-  if $result.exit_code != 0 {
+  try {
+    if $compress == 'zstd' {
+      ^docker exec -e $'PGPASSWORD=($password)' $cfg.container pg_dump ...$pg_dump_args -U $cfg.db_user $cfg.db_name
+      | ^zstd
+      | ^rclone rcat $'($cfg.bucket)($filename)'
+    } else if $compress == 'none' {
+      ^docker exec -e $'PGPASSWORD=($password)' $cfg.container pg_dump ...$pg_dump_args -U $cfg.db_user $cfg.db_name
+      | ^rclone rcat $'($cfg.bucket)($filename)'
+    } else {
+      ^docker exec -e $'PGPASSWORD=($password)' $cfg.container pg_dump ...$pg_dump_args -U $cfg.db_user $cfg.db_name
+      | ^gzip
+      | ^rclone rcat $'($cfg.bucket)($filename)'
+    }
+  } catch {|err|
     print -e 'failed'
-    let stderr_msg = $result.stderr | str trim
-    if ($stderr_msg | is-not-empty) { print -e $stderr_msg }
     error make {
-      msg: 'backup failed'
+      msg: $'backup failed: ($err.msg)'
       label: {
         text: 'pg_dump pipeline failed'
         span: (metadata $cfg.project).span
       }
     }
-  }
-
-  if $verbose and ($result.stderr | str trim | is-not-empty) {
-    print -e ($result.stderr | str trim)
   }
 
   let duration = ((date now) - $start) | format duration ms
@@ -242,10 +240,11 @@ def run-restore [
 
   let filename = if ($file | is-empty) {
     let latest = (
-      ^rclone lsjson $cfg.bucket
-      | from json
-      | sort-by ModTime
-      | last
+      try {
+        ^rclone lsjson $cfg.bucket | from json | sort-by ModTime | last
+      } catch {|err|
+        error make {msg: $'failed to list backups in ($cfg.bucket): ($err.msg)'}
+      }
     )
     if ($latest | is-empty) {
       error make {
@@ -283,7 +282,7 @@ def run-restore [
 
   if ($file | is-empty) {
     let answer = (input $'About to restore latest backup to ($cfg.db_name). Continue? [y/N]: ')
-    if ($answer | str downcase) not-in ['y' 'yes'] {
+    if ($answer | str lowercase) not-in ['y' 'yes'] {
       print 'aborted'
       return
     }
@@ -294,40 +293,32 @@ def run-restore [
   let start = (date now)
   print -n $'restoring ($filename) to ($cfg.db_name)... '
 
-  let result = if ($filename | str ends-with '.zst') {
-    ^rclone cat $'($cfg.bucket)($filename)'
-    | ^zstd -d
-    | ^docker exec -i -e $'PGPASSWORD=($password)' $cfg.container psql -U $cfg.db_user -d $cfg.db_name
-    | complete
-  } else if ($filename | str ends-with '.gz') {
-    ^rclone cat $'($cfg.bucket)($filename)'
-    | ^gunzip
-    | ^docker exec -i -e $'PGPASSWORD=($password)' $cfg.container psql -U $cfg.db_user -d $cfg.db_name
-    | complete
-  } else {
-    ^rclone cat $'($cfg.bucket)($filename)'
-    | ^docker exec -i -e $'PGPASSWORD=($password)' $cfg.container psql -U $cfg.db_user -d $cfg.db_name
-    | complete
+  if $verbose {
+    print -e $'pipeline: rclone cat ($cfg.bucket)($filename) -> decompress -> docker exec ($cfg.container) psql -U ($cfg.db_user) -d ($cfg.db_name)'
   }
 
-  if $result.exit_code != 0 {
+  try {
+    if ($filename | str ends-with '.zst') {
+      ^rclone cat $'($cfg.bucket)($filename)'
+      | ^zstd -d
+      | ^docker exec -i -e $'PGPASSWORD=($password)' $cfg.container psql -U $cfg.db_user -d $cfg.db_name
+    } else if ($filename | str ends-with '.gz') {
+      ^rclone cat $'($cfg.bucket)($filename)'
+      | ^gunzip
+      | ^docker exec -i -e $'PGPASSWORD=($password)' $cfg.container psql -U $cfg.db_user -d $cfg.db_name
+    } else {
+      ^rclone cat $'($cfg.bucket)($filename)'
+      | ^docker exec -i -e $'PGPASSWORD=($password)' $cfg.container psql -U $cfg.db_user -d $cfg.db_name
+    }
+  } catch {|err|
     print -e 'failed'
-    let stderr_msg = $result.stderr | str trim
-    if ($stderr_msg | is-not-empty) { print -e $stderr_msg }
     error make {
-      msg: 'restore failed'
+      msg: $'restore failed: ($err.msg)'
       label: {
         text: 'psql restore pipeline failed'
         span: (metadata $cfg.project).span
       }
     }
-  }
-
-  if $verbose {
-    let stdout_msg = $result.stdout | str trim
-    if ($stdout_msg | is-not-empty) { print $stdout_msg }
-    let stderr_msg = $result.stderr | str trim
-    if ($stderr_msg | is-not-empty) { print -e $stderr_msg }
   }
 
   let duration = ((date now) - $start) | format duration ms

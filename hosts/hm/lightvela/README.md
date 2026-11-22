@@ -87,7 +87,8 @@ The PA profile is curated from `home/core`, not the whole directory:
 - `home/core/init.nix`（username / homeDirectory / stateVersion / home-manager）
 - `home/core/kernel`（zsh 全量 + starship + atuin + fzf）
 - `home/core/langs`（jq）
-- `home/core/devops/{btop,git,gh,journalctl,lazygit,ssh,worktrunk}.nix`
+- `home/core/devops/{btop,fetch,git,gh,journalctl,lazygit,ssh,worktrunk}.nix`
+  （`fetch` 用 `microfetch`，命令入口是 `ff`）
 - `ssh` only enables tailnet hosts (`github.enable = false`)
 - no `db` / `lazydocker`（无 enable 开关，import 即安装）
 - no `cntr` / `taskfile` / `infra`
@@ -116,6 +117,10 @@ Default: PA-local build + activate via Ansible:
 ```bash
 task nix:hm:apply
 ```
+
+`task nix:deploy:hm` is the hm track entry: select `hm-lightvela` and the
+`ansible-hm` driver runs this same playbook with an inventory generated from
+`.#deployRoutes`.
 
 `hosts/_base/hm/ansible/bootstrap.yml` tars the dotfiles tree, copies it to
 `/root/hm-build` on the PA, and builds

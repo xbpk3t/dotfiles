@@ -6,21 +6,24 @@ applyTo: "**"
 
 ## 项目概览
 
-NixOS/nix-darwin/home-manager 的 flake-parts 项目，管理多平台（macOS、NixOS、非 NixOS Debian sm 轨）的 fleet 配置。flake-parts 做模块化编排，deploy-rs 统一部署，sops-nix 管理密钥。
+NixOS/nix-darwin/home-manager 的 flake-parts 项目，管理多平台（macOS、NixOS、非 NixOS Debian sm 轨）的 fleet 配置。flake-parts 做模块化编排，部署按 deploy-rs / sm / ansible-hm 三轨拆分，sops-nix 管理密钥。
 
 ## 关键命令
 
 所有操作入口为 go-task（`task`）：
 
 ```bash
-# 部署
-task nix:deploy            # 交互式多选节点部署（deploy-rs，--impure）
+# 部署（三条平台轨道，互不混用）
+task nix:deploy            # nixos/darwin，deploy-rs 多选
+task nix:deploy:sm         # sm-vps 轨，deploy-rs + sm 后处理（支持 NODE/NODES/多选）
+task nix:deploy:hm         # hm-only PA 轨，Ansible 本地 build + activate（支持 NODES/多选）
 task nix:rollback          # 回滚当前机器到上一代配置
 
 # Flake 维护
 task nix:flake:update      # 更新所有 flake inputs (nix flake update)
 task nix:flake:rm          # 移除 flake 包后的清理流程（lock → check → metadata）
 task nix:test:quick        # 快速验证当前 host 配置 (targeted nix eval)
+task nix:test:nu-lint      # 用 nu-lint 检查仓库内所有 Nushell 脚本
 
 # SOPS 密钥
 task nix:sk:edit           # 编辑加密的 secrets 文件
@@ -64,9 +67,17 @@ lib/fleet/             # 扫描 hosts/**/meta.nix，派生节点名与跨机拓�
 - `home/base/`：按功能分类的大类 app 配置（AI、desktop、langs、ms、works 等），跨平台共享
 - `home/core/`：更核心/通用的配置，如 devops 和 infra 基础工具，也是跨平台但更偏底层
 
-### deploy-rs 统一部署
+### 部署三轨（deploy-rs / sm / ansible-hm）
 
 从 colmena 迁移到 deploy-rs，原因：colmena 不支持 multi-profile（Darwin 和 NixOS 需要不同部署工具），deploy-rs 统一了所有 profile 的部署流程。部署使用 `--impure` 评估以兼容当前 working tree（仓库内存在未 track 的源码目录时 pure evaluation 会失败）。
+
+入口按平台轨道拆分，互不混用：
+
+- `task nix:deploy`：nixos + darwin，deploy-rs 多选；
+- `task nix:deploy:sm`：sm-vps，deploy-rs + sm 专属后处理（zsh shell、drop-in reload）；
+- `task nix:deploy:hm`：hm-only PA，Ansible 本地 nix-portable build + activate。
+
+`lib/fleet` 为每个节点派生 `deployDriver` / `kind`，并通过 flake `.#deployRoutes` 发布：带 `deploy` 块的 nixos/darwin/sm 节点走 `deploy-rs`；`kind = "home"` 的厂商托管 PA 走 `ansible-hm`（不产出 `deploy.nodes`）。三条 track task 从 `.#deployRoutes` 过滤节点，新增同类 hm 节点只需 `hosts/hm/<name>/`，无需改 Taskfile 或 Ansible inventory。
 
 ### 密钥管理
 
@@ -105,7 +116,7 @@ lib/fleet/             # 扫描 hosts/**/meta.nix，派生节点名与跨机拓�
 
 1. `task nix:test:quick` — 唯一允许的验证方式，确保当前 host 配置评估通过。严禁执行 `nix flake check`
 2. 确认 `flake.lock` 已提交（避免部署未锁定的版本）
-3. `task nix:deploy` — 交互式选择目标节点，deploy-rs 会跳过内建 checks 并用 `--impure` 评估
+3. 按轨道部署：`task nix:deploy`（nixos/darwin）、`task nix:deploy:sm`（sm-vps）、`task nix:deploy:hm`（hm-only PA）
 
 ### 测试策略
 
@@ -121,7 +132,7 @@ lib/fleet/             # 扫描 hosts/**/meta.nix，派生节点名与跨机拓�
 
 1. **先读 flake.nix**：任何涉及 Nix 配置的修改，先理解 `flake.nix` 的 inputs/outputs 结构
 2. **保守改动**：Nix 改动影响面广（可能影响多台机器），修改模块时考虑跨平台兼容性
-3. **不自动部署**：绝对不要在未经用户明确确认的情况下执行 `task nix:deploy` 或任何部署命令
+3. **不自动部署**：绝对不要在未经用户明确确认的情况下执行 `task nix:deploy*` 或任何部署命令
 4. **不修改 docs/ 内容**：`docs/` 中的文档由 docs monorepo 管理，dotfiles 侧只读
 5. **修改配置后运行检查**：改完 `.nix` 文件后只允许执行 `task nix:test:quick` 验证当前 host 配置（仅评估，不触发构建/下载）。严禁执行 `nix flake check` 或 `task nix:test:check` —— 这会唤醒 nix-daemon 并下载全量依赖，严重影响日常开发
 6. **不自动 commit/push**：等待用户确认后再提交

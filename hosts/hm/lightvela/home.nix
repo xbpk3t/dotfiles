@@ -24,6 +24,12 @@
     ];
   };
 
+  # `ff` 系统信息入口；其他 host 走 modules.devops.fetch，hm 轨也补上。
+  modules.devops.fetch = {
+    enable = true;
+    driver = "microfetch";
+  };
+
   # Nezha agent config (N1). The agent v1 reads JSON, not YAML. The secret is
   # rendered by sops-nix; the system service waits for this file before starting.
   #

@@ -33,8 +33,17 @@ does not filter FORWARD, so no extra rule is needed there.
 From the repo root (Mac or agt; both have ansible + SSH to the PA):
 
 ```bash
-task nix:hm:apply
-# or:
+task nix:deploy:hm               # hm track: multi-select ansible-hm nodes
+task nix:hm:apply                # hm-only: all ansible-hm nodes
+task nix:hm:apply NODES=hm-lightvela
+```
+
+The inventory is generated from flake `.#deployRoutes` (`host`/`sshUser` from
+`hosts/hm/<node>/meta.nix`), so a new `hosts/hm/<name>/` node needs no
+inventory edit. `inventory/hm.ini` is only a manual override
+(`INVENTORY=...`); the raw command still works:
+
+```bash
 ansible-playbook -i hosts/_base/hm/ansible/inventory/hm.ini \
   hosts/_base/hm/ansible/bootstrap.yml
 ```
