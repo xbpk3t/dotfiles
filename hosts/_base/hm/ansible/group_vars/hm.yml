@@ -1,5 +1,9 @@
 # hm-only build/activate settings.
 #
+# Ansible connects over SSH. Keep the interpreter here (not only in the static
+# inventory) so inventories generated from flake `deployRoutes` behave the same.
+ansible_python_interpreter: /usr/bin/python3
+
 # The source is the dotfiles tree; the playbook is under hosts/_base/hm/ansible,
 # so ../../../.. is the repo root. `hm_source` can be overridden from the CLI
 # (e.g. a clean `git archive` checkout).
