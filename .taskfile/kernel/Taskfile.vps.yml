@@ -1,62 +1,84 @@
 ---
 version: "3"
 
+# Why: 新购 VPS 的 ecs-only 体检入口（Nushell 单文件）。
+#
+# Q: 为什么只跑 ecs？
+# A: ecs 已覆盖 IP 质量（19 个库）、解锁（~30 平台）、邮件端口、DNSBL、
+#    回程/PING/就近测速和硬件。NetQuality 的独有价值只剩 BGP/IX、
+#    31 省三网延迟矩阵和全球 iperf3；IPQuality 与 ecs 高度重叠。
+#    默认 ecs-only 约 6-8 分钟，避免之前三件套 60+ 分钟。
+#
+# Q: fresh 和 managed 有什么区别？
+# A: fresh   = 已安装 nushell 的新机器：脚本用发行版包管理器装依赖。
+#    managed = NixOS：Taskfile 用 nix-shell 提供 nushell + 依赖，绝不改系统；
+#              默认 --stop-proxy（停 mihomo -> 跑 -> try/finally 恢复）。
+#
+# Q: 为什么用 Nushell？
+# A: 单文件、typed main、结构化解析；mihomo 恢复用 try/finally。
+#    Ctrl-C 会进入 finally；SIGTERM/SIGHUP 不保证。
+#
+# Q: fresh 机器怎么引导 nushell？
+# A: 本项目不附带 bash 引导器；fresh 机器需预装 nushell。
+#    脚本不再支持 curl | sudo bash。
+#
+# Q: 怎么 lint？
+# A: task -t .taskfile/kernel/Taskfile.vps.yml lint
+#    nix-shell 提供 nushell / nufmt / nu-lint。
+#
+# 常用入口：
+#   task -t .taskfile/kernel/Taskfile.vps.yml default
+#   task -t .taskfile/kernel/Taskfile.vps.yml fresh
+#   task -t .taskfile/kernel/Taskfile.vps.yml lint
+#   sudo nu .taskfile/kernel/scripts/vps-check.nu --profile fresh
 
-# Why:
-# Q: 这个taskfile是用来干什么的？
-# A: 用来测试“新购入VPS”的IP质量、网络情况、解锁等指标。
-#
-#
-# Q: 为啥写了一个script，而taskfile来调用这个script呢？
-# A: 考虑到使用场景——针对新购入VPS，这种机器通常是没有安装go-task的，而go-task虽然现在是支持 remote-taskfiles的，但是仍作为 experiments feats. 因此写一个 script，就可以通过curl来直接调用，同时也给taskfile对应的入口，保证在NixOS刷机后，仍然可以用taskfile直接使用
-#
-## https://taskfile.dev/docs/experiments/remote-taskfiles
-#
-#
-#
-# Q: 具体怎么调用这个script?
-# - 全量体检
-# ./vps-check.sh
-#
-# - 快速体检（NetQuality 用延迟模式+低数据模式）
-# ./vps-check.sh --quick
-#
-# - 远程调用
-## curl -fsSL <URL>/vps-check.sh | bash
-## curl -fsSL <URL>/vps-check.sh | bash -s -- --quick
-##
-## curl -fsSL https://raw.githubusercontent.com/xbpk3t/dotfiles/refs/heads/main/.taskfile/kernel/scripts/vps-check.sh | bash -s -- --quick
-#
-#
-#
-# Q: 为啥这3个工具都要跑？
-# A:
-# - ecs 做“全科初筛+硬件能力”
-# - NetQuality 把“网络”做深
-# - IPQuality 把“IP可用性/风险/解锁”做深
-# 结论：三个工具是互补关系，缺一不可
-
-
-
-
+vars:
+  # ecs + installer 所需；nushell 是脚本解释器。
+  NIX_DEPS: "nushell curl unzip iproute2 procps dmidecode bc jq gnutar iputils coreutils sysbench fio"
+  SCRIPT: "scripts/vps-check.nu"
 
 tasks:
   default:
-    desc: "Full VPS check (ecs + NetQuality + IPQuality)"
-    summary: "task -t .taskfile/kernel/Taskfile.vps.yml default"
-    cmd: ./scripts/vps-check.sh --full
+    desc: "Managed NixOS: ecs check in nix-shell (stops/restores mihomo)"
+    aliases: [quick, full] # compatibility: ecs-only now
+    summary: |
+      task -t .taskfile/kernel/Taskfile.vps.yml default
+      task -t .taskfile/kernel/Taskfile.vps.yml default -- --out /root/vps-check
+    cmd: |
+      nix-shell -p {{.NIX_DEPS}} --run 'sudo env PATH="$PATH" nu {{.SCRIPT}} --profile managed --stop-proxy {{.CLI_ARGS}}'
 
-  quick:
-    desc: "Quick VPS check (NetQuality latency+low-data)"
-    summary: "task -t .taskfile/kernel/Taskfile.vps.yml quick"
-    cmd: ./scripts/vps-check.sh --quick
+  no-proxy:
+    desc: "Managed NixOS: do not stop mihomo; run with --allow-proxy (results may be invalid)"
+    summary: "task -t .taskfile/kernel/Taskfile.vps.yml no-proxy"
+    cmd: |
+      nix-shell -p {{.NIX_DEPS}} --run 'sudo env PATH="$PATH" nu {{.SCRIPT}} --profile managed --allow-proxy {{.CLI_ARGS}}'
+
+  direct:
+    desc: "Managed NixOS: run without nix-shell (deps must already be in root PATH)"
+    summary: "task -t .taskfile/kernel/Taskfile.vps.yml direct"
+    cmd: |
+      sudo env PATH="$PATH" nu {{.SCRIPT}} --profile managed {{.CLI_ARGS}}
+
+  fresh:
+    desc: "Fresh VPS: nushell must be installed; auto-install ecs deps"
+    summary: "task -t .taskfile/kernel/Taskfile.vps.yml fresh"
+    cmd: |
+      sudo env PATH="$PATH" nu {{.SCRIPT}} --profile fresh {{.CLI_ARGS}}
 
   no-deps:
-    desc: "Run checks without trying to install deps (-n / -En)"
+    desc: "Compatibility alias: managed run with --no-install (managed never installs anyway)"
     summary: "task -t .taskfile/kernel/Taskfile.vps.yml no-deps"
-    cmd: ./scripts/vps-check.sh --no-deps
+    cmd: |
+      nix-shell -p {{.NIX_DEPS}} --run 'sudo env PATH="$PATH" nu {{.SCRIPT}} --profile managed --stop-proxy --no-install {{.CLI_ARGS}}'
 
   out-local:
-    desc: "Write reports to local ./.reports"
+    desc: "Managed NixOS: write reports under ./.reports"
     summary: "task -t .taskfile/kernel/Taskfile.vps.yml out-local"
-    cmd: ./scripts/vps-check.sh --out ./.reports
+    cmd: |
+      nix-shell -p {{.NIX_DEPS}} --run 'sudo env PATH="$PATH" nu {{.SCRIPT}} --profile managed --stop-proxy --out ./.reports {{.CLI_ARGS}}'
+
+  lint:
+    desc: "Nushell syntax, format, and correctness lint (nufmt + nu-lint)"
+    summary: "task -t .taskfile/kernel/Taskfile.vps.yml lint"
+    cmd: |
+      nix-shell -p nushell nufmt nu-lint --run 'set -e; nu -c "source {{.SCRIPT}}"; nufmt --dry-run {{.SCRIPT}}; nu-lint check --only catch-runtime-failures,annotate-types {{.SCRIPT}}'
