@@ -1,10 +1,6 @@
 ---
 version: "3"
 
-vars:
-  DNS_DIR: "infra/stacks/homelab/cloudflare/lucc.dev/dns"
-  FLEET_METADATA_CMD: "nix eval --impure --json '.#fleetMetadata' | jq ."
-
 tasks:
   inventory:
     desc: "拉取 Cloudflare live inventory"
@@ -25,39 +21,3 @@ tasks:
       CF_ZONE_ID: "{{.CF_ZONE_ID}}"
     cmds:
       - nu .taskfile/cloudflare-inventory.nu {{.DATE}}
-
-  dns:generate:
-    desc: "从 fleet metadata 生成 DERP DNS records 文件"
-    summary: |
-      task tf:dns:generate
-    dir: "{{.USER_WORKING_DIR}}"
-    preconditions:
-      - sh: command -v nix >/dev/null
-        msg: "需要 nix"
-      - sh: command -v jq >/dev/null
-        msg: "需要 jq"
-    cmds:
-      - |
-        set -euo pipefail
-        tmp="$(mktemp "{{.DNS_DIR}}/.fleet.generated.json.XXXXXX")"
-        trap 'rm -f "$tmp"' EXIT
-        {{.FLEET_METADATA_CMD}} > "$tmp"
-        mv "$tmp" "{{.DNS_DIR}}/fleet.generated.json"
-
-  dns:check:
-    desc: "检查 fleet.generated.json 是否与 fleet metadata 同步"
-    summary: |
-      task tf:dns:check
-    dir: "{{.USER_WORKING_DIR}}"
-    preconditions:
-      - sh: command -v nix >/dev/null
-        msg: "需要 nix"
-      - sh: command -v jq >/dev/null
-        msg: "需要 jq"
-    cmds:
-      - |
-        set -euo pipefail
-        tmp="$(mktemp "${TMPDIR:-/tmp}/fleet.check.XXXXXX")"
-        trap 'rm -f "$tmp"' EXIT
-        {{.FLEET_METADATA_CMD}} > "$tmp"
-        diff -u "{{.DNS_DIR}}/fleet.generated.json" "$tmp"

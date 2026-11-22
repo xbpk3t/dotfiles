@@ -1,7 +1,7 @@
 # terranix 第二个试点：把 tailscale/tailnet 从 HCL 迁到 Nix。
 #
 # 生成：
-#   task tf:terranix-tailscale
+#   task tf:terranix
 # 等价命令（仓库根目录）：
 #   nix develop .#infra --command bash -c \
 #     'terranix --with-nulls infra/stacks/homelab/tailscale/tailnet/terranix.nix \
@@ -12,6 +12,7 @@
 { lib, ... }:
 let
   facts = import ../../../../facts.nix;
+  infraLib = import ../../../../terranix-lib.nix;
 
   # fleet 是 hosts/**/meta.nix 的派生视图；tailnet IP/设备名从 meta.nix 取，
   # 不在 Terraform 里再写一份。
@@ -301,28 +302,12 @@ let
   ) deviceCapabilityTags;
 in
 {
-  terraform = {
-    required_version = ">= 1.10.0";
-
-    required_providers.tailscale = {
+  terraform = infraLib.mkTerraform {
+    stateKey = "homelab/tailscale/tailnet/terraform.tfstate";
+    r2Endpoint = facts.cloudflare.r2_endpoint;
+    providers.tailscale = {
       source = "tailscale/tailscale";
       version = "~> 0.18";
-    };
-
-    backend.s3 = {
-      bucket = "luck-dotfiles-opentofu-state";
-      key = "homelab/tailscale/tailnet/terraform.tfstate";
-      region = "auto";
-
-      endpoints.s3 = facts.cloudflare.r2_endpoint;
-
-      skip_credentials_validation = true;
-      skip_metadata_api_check = true;
-      skip_region_validation = true;
-      skip_requesting_account_id = true;
-      skip_s3_checksum = true;
-      use_path_style = true;
-      use_lockfile = true;
     };
   };
 

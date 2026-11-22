@@ -37,7 +37,7 @@ tasks:
   plan:
     desc: "对单个 stack 或一组 tagged stacks 做 tofu plan"
     summary: |
-      task tf:plan STACK=infra/stacks/homelab/cloudflare/account/pages
+      task tf:plan STACK=infra/stacks/homelab/cloudflare/account/d1
       task tf:plan TAG=cloudflare
     cmds:
       - task: '{{if .STACK}}plan-stack{{else}}plan-tag{{end}}'
@@ -105,7 +105,7 @@ tasks:
   apply:
     desc: "对单个 stack 执行 tofu apply"
     summary: |
-      task tf:apply STACK=infra/stacks/homelab/cloudflare/account/pages
+      task tf:apply STACK=infra/stacks/homelab/cloudflare/account/d1
     requires:
       vars:
         - STACK

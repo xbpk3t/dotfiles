@@ -14,7 +14,7 @@ terranix 生成 Terraform JSON。
 ## 生成与校验
 
 ```bash
-task tf:terranix-tailscale
+task tf:terranix
 cd infra/stacks/homelab/tailscale/tailnet
 tofu init -reconfigure -input=false
 tofu validate

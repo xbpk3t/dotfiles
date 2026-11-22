@@ -15,15 +15,16 @@ infra/
   stacks/
     homelab/
       cloudflare/
-        account/{d1,kv,pages,r2}/
+        account/{d1,kv,r2}/
         lucc.dev/{dns,email-routing}/
       tailscale/tailnet/
   .taskfile/              # OpenTofu/Cloudflare inventory 任务
-  cloud-init/             # 手工 bootstrap 产物
   cloudflare/             # Cloudflare 纳管策略与 inventory 说明
 ```
 
 > 注：inventory 为本地盘点产物，不入仓库（见 `infra/AGENTS.md`）。
+> 历史 `infra/cloud-init/aliyun-vps.yaml` 已删除：模板没有被任何链路引用，
+> 当前 VPS 走 NixOS + Ansible，不再维护 Ubuntu/Debian cloud-init 模板。
 
 ## 当前 stack
 
@@ -33,11 +34,12 @@ infra/
 - `stacks/homelab/cloudflare/lucc.dev/email-routing`
 - `stacks/homelab/cloudflare/lucc.dev/workers`（`music.lucc.dev` -> Worker `music`）
 
-> Pages stack 现在为空：`blog` / `docs` / `me` / `music` 已迁到 Workers，
-> `slides` / `nextflux` 已删除。保留空 stack 作为历史锚点。
+> Pages stack 已移除：live 已无 Pages project。KV stack 只纳管 `docs-session`；
+> `__me-workers_sites_assets` 是 Workers Sites 自动创建的 assets namespace，
+> 仍有数据，刻意不纳管。
+
 - `stacks/homelab/cloudflare/account/d1`
 - `stacks/homelab/cloudflare/account/kv`
-- `stacks/homelab/cloudflare/account/pages`
 - `stacks/homelab/cloudflare/account/r2`
 - `stacks/homelab/tailscale/tailnet`
 
@@ -62,7 +64,7 @@ infra/stacks/<scope>/<provider>/<service>/
 
 ```text
 infra/stacks/homelab/cloudflare/lucc.dev/dns/
-infra/stacks/homelab/cloudflare/account/pages/
+infra/stacks/homelab/cloudflare/account/d1/
 infra/stacks/homelab/tailscale/tailnet/
 ```
 
@@ -88,8 +90,8 @@ cd /path/to/dotfiles
 
 task tf                    # 列出 stacks
 task tf:validate STACK=infra/stacks/homelab/cloudflare/lucc.dev/dns
-task tf:plan STACK=infra/stacks/homelab/cloudflare/account/pages
-task tf:apply STACK=infra/stacks/homelab/cloudflare/account/pages
+task tf:plan STACK=infra/stacks/homelab/cloudflare/account/d1
+task tf:apply STACK=infra/stacks/homelab/cloudflare/account/d1
 
 terramate list --tags layer-infra
 terramate run --tags layer-infra -- tofu plan
@@ -115,7 +117,7 @@ task tf:check
 - **PR**：对 `terramate list --tags layer-infra` 选出的全部 stack 逐个跑
   `tofu plan`（只读）。fork PR 拿不到 secrets，会跳过；同仓分支 PR 正常跑。
 - **所有 PR / push**：`validate` job 不依赖 secrets，跑 `task tf:check`
-  （facts / terranix freshness、actionlint、`tofu fmt -check`、全 stack
+  （terranix freshness、actionlint、`tofu fmt -check`、全 stack
   `tofu validate`）。fork PR 也能拿到这层检查。
 - **main**：merge 后**默认不自动 apply**。确认仓库里的 drift 可接受后，可在
   仓库变量里设置 `INFRA_AUTO_APPLY=true` 打开自动 apply；或者手动触发
@@ -140,7 +142,7 @@ locking（OpenTofu 1.13.9 实测可用），不再需要 DynamoDB 锁表。workf
 
 ### Token 权限
 
-- **plan / drift**：Cloudflare Pages / Email Routing / DNS / Workers 的 Read
+- **plan / drift**：Cloudflare Email Routing / DNS / Workers 的 Read
   权限即可；R2 state backend 需要 `CF_R2_AK` / `CF_R2_SK` 的读写。
 - **apply**：上述资源需要 Edit 权限；`CLOUDFLARE_API_TOKEN` 在 GitHub 里必须
   使用 write token。
@@ -160,7 +162,7 @@ printf '%s' '"cfat_..."' | sops set --value-stdin secrets/secrets.yaml \
 - [ ] `infra` environment 配置 required reviewers
 - [ ] 需要 main 自动 apply 时设置仓库变量 `INFRA_AUTO_APPLY=true`
 - [ ] 每次 drift 变红时先确认是否预期，再手动 `workflow_dispatch mode=apply`
-- [ ] 回退：`git revert` + 对应 stack apply；Pages/Workers 域名 ownership
+- [ ] 回退：`git revert` + 对应 stack apply；Workers 域名 ownership
       的变更要先确认 custom domain/DNS 顺序
 
 本地复现（与 CI 使用同一套工具）：
@@ -181,31 +183,35 @@ tofu plan -input=false
 - `nixos-vps-dev` 的公网 IP（api / as / rsshub 共用）
 - Tailscale tailnet 名称
 - 由 host meta 派生的共享 DNS 记录（api / as / rsshub）；DERP 记录
-  （derp / nva）走 `task tf:dns:generate` 写入 `dns/fleet.generated.json`
+  （derp / nva）由 DNS terranix 直接 import `lib/fleet` 派生
 
-生成物是 `infra/generated/facts.json`，由 `task tf:facts` 写入；Cloudflare
-stack 用 `jsondecode(file(...))` 消费。改 `hosts/*/meta.nix` 时要同时重跑
-`task tf:dns:generate`（DERP）和 `task tf:facts`（facts），再跑
-`task tf:terranix`；改 `infra/facts.nix` 后只需 `task tf:facts`。
-CI 会做 freshness 检查。
+`infra/facts.nix` 是共享事实源；所有 terranix stack 直接 `import` 它，
+不再生成中间 JSON。改 `hosts/*/meta.nix` 或 `infra/facts.nix` 后重跑
+`task tf:terranix` 即可。CI 会做 terranix freshness 检查。
 
-## terranix 试点
+## terranix stacks
 
-目前两个 stack 使用 terranix：
+目前所有 stack 都使用 terranix：
 
 - `infra/stacks/homelab/cloudflare/lucc.dev/dns`
-  - 源文件：`terranix.nix`（共享 facts + 手写记录 + provider/backend/moved/import）
-  - 生成物：`generated.tf.json`，由 `task tf:terranix` 写入，不要手改
+- `infra/stacks/homelab/cloudflare/lucc.dev/email-routing`
+- `infra/stacks/homelab/cloudflare/lucc.dev/workers`
+- `infra/stacks/homelab/cloudflare/account/d1`
+- `infra/stacks/homelab/cloudflare/account/kv`
+- `infra/stacks/homelab/cloudflare/account/r2`
 - `infra/stacks/homelab/tailscale/tailnet`
-  - 源文件：`terranix.nix`（ACL / DERP / provider / resources）
-  - 生成物：`generated.tf.json`，由 `task tf:terranix-tailscale` 写入，不要手改
+
+每个 stack 的源文件是 `terranix.nix`，生成物是同目录的
+`generated.tf.json`，由 `task tf:terranix` 统一写入，不要手改。
+共享的 `required_version` / provider / R2 backend 骨架在
+`infra/terranix-lib.nix`；资源、import、moved 等语义仍留在各 stack。
 
 共同约定：
 
 - 回退：`git revert` 对应 commit 即可恢复被删除的 HCL 文件（git 历史保留）
 - 这些 stack 不再适用 `terraform fmt` / `tflint` / `terraform-ls` 的 HCL 能力；
   `tofu validate` / `tofu plan` 仍是有效闸门
-- 其他 stack 暂时保持 HCL，不做全量迁移
+- 新增 stack 时优先用 terranix；默认不引入新 HCL
 
 ## 下一步
 
