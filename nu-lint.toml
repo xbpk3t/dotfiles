@@ -1,0 +1,14 @@
+# nu-lint configuration for the dotfiles repository.
+#
+# Legacy helper scripts predate nu-lint and intentionally use:
+# - optional env/flag defaults of "" (empty means "not provided")
+# - internal positional helper APIs (not user-facing CLI commands)
+# - typed flags validated by their callers
+#
+# These rules are disabled repo-wide; entry-point scripts under
+# .taskfile/nix/scripts are still kept warning-free.
+[rules]
+default_empty_masks_missing = "off"
+check_typed_flag_before_use = "off"
+list_param_to_variadic = "off"
+max_positional_params = "off"

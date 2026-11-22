@@ -5,16 +5,36 @@
 
 # HTTP GET with Cloudflare auth headers
 def api-get [path: string]: nothing -> record {
-  http get $"https://api.cloudflare.com/client/v4/($path)" -H {
-    Authorization: $"Bearer ($env.CF_API_TOKEN)",
-    "Content-Type": "application/json"
+  try {
+    http get $"https://api.cloudflare.com/client/v4/($path)" -H {
+      Authorization: $"Bearer ($env.CF_API_TOKEN)",
+      "Content-Type": "application/json"
+    }
+  } catch {|err|
+    error make {msg: $"Cloudflare API ($path) failed: ($err.msg)"}
+  }
+}
+
+def save-json [value: record, path: path]: nothing -> nothing {
+  try {
+    $value | to json | save --force $path
+  } catch {|err|
+    error make {msg: $"failed to write ($path): ($err.msg)"}
+  }
+}
+
+def open-json [path: path]: nothing -> record {
+  try {
+    open $path
+  } catch {|err|
+    error make {msg: $"failed to read ($path): ($err.msg)"}
   }
 }
 
 # Fetch a single API resource and save to raw_dir
 def fetch-single [name: string, path: string, raw_dir: string]: nothing -> nothing {
   let resp = api-get $path
-  $resp | to json | save --force $"($raw_dir)/($name).json"
+  save-json $resp $"($raw_dir)/($name).json"
 }
 
 # Fetch a paginated API resource, merge all pages, and save to raw_dir
@@ -24,7 +44,7 @@ def fetch-paginated [name: string, path: string, raw_dir: string, per_page: int 
   let pages = generate {|page_num|
     let url = $"($path)($separator)page=($page_num)&per_page=($per_page)"
     let resp = api-get $url
-    let total_pages = ($resp | get -i result_info.total_pages | default 1 | into int)
+    let total_pages = ($resp | get --optional result_info.total_pages | default 1 | into int)
     if $page_num >= $total_pages {
       {out: $resp}
     } else {
@@ -36,8 +56,8 @@ def fetch-paginated [name: string, path: string, raw_dir: string, per_page: int 
     $pages | first
   } else {
     let first = $pages | first
-    let all_results = $pages | each {|p| $p | get -i result | default [] } | flatten
-    let last_info = $pages | last | get -i result_info | default ($first | get -i result_info | default null)
+    let all_results = $pages | each {|p| $p | get --optional result | default [] } | flatten
+    let last_info = $pages | last | get --optional result_info | default ($first | get --optional result_info | default null)
     {
       ...$first,
       result: $all_results,
@@ -45,12 +65,12 @@ def fetch-paginated [name: string, path: string, raw_dir: string, per_page: int 
     }
   }
 
-  $merged | to json | save --force $"($raw_dir)/($name).json"
+  save-json $merged $"($raw_dir)/($name).json"
 }
 
 # Build a resource summary entry for the summary JSON
 def build-resource-entry [key: string, scope: string, data: record, name_fn: closure]: nothing -> record {
-  let result = $data | get -i result
+  let result = $data | get --optional result
   let is_list = ($result | describe) =~ "list"
   let ok = ($data.success? == true)
 
@@ -79,7 +99,11 @@ def run-inventory [date_stamp: string]: nothing -> nothing {
     error make {msg: "CF_ZONE_ID is required"}
   }
 
-  mkdir $raw_dir
+  try {
+    mkdir $raw_dir
+  } catch {|err|
+    error make {msg: $"failed to create ($raw_dir): ($err.msg)"}
+  }
 
   print $"Fetching Cloudflare inventory into: ($out_dir)"
 
@@ -101,25 +125,25 @@ def run-inventory [date_stamp: string]: nothing -> nothing {
   fetch-single "workers_subdomain" $"accounts/($cf_account)/workers/subdomain" $raw_dir
 
   # Read all raw data for summary construction
-  let token = open $"($raw_dir)/token_verify.json"
-  let account = open $"($raw_dir)/account.json"
-  let zone = open $"($raw_dir)/zone.json"
-  let dns = open $"($raw_dir)/dns_records.json"
-  let email = open $"($raw_dir)/email_routing_rules.json"
-  let pages = open $"($raw_dir)/pages_projects.json"
-  let d1 = open $"($raw_dir)/d1_databases.json"
-  let kv = open $"($raw_dir)/kv_namespaces.json"
-  let r2 = open $"($raw_dir)/r2_buckets.json"
-  let workers = open $"($raw_dir)/workers_scripts.json"
-  let workers_subdomain = open $"($raw_dir)/workers_subdomain.json"
+  let token = open-json $"($raw_dir)/token_verify.json"
+  let account = open-json $"($raw_dir)/account.json"
+  let zone = open-json $"($raw_dir)/zone.json"
+  let dns = open-json $"($raw_dir)/dns_records.json"
+  let email = open-json $"($raw_dir)/email_routing_rules.json"
+  let pages = open-json $"($raw_dir)/pages_projects.json"
+  let d1 = open-json $"($raw_dir)/d1_databases.json"
+  let kv = open-json $"($raw_dir)/kv_namespaces.json"
+  let r2 = open-json $"($raw_dir)/r2_buckets.json"
+  let workers = open-json $"($raw_dir)/workers_scripts.json"
+  let workers_subdomain = open-json $"($raw_dir)/workers_subdomain.json"
 
   # Build summary JSON
-  let r2_result = $r2 | get -i result.buckets
+  let r2_result = $r2 | get --optional result.buckets
   let r2_ok = ($r2.success? == true) and (($r2_result | describe) =~ "list")
 
-  let ws_result = $workers_subdomain | get -i result
+  let ws_result = $workers_subdomain | get --optional result
   let ws_ok = ($workers_subdomain.success? == true)
-  let ws_sub = if $ws_ok { $ws_result | get -i subdomain | default "" | into string } else { "" }
+  let ws_sub = if $ws_ok { $ws_result | get --optional subdomain | default "" | into string } else { "" }
 
   let summary = {
     generated_at: (date now | format date "%Y-%m-%dT%H:%M:%SZ"),
@@ -140,12 +164,12 @@ def run-inventory [date_stamp: string]: nothing -> nothing {
     resources: [
       (build-resource-entry "dns_records" "zone" $dns {|r| $r.name}),
       (build-resource-entry "email_routing_rules" "zone" $email {|r|
-        $r | get -i name | default ($r | get -i tag | default ($r | get -i id | default ""))
+        $r | get --optional name | default ($r | get --optional tag | default ($r | get --optional id | default ""))
       }),
       (build-resource-entry "pages_projects" "account" $pages {|r| $r.name}),
       (build-resource-entry "d1_databases" "account" $d1 {|r| $r.name}),
       (build-resource-entry "kv_namespaces" "account" $kv {|r|
-        $r | get -i title | default ($r | get -i name | default ($r | get -i id | default ""))
+        $r | get --optional title | default ($r | get --optional name | default ($r | get --optional id | default ""))
       }),
       {
         key: "r2_buckets",
@@ -154,7 +178,7 @@ def run-inventory [date_stamp: string]: nothing -> nothing {
         names: (if $r2_ok { $r2_result | each {|b| $b.name} | sort } else { [] })
       },
       (build-resource-entry "workers_scripts" "account" $workers {|r|
-        $r | get -i id | default ($r | get -i tag | default ($r | get -i name | default ""))
+        $r | get --optional id | default ($r | get --optional tag | default ($r | get --optional name | default ""))
       }),
       {
         key: "workers_subdomain",
@@ -165,7 +189,7 @@ def run-inventory [date_stamp: string]: nothing -> nothing {
     ]
   }
 
-  $summary | to json | save --force $"($out_dir)/summary.json"
+  save-json $summary $"($out_dir)/summary.json"
 
   # Generate README.md
   let resource_lines = $summary.resources | each {|r| $"- ($r.key): ($r.count)"} | str join "\n"
@@ -188,7 +212,11 @@ def run-inventory [date_stamp: string]: nothing -> nothing {
 - 正式纳管前，先确认每一类资源的 state 边界，再决定是否生成 HCL/import blocks。
 "
 
-  $readme | save --force $"($out_dir)/README.md"
+  try {
+    $readme | save --force $"($out_dir)/README.md"
+  } catch {|err|
+    error make {msg: $"failed to write ($out_dir)/README.md: ($err.msg)"}
+  }
 
   print $"Cloudflare inventory written to: ($out_dir)"
 }

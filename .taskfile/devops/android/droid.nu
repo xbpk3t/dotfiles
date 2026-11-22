@@ -10,7 +10,13 @@ def load-apps-config [config_path: string]: nothing -> record {
         }
     }
 
-    let config = (open $config_abs)
+    let config = (
+        try {
+            open $config_abs
+        } catch {|err|
+            error make {msg: $'Failed to read apps config ($config_abs): ($err.msg)'}
+        }
+    )
 
     if (($config | describe) != 'record') {
         error make {
@@ -25,7 +31,7 @@ def load-apps-config [config_path: string]: nothing -> record {
 }
 
 def normalize-debloat-group [
-    items: any
+    items: list<any>
     action_name: string
     config_abs: string
 ]: nothing -> list<record> {
@@ -79,7 +85,13 @@ def load-debloat-config [config_path: string]: nothing -> list<record> {
         }
     }
 
-    let config = (open $config_abs)
+    let config = (
+        try {
+            open $config_abs
+        } catch {|err|
+            error make {msg: $'Failed to read debloat config ($config_abs): ($err.msg)'}
+        }
+    )
     let config_type = ($config | describe)
 
     # 重要：当前支持两种 debloat manifest 结构：
@@ -118,10 +130,6 @@ def normalize-user-id [user_id: string]: nothing -> string {
     }
 
     $user_id
-}
-
-def adb-base-args []: nothing -> list<string> {
-    []
 }
 
 def run-adb [args: list<string>]: nothing -> record {
@@ -307,7 +315,7 @@ def collect-matching-lines [
     }
 }
 
-def normalize-logcat-since [since: string] {
+def normalize-logcat-since [since: string]: nothing -> string {
     let raw_value = ($since | str trim)
 
     if $raw_value == '' {
@@ -363,6 +371,7 @@ def normalize-logcat-since [since: string] {
         msg: $'Failed to convert since value for logcat: ($raw_value)'
         help: 'Neither GNU date nor BSD date conversion succeeded on this host.'
     }
+    return ''
 }
 
 def get-diag-log-filterspec []: nothing -> list<string> {
@@ -511,7 +520,7 @@ def "main apps-check" [
 def "main apps-install" [
     --config (-c): string
     --user-id (-u): string = '0'
-] {
+]: nothing -> nothing {
     let checked_user_id = (normalize-user-id $user_id)
     let config = (load-apps-config $config)
     let fdroid_apps = ($config.fdroid | default [])
@@ -557,7 +566,7 @@ def "main apps-install" [
 def "main debloat-check" [
     --config (-c): string
     --user-id (-u): string = '0'
-] {
+]: nothing -> table {
     let checked_user_id = (normalize-user-id $user_id)
     let packages = (load-debloat-config $config)
 
@@ -597,7 +606,7 @@ def "main debloat-check" [
 def "main debloat-apply" [
     --config (-c): string
     --user-id (-u): string = '0'
-] {
+]: nothing -> nothing {
     let checked_user_id = (normalize-user-id $user_id)
     let packages = (load-debloat-config $config)
 

@@ -33,7 +33,7 @@ def parse-exclude-dirs [exclude_dirs_csv: string]: nothing -> list<string> {
 
 # 构造 glob exclude patterns。
 # 同时排除目录本身与其子树，避免 walker 继续深入被忽略的目录。
-def build-exclude-patterns [exclude_dirs: list<string>]: nothing -> list<string> {
+def build-exclude-patterns [...exclude_dirs: string]: nothing -> list<string> {
     $exclude_dirs
     | each {|dir|
         [
@@ -48,7 +48,7 @@ def build-exclude-patterns [exclude_dirs: list<string>]: nothing -> list<string>
 # 重要：统一返回 absolute path，后续再转换为 relative path 做聚合。
 def list-tree-files [folder_abs: string, exclude_dirs_csv: string]: nothing -> list<string> {
     let exclude_dirs = (parse-exclude-dirs $exclude_dirs_csv)
-    let exclude_patterns = (build-exclude-patterns $exclude_dirs)
+    let exclude_patterns = (build-exclude-patterns ...$exclude_dirs)
 
     glob $'($folder_abs)/**/*' --no-dir --exclude $exclude_patterns
     | sort
@@ -89,7 +89,13 @@ def compute-tree-signature [folder: string, exclude_dirs_csv: string]: nothing -
         list-tree-files $folder_abs $exclude_dirs_csv
         | each {|file_path|
             let relative_path = ($file_path | path relative-to $folder_abs)
-            let content_hash = (open --raw $file_path | hash sha256)
+            let content_hash = (
+                try {
+                    open --raw $file_path | hash sha256
+                } catch {|err|
+                    error make {msg: $'failed to read ($file_path): ($err.msg)'}
+                }
+            )
             $'($content_hash)  ($relative_path)'
         }
     )
@@ -101,56 +107,71 @@ def compute-tree-signature [folder: string, exclude_dirs_csv: string]: nothing -
 }
 
 def check-tree-signature [
-    --folder (-f): string
-    --stamp (-s): string
+    --folder (-f): string = ''
+    --stamp (-s): string = ''
     --exclude-dirs (-e): string = $default_exclude_dirs
-] {
-    let stamp_abs = (resolve-stamp-path $folder $stamp)
+]: nothing -> bool {
+    if ($folder | is-empty) or ($stamp | is-empty) {
+        error make {msg: '--folder and --stamp are required'}
+    }
 
+    let stamp_abs = (resolve-stamp-path $folder $stamp)
     if not ($stamp_abs | path exists) {
-        exit 1
+        return false
     }
 
     let current_signature = (compute-tree-signature $folder $exclude_dirs)
-    let expected_signature = (open --raw $stamp_abs | str trim)
+    let expected_signature = (
+        try {
+            open --raw $stamp_abs | str trim
+        } catch {|err|
+            error make {msg: $'failed to read stamp ($stamp_abs): ($err.msg)'}
+        }
+    )
 
-    if $current_signature == $expected_signature {
-        exit 0
-    }
-
-    exit 1
+    $current_signature == $expected_signature
 }
 
 def write-tree-signature [
-    --folder (-f): string
-    --stamp (-s): string
+    --folder (-f): string = ''
+    --stamp (-s): string = ''
     --exclude-dirs (-e): string = $default_exclude_dirs
-] {
+]: nothing -> nothing {
+    if ($folder | is-empty) or ($stamp | is-empty) {
+        error make {msg: '--folder and --stamp are required'}
+    }
+
     let stamp_abs = (resolve-stamp-path $folder $stamp)
     let stamp_dir = ($stamp_abs | path dirname)
     let current_signature = (compute-tree-signature $folder $exclude_dirs)
 
-    mkdir $stamp_dir
-    $current_signature | save --force --raw $stamp_abs
+    try {
+        mkdir $stamp_dir
+        $current_signature | save --force --raw $stamp_abs
+    } catch {|err|
+        error make {msg: $'failed to write stamp ($stamp_abs): ($err.msg)'}
+    }
 }
 
-def main [
-    action: string
-    --folder (-f): string
-    --stamp (-s): string
+def "main check" [
+    --folder (-f): string = ''
+    --stamp (-s): string = ''
     --exclude-dirs (-e): string = $default_exclude_dirs
-] {
-    match $action {
-        'check' => {
-            check-tree-signature --folder $folder --stamp $stamp --exclude-dirs $exclude_dirs
-        }
-        'write' => {
-            write-tree-signature --folder $folder --stamp $stamp --exclude-dirs $exclude_dirs
-        }
-        _ => {
-            error make {
-                msg: $"Unsupported action: ($action)"
-            }
-        }
+]: nothing -> nothing {
+    if not (check-tree-signature --folder $folder --stamp $stamp --exclude-dirs $exclude_dirs) {
+        exit 1
     }
+}
+
+def "main write" [
+    --folder (-f): string = ''
+    --stamp (-s): string = ''
+    --exclude-dirs (-e): string = $default_exclude_dirs
+]: nothing -> nothing {
+    write-tree-signature --folder $folder --stamp $stamp --exclude-dirs $exclude_dirs
+}
+
+def main []: nothing -> nothing {
+    print -e 'Usage: tree-sig.nu <check|write> --folder <dir> --stamp <name>'
+    exit 2
 }

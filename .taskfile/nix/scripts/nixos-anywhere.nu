@@ -11,22 +11,22 @@
 #   nu .taskfile/nix/scripts/nixos-anywhere.nu --flake "path#host" --host "root@ip"
 #   nu .taskfile/nix/scripts/nixos-anywhere.nu --flake "path#host" --host "root@ip" --execute
 
-export def main [
-    --flake: string                     # flake 引用（path#nixosConfigurationName）
-    --host: string                      # 目标 SSH（root@ip）
+def main [
+    --flake: string = ''                # flake 引用（path#nixosConfigurationName）
+    --host: string = ''                 # 目标 SSH（root@ip）
     # Why 不加 --no-reboot：ssh public key 已写入 NixOS config，
     # 刷机后直接 reboot 即可 key auth 登录，无需手动传 key。
     --na-args: string = "--debug"  # 透传给 nixos-anywhere 的额外参数
     --execute                           # 设此标志则真正执行，否则 dry-run
 ]: nothing -> nothing {
 
-    print $'■ nixos-anywhere: FLAKE=($flake) HOST=($host)'
-    print ''
-
     # ── [1/3] 本地 preflight ──────────────────────────
     print '◆ [1/3] 本地环境检查'
     check-local $flake $host
     print '  ✓ 全部通过'
+    print ''
+    print $'■ nixos-anywhere: FLAKE=($flake) HOST=($host)'
+    print ''
     print ''
 
     # ── [2/3] 远端 preflight（单次 SSH）───────────────
@@ -59,14 +59,14 @@ export def main [
 
     let args = ["--flake", $flake, "--target-host", $host, ...($na_args | split row ' ')]
 
-    if $has_na {
-        ^nixos-anywhere ...$args
-    } else {
-        ^nix run --refresh github:nix-community/nixos-anywhere -- ...$args
-    }
-
-    if $env.LAST_EXIT_CODE != 0 {
-        error make { msg: $'nixos-anywhere 执行失败 (exit: $env.LAST_EXIT_CODE)' }
+    try {
+        if $has_na {
+            ^nixos-anywhere ...$args
+        } else {
+            ^nix run --refresh github:nix-community/nixos-anywhere -- ...$args
+        }
+    } catch {|err|
+        error make { msg: $'nixos-anywhere 执行失败: ($err.msg)' }
     }
 
     print '✓ 完成'
@@ -122,9 +122,9 @@ echo "✓ 远端 preflight 全部通过"
 
     # 注意：不能 pipe（| complete 等），否则 SSH 无法访问 /dev/tty
     # 读密码，所有认证都会以 "Device not configured" 失败。
-    ^ssh -o ConnectTimeout=5 $host $script
-
-    if $env.LAST_EXIT_CODE != 0 {
-        error make { msg: '远端 preflight 失败，请检查目标机状态' }
+    try {
+        ^ssh -o ConnectTimeout=5 $host $script
+    } catch {|err|
+        error make { msg: $'远端 preflight 失败，请检查目标机状态: ($err.msg)' }
     }
 }
