@@ -15,9 +15,27 @@ task tf:terranix
 
 ## 当前范围
 
-- `music.lucc.dev` -> Worker `music`
-  - Worker 脚本由 `zzz` repo 部署
-  - 这个 stack 只负责 custom domain（Cloudflare 会自动创建/接管 DNS 记录和证书）
+Terraform 管理的 custom domains：
+
+| hostname | Worker | 归属 |
+| --- | --- | --- |
+| `music.lucc.dev` | `music` | Worker 脚本由 `zzz` repo 部署 |
+| `dp.lucc.dev` / `dp.hxha.xyz` / `dp.lucas1.xyz` | `dp` | 外部/dashboard 创建，已 import 收编 |
+| `temp-email-api.lucc.dev` / `temp-mail.lucc.dev` | `cloudflare_temp_email` | 外部/dashboard 创建，已 import 收编 |
+
+这个 stack 只负责 custom domain（Cloudflare 会自动创建/接管 DNS 记录和证书）。
+`dp.hxha.xyz` / `dp.lucas1.xyz` 属于其它 zone，但仍是同一个 account 下的
+Worker custom domain，所以和 `lucc.dev` 放在同一个 stack。
+
+刻意不纳入 Terraform：
+
+| hostname | 原因 |
+| --- | --- |
+| `docs.lucc.dev` | 由 docs repo 的 `wrangler.toml` routes 管理 |
+| `blog.lucc.dev` | 由 docs repo 的 `wrangler.blog.toml` routes 管理 |
+
+这两个域名如果同时由 Terraform 和 Wrangler 管理会形成双写；要改变 ownership
+时必须先改 docs repo 的部署配置。
 
 ## Cutover
 

@@ -1,9 +1,69 @@
 {
+  "import": [
+    {
+      "id": "96540bd100b82adba941163704660c31/04785ab2f5878c4f523ac7a1136ee6bf90d554b2",
+      "to": "cloudflare_workers_custom_domain.domains[\"dp-hxha\"]"
+    },
+    {
+      "id": "96540bd100b82adba941163704660c31/83422ae3774d473f741fa6c6ef3fe4c2ecbb7b25",
+      "to": "cloudflare_workers_custom_domain.domains[\"dp-lucas1\"]"
+    },
+    {
+      "id": "96540bd100b82adba941163704660c31/ea312fb627610bd6e294bb3a5b23d36a0130f88a",
+      "to": "cloudflare_workers_custom_domain.domains[\"dp-lucc\"]"
+    },
+    {
+      "id": "96540bd100b82adba941163704660c31/4114869823805ccc549dfd01bce3f6a33d34bcb5",
+      "to": "cloudflare_workers_custom_domain.domains[\"temp-email-api\"]"
+    },
+    {
+      "id": "96540bd100b82adba941163704660c31/dd9c471c95d19465509ec6902ba41801a04e0993",
+      "to": "cloudflare_workers_custom_domain.domains[\"temp-mail\"]"
+    }
+  ],
   "provider": {
     "cloudflare": {}
   },
   "resource": {
     "cloudflare_workers_custom_domain": {
+      "domains": {
+        "account_id": "96540bd100b82adba941163704660c31",
+        "for_each": {
+          "dp-hxha": {
+            "hostname": "dp.hxha.xyz",
+            "id": "04785ab2f5878c4f523ac7a1136ee6bf90d554b2",
+            "service": "dp",
+            "zone_id": "7fc45c38cd3076f415f74ee899fc91e6"
+          },
+          "dp-lucas1": {
+            "hostname": "dp.lucas1.xyz",
+            "id": "83422ae3774d473f741fa6c6ef3fe4c2ecbb7b25",
+            "service": "dp",
+            "zone_id": "2de11ed56efd0b7d6aee9c0d090de3e2"
+          },
+          "dp-lucc": {
+            "hostname": "dp.lucc.dev",
+            "id": "ea312fb627610bd6e294bb3a5b23d36a0130f88a",
+            "service": "dp",
+            "zone_id": "1c07a1b84d8273f4dfa6c3adce513f94"
+          },
+          "temp-email-api": {
+            "hostname": "temp-email-api.lucc.dev",
+            "id": "4114869823805ccc549dfd01bce3f6a33d34bcb5",
+            "service": "cloudflare_temp_email",
+            "zone_id": "1c07a1b84d8273f4dfa6c3adce513f94"
+          },
+          "temp-mail": {
+            "hostname": "temp-mail.lucc.dev",
+            "id": "dd9c471c95d19465509ec6902ba41801a04e0993",
+            "service": "cloudflare_temp_email",
+            "zone_id": "1c07a1b84d8273f4dfa6c3adce513f94"
+          }
+        },
+        "hostname": "${each.value.hostname}",
+        "service": "${each.value.service}",
+        "zone_id": "${each.value.zone_id}"
+      },
       "music": {
         "account_id": "96540bd100b82adba941163704660c31",
         "hostname": "music.lucc.dev",

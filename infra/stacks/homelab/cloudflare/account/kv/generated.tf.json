@@ -1,0 +1,51 @@
+{
+  "import": [
+    {
+      "id": "96540bd100b82adba941163704660c31/bb27afbe4c4b4083a126def401be39e3",
+      "to": "cloudflare_workers_kv_namespace.namespaces[\"docs-session\"]"
+    }
+  ],
+  "provider": {
+    "cloudflare": {}
+  },
+  "resource": {
+    "cloudflare_workers_kv_namespace": {
+      "namespaces": {
+        "account_id": "96540bd100b82adba941163704660c31",
+        "for_each": {
+          "docs-session": {
+            "id": "bb27afbe4c4b4083a126def401be39e3",
+            "title": "docs-session"
+          }
+        },
+        "title": "${each.value.title}"
+      }
+    }
+  },
+  "terraform": {
+    "backend": {
+      "s3": {
+        "bucket": "luck-dotfiles-opentofu-state",
+        "endpoints": {
+          "s3": "https://96540bd100b82adba941163704660c31.r2.cloudflarestorage.com"
+        },
+        "key": "homelab/cloudflare/account/kv/terraform.tfstate",
+        "region": "auto",
+        "skip_credentials_validation": true,
+        "skip_metadata_api_check": true,
+        "skip_region_validation": true,
+        "skip_requesting_account_id": true,
+        "skip_s3_checksum": true,
+        "use_lockfile": true,
+        "use_path_style": true
+      }
+    },
+    "required_providers": {
+      "cloudflare": {
+        "source": "cloudflare/cloudflare",
+        "version": "~> 5.0"
+      }
+    },
+    "required_version": ">= 1.10.0"
+  }
+}
