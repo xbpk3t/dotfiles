@@ -5,8 +5,12 @@ schedule: "0 0 1 * *"
 max_active_runs: 1
 
 # dagu 没有 runs-on，用 DAG-level precondition 做主机 gate。
+# TODO(deadlink): agt 的 opencli-browser（chromium-agent/Xvfb/x11vnc）已按 B 方案移除；
+# 这个 DAG 依赖 chromium-agent + opencli，先以 unit 是否存在做 gate（agt 上会 skip）。
+# 以后迁到 macos-ws 时，把 start_browser/stop_browser 改成 Mac 版（真实桌面浏览器，
+# 无 systemctl/chromium-agent），并确认 Mac 有 nu/lychee/opencli。
 preconditions:
-  - condition: '[ "$(hostname -s)" = "nixos-vps-agt" ]'
+  - condition: '[ "$(hostname -s)" = "nixos-vps-agt" ] && systemctl --user cat chromium-agent >/dev/null 2>&1'
 
 env:
   WORKSPACE: ${HOME}/Desktop/docs

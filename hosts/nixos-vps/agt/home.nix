@@ -104,19 +104,9 @@ in
 
       dsh.enable = false;
 
-      opencli-browser = {
-        enable = true;
-        # 4G 机器：Chromium 不随 session 常驻，用 OpenCLI 前手动
-        # `systemctl --user start chromium-agent`，闲置省 ~430M。
-        # deadlink-loop DAG 的 scan 步走 `opencli browser`；DAG 现在会在 scan
-        # 前按需 start、结束后 stop（见 deadlink-loop.yml），不依赖常驻。
-        autoStart = false;
-        # 4G 机器：先节流再硬限，避免 Chromium 拖进全局 OOM。
-        chromiumMemoryHigh = "700M";
-        chromiumMemoryMax = "1200M";
-        # x11vnc 绑 tailnet，Mac 可直接用 Screen Sharing 打开 vnc://<tailnet-ip>:5900。
-        bindAddress = tailnetIp;
-      };
+      # opencli-browser（Xvfb/chromium-agent/x11vnc）已按 B 方案移除：
+      # 4G 内存跑不动 browser + 并行 digest，浏览器相关 DAG 迁到 macos-ws。
+      # 模块文件保留在 git 历史/未来 headless 需求时再恢复。
 
       # opencode CLI 保留；web UI 已关闭。bind/port 保留，方便以后恢复。
       opencode = {

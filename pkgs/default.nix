@@ -5,7 +5,6 @@ in
 {
   voltagent-subagents = sources.voltagent-subagents.src;
   dagu = pkgs.callPackage ./dagu { };
-  opencli-extension = pkgs.callPackage ./opencli-extension { };
   apm-bin = pkgs.callPackage ./apm-bin {
     inherit (sources)
       apm-bin-x86_64-linux
