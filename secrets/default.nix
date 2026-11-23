@@ -104,12 +104,8 @@ in
 
       # sub（机场订阅，挂在 proxy 下）：key = 源名，value = 订阅 URL（含 token）。
       # 新增机场 = 这里加一条 SUB_<NAME> + secrets.yaml 加 proxy.sub.<name>，mihomo 自动发现。
-      #
-      # [DOGEGG流量站](https://traffic.dogegg.online/)
-      #
-      SUB_DOGEGG = mkRootSecret "proxy/sub/dogegg";
-      SUB_DOING = mkRootSecret "proxy/sub/doing";
       SUB_IKUUU = mkRootSecret "proxy/sub/ikuuu";
+      SUB_9TI = mkRootSecret "proxy/sub/9ti";
 
       # Shared API tokens
       # youtubeApiKey = mkUserSecret "youtube/api_key";

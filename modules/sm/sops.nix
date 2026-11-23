@@ -63,9 +63,8 @@ in
         PROXY_FLYINGBIRD = mkRootSecret "proxy/flyingbird";
         PROXY_CLASH_SK = mkRootSecret "proxy/clash_secret";
         # sub（机场订阅）
-        SUB_DOGEGG = mkRootSecret "proxy/sub/dogegg";
-        SUB_DOING = mkRootSecret "proxy/sub/doing";
         SUB_IKUUU = mkRootSecret "proxy/sub/ikuuu";
+        SUB_9TI = mkRootSecret "proxy/sub/9ti";
         # Tailscale 加入 key 不在 sm 声明：join 由 ansible bootstrap 用本地
         # sm_ts_authkey_src 完成，Nix 侧没有消费者。
       }

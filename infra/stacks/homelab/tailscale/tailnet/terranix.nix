@@ -24,6 +24,7 @@ let
 
   hmPaIp = fleet.nodes."hm-lightvela".tailscale.ip;
   macosIp = fleet.nodes."macos-ws".tailscale.ip;
+  devIp = fleet.nodes."nixos-vps-dev".tailscale.ip;
   # agt 的 DERP 事实（域名/公网 IP）与 DNS/ACME 同源，见 hosts/nixos-vps/agt/meta.nix。
   agtNode = fleet.nodes."nixos-vps-agt";
   agtIp = agtNode.tailscale.ip;
@@ -63,13 +64,13 @@ let
     "tag:exit" = [ owner ];
   };
 
-  # 一次性/非 fleet 管理设备的 host alias。
-  # 注意：ACL 里直接写 hostname 会被控制面拒绝（invalid address）；
-  # 在 hosts 里定义别名，再用别名写 grants/tests。
+  # ACL host alias。fleet 节点若需要在 grants 里作为 src/dst，也在这里起
+  # 别名；ACL 里直接写 hostname 会被控制面拒绝（invalid address）。
   hosts = {
     "macos-ws" = macosIp;
     "hermes-wb" = hmPaIp;
     "agt" = agtIp;
+    "dev" = devIp;
     "nod-am" = phoneIp;
   };
 
@@ -137,6 +138,16 @@ let
     # agt 主机防火墙只对 hmPaIp 放行 7890；这里用 host alias 保持同一最小权限。
     {
       src = [ "hermes-wb" ];
+      dst = [ "agt" ];
+      ip = [ "7890" ];
+    }
+    # TODO(volces): 这条 grant 只为 AxonHub 的 volces 渠道（ark.cn-beijing
+    # 只有国内可达）。停用 volces 后，连同 hosts/nixos-vps/agt/default.nix
+    # 里 devIp 的 7890 防火墙放行一起删除。
+    # AxonHub（dev，LA）→ agt mihomo：volces ark 端点只有国内可达，复用与
+    # hm PA 同一个无认证代理；源地址仍只放行单个节点。
+    {
+      src = [ "dev" ];
       dst = [ "agt" ];
       ip = [ "7890" ];
     }
