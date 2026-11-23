@@ -16,6 +16,9 @@ let
   # 停用 volces 后，连同 tailnet ACL 里 dev → agt:7890 的 grant 一起删除。
   # dev 上的 AxonHub 需要访问只有国内可达的 volces ark 端点，复用 agt mihomo。
   devIp = mylib.fleet.nodes."nixos-vps-dev".tailscale.ip;
+  # Mac 的 tailnet IP；只用于 CloudCLI UI（3001）。5900/x11vnc 已随
+  # opencli-browser B 方案移除。
+  macIp = mylib.fleet.nodes."macos-ws".tailscale.ip;
 in
 {
   imports = [ ../default.nix ];
@@ -27,6 +30,11 @@ in
       bwMbps = 6;
       rttMs = 30;
     };
+
+    # VM 没有硬件 watchdog；softdog（见下方 boot.kernelModules）提供
+    # /dev/watchdog 后，这里放宽 systemd 的喂狗超时：默认 15s 对 4G
+    # 重载机太激进，60s 兼顾兜底与避免正常抖动误重启。
+    systemd.manager.watchdog.runtimeSec = "60s";
 
     # 4G agent 当前没有容器；Docker 守护进程常驻约 120M，agt 上关闭。
     kernel.vm.docker.enable = false;
@@ -68,15 +76,18 @@ in
   #
   # 只放行 PA（hermes-wb，fleet 节点 hm-lightvela）和 dev（AxonHub 的
   # volces 渠道）。不要用 interfaces.tailscale0.allowedTCPPorts：它会把
-  # 7890 开给整个 tailnet，而这个代理没有认证。以后 Mac/手机也要用的话，
-  # 在这里追加源地址。
+  # 7890 开给整个 tailnet，而这个代理没有认证。Mac 需要 CloudCLI UI
+  # （3001），按源地址单独放行；5900/x11vnc 已随 B 方案移除。
+  # 注意：tailnet ACL 只管 tailnet 层，主机 nftables 仍需这条 accept。
   networking.firewall.extraCommands = lib.mkIf (config.networking.firewall.backend == "iptables") ''
     iptables -w -A nixos-fw -i tailscale0 -s ${hmPaIp} -p tcp --dport 7890 -j nixos-fw-accept
     iptables -w -A nixos-fw -i tailscale0 -s ${devIp} -p tcp --dport 7890 -j nixos-fw-accept
+    iptables -w -A nixos-fw -i tailscale0 -s ${macIp} -p tcp --dport 3001 -j nixos-fw-accept
   '';
   networking.firewall.extraInputRules = lib.mkIf (config.networking.firewall.backend == "nftables") ''
     iifname "tailscale0" ip saddr ${hmPaIp} tcp dport 7890 accept
     iifname "tailscale0" ip saddr ${devIp} tcp dport 7890 accept
+    iifname "tailscale0" ip saddr ${macIp} tcp dport 3001 accept
   '';
 
   services = {
@@ -87,6 +98,12 @@ in
       DNS = lib.mkForce (lib.filter (n: !(lib.hasInfix ":" n)) nameservers);
       DNSOverTLS = lib.mkForce "no";
     };
+
+    # user.slice 的 MemorySwapMax 上限让全局 swap free 永远 ≥ ~50%，
+    # earlyoom 默认「内存和 swap 同时低于阈值」的条件不可能成立
+    # （LUC-562：整个 boot 0 次 kill，机器在 reclaim 里假死）。
+    # 100 = 去掉 swap 门槛，只按 MemAvailable 触发。
+    earlyoom.freeSwapThreshold = 100;
 
     # Tailscale SSH 已关闭（LUC-556 D 方案）：显式 --ssh=false，因为仅移除
     # flag 不会改 daemon 的持久偏好。所有 SSH 走 OpenSSH over tailnet；
@@ -112,12 +129,20 @@ in
   # 4G agent 机的用户会话硬上限：把 OOM 限制在 user.slice 内，
   # 避免 Chromium/Claude 把内核/系统服务一起拖死。dev(6G) 不继承。
   systemd.slices."user".sliceConfig = {
-    MemoryHigh = "2800M";
-    MemoryMax = "3200M";
+    MemoryHigh = "2400M";
+    MemoryMax = "2700M";
     # 只限 RAM 不够：cgroup 默认可以无限用 swap，溢出会进 zram/磁盘。
-    # 2G 让 user.slice 在 swap 侧也有硬边界，earlyoom 仍负责提前 kill。
-    MemorySwapMax = "2G";
+    # 但 swap 用量本身就是 zram 的 RAM 占用（不可回收）：LUC-562 里 2G
+    # 上限让 zram 吃掉隐藏内存、全局 MemAvailable 见底时 earlyoom 的
+    # swap 门槛又永不成立。收紧到 1G，配合上面的阈值提前 kill。
+    MemorySwapMax = "1G";
   };
+
+  # VM 没有硬件 watchdog（boot 日志：Failed to open any watchdog device）。
+  # softdog 用内核定时器模拟 /dev/watchdog，systemd Manager 会周期性喂狗；
+  # 用户态被内存回收饿死、PID1 也调度不上时，超时后由 softdog 强制重启。
+  # 注意它依赖内核定时器，防不了内核彻底锁死；只是本次这种“活着但假死”的兜底。
+  boot.kernelModules = [ "softdog" ];
 
   # 官方 Node 的 V8 getter 与 nixpkgs Node 的加固编译不同；dsh 的
   # node-addon-require-builtin 只认官方构建。nix-ld 让官方 Node 能在 NixOS 上跑。
