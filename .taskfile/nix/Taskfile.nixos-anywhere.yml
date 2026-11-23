@@ -7,8 +7,9 @@ version: '3'
 # Taskfile 仅做变量传参和 precondition 前置拦截。
 #
 # 用法:
-#   tgg nix:nixos-anywhere FLAKE="path#host" HOST="root@ip"
-#   tgg nix:nixos-anywhere FLAKE="path#host" HOST="root@ip" DRY_RUN=false
+#   tgg nix:nixos-anywhere FLAKE="path#host" HOST="root@ip" [DISK=/dev/vda]
+#   tgg nix:nixos-anywhere FLAKE="path#host" HOST="root@ip" AGE_KEY="$HOME/Library/Application Support/sops/age/keys.txt"
+#   tgg nix:nixos-anywhere FLAKE="path#host" HOST="root@ip" DRY_RUN=false CONFIRM="path#host"
 
 
 vars:
@@ -17,14 +18,19 @@ vars:
 
 tasks:
   default:
-    desc: nixos-anywhere 远程刷机（默认 dry-run，加 DRY_RUN=false 执行）
-    summary: "t nix:nixos-anywhere FLAKE=... HOST=... [DRY_RUN=false]"
+    desc: nixos-anywhere 远程刷机（默认 dry-run；执行需 DRY_RUN=false + CONFIRM）
+    summary: "t nix:nixos-anywhere FLAKE=... HOST=... [DISK=/dev/vda] [AGE_KEY=...] [DRY_RUN=false CONFIRM=<FLAKE>]"
     vars:
       FLAKE: '{{.FLAKE | default ""}}'
       HOST: '{{.HOST | default ""}}'
+      DISK: '{{.DISK | default "/dev/vda"}}'
+      AGE_KEY: '{{.AGE_KEY | default ""}}'
+      CONFIRM: '{{.CONFIRM | default ""}}'
       # Why 不加 --no-reboot：ssh public key 已写入 NixOS config，
       # 刷机后直接 reboot 即可 key auth 登录，无需手动传 key。
-      NA_ARGS: '{{.NA_ARGS | default "--debug"}}'
+      # Why --option pure-eval false：仓库依赖 impure eval（未 track 源码目录），
+      # nixos-anywhere 没有 --impure，但可以把该选项透传给内部 nix。
+      NA_ARGS: '{{.NA_ARGS | default "--debug --option pure-eval false"}}'
       # DRY_RUN="false" → --execute 传给 Nushell 脚本
       _EXECUTE: '{{if eq .DRY_RUN "false"}}--execute{{end}}'
     cmds:
@@ -32,8 +38,13 @@ tasks:
           nu "{{.NA_SCRIPT}}"
           --flake '{{.FLAKE}}'
           --host '{{.HOST}}'
+          --disk '{{.DISK}}'
           --na-args='{{.NA_ARGS}}'
+          --age-key '{{.AGE_KEY}}'
           {{._EXECUTE}}
     preconditions:
       - sh: command -v nu
         msg: "需要 nushell（brew install nushell / nix shell nixpkgs#nushell）"
+      # 防止环境里残留 DRY_RUN=false 直接触发刷机；必须显式给出 CONFIRM=<FLAKE>
+      - sh: '{{if eq .DRY_RUN "false"}}test "{{.CONFIRM}}" = "{{.FLAKE}}"{{end}}'
+        msg: "DRY_RUN=false 需要 CONFIRM=<FLAKE>（例：CONFIRM=.#nixos-vps-agt）"
