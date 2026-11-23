@@ -42,6 +42,11 @@ let
     "119.29.29.29"
   ];
 
+  domesticDohServers = [
+    "https://doh.pub/dns-query"
+    "https://dns.alidns.com/dns-query"
+  ];
+
   # 参考 iKuuu_V2.yaml / 雷霆.yaml 的静态模板结构
   # 节点不再硬编码进 proxies，而是拆成两类 provider：
   #   self —— file provider，由 selfProviderContent 渲染到 providers/self.yaml
@@ -50,15 +55,6 @@ let
   # 订阅源自动发现：sops secrets 里所有 SUB_<NAME> 即一个机场源（key=源名，value=URL），
   # provider 名取 NAME 小写。新增机场只改 sops（secrets.yaml + secrets/default.nix），
   # 此处与 host 零改动。
-  #
-  # 订阅域名直连 + 排除代理：否则 mihomo 的 TUN + MATCH,Manual 兜底会把
-  # 机场订阅域名也代理掉 → provider 拉订阅走自己 → DNS 自环 → EOF 拉取失败 → 全部节点挂。
-  # 这些域名同时加入 fake-ip-filter，让解析直接走真实 DNS 而非 FakeIP。
-  subDomains = lib.lists.unique (
-    map (s: (builtins.elemAt (lib.splitString "/" (lib.removePrefix "https://" s.url)) 0)) wildSources
-  );
-  subDomainRules = map (d: "DOMAIN-SUFFIX,${d},DIRECT") subDomains;
-  subDomainFakeIpFilter = map (d: "*.${d}") subDomains;
   wildSources = lib.attrsets.mapAttrsToList (name: _: {
     name = lib.strings.toLower (lib.strings.removePrefix "SUB_" name);
     url = config.sops.placeholder.${name};
@@ -68,6 +64,9 @@ let
   mkWildProvider = src: {
     type = "http";
     inherit (src) url;
+    # provider 下载固定直连。不写的话订阅 GET 会匹配 MATCH,Manual 走代理，
+    # 可能穿过已失效节点或绕回自身（EOF/TLS 错误）；只影响订阅下载，不影响节点流量。
+    proxy = "DIRECT";
     # mihomo 缓存目录，http provider 拉取失败时保留上次成功内容
     path = "/var/lib/mihomo/providers/${src.name}.yaml";
     interval = 1800;
@@ -130,27 +129,19 @@ let
         "*.tailscale.io"
         "ts.net"
         "*.ts.net"
-      ]
-      ++ subDomainFakeIpFilter;
+      ];
       nameserver-policy = {
         "+.tailscale.com" = anyDnsServers;
         "+.tailscale.io" = anyDnsServers;
         "+.ts.net" = anyDnsServers;
       };
       default-nameserver = anyDnsServers;
-      nameserver = [
-        "https://doh.pub/dns-query"
-        "https://dns.alidns.com/dns-query"
-      ];
-      fallback = [
-        "https://1.1.1.1/dns-query"
-        "https://8.8.8.8/dns-query"
-      ];
-      fallback-filter = {
-        geoip = true;
-        geoip-code = "CN";
-        ipcidr = [ "240.0.0.0/4" ];
-      };
+      nameserver = domesticDohServers;
+      # mihomo 自己的 DNS 查询是直连的：1.1.1.1/8.8.8.8 在大陆直连不可达，
+      # 作 fallback 只会把解析拖到超时。订阅域用国内 DoH 已能解析（实测）。
+      # provider 的 DIRECT 下载和代理节点域名也固定走国内 DoH。
+      direct-nameserver = domesticDohServers;
+      proxy-server-nameserver = domesticDohServers;
     };
 
     proxy-providers = {
@@ -204,68 +195,66 @@ let
       }
     ];
 
-    rules =
-      subDomainRules
-      ++ [
-        # 私网直连
-        "IP-CIDR,127.0.0.0/8,DIRECT"
-        "IP-CIDR,10.0.0.0/8,DIRECT"
-        "IP-CIDR,172.16.0.0/12,DIRECT"
-        "IP-CIDR,192.168.0.0/16,DIRECT"
-        "IP-CIDR,100.64.0.0/10,DIRECT"
-        "IP-CIDR,224.0.0.0/4,DIRECT"
+    rules = [
+      # 私网直连
+      "IP-CIDR,127.0.0.0/8,DIRECT"
+      "IP-CIDR,10.0.0.0/8,DIRECT"
+      "IP-CIDR,172.16.0.0/12,DIRECT"
+      "IP-CIDR,192.168.0.0/16,DIRECT"
+      "IP-CIDR,100.64.0.0/10,DIRECT"
+      "IP-CIDR,224.0.0.0/4,DIRECT"
 
-        # SSH 避免回环（mihomo TUN 下的 SSH 流量走代理会导致循环依赖）
-        "DST-PORT,22,DIRECT"
+      # SSH 避免回环（mihomo TUN 下的 SSH 流量走代理会导致循环依赖）
+      "DST-PORT,22,DIRECT"
 
-        # 代理节点 IP 直连（避免流量经代理再回连自己）
-      ]
-      ++ (map (s: "IP-CIDR,${s.server}/32,DIRECT,no-resolve") servers)
-      ++ [
-        # 必须代理的站点（统一走 Manual，由用户在 UI 上选 Self/Wild/Auto）
-        "DOMAIN-SUFFIX,openai.com,Manual"
-        "DOMAIN-SUFFIX,chatgpt.com,Manual"
-        "DOMAIN-SUFFIX,grok.com,Manual"
-        "DOMAIN-SUFFIX,github.com,Manual"
-        "DOMAIN-SUFFIX,githubusercontent.com,Manual"
-        "DOMAIN-SUFFIX,githubassets.com,Manual"
-        "DOMAIN-SUFFIX,google.com,Manual"
-        "DOMAIN-SUFFIX,youtube.com,Manual"
-        "DOMAIN-SUFFIX,ytimg.com,Manual"
-        "DOMAIN-SUFFIX,twimg.com,Manual"
-        "DOMAIN-SUFFIX,docker.com,Manual"
-        "DOMAIN-SUFFIX,linux.do,Manual"
-        "DOMAIN-SUFFIX,cache.nixos.org,Manual"
+      # 代理节点 IP 直连（避免流量经代理再回连自己）
+    ]
+    ++ (map (s: "IP-CIDR,${s.server}/32,DIRECT,no-resolve") servers)
+    ++ [
+      # 必须代理的站点（统一走 Manual，由用户在 UI 上选 Self/Wild/Auto）
+      "DOMAIN-SUFFIX,openai.com,Manual"
+      "DOMAIN-SUFFIX,chatgpt.com,Manual"
+      "DOMAIN-SUFFIX,grok.com,Manual"
+      "DOMAIN-SUFFIX,github.com,Manual"
+      "DOMAIN-SUFFIX,githubusercontent.com,Manual"
+      "DOMAIN-SUFFIX,githubassets.com,Manual"
+      "DOMAIN-SUFFIX,google.com,Manual"
+      "DOMAIN-SUFFIX,youtube.com,Manual"
+      "DOMAIN-SUFFIX,ytimg.com,Manual"
+      "DOMAIN-SUFFIX,twimg.com,Manual"
+      "DOMAIN-SUFFIX,docker.com,Manual"
+      "DOMAIN-SUFFIX,linux.do,Manual"
+      "DOMAIN-SUFFIX,cache.nixos.org,Manual"
 
-        # CN 域名直连
-        "DOMAIN-SUFFIX,cn,DIRECT"
-        "DOMAIN-KEYWORD,-cn,DIRECT"
+      # CN 域名直连
+      "DOMAIN-SUFFIX,cn,DIRECT"
+      "DOMAIN-KEYWORD,-cn,DIRECT"
 
-        # 国内大站直连
-        "DOMAIN-SUFFIX,baidu.com,DIRECT"
-        # "DOMAIN-SUFFIX,bilibili.com,DIRECT"
-        "DOMAIN-SUFFIX,taobao.com,DIRECT"
-        "DOMAIN-SUFFIX,alipay.com,DIRECT"
-        "DOMAIN-SUFFIX,qq.com,DIRECT"
-        "DOMAIN-SUFFIX,weibo.com,DIRECT"
-        "DOMAIN-SUFFIX,jd.com,DIRECT"
-        "DOMAIN-SUFFIX,163.com,DIRECT"
-        "DOMAIN-SUFFIX,netease.com,DIRECT"
-      ]
-      # 主机/角色策略（host 层通过 extraRules 注入）。
-      # 必须放在 GEOIP/MATCH 之前：域名规则先匹配，否则会被 GEOIP,CN 抢先。
-      ++ extraRules
-      ++ [
-        # GEOIP CN 直连
-        "GEOIP,CN,DIRECT"
+      # 国内大站直连
+      "DOMAIN-SUFFIX,baidu.com,DIRECT"
+      # "DOMAIN-SUFFIX,bilibili.com,DIRECT"
+      "DOMAIN-SUFFIX,taobao.com,DIRECT"
+      "DOMAIN-SUFFIX,alipay.com,DIRECT"
+      "DOMAIN-SUFFIX,qq.com,DIRECT"
+      "DOMAIN-SUFFIX,weibo.com,DIRECT"
+      "DOMAIN-SUFFIX,jd.com,DIRECT"
+      "DOMAIN-SUFFIX,163.com,DIRECT"
+      "DOMAIN-SUFFIX,netease.com,DIRECT"
+    ]
+    # 主机/角色策略（host 层通过 extraRules 注入）。
+    # 必须放在 GEOIP/MATCH 之前：域名规则先匹配，否则会被 GEOIP,CN 抢先。
+    ++ extraRules
+    ++ [
+      # GEOIP CN 直连
+      "GEOIP,CN,DIRECT"
 
-        # 本地域名直连
-        "DOMAIN-SUFFIX,local,DIRECT"
-        "DOMAIN-SUFFIX,lan,DIRECT"
+      # 本地域名直连
+      "DOMAIN-SUFFIX,local,DIRECT"
+      "DOMAIN-SUFFIX,lan,DIRECT"
 
-        # 兜底
-        "MATCH,Manual"
-      ];
+      # 兜底
+      "MATCH,Manual"
+    ];
   };
 
   # 纯 eval：不触发任何 derivation build。mihomo 接受 JSON 作为 YAML 配置。
