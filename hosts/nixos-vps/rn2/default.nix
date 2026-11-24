@@ -103,7 +103,7 @@ in
         bwMbps = 1000;
         rttMs = 150;
         # Small-memory profile: 18.75MB tcp buffers, 65536 conntrack,
-        # 1-day established timeout. dev/agt keep balanced/performance.
+        # 1-day established timeout. dev/agt keep bal/perf.
         mode = "steady";
       };
 

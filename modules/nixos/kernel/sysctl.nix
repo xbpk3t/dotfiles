@@ -27,7 +27,7 @@ in
       description = ''
         VPS hardware/network profile used to derive kernel sysctl.
         Set this in the host module; leave null to use the default tuning.
-        Known fields: cpuCores, memGiB, bwMbps, rttMs, mode, cc, qdisc, isSsd.
+        Known fields: cpuCores, memGiB, bwMbps, rttMs, mode (steady|bal|perf|aggr), cc, qdisc, isSsd.
       '';
     };
 

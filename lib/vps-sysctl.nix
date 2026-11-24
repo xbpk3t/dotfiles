@@ -29,6 +29,7 @@ let
     perGiB = 16384;
   };
 
+  # 模式缩写：steady（小内存稳定档）/ bal / perf / aggr，逐级放宽。
   modeTable = {
     steady = {
       factorNum = 1;
@@ -43,19 +44,19 @@ let
       };
       tcpEstablishedTimeout = 86400;
     };
-    balanced = {
+    bal = {
       factorNum = 2;
       factorDen = 1;
       capPct = 4;
       backlogMult = 2;
     };
-    performance = {
+    perf = {
       factorNum = 3;
       factorDen = 1;
       capPct = 8;
       backlogMult = 3;
     };
-    aggressive = {
+    aggr = {
       factorNum = 4;
       factorDen = 1;
       capPct = 12;
@@ -71,7 +72,8 @@ let
       bwMbps,
       rttMs,
       memGiB,
-      mode ? "performance",
+      # 允许值：steady | bal | perf | aggr
+      mode ? "perf",
       cc ? "bbr", # BBR, CUBIC
       qdisc ? "fq", # FQ, CAKE, FQ_PIE
       cpuCores ? null,
@@ -81,7 +83,12 @@ let
       isSsd ? true,
     }:
     let
-      m = modeTable.${mode} or modeTable.balanced;
+      # 未知 mode 直接报错，避免拼错时静默退化成 bal。
+      m =
+        if builtins.hasAttr mode modeTable then
+          modeTable.${mode}
+        else
+          throw "modules.kernel.sysctl.hardware.mode: unknown mode '${mode}' (allowed: ${lib.concatStringsSep ", " (builtins.attrNames modeTable)})";
 
       cores = if cpuCores == null then 1 else cpuCores;
 
@@ -143,8 +150,8 @@ let
       somaxconn = clamp 4096 65535 (cores * 512);
       synBacklog = clamp 8192 262144 (cores * 1024);
 
-      # NIC/吞吐相关队列
-      netdevBacklog = if has10g then 250000 else 30000;
+      # NIC/吞吐相关队列：按 mode 的 backlogMult 缩放
+      netdevBacklog = (if has10g then 250000 else 30000) * m.backlogMult;
       netdevBudget = clamp 300 1000 (cores * 20);
       netdevBudgetUsecs = clamp 2000 16000 (if nicMbps <= 1000 then 4000 else 8000);
 
@@ -495,7 +502,7 @@ let
     rttMs = 50;
     memGiB = 1;
     cpuCores = 1;
-    mode = "balanced";
+    mode = "bal";
     cc = "bbr";
     qdisc = "fq";
   });
