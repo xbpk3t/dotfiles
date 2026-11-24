@@ -8,7 +8,7 @@
   ...
 }:
 let
-  inherit (inputs) nixpkgs home-manager nixos-generators;
+  inherit (inputs) nixpkgs home-manager;
   hmUsername = specialArgs.userMeta.username;
   # NOTE:
   # nixos/lib/eval-config.nix 会在 specialArgs.pkgs 存在时直接给出 warning。
@@ -21,9 +21,6 @@ nixpkgs.lib.nixosSystem {
   specialArgs = nixosSpecialArgs;
   modules =
     nixos-modules
-    ++ [
-      nixos-generators.nixosModules.all-formats
-    ]
     # 舰队拓扑图（README 用）：所有 NixOS host 注入 nix-topology 模块，
     # 让 topology 能自动提取各 host 的接口/服务信息。
     ++ [
