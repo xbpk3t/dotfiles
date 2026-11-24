@@ -7,6 +7,7 @@
 
   deploy = {
     remoteBuild = true;
+    auto = true;
   };
 
   ssh = {
