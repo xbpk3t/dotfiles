@@ -101,6 +101,13 @@ in
     infra = {
       fail2ban.enable = true;
 
+      # Healthchecks 的磁盘/待重启检查是所有 VPS 的通用策略；
+      # 节点只声明 enable + urlFile。
+      healthchecks = {
+        disk.enable = lib.mkDefault true;
+        rebootPending.enable = lib.mkDefault true;
+      };
+
       nix-tools = {
         enable = lib.mkDefault true;
 
