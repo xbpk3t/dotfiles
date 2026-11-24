@@ -51,14 +51,11 @@ in
     # declares them, so other hosts never request these keys from sops.
     # Keys must exist in secrets/secrets.yaml:
     #   github/runner_token    fine-grained PAT with Administration: write
-    #   github/runner_ssh_key  private key allowed to SSH to fleet targets
+    #   github/runner_ssh_key  existing nixos-vps-agt-deploy private key
     #
-    # Generate the key pair once:
-    #   ssh-keygen -t ed25519 -f github-runner -C github-runner
-    # Then:
-    #   1. add github-runner.pub to globals.auth.deployKeys (NixOS VPS root/luck)
-    #   2. add github-runner.pub to sm-vps luck authorized_keys (Debian track)
-    #   3. put the private key into sops as github/runner_ssh_key
+    # The matching public key is already in globals.auth.deployKeys, so NixOS
+    # VPS root/luck already trust it. sm-vps nodes are currently auto=false; if
+    # they are re-enabled, authorize the same public key on luck there.
     #
     # SECURITY: this key is trusted as root/luck on every fleet host, so the
     # runner is a fleet-wide root credential holder. Prefer a dedicated non-root

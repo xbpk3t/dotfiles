@@ -7,7 +7,8 @@
 
   deploy = {
     remoteBuild = true;
-    auto = true;
+    # 机器已下线；保留配置/Ansible 工具，但不参与 auto。
+    auto = false;
   };
 
   ssh = {
