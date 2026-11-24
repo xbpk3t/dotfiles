@@ -134,7 +134,7 @@ in
         );
         # 多角色：基础 client；exitNode 开启时提升为 "server"（开 ip_forward，exit node 必备）。
         # 纯 if（求值期）而非 mkIf（合并期）：mkIf false 会 fallback 到 NixOS 默认 "none"，
-        # 丢掉 client 语义（rp_filter strict）——nixos-usb 等只开 enable 的 host 会回归。
+        # 丢掉 client 语义（rp_filter strict）——只开 enable 的 host 会回归。
         # 用 if 显式二选一：exitNode → server，否则 client。
         useRoutingFeatures = if cfg.exitNode then "server" else "client";
         # extraUpFlags 覆盖首次 join / auth key 过期后的重新认证；

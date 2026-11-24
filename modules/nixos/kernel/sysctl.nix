@@ -10,7 +10,7 @@ let
     (
       if cfg.hardware == null then
         # 无 hardware profile 时的保守基线；显式策略选项在下面统一叠加，
-        # 否则没有 profile 的 host（例如 nixos-usb）设了策略会被静默忽略。
+        # 否则没有 profile 的 host 设了策略会被静默忽略。
         mylib.vpsSysctl.mkDefaultSysctl
       else
         mylib.vpsSysctl.mkSysctl (cfg.hardware // { zramEnabled = config.zramSwap.enable; })

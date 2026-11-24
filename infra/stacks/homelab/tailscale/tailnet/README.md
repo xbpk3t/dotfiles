@@ -66,7 +66,7 @@ import；只 `git revert` 会让旧地址计划为 create。
 ## 安全模型（2026-11）
 
 - `tag:vps`：公网/低信任设备（dev、agt、hermes；tc/hk 回来时）
-- `tag:ws`：个人设备（macos-ws、nixos-wsl、nixos-usb，以及手动打 tag 的手机 Redmi Note 13 Pro）
+- `tag:ws`：个人设备（macos-ws、nixos-wsl，以及手动打 tag 的手机 Redmi Note 13 Pro）
 - `tag:svc`：Tailscale Services host（dev）
 - `tag:exit`：exit node（dev）
 - tag 是扁平的；一台设备可叠加多个：dev = `tag:vps` + `tag:svc` + `tag:exit`，
