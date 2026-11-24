@@ -8,7 +8,9 @@
 with lib;
 let
   cfg = config.modules.infra.singbox-server;
-  port = singbox.vlessPort or 8443;
+  # 端口/path/协议参数由 lib/fleet 的 normalizeSingbox 归一化后保证存在；
+  # 这里直接读取，缺字段会在 eval 阶段报错，而不是静默回退到第二份默认值。
+  port = singbox.vlessPort;
   # 伪装握手目标域名（随便换一个稳定的大站都行）
   handshakeServer = "www.bing.com";
   # 本机发布的 singbox 能力；由 fleet registry 同步给所有 client。
@@ -16,19 +18,19 @@ let
   singbox = hostMeta.singbox or { };
   hy2Enabled = singbox ? hy2;
   hy2Domain = singbox.hy2.domain;
-  hy2Port = singbox.hy2.port or 8500;
+  hy2Port = singbox.hy2.port;
   vmessEnabled = singbox ? vmessWs;
-  vmessDomain = attrByPath [ "vmessWs" "domain" ] null singbox;
-  vmessPort = attrByPath [ "vmessWs" "port" ] null singbox;
-  vmessPath = attrByPath [ "vmessWs" "path" ] null singbox;
+  vmessDomain = singbox.vmessWs.domain;
+  vmessPort = singbox.vmessWs.port;
+  vmessPath = singbox.vmessWs.path;
   tuicEnabled = singbox ? tuic;
-  tuicDomain = attrByPath [ "tuic" "domain" ] null singbox;
-  tuicPort = attrByPath [ "tuic" "port" ] null singbox;
-  tuicCongestionControl = attrByPath [ "tuic" "congestionControl" ] "bbr" singbox;
+  tuicDomain = singbox.tuic.domain;
+  tuicPort = singbox.tuic.port;
+  tuicCongestionControl = singbox.tuic.congestionControl;
   anytlsEnabled = singbox ? anytls;
-  anytlsDomain = attrByPath [ "anytls" "domain" ] null singbox;
-  anytlsPort = attrByPath [ "anytls" "port" ] null singbox;
-  anytlsAlpn = attrByPath [ "anytls" "alpn" ] [ "h2" "http/1.1" ] singbox;
+  anytlsDomain = singbox.anytls.domain;
+  anytlsPort = singbox.anytls.port;
+  anytlsAlpn = singbox.anytls.alpn;
   # 本模块需要的 TLS 证书域名；acme ensure units 和 security.acme.certs
   # 都从这一份列表派生，新增协议只需改一处。
   acmeDomains =

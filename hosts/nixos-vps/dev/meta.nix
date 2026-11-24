@@ -33,26 +33,21 @@
   # Nezha 只允许一个 hub；agent 的 dashboard 地址从这里派生。
   nezha.hub = true;
 
+  # 端口/path 由 lib/fleet 的 normalizeSingbox 补默认；
+  # 这里只写真正变化的 label 与协议域名。
   singbox = {
     label = "LA-RN";
-    server = "192.129.183.26";
-    vlessPort = 8443;
     hy2 = {
       domain = "hy2-nixos-vps-dev.lucc.dev";
-      port = 8500;
     };
     vmessWs = {
       domain = "vmess-nixos-vps-dev.lucc.dev";
-      port = 9443;
-      path = "/vmess";
     };
     tuic = {
       domain = "tuic-nixos-vps-dev.lucc.dev";
-      port = 10443;
     };
     anytls = {
       domain = "anytls-nixos-vps-dev.lucc.dev";
-      port = 11443;
     };
   };
 }

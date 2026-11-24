@@ -20,6 +20,56 @@ let
 
   topEntries = builtins.readDir hostsDir;
 
+  # sing-box 的协议端口/path 是 fleet 约定，不是每台机器的事实：默认值只在
+  # 这里维护，meta 只写真正变化的字段（label、域名）。
+  singboxProtocolDefaults = {
+    hy2 = {
+      port = 8500;
+    };
+    vmessWs = {
+      port = 9443;
+      path = "/vmess";
+    };
+    tuic = {
+      port = 10443;
+      congestionControl = "bbr";
+    };
+    anytls = {
+      port = 11443;
+      alpn = [
+        "h2"
+        "http/1.1"
+      ];
+    };
+  };
+
+  # 只对 meta 已声明的协议补默认，避免补出未启用的协议
+  # （singbox-server 用 `singbox ? hy2` 判断是否启用该协议）。
+  # domain 没有默认值：声明了协议就必须在 meta 里写非空域名。
+  normalizeSingbox =
+    name: meta:
+    if !(meta ? singbox) then
+      meta
+    else
+      let
+        sb = meta.singbox;
+        declaredDefaults = lib.intersectAttrs sb singboxProtocolDefaults;
+        missingDomains = lib.filter (protocol: (lib.attrByPath [ protocol "domain" ] "" sb) == "") (
+          builtins.attrNames declaredDefaults
+        );
+      in
+      assert lib.assertMsg (missingDomains == [ ])
+        "fleet: '${name}' singbox protocols require non-empty domain: ${lib.concatStringsSep ", " missingDomains}";
+      meta
+      // {
+        singbox =
+          sb
+          // {
+            vlessPort = sb.vlessPort or 8443;
+          }
+          // lib.mapAttrs (protocol: defaults: defaults // sb.${protocol}) declaredDefaults;
+      };
+
   # 节点名 = hosts/ 下的相对路径，把 "/" 换成 "-"：
   #   hosts/nixos-vps/dev      -> nixos-vps-dev
   #   hosts/macos-ws           -> macos-ws
@@ -66,7 +116,7 @@ let
       "fleet: '${name}' has unknown deploy.driver '${toString deployDriver}' (expected deploy-rs or ansible-hm)";
     assert lib.assertMsg homeDriverValid
       "fleet: '${name}' is kind=home but deploy.driver=deploy-rs; use ansible-hm (default) or omit deploy.driver";
-    meta
+    normalizeSingbox name meta
     // {
       inherit name path;
       hostName = name;
@@ -186,8 +236,8 @@ let
       throw "fleet: incomplete derper meta for '${name}' (need derper.domain, derper.dnsKey, publicIpv4)"
   ) (lib.filterAttrs (_: node: node ? derper) allNodes);
 
-  # 发布给 client 的 singbox server 视图：补 hostName 和 server fallback，
-  # 保持 fleet API 的形状稳定；server 缺失时的最终契约仍由 checks 兜底。
+  # 发布给 client 的 singbox server 视图：补 hostName 和 server。
+  # server 解析顺序：显式 meta → publicIpv4 → tailnet/ssh 地址。
   singboxServers = lib.filter (s: s != null) (
     lib.attrsets.mapAttrsToList (
       name: node:
@@ -195,7 +245,7 @@ let
         node.singbox
         // {
           hostName = node.hostName or name;
-          server = node.singbox.server or (primaryHostForNode name node);
+          server = node.singbox.server or (node.publicIpv4 or (primaryHostForNode name node));
         }
       else
         null
@@ -272,7 +322,11 @@ let
     "test-nezha-hub-at-most-one" =
       lib.length (lib.filter (node: node.nezha.hub or false) nodeList) <= 1;
 
-    "test-singbox-server-address" = every (node: !(node ? singbox) || node.singbox ? server);
+    # sing-box 节点必须能从公网被 client 访问：显式 server 或 publicIpv4。
+    # singboxServers 的 tailnet fallback 只作为兜底，不作为公网代理的部署方式。
+    "test-singbox-server-address" = every (
+      node: !(node ? singbox) || node.singbox ? server || node ? publicIpv4
+    );
 
     # 每个节点必须有可寻址的 tailscale.ip 或 ssh.host，避免 primaryHostForNode 回退到节点名。
     "test-node-addressable" = every (

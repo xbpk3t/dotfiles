@@ -30,27 +30,21 @@ in
   };
 
   # Full protocol set; singbox-server.nix derives the inbounds, firewall
-  # ports and ACME certificates directly from these fields.
+  # ports and ACME certificates from these fields. Port/path defaults come
+  # from lib/fleet (normalizeSingbox); only the domains vary per node.
   singbox = {
     label = "LA-RN2";
-    server = ip;
-    vlessPort = 8443;
     hy2 = {
       domain = "hy2-nixos-vps-rn2.lucc.dev";
-      port = 8500;
     };
     vmessWs = {
       domain = "vmess-nixos-vps-rn2.lucc.dev";
-      port = 9443;
-      path = "/vmess";
     };
     tuic = {
       domain = "tuic-nixos-vps-rn2.lucc.dev";
-      port = 10443;
     };
     anytls = {
       domain = "anytls-nixos-vps-rn2.lucc.dev";
-      port = 11443;
     };
   };
 }
