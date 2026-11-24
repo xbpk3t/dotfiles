@@ -8,18 +8,32 @@ version: '3'
 #
 # 用法:
 #   tgg nix:nixos-anywhere FLAKE="path#host" HOST="root@ip" [DISK=/dev/vda]
+#   tgg nix:nixos-anywhere FLAKE="path#host" HOST="root@ip" STAGED=true
+#   tgg nix:nixos-anywhere FLAKE="path#host" HOST="root@ip" PHASES=kexec
+#   tgg nix:nixos-anywhere FLAKE="path#host" HOST="root@ip" PHASES=disko,install
 #   tgg nix:nixos-anywhere FLAKE="path#host" HOST="root@ip" AGE_KEY="$HOME/Library/Application Support/sops/age/keys.txt"
 #   tgg nix:nixos-anywhere FLAKE="path#host" HOST="root@ip" DRY_RUN=false CONFIRM="path#host"
+#
+# STAGED=true：kexec -> installer 检查/自动启用旧 swap -> 确认 -> disko,install
+#              -> 安装后检查（不自动 reboot）。
+# PHASES：显式阶段，逗号分隔；空则脚本默认 kexec,disko,install（不自动 reboot）。
+# STAGED_YES=true：STAGED 模式下跳过 Enter 确认（非交互用）。
+# NA_ARGS 只放额外 nixos-anywhere flags；不要在 NA_ARGS 里放 --phases。
 
 
 vars:
   NA_SCRIPT: "{{.TASKFILE_DIR}}/scripts/nixos-anywhere.nu"
+  PHASES: '{{.PHASES | default ""}}'
+  STAGED: '{{.STAGED | default "false"}}'
+  STAGED_YES: '{{.STAGED_YES | default "false"}}'
+  _STAGED: '{{if eq .STAGED "true"}}--staged{{end}}'
+  _STAGED_YES: '{{if eq .STAGED_YES "true"}}--yes{{end}}'
 
 
 tasks:
   default:
     desc: nixos-anywhere 远程刷机（默认 dry-run；执行需 DRY_RUN=false + CONFIRM）
-    summary: "t nix:nixos-anywhere FLAKE=... HOST=... [DISK=/dev/vda] [AGE_KEY=...] [DRY_RUN=false CONFIRM=<FLAKE>]"
+    summary: "t nix:nixos-anywhere FLAKE=... HOST=... [DISK=/dev/vda] [PHASES=kexec|disko,install|...] [STAGED=true] [AGE_KEY=...] [DRY_RUN=false CONFIRM=<FLAKE>]"
     vars:
       FLAKE: '{{.FLAKE | default ""}}'
       HOST: '{{.HOST | default ""}}'
@@ -39,6 +53,9 @@ tasks:
           --flake '{{.FLAKE}}'
           --host '{{.HOST}}'
           --disk '{{.DISK}}'
+          --phases '{{.PHASES}}'
+          {{._STAGED}}
+          {{._STAGED_YES}}
           --na-args='{{.NA_ARGS}}'
           --age-key '{{.AGE_KEY}}'
           {{._EXECUTE}}
