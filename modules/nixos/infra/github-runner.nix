@@ -68,7 +68,9 @@ in
       mode = "0400";
       # PAT 轮换后必须重启 runner；否则单元继续使用启动时读到的旧 token。
       # SSH key 不需要：ssh 每次连接都会重新读取 IdentityFile。
-      restartUnits = [ "github-runner-${cfg.name}" ];
+      # sops-nix 需要完整 unit 名（含 .service），否则激活时报
+      # "Unit name github-runner-<name> is not valid" 并触发 deploy-rs 回滚。
+      restartUnits = [ "github-runner-${cfg.name}.service" ];
     };
     sops.secrets.GITHUB_RUNNER_SSH_KEY = {
       key = "github/runner_ssh_key";
