@@ -56,6 +56,11 @@ in
             port = "ssh";
             inherit (cfg) maxretry bantime;
             backend = "systemd";
+            # fleet sshd 只允许公钥（openssh.nix 关闭 Password/KbdInteractive），
+            # 扫描器不产生 "Failed password"，只有 preauth 断连/超时；filter 的
+            # normal mode 把这些标成 NOFAIL，只有 aggressive 才计入失败。
+            # 与 sm 轨实测结论一致（modules/sm/fail2ban.nix）。
+            mode = "aggressive";
           };
         };
       };
