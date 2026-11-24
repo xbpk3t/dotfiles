@@ -1,19 +1,34 @@
 {
   config,
+  hostMeta,
   lib,
   mylib,
   ...
 }:
 let
   cfg = config.modules.kernel.sysctl;
+  hardware = hostMeta.hardware or null;
+  hardwareComplete =
+    hardware == null
+    || (hardware ? cpuCores && hardware ? memGiB && hardware ? bwMbps && hardware ? rttMs);
+  derived = mylib.hardwareProfile.profileFor (
+    if hardware == null then null else hardware.memGiB or null
+  );
+
   sysctl =
     (
-      if cfg.hardware == null then
-        # 无 hardware profile 时的保守基线；显式策略选项在下面统一叠加，
+      if hardware == null then
+        # 无 hardware 事实时的保守基线；显式策略选项在下面统一叠加，
         # 否则没有 profile 的 host 设了策略会被静默忽略。
         mylib.vpsSysctl.mkDefaultSysctl
       else
-        mylib.vpsSysctl.mkSysctl (cfg.hardware // { zramEnabled = config.zramSwap.enable; })
+        mylib.vpsSysctl.mkSysctl (
+          hardware
+          // {
+            inherit (cfg) mode;
+            zramEnabled = config.zramSwap.enable;
+          }
+        )
     )
     // mylib.vpsSysctl.mkMemoryPolicy {
       inherit (cfg) oomKillAllocatingTask overcommitMemory;
@@ -21,13 +36,17 @@ let
 in
 {
   options.modules.kernel.sysctl = {
-    hardware = lib.mkOption {
-      type = lib.types.nullOr lib.types.attrs;
-      default = null;
+    mode = lib.mkOption {
+      type = lib.types.enum [
+        "steady"
+        "bal"
+        "perf"
+        "aggr"
+      ];
+      default = derived.mode;
       description = ''
-        VPS hardware/network profile used to derive kernel sysctl.
-        Set this in the host module; leave null to use the default tuning.
-        Known fields: cpuCores, memGiB, bwMbps, rttMs, mode (steady|bal|perf|aggr), cc, qdisc, isSsd.
+        Sysctl tuning mode. Defaults from hostMeta.hardware.memGiB via
+        lib/hardware-profile.nix; override only for role-specific tuning.
       '';
     };
 
@@ -54,7 +73,14 @@ in
 
   # 模块里已有 `options`，其它配置必须放进显式 `config`。
   config = {
-    # VPS 专用：根据 host module 提供的 hardware profile 动态生成 sysctl。
+    assertions = [
+      {
+        assertion = hardwareComplete;
+        message = "hostMeta.hardware must provide cpuCores, memGiB, bwMbps, rttMs (or be omitted)";
+      }
+    ];
+
+    # 根据 hostMeta.hardware 动态生成 sysctl。
     # mkForce 确保覆盖 nixpkgs 默认 sysctl（如 fs.inotify.max_user_instances），
     # 避免在容器等叠加上下文中出现 "defined multiple times" 错误。
     boot.kernel.sysctl = lib.mkForce sysctl;

@@ -9,6 +9,7 @@ let
   # 跨机拓扑 registry（node-keyed）
   fleet = import ./fleet { inherit lib; };
   vpsSysctl = import ./vps-sysctl.nix { inherit lib; };
+  hardwareProfile = import ./hardware-profile.nix { inherit lib; };
   nixCacheSettings = import ./nix-cache-settings.nix;
   # pre-commit 依赖工具集（单一事实来源，devShell 与 home.packages 共用）
   precommitTools = import ./precommit-tools.nix;
@@ -41,6 +42,7 @@ in
     systemManager
     fleet
     vpsSysctl
+    hardwareProfile
     nixCacheSettings
     precommitTools
     infraTools

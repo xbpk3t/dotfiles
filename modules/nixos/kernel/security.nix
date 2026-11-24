@@ -1,22 +1,5 @@
 { lib, ... }:
-let
-  inherit (lib) mkEnableOption mkOption types;
-in
 {
-  options.modules.security.enableHighLimits = mkEnableOption ''
-    启用高 ulimit 档（基于 Linux-Optimizer）：放宽 nofile/stack 等资源限制，适合高并发/压测/调试。
-    默认关闭以保持安全基线（core=0）。
-  '';
-
-  options.modules.security.enableFirewall = mkOption {
-    type = types.bool;
-    default = true;
-    description = ''
-      是否启用主机防火墙。VPS 默认开启。
-      适用于“私网 homelab 但仍需要 vps 模块”这类场景的显式关停。
-    '';
-  };
-
   config = {
     security = {
       # 基础安全基线（不含 AppArmor/SELinux）

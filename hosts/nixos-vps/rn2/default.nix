@@ -97,16 +97,6 @@ in
         forwardFilter.enable = lib.mkForce false;
       };
 
-      sysctl.hardware = {
-        cpuCores = 1;
-        memGiB = 1;
-        bwMbps = 1000;
-        rttMs = 150;
-        # Small-memory profile: 18.75MB tcp buffers, 65536 conntrack,
-        # 1-day established timeout. dev/agt keep bal/perf.
-        mode = "steady";
-      };
-
       # Keep the services that keep the box reachable/proxying alive when
       # earlyoom fires; the largest remaining process is nix-daemon.
       earlyoom.avoid = [

@@ -8,6 +8,14 @@ in
   system = "x86_64-linux";
   stateVersion = "26.05";
 
+  # 硬件事实：sysctl mode 与 limits profile 由 memGiB 统一派生。
+  hardware = {
+    cpuCores = 1;
+    memGiB = 1;
+    bwMbps = 1000;
+    rttMs = 150;
+  };
+
   tailscale = {
     ip = "100.113.219.86";
     role = "vps";

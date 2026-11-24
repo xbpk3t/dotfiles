@@ -300,6 +300,25 @@ let
 
     # 用户身份是 flake globals.identity，不允许回流到 per-node meta。
     "test-no-per-node-identity" = every (node: !(node ? user) && !(node ? time) && !(node ? editor));
+
+    # 硬件事实只放 hostMeta.hardware；mode/profile 是策略，不进 meta。
+    "test-hardware-facts-only" = every (
+      node:
+      let
+        hardware = node.hardware or { };
+      in
+      !(hardware ? mode) && !(hardware ? profile)
+    );
+
+    # 一旦声明 hardware，就必须提供完整事实，避免 mkSysctl 缺参。
+    "test-hardware-complete" = every (
+      node:
+      let
+        hardware = node.hardware or null;
+      in
+      hardware == null
+      || (hardware ? cpuCores && hardware ? memGiB && hardware ? bwMbps && hardware ? rttMs)
+    );
   };
 
   # 所有 deploy-rs 节点共享的 SSH 目标解析（hostname / sshUser / sshOpts）。

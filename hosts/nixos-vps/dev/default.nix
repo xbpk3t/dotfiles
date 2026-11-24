@@ -11,15 +11,6 @@
   ];
 
   modules = {
-    kernel.sysctl.hardware = {
-      cpuCores = 5;
-      memGiB = 6;
-      bwMbps = 800;
-      # LA→China 跨境链路 RTT，用于 BDP 计算 socket buffer 上限
-      rttMs = 150;
-      mode = "perf";
-    };
-
     networking.tailscale = {
       # dev 是唯一 exit node；DERP 只保留 agt（见 terranix.nix 的 derpMap）。
       exitNode = true;

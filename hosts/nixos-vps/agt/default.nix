@@ -27,14 +27,6 @@ in
   ];
 
   modules = {
-    kernel.sysctl.hardware = {
-      cpuCores = 4;
-      memGiB = 4;
-      bwMbps = 6;
-      rttMs = 30;
-      mode = "bal";
-    };
-
     # VM 没有硬件 watchdog；softdog（见下方 boot.kernelModules）提供
     # /dev/watchdog 后，这里放宽 systemd 的喂狗超时：默认 15s 对 4G
     # 重载机太激进，60s 兼顾兜底与避免正常抖动误重启。
