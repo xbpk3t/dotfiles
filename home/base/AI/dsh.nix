@@ -122,7 +122,7 @@ let
         providers.axonhub = {
           apiKeyEnv = "AXONHUB_API_KEY";
           api = "openai-completions";
-          baseURL = "https://api.lucc.dev/v1";
+          baseURL = "${globals.llmGateway}/v1";
           models = [
             {
               id = globals.models.dsf;

@@ -95,7 +95,7 @@ in
         model_providers = {
           axonhub = {
             name = "axonhub";
-            base_url = "https://api.lucc.dev/v1";
+            base_url = "${globals.llmGateway}/v1";
             env_key = "LLM_AxonHub";
             wire_api = "responses";
           };
@@ -120,7 +120,7 @@ in
         CODEX_UNSAFE_ALLOW_NO_SANDBOX = 1;
 
         OPENAI_API_KEY = "$(cat ${config.sops.secrets.LLM_AxonHub.path})";
-        OPENAI_BASE_URL = "https://api.lucc.dev/v1";
+        OPENAI_BASE_URL = "${globals.llmGateway}/v1";
         OPENAI_MODEL = "";
 
         LLM_AxonHub = "$(cat ${config.sops.secrets.LLM_AxonHub.path})";
@@ -128,7 +128,7 @@ in
         # ccx session export 配置
         CCX_WIKI_ROOT = "${config.home.homeDirectory}/Desktop/docs/wiki";
         CCX_AI_MODEL = globals.models.dsf;
-        CCX_AI_BASE_URL = "https://api.lucc.dev/v1";
+        CCX_AI_BASE_URL = "${globals.llmGateway}/v1";
       };
       shellAliases = {
       };

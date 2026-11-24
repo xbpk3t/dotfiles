@@ -148,6 +148,10 @@ rec {
                 gpt = "gpt-6-astra";
               };
 
+              # LLM gateway origin：claude/codex/opencode/dsh/cloudcli/ocr 共用。
+              # 存裸 origin（anthropic 协议直接用）；OpenAI 兼容路径由各端自行拼 /v1。
+              llmGateway = "https://api.lucc.dev";
+
               # 全局身份常量：所有 host 共享。
               # Why: user/time/editor 不是 fleet topology，不该每个节点在
               # fleet registry 里复制一份；per-host 差异由 host 模块覆盖。

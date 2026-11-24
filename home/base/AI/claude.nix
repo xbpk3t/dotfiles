@@ -236,7 +236,7 @@ in
               # env，必须保留两份。
               CCX_WIKI_ROOT = "${config.home.homeDirectory}/Desktop/docs/wiki";
               CCX_AI_MODEL = globals.models.dsf;
-              CCX_AI_BASE_URL = "https://api.lucc.dev/v1";
+              CCX_AI_BASE_URL = "${globals.llmGateway}/v1";
             };
 
             # statusLine = {
@@ -273,7 +273,7 @@ in
           #  # API 认证令牌 - 使用 sops 管理，通过 cat 命令读取文件内容
           #  ANTHROPIC_AUTH_TOKEN = "$(cat ${config.sops.secrets.API_GLM.path})";
 
-          ANTHROPIC_BASE_URL = "https://api.lucc.dev";
+          ANTHROPIC_BASE_URL = globals.llmGateway;
           ANTHROPIC_AUTH_TOKEN = "$(cat ${config.sops.secrets.LLM_AxonHub.path})";
 
           # docs-cli / wiki digest 走 OpenAI 兼容接口时需要这两个名字。

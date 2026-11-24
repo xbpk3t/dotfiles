@@ -45,7 +45,7 @@ in
             npm = "@ai-sdk/openai-compatible";
             name = "AxonHub";
             options = {
-              baseURL = "https://api.lucc.dev/v1";
+              baseURL = "${globals.llmGateway}/v1";
               # 密钥由 web service 的 environmentFile 注入，不进 Nix store。
               apiKey = "{env:AXONHUB_API_KEY}";
             };

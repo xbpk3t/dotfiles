@@ -1,5 +1,6 @@
 {
   config,
+  globals,
   lib,
   pkgs,
   ...
@@ -112,7 +113,7 @@ in
     # 只在 hm-session-vars 里，而 CloudCLI 拉起的 claude 进程不经过 shell。
     # CloudCLI 会把自身 env 传给子进程，所以在这里显式注入。
     sops.templates."cloudcli-env".content = ''
-      ANTHROPIC_BASE_URL=https://api.lucc.dev
+      ANTHROPIC_BASE_URL=${globals.llmGateway}
       ANTHROPIC_AUTH_TOKEN=${config.sops.placeholder.LLM_AxonHub}
       AXONHUB_API_KEY=${config.sops.placeholder.LLM_AxonHub}
       OPENAI_API_KEY=cloudcli-status-only
