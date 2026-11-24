@@ -33,8 +33,28 @@ let
       claudeHeaders.Authorization = "Bearer \${TAVILY_API_KEY}";
     };
   };
+  # stdio MCP：server 名 → (环境变量, sops secret)。host 未 opt-in HTTP 时使用。
+  # key 走 passwordCommand（进程启动时注入），不依赖 shell 是否导出，
+  # 也不把明文写进 store。
+  stdioServers = {
+    github = {
+      env = "GITHUB_PERSONAL_ACCESS_TOKEN";
+      secret = "GITHUB_TOKEN";
+    };
+    context7 = {
+      env = "CONTEXT7_API_KEY";
+      secret = "API_CONTEXT7";
+    };
+    tavily = {
+      env = "TAVILY_API_KEY";
+      secret = "API_TAVILY";
+    };
+  };
   isHttp = name: builtins.elem name cfg.httpServers;
 in
+assert lib.assertMsg (
+  builtins.attrNames hostedServers == builtins.attrNames stdioServers
+) "modules.AI.mcp: hostedServers and stdioServers must expose the same server names";
 {
   imports = [
     inputs.mcp-servers-nix.homeManagerModules.default
@@ -56,10 +76,27 @@ in
         per-server header overrides. Other clients may need their own auth wiring.
       '';
     };
+
+    # Codex-flavor server 视图：Codex 与 dsh 共用，避免各自重复 evalModule。
+    codexServers = mkOption {
+      type = types.attrs;
+      readOnly = true;
+      internal = true;
+      description = "mcp-servers-nix codex-flavor server view shared by Codex and dsh.";
+    };
   };
 
   # https://developers.openai.com/codex/mcp
   config = lib.mkIf mcpEnabled {
+    # Codex 与 dsh 共用的 codex-flavor server 视图；eval 只在这里做一次。
+    # 消费方依赖本文件已被 import（home/base/AI/default.nix 已保证）；单独
+    # import codex.nix/dsh.nix 的 host 需要同时 import 本文件。
+    modules.AI.mcp.codexServers =
+      (inputs.mcp-servers-nix.lib.evalModule pkgs {
+        inherit (config.mcp-servers) programs settings;
+        flavor = "codex";
+      }).config.settings.servers;
+
     programs = {
       mcp.enable = true;
 
@@ -74,71 +111,39 @@ in
           headers.Authorization = "Bearer \${LINEAR_API_KEY}";
           default_tools_approval_mode = "approve";
         };
-
-        # Hosted HTTP variants for Claude Code. CC expands ${VAR} in headers;
-        # shared settings.servers deliberately has no headers to avoid Codex's
-        # HM bridge sending duplicate Authorization headers (see linear comment).
-        context7 = lib.mkIf (config.modules.AI.claude.enable && isHttp "context7") {
-          type = "http";
-          inherit (hostedServers.context7) url;
-          headers = hostedServers.context7.claudeHeaders;
-          default_tools_approval_mode = "approve";
-        };
-
-        tavily = lib.mkIf (config.modules.AI.claude.enable && isHttp "tavily") {
-          type = "http";
-          inherit (hostedServers.tavily) url;
-          headers = hostedServers.tavily.claudeHeaders;
-          default_tools_approval_mode = "approve";
-        };
-
-        github = lib.mkIf (config.modules.AI.claude.enable && isHttp "github") {
-          type = "http";
-          inherit (hostedServers.github) url;
-          headers = hostedServers.github.claudeHeaders;
-          default_tools_approval_mode = "approve";
-        };
-      };
+      }
+      # Hosted HTTP variants for Claude Code. CC expands ${VAR} in headers;
+      # shared settings.servers deliberately has no headers to avoid Codex's
+      # HM bridge sending duplicate Authorization headers (see linear comment).
+      # 只给声明了 claudeHeaders 的 hosted server 生成 CC 条目；没有该字段的
+      # server 视为 Codex/dsh-only，避免被隐式注入 Claude。
+      // lib.mapAttrs' (
+        name: server:
+        lib.nameValuePair name (
+          lib.mkIf (config.modules.AI.claude.enable && isHttp name) {
+            type = "http";
+            inherit (server) url;
+            headers = server.claudeHeaders;
+            default_tools_approval_mode = "approve";
+          }
+        )
+      ) (lib.filterAttrs (_: server: server ? claudeHeaders) hostedServers);
     };
 
     mcp-servers = {
-      programs = {
-        github = lib.mkIf (!isHttp "github") {
+      # stdio 变体：secret 通过 passwordCommand 在启动时从 sops 读取，避免明文
+      # 进 store，也不依赖 shell 是否导出（dsh 的 stdio MCP 同样继承）。
+      # github-mcp-server 只认 GITHUB_PERSONAL_ACCESS_TOKEN；映射见表 stdioServers。
+      programs = lib.mapAttrs (
+        name: spec:
+        lib.mkIf (!isHttp name) {
           enable = true;
-          # github-mcp-server 只认 GITHUB_PERSONAL_ACCESS_TOKEN；用 wrapper 在
-          # 启动时从 sops 读取，避免明文进 store，也让 dsh 的 stdio MCP 继承到。
-          passwordCommand = {
-            GITHUB_PERSONAL_ACCESS_TOKEN = [
-              "cat"
-              config.sops.secrets.GITHUB_TOKEN.path
-            ];
-          };
-        };
-
-        context7 = lib.mkIf (!isHttp "context7") {
-          enable = true;
-          passwordCommand = {
-            CONTEXT7_API_KEY = [
-              "cat"
-              config.sops.secrets.API_CONTEXT7.path
-            ];
-          };
-        };
-
-        # Tavily: 通用网页搜索 MCP（替代被第三方网关废掉的 Anthropic 服务端 WebSearch）。
-        # 走第三方 API，不经 Anthropic 后端 → DeepSeek 网关下照常可用。
-        # key 注入用 passwordCommand（进程启动时 wrap 一层注入），与 context7 同一规范，
-        # 不依赖 shell 是否导出了 TAVILY_API_KEY；勿改用 env 硬编码（store 可被任意读）。
-        tavily = lib.mkIf (!isHttp "tavily") {
-          enable = true;
-          passwordCommand = {
-            TAVILY_API_KEY = [
-              "cat"
-              config.sops.secrets.API_TAVILY.path
-            ];
-          };
-        };
-      };
+          passwordCommand.${spec.env} = [
+            "cat"
+            config.sops.secrets.${spec.secret}.path
+          ];
+        }
+      ) stdioServers;
 
       settings.servers = {
 

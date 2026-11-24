@@ -9,14 +9,6 @@
 let
   cfg = config.modules.AI.codex;
   codexDefaultModel = globals.models.gpt;
-  mcpServersForCodex =
-    (inputs.mcp-servers-nix.lib.evalModule pkgs {
-      inherit (config.mcp-servers)
-        programs
-        settings
-        ;
-      flavor = "codex";
-    }).config.settings.servers;
 in
 {
   # codex resume   打开可恢复的会话列表
@@ -97,7 +89,7 @@ in
 
         # [2026-04-18] 直接注入 mcp-servers-nix 的 codex flavor server 配置。
         # 这样 settings.servers.<name>.tools.*.approval_mode 可以原样进入 Codex 的 mcp_servers。
-        mcp_servers = mcpServersForCodex;
+        mcp_servers = config.modules.AI.mcp.codexServers;
 
         model_provider = "axonhub";
         model_providers = {
