@@ -30,10 +30,10 @@
 
       # A1 无人值守 runner 宿主。启用前必须先补两个 sops key：
       #   github/runner_token    fine-grained PAT（Administration: write）
-      #   github/runner_ssh_key  可 SSH 到 fleet 目标的专用私钥
-      # 补齐后把 enable 改为 true，手动部署一次 dev：
+      #   github/runner_ssh_key  现有 nixos-vps-agt-deploy 私钥（复用已授权 deploy key）
+      # 补齐后手动部署一次 dev：
       #   task nix:deploy NODES=nixos-vps-dev
-      github-runner.enable = false;
+      github-runner.enable = true;
       healthchecks = {
         enable = true;
         urlFile = config.sops.secrets.HEALTHCHECKS_VPS_DEV.path;

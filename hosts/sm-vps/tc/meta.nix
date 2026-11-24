@@ -15,7 +15,8 @@
 
   deploy = {
     remoteBuild = true;
-    auto = true;
+    # 机器已下线；保留配置/Ansible 工具，但不参与 auto。
+    auto = false;
   };
 
   # bootstrap 后 SSH 目标：luck + 公网 IP（root 密码登录仅用于首次建用户）。
