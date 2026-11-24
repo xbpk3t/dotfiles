@@ -2,10 +2,9 @@
   inputs,
   lib,
   system,
-  genSpecialArgs,
   nixos-modules,
   home-modules ? [ ],
-  specialArgs ? (genSpecialArgs system),
+  specialArgs,
   ...
 }:
 let

@@ -1,9 +1,7 @@
 {
   inputs,
-  system,
-  genSpecialArgs,
   home-modules ? [ ],
-  specialArgs ? (genSpecialArgs system),
+  specialArgs,
   ...
 }:
 let

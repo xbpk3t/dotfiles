@@ -115,7 +115,6 @@ let
       inputs
       lib
       mylib
-      genSpecialArgs
       mkSpecialArgs
       ;
   };

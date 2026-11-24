@@ -67,12 +67,6 @@ in
         SUB_9TI = mkRootSecret "proxy/sub/9ti";
         # Tailscale 加入 key 不在 sm 声明：join 由 ansible bootstrap 用本地
         # sm_ts_authkey_src 完成，Nix 侧没有消费者。
-      }
-      // lib.optionalAttrs config.modules.infra.derper.enable {
-        # ACME（derper 证书 DNS-01）：CF token（复用 secrets/default.nix 的 acme/cloudflare_env）。
-        # email 用 userMeta.mail（flake globals.identity），不进 sops。
-        # 只有启用 derper 的 sm 主机才解密这个 root secret。
-        ACME_CF_ENV = mkRootSecret "acme/cloudflare_env";
       };
     };
 

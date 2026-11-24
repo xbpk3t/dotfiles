@@ -233,6 +233,8 @@ let
   # 不变量：值全部是布尔，nix-unit 直接消费；键以 test- 开头。
   # 注意：hostName 由 scanNode 从路径派生（并在 meta 自带 hostName 时直接报错），
   # 不再单列 "hostName == node key" 测试——那是构造保证的，写出来只会是永远为真的假测试。
+  # 同理，deployDriver 合法性 / home 不得走 deploy-rs 已由 scanNode 的 assert 保证，
+  # 不再重复成永远为真的 nix-unit case。
   checks = {
     "test-kind-present" = every (node: node ? kind);
 
@@ -277,23 +279,6 @@ let
       node: (node.tailscale.ip or null) != null || (node.ssh.host or null) != null
     );
 
-    # 部署路由：driver 必须是 Taskfile 能分发的已知值；home 节点不能走 deploy-rs。
-    "test-deploy-driver-known" = every (
-      node:
-      let
-        driver = node.deployDriver;
-      in
-      driver == null
-      || builtins.elem driver [
-        "deploy-rs"
-        "ansible-hm"
-      ]
-    );
-
-    "test-home-not-deploy-rs" = every (
-      node: !(node.kind == "home" && node.deployDriver == "deploy-rs")
-    );
-
     "test-deploy-route-host" = lib.all (route: route.host != "") (lib.attrValues deployRoutes);
 
     # auto 只接受 boolean；默认 false，避免新节点“新增即可自动上线”。
@@ -324,7 +309,6 @@ let
       name,
       node,
       defaultSshUser,
-      defaultSshPort ? null,
       remoteBuild ? true,
     }:
     let
@@ -339,7 +323,7 @@ let
       sshUser = ssh.user or defaultSshUser;
       # What：额外 SSH 参数（如端口）。
       # Why：deploy-rs 没有独立的 sshPort 字段，只能通过 sshOpts 传递。
-      sshOpts = sshOptsFor node defaultSshPort;
+      sshOpts = sshOptsFor node null;
       # What：是否在远端构建。
       # Why：与 Colmena 的 buildOnTarget 行为一致，避免本地负载。
       inherit remoteBuild;
@@ -352,7 +336,6 @@ let
       nixosConfiguration,
       deployLib,
       defaultSshUser ? "root",
-      defaultSshPort ? null,
       remoteBuild ? true,
     }:
     deployTarget {
@@ -360,7 +343,6 @@ let
         name
         node
         defaultSshUser
-        defaultSshPort
         remoteBuild
         ;
     }
@@ -387,7 +369,7 @@ let
   #   - 不修改 deployRsNode 的 activate.nixos 语义
   #   - system profile 的 user 固定为 root（sm 激活写 /etc、systemd、/var/lib）
   #     → deploy-rs 在 sshUser != root 时自动用 `sudo <user>` 包装（容器内 luck 有 NOPASSWD sudo）
-  #   - profilesOrder 默认先 system 后 home（先建系统态再收敛用户态）
+  #   - profilesOrder 固定先 system 后 home（先建系统态再收敛用户态）
   deploySmHmNode =
     {
       name,
@@ -398,12 +380,7 @@ let
       homeActivationPackage,
       deployLib,
       defaultSshUser ? "luck",
-      defaultSshPort ? null,
       remoteBuild ? true,
-      profilesOrder ? [
-        "system"
-        "home"
-      ],
     }:
     let
       # sm 引擎激活：deploy-rs 先 nix-env --set 把 $PROFILE 指向 toplevel，
@@ -421,7 +398,6 @@ let
           name
           node
           defaultSshUser
-          defaultSshPort
           remoteBuild
           ;
       };
@@ -448,7 +424,10 @@ let
           path = deployLib.activate.home-manager homeActivationPackage;
         };
       };
-      inherit profilesOrder;
+      profilesOrder = [
+        "system"
+        "home"
+      ];
     };
 in
 {

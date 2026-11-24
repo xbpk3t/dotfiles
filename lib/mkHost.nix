@@ -7,7 +7,6 @@
   lib,
   mylib,
   mkSpecialArgs,
-  genSpecialArgs,
 }:
 { name, node }:
 let
@@ -29,7 +28,6 @@ let
       inputs
       lib
       system
-      genSpecialArgs
       specialArgs
       ;
     nixos-modules = [ hostDefault ];
@@ -41,7 +39,6 @@ let
       inputs
       lib
       system
-      genSpecialArgs
       specialArgs
       ;
     darwin-modules = [ hostDefault ];
@@ -52,7 +49,6 @@ let
     inherit
       inputs
       system
-      genSpecialArgs
       specialArgs
       ;
     home-modules = homeModules;
