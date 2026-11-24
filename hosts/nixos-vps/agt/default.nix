@@ -27,14 +27,6 @@ in
   ];
 
   modules = {
-    kernel.sysctl.hardware = {
-      cpuCores = 4;
-      memGiB = 4;
-      bwMbps = 6;
-      rttMs = 30;
-      mode = "bal";
-    };
-
     # VM 没有硬件 watchdog；softdog（见下方 boot.kernelModules）提供
     # /dev/watchdog 后，这里放宽 systemd 的喂狗超时：默认 15s 对 4G
     # 重载机太激进，60s 兼顾兜底与避免正常抖动误重启。
@@ -66,8 +58,6 @@ in
     infra.healthchecks = {
       enable = true;
       urlFile = config.sops.secrets.HEALTHCHECKS_VPS_AGT.path;
-      disk.enable = true;
-      rebootPending.enable = true;
     };
     # 稳定 UUID：`uuidgen` 生成一次后固定，避免 hostname/FQDN 变化导致重复注册。
     infra.nezha.agent.uuid = "5b8a9ab4-6ed8-4e5d-9c45-03425b6b4644";

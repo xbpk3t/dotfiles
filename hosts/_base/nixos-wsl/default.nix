@@ -58,6 +58,8 @@ in
 
     networking = {
       hostName = lib.mkDefault hostMeta.hostName;
+      # WSL 网络由 Windows 管理；显式关闭 NixOS firewall，保留原行为。
+      firewall.enable = false;
       # WSL 自己生成 /etc/resolv.conf；NixOS-WSL 的 generateResolvConf
       # 已经关闭 NixOS 侧 resolvconf，不需要 useHostResolvConf。
     };

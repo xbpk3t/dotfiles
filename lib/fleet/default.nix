@@ -20,6 +20,56 @@ let
 
   topEntries = builtins.readDir hostsDir;
 
+  # sing-box 的协议端口/path 是 fleet 约定，不是每台机器的事实：默认值只在
+  # 这里维护，meta 只写真正变化的字段（label、域名）。
+  singboxProtocolDefaults = {
+    hy2 = {
+      port = 8500;
+    };
+    vmessWs = {
+      port = 9443;
+      path = "/vmess";
+    };
+    tuic = {
+      port = 10443;
+      congestionControl = "bbr";
+    };
+    anytls = {
+      port = 11443;
+      alpn = [
+        "h2"
+        "http/1.1"
+      ];
+    };
+  };
+
+  # 只对 meta 已声明的协议补默认，避免补出未启用的协议
+  # （singbox-server 用 `singbox ? hy2` 判断是否启用该协议）。
+  # domain 没有默认值：声明了协议就必须在 meta 里写非空域名。
+  normalizeSingbox =
+    name: meta:
+    if !(meta ? singbox) then
+      meta
+    else
+      let
+        sb = meta.singbox;
+        declaredDefaults = lib.intersectAttrs sb singboxProtocolDefaults;
+        missingDomains = lib.filter (protocol: (lib.attrByPath [ protocol "domain" ] "" sb) == "") (
+          builtins.attrNames declaredDefaults
+        );
+      in
+      assert lib.assertMsg (missingDomains == [ ])
+        "fleet: '${name}' singbox protocols require non-empty domain: ${lib.concatStringsSep ", " missingDomains}";
+      meta
+      // {
+        singbox =
+          sb
+          // {
+            vlessPort = sb.vlessPort or 8443;
+          }
+          // lib.mapAttrs (protocol: defaults: defaults // sb.${protocol}) declaredDefaults;
+      };
+
   # 节点名 = hosts/ 下的相对路径，把 "/" 换成 "-"：
   #   hosts/nixos-vps/dev      -> nixos-vps-dev
   #   hosts/macos-ws           -> macos-ws
@@ -66,7 +116,7 @@ let
       "fleet: '${name}' has unknown deploy.driver '${toString deployDriver}' (expected deploy-rs or ansible-hm)";
     assert lib.assertMsg homeDriverValid
       "fleet: '${name}' is kind=home but deploy.driver=deploy-rs; use ansible-hm (default) or omit deploy.driver";
-    meta
+    normalizeSingbox name meta
     // {
       inherit name path;
       hostName = name;
@@ -186,8 +236,8 @@ let
       throw "fleet: incomplete derper meta for '${name}' (need derper.domain, derper.dnsKey, publicIpv4)"
   ) (lib.filterAttrs (_: node: node ? derper) allNodes);
 
-  # 发布给 client 的 singbox server 视图：补 hostName 和 server fallback，
-  # 保持 fleet API 的形状稳定；server 缺失时的最终契约仍由 checks 兜底。
+  # 发布给 client 的 singbox server 视图：补 hostName 和 server。
+  # server 解析顺序：显式 meta → publicIpv4 → tailnet/ssh 地址。
   singboxServers = lib.filter (s: s != null) (
     lib.attrsets.mapAttrsToList (
       name: node:
@@ -195,7 +245,7 @@ let
         node.singbox
         // {
           hostName = node.hostName or name;
-          server = node.singbox.server or (primaryHostForNode name node);
+          server = node.singbox.server or (node.publicIpv4 or (primaryHostForNode name node));
         }
       else
         null
@@ -233,6 +283,8 @@ let
   # 不变量：值全部是布尔，nix-unit 直接消费；键以 test- 开头。
   # 注意：hostName 由 scanNode 从路径派生（并在 meta 自带 hostName 时直接报错），
   # 不再单列 "hostName == node key" 测试——那是构造保证的，写出来只会是永远为真的假测试。
+  # 同理，deployDriver 合法性 / home 不得走 deploy-rs 已由 scanNode 的 assert 保证，
+  # 不再重复成永远为真的 nix-unit case。
   checks = {
     "test-kind-present" = every (node: node ? kind);
 
@@ -270,28 +322,15 @@ let
     "test-nezha-hub-at-most-one" =
       lib.length (lib.filter (node: node.nezha.hub or false) nodeList) <= 1;
 
-    "test-singbox-server-address" = every (node: !(node ? singbox) || node.singbox ? server);
+    # sing-box 节点必须能从公网被 client 访问：显式 server 或 publicIpv4。
+    # singboxServers 的 tailnet fallback 只作为兜底，不作为公网代理的部署方式。
+    "test-singbox-server-address" = every (
+      node: !(node ? singbox) || node.singbox ? server || node ? publicIpv4
+    );
 
     # 每个节点必须有可寻址的 tailscale.ip 或 ssh.host，避免 primaryHostForNode 回退到节点名。
     "test-node-addressable" = every (
       node: (node.tailscale.ip or null) != null || (node.ssh.host or null) != null
-    );
-
-    # 部署路由：driver 必须是 Taskfile 能分发的已知值；home 节点不能走 deploy-rs。
-    "test-deploy-driver-known" = every (
-      node:
-      let
-        driver = node.deployDriver;
-      in
-      driver == null
-      || builtins.elem driver [
-        "deploy-rs"
-        "ansible-hm"
-      ]
-    );
-
-    "test-home-not-deploy-rs" = every (
-      node: !(node.kind == "home" && node.deployDriver == "deploy-rs")
     );
 
     "test-deploy-route-host" = lib.all (route: route.host != "") (lib.attrValues deployRoutes);
@@ -315,6 +354,25 @@ let
 
     # 用户身份是 flake globals.identity，不允许回流到 per-node meta。
     "test-no-per-node-identity" = every (node: !(node ? user) && !(node ? time) && !(node ? editor));
+
+    # 硬件事实只放 hostMeta.hardware；mode/profile 是策略，不进 meta。
+    "test-hardware-facts-only" = every (
+      node:
+      let
+        hardware = node.hardware or { };
+      in
+      !(hardware ? mode) && !(hardware ? profile)
+    );
+
+    # 一旦声明 hardware，就必须提供完整事实，避免 mkSysctl 缺参。
+    "test-hardware-complete" = every (
+      node:
+      let
+        hardware = node.hardware or null;
+      in
+      hardware == null
+      || (hardware ? cpuCores && hardware ? memGiB && hardware ? bwMbps && hardware ? rttMs)
+    );
   };
 
   # 所有 deploy-rs 节点共享的 SSH 目标解析（hostname / sshUser / sshOpts）。
@@ -324,7 +382,6 @@ let
       name,
       node,
       defaultSshUser,
-      defaultSshPort ? null,
       remoteBuild ? true,
     }:
     let
@@ -339,7 +396,7 @@ let
       sshUser = ssh.user or defaultSshUser;
       # What：额外 SSH 参数（如端口）。
       # Why：deploy-rs 没有独立的 sshPort 字段，只能通过 sshOpts 传递。
-      sshOpts = sshOptsFor node defaultSshPort;
+      sshOpts = sshOptsFor node null;
       # What：是否在远端构建。
       # Why：与 Colmena 的 buildOnTarget 行为一致，避免本地负载。
       inherit remoteBuild;
@@ -352,7 +409,6 @@ let
       nixosConfiguration,
       deployLib,
       defaultSshUser ? "root",
-      defaultSshPort ? null,
       remoteBuild ? true,
     }:
     deployTarget {
@@ -360,7 +416,6 @@ let
         name
         node
         defaultSshUser
-        defaultSshPort
         remoteBuild
         ;
     }
@@ -387,7 +442,7 @@ let
   #   - 不修改 deployRsNode 的 activate.nixos 语义
   #   - system profile 的 user 固定为 root（sm 激活写 /etc、systemd、/var/lib）
   #     → deploy-rs 在 sshUser != root 时自动用 `sudo <user>` 包装（容器内 luck 有 NOPASSWD sudo）
-  #   - profilesOrder 默认先 system 后 home（先建系统态再收敛用户态）
+  #   - profilesOrder 固定先 system 后 home（先建系统态再收敛用户态）
   deploySmHmNode =
     {
       name,
@@ -398,12 +453,7 @@ let
       homeActivationPackage,
       deployLib,
       defaultSshUser ? "luck",
-      defaultSshPort ? null,
       remoteBuild ? true,
-      profilesOrder ? [
-        "system"
-        "home"
-      ],
     }:
     let
       # sm 引擎激活：deploy-rs 先 nix-env --set 把 $PROFILE 指向 toplevel，
@@ -421,7 +471,6 @@ let
           name
           node
           defaultSshUser
-          defaultSshPort
           remoteBuild
           ;
       };
@@ -448,7 +497,10 @@ let
           path = deployLib.activate.home-manager homeActivationPackage;
         };
       };
-      inherit profilesOrder;
+      profilesOrder = [
+        "system"
+        "home"
+      ];
     };
 in
 {

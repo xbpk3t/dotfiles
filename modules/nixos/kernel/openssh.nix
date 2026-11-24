@@ -6,11 +6,8 @@ in
   options.modules.kernel.openssh.enable = lib.mkEnableOption "OpenSSH server baseline";
 
   config = lib.mkIf cfg.enable {
-    # Or disable the firewall altogether.
-    # 默认开启（如果workstation等场景不需要时，则在hosts中overrides该配置）
-    # 服务器建议开启防火墙，桌面可以依赖 NetworkManager 自动规则
-    # [2025-12-19]
-    networking.firewall.enable = lib.mkDefault false;
+    # Firewall policy is owned by the host. NixOS defaults to enabled;
+    # hosts that need it off (e.g. WSL) set networking.firewall.enable = false.
 
     # Enable the OpenSSH daemon.
     services.openssh = {

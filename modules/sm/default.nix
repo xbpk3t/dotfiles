@@ -36,7 +36,7 @@
   # 全部模块常驻 import（option 声明永远存在）：
   #   - 命名统一为 modules.* 布局（对齐 darwin/nixos 轨）：
   #       modules.networking.* — 客户端（mihomo）
-  #       modules.infra.*       — 服务端/服务角色（singbox-server/derper/status-page）
+  #       modules.infra.*       — 服务端/服务角色（singbox-server/status-page）
   #   - shared 差异收敛到「config 主体」：各模块内部用
   #     lib.mkIf (!config.modules.sm.shared) / lib.mkIf (config ? sops)
   #     门控依赖 sops/tailscale 的部分，shared 下不求值。
@@ -58,7 +58,6 @@
     ./mihomo.nix
     ./tailscale.nix
     ./singbox.nix
-    ./derper.nix
     ./status-page.nix
   ];
 }

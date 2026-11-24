@@ -8,7 +8,7 @@ let
   cfg = config.modules.ms.k8s;
 in
 {
-  # K8s 工具集开关。nixos-usb（便携 USB）不需要 k8s，避免了跨 host 无差别装载
+  # K8s 工具集开关。桌面/便携 host 不需要 k8s，避免了跨 host 无差别装载
   # kubecolor 等工具；需要 K8s 的 host（vps/ws/homelab）设 modules.ms.k8s.enable = true。
   options.modules.ms.k8s = {
     enable = lib.mkEnableOption "Kubernetes 工具集（kubectl / k9s / flux 等）";

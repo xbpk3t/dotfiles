@@ -35,37 +35,31 @@ let
       null
     else
       let
-        vmess = s.vmessWs;
-        domain = vmess.domain or null;
-        port = vmess.port or null;
-        path = vmess.path or null;
+        inherit (s) vmessWs;
       in
-      if domain == null || port == null || path == null then
-        throw "mihomo: servers.*.vmessWs.{domain,port,path} are required"
-      else
-        {
-          name = mkTag "vmess" s;
-          type = "vmess";
-          inherit (s) server;
-          inherit port;
-          udp = true;
-          inherit uuid;
-          alterId = 0;
-          cipher = "auto";
-          packet-encoding = "packetaddr";
-          global-padding = false;
-          authenticated-length = false;
-          tls = true;
-          servername = domain;
-          client-fingerprint = fingerprint;
-          network = "ws";
-          ws-opts = {
-            inherit path;
-            headers = {
-              Host = domain;
-            };
+      {
+        name = mkTag "vmess" s;
+        type = "vmess";
+        inherit (s) server;
+        inherit (vmessWs) port;
+        udp = true;
+        inherit uuid;
+        alterId = 0;
+        cipher = "auto";
+        packet-encoding = "packetaddr";
+        global-padding = false;
+        authenticated-length = false;
+        tls = true;
+        servername = vmessWs.domain;
+        client-fingerprint = fingerprint;
+        network = "ws";
+        ws-opts = {
+          inherit (vmessWs) path;
+          headers = {
+            Host = vmessWs.domain;
           };
         };
+      };
 
   toHy2Outbound =
     s:
@@ -74,23 +68,18 @@ let
     else
       let
         inherit (s) hy2;
-        domain = hy2.domain or null;
-        port = hy2.port or 8500;
       in
-      if domain == null then
-        throw "mihomo: servers.*.hy2.domain is required"
-      else
-        {
-          name = mkTag "hy2" s;
-          type = "hysteria2";
-          inherit (s) server;
-          inherit port;
-          inherit password;
-          sni = domain;
-          skip-cert-verify = false;
-        }
-        // (lib.optionalAttrs (hy2 ? up_mbps) { up = "${toString hy2.up_mbps}Mbps"; })
-        // (lib.optionalAttrs (hy2 ? down_mbps) { down = "${toString hy2.down_mbps}Mbps"; });
+      {
+        name = mkTag "hy2" s;
+        type = "hysteria2";
+        inherit (s) server;
+        inherit (hy2) port;
+        inherit password;
+        sni = hy2.domain;
+        skip-cert-verify = false;
+      }
+      // (lib.optionalAttrs (hy2 ? up_mbps) { up = "${toString hy2.up_mbps}Mbps"; })
+      // (lib.optionalAttrs (hy2 ? down_mbps) { down = "${toString hy2.down_mbps}Mbps"; });
 
   toTuicOutbound =
     s:
@@ -99,27 +88,21 @@ let
     else
       let
         inherit (s) tuic;
-        domain = tuic.domain or null;
-        port = tuic.port or null;
-        congestionControl = tuic.congestionControl or "bbr";
       in
-      if domain == null || port == null then
-        throw "mihomo: servers.*.tuic.{domain,port} are required"
-      else
-        {
-          name = mkTag "tuic" s;
-          type = "tuic";
-          inherit (s) server;
-          inherit port;
-          inherit uuid password;
-          alpn = [ "h3" ];
-          request-timeout = 8000;
-          udp-relay-mode = "native";
-          congestion-controller = congestionControl;
-          reduce-rtt = true;
-          sni = domain;
-          skip-cert-verify = false;
-        };
+      {
+        name = mkTag "tuic" s;
+        type = "tuic";
+        inherit (s) server;
+        inherit (tuic) port;
+        inherit uuid password;
+        alpn = [ "h3" ];
+        request-timeout = 8000;
+        udp-relay-mode = "native";
+        congestion-controller = tuic.congestionControl;
+        reduce-rtt = true;
+        sni = tuic.domain;
+        skip-cert-verify = false;
+      };
 
   toAnytlsOutbound =
     s:
@@ -128,28 +111,19 @@ let
     else
       let
         inherit (s) anytls;
-        domain = anytls.domain or null;
-        port = anytls.port or null;
-        alpn =
-          anytls.alpn or [
-            "h2"
-            "http/1.1"
-          ];
       in
-      if domain == null || port == null then
-        throw "mihomo: servers.*.anytls.{domain,port} are required"
-      else
-        {
-          name = mkTag "anytls" s;
-          type = "anytls";
-          inherit (s) server;
-          inherit port;
-          inherit password alpn;
-          client-fingerprint = fingerprint;
-          udp = true;
-          sni = domain;
-          skip-cert-verify = false;
-        };
+      {
+        name = mkTag "anytls" s;
+        type = "anytls";
+        inherit (s) server;
+        inherit (anytls) port;
+        inherit password;
+        inherit (anytls) alpn;
+        client-fingerprint = fingerprint;
+        udp = true;
+        sni = anytls.domain;
+        skip-cert-verify = false;
+      };
 
   vlessOuts = map toVlessOutbound servers;
   vmessOuts = lib.lists.filter (o: o != null) (map toVmessOutbound servers);

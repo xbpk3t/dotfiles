@@ -1,7 +1,6 @@
 {
   config,
   globals,
-  inputs,
   lib,
   pkgs,
   ...
@@ -30,11 +29,7 @@ let
 
   # MCP server 声明复用 mcp.nix 里那一份（cc / codex 也吃同一份），保证三端
   # 不漂移。flavor 保持 codex：它只是输出通用形状 + codex 专有字段。
-  mcpServers =
-    (inputs.mcp-servers-nix.lib.evalModule pkgs {
-      inherit (config.mcp-servers) programs settings;
-      flavor = "codex";
-    }).config.settings.servers;
+  mcpServers = config.modules.AI.mcp.codexServers;
 
   # dsh-mcp-client 只认 stdio / streamable-http，也没有 codex 的审批字段
   # （default_tools_approval_mode / tools.*.approval_mode）：本机是

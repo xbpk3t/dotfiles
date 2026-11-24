@@ -88,7 +88,7 @@ let
         if builtins.hasAttr mode modeTable then
           modeTable.${mode}
         else
-          throw "modules.kernel.sysctl.hardware.mode: unknown mode '${mode}' (allowed: ${lib.concatStringsSep ", " (builtins.attrNames modeTable)})";
+          throw "modules.kernel.sysctl.mode: unknown mode '${mode}' (allowed: ${lib.concatStringsSep ", " (builtins.attrNames modeTable)})";
 
       cores = if cpuCores == null then 1 else cpuCores;
 

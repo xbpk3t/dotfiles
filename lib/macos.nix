@@ -4,8 +4,7 @@
   darwin-modules,
   home-modules ? [ ],
   system,
-  genSpecialArgs,
-  specialArgs ? (genSpecialArgs system),
+  specialArgs,
   ...
 }:
 let

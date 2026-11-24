@@ -16,14 +16,6 @@ let
   # 自动提取不到的接口/硬件事实。
   manualNodes = {
     # —— 自动提取的 NixOS 主机：补接口定义（host 用 NetworkManager/DHCP，无静态接口）——
-    nixos-usb = {
-      hardware.info = "Portable USB NixOS";
-      interfaces = {
-        eth0 = {
-          network = "lan";
-        };
-      };
-    };
     nixos-vps-dev = {
       interfaces = {
         ens3 = {
@@ -127,7 +119,6 @@ let
 
       connections = {
         eth1 = [
-          (mkConnection "nixos-usb" "eth0")
           (mkConnection "macos-ws" "en0")
         ];
         wan1 = mkConnection "internet" "*";
