@@ -7,6 +7,7 @@ _: {
     ./cloudcli.nix
     ./dagu.nix
     ./dsh.nix
+    ./ocr.nix
     ./opencode.nix
     ./skills.nix
   ];
