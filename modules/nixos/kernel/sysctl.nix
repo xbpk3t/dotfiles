@@ -58,5 +58,9 @@ in
     # mkForce 确保覆盖 nixpkgs 默认 sysctl（如 fs.inotify.max_user_instances），
     # 避免在容器等叠加上下文中出现 "defined multiple times" 错误。
     boot.kernel.sysctl = lib.mkForce sysctl;
+
+    # systemd-sysctl 晚于 systemd-modules-load；显式加载 nf_conntrack，
+    # 否则 net.netfilter.nf_conntrack_* 会被静默跳过。
+    boot.kernelModules = [ "nf_conntrack" ];
   };
 }

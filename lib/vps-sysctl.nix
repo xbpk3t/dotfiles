@@ -22,12 +22,26 @@ let
   # 小内存机器的分界点；swappiness 与 zram 容量共用，避免两处阈值漂移。
   smallMemGiB = 8;
 
+  # 连接跟踪参数：默认按内存增长并钳制；steady 在 modeTable 里覆盖。
+  defaultConntrack = {
+    floor = 262144;
+    cap = 4194304;
+    perGiB = 16384;
+  };
+
   modeTable = {
     steady = {
       factorNum = 1;
       factorDen = 1;
       capPct = 2;
       backlogMult = 1;
+      # 小内存档：conntrack 固定 65536（约 20MB），established 超时 1 天。
+      conntrack = {
+        floor = 65536;
+        cap = 65536;
+        perGiB = 0;
+      };
+      tcpEstablishedTimeout = 86400;
     };
     balanced = {
       factorNum = 2;
@@ -142,8 +156,9 @@ let
       # TCP 窗口广告缩放：高带宽场景更保守
       tcpAdvWinScale = if has10g then 1 else 2;
 
-      # 连接跟踪上限：按内存增长并钳制
-      nfConntrackMax = clamp 262144 4194304 (ramGiB * 16384);
+      # 连接跟踪上限：按内存增长并钳制；steady 在 modeTable 中覆盖。
+      conntrack = m.conntrack or defaultConntrack;
+      nfConntrackMax = clamp conntrack.floor conntrack.cap (ramGiB * conntrack.perGiB);
 
       # inotify 监控上限：按内存增长并钳制
       inotifyInstances = clamp 8192 65536 (ramGiB * 32);
@@ -417,8 +432,9 @@ let
       "net.netfilter.nf_conntrack_max" = nfConntrackMax;
       "net.nf_conntrack_max" = nfConntrackMax;
 
-      # 连接跟踪超时（提升高并发场景下资源回收速度）
-      "net.netfilter.nf_conntrack_tcp_timeout_established" = 432000;
+      # 连接跟踪超时（提升高并发场景下资源回收速度）。
+      # steady 用 1 天，其他档保持 5 天。
+      "net.netfilter.nf_conntrack_tcp_timeout_established" = m.tcpEstablishedTimeout or 432000;
       "net.netfilter.nf_conntrack_tcp_timeout_time_wait" = 30;
       "net.netfilter.nf_conntrack_tcp_timeout_fin_wait" = 30;
       "net.netfilter.nf_conntrack_tcp_timeout_close_wait" = 30;
