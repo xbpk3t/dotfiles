@@ -139,12 +139,31 @@ let
 
   defaultDeploySshUser = node: if node.kind == "darwin" || node.kind == "sm" then "luck" else "root";
 
+  # SSH opts 必须与 deploy-rs 完全一致：deployTarget 与 deployRoutes 共用这一份推导。
+  # 不要在 deployRoutes 里另写一份，否则 pre-check/post-processing 会和 deploy-rs 漂移。
+  sshOptsFor =
+    node: defaultSshPort:
+    let
+      ssh = node.ssh or { };
+      sshPort = ssh.port or defaultSshPort;
+    in
+    (ssh.opts or [ ])
+    ++ lib.optionals (sshPort != null) [
+      "-p"
+      (toString sshPort)
+    ];
+
   deployRoutes = lib.mapAttrs (name: node: {
     driver = node.deployDriver;
     inherit (node) kind;
     host = node.ssh.host or (primaryHostForNode name node);
     sshUser = node.ssh.user or (defaultDeploySshUser node);
     port = node.ssh.port or null;
+    # Keep pre-check/post-processing SSH aligned with deploy-rs.
+    sshOpts = sshOptsFor node null;
+    # 无人值守部署策略：默认 false，必须由 host meta 显式 opt-in。
+    # 不能用 deployDriver 推断：可远程部署 ≠ 可自动部署（USB/工作站/PA 都要排除）。
+    auto = (node.deploy or { }).auto or false;
     inherit (node) system;
   }) deployableNodes;
 
@@ -277,6 +296,20 @@ let
 
     "test-deploy-route-host" = lib.all (route: route.host != "") (lib.attrValues deployRoutes);
 
+    # auto 只接受 boolean；默认 false，避免新节点“新增即可自动上线”。
+    "test-deploy-auto-bool" = every (node: builtins.isBool ((node.deploy or { }).auto or false));
+
+    # 自动部署只允许 deploy-rs，且不得覆盖 darwin。
+    # home 不可能是 deploy-rs（test-home-not-deploy-rs），所以不需要单独的 home 断言。
+    # sm 允许 auto：deploy.nu auto 在 deploy-rs 后复用了 main sm 的 shell/reload 后处理。
+    # darwin 需要用户会话，默认排除。
+    "test-deploy-auto-deploy-rs" = every (
+      node: !((node.deploy or { }).auto or false) || node.deployDriver == "deploy-rs"
+    );
+    "test-deploy-auto-not-darwin" = every (
+      node: !((node.deploy or { }).auto or false) || node.kind != "darwin"
+    );
+
     # SSH 登录用户只由 ssh.user 决定；deploy.sshUser 不是有效契约。
     "test-no-deploy-ssh-user" = every (node: (node.deploy.sshUser or null) == null);
 
@@ -296,7 +329,6 @@ let
     }:
     let
       ssh = node.ssh or { };
-      sshPort = ssh.port or defaultSshPort;
     in
     {
       # What：部署目标地址（IP/域名/别名）。
@@ -307,12 +339,7 @@ let
       sshUser = ssh.user or defaultSshUser;
       # What：额外 SSH 参数（如端口）。
       # Why：deploy-rs 没有独立的 sshPort 字段，只能通过 sshOpts 传递。
-      sshOpts =
-        (ssh.opts or [ ])
-        ++ lib.optionals (sshPort != null) [
-          "-p"
-          (toString sshPort)
-        ];
+      sshOpts = sshOptsFor node defaultSshPort;
       # What：是否在远端构建。
       # Why：与 Colmena 的 buildOnTarget 行为一致，避免本地负载。
       inherit remoteBuild;

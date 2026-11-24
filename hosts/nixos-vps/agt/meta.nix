@@ -22,6 +22,8 @@
 
   deploy = {
     remoteBuild = true;
+    # 自动部署；DERP 关键节点，故障时优先看 job summary / 手动回滚。
+    auto = true;
   };
 
   # Mac 的 ssh.nix 读取该字段；只对交互式高延迟 host opt-in。

@@ -36,24 +36,77 @@ tasks:
     desc: "部署 nixos/darwin（deploy-rs，支持多选）"
     summary: |
       task nix:deploy
+      task nix:deploy NODES=nixos-vps-dev
+      task nix:deploy NODES=all
 
       只列 nixos + darwin 的 deploy-rs 节点。
         - sm-vps：task nix:deploy:sm（带 sm 后处理）
         - hm-only PA：task nix:deploy:hm（ansible-hm）
     dir: '{{.USER_WORKING_DIR}}'
-    vars:
-      HOSTS:
-        sh: '{{.NODES_CMD}} | gum choose --no-limit --header "选择节点（可多选：nixos/darwin）"'
+    # 通过 env 传递，避免把 NODES/NODE 直接插值进 shell 双引号（注入风险）。
+    env:
+      NODES_INPUT: '{{.NODES | default ""}}'
+      NODE_INPUT: '{{.NODE | default ""}}'
     set: [errexit, nounset, pipefail]
     cmds:
       - |
-        if [ -z "{{.HOSTS}}" ]; then
+        if [ -n "$NODES_INPUT" ]; then
+          input="$NODES_INPUT"
+        elif [ -n "$NODE_INPUT" ]; then
+          input="$NODE_INPUT"
+        else
+          input=""
+        fi
+
+        if [ -n "$input" ]; then
+          if [ "$input" = "all" ]; then
+            hosts="$({{.NODES_CMD}})"
+          else
+            hosts="$(printf "%s\n" "$input" | tr ',' '\n')"
+          fi
+        else
+          hosts="$({{.NODES_CMD}} | gum choose --no-limit --header "选择节点（可多选：nixos/darwin）")"
+        fi
+
+        if [ -z "$hosts" ]; then
           echo "No node selected"
           exit 1
         fi
         # NOTE: xargs 在 -I 模式下会按行逐个替换，-n1 与其冲突且会触发 warning。
-        printf "%s\n" "{{.HOSTS}}" | xargs -P "{{.CONCURRENCY_RESOLVED}}" -I{} \
+        printf "%s\n" "$hosts" | xargs -P "{{.CONCURRENCY_RESOLVED}}" -I{} \
           {{.DEPLOY_RS_CMD}} ".#{}" -- --impure
+
+  auto:
+    desc: "无人值守：并行部署所有 deploy.auto=true 节点（逐台 closure skip）"
+    summary: |
+      task nix:deploy:auto REVISION=<sha> CONCURRENCY=4
+
+      只处理 hosts/**/meta.nix 中 deploy.auto = true 的节点。
+      每台先比对 deploy-rs profile closure；已在目标 closure 的直接 skip。
+      单台失败不阻塞其他机器；workflow 最终失败，下次只重试未收敛节点。
+    dir: '{{.USER_WORKING_DIR}}'
+    # 与 default task 相同：通过 env 传参，避免把用户输入插值进 shell 命令行。
+    env:
+      REVISION_INPUT: '{{.REVISION | default ""}}'
+      CONCURRENCY_INPUT: '{{.CONCURRENCY | default .CONCURRENCY_DEFAULT}}'
+      LOG_DIR_INPUT: '{{.LOG_DIR | default "deploy-logs"}}'
+      SUMMARY_JSON_INPUT: '{{.SUMMARY_JSON | default "deploy-summary.json"}}'
+      SUMMARY_MD_INPUT: '{{.SUMMARY_MD | default "deploy-summary.md"}}'
+    set: [errexit, nounset, pipefail]
+    cmds:
+      - |
+        case "$CONCURRENCY_INPUT" in
+          ''|*[!0-9]*)
+            echo "CONCURRENCY must be a non-negative integer" >&2
+            exit 1
+            ;;
+        esac
+        nu "{{.SCRIPTS_DIR}}/deploy.nu" auto \
+          --desired-revision "$REVISION_INPUT" \
+          --concurrency "$CONCURRENCY_INPUT" \
+          --log-dir "$LOG_DIR_INPUT" \
+          --summary-json "$SUMMARY_JSON_INPUT" \
+          --summary-md "$SUMMARY_MD_INPUT" {{if .DRY_RUN}}--dry-run{{end}} {{if .ALLOW_DIRTY}}--allow-dirty{{end}}
 
 
 # [2026-04-27] 其实没啥用，注释掉

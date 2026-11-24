@@ -1,0 +1,181 @@
+name: deploy
+
+# 无人值守部署（L2）：
+# - 每日 cron 部署最新 main；无新 commit 则 skip。
+# - 只处理 hosts/**/meta.nix 中 deploy.auto = true 的节点。
+# - 每台先比对 revision；已在目标 revision 的 skip。
+# - 并行部署；单台失败不阻塞其他机器，job 最终失败，下次只重试未收敛节点。
+#
+# 这是 push 部署，不是 pull 收敛：主机离线/手动漂移不会自动补齐。
+# 全局 skip 是“上次成功 deploy run 的 SHA == 当前 SHA”；手动回滚后用
+# workflow_dispatch + force=true 强制重新收敛。
+#
+# 前置：在 nixos-vps-dev 上启用 modules.infra.github-runner，并提供
+# label fleet-control 与 sops github/runner_token + github/runner_ssh_key。
+
+on:
+  schedule:
+    # 02:17 UTC = 10:17 CST。刻意避开整点，且放在你醒着的时间。
+    - cron: "17 2 * * *"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Ignore last-successful-SHA skip (e.g. after manual rollback)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: fleet-deploy
+  cancel-in-progress: false
+
+env:
+  USER_WORKING_DIR: ${{ github.workspace }}
+  GH_TOKEN: ${{ github.token }}
+
+jobs:
+  deploy:
+    name: deploy auto nodes
+    runs-on: [self-hosted, linux, x64, fleet-control]
+    timeout-minutes: 180
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # 自托管 runner 的工作区会被复用；gh 用 GH_TOKEN，不需要 git 凭据落盘。
+          persist-credentials: false
+
+      - name: Verify toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config --global --get-all safe.directory | grep -qxF "$GITHUB_WORKSPACE" \
+            || git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          nix --version
+          task --version
+          nu --version
+          gh --version
+
+      - name: Global skip
+        id: gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$GITHUB_REF_NAME" != "main" ]; then
+            echo "::error title=Invalid ref::deploy only runs from main (got $GITHUB_REF_NAME)"
+            exit 1
+          fi
+
+          if [ "${{ inputs.force }}" = "true" ]; then
+            echo "force=true; skipping last-successful-SHA check"
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          last="$(gh run list --workflow deploy.yml --status success --limit 1 --json headSha --jq '.[0].headSha // ""')"
+          if [ "$last" = "$GITHUB_SHA" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            {
+              echo "## Deploy skipped"
+              echo
+              echo "- reason: no new commit since last successful deploy"
+              echo "- last deployed SHA: \`$last\`"
+              echo "- current SHA: \`$GITHUB_SHA\`"
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Preflight
+        if: steps.gate.outputs.skip != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          # 无人值守只部署 clean checkout；禁止把未提交内容伪装成某个 commit。
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "::error title=Dirty tree::deploy requires a clean working tree"
+            git status --short
+            exit 1
+          fi
+
+          # 拒绝部署过期 revision：runner 离线导致排队的 run 可能在 main 前进后
+          # 仍检出旧 SHA，从而把旧 closure 推回 fleet。
+          git fetch --no-tags origin main
+          main_sha="$(git rev-parse origin/main)"
+          if [ "$GITHUB_SHA" != "$main_sha" ]; then
+            echo "::error title=Stale revision::main is at ${main_sha:0:12}; refusing to deploy ${GITHUB_SHA:0:12}"
+            exit 1
+          fi
+
+          # full flake check 会同时求值/构建全部 host checks，6 GiB dev runner
+          # 峰值可能 4–8 GiB；这里只验证 GitHub-hosted runner 上该 SHA 的
+          # flake-check 已成功，避免在部署机上重复跑重活。
+          flake_run="$(gh run list --workflow flake-check.yml --event push --commit "$GITHUB_SHA" --status success --limit 1 --json databaseId --jq '.[0].databaseId // ""')"
+          if [ -z "$flake_run" ]; then
+            # cron 可能在 flake-check 仍 queued/in_progress 时触发。等待它结束，
+            # 而不是直接失败：否则这个 SHA 要等到下一次 cron 才会部署。
+            pending_id="$(gh run list --workflow flake-check.yml --event push --commit "$GITHUB_SHA" --limit 1 --json databaseId --jq '.[0].databaseId // ""')"
+            if [ -n "$pending_id" ]; then
+              echo "flake-check for $GITHUB_SHA is still pending (run $pending_id); waiting..."
+              gh run watch "$pending_id" --exit-status --interval 20
+              flake_run="$(gh run list --workflow flake-check.yml --event push --commit "$GITHUB_SHA" --status success --limit 1 --json databaseId --jq '.[0].databaseId // ""')"
+            fi
+          fi
+          if [ -z "$flake_run" ]; then
+            echo "::error title=flake-check missing::no successful flake-check run for $GITHUB_SHA"
+            exit 1
+          fi
+
+          routes_json="$(mktemp)"
+          nix eval --accept-flake-config --json '.#deployRoutes' > "$routes_json"
+          auto_count="$(jq '[.[] | select(.auto == true)] | length' "$routes_json")"
+          # 与 deploy.nu 的 "no auto nodes = success" 不同：无人值守 cron 下，
+          # auto 集为空更像配置回归（auto 字段拼错/节点被误删），宁可红一次，
+          # 也不要静默停止部署。确需冻结时临时停用 schedule，而不是让 cron 空转。
+          if [ "$auto_count" -eq 0 ]; then
+            echo "::error title=No auto nodes::no deployRoutes entry has deploy.auto = true"
+            exit 1
+          fi
+
+      - name: Deploy
+        if: steps.gate.outputs.skip != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          # 6 GiB dev runner：4 个 deploy-rs 同时求值/远程构建容易顶到内存上限；
+          # 2 路并行已足够，且仍符合“单台失败不阻塞其他机器”的语义。
+          task nix:deploy:auto \
+            REVISION="$GITHUB_SHA" \
+            CONCURRENCY=2
+
+      - name: Summary
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -f deploy-summary.md ]; then
+            cat deploy-summary.md >> "$GITHUB_STEP_SUMMARY"
+          elif [ "${{ steps.gate.outputs.skip }}" != "true" ]; then
+            {
+              echo "## Deploy did not produce a summary"
+              echo
+              echo "Check the job log for the failing step (preflight or deploy)."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload deploy artifacts
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: deploy-${{ github.run_id }}
+          path: |
+            deploy-logs/
+            deploy-summary.json
+            deploy-summary.md
+          if-no-files-found: ignore
+          retention-days: 90

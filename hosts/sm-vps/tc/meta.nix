@@ -15,6 +15,7 @@
 
   deploy = {
     remoteBuild = true;
+    auto = true;
   };
 
   # bootstrap 后 SSH 目标：luck + 公网 IP（root 密码登录仅用于首次建用户）。

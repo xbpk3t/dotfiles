@@ -17,6 +17,8 @@ in
   deploy = {
     # 1 vCPU / 1 GiB: never build closures on the target.
     remoteBuild = false;
+    # 无人值守部署的全局 smoke：配置最薄，适合先验证 activation/SSH/Tailscale。
+    auto = true;
   };
 
   # Full protocol set; singbox-server.nix derives the inbounds, firewall

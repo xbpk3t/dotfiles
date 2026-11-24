@@ -17,5 +17,7 @@
     # U 盘系统不远程构建：在构建机（VPS/Mac）构建，推 closure 到 U 盘。
     # Why: 插到公司/未知机器上，目标机构建环境不可控。
     remoteBuild = false;
+    # 可移除介质，可能长期离线；不参与无人值守。
+    auto = false;
   };
 }

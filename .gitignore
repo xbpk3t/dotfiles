@@ -67,3 +67,8 @@ __pycache__/
 # APM dependencies
 apm_modules/
 apm.lock.yaml
+
+# 无人值守部署产物（CI/local）
+/deploy-logs/
+/deploy-summary.json
+/deploy-summary.md

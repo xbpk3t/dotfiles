@@ -31,6 +31,14 @@ tasks:
     cmds:
       - nix eval --impure ".#homeConfigurations.{{.HOST}}.activationPackage.drvPath"
 
+  sm:
+    desc: "快速验证 sm system-manager 配置（仅评估，不 build）"
+    summary: "task nix:test:sm HOST=sm-vps-hk"
+    vars:
+      HOST: '{{.HOST | default "sm-vps-hk"}}'
+    cmds:
+      - nix eval --impure ".#systemConfigs.{{.HOST}}.config.build.toplevel.drvPath"
+
   nu-lint:
     desc: "用 nu-lint 检查仓库内所有 Nushell 脚本"
     summary: |

@@ -267,10 +267,39 @@ assert lib.assertMsg (
           mkHomeEval =
             name: cfg:
             lib.nameValuePair "hm-eval-${name}" (mkEvalCheck "hm-eval-${name}" cfg.activationPackage.drvPath);
+          # github-runner 在唯一宿主上 enable=false，hostEvalChecks 不会求值其配置体；
+          # 用最小 NixOS 配置强制求值 enabled 路径，避免上游 option 改名/类型变化
+          # 直到首次真正启用并部署时才暴露（green CI + red deploy）。
+          mkRunnerEval = lib.optionalAttrs (system == "x86_64-linux") {
+            "github-runner-eval" =
+              mkEvalCheck "github-runner-eval"
+                (inputs.nixpkgs.lib.nixosSystem {
+                  inherit system;
+                  modules = [
+                    inputs.sops-nix.nixosModules.sops
+                    ../modules/nixos/infra/github-runner.nix
+                    {
+                      modules.infra.github-runner.enable = true;
+                      sops = {
+                        validateSopsFiles = false;
+                        defaultSopsFile = ../secrets/secrets.yaml;
+                        age.keyFile = "/run/age/keys.txt";
+                      };
+                      fileSystems."/" = {
+                        device = "/dev/null";
+                        fsType = "ext4";
+                      };
+                      boot.loader.grub.devices = [ "/dev/null" ];
+                      system.stateVersion = "25.05";
+                    }
+                  ];
+                }).config.system.build.toplevel.drvPath;
+          };
         in
         (lib.mapAttrs' mkHostEval allHosts)
         // (lib.mapAttrs' mkSystemEval allSystems)
-        // (lib.mapAttrs' mkHomeEval allHomes);
+        // (lib.mapAttrs' mkHomeEval allHomes)
+        // mkRunnerEval;
     in
     {
       # flake apps:
