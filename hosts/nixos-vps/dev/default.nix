@@ -5,7 +5,10 @@
   ...
 }:
 {
-  imports = [ ../default.nix ];
+  imports = [
+    ../default.nix
+    ../../../secrets/default.nix
+  ];
 
   modules = {
     kernel.sysctl.hardware = {

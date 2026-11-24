@@ -16,13 +16,12 @@ let
 in
 {
   imports = [
-    # 平台/角色基线：capability 树与 secrets 由 group base 拥有，
-    # 节点只 import 本组 base 并写 delta。
+    # 平台/角色基线：capability 树由 group base 拥有，节点 import 本组 base
+    # 并写 delta；sops secret set 由节点自行选择（full 或 minimal）。
     inputs.sops-nix.nixosModules.sops
     inputs.disko.nixosModules.disko
     ../../modules/nixos/kernel
     ../../modules/nixos/infra
-    ../../secrets/default.nix
     ./disko.nix
     ./hardware.nix
   ];

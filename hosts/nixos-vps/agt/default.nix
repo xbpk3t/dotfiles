@@ -21,7 +21,10 @@ let
   macIp = mylib.fleet.nodes."macos-ws".tailscale.ip;
 in
 {
-  imports = [ ../default.nix ];
+  imports = [
+    ../default.nix
+    ../../../secrets/default.nix
+  ];
 
   modules = {
     kernel.sysctl.hardware = {
