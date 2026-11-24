@@ -1,13 +1,12 @@
 {
-  config,
-  lib,
+  hostMeta,
   mylib,
   ...
 }:
 let
-  # attrByPath 让 zram 模块可以单独导入而不依赖 sysctl 模块存在；
-  # hardware 缺失或为 null 时回落为 null（保守的 25%）。
-  memGiB = lib.attrByPath [ "modules" "kernel" "sysctl" "hardware" "memGiB" ] null config;
+  # 内存事实唯一来源是 hosts/<...>/meta.nix 的 hardware.memGiB；
+  # hardware 缺失时回落 null（保守的 25%）。
+  memGiB = hostMeta.hardware.memGiB or null;
   zramProfile = mylib.vpsSysctl.mkZramProfile { inherit memGiB; };
 in
 {
