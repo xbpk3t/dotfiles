@@ -98,8 +98,9 @@ in
         nvidiaSettings = true;
       }
       // lib.optionalAttrs (cfg.package != null) {
-        # null 时不覆盖，让上游按 `hardware.nvidia.branch` 选择驱动。
-        inherit (cfg) package;
+        # null 时不覆盖，让上游按 `hardware.nvidia.branch` 选择驱动；
+        # 非 null 时用 mkDefault，仍允许 host 直接覆盖 hardware.nvidia.package。
+        package = lib.mkDefault cfg.package;
       };
 
       nvidia-container-toolkit.enable = cfg.enableContainerToolkit;
