@@ -21,7 +21,10 @@ let
   macIp = mylib.fleet.nodes."macos-ws".tailscale.ip;
 in
 {
-  imports = [ ../default.nix ];
+  imports = [
+    ../default.nix
+    ../../../secrets/default.nix
+  ];
 
   modules = {
     kernel.sysctl.hardware = {
@@ -29,6 +32,7 @@ in
       memGiB = 4;
       bwMbps = 6;
       rttMs = 30;
+      mode = "bal";
     };
 
     # VM 没有硬件 watchdog；softdog（见下方 boot.kernelModules）提供

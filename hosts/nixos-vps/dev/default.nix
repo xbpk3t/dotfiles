@@ -5,7 +5,10 @@
   ...
 }:
 {
-  imports = [ ../default.nix ];
+  imports = [
+    ../default.nix
+    ../../../secrets/default.nix
+  ];
 
   modules = {
     kernel.sysctl.hardware = {
@@ -14,6 +17,7 @@
       bwMbps = 800;
       # LA→China 跨境链路 RTT，用于 BDP 计算 socket buffer 上限
       rttMs = 150;
+      mode = "perf";
     };
 
     networking.tailscale = {

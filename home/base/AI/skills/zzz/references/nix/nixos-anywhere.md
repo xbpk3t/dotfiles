@@ -35,7 +35,7 @@ desc: nixos-anywhere VPS 刷机 runbook：磁盘/阶段/closure/构建/首启验
 ### Preflight
 1. 目标机重装过先 `ssh-keygen -R <IP>`；先 `ssh-copy-id`；脚本的远端 preflight 会检查 sudo/Linux/arch/setsid/kexec/disk/RAM。非 22 端口或代理先手动验证。
 2. 从 disko.nix 读目标盘（默认 /dev/vda），通过 `DISK=<device>` 传给 Taskfile；核对型号/序列号，确认不是另一台机器的盘。
-3. 阶段分支：Ubuntu/Debian → 默认 kexec；已是 nixos-installer → 不重复 kexec，HOST=root@<IP> 且 NA_ARGS 加 --phases disko,install,reboot；非 Linux / 无 passwordless sudo / setsid 无 --wait → 停止先修前置。
+3. 阶段分支：Ubuntu/Debian → 默认 kexec；已是 nixos-installer → 不重复 kexec，HOST=root@<IP> 且 `PHASES=disko,install`（需要自动 reboot 才加 reboot）；非 Linux / 无 passwordless sudo / setsid 无 --wait → 停止先修前置。
 4. macOS 先确认 Linux builder 可用，再 build：`nix config show | grep -E 'builders|require-sigs|trusted-public-keys|substituters'`（Mac 和 builder 都看）；`--build-on local --option builders-use-substitutes true`。临时放宽 require-sigs 后必须恢复。
 
 ### Key And Flake
@@ -47,21 +47,21 @@ desc: nixos-anywhere VPS 刷机 runbook：磁盘/阶段/closure/构建/首启验
 ### Closure Gate
 1. 构建并量完整配置：`nix build --impure --no-link --print-out-paths .#nixosConfigurations.<NODE>.config.system.build.toplevel | xargs nix path-info -S`。
 2. ≤1.7G：直接刷完整配置。>1.7G：先刷 system-only：临时把 `hosts/<group>/<node>/home.nix` 改名为 `home.nix.disabled`（mkHost 会省略 HM），commit、构建/量 closure、刷机；刷完恢复并 commit。
-3. installer 的 /nix/store 是内存 overlay（≈目标 RAM；4G 机器约 2G），不是目标盘；2G RAM 机器阈值更低。RAM 紧可加 `--no-disko-deps`，并量 disko 依赖 closure。
+3. installer 的 /nix/store 是内存 overlay（≈目标 RAM；4G 机器约 2G），不是目标盘；2G RAM 机器阈值更低。**不要先验地加 `--no-disko-deps`**：先确认 installer 里有 `sgdisk`/`mkfs.ext4`/`mkfs.vfat`/`mkswap`/`partprobe`。本仓实测 nixos-images 25.05 kexec installer 没有这些工具，必须上传标准 disko 依赖（实测 356MB）。1GB 机器用 `STAGED=true`：kexec 后启用旧 swap，再 disko,install。
 4. `--no-substitute-on-destination` 只改变谁下载 closure，不降低 RAM 预算。
 
 ### Flash
-1. 先 dry-run：`task nix:nixos-anywhere FLAKE="<flakeref>#<NODE>" HOST="<user>@<IP>" DISK=<device> [AGE_KEY=...]`；核对命令、磁盘和 preflight 输出。优先用已安装的 nixos-anywhere；`nix run --refresh` 不锁版本。
+1. 先 dry-run：`task nix:nixos-anywhere FLAKE="<flakeref>#<NODE>" HOST="<user>@<IP>" DISK=<device> [STAGED=true | PHASES=...] [AGE_KEY=...]`；核对命令、磁盘和 preflight 输出。优先用已安装的 nixos-anywhere；`nix run --refresh` 不锁版本。
 2. 确认无误后执行：`DRY_RUN=false CONFIRM="<flakeref>#<NODE>"`；CONFIRM 必须等于 FLAKE，防止环境变量误触。host key 未知时 NA_ARGS 加 `--ssh-option StrictHostKeyChecking=accept-new`。
-3. VPS 首次建议 `NA_ARGS='--debug --option pure-eval false --phases kexec,disko,install'`（不自动 reboot）；在 installer 检查 `/mnt/boot/initrd` 含 virtio（`lsinitrd ... | grep virtio`，或 `zstdcat ... | cpio -t`），再 reboot。
-4. 默认 phases 含 reboot；若直接 reboot，保留云控制台 OrcaTerm/VNC 兜底。
+3. VPS 首次：`STAGED=true`（kexec → installer 检查/自动启用旧 swap → Enter 确认 → disko,install → 安装后检查，不自动 reboot）或 `PHASES=kexec,disko,install`（一次跑完不 reboot）。`NA_ARGS` 只放额外 flags（`--debug --option pure-eval false`、`--no-substitute-on-destination`）；不要在里面放 `--phases`。在 installer 检查 `/mnt/boot/initrd` 含 virtio（`lsinitrd ... | grep virtio`，或 `zstdcat ... | cpio -t`），再 reboot。
+4. 默认 `PHASES=kexec,disko,install`（不自动 reboot）；要自动 reboot 用 `PHASES=kexec,disko,install,reboot`。`STAGED=true` 不自动 reboot；若直接 reboot，保留云控制台 OrcaTerm/VNC 兜底。
 
 ### First Boot
 1. ssh-keygen -R <IP> 或 StrictHostKeyChecking=accept-new（刷机后 host key 变化；deploy-rs 非交互）。
-2. 检查 hostname -s、id luck（1000/100）、loginctl show-user luck | grep Linger=yes、/run/secrets 和 /run/user/1000/secrets、systemctl is-active sshd fail2ban、lsinitrd /boot/initrd | grep virtio、nixos-option system.stateVersion。
+2. 检查 hostname -s、id luck（1000/100）、`loginctl show-user luck | grep Linger=`（按 host 配置：dev/agt=yes；minimal/无 HM 如 rn2=no）、/run/secrets 和 /run/user/1000/secrets、systemctl is-active sshd fail2ban、lsinitrd /boot/initrd | grep virtio、nixos-option system.stateVersion。
 3. 检查 /etc/fstab：grep -c NIXOS_SWAP /etc/fstab、findmnt --verify、swapon --show；检查 df -h /。
 4. 从 host 配置读取要检查的关键服务（user/system 按 host 配置，不要写死）；如 agt 的 dagu、cloudcli、restic-backup.timer、derper/tailscale、mihomo、nezha。
-5. 若未用 --chown 注入：chown -R luck:users /home/luck，再跑 home-manager/deploy。
+5. 若未用 --chown 注入：chown -R luck:users /home/luck，再跑 home-manager/deploy。无 HM 的 minimal 节点（如 rn2）跳过 HM/deploy。
 
 ### Deploy And Recover
 1. 确认目标 host 已启用 modules.infra.nix-tools.enable；否则目标机 nix.conf 没有 flakes/cache，remoteBuild=true 会失败。
