@@ -85,7 +85,27 @@
     extraBackupArgs = [ "--tag nezha" ];
   };
 
+  # LUC-585：China client → agt Caddy → dev 的 kernel-TCP relay。
+  # 用 host Caddy（不是 Docker 容器）避免容器启动时 tailnet IP 尚未就绪导致
+  # `100.101.189.7:8080` bind 失败；`:8080` 全接口 + 防火墙只放行 tailscale0，
+  # 再加 remote_ip 兜底。上游仍由 AxonHub 的 API key 鉴权。
+  networking.firewall.interfaces.tailscale0.allowedTCPPorts = [ 8080 ];
+
   services = {
+    caddy = {
+      enable = true;
+      openFirewall = false;
+      configFile = pkgs.writeText "Caddyfile" ''
+        :8080 {
+          @tailnet remote_ip 100.64.0.0/10 fd7a:115c:a1e0::/48
+          handle @tailnet {
+            reverse_proxy http://127.0.0.1:8090
+          }
+          respond 403
+        }
+      '';
+    };
+
     # 9router dashboard on the tailnet:
     #   Tailscale Service svc:9router is defined in
     #   infra/stacks/homelab/tailscale/tailnet (tailscale_service.ninerouter).

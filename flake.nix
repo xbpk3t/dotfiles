@@ -134,6 +134,9 @@ rec {
         inputs.nix-unit.modules.flake.default
         (
           { lib, ... }:
+          let
+            fleet = import ./lib/fleet { inherit lib; };
+          in
           {
             options.globals = lib.mkOption {
               description = "Cross-host shared configuration that is not host identity metadata.";
@@ -150,7 +153,9 @@ rec {
 
               # LLM gateway origin：claude/codex/opencode/dsh/cloudcli/ocr 共用。
               # 存裸 origin（anthropic 协议直接用）；OpenAI 兼容路径由各端自行拼 /v1。
-              llmGateway = "https://api.lucc.dev";
+              # agt relay；tailnet IP 从 fleet registry 派生，避免硬编码设备名。
+              # 注意：dev 本地 client 也会绕 agt 一次；后续可按 host 覆盖。
+              llmGateway = "http://${fleet.nodes."nixos-vps-agt".tailscale.ip}:8080";
 
               # 全局身份常量：所有 host 共享。
               # Why: user/time/editor 不是 fleet topology，不该每个节点在

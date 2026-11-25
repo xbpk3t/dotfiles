@@ -42,7 +42,7 @@ CNTR_DIR=./.cntr CNTR_DRY_RUN=true task cntr:reconcile
 
 | Stack | 容器 | 入口 | 网络 | 持久化 | 备份 | 更新 |
 |-------|------|------|------|--------|------|------|
-| `caddy` | caddy:2 | `:80/:443`；api/rsshub/as.lucc.dev | edge | `./data`, `./config` | — | 手动（不在 watchtower） |
+| `caddy` | caddy:2 | `:80/:443`（api/rsshub/as.lucc.dev，保留为 fallback）；tailnet relay 由 dev 的 host Caddy `:8080` 负责（LUC-585） | edge | `./data`, `./config` | — | 手动（不在 watchtower） |
 | `axonhub` | axonhub:latest, postgres:15-alpine, 9router:latest, resin:latest, cpa:latest | `127.0.0.1:8090/20228/2260/8317` + edge；9router dashboard: http://9router.tailf19540.ts.net/ | edge | named volumes + `./CPA/auth-dir`, `./resin/*` | `backup-pgsql.nu axonhub`（`axonhub-pgsql`） | watchtower: axonhub/9router/resin/cpa；postgres 手动 |
 | `rsshub` | rsshub:latest, browserless:1.43-chrome-stable | edge（caddy 反代） | edge | — | — | watchtower |
 | `openlist` | openlistteam/openlist:latest | edge（caddy 反代） | edge | `./data`, `./downloads` | — | watchtower |

@@ -83,8 +83,30 @@ in
     iifname "tailscale0" ip saddr ${devIp} tcp dport 7890 accept
     iifname "tailscale0" ip saddr ${macIp} tcp dport 3001 accept
   '';
+  # LUC-585：Caddy relay 只在 tailscale0 上暴露 8080，公网接口保持关闭；
+  # 来源由 tailnet ACL（tag:ws/tag:vps → agt:8080）限制。
+  # relay 本身无认证，但上游 AxonHub 仍要求 API key；`tailscale_acl_allow_all`
+  # 会把 ACL 临时降为 *→*，仅用于打 tag 阶段。
+  networking.firewall.interfaces.tailscale0.allowedTCPPorts = [ 8080 ];
 
   services = {
+    # LUC-585：China 客户端 → agt（kernel TCP）→ dev host Caddy → axonhub。
+    # 绑 :8080（全接口）而不是 tailnet IP，避免 caddy 先于 tailscaled 启动时
+    # 因地址尚不存在而 bind 失败；公网口由上面防火墙挡住，remote_ip 兜底。
+    caddy = {
+      enable = true;
+      openFirewall = false;
+      configFile = pkgs.writeText "Caddyfile" ''
+        :8080 {
+          @tailnet remote_ip 100.64.0.0/10 fd7a:115c:a1e0::/48
+          handle @tailnet {
+            reverse_proxy http://${mylib.fleet.nodes."nixos-vps-dev".tailscale.ip}:8080
+          }
+          respond 403
+        }
+      '';
+    };
+
     # 上海 VPS 上 1.1.1.1/8.8.8.8 的 DoT 不可达；改用国内 DNS + 明文 53，
     # 让 mihomo TUN 的 dns-hijack(any:53) 接管解析。
     resolved.settings.Resolve = {
