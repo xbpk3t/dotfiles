@@ -58,6 +58,29 @@ in
         # --setting-sources ''  不加载任何 settings 文件，避免侧信道干扰
         # --system-prompt ''    清空系统提示词，完全由 Worktrunk 的 prompt 模板驱动
         command = "CLAUDECODE= MAX_THINKING_TOKENS=0 claude -p --no-session-persistence --model ${globals.models.dsf} --tools '' --disable-slash-commands --setting-sources '' --system-prompt ''";
+
+        # 追加到默认 prompt：中文 + conventional + issue 标识
+        template-append = ''
+
+          风格要求：
+          - conventional commits：type 用英文（feat/fix/refactor/docs/chore/ci/test…），可选 scope
+          - subject 一行，尽量 ≤ 50 字符，硬上限 72；不加句号；用祈使/直接陈述（移除… / 修复…），不要「已移除」「本次修复」
+          - 中文叙述 + 英文技术术语混排；已有英文术语不要硬译成中文
+            原则：工具名、项目名、路径、配置键、常见基础设施概念保持英文
+            例：input、module、flake、lock、host、topology、package、config、service、
+            hook、worktree、branch、PR、API；nixos-generators、lib/nixos.nix、all-formats
+          - 避免「输入与模块」「主机配置」这类生硬全中文；写成「input 与 module」「host 配置」
+          - subject 与 body 之间空一行
+          - body 仅在有必要时写：不要复述 diff
+            需要时按顺序简要覆盖：
+            1) what：高层说明改了什么（不是逐文件罗列）
+            2) why：动机 / 背景
+            3) effect：影响范围或迁移注意（没有就省略）
+          - Linear ID（如 ENG-123）写入 subject 或 footer：Closes ENG-123
+          - GitHub issue（#123）写在 footer：Closes #123 / Fixes #123
+          - 没有相关 issue 不要硬加；不要编造 ID
+        '';
+
       };
     };
 
