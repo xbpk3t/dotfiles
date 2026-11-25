@@ -15,15 +15,24 @@ in
     (mylib.relativeToRoot "modules/darwin")
   ];
 
-  modules.networking.mihomo-client = {
-    # Mihomo (Clash.Meta) proxy service (client)
-    # wild 订阅源由 sops 自动发现（SUB_* secrets → sub.<name>），host 无需配置
-    enable = true;
-    # workstation focus policy：与 VPS 的 DIRECT 策略相反，这里主动阻断。
-    extraRules = [
-      "DOMAIN-SUFFIX,zhihu.com,REJECT"
-      "DOMAIN-SUFFIX,bilibili.com,REJECT"
-    ];
+  modules = {
+    infra.nezha.agent = {
+      enable = true;
+      server = mylib.fleet.nezha.server;
+      # Stable per-host identity; generated once with uuidgen.
+      uuid = "aed69b58-0786-46e6-ba6d-8600d394a911";
+    };
+
+    networking.mihomo-client = {
+      # Mihomo (Clash.Meta) proxy service (client)
+      # wild 订阅源由 sops 自动发现（SUB_* secrets → sub.<name>），host 无需配置
+      enable = true;
+      # workstation focus policy：与 VPS 的 DIRECT 策略相反，这里主动阻断。
+      extraRules = [
+        "DOMAIN-SUFFIX,zhihu.com,REJECT"
+        "DOMAIN-SUFFIX,bilibili.com,REJECT"
+      ];
+    };
   };
 
   modules.darwin = {

@@ -99,6 +99,12 @@ let
       dst = [ "tag:svc" ];
       ip = [ "8008" ];
     }
+    # macos-ws 上的 Nezha agent → hub。只开 8008，不扩大 ws→vps 的其他端口。
+    {
+      src = [ "macos-ws" ];
+      dst = [ "tag:svc" ];
+      ip = [ "8008" ];
+    }
     # 个人设备 → Tailscale Services VIPs。
     {
       src = [ "tag:ws" ];
@@ -235,8 +241,15 @@ let
         deny = [ "tag:ws:22" ];
       }
       {
+        # macos-ws 上的 Nezha agent → hub gRPC。
+        src = "macos-ws";
+        accept = [ "tag:svc:8008" ];
+      }
+      {
         src = "nod-am";
         accept = map (name: "${name}:80") serviceNames;
+        # 8008 只给 macos-ws，不随 tag:ws 扩散到手机。
+        deny = [ "tag:svc:8008" ];
       }
       {
         # 回归：hm PA 的默认 build 路径依赖 agt mihomo 代理（7890）。
