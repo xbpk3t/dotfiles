@@ -98,8 +98,12 @@
       configFile = pkgs.writeText "Caddyfile" ''
         :8080 {
           @tailnet remote_ip 100.64.0.0/10 fd7a:115c:a1e0::/48
+          @llm host llm.lucc.dev
           handle @tailnet {
-            reverse_proxy http://127.0.0.1:8090
+            handle @llm {
+              reverse_proxy http://127.0.0.1:8090
+            }
+            respond 404
           }
           respond 403
         }

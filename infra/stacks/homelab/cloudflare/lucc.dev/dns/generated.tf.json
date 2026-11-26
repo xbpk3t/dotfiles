@@ -170,6 +170,16 @@
             "ttl": 1,
             "type": "AAAA"
           },
+          "llm": {
+            "comment": "LLM gateway (tailnet relay, kernel TCP)",
+            "content": "100.66.22.92",
+            "id": null,
+            "name": "llm.lucc.dev",
+            "priority": null,
+            "proxied": false,
+            "ttl": 1,
+            "type": "A"
+          },
           "mx_route1": {
             "comment": null,
             "content": "route1.mx.cloudflare.net",

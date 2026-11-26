@@ -129,11 +129,16 @@ let
         "*.tailscale.io"
         "ts.net"
         "*.ts.net"
+        # lucc.dev 自有服务别名：llm/rsshub/as 的 A 指向 tailnet IP，
+        # 必须走真实 DNS + DIRECT，不能被 FakeIP/代理接管。
+        "lucc.dev"
+        "*.lucc.dev"
       ];
       nameserver-policy = {
         "+.tailscale.com" = anyDnsServers;
         "+.tailscale.io" = anyDnsServers;
         "+.ts.net" = anyDnsServers;
+        "+.lucc.dev" = anyDnsServers;
       };
       default-nameserver = anyDnsServers;
       nameserver = domesticDohServers;
@@ -211,6 +216,10 @@ let
     ]
     ++ (map (s: "IP-CIDR,${s.server}/32,DIRECT,no-resolve") servers)
     ++ [
+      # 自有域名：tailnet 服务别名（llm/rsshub/as）与 CF/R2 站点均直连；
+      # llm.lucc.dev 的 A 是 100.x，靠 IP-CIDR,100.64/10,DIRECT 走 tailnet。
+      "DOMAIN-SUFFIX,lucc.dev,DIRECT"
+
       # 必须代理的站点（统一走 Manual，由用户在 UI 上选 Self/Wild/Auto）
       "DOMAIN-SUFFIX,openai.com,Manual"
       "DOMAIN-SUFFIX,chatgpt.com,Manual"

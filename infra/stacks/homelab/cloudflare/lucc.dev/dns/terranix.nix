@@ -131,7 +131,19 @@ let
     };
   };
 
-  records = facts.dns.shared_records // derpRecords // manualRecords;
+  # Tailscale-only 服务别名：DNS A 直接指向 relay 的 tailnet IP（DNS-only），
+  # 公网无法路由到 100.64/10；客户端在 tailnet 内解析后走 kernel-TCP relay。
+  relayRecords = {
+    llm = mkRecord {
+      name = "llm.${facts.cloudflare.zone_name}";
+      type = "A";
+      content = fleet.nodes."nixos-vps-agt".tailscale.ip;
+      proxied = false;
+      comment = "LLM gateway (tailnet relay, kernel TCP)";
+    };
+  };
+
+  records = facts.dns.shared_records // derpRecords // manualRecords // relayRecords;
   importable = lib.filterAttrs (_: record: record.id != null) records;
 
   # derp key 与手写记录撞名时 `//` 会静默覆盖其中一条，Terraform 随后会删除/

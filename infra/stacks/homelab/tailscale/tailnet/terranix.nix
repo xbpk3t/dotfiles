@@ -81,17 +81,23 @@ let
       dst = [ "tag:vps" ];
       ip = [ "22" ];
     }
-    # China clients reach the agt Caddy relay; the relay reaches dev Caddy.
+    # China clients reach the agt Caddy relay (80 redirect / 443 TLS); the relay reaches dev Caddy.
     {
       src = [ "tag:ws" ];
       dst = [ "agt" ];
-      ip = [ "8080" ];
+      ip = [
+        "80"
+        "443"
+      ];
     }
     # VPS 节点（dev/agt/rn2）也走同一个 relay；AxonHub 仍要求 API key。
     {
       src = [ "tag:vps" ];
       dst = [ "agt" ];
-      ip = [ "8080" ];
+      ip = [
+        "80"
+        "443"
+      ];
     }
     {
       src = [ "agt" ];
@@ -242,7 +248,8 @@ let
         accept = [
           "tag:vps:22"
           "tag:ws:22"
-          "agt:8080"
+          "agt:80"
+          "agt:443"
         ]
         ++ map (name: "${name}:80") serviceNames;
         deny = [
@@ -259,7 +266,8 @@ let
         accept = [
           "tag:vps:22"
           "tag:svc:8008"
-          "agt:8080"
+          "agt:80"
+          "agt:443"
         ];
         deny = [ "tag:ws:22" ];
       }

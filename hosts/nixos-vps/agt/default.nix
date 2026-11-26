@@ -83,24 +83,46 @@ in
     iifname "tailscale0" ip saddr ${devIp} tcp dport 7890 accept
     iifname "tailscale0" ip saddr ${macIp} tcp dport 3001 accept
   '';
-  # LUC-585：Caddy relay 只在 tailscale0 上暴露 8080，公网接口保持关闭；
-  # 来源由 tailnet ACL（tag:ws/tag:vps → agt:8080）限制。
-  # relay 本身无认证，但上游 AxonHub 仍要求 API key；`tailscale_acl_allow_all`
-  # 会把 ACL 临时降为 *→*，仅用于打 tag 阶段。
-  networking.firewall.interfaces.tailscale0.allowedTCPPorts = [ 8080 ];
+  # LUC-585：China 客户端 → agt（TLS + kernel TCP）→ dev host Caddy → 服务。
+  # agt 只做入口/relay；证书用 security.acme 的 *.lucc.dev 通配符。
+  security.acme.certs."lucc.dev" = {
+    email = mail;
+    dnsProvider = "cloudflare";
+    environmentFile = config.sops.secrets.ACME_CF_ENV.path;
+    extraDomainNames = [ "*.lucc.dev" ];
+    group = "caddy";
+    reloadServices = [ "caddy.service" ];
+    extraLegoFlags = [ "--dns.propagation.disable-rns" ];
+  };
+
+  # 首次启动时 Caddy 不能早于证书；acme-lucc.dev.service 由 security.acme 生成。
+  systemd.services.caddy.after = [ "acme-lucc.dev.service" ];
+  systemd.services.caddy.wants = [ "acme-lucc.dev.service" ];
+
+  # 只开 tailscale0 的 80/443；公网 80/443 由默认 firewall 关闭。
+  networking.firewall.interfaces.tailscale0.allowedTCPPorts = [
+    80
+    443
+  ];
 
   services = {
-    # LUC-585：China 客户端 → agt（kernel TCP）→ dev host Caddy → axonhub。
-    # 绑 :8080（全接口）而不是 tailnet IP，避免 caddy 先于 tailscaled 启动时
-    # 因地址尚不存在而 bind 失败；公网口由上面防火墙挡住，remote_ip 兜底。
     caddy = {
       enable = true;
       openFirewall = false;
       configFile = pkgs.writeText "Caddyfile" ''
-        :8080 {
+        llm.lucc.dev {
+          tls /var/lib/acme/lucc.dev/fullchain.pem /var/lib/acme/lucc.dev/key.pem
           @tailnet remote_ip 100.64.0.0/10 fd7a:115c:a1e0::/48
           handle @tailnet {
             reverse_proxy http://${mylib.fleet.nodes."nixos-vps-dev".tailscale.ip}:8080
+          }
+          respond 403
+        }
+
+        :80 {
+          @tailnet remote_ip 100.64.0.0/10 fd7a:115c:a1e0::/48
+          handle @tailnet {
+            redir https://{host}{uri}
           }
           respond 403
         }
