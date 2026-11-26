@@ -53,6 +53,7 @@ in
     };
   };
 
-  # VPS 上 Caddy 管理 edge 网络，所有服务都需要以 external 方式加入。
+  # compose 服务通过 external edge 网络暴露给 dev 上的 host Caddy；
+  # edge 网络由 cntr.nu 幂等创建。
   home.sessionVariables.EDGE_NETWORK_EXTERNAL = "true";
 }

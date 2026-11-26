@@ -1,0 +1,23 @@
+# agt relay Caddyfile.
+# Nix 构建时把上游占位符替换成 dev 的 tailnet IP；这样 pre-commit 的
+# caddy fmt / caddy adapt 可以直接检查这个真实文件。
+# 只监听 tailscale0（主机防火墙限制）；:80 只对三个服务名做 HTTPS 跳转。
+llm.lucc.dev, rsshub.lucc.dev, as.lucc.dev {
+	tls /var/lib/acme/llm.lucc.dev/fullchain.pem /var/lib/acme/llm.lucc.dev/key.pem
+	@tailnet remote_ip 100.64.0.0/10 fd7a:115c:a1e0::/48
+	handle @tailnet {
+		reverse_proxy http://dev-tailnet-ip:8082
+	}
+	respond 403
+}
+
+:80 {
+	@svc {
+		remote_ip 100.64.0.0/10 fd7a:115c:a1e0::/48
+		host llm.lucc.dev rsshub.lucc.dev as.lucc.dev
+	}
+	handle @svc {
+		redir https://{host}{uri}
+	}
+	respond 403
+}
