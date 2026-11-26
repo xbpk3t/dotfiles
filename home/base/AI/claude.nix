@@ -88,7 +88,7 @@ in
 
             # [2026-06-12] 禁用 auto mode，原因：
             #
-            # 通过 ANTHROPIC_BASE_URL (api.lucc.dev) 走自定义 gateway 时，
+            # 通过 ANTHROPIC_BASE_URL (api.lucc.dev，现为 llm.lucc.dev) 走自定义 gateway 时，
             # auto mode 的安全分类器 (deepseek-v4-flash) 频繁不可用，报：
             #   "auto mode cannot determine the safety of Bash right now"
             #
@@ -204,7 +204,7 @@ in
               # 只把 compact 收到真实 500k，而不是一直撑到假 1M
               # CLAUDE_CODE_AUTO_COMPACT_WINDOW = "500000";
 
-              # 模型映射（gateway: api.lucc.dev）
+              # 模型映射（gateway: api.lucc.dev，现为 llm.lucc.dev）
               # - settings.model = deepseek-v4.1-flash[1m]  ← session 默认（本块上方，勿与 alias 混淆）
               # - [1m] = CC 侧 1M context 标记；gateway /v1/models 为裸 id
               # - FABLE / OPUS / SONNET / HAIKU 均指向 deepseek-v4.1-flash[1m]（刻意重复）

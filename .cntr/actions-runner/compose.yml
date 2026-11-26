@@ -40,6 +40,15 @@ services:
     volumes:
       - runner_data:/tmp/runner
       - ~/.opencli/xiaoyuzhou.json:/root/.opencli/xiaoyuzhou.json
+    # default 保留 runner 自身出网；edge 让 docs CI 用 Docker DNS 访问
+    # rsshub:1200 / axonhub:8090（Phase 3 self-hosted workflows）。
+    networks:
+      - default
+      - edge
 
 volumes:
   runner_data:
+
+networks:
+  edge:
+    external: true

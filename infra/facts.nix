@@ -5,14 +5,12 @@
 # - 只放 NixOS 与云资源都需要的事实；纯 Terraform provider 细节不要进来。
 # - terranix stack 直接 import 本文件；不再生成中间 JSON。
 let
-  # facts 消费 dev 公网 IP（api 的 CF fallback）和 agt tailnet IP（llm/rsshub/as 的 tailnet relay）。
+  # facts 只消费 agt tailnet IP（llm/rsshub/as 的 tailnet relay）。
   # 其他 host 的 DERP 事实由 lib/fleet 负责，不在这里重复。
-  dev = import ../hosts/nixos-vps/dev/meta.nix;
   agt = import ../hosts/nixos-vps/agt/meta.nix;
 
   account_id = "96540bd100b82adba941163704660c31";
   zone_name = "lucc.dev";
-  dev_ip = dev.publicIpv4;
   agt_ip = agt.tailscale.ip;
 
   aRecord = name: content: proxied: comment: {
@@ -69,9 +67,7 @@ in
     # 这些记录的内容来自 hosts/*/meta.nix；手写记录（MX/DKIM/apex 占位等）
     # 留在 dns/terranix.nix 的 manualRecords 里。
     shared_records = {
-      # api 仍走 CF proxied，作为 docs CI 迁移期的 fallback。
-      api = aRecord "api.${zone_name}" dev_ip true "AxonHub";
-      # as/rsshub 只做 tailnet 服务别名：DNS-only A 指向 agt relay 的 tailnet IP。
+      # 只保留 tailnet 服务别名：DNS-only A 指向 agt relay 的 tailnet IP。
       as = aRecord "as.${zone_name}" agt_ip false "OpenList (ASMR, tailnet relay)";
       rsshub = (aRecord "rsshub.${zone_name}" agt_ip false "RSSHub (tailnet relay)") // {
         id = "1eb043e1ffe747891513e47be11b0a6f";

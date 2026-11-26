@@ -1,6 +1,6 @@
 ---
 # ℹ️ 用途：AxonHub 是主 LLM 网关，统一所有 client 的路由入口。
-#   client → api.lucc.dev → Caddy → AxonHub → 各个 upstream provider
+#   client → https://llm.lucc.dev（agt Caddy relay）→ dev Caddy → AxonHub → upstream
 #
 # 同文件包含：
 #   9router — ds4f proxy pool 转发 sidecar（127.0.0.1:20228；Dashboard: http://9router.tailf19540.ts.net/）

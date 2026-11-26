@@ -100,16 +100,6 @@
         "comment": "${each.value.comment}",
         "content": "${each.value.content}",
         "for_each": {
-          "api": {
-            "comment": "AxonHub",
-            "content": "192.129.183.26",
-            "id": null,
-            "name": "api.lucc.dev",
-            "priority": null,
-            "proxied": true,
-            "ttl": 1,
-            "type": "A"
-          },
           "as": {
             "comment": "OpenList (ASMR, tailnet relay)",
             "content": "100.66.22.92",
