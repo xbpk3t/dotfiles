@@ -66,7 +66,10 @@
       apm.enable = true;
       ocr.enable = true;
       codex.enable = false;
-      claude.enable = true;
+      claude = {
+        enable = true;
+        permissionMode = "yolo";
+      };
       # dsh 配置走 ~/.dsh/cordis.patch.yml（home 层），见 home/base/AI/dsh.nix
       dsh.enable = false;
 

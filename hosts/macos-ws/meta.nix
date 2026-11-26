@@ -13,7 +13,7 @@
   deploy = {
     remoteBuild = true;
     # 工作站不参与无人值守：activation 可能打断用户会话。
-    auto = false;
+    auto = true;
     # 本机 localhost 激活成功后 deploy-rs 的 confirmation waiter 偶发超时，
     # 会误判失败并回滚；本机部署关闭 magic rollback。
     magicRollback = false;

@@ -8,6 +8,24 @@
   imports = [
     (mylib.relativeToRoot "home/hm")
     (mylib.relativeToRoot "secrets/hm-lightvela.nix")
+  ]
+  ++ map mylib.relativeToRoot [
+    # dev 环境：与 macos-ws / vps-dev 同一套 home/base 开关，节点显式 import。
+    "home/base/devops/direnv.nix"
+    "home/base/devops/helix.nix"
+    "home/base/infra/nix-tools.nix"
+    "home/base/langs"
+
+    # host 的 modules.AI.* 开关需要这些 option 定义；不 import dagu
+    # （它的顶层 config 引用在 standalone HM 里会触发 infinite recursion）。
+    "home/base/AI/apm.nix"
+    "home/base/AI/claude.nix"
+    "home/base/AI/codex.nix"
+    "home/base/AI/dsh.nix"
+    "home/base/AI/mcp.nix"
+    "home/base/AI/ocr.nix"
+    "home/base/AI/opencode.nix"
+    "home/base/AI/skills.nix"
   ];
 
   # 厂商 PA 当前授权的是 root（hermes-workbench-client）；不建 luck。
@@ -16,18 +34,47 @@
   home = {
     username = "root";
 
-    # git/gh 的 editorMeta.command 是 hx；补上 helix。
-    # nezha-agent 供 systemd system service 使用。
+    # nezha-agent 供 systemd system service 使用；其余 dev 工具走 modules。
     packages = with pkgs; [
-      helix
       nezha-agent
     ];
   };
 
   # `ff` 系统信息入口；其他 host 走 modules.devops.fetch，hm 轨也补上。
-  modules.devops.fetch = {
-    enable = true;
-    driver = "microfetch";
+  modules = {
+    devops = {
+      fetch = {
+        enable = true;
+        driver = "microfetch";
+      };
+
+      helix.enable = true;
+      direnv.enable = false;
+    };
+
+    infra.nix-tools.enable = true;
+
+    langs = {
+      basePackages.enable = true;
+
+      lsp.enable = true;
+
+      treefmt.enable = true;
+      golang.enable = true;
+      python.enable = true;
+      ts.enable = true;
+    };
+
+    AI = {
+      apm.enable = true;
+      ocr.enable = true;
+      claude = {
+        enable = true;
+        permissionMode = "yolo";
+      };
+      skills.enable = true;
+      mcp.isDesktop = false;
+    };
   };
 
   # Nezha agent config (N1). The agent v1 reads JSON, not YAML. The secret is

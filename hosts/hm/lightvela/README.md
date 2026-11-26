@@ -80,37 +80,22 @@ Mac/phone.
   run `task nix:hm:restore` after a reset.
   `libpam-systemd` is available from the Tencent Ubuntu mirror.
 
-## Full HM profile (S-Full-PA + Nezha N1)
+## Sops (PA-only subset)
 
-The PA profile is curated from `home/core`, not the whole directory:
-
-- `home/core/init.nix`（username / homeDirectory / stateVersion / home-manager）
-- `home/core/kernel`（zsh 全量 + starship + atuin + fzf）
-- `home/core/langs`（jq）
-- `home/core/devops/{btop,fetch,git,gh,journalctl,lazygit,ssh,worktrunk}.nix`
-  （`fetch` 用 `microfetch`，命令入口是 `ff`）
-- `ssh` only enables tailnet hosts (`github.enable = false`)
-- no `db` / `lazydocker`（无 enable 开关，import 即安装）
-- no `cntr` / `taskfile` / `infra`
-- `herdr-core` stays sh/closure-managed; HM does not touch
-  `~/.local/bin/{hc,herdr-core}` or `/usr/local/bin` wrappers
-
-### Sops (PA-only subset)
-
-- `secrets/hm-lightvela.yaml` contains only the secrets the PA actually uses:
-  `API/github`, `resend/pwd`, `atuin/key`, `nezha/agent_sk`. It is encrypted to
-  the PA-only age key, not the fleet master key.
+- `secrets/hm-lightvela.yaml` contains only the subset required by the host's
+  imported HM modules. It is encrypted to the PA-only age key, not the fleet
+  master key.
 - PA private key: `/root/.config/sops/age/keys.txt`.
 - `.sops.yaml` has a dedicated rule for `secrets/hm-lightvela.yaml`.
-- `secrets/hm-lightvela.nix` declares only those four `sops.secrets` and
-  overrides `sops.defaultSopsFile` + `sops.age.keyFile`. It deliberately does
-  **not** import `secrets/default.nix`; that would make sops-nix decrypt every
-  fleet secret on the vendor-managed PA.
+- `secrets/hm-lightvela.nix` declares only that subset and overrides
+  `sops.defaultSopsFile` + `sops.age.keyFile`. It deliberately does **not**
+  import `secrets/default.nix`; that would make sops-nix decrypt every fleet
+  secret on the vendor-managed PA.
 - The fleet master age key is **not** on the PA. If the PA is compromised, only
-  those four secrets are exposed; rotate them and the PA age key. The other
-  fleet secrets are not present in this file.
+  that subset is exposed; rotate it and the PA age key. The other fleet secrets
+  are not present in this file.
 
-### HM activation
+## HM activation
 
 Default: PA-local build + activate via Ansible:
 
@@ -169,7 +154,7 @@ usermod -s /root/.nix-profile/bin/zsh root
 `PATH=/root/.local/bin:$PATH` lets the activate script find the `nix-env`
 wrapper. The wrapper enters nix-portable, which sees `/root` and the store.
 
-### Nezha agent (N1)
+## Nezha agent (N1)
 
 The HM profile includes `pkgs.nezha-agent` and renders
 `/root/.config/nezha/config.json` (the agent v1 expects JSON) from the sops
@@ -352,12 +337,10 @@ present locally or referenced remotely):
 home-manager switch --flake .#hm-lightvela
 ```
 
-The shared profile lives in `home/hm/default.nix`; it is identity-agnostic and
-imports a curated subset of `home/core` (init, kernel, langs, selected devops). It
-still reads a few `sops.secrets.*` (`AUTIN_KEY`, `GITHUB_TOKEN`,
-`RESEND_TOKEN`), and the host-specific Nezha template uses
-`NEZHA_AGENT_SK`; the host must import `secrets/hm-<node>.nix`; the
-GUI-heavy `home/base` is not imported.
+The host imports `home/hm` plus the selected `home/base` modules; the exact
+list lives in `hosts/hm/<node>/home.nix`. The host must import
+`secrets/hm-<node>.nix`; the GUI-heavy `home/base` modules are not imported
+wholesale.
 This path is not applied yet on this PA; the sh/closure path is the current
 installation.
 

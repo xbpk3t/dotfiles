@@ -226,7 +226,8 @@ in
         {
           name = "nix";
           formatter = {
-            command = "nixpkgs-fmt";
+            # dotfiles 统一用 nixfmt；由 modules.infra.nix-tools 提供。
+            command = "nixfmt";
           };
           auto-format = true;
         }
