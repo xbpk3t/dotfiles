@@ -15,10 +15,15 @@ let
   # TODO(volces): devIp 及下面两条 7890 放行只为 AxonHub 的 volces 渠道；
   # 停用 volces 后，连同 tailnet ACL 里 dev → agt:7890 的 grant 一起删除。
   # dev 上的 AxonHub 需要访问只有国内可达的 volces ark 端点，复用 agt mihomo。
+  # 注意：LUC-585 后 client 流量也经 agt relay，agt 上行同时承载 client↔dev
+  # 与 dev→volces 两段；volces 请求会额外占用 agt 带宽。
   devIp = mylib.fleet.nodes."nixos-vps-dev".tailscale.ip;
   # Mac 的 tailnet IP；只用于 CloudCLI UI（3001）。5900/x11vnc 已随
   # opencli-browser B 方案移除。
   macIp = mylib.fleet.nodes."macos-ws".tailscale.ip;
+  # Caddyfile 保持为真实文件，pre-commit 才能跑 caddy fmt/adapt；
+  # 构建时把占位符替换成 dev 的 tailnet IP。
+  caddyfile = lib.replaceStrings [ "dev-tailnet-ip" ] [ devIp ] (builtins.readFile ./Caddyfile);
 in
 {
   imports = [
@@ -58,6 +63,8 @@ in
     infra.healthchecks = {
       enable = true;
       urlFile = config.sops.secrets.HEALTHCHECKS_VPS_AGT.path;
+      # 全链路探针：agt Caddy → dev Caddy → AxonHub /health。
+      healthUrl = "https://llm.lucc.dev/health";
     };
     # 稳定 UUID：`uuidgen` 生成一次后固定，避免 hostname/FQDN 变化导致重复注册。
     infra.nezha.agent.uuid = "5b8a9ab4-6ed8-4e5d-9c45-03425b6b4644";
@@ -73,71 +80,84 @@ in
   # 7890 开给整个 tailnet，而这个代理没有认证。Mac 需要 CloudCLI UI
   # （3001），按源地址单独放行；5900/x11vnc 已随 B 方案移除。
   # 注意：tailnet ACL 只管 tailnet 层，主机 nftables 仍需这条 accept。
-  networking.firewall.extraCommands = lib.mkIf (config.networking.firewall.backend == "iptables") ''
-    iptables -w -A nixos-fw -i tailscale0 -s ${hmPaIp} -p tcp --dport 7890 -j nixos-fw-accept
-    iptables -w -A nixos-fw -i tailscale0 -s ${devIp} -p tcp --dport 7890 -j nixos-fw-accept
-    iptables -w -A nixos-fw -i tailscale0 -s ${macIp} -p tcp --dport 3001 -j nixos-fw-accept
-  '';
-  networking.firewall.extraInputRules = lib.mkIf (config.networking.firewall.backend == "nftables") ''
-    iifname "tailscale0" ip saddr ${hmPaIp} tcp dport 7890 accept
-    iifname "tailscale0" ip saddr ${devIp} tcp dport 7890 accept
-    iifname "tailscale0" ip saddr ${macIp} tcp dport 3001 accept
-  '';
+  networking.firewall = {
+    extraCommands = lib.mkIf (config.networking.firewall.backend == "iptables") ''
+      iptables -w -A nixos-fw -i tailscale0 -s ${hmPaIp} -p tcp --dport 7890 -j nixos-fw-accept
+      iptables -w -A nixos-fw -i tailscale0 -s ${devIp} -p tcp --dport 7890 -j nixos-fw-accept
+      iptables -w -A nixos-fw -i tailscale0 -s ${macIp} -p tcp --dport 3001 -j nixos-fw-accept
+    '';
+    extraInputRules = lib.mkIf (config.networking.firewall.backend == "nftables") ''
+      iifname "tailscale0" ip saddr ${hmPaIp} tcp dport 7890 accept
+      iifname "tailscale0" ip saddr ${devIp} tcp dport 7890 accept
+      iifname "tailscale0" ip saddr ${macIp} tcp dport 3001 accept
+    '';
+    # 只开 tailscale0 的 80/443；公网 80/443 由默认 firewall 关闭。
+    interfaces.tailscale0.allowedTCPPorts = [
+      80
+      443
+    ];
+  };
   # LUC-585：China 客户端 → agt（TLS + kernel TCP）→ dev host Caddy → 服务。
-  # agt 只做入口/relay；证书用 security.acme 的 *.lucc.dev 通配符。
-  security.acme.certs."lucc.dev" = {
+  # agt 只做入口/relay；只签发实际使用的三个站点名，避免把
+  # *.lucc.dev 通配符私钥放在公网 VPS 上。
+  security.acme.certs."llm.lucc.dev" = {
     email = mail;
     dnsProvider = "cloudflare";
     environmentFile = config.sops.secrets.ACME_CF_ENV.path;
-    extraDomainNames = [ "*.lucc.dev" ];
+    extraDomainNames = [
+      "rsshub.lucc.dev"
+      "as.lucc.dev"
+    ];
     group = "caddy";
     reloadServices = [ "caddy.service" ];
     extraLegoFlags = [ "--dns.propagation.disable-rns" ];
   };
 
-  # 首次启动时 Caddy 不能早于证书；acme-lucc.dev.service 由 security.acme 生成。
-  systemd.services.caddy.after = [ "acme-lucc.dev.service" ];
-  systemd.services.caddy.wants = [ "acme-lucc.dev.service" ];
+  systemd = {
+    # 首次启动时 Caddy 不能早于证书；acme-llm.lucc.dev.service 由 security.acme 生成。
+    services.caddy = {
+      after = [ "acme-llm.lucc.dev.service" ];
+      wants = [ "acme-llm.lucc.dev.service" ];
 
-  # LUC-585：agt 是中国侧唯一 relay，Caddy 单点必须优先存活。Caddy RSS
-  # 约 35M；256M 上限足够反代多个服务，同时限制异常流量拖垮 4G 整机。
-  # OOMScoreAdjust 让内核 OOM killer 优先选其他进程；Restart=always
-  # 覆盖 nixpkgs caddy 模块默认的 on-failure，clean exit 也自动拉起。
-  systemd.services.caddy.serviceConfig = {
-    MemoryHigh = "192M";
-    MemoryMax = "256M";
-    OOMScoreAdjust = -500;
-    Restart = lib.mkForce "always";
+      # LUC-585：agt 是中国侧唯一 relay，Caddy 单点必须优先存活。Caddy RSS
+      # 约 35M；256M 上限足够反代多个服务，同时限制异常流量拖垮 4G 整机。
+      # OOMScoreAdjust 让内核 OOM killer 优先选其他进程；Restart=always
+      # 覆盖 nixpkgs caddy 模块默认的 on-failure，clean exit 也自动拉起。
+      serviceConfig = {
+        MemoryHigh = "192M";
+        MemoryMax = "256M";
+        OOMScoreAdjust = -500;
+        Restart = lib.mkForce "always";
+      };
+    };
+
+    # 本地 build 的内存兜底：nix-daemon 及其 build 子进程都受这个 cgroup 限制。
+    # 超限时是 build 失败，而不是整机 OOM；eval 是客户端进程，由 user.slice 上限覆盖。
+    services.nix-daemon.serviceConfig = {
+      MemoryHigh = "1200M";
+      MemoryMax = "2000M";
+      # 构建的 swap 也要有边界；超限时是 build 失败，而不是拖垮整机。
+      MemorySwapMax = "1G";
+    };
+
+    # 4G agent 机的用户会话硬上限：把 OOM 限制在 user.slice 内，
+    # 避免 Chromium/Claude 把内核/系统服务一起拖死。dev(6G) 不继承。
+    slices."user".sliceConfig = {
+      MemoryHigh = "2400M";
+      MemoryMax = "2700M";
+      # 只限 RAM 不够：cgroup 默认可以无限用 swap，溢出会进 zram/磁盘。
+      # 但 swap 用量本身就是 zram 的 RAM 占用（不可回收）：LUC-562 里 2G
+      # 上限让 zram 吃掉隐藏内存、全局 MemAvailable 见底时 earlyoom 的
+      # swap 门槛又永不成立。收紧到 1G，配合上面的阈值提前 kill。
+      MemorySwapMax = "1G";
+    };
   };
-
-  # 只开 tailscale0 的 80/443；公网 80/443 由默认 firewall 关闭。
-  networking.firewall.interfaces.tailscale0.allowedTCPPorts = [
-    80
-    443
-  ];
 
   services = {
     caddy = {
       enable = true;
       openFirewall = false;
-      configFile = pkgs.writeText "Caddyfile" ''
-        llm.lucc.dev, rsshub.lucc.dev, as.lucc.dev {
-          tls /var/lib/acme/lucc.dev/fullchain.pem /var/lib/acme/lucc.dev/key.pem
-          @tailnet remote_ip 100.64.0.0/10 fd7a:115c:a1e0::/48
-          handle @tailnet {
-            reverse_proxy http://${mylib.fleet.nodes."nixos-vps-dev".tailscale.ip}:8080
-          }
-          respond 403
-        }
-
-        :80 {
-          @tailnet remote_ip 100.64.0.0/10 fd7a:115c:a1e0::/48
-          handle @tailnet {
-            redir https://{host}{uri}
-          }
-          respond 403
-        }
-      '';
+      configFile = pkgs.writeText "Caddyfile" caddyfile;
     };
 
     # 上海 VPS 上 1.1.1.1/8.8.8.8 的 DoT 不可达；改用国内 DNS + 明文 53，
@@ -164,27 +184,6 @@ in
   nix.settings = {
     max-jobs = lib.mkForce 1;
     cores = lib.mkForce 1;
-  };
-
-  # 本地 build 的内存兜底：nix-daemon 及其 build 子进程都受这个 cgroup 限制。
-  # 超限时是 build 失败，而不是整机 OOM；eval 是客户端进程，由 user.slice 上限覆盖。
-  systemd.services.nix-daemon.serviceConfig = {
-    MemoryHigh = "1200M";
-    MemoryMax = "2000M";
-    # 构建的 swap 也要有边界；超限时是 build 失败，而不是拖垮整机。
-    MemorySwapMax = "1G";
-  };
-
-  # 4G agent 机的用户会话硬上限：把 OOM 限制在 user.slice 内，
-  # 避免 Chromium/Claude 把内核/系统服务一起拖死。dev(6G) 不继承。
-  systemd.slices."user".sliceConfig = {
-    MemoryHigh = "2400M";
-    MemoryMax = "2700M";
-    # 只限 RAM 不够：cgroup 默认可以无限用 swap，溢出会进 zram/磁盘。
-    # 但 swap 用量本身就是 zram 的 RAM 占用（不可回收）：LUC-562 里 2G
-    # 上限让 zram 吃掉隐藏内存、全局 MemAvailable 见底时 earlyoom 的
-    # swap 门槛又永不成立。收紧到 1G，配合上面的阈值提前 kill。
-    MemorySwapMax = "1G";
   };
 
   # VM 没有硬件 watchdog（boot 日志：Failed to open any watchdog device）。

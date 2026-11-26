@@ -102,7 +102,7 @@ let
     {
       src = [ "agt" ];
       dst = [ "dev" ];
-      ip = [ "8080" ];
+      ip = [ "8082" ];
     }
     # 个人设备之间：只开 SSH；其他端口用 SSH 隧道或按需加。
     {
@@ -259,7 +259,7 @@ let
       }
       {
         src = "agt";
-        accept = [ "dev:8080" ];
+        accept = [ "dev:8082" ];
       }
       {
         src = "tag:vps";

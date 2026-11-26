@@ -87,35 +87,16 @@
 
   # LUC-585：China client → agt Caddy → dev 的 kernel-TCP relay。
   # 用 host Caddy（不是 Docker 容器）避免容器启动时 tailnet IP 尚未就绪导致
-  # `100.101.189.7:8080` bind 失败；`:8080` 全接口 + 防火墙只放行 tailscale0，
+  # `100.101.189.7:8082` bind 失败；`:8082` 全接口 + 防火墙只放行 tailscale0，
   # 再加 remote_ip 兜底。上游仍由 AxonHub 的 API key 鉴权。
-  networking.firewall.interfaces.tailscale0.allowedTCPPorts = [ 8080 ];
+  # 8080 保留给 qbittorrent（见 home.nix）；8081/8091 被 dagu 占用，8090 是 AxonHub。
+  networking.firewall.interfaces.tailscale0.allowedTCPPorts = [ 8082 ];
 
   services = {
     caddy = {
       enable = true;
       openFirewall = false;
-      configFile = pkgs.writeText "Caddyfile" ''
-        :8080 {
-          @tailnet remote_ip 100.64.0.0/10 fd7a:115c:a1e0::/48
-          @llm host llm.lucc.dev
-          @rsshub host rsshub.lucc.dev
-          @openlist host as.lucc.dev
-          handle @tailnet {
-            handle @llm {
-              reverse_proxy http://127.0.0.1:8090
-            }
-            handle @rsshub {
-              reverse_proxy http://127.0.0.1:1200
-            }
-            handle @openlist {
-              reverse_proxy http://127.0.0.1:5244
-            }
-            respond 404
-          }
-          respond 403
-        }
-      '';
+      configFile = pkgs.writeText "Caddyfile" (builtins.readFile ./Caddyfile);
     };
 
     # 9router dashboard on the tailnet:

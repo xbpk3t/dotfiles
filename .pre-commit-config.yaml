@@ -242,21 +242,36 @@ repos:
         pass_filenames: false
         language: system
 
-      # caddy 本身不会“自动扫描仓库里的 Caddyfile”，validate / caddy fmt 都是一次处理一个 config 路径（--config  <file>），所以这里只能写死path
-      - id: caddy-fmt
-        name: caddy-fmt
+      # caddy 本身不会“自动扫描仓库里的 Caddyfile”，validate / caddy fmt 都是
+      # 一次处理一个 config 路径（--config <file>），所以这里按文件写死 path；
+      # 新增 Caddyfile 时记得同步加 hook。
+      - id: caddy-fmt-agt
+        name: caddy-fmt (agt relay)
         language: system
         pass_filenames: false
-        entry: caddy fmt --diff .cntr/caddy/Caddyfile --overwrite
+        entry: caddy fmt --diff hosts/nixos-vps/agt/Caddyfile --overwrite
 
-      - id: caddy-adapt
-        name: caddy-adapt
+      - id: caddy-fmt-dev
+        name: caddy-fmt (dev relay)
+        language: system
+        pass_filenames: false
+        entry: caddy fmt --diff hosts/nixos-vps/dev/Caddyfile --overwrite
+
+      - id: caddy-adapt-agt
+        name: caddy-adapt (agt relay)
         language: system
         pass_filenames: false
         # pre-commit 只做静态语法/结构检查（Caddyfile → JSON）。
         # 完整 `caddy validate` 会跑模块 Provision()，对 basic_auth 等需要 runtime secret
         # 的指令会因 env 为空报错。runtime 校验留给真实 compose/CI 环境。
-        entry: caddy adapt --config .cntr/caddy/Caddyfile
+        # agt 模板里的 dev-tailnet-ip 是合法 hostname，adapt 不需要真实 IP。
+        entry: caddy adapt --config hosts/nixos-vps/agt/Caddyfile
+
+      - id: caddy-adapt-dev
+        name: caddy-adapt (dev relay)
+        language: system
+        pass_filenames: false
+        entry: caddy adapt --config hosts/nixos-vps/dev/Caddyfile
 
       - id: markdownlint
         name: Lint Markdown files

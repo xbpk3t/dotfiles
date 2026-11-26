@@ -5,7 +5,8 @@
 # - 只放 NixOS 与云资源都需要的事实；纯 Terraform provider 细节不要进来。
 # - terranix stack 直接 import 本文件；不再生成中间 JSON。
 let
-  # facts 只消费 agt tailnet IP（llm/rsshub/as 的 tailnet relay）。
+  # facts 只消费 agt tailnet IP（as/rsshub 的 tailnet relay）。
+  # llm 别名不走 facts，直接在 dns/terranix.nix 的 relayRecords 里构造。
   # 其他 host 的 DERP 事实由 lib/fleet 负责，不在这里重复。
   agt = import ../hosts/nixos-vps/agt/meta.nix;
 
@@ -68,6 +69,8 @@ in
     # 留在 dns/terranix.nix 的 manualRecords 里。
     shared_records = {
       # 只保留 tailnet 服务别名：DNS-only A 指向 agt relay 的 tailnet IP。
+      # 注意：as（OpenList）大文件下载走 agt relay，受 agt 4G 上行
+      # （meta bwMbps=6）限制；需要高吞吐时再考虑 dev 直连入口。
       as = aRecord "as.${zone_name}" agt_ip false "OpenList (ASMR, tailnet relay)";
       rsshub = (aRecord "rsshub.${zone_name}" agt_ip false "RSSHub (tailnet relay)") // {
         id = "1eb043e1ffe747891513e47be11b0a6f";

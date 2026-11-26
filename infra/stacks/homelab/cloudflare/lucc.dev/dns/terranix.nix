@@ -151,9 +151,15 @@ let
   derpKeyCollisions = lib.intersectLists (builtins.attrNames derpRecords) (
     builtins.attrNames (facts.dns.shared_records // manualRecords)
   );
+  # relayRecords 位于 // 链最后，撞名会静默覆盖 shared/derp/manual；单独检查。
+  relayKeyCollisions = lib.intersectLists (builtins.attrNames relayRecords) (
+    builtins.attrNames (facts.dns.shared_records // derpRecords // manualRecords)
+  );
 in
 assert lib.assertMsg (derpKeyCollisions == [ ])
   "dns terranix: derp dnsKey collides with manual records: ${lib.concatStringsSep ", " derpKeyCollisions}";
+assert lib.assertMsg (relayKeyCollisions == [ ])
+  "dns terranix: relay record collides with shared/derp/manual records: ${lib.concatStringsSep ", " relayKeyCollisions}";
 {
   terraform = infraLib.mkTerraform {
     stateKey = "homelab/cloudflare/lucc.dev/dns/terraform.tfstate";

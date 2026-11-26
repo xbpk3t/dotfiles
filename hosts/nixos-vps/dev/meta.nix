@@ -19,8 +19,8 @@
     role = "vps";
   };
 
-  # 公网 IPv4：singbox 服务地址仍从这里派生；api/as/rsshub 的
-  # lucc.dev DNS 已改为 agt tailnet relay（LUC-585），不再使用该 IP。
+  # 公网 IPv4：singbox 服务地址仍从这里派生；as/rsshub 的 lucc.dev DNS
+  # 已改为 agt tailnet relay（LUC-585），api 记录已删除，不再使用该 IP。
   # dev 不再跑 derper（DERP 只保留 agt，见 terranix.nix 的 derpMap）。
   publicIpv4 = "192.129.183.26";
 

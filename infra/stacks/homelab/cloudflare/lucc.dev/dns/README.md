@@ -62,7 +62,8 @@ HCL 原文件仍在 git 历史里，state 地址未改变（`cloudflare_dns_reco
 ## DX 备注
 
 - 日常维护优先改 `terranix.nix` 里的 records 数据模型，不要新增独立 resource block。
-- 共享记录来自 `infra/facts.nix`；DERP 记录来自 `lib/fleet`。
+- 共享记录来自 `infra/facts.nix`；DERP 记录来自 `lib/fleet`；`llm` 等纯 relay
+  别名在 `terranix.nix` 的 `relayRecords`。
 - 改 host meta 或 facts 后重跑 `task tf:terranix`。
 - `terraform fmt` / `tflint` / `terraform-ls` 对该 stack 不再适用；
   改记录时靠 `tofu validate` / `plan` 反馈。
