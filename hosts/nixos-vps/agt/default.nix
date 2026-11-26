@@ -99,6 +99,17 @@ in
   systemd.services.caddy.after = [ "acme-lucc.dev.service" ];
   systemd.services.caddy.wants = [ "acme-lucc.dev.service" ];
 
+  # LUC-585：agt 是中国侧唯一 relay，Caddy 单点必须优先存活。Caddy RSS
+  # 约 35M；256M 上限足够反代多个服务，同时限制异常流量拖垮 4G 整机。
+  # OOMScoreAdjust 让内核 OOM killer 优先选其他进程；Restart=always
+  # 覆盖 nixpkgs caddy 模块默认的 on-failure，clean exit 也自动拉起。
+  systemd.services.caddy.serviceConfig = {
+    MemoryHigh = "192M";
+    MemoryMax = "256M";
+    OOMScoreAdjust = -500;
+    Restart = lib.mkForce "always";
+  };
+
   # 只开 tailscale0 的 80/443；公网 80/443 由默认 firewall 关闭。
   networking.firewall.interfaces.tailscale0.allowedTCPPorts = [
     80
