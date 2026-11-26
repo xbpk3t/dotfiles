@@ -110,7 +110,7 @@ in
       enable = true;
       openFirewall = false;
       configFile = pkgs.writeText "Caddyfile" ''
-        llm.lucc.dev {
+        llm.lucc.dev, rsshub.lucc.dev, as.lucc.dev {
           tls /var/lib/acme/lucc.dev/fullchain.pem /var/lib/acme/lucc.dev/key.pem
           @tailnet remote_ip 100.64.0.0/10 fd7a:115c:a1e0::/48
           handle @tailnet {

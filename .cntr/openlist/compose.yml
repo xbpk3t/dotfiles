@@ -11,7 +11,10 @@ services:
       - './data:/opt/openlist/data'
       # 本地存储挂载点：OpenList 的 storage 指到这个目录，离线下载文件最终落在 VPS 本地
       - './downloads:/downloads'
-    # 对外统一走 caddy（edge 网络）反代 as.lucc.dev，不暴露端口（同 rsshub 等服务的处理）
+    # 对外走 Tailscale 服务别名 as.lucc.dev；只绑 127.0.0.1:5244，
+    # 供 dev 上的 host Caddy 反代。
+    ports:
+      - "127.0.0.1:5244:5244"
     networks:
       - edge
     environment:

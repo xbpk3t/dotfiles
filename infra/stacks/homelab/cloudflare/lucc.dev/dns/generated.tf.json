@@ -111,12 +111,12 @@
             "type": "A"
           },
           "as": {
-            "comment": "OpenList (ASMR)",
-            "content": "192.129.183.26",
+            "comment": "OpenList (ASMR, tailnet relay)",
+            "content": "100.66.22.92",
             "id": null,
             "name": "as.lucc.dev",
             "priority": null,
-            "proxied": true,
+            "proxied": false,
             "ttl": 1,
             "type": "A"
           },
@@ -231,12 +231,12 @@
             "type": "AAAA"
           },
           "rsshub": {
-            "comment": "rsshub",
-            "content": "192.129.183.26",
+            "comment": "RSSHub (tailnet relay)",
+            "content": "100.66.22.92",
             "id": "1eb043e1ffe747891513e47be11b0a6f",
             "name": "rsshub.lucc.dev",
             "priority": null,
-            "proxied": true,
+            "proxied": false,
             "ttl": 1,
             "type": "A"
           },

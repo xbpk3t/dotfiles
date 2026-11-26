@@ -19,6 +19,10 @@ services:
     image: diygod/rsshub:latest
     container_name: rsshub
     <<: *common-restart
+    # 对外走 Tailscale 服务别名 rsshub.lucc.dev；只绑 127.0.0.1:1200，
+    # 供 dev 上的 host Caddy 反代。
+    ports:
+      - "127.0.0.1:1200:1200"
     networks:
       - edge
     environment:

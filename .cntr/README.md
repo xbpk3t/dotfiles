@@ -42,10 +42,10 @@ CNTR_DIR=./.cntr CNTR_DRY_RUN=true task cntr:reconcile
 
 | Stack | 容器 | 入口 | 网络 | 持久化 | 备份 | 更新 |
 |-------|------|------|------|--------|------|------|
-| `caddy` | caddy:2 | `:80/:443`（api/rsshub/as.lucc.dev，保留为 fallback）；tailnet relay 由 dev 的 host Caddy `:8080` 负责（LUC-585） | edge | `./data`, `./config` | — | 手动（不在 watchtower） |
+| `caddy` | caddy:2 | `:80/:443`（api/rsshub/as.lucc.dev，保留为 fallback）；tailnet relay 由 agt/dev 的 host Caddy 负责（LUC-585） | edge | `./data`, `./config` | — | 手动（不在 watchtower） |
 | `axonhub` | axonhub:latest, postgres:15-alpine, 9router:latest, resin:latest, cpa:latest | `127.0.0.1:8090/20228/2260/8317` + edge；9router dashboard: http://9router.tailf19540.ts.net/ | edge | named volumes + `./CPA/auth-dir`, `./resin/*` | `backup-pgsql.nu axonhub`（`axonhub-pgsql`） | watchtower: axonhub/9router/resin/cpa；postgres 手动 |
-| `rsshub` | rsshub:latest, browserless:1.43-chrome-stable | edge（caddy 反代） | edge | — | — | watchtower |
-| `openlist` | openlistteam/openlist:latest | edge（caddy 反代） | edge | `./data`, `./downloads` | — | watchtower |
+| `rsshub` | rsshub:latest, browserless:1.43-chrome-stable | `127.0.0.1:1200`；`https://rsshub.lucc.dev`（tailnet） | edge | — | — | watchtower |
+| `openlist` | openlistteam/openlist:latest | `127.0.0.1:5244`；`https://as.lucc.dev`（tailnet） | edge | `./data`, `./downloads` | — | watchtower |
 | `actions-runner` | myoung34/github-runner:2.338.2 | 无 | default | `runner_data` + `~/.opencli/xiaoyuzhou.json` | — | 手动；**必须**保持 `DISABLE_AUTO_UPDATE` |
 | `watchtower` | containrrr/watchtower:latest | 无 | default | `docker.sock` | — | 自身不纳入 allowlist |
 | `golang` | 本地 dev sandbox（profiles） | 本地端口 | `golang_backend` | named volumes | — | 不纳入 reconcile（`CNTR_INCLUDE_DEV=true` 才包含） |

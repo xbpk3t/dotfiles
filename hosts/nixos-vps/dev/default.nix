@@ -99,9 +99,17 @@
         :8080 {
           @tailnet remote_ip 100.64.0.0/10 fd7a:115c:a1e0::/48
           @llm host llm.lucc.dev
+          @rsshub host rsshub.lucc.dev
+          @openlist host as.lucc.dev
           handle @tailnet {
             handle @llm {
               reverse_proxy http://127.0.0.1:8090
+            }
+            handle @rsshub {
+              reverse_proxy http://127.0.0.1:1200
+            }
+            handle @openlist {
+              reverse_proxy http://127.0.0.1:5244
             }
             respond 404
           }

@@ -2,6 +2,7 @@ api.lucc.dev {
 	reverse_proxy axonhub:8090
 }
 
+# 临时保留：Phase 2 先验证 tailnet 路径；DNS 切换/Phase 3 后删除。
 rsshub.lucc.dev {
 	reverse_proxy rsshub:1200
 }
