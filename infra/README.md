@@ -218,3 +218,5 @@ tofu plan -input=false
 - 按需补充 `infra/.inventory/<date>/` 盘点清单
 - 新资源优先进入 `stacks/<scope>/<provider>/<service>/`
 - 不要为了“框架整齐”先做大规模抽模块或改 state key
+
+<!-- infra-gate verification: infra path -->
