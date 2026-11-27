@@ -119,16 +119,31 @@ jobs:
           # full flake check 会同时求值/构建全部 host checks，6 GiB dev runner
           # 峰值可能 4–8 GiB；这里只验证 GitHub-hosted runner 上该 SHA 的
           # flake-check 已成功，避免在部署机上重复跑重活。
-          flake_run="$(gh run list --workflow flake-check.yml --event push --commit "$GITHUB_SHA" --status success --limit 1 --json databaseId --jq '.[0].databaseId // ""')"
-          if [ -z "$flake_run" ]; then
-            # cron 可能在 flake-check 仍 queued/in_progress 时触发。等待它结束，
-            # 而不是直接失败：否则这个 SHA 要等到下一次 cron 才会部署。
+          # push 触发时 deploy 与 flake-check 同时启动；自托管 runner 可能在
+          # GitHub 的 run 列表索引到 flake-check 之前就跑到这里（实测 9s 内）。
+          # 轮询等 run 出现，避免把“尚未索引”误判成“没有 flake-check”。
+          flake_run=""
+          pending_id=""
+          for _ in $(seq 1 20); do
+            flake_run="$(gh run list --workflow flake-check.yml --event push --commit "$GITHUB_SHA" --status success --limit 1 --json databaseId --jq '.[0].databaseId // ""')"
+            if [ -n "$flake_run" ]; then
+              break
+            fi
             pending_id="$(gh run list --workflow flake-check.yml --event push --commit "$GITHUB_SHA" --limit 1 --json databaseId --jq '.[0].databaseId // ""')"
             if [ -n "$pending_id" ]; then
-              echo "flake-check for $GITHUB_SHA is still pending (run $pending_id); waiting..."
-              gh run watch "$pending_id" --exit-status --interval 20
-              flake_run="$(gh run list --workflow flake-check.yml --event push --commit "$GITHUB_SHA" --status success --limit 1 --json databaseId --jq '.[0].databaseId // ""')"
+              break
             fi
+            sleep 10
+          done
+          if [ -z "$flake_run" ] && [ -n "$pending_id" ]; then
+            # cron 可能在 flake-check 仍 queued/in_progress 时触发。等待它结束，
+            # 而不是直接失败：否则这个 SHA 要等到下一次 cron 才会部署。
+            echo "flake-check for $GITHUB_SHA is still pending (run $pending_id); waiting..."
+            if ! gh run watch "$pending_id" --exit-status --interval 20; then
+              echo "::error title=flake-check failed::see run $pending_id"
+              exit 1
+            fi
+            flake_run="$(gh run list --workflow flake-check.yml --event push --commit "$GITHUB_SHA" --status success --limit 1 --json databaseId --jq '.[0].databaseId // ""')"
           fi
           if [ -z "$flake_run" ]; then
             echo "::error title=flake-check missing::no successful flake-check run for $GITHUB_SHA"
