@@ -1,12 +1,14 @@
 name: deploy
 
 # 无人值守部署（L2）：
-# - 每日 cron 部署最新 main；无新 commit 则 skip。
+# - main push 或每日 cron 部署最新 main；无新 commit 则 skip。
 # - 只处理 hosts/**/meta.nix 中 deploy.auto = true 的节点。
 # - 每台先比对 revision；已在目标 revision 的 skip。
 # - 并行部署；单台失败不阻塞其他机器，job 最终失败，下次只重试未收敛节点。
 #
 # 这是 push 部署，不是 pull 收敛：主机离线/手动漂移不会自动补齐。
+# push 触发会 self-deploy dev（runner 所在机），风险由 deploy-rs 的
+# magic rollback 兜底；dev 的 deploy.auto 见 hosts/nixos-vps/dev/meta.nix。
 # 全局 skip 是“上次成功 deploy run 的 SHA == 当前 SHA”；手动回滚后用
 # workflow_dispatch + force=true 强制重新收敛。
 #
@@ -14,6 +16,9 @@ name: deploy
 # label fleet-control 与 sops github/runner_token + github/runner_ssh_key。
 
 on:
+  push:
+    branches:
+      - main
   schedule:
     # 02:17 UTC = 10:17 CST。刻意避开整点，且放在你醒着的时间。
     - cron: "17 2 * * *"
