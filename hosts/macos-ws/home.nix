@@ -118,16 +118,4 @@
     darwin.basePackages.enable = true;
     darwin.default-apps.enable = true;
   };
-
-  # docs: Mutagen 只同步工作区，.git 由 --ignore-vcs 排除；
-  # 其余 ignore 直接读 docs repo 里 tracked 的 .gitignore（含 docs/、wiki/ 下的嵌套文件）。
-  # Mac 是唯一 git owner；agt 只接收文件，不跑 git。
-  modules.devops.mutagen = {
-    enable = true;
-    syncs.docs = {
-      alpha = "${config.home.homeDirectory}/Desktop/docs";
-      beta = "nixos-vps-agt:/home/luck/Desktop/docs";
-      gitignore = true;
-    };
-  };
 }
