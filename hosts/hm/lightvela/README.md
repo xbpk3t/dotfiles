@@ -80,20 +80,15 @@ Mac/phone.
   run `task nix:hm:restore` after a reset.
   `libpam-systemd` is available from the Tencent Ubuntu mirror.
 
-## Sops (PA-only subset)
+## Sops
 
-- `secrets/hm-lightvela.yaml` contains only the subset required by the host's
-  imported HM modules. It is encrypted to the PA-only age key, not the fleet
-  master key.
-- PA private key: `/root/.config/sops/age/keys.txt`.
-- `.sops.yaml` has a dedicated rule for `secrets/hm-lightvela.yaml`.
-- `secrets/hm-lightvela.nix` declares only that subset and overrides
-  `sops.defaultSopsFile` + `sops.age.keyFile`. It deliberately does **not**
-  import `secrets/default.nix`; that would make sops-nix decrypt every fleet
-  secret on the vendor-managed PA.
-- The fleet master age key is **not** on the PA. If the PA is compromised, only
-  that subset is exposed; rotate it and the PA age key. The other fleet secrets
-  are not present in this file.
+- `secrets/secrets.yaml` is the single encrypted secret file; every host,
+  including the PA, decrypts it with the fleet master age key.
+- `secrets/default.nix` declares the full set; there is no per-host or
+  per-group YAML.
+- PA key file: `/root/.config/sops/age/keys.txt` (fleet key).
+- If the PA is compromised, the fleet secret set is exposed; rotate the fleet
+  key and affected secrets.
 
 ## HM activation
 

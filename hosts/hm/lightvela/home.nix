@@ -1,5 +1,6 @@
 {
   config,
+  lib,
   mylib,
   pkgs,
   ...
@@ -7,7 +8,7 @@
 {
   imports = [
     (mylib.relativeToRoot "home/hm")
-    (mylib.relativeToRoot "secrets/hm-lightvela.nix")
+    (mylib.relativeToRoot "secrets/default.nix")
   ]
   ++ map mylib.relativeToRoot [
     # dev 环境：与 macos-ws / vps-dev 同一套 home/base 开关，节点显式 import。
@@ -39,6 +40,9 @@
       nezha-agent
     ];
   };
+
+  # Single fleet secret file; the PA uses the fleet master key.
+  sops.age.keyFile = lib.mkForce "/root/.config/sops/age/keys.txt";
 
   # `ff` 系统信息入口；其他 host 走 modules.devops.fetch，hm 轨也补上。
   modules = {

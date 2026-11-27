@@ -16,8 +16,8 @@ in
 {
   imports = [
     ../default.nix
-    # Disk/RAM-constrained appliance: do not decrypt the full fleet set.
-    ../../../secrets/minimal.nix
+    # Single fleet secret file; rn2 holds the fleet key.
+    ../../../secrets/default.nix
   ];
 
   # RackNerd ships a static IPv4 (no DHCP) and boots the Ubuntu image with
