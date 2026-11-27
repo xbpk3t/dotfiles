@@ -1,0 +1,96 @@
+name: infra-gate
+
+# 每个 PR 都会跑的 infra 门禁（workflow 级别不加 paths 过滤）。
+#
+# 为什么需要它：infra.yml 带 paths 过滤，只有触及 infra 路径的 PR 才会产生
+# validate/plan check。直接把这些 check 设为 required，会让没碰 infra 的 PR
+# 永远等不到 check 而卡死。这里用一个 always-on 的 job：
+#   - 没碰 infra 路径：秒过
+#   - 碰了：等 infra.yml 的 PR run 完成，并要求至少一个 plan job 成功
+# 这样 ruleset 只 required 一个 `infra-gate`，也不用维护每个 stack 的 check 名。
+#
+# 路径列表必须与 infra.yml 的 `paths` 保持一致；不一致时 gate 会以
+# "infra workflow did not start" 失败，作为漂移告警。
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: infra-gate-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  infra-gate:
+    name: infra-gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect infra changes
+        id: changes
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin "$BASE_REF"
+          changed="$(git diff --name-only "origin/${BASE_REF}...HEAD")"
+          infra=false
+          while IFS= read -r f; do
+            if [ -z "$f" ]; then
+              continue
+            fi
+            case "$f" in
+              infra/*|hosts/*/meta.nix|outputs/default.nix|lib/fleet/*|lib/default.nix|lib/infra-tools.nix|flake.nix|flake.lock|.github/workflows/infra.yml)
+                infra=true
+                break
+                ;;
+            esac
+          done <<< "$changed"
+          echo "infra=$infra" >> "$GITHUB_OUTPUT"
+          echo "infra changes detected: $infra"
+
+      - name: Wait for infra plan
+        if: steps.changes.outputs.infra == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          run_id=""
+          for _ in $(seq 1 20); do
+            run_id="$(gh run list --workflow infra.yml --event pull_request --commit "$SHA" \
+              --limit 1 --json databaseId --jq '.[0].databaseId // ""')"
+            if [ -n "$run_id" ]; then
+              break
+            fi
+            sleep 15
+          done
+          if [ -z "$run_id" ]; then
+            echo "::error title=infra workflow missing::infra changes detected but no infra.yml PR run was found for $SHA"
+            exit 1
+          fi
+
+          echo "watching infra run $run_id"
+          if ! gh run watch "$run_id" --exit-status --interval 15; then
+            echo "::error title=infra run failed::see $run_id"
+            gh run view "$run_id" --json jobs \
+              --jq '.jobs[] | select(.conclusion != "success" and .conclusion != "skipped") | "\(.name): \(.conclusion)"' || true
+            exit 1
+          fi
+
+          plan_success="$(gh run view "$run_id" --json jobs \
+            --jq '[.jobs[] | select(.name | startswith("plan ")) | select(.conclusion == "success")] | length')"
+          if [ "$plan_success" -eq 0 ]; then
+            echo "::error title=infra plan skipped::no successful plan job in infra run $run_id (fork PR or path-filter mismatch)"
+            exit 1
+          fi
+          echo "infra plan OK ($plan_success stack(s))"

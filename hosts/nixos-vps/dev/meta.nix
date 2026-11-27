@@ -26,9 +26,9 @@
 
   deploy = {
     remoteBuild = true;
-    # dev 是无人值守 runner 所在机器，不能由自己自动部署（self-deploy）。
-    # 更新 dev 走手动：task nix:deploy NODES=nixos-vps-dev。
-    auto = false;
+    # dev 是无人值守 runner 所在机器；self-deploy 风险由 deploy-rs 的
+    # magic rollback 兜底，每日 cron 仍作为兜底收敛。
+    auto = true;
   };
 
   # Nezha 只允许一个 hub；agent 的 dashboard 地址从这里派生。
