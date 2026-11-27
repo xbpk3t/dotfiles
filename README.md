@@ -1,5 +1,7 @@
 # dotfiles
 
+<!-- infra-gate verification: non-infra path -->
+
 [![NixOS](https://img.shields.io/badge/NixOS-5277C3?logo=nixos&logoColor=white)](https://nixos.org)
 [![flake-check](https://github.com/xbpk3t/dotfiles/actions/workflows/flake-check.yml/badge.svg)](https://github.com/xbpk3t/dotfiles/actions/workflows/flake-check.yml)
 [![pre-commit](https://github.com/xbpk3t/dotfiles/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/xbpk3t/dotfiles/actions/workflows/pre-commit.yml)
