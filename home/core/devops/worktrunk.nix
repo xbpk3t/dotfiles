@@ -72,10 +72,10 @@ in
           - 避免「输入与模块」「主机配置」这类生硬全中文；写成「input 与 module」「host 配置」
           - subject 与 body 之间空一行
           - body 仅在有必要时写：不要复述 diff
-            需要时按顺序简要覆盖：
-            1) what：高层说明改了什么（不是逐文件罗列）
-            2) why：动机 / 背景
-            3) effect：影响范围或迁移注意（没有就省略）
+            需要时参考以下 template：
+            ## 1) what：高层说明改了什么（不是逐文件罗列）
+            ## 2) why：动机 / 背景
+            ## 3) effect：影响范围或迁移注意（没有就省略）
           - Linear ID（如 ENG-123）写入 subject 或 footer：Closes ENG-123
           - GitHub issue（#123）写在 footer：Closes #123 / Fixes #123
           - 没有相关 issue 不要硬加；不要编造 ID
